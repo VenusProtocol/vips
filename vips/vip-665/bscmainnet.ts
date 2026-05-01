@@ -2,8 +2,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams } from "../../simulations/vip-665/utils/cut-params-bscmainnet.json";
-import { assetConfigs } from "./asset-configs-bscmainnet.json";
+import { assetConfigs } from "./utils/asset-configs-bscmainnet.json";
+import { cutParams } from "./utils/cut-params-bscmainnet.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const {
@@ -107,7 +107,11 @@ export const vip665 = () => {
 
 If passed, this VIP rolls out the new **DeviationBoundedOracle (DBO)** on BNB Chain mainnet (VIP 1 of 2). The DBO wraps the existing ResilientOracle with a per-market rolling min/max price window. When spot deviates beyond a configured threshold, collateral is valued at \`min(spot, windowMin)\` and debt at \`max(spot, windowMax)\` — protecting CF/debt-path pricing against short-duration manipulation on low-liquidity collateral tokens.
 
-VIP 1 ships DBO live but **inactive**: every asset is initialized with \`isBoundedPricingEnabled = false\`, so DBO returns \`(spot, spot)\` and behaviour is unchanged. One isolated low-liquidity eMode market ships enabled to validate the protection logic in production. VIP 2 will flip the rest of the assets to enabled once keepers and parameters are validated.
+VIP 1 ships DBO live but **inactive** for all assets except one. The following asset is enabled with \`isBoundedPricingEnabled = true\` (dual pricing active) to validate the protection logic in production:
+
+- **TRX** — \`0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3\`
+
+All other 23 assets (AAVE, ADA, asBNB, BCH, BNB, BTCB, CAKE, DOGE, ETH, FIL, LINK, LTC, slisBNB, SOL, SolvBTC, TWT, UNI, WBETH, WBNB, XAUM, XRP, xSolvBTC, XVS) are initialized with \`isBoundedPricingEnabled = false\`, so DBO returns \`(spot, spot)\` and behaviour is unchanged. VIP 2 will flip the rest of the assets to enabled once keepers and parameters are validated.
 
 #### Deployed contracts (populated prior to proposal)
 

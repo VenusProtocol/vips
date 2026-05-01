@@ -30,6 +30,7 @@ import vip665, {
   UNITROLLER_IMPLEMENTATION,
   VAI_CONTROLLER_IMPL,
 } from "../../vips/vip-665/bscmainnet";
+import { cutParams } from "../../vips/vip-665/utils/cut-params-bscmainnet.json";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
@@ -37,7 +38,6 @@ import DIAMOND_ABI from "./abi/Diamond.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import VAI_UNITROLLER_ABI from "./abi/VAIUnitroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import { cutParams } from "./utils/cut-params-bscmainnet.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const {
@@ -58,18 +58,26 @@ const SUPPORTER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 const EXPECTED_ROLE_GRANTED_EVENTS = 43;
 
 const SET_DBO_SELECTOR = ethers.utils.id("setDeviationBoundedOracle(address)").slice(0, 10);
+// Hardcoded from the ADD entry in cut-params-bscmainnet.json: the SetterFacet address
+// that gains the new setDeviationBoundedOracle selector.
+const SETTER_FACET = "0x4a45FBAf2A736bdF025DEd1D0Af3dF80070EDac0";
 
 // BSC mainnet ACM exposes hasRole(bytes32, address) only; role = keccak256(packed target+sig).
 const roleHash = (target: string, signature: string): string =>
   ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [target, signature]));
 
-const getAsset = (name: string): string => {
+const getAssetConfig = (name: string): { asset: string; vToken: string } => {
   const cfg = ASSET_CONFIGS.find(c => c.name === name);
   if (!cfg) throw new Error(`Asset "${name}" not present in asset-configs-bscmainnet.json`);
-  return cfg.asset;
+  return { asset: cfg.asset, vToken: cfg.vToken };
 };
-const ETH_ASSET = getAsset("ETH");
-const TRX_UNDERLYING = getAsset("TRX");
+const getAsset = (name: string): string => getAssetConfig(name).asset;
+const ETH_ASSET = getAssetConfig("ETH").asset;
+const ETH_VTOKEN = getAssetConfig("ETH").vToken;
+const TRX_UNDERLYING = getAssetConfig("TRX").asset;
+const TRX_VTOKEN = getAssetConfig("TRX").vToken;
+
+type Signer = Awaited<ReturnType<typeof initMainnetUser>>;
 
 // Fixed VIP-1 rollout parameters.
 const FIXED_COOLDOWN = 3600; // 1h
@@ -105,9 +113,6 @@ forking(FORK_BLOCK, async () => {
   let oldPendingAdmin: string;
   let oldEthMarket: { isListed: boolean; collateralFactorMantissa: BigNumber };
 
-  // Held-fixed account-liquidity smoke — `getAccountLiquidity` exercises ComptrollerLens.
-  let supporterLiquidityErr: BigNumber;
-
   before(async () => {
     comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, provider);
     acm = new ethers.Contract(ACCESS_CONTROL_MANAGER, ACM_ABI, provider);
@@ -132,9 +137,6 @@ forking(FORK_BLOCK, async () => {
     const m = await comptroller.markets(ethVToken);
     oldEthMarket = { isListed: m.isListed, collateralFactorMantissa: m.collateralFactorMantissa };
 
-    const [errPre] = await comptroller.getAccountLiquidity(SUPPORTER);
-    supporterLiquidityErr = errPre;
-
     // Stretch every DBO-configured asset's resilient-oracle freshness window
     // out to 1y on the fork. The proposal lifecycle (propose→queue→execute)
     // mines blocks past real-world heartbeats, so a CF/price check during
@@ -144,10 +146,12 @@ forking(FORK_BLOCK, async () => {
     const assetContracts = await Promise.all(ASSET_CONFIGS.map(c => ethers.getContractAt(ERC20_ABI, c.asset)));
     await setMaxStalePeriodForAllAssets(resilientOracle, assetContracts);
 
-    // SolvBTC, xSolvBTC, and TWT use a non-standard oracle adapter that
-    // setMaxStalePeriod cannot recognize, so their feeds still go stale across
-    // the proposal lifecycle. Rewrite their token configs fork-side to a
-    // Redstone-only feed pinned at the live spot.
+    // SolvBTC, xSolvBTC, and TWT use feeds that enforce their own internal
+    // staleness window — the check lives inside the feed contract itself, not in
+    // the ResilientOracle config that setMaxStalePeriod writes to. Bumping the
+    // ResilientOracle's freshness window therefore has no effect on these feeds,
+    // and they still revert as stale across the proposal lifecycle. Rewrite their
+    // token configs fork-side to a Redstone-only feed pinned at the live spot.
     const REDSTONE_PIN_ASSETS = [getAsset("SolvBTC"), getAsset("xSolvBTC"), getAsset("TWT")];
     for (const asset of REDSTONE_PIN_ASSETS) {
       await pinResilientOraclePriceViaRedstone(resilientOracle, asset);
@@ -324,9 +328,11 @@ forking(FORK_BLOCK, async () => {
         }
       });
 
-      it("setDeviationBoundedOracle selector resolves to a non-zero facet", async () => {
+      it("setDeviationBoundedOracle selector is installed on the SetterFacet", async () => {
         const resolved = (await comptroller.facetAddress(SET_DBO_SELECTOR)).facetAddress;
-        expect(resolved).to.not.equal(ethers.constants.AddressZero);
+        expect(resolved).to.equal(SETTER_FACET);
+        const setterSels = await comptroller.facetFunctionSelectors(SETTER_FACET);
+        expect(setterSels).to.include(SET_DBO_SELECTOR);
       });
 
       it("all old facet addresses have been replaced", async () => {
@@ -445,7 +451,20 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
+    // Wrapped in evm_snapshot/evm_revert because the tests in this block
+    // mutate DBO state (setCooldownPeriod, setAssetBoundedPricingEnabled,
+    // updateMaxPrice). Without isolation those mutations leak into the
+    // "DBO pass-through behaviour" and "Comptroller post-upgrade smoke"
+    // blocks that follow, which assert against the VIP-seeded state.
     describe("Functional ACM verification", () => {
+      let acmSnapshotId: string;
+      before(async () => {
+        acmSnapshotId = await provider.send("evm_snapshot", []);
+      });
+      after(async () => {
+        await provider.send("evm_revert", [acmSnapshotId]);
+      });
+
       it("Normal Timelock can call setCooldownPeriod (3TL governance)", async () => {
         const signer = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
         await expect(dbo.connect(signer).setCooldownPeriod(ETH_ASSET, 7200)).to.not.be.reverted;
@@ -494,8 +513,6 @@ forking(FORK_BLOCK, async () => {
           provider,
         );
 
-      const VTRX_VTOKEN = ASSET_CONFIGS.find(c => c.name === "TRX")!.vToken;
-
       it("disabled assets: getBoundedPricesView returns (spot, spot) from ResilientOracle", async () => {
         const ro = resilientOracle();
         for (const c of ASSET_CONFIGS) {
@@ -522,34 +539,14 @@ forking(FORK_BLOCK, async () => {
       it("vTRX (enabled): window seeded at spot and getBoundedPricesView returns (spot, spot) at activation", async () => {
         const ro = resilientOracle();
         const spotAsset: BigNumber = await ro.getPrice(TRX_UNDERLYING);
-        const spotVToken: BigNumber = await ro.getUnderlyingPrice(VTRX_VTOKEN);
+        const spotVToken: BigNumber = await ro.getUnderlyingPrice(TRX_VTOKEN);
         const cfg = await dbo.assetProtectionConfig(TRX_UNDERLYING);
         expect(cfg.minPrice, "TRX.minPrice").to.equal(spotAsset);
         expect(cfg.maxPrice, "TRX.maxPrice").to.equal(spotAsset);
         expect(cfg.currentlyUsingProtectedPrice, "TRX.currentlyUsingProtectedPrice").to.equal(false);
-        const [collateral, debt] = await dbo.getBoundedPricesView(VTRX_VTOKEN);
+        const [collateral, debt] = await dbo.getBoundedPricesView(TRX_VTOKEN);
         expect(collateral, "TRX.collateralPrice").to.equal(spotVToken);
         expect(debt, "TRX.debtPrice").to.equal(spotVToken);
-      });
-    });
-
-    describe("Comptroller post-upgrade smoke", () => {
-      it("oracle() still resolves to the live ResilientOracle", async () => {
-        const oracle = await comptroller.oracle();
-        expect(oracle).to.equal(NETWORK_ADDRESSES.bscmainnet.RESILIENT_ORACLE);
-      });
-
-      it("comptroller admin remains the Normal Timelock", async () => {
-        expect(await comptroller.admin()).to.equal(NORMAL_TIMELOCK);
-      });
-
-      // Exercises the new ComptrollerLens path. With DBO inactive everywhere except vTRX
-      // (and protection not yet triggered), bounded prices pass through to spot, so the
-      // err code must remain whatever it was pre-VIP — typically 0.
-      it("getAccountLiquidity for the supporter still returns a non-error result", async () => {
-        const [errPost] = await comptroller.getAccountLiquidity(SUPPORTER);
-        expect(errPost).to.equal(supporterLiquidityErr);
-        expect(errPost).to.equal(0);
       });
     });
   });
@@ -566,16 +563,15 @@ forking(FORK_BLOCK, async () => {
   // leak fork state to anything that runs after it.
   // ────────────────────────────────────────────────────────────────────
   describe("E2E scenarios — DBO lifecycle on ETH", () => {
-    const ETH_VTOKEN = ASSET_CONFIGS.find(c => c.name === "ETH")!.vToken;
     const ORACLE_ROLE_PIVOT = 1;
 
     let chainlink: Contract;
     let resilient: Contract;
-    let timelockSigner: Awaited<ReturnType<typeof initMainnetUser>>;
-    let guardianSigner: Awaited<ReturnType<typeof initMainnetUser>>;
-    let keeperSigner: Awaited<ReturnType<typeof initMainnetUser>>;
+    let timelockSigner: Signer;
+    let guardianSigner: Signer;
+    let keeperSigner: Signer;
     let snapshotId: string;
-    let originalSpot: BigNumber;
+    let originalEthSpot: BigNumber;
 
     before(async () => {
       snapshotId = await provider.send("evm_snapshot", []);
@@ -590,11 +586,15 @@ forking(FORK_BLOCK, async () => {
       // Disable PIVOT for ETH so a deviated MAIN price is returned through.
       await resilient.connect(timelockSigner).enableOracle(ETH_ASSET, ORACLE_ROLE_PIVOT, false);
 
-      // Pin Chainlink storage to the live spot — ETH is 18 decimals, so the
-      // setDirectPrice value passes through getPrice unchanged.
-      originalSpot = await resilient.getPrice(ETH_ASSET);
-      await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, originalSpot);
-      expect(await resilient.getPrice(ETH_ASSET)).to.equal(originalSpot);
+      // Pin ChainlinkOracle storage to the live spot. Chainlink is the MAIN
+      // oracle for ETH on BSC, so setDirectPrice fully drives ResilientOracle's
+      // reading; ETH is 18 decimals so the value passes through unchanged.
+      // Once pinned, every subsequent price move in this block can be driven
+      // by a single setDirectPrice call on Chainlink — no need to touch the
+      // ResilientOracle or the underlying Chainlink aggregator separately.
+      originalEthSpot = await resilient.getPrice(ETH_ASSET);
+      await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, originalEthSpot);
+      expect(await resilient.getPrice(ETH_ASSET)).to.equal(originalEthSpot);
     });
 
     after(async () => {
@@ -622,15 +622,15 @@ forking(FORK_BLOCK, async () => {
       // 50% pump — well above the ~16.67% triggerThreshold seeded for ETH.
       let pumpedSpot: BigNumber;
 
-      before(() => {
-        pumpedSpot = originalSpot.mul(150).div(100);
+      before(async () => {
+        pumpedSpot = originalEthSpot.mul(150).div(100);
       });
 
       it("Guardian enables ETH whitelist; window seeds at current spot", async () => {
         await dbo.connect(guardianSigner).setAssetBoundedPricingEnabled(ETH_ASSET, true);
         const cfg = await dbo.assetProtectionConfig(ETH_ASSET);
-        expect(cfg.minPrice).to.equal(originalSpot);
-        expect(cfg.maxPrice).to.equal(originalSpot);
+        expect(cfg.minPrice).to.equal(originalEthSpot);
+        expect(cfg.maxPrice).to.equal(originalEthSpot);
         expect(cfg.currentlyUsingProtectedPrice).to.equal(false);
         expect(await dbo.isBoundedPricingEnabled(ETH_ASSET)).to.equal(true);
       });
@@ -639,47 +639,66 @@ forking(FORK_BLOCK, async () => {
         await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, pumpedSpot);
         expect(await resilient.getPrice(ETH_ASSET)).to.equal(pumpedSpot);
 
-        // Pre-trigger: window is still seeded at originalSpot, so the pumped spot
+        // Pre-trigger: window is still seeded at originalEthSpot, so the pumped spot
         // sits strictly outside [minPrice, maxPrice] — that's what arms the trigger.
         const cfgBefore = await dbo.assetProtectionConfig(ETH_ASSET);
-        expect(cfgBefore.minPrice).to.equal(originalSpot);
-        expect(cfgBefore.maxPrice).to.equal(originalSpot);
+        expect(cfgBefore.minPrice).to.equal(originalEthSpot);
+        expect(cfgBefore.maxPrice).to.equal(originalEthSpot);
         expect(pumpedSpot).to.not.equal(cfgBefore.minPrice);
         expect(pumpedSpot).to.not.equal(cfgBefore.maxPrice);
+
+        // Pre-trigger: protection is not yet active, so getBoundedPricesView
+        // passes spot through on both sides — no clipping happens yet.
+        const [collateralBefore, debtBefore] = await dbo.getBoundedPricesView(ETH_VTOKEN);
+        expect(collateralBefore).to.equal(pumpedSpot);
+        expect(debtBefore).to.equal(pumpedSpot);
 
         const tx = await dbo.connect(keeperSigner).updateProtectionState(ETH_VTOKEN);
         await expect(tx).to.emit(dbo, "ProtectionTriggered");
         expect(await dbo.currentlyUsingProtectedPrice(ETH_ASSET)).to.equal(true);
 
         // Post-trigger: maxPrice latches to the pumped spot while minPrice stays at
-        // originalSpot — the bounds have diverged from each other and from the seed.
+        // originalEthSpot — the bounds have diverged from each other and from the seed.
         const cfgAfter = await dbo.assetProtectionConfig(ETH_ASSET);
-        expect(cfgAfter.minPrice).to.equal(originalSpot);
+        expect(cfgAfter.minPrice).to.equal(originalEthSpot);
         expect(cfgAfter.maxPrice).to.equal(pumpedSpot);
         expect(cfgAfter.minPrice).to.not.equal(cfgAfter.maxPrice);
+
+        // Post-trigger: protection is active and getBoundedPricesView now clips.
+        // collateral = min(spot, minPrice) = min(pumped, original) = original — moved
+        //   away from the pre-trigger pass-through value (pumped → original).
+        // debt = max(spot, maxPrice) = max(pumped, pumped) = pumped (unchanged here,
+        //   but the next test exercises debt-side clipping with a dipped spot).
+        const [collateralAfter, debtAfter] = await dbo.getBoundedPricesView(ETH_VTOKEN);
+        expect(collateralAfter).to.equal(originalEthSpot);
+        expect(debtAfter).to.equal(pumpedSpot);
+        expect(collateralAfter).to.not.equal(collateralBefore);
       });
 
       it("getBoundedPricesView clips both sides — spot strictly between minPrice and maxPrice", async () => {
         // Dip spot below the pumped peak so three distinct prices are in play:
-        //   originalSpot (low / minPrice) < dippedSpot (current) < pumpedSpot (high / maxPrice).
+        //   originalEthSpot (low / minPrice) < dippedSpot (current) < pumpedSpot (high / maxPrice).
         // Without this, debt == spot trivially and the upper-bound clip isn't exercised.
         const dippedSpot = pumpedSpot.mul(95).div(100);
         await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, dippedSpot);
         expect(await resilient.getPrice(ETH_ASSET)).to.equal(dippedSpot);
 
         const cfg = await dbo.assetProtectionConfig(ETH_ASSET);
-        // Window unchanged: min still at originalSpot, max latched at pumpedSpot from the trigger.
-        expect(cfg.minPrice).to.equal(originalSpot);
+        // Window unchanged: min still at originalEthSpot, max latched at pumpedSpot from the trigger.
+        expect(cfg.minPrice).to.equal(originalEthSpot);
         expect(cfg.maxPrice).to.equal(pumpedSpot);
 
         const [collateral, debt] = await dbo.getBoundedPricesView(ETH_VTOKEN);
         // collateral = min(spot, minPrice) = min(dipped, original) = original
-        expect(collateral).to.equal(originalSpot);
+        expect(collateral).to.equal(originalEthSpot);
         // debt = max(spot, maxPrice) = max(dipped, pumped) = pumped
         expect(debt).to.equal(pumpedSpot);
-        // Both bounds diverge from current spot — clipping is doing work on each side.
-        expect(collateral).to.not.equal(dippedSpot);
-        expect(debt).to.not.equal(dippedSpot);
+        // Both bounds diverge from the live ResilientOracle spot — clipping is doing
+        // work on each side rather than passing spot through.
+        const liveSpot = await resilient.getPrice(ETH_ASSET);
+        expect(liveSpot).to.equal(dippedSpot);
+        expect(collateral).to.not.equal(liveSpot);
+        expect(debt).to.not.equal(liveSpot);
       });
     });
 
@@ -692,10 +711,10 @@ forking(FORK_BLOCK, async () => {
 
       it("keeper narrows window + cooldown elapses + exitProtectionMode succeeds", async () => {
         // Restore spot so keeper bounds (newMin ≤ spot, newMax ≥ spot) accept ±1%.
-        await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, originalSpot);
+        await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, originalEthSpot);
 
-        const tightMin = originalSpot.mul(99).div(100);
-        const tightMax = originalSpot.mul(101).div(100);
+        const tightMin = originalEthSpot.mul(99).div(100);
+        const tightMax = originalEthSpot.mul(101).div(100);
         await dbo.connect(keeperSigner).updateMinPrice(ETH_ASSET, tightMin);
         await dbo.connect(keeperSigner).updateMaxPrice(ETH_ASSET, tightMax);
 
@@ -727,13 +746,17 @@ forking(FORK_BLOCK, async () => {
       });
 
       it("subsequent oracle pump produces (spot, spot) — bounded pricing bypassed", async () => {
-        const movedSpot = originalSpot.mul(2); // +100%, would clearly trigger if enabled
+        const movedSpot = originalEthSpot.mul(2); // +100%, would clearly trigger if enabled
         await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, movedSpot);
         expect(await resilient.getPrice(ETH_ASSET)).to.equal(movedSpot);
 
         const [collateral, debt] = await dbo.getBoundedPricesView(ETH_VTOKEN);
         expect(collateral).to.equal(movedSpot);
         expect(debt).to.equal(movedSpot);
+
+        // Whitelist is off, so the +100% move must not arm protection — confirms the
+        // disable path actually short-circuits the trigger logic, not just the view.
+        expect(await dbo.currentlyUsingProtectedPrice(ETH_ASSET)).to.equal(false);
       });
     });
 
@@ -742,19 +765,19 @@ forking(FORK_BLOCK, async () => {
       let droppedSpot: BigNumber;
 
       it("re-enable resets window at current spot", async () => {
-        await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, originalSpot);
+        await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, originalEthSpot);
         await dbo.connect(guardianSigner).setAssetBoundedPricingEnabled(ETH_ASSET, true);
 
         const cfg = await dbo.assetProtectionConfig(ETH_ASSET);
-        expect(cfg.minPrice).to.equal(originalSpot);
-        expect(cfg.maxPrice).to.equal(originalSpot);
+        expect(cfg.minPrice).to.equal(originalEthSpot);
+        expect(cfg.maxPrice).to.equal(originalEthSpot);
         priorTriggerTimestamp = cfg.lastProtectionTriggeredAt;
       });
 
       it("oracle drop + updateProtectionState mutates state and re-activates protection", async () => {
         // 50% drop — well below the ~16.67% triggerThreshold seeded for ETH.
         // E2E-2 covered the upward-spike path; this exercises the symmetric downside.
-        droppedSpot = originalSpot.mul(50).div(100);
+        droppedSpot = originalEthSpot.mul(50).div(100);
         await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, droppedSpot);
 
         const tx = await dbo.connect(keeperSigner).updateProtectionState(ETH_VTOKEN);
@@ -763,9 +786,9 @@ forking(FORK_BLOCK, async () => {
         const cfg = await dbo.assetProtectionConfig(ETH_ASSET);
         expect(cfg.currentlyUsingProtectedPrice).to.equal(true);
         expect(cfg.lastProtectionTriggeredAt).to.be.gt(priorTriggerTimestamp);
-        // minPrice latches down to the dropped spot; maxPrice stays at originalSpot.
+        // minPrice latches down to the dropped spot; maxPrice stays at originalEthSpot.
         expect(cfg.minPrice).to.equal(droppedSpot);
-        expect(cfg.maxPrice).to.equal(originalSpot);
+        expect(cfg.maxPrice).to.equal(originalEthSpot);
       });
 
       it("bounded prices reflect the new window — collateral pinned at dropped, debt at original", async () => {
@@ -773,7 +796,7 @@ forking(FORK_BLOCK, async () => {
         // collateral = min(spot, minPrice) = min(dropped, dropped) = dropped
         expect(collateral).to.equal(droppedSpot);
         // debt = max(spot, maxPrice) = max(dropped, original) = original
-        expect(debt).to.equal(originalSpot);
+        expect(debt).to.equal(originalEthSpot);
       });
     });
 
@@ -785,9 +808,8 @@ forking(FORK_BLOCK, async () => {
       });
 
       it("TRX bounded prices still pass through to spot — independent of ETH lifecycle", async () => {
-        const VTRX_VTOKEN = ASSET_CONFIGS.find(c => c.name === "TRX")!.vToken;
-        const spot: BigNumber = await resilient.getUnderlyingPrice(VTRX_VTOKEN);
-        const [collateral, debt] = await dbo.getBoundedPricesView(VTRX_VTOKEN);
+        const spot: BigNumber = await resilient.getUnderlyingPrice(TRX_VTOKEN);
+        const [collateral, debt] = await dbo.getBoundedPricesView(TRX_VTOKEN);
         expect(collateral, "TRX.collateralPrice").to.equal(spot);
         expect(debt, "TRX.debtPrice").to.equal(spot);
       });
@@ -804,7 +826,6 @@ forking(FORK_BLOCK, async () => {
   // the manipulated price. Wrapped in evm_snapshot/evm_revert.
   // ────────────────────────────────────────────────────────────────────
   describe("E2E scenarios — Comptroller core lending operations", () => {
-    const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
     const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
     const USDT_ASSET = "0x55d398326f99059fF775485246999027B3197955";
     // Venus restricts vToken.liquidateBorrow to this contract; direct EOA calls return UNAUTHORIZED.
@@ -822,9 +843,9 @@ forking(FORK_BLOCK, async () => {
     let usdt: Contract;
     let chainlink: Contract;
     let resilient: Contract;
-    let borrowerSigner: Awaited<ReturnType<typeof initMainnetUser>>;
-    let liquidatorSigner: Awaited<ReturnType<typeof initMainnetUser>>;
-    let timelockSigner: Awaited<ReturnType<typeof initMainnetUser>>;
+    let borrowerSigner: Signer;
+    let liquidatorSigner: Signer;
+    let timelockSigner: Signer;
     let originalEthSpot: BigNumber;
     let usdtDecimals: number;
     let supplyAmount: BigNumber;
@@ -837,7 +858,7 @@ forking(FORK_BLOCK, async () => {
       borrowerSigner = await initMainnetUser(BORROWER, ethers.utils.parseEther("1"));
       liquidatorSigner = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
 
-      veth = new ethers.Contract(VETH, VTOKEN_ABI, provider);
+      veth = new ethers.Contract(ETH_VTOKEN, VTOKEN_ABI, provider);
       vusdt = new ethers.Contract(VUSDT, VTOKEN_ABI, provider);
       eth = new ethers.Contract(ETH_ASSET, ERC20_ABI, provider);
       usdt = new ethers.Contract(USDT_ASSET, ERC20_ABI, provider);
@@ -874,13 +895,13 @@ forking(FORK_BLOCK, async () => {
 
     it("mint: supplying ETH increases the borrower's vETH balance", async () => {
       const before = await veth.balanceOf(BORROWER);
-      await eth.connect(borrowerSigner).approve(VETH, supplyAmount);
+      await eth.connect(borrowerSigner).approve(ETH_VTOKEN, supplyAmount);
       await veth.connect(borrowerSigner).mint(supplyAmount);
       expect(await veth.balanceOf(BORROWER)).to.be.gt(before);
     });
 
     it("borrow: enterMarkets + borrow transfers USDT to the borrower", async () => {
-      await comptroller.connect(borrowerSigner).enterMarkets([VETH]);
+      await comptroller.connect(borrowerSigner).enterMarkets([ETH_VTOKEN]);
       const before = await usdt.balanceOf(BORROWER);
       await vusdt.connect(borrowerSigner).borrow(borrowAmount);
       expect(await usdt.balanceOf(BORROWER)).to.equal(before.add(borrowAmount));
@@ -893,6 +914,37 @@ forking(FORK_BLOCK, async () => {
       expect(await eth.balanceOf(BORROWER)).to.equal(before.add(redeemAmount));
     });
 
+    // Mirrors Compound liquidity math: tokensToDenom = exchangeRate × CF × price / 1e36;
+    // sumCollateral = tokensToDenom × vTokenBalance / 1e18; sumBorrows = borrowBalance × price / 1e18.
+    // Returns the expected (sumCollateral − sumBorrows) at the live oracle prices.
+    const expectedLiquidityDelta = async (): Promise<BigNumber> => {
+      const ONE = ethers.constants.WeiPerEther;
+      const [, ethVTokenBal, , ethExchangeRate] = await veth.getAccountSnapshot(BORROWER);
+      const [, , usdtBorrowBal] = await vusdt.getAccountSnapshot(BORROWER);
+      const ethCF = (await comptroller.markets(ETH_VTOKEN)).collateralFactorMantissa;
+      const ethPrice = await resilient.getUnderlyingPrice(ETH_VTOKEN);
+      const usdtPrice = await resilient.getUnderlyingPrice(VUSDT);
+      const tokensToDenom = ethExchangeRate.mul(ethCF).div(ONE).mul(ethPrice).div(ONE);
+      const sumCollateral = tokensToDenom.mul(ethVTokenBal).div(ONE);
+      const sumBorrows = usdtBorrowBal.mul(usdtPrice).div(ONE);
+      return sumCollateral.sub(sumBorrows);
+    };
+
+    // Tolerance: $1 in 1e18 — covers rounding-order differences between this
+    // computation and the on-chain lens, while staying well under any real-bug delta
+    // on ~$1500 of liquidity / ~$80 of shortfall.
+    const LIQUIDITY_TOLERANCE = ethers.utils.parseEther("1");
+
+    it("pre-crash: getAccountLiquidity matches expected (ComptrollerLens path)", async () => {
+      const expected = await expectedLiquidityDelta();
+      expect(expected).to.be.gt(0);
+
+      const [err, liquidity, shortfall] = await comptroller.getAccountLiquidity(BORROWER);
+      expect(err).to.equal(0);
+      expect(shortfall).to.equal(0);
+      expect(liquidity).to.be.closeTo(expected, LIQUIDITY_TOLERANCE);
+    });
+
     it("liquidate: ETH price crash puts the borrower into shortfall and liquidator seizes vETH", async () => {
       // 1 ETH supply × $2239 × CF ≈ $1500 collateral vs $100 debt — a 10× crash
       // still leaves ~$150 of borrow capacity. Crash to 1% of spot to force shortfall.
@@ -900,9 +952,13 @@ forking(FORK_BLOCK, async () => {
       await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, crashedSpot);
       expect(await resilient.getPrice(ETH_ASSET)).to.equal(crashedSpot);
 
-      const [err, , shortfall] = await comptroller.getAccountLiquidity(BORROWER);
+      const expectedDelta = await expectedLiquidityDelta();
+      expect(expectedDelta).to.be.lt(0);
+
+      const [err, liquidity, shortfall] = await comptroller.getAccountLiquidity(BORROWER);
       expect(err).to.equal(0);
-      expect(shortfall).to.be.gt(0);
+      expect(liquidity).to.equal(0);
+      expect(shortfall).to.be.closeTo(expectedDelta.mul(-1), LIQUIDITY_TOLERANCE);
 
       const liquidator = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
       const repayAmount = ethers.utils.parseUnits("10", usdtDecimals);
@@ -912,10 +968,9 @@ forking(FORK_BLOCK, async () => {
       await usdt.connect(liquidatorSigner).approve(LIQUIDATOR_CONTRACT, repayAmount);
 
       const liquidatorVethBefore = await veth.balanceOf(LIQUIDATOR);
-      await expect(liquidator.connect(liquidatorSigner).liquidateBorrow(VUSDT, BORROWER, repayAmount, VETH)).to.emit(
-        vusdt,
-        "LiquidateBorrow",
-      );
+      await expect(
+        liquidator.connect(liquidatorSigner).liquidateBorrow(VUSDT, BORROWER, repayAmount, ETH_VTOKEN),
+      ).to.emit(vusdt, "LiquidateBorrow");
       expect(await veth.balanceOf(LIQUIDATOR)).to.be.gt(liquidatorVethBefore);
     });
   });

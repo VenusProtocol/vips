@@ -17,12 +17,12 @@ import vip665, {
   UNITROLLER_IMPLEMENTATION,
   VAI_CONTROLLER_IMPL,
 } from "../../vips/vip-665/bsctestnet";
+import { cutParams } from "../../vips/vip-665/utils/cut-params-bsctestnet.json";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import VAI_UNITROLLER_ABI from "./abi/VAIUnitroller.json";
-import { cutParams } from "./utils/cut-params-bsctestnet.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 const { NORMAL_TIMELOCK, GUARDIAN, ACCESS_CONTROL_MANAGER, UNITROLLER, VAI_UNITROLLER } = bsctestnet;
