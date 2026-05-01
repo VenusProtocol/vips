@@ -636,43 +636,41 @@ forking(FORK_BLOCK, async () => {
       });
 
       it("oracle pump + updateProtectionState activates protection", async () => {
+        // Pre-pump: spot == window bounds, deviation is zero, so getBoundedPricesView
+        // is a pure passthrough — (spot, spot).
+        const [collateralBefore, debtBefore] = await dbo.getBoundedPricesView(ETH_VTOKEN);
+        expect(collateralBefore).to.equal(originalEthSpot);
+        expect(debtBefore).to.equal(originalEthSpot);
+
         await chainlink.connect(timelockSigner).setDirectPrice(ETH_ASSET, pumpedSpot);
         expect(await resilient.getPrice(ETH_ASSET)).to.equal(pumpedSpot);
 
-        // Pre-trigger: window is still seeded at originalEthSpot, so the pumped spot
-        // sits strictly outside [minPrice, maxPrice] — that's what arms the trigger.
+        // Pre-call storage: window still seeded at originalEthSpot and the protection
+        // flag is unset — updateProtectionState has not run, so nothing has been latched.
         const cfgBefore = await dbo.assetProtectionConfig(ETH_ASSET);
         expect(cfgBefore.minPrice).to.equal(originalEthSpot);
         expect(cfgBefore.maxPrice).to.equal(originalEthSpot);
-        expect(pumpedSpot).to.not.equal(cfgBefore.minPrice);
-        expect(pumpedSpot).to.not.equal(cfgBefore.maxPrice);
-
-        // Pre-trigger: protection is not yet active, so getBoundedPricesView
-        // passes spot through on both sides — no clipping happens yet.
-        const [collateralBefore, debtBefore] = await dbo.getBoundedPricesView(ETH_VTOKEN);
-        expect(collateralBefore).to.equal(pumpedSpot);
-        expect(debtBefore).to.equal(pumpedSpot);
+        expect(cfgBefore.currentlyUsingProtectedPrice).to.equal(false);
 
         const tx = await dbo.connect(keeperSigner).updateProtectionState(ETH_VTOKEN);
         await expect(tx).to.emit(dbo, "ProtectionTriggered");
         expect(await dbo.currentlyUsingProtectedPrice(ETH_ASSET)).to.equal(true);
 
-        // Post-trigger: maxPrice latches to the pumped spot while minPrice stays at
-        // originalEthSpot — the bounds have diverged from each other and from the seed.
+        // Post-call storage: maxPrice latches to pumpedSpot, minPrice stays at originalEthSpot,
+        // and currentlyUsingProtectedPrice is set so the whitelist can no longer be flipped off.
         const cfgAfter = await dbo.assetProtectionConfig(ETH_ASSET);
         expect(cfgAfter.minPrice).to.equal(originalEthSpot);
         expect(cfgAfter.maxPrice).to.equal(pumpedSpot);
         expect(cfgAfter.minPrice).to.not.equal(cfgAfter.maxPrice);
 
-        // Post-trigger: protection is active and getBoundedPricesView now clips.
-        // collateral = min(spot, minPrice) = min(pumped, original) = original — moved
-        //   away from the pre-trigger pass-through value (pumped → original).
-        // debt = max(spot, maxPrice) = max(pumped, pumped) = pumped (unchanged here,
-        //   but the next test exercises debt-side clipping with a dipped spot).
+        // Post-call view: now clips. collateral = min(spot, minPrice) = min(pumped, original) = original;
+        // debt = max(spot, maxPrice) = max(pumped, pumped) = pumped. The view has shifted away from
+        // the pre-pump passthrough — collateral is pinned at the seed and debt tracks the pump.
         const [collateralAfter, debtAfter] = await dbo.getBoundedPricesView(ETH_VTOKEN);
         expect(collateralAfter).to.equal(originalEthSpot);
         expect(debtAfter).to.equal(pumpedSpot);
-        expect(collateralAfter).to.not.equal(collateralBefore);
+        expect(collateralAfter).to.equal(collateralBefore); // collateral unchanged: still pinned at original
+        expect(debtAfter).to.not.equal(debtBefore); // debt diverged: original → pumped
       });
 
       it("getBoundedPricesView clips both sides — spot strictly between minPrice and maxPrice", async () => {

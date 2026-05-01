@@ -1,6 +1,5 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
 import { JsonRpcProvider, TransactionResponse } from "@ethersproject/providers";
-import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
