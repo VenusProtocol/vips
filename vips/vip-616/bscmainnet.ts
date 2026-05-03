@@ -127,8 +127,8 @@ export const grant = (acm: string, contract: string, sig: string, account: strin
   dstChainId,
 });
 
-// VIP-666 (Sub-A): bootstrap + permissions. Kept under each chain's block gas
-// limit by deferring governance EBrake action grants and market wiring to VIP-667.
+// VIP-616 (Sub-A): bootstrap + permissions. Kept under each chain's block gas
+// limit by deferring governance EBrake action grants and market wiring to VIP-617.
 // Per-chain command count varies with the optional CurveOracle (Ethereum) and
 // AerodromeSlipstreamOracle (Base): each adds 1 acceptOwnership + 4 admin grants.
 //   - Ethereum: 60 + 5 (CurveOracle)            = 65
@@ -208,40 +208,26 @@ const buildChainCommandsA = (cfg: ChainConfig): Command[] => {
   ];
 };
 
-export const vip666 = () => {
+export const vip616 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-666 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2 — Bootstrap & Permissions (1/2)",
-    description: `#### Description
+      "VIP-616 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2 — Bootstrap & Permissions (1/2)",
+    description: `#### Context
 
-This is the first of two VIPs that configure the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, and **Base**, mirroring the BSC setup from VIP-590 + VIP-610. Each chain's DeviationSentinel routes automated oracle-deviation enforcement through a local EBrakeV2, which applies per-action, per-market restrictions (pause borrow/supply, zero collateral factor) without manual intervention.
+Deploys the DeviationSentinel + EBrakeV2 stack on the three non-BSC chains — the same oracle-manipulation protection layer that's been running on BSC since VIP-590 / VIP-610. This VIP accepts ownership of the newly deployed contracts and wires up the permissions between Sentinel, EBrake, the IL Comptroller, governance, and the Multisig Pauser. The actual market monitoring is turned on in VIP-617.
 
-The configuration is split across two VIPs so each per-chain payload fits under the destination chain's block gas limit:
+#### Per-chain Actions (×3 chains)
 
-- **VIP-666 (this VIP)** — accept ownership, grant admin/reset/sentinel→ebrake/ebrake→comptroller/multisig permissions, whitelist trusted keepers
-- **VIP-667 (follow-up)** — grant Guardian + Timelocks the IL-supported EBrake action permissions, then wire each monitored market on the appropriate DEX oracle (UniswapOracle / CurveOracle / AerodromeSlipstreamOracle), SentinelOracle, and DeviationSentinel
+For each chain, the VIP performs the following 7 steps:
 
-In addition to UniswapOracle, two extra DEX oracles are bootstrapped on the chains that need them:
-
-- **CurveOracle (Ethereum only)** — prices eBTC against WBTC via the eBTC/WBTC Curve StableSwap-NG pool's EMA \`price_oracle\`. Required because Curve StableSwap-NG pools are not Uniswap V3 ABI-compatible.
-- **AerodromeSlipstreamOracle (Base only)** — prices cbBTC and wstETH on the most liquid Aerodrome Slipstream pools (cbBTC/USDC and wstETH/WETH). Aerodrome Slipstream's \`slot0()\` returns a 6-tuple (no \`feeProtocol\`) so the Solidity decoder reverts when read against the Uniswap V3 7-tuple ABI used by UniswapOracle.
-
-Because EBrake on these chains uses \`isIsolatedPool=true\` (single-pool IL Comptroller, not the BSC Diamond), only the IL-supported subset of EBrake action functions is granted. Diamond-only functions (\`pauseFlashLoan\`, \`disablePoolBorrow\`, \`revokeFlashLoanAccess\`, \`decreaseCF(address,uint96,uint256)\`) are omitted as they revert on IL comptrollers.
-
-#### Summary
-
-If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
-
-- Accept governance ownership of the **DeviationSentinel**, **SentinelOracle**, **UniswapOracle**, and **EBrakeV2** contracts (plus **CurveOracle** on Ethereum and **AerodromeSlipstreamOracle** on Base)
-- Grant admin permissions on DeviationSentinel, SentinelOracle, UniswapOracle, and (where present) CurveOracle / AerodromeSlipstreamOracle to Guardian + 3 Timelocks
-- Grant **EBrakeV2** the 4 IL-supported Comptroller permissions it needs to execute emergency actions
-- Authorize **DeviationSentinel** to call \`pauseBorrow\`, \`pauseSupply\`, and \`decreaseCF\` on EBrake
-- Grant **Guardian** and governance **Timelocks** the granular snapshot-reset permissions on EBrake
-- Grant the **per-chain 1-of-1 Multisig Pauser** the 8 IL-supported EBrake action functions for manual emergency pausing (Phase 0)
-- Whitelist Keeper + Guardian + 3 Timelocks as trusted keepers on DeviationSentinel
-
-**Permission event summary**: 161 PermissionGranted (Ethereum 55 + Arbitrum One 51 + Base 55), 0 PermissionRevoked
+1. **Accept ownership** of the newly deployed contracts: DeviationSentinel, SentinelOracle, UniswapOracle, EBrake (+ CurveOracle on Ethereum, + AerodromeSlipstreamOracle on Base).
+2. **Grant admin perms** to Guardian + 3 Timelocks (Normal / Fast-track / Critical) on each oracle and the DeviationSentinel — so governance can update pool configs and monitoring settings.
+3. **Authorize EBrake → IL Comptroller** for the 4 emergency action types (pause, collateral factor, borrow cap, supply cap).
+4. **Grant snapshot-reset perms on EBrake** to Guardian + 3 Timelocks — so governance can restore market config after a brake event fires.
+5. **Authorize DeviationSentinel → EBrake** for the 3 actions Sentinel auto-invokes when a deviation triggers (pause borrow, pause supply, decrease CF).
+6. **Grant the Multisig Pauser the 8 IL-supported EBrake actions** — manual emergency control during the early operational phase.
+7. **Whitelist trusted keepers** on DeviationSentinel — the off-chain keeper + Guardian + 3 Timelocks.
 
 #### References
 
@@ -257,4 +243,4 @@ If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
   return makeProposal(NETWORKS.flatMap(buildChainCommandsA), meta, ProposalType.REGULAR);
 };
 
-export default vip666;
+export default vip616;

@@ -6,7 +6,7 @@ import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip666, {
+import vip616, {
   AERODROME_ORACLE_ADMIN_PERMS,
   CURVE_ORACLE_ADMIN_PERMS,
   ChainConfig,
@@ -19,7 +19,7 @@ import vip666, {
   SENTINEL_ORACLE_ADMIN_PERMS,
   UNISWAP_ORACLE_ADMIN_PERMS,
   governanceAccounts,
-} from "../../vips/vip-666/bscmainnet";
+} from "../../vips/vip-616/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import AERODROME_ORACLE_ABI from "./abi/AerodromeSlipstreamOracle.json";
 import CURVE_ORACLE_ABI from "./abi/CurveOracle.json";
@@ -28,7 +28,7 @@ import EBRAKE_ABI from "./abi/EBrake.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
 import UNISWAP_ORACLE_ABI from "./abi/UniswapOracle.json";
 
-// RoleGranted events emitted by VIP-666 (Sub-A). Per-chain count is variable because
+// RoleGranted events emitted by VIP-616 (Sub-A). Per-chain count is variable because
 // CurveOracle (Ethereum) and AerodromeSlipstreamOracle (Base) each add 4 admin grants.
 //   base = admin grants (12+8+4) + ebrake→comptroller (4) + reset (12) + sentinel→ebrake (3) + multisig (8) = 51
 //   +4 if cfg.curveOracle is set, +4 if cfg.aerodromeOracle is set
@@ -56,10 +56,10 @@ const collectMissingPlaceholders = (cfg: ChainConfig): string[] => {
   return missing;
 };
 
-export const runVip666Suite = async (cfg: ChainConfig) => {
+export const runVip616Suite = async (cfg: ChainConfig) => {
   const missing = collectMissingPlaceholders(cfg);
   if (missing.length > 0) {
-    describe.skip(`VIP-666 [${cfg.name}] — placeholder addresses missing: ${missing.join(", ")}`, () => {
+    describe.skip(`VIP-616 [${cfg.name}] — placeholder addresses missing: ${missing.join(", ")}`, () => {
       it(`Fill ${missing.join(", ")} in addresses/${cfg.name
         .toLowerCase()
         .replace(/\s/g, "")}.ts to run this suite`, () => {
@@ -111,7 +111,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     }
   });
 
-  describe(`VIP-666 [${cfg.name}] — Pre-VIP behaviour`, () => {
+  describe(`VIP-616 [${cfg.name}] — Pre-VIP behaviour`, () => {
     it("DeviationSentinel pendingOwner is Normal Timelock", async () => {
       expect(await deviationSentinel.pendingOwner()).to.equal(cfg.normalTimelock);
     });
@@ -233,7 +233,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     });
   });
 
-  testForkedNetworkVipCommands(`VIP-666 [${cfg.name}] Bootstrap & Permissions`, await vip666(), {
+  testForkedNetworkVipCommands(`VIP-616 [${cfg.name}] Bootstrap & Permissions`, await vip616(), {
     callbackAfterExecution: async txResponse => {
       // 4 + (1 each for CurveOracle / AerodromeSlipstreamOracle) acceptOwnership() calls
       await expectEvents(
@@ -244,13 +244,13 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
       );
       // 5 trusted keepers whitelisted per chain
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TrustedKeeperUpdated"], [5]);
-      // RoleGranted events (Sub-A only — governance EBrake actions deferred to VIP-667).
+      // RoleGranted events (Sub-A only — governance EBrake actions deferred to VIP-617).
       // Variable per chain depending on which optional DEX oracles are present.
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [expectedPermsGranted(cfg)]);
     },
   });
 
-  describe(`VIP-666 [${cfg.name}] — Post-VIP behaviour`, () => {
+  describe(`VIP-616 [${cfg.name}] — Post-VIP behaviour`, () => {
     it("All bootstrap contracts have Normal Timelock as owner", async () => {
       expect(await deviationSentinel.owner()).to.equal(cfg.normalTimelock);
       expect(await sentinelOracle.owner()).to.equal(cfg.normalTimelock);
@@ -363,13 +363,13 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     });
 
     // Sub-A intentionally does NOT grant governance EBrake action perms or wire markets
-    // — those land in VIP-667. Assert the deferred state explicitly so a regression is loud.
-    it("Guardian + Timelocks still have no EBrake-specific action permissions (deferred to VIP-667)", async () => {
+    // — those land in VIP-617. Assert the deferred state explicitly so a regression is loud.
+    it("Guardian + Timelocks still have no EBrake-specific action permissions (deferred to VIP-617)", async () => {
       for (const account of govAccounts) {
         for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
           expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(
             false,
-            `unexpected ${sig} for ${account} — should be granted by VIP-667`,
+            `unexpected ${sig} for ${account} — should be granted by VIP-617`,
           );
         }
       }
@@ -377,7 +377,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     for (const market of cfg.monitoredMarkets) {
       if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
-      it(`${market.symbol} is still not wired (deferred to VIP-667)`, async () => {
+      it(`${market.symbol} is still not wired (deferred to VIP-617)`, async () => {
         // Each market's wiring lives on its routed DEX oracle; assert its slot is empty.
         const oracleType = market.oracleType ?? "uniswap";
         if (oracleType === "curve") {

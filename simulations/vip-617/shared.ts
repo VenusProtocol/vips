@@ -5,24 +5,24 @@ import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents, getForkedNetworkAddress, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip666, {
+import vip616, {
   ChainConfig,
   GOVERNANCE_EBRAKE_PERMS_IL,
   MonitoredMarket,
   governanceAccounts,
-} from "../../vips/vip-666/bscmainnet";
-import vip667 from "../../vips/vip-667/bscmainnet";
-import ACCESS_CONTROL_MANAGER_ABI from "../vip-666/abi/AccessControlManager.json";
-import AERODROME_ORACLE_ABI from "../vip-666/abi/AerodromeSlipstreamOracle.json";
-import CURVE_ORACLE_ABI from "../vip-666/abi/CurveOracle.json";
-import DEVIATION_SENTINEL_ABI from "../vip-666/abi/DeviationSentinel.json";
-import IL_COMPTROLLER_ABI from "../vip-666/abi/ILComptroller.json";
-import RESILIENT_ORACLE_ABI from "../vip-666/abi/ResilientOracle.json";
-import SENTINEL_ORACLE_ABI from "../vip-666/abi/SentinelOracle.json";
-import UNISWAP_ORACLE_ABI from "../vip-666/abi/UniswapOracle.json";
-import VTOKEN_ABI from "../vip-666/abi/VToken.json";
+} from "../../vips/vip-616/bscmainnet";
+import vip617 from "../../vips/vip-617/bscmainnet";
+import ACCESS_CONTROL_MANAGER_ABI from "../vip-616/abi/AccessControlManager.json";
+import AERODROME_ORACLE_ABI from "../vip-616/abi/AerodromeSlipstreamOracle.json";
+import CURVE_ORACLE_ABI from "../vip-616/abi/CurveOracle.json";
+import DEVIATION_SENTINEL_ABI from "../vip-616/abi/DeviationSentinel.json";
+import IL_COMPTROLLER_ABI from "../vip-616/abi/ILComptroller.json";
+import RESILIENT_ORACLE_ABI from "../vip-616/abi/ResilientOracle.json";
+import SENTINEL_ORACLE_ABI from "../vip-616/abi/SentinelOracle.json";
+import UNISWAP_ORACLE_ABI from "../vip-616/abi/UniswapOracle.json";
+import VTOKEN_ABI from "../vip-616/abi/VToken.json";
 
-// RoleGranted events emitted by VIP-667 (Sub-B) per chain:
+// RoleGranted events emitted by VIP-617 (Sub-B) per chain:
 //   8 (governance ebrake action) × 4 = 32 (token wiring uses direct setter calls)
 const PERMS_GRANTED_PER_CHAIN = 32;
 
@@ -108,11 +108,11 @@ const buildVTokenIndex = async (comptrollerAddress: string): Promise<Map<string,
   return vTokenByUnderlying;
 };
 
-export const runVip667Suite = async (cfg: ChainConfig) => {
+export const runVip617Suite = async (cfg: ChainConfig) => {
   const missing = collectMissingPlaceholders(cfg);
   if (missing.length > 0) {
-    describe.skip(`VIP-667 [${cfg.name}] — placeholder addresses missing: ${missing.join(", ")}`, () => {
-      it(`Fill ${missing.join(", ")} in vips/vip-666/addresses/${cfg.name
+    describe.skip(`VIP-617 [${cfg.name}] — placeholder addresses missing: ${missing.join(", ")}`, () => {
+      it(`Fill ${missing.join(", ")} in vips/vip-616/addresses/${cfg.name
         .toLowerCase()
         .replace(/\s/g, "")}.ts to run this suite`, () => {
         // intentionally empty — skip stub
@@ -146,7 +146,7 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     vTokenByUnderlying = await buildVTokenIndex(cfg.comptroller);
   });
 
-  describe(`VIP-667 [${cfg.name}] — Monitored markets config validity`, () => {
+  describe(`VIP-617 [${cfg.name}] — Monitored markets config validity`, () => {
     // A zero-address token or pool, or an out-of-range deviation, would be silently
     // skipped or accepted-as-malformed by the wiring loop. Fail loud at simulation time.
     it("Every monitored market has non-zero token, non-zero pool, and 0 < deviation ≤ 100", () => {
@@ -171,11 +171,11 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     });
   });
 
-  // VIP-667 depends on VIP-666 having been executed — apply it first within the
+  // VIP-617 depends on VIP-616 having been executed — apply it first within the
   // same fork so post-A state is the pre-VIP state for B.
-  testForkedNetworkVipCommands(`VIP-666 [${cfg.name}] (prerequisite for VIP-667)`, await vip666());
+  testForkedNetworkVipCommands(`VIP-616 [${cfg.name}] (prerequisite for VIP-617)`, await vip616());
 
-  describe(`VIP-667 [${cfg.name}] — Pre-VIP behaviour (post-VIP-666 state)`, () => {
+  describe(`VIP-617 [${cfg.name}] — Pre-VIP behaviour (post-VIP-616 state)`, () => {
     it("Guardian + Timelocks have no EBrake-specific action permissions yet", async () => {
       for (const account of govAccounts) {
         for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
@@ -208,7 +208,7 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     }
   });
 
-  testForkedNetworkVipCommands(`VIP-667 [${cfg.name}] Governance Actions & Market Wiring`, await vip667(), {
+  testForkedNetworkVipCommands(`VIP-617 [${cfg.name}] Governance Actions & Market Wiring`, await vip617(), {
     callbackAfterExecution: async txResponse => {
       // 32 RoleGranted events per chain (governance EBrake action perms)
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [PERMS_GRANTED_PER_CHAIN]);
@@ -233,7 +233,7 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     },
   });
 
-  describe(`VIP-667 [${cfg.name}] — Post-VIP behaviour`, () => {
+  describe(`VIP-617 [${cfg.name}] — Post-VIP behaviour`, () => {
     it("Guardian + Timelocks have all 8 IL-supported EBrake action permissions", async () => {
       for (const account of govAccounts) {
         for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {

@@ -1,10 +1,10 @@
 import { forking } from "src/vip-framework";
 
-import { ARBITRUMONE_CONFIG } from "../../vips/vip-666/addresses/arbitrumone";
-import { runVip666Suite } from "./shared";
+import { ARBITRUMONE_CONFIG } from "../../vips/vip-616/addresses/arbitrumone";
+import { runVip616Suite } from "./shared";
 
 const FORK_BLOCK = 457580585;
 
 forking(FORK_BLOCK, async () => {
-  await runVip666Suite(ARBITRUMONE_CONFIG);
+  await runVip616Suite(ARBITRUMONE_CONFIG);
 });

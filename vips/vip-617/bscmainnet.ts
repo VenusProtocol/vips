@@ -2,16 +2,16 @@ import { ZERO_ADDRESS } from "src/networkAddresses";
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { ARBITRUMONE_CONFIG } from "../vip-666/addresses/arbitrumone";
-import { BASEMAINNET_CONFIG } from "../vip-666/addresses/basemainnet";
-import { ETHEREUM_CONFIG } from "../vip-666/addresses/ethereum";
+import { ARBITRUMONE_CONFIG } from "../vip-616/addresses/arbitrumone";
+import { BASEMAINNET_CONFIG } from "../vip-616/addresses/basemainnet";
+import { ETHEREUM_CONFIG } from "../vip-616/addresses/ethereum";
 import {
   ChainConfig,
   GOVERNANCE_EBRAKE_PERMS_IL,
   MonitoredMarket,
   governanceAccounts,
   grant,
-} from "../vip-666/bscmainnet";
+} from "../vip-616/bscmainnet";
 
 const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, BASEMAINNET_CONFIG];
 
@@ -70,7 +70,7 @@ const buildSetPoolCommand = (cfg: ChainConfig, market: MonitoredMarket, dstChain
   };
 };
 
-// VIP-667 (Sub-B): governance EBrake action grants + per-market wiring.
+// VIP-617 (Sub-B): governance EBrake action grants + per-market wiring.
 // Per-chain command count: gov ebrake action 32 + 3 × eligible markets.
 //   - Ethereum: 32 + 30 (10 mkts: 9 Uniswap + 1 Curve) = 62
 //   - Arbitrum: 32 + 15 ( 5 mkts: 5 Uniswap)           = 47
@@ -114,31 +114,34 @@ const buildChainCommandsB = (cfg: ChainConfig): Command[] => {
   return commands;
 };
 
-export const vip667 = () => {
+export const vip617 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-667 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2 — Governance Actions & Market Wiring (2/2)",
-    description: `#### Description
+      "VIP-617 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2 — Governance Actions & Market Wiring (2/2)",
+    description: `#### Context
 
-This is the second of two VIPs configuring the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, and **Base**. It depends on VIP-666 (Bootstrap & Permissions) being executed first.
+With ownership and permissions in place from VIP-616, this VIP grants governance the ability to manually invoke EBrake actions and turns on deviation monitoring for the 19 eligible markets at a unified 10% threshold.
 
-Splitting the configuration across two VIPs keeps each per-chain payload under the destination chain's block gas limit. VIP-666 covers ownership, admin permissions, reset / sentinel → ebrake / ebrake → comptroller / multisig grants, and trusted-keeper whitelisting. This VIP covers governance EBrake action permissions and per-market deviation wiring.
+#### Per-chain Actions
 
-Because EBrake on these chains uses \`isIsolatedPool=true\`, only the IL-supported subset of action functions is granted (Diamond-only functions revert on IL comptrollers).
+For each chain, the VIP performs the following 2 blocks of work:
 
-#### Summary
+1. **Grant the 8 IL-supported EBrake action perms** to Guardian + 3 Timelocks (same set Multisig Pauser receives in VIP-616 step 6).
+2. **For each monitored market** — 3 calls per market:
+    - Bind the underlying token to its DEX pool on the appropriate DEX oracle
+    - Route SentinelOracle to that DEX oracle for the token
+    - Enable DeviationSentinel monitoring at the 10% threshold
 
-If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
+#### DEX oracles routed
 
-- Grant **Guardian** and governance **Timelocks** the 8 IL-supported EBrake action functions
-- Configure deviation monitoring (10% threshold) for the eligible Core Pool markets on each chain — 10 on Ethereum (9 Uniswap V3 + 1 Curve / eBTC), 5 on Arbitrum One (Uniswap V3), 4 on Base (2 Uniswap V3 + 2 Aerodrome Slipstream / cbBTC + wstETH)
-
-**Permission event summary**: 96 PermissionGranted (32 per chain × 3 chains), 0 PermissionRevoked
+- **Uniswap V3** (UniswapOracle) — default, covers most markets on all 3 chains
+- **Curve** (CurveOracle) — Ethereum only, for the eBTC/WBTC StableSwap-NG pool
+- **Aerodrome Slipstream** (AerodromeSlipstreamOracle) — Base only, for cbBTC + wstETH
 
 #### References
 
-- [VIP-666 (Bootstrap & Permissions)](https://app.venus.io/governance/proposal/666)
+- [VIP-616 (Bootstrap & Permissions)](https://app.venus.io/governance/proposal/616)
 - [VIP-590 (BSC)](https://app.venus.io/governance/proposal/590)
 - [VIP-610 (BSC)](https://app.venus.io/governance/proposal/610)
 - [Original Proposal: Emergency Brake — Price Deviation Safeguard Mechanism](https://community.venus.io/t/proposal-emergency-brake-price-deviation-safeguard-mechanism/5668)
@@ -151,4 +154,4 @@ If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
   return makeProposal(NETWORKS.flatMap(buildChainCommandsB), meta, ProposalType.REGULAR);
 };
 
-export default vip667;
+export default vip617;

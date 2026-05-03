@@ -6,17 +6,17 @@ import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { SEPOLIA_CONFIG, SEPOLIA_GUARDIAN_OWNER } from "../../vips/vip-666/addresses/sepolia";
+import { SEPOLIA_CONFIG, SEPOLIA_GUARDIAN_OWNER } from "../../vips/vip-616/addresses/sepolia";
 import {
   DIAMOND_ONLY_EBRAKE_PERMS,
   EBRAKE_COMPTROLLER_PERMS_IL,
   SENTINEL_EBRAKE_PERMS,
-} from "../../vips/vip-666/bscmainnet";
+} from "../../vips/vip-616/bscmainnet";
 import vip666Sepolia, {
   DEPLOYER_COMPTROLLER_PERMS,
   DEPLOYER_EBRAKE_PERMS,
   DEPLOYER_SENTINEL_ORACLE_PERMS,
-} from "../../vips/vip-666/bsctestnet";
+} from "../../vips/vip-616/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
