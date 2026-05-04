@@ -1,5 +1,7 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
 import { LzChainId } from "src/types";
+
+import type { ChainConfig } from "../bscmainnet";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -114,8 +116,8 @@ export const ETHEREUM_CONFIG = {
   sentinelOracle: ETHEREUM_SENTINEL_ORACLE,
   uniswapOracle: ETHEREUM_UNISWAP_ORACLE,
   curveOracle: ETHEREUM_CURVE_ORACLE,
-
   multisigPauser: ETHEREUM_MULTISIG_PAUSER,
   keeper: ETHEREUM_KEEPER,
   monitoredMarkets: ETHEREUM_MONITORED_MARKETS,
-} as const;
+  configurator: ZERO_ADDRESS, // TODO: deploy DeviationSentinelConfiguratorEthereum and update
+} satisfies ChainConfig;

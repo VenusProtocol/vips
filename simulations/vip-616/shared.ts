@@ -3,16 +3,18 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { ZERO_ADDRESS } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents, getForkedNetworkAddress, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip616, {
+import vip616 from "../../vips/vip-616/bscmainnet";
+import {
   AERODROME_ORACLE_ADMIN_PERMS,
   CURVE_ORACLE_ADMIN_PERMS,
   ChainConfig,
   DIAMOND_ONLY_EBRAKE_PERMS,
   EBRAKE_COMPTROLLER_PERMS_IL,
   GOVERNANCE_EBRAKE_PERMS_IL,
+  MonitoredMarket,
   RESET_PERMS,
   SENTINEL_ADMIN_PERMS,
   SENTINEL_EBRAKE_PERMS,
@@ -25,24 +27,113 @@ import AERODROME_ORACLE_ABI from "./abi/AerodromeSlipstreamOracle.json";
 import CURVE_ORACLE_ABI from "./abi/CurveOracle.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
+import IL_COMPTROLLER_ABI from "./abi/ILComptroller.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
 import UNISWAP_ORACLE_ABI from "./abi/UniswapOracle.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
-// RoleGranted events emitted by VIP-616 (Sub-A). Per-chain count is variable because
-// CurveOracle (Ethereum) and AerodromeSlipstreamOracle (Base) each add 4 admin grants.
-//   base = admin grants (12+8+4) + ebrake→comptroller (4) + reset (12) + sentinel→ebrake (3) + multisig (8) = 51
-//   +4 if cfg.curveOracle is set, +4 if cfg.aerodromeOracle is set
-const expectedPermsGranted = (cfg: ChainConfig): number => {
-  let n = 51;
-  if (cfg.curveOracle) n += 4;
-  if (cfg.aerodromeOracle) n += 4;
+// The VIP grants the configurator DEFAULT_ADMIN_ROLE on the local ACM so that
+// execute() can call giveCallPermission / revokeCallPermission (both wrap OZ
+// grantRole / revokeRole which require DEFAULT_ADMIN_ROLE). The configurator
+// renounces this role at the end of execute() via _selfRevokeACMPermissions().
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+// Tokens whose `DeviationSentinel.checkPriceDeviation` end-to-end check is
+// fragile at fork time only — wrapped/correlated oracles whose inner feeds
+// expose staleness windows we can't override from the simulation side.
+//   - LBTC: OneJumpOracle (RedStone LBTC/BTC ratio + Chainlink BTC/USD).
+//   - eBTC: same OneJumpOracle pattern (eBTC/BTC ratio + BTC/USD).
+const SKIP_CHECK_PRICE_DEVIATION = new Set<string>(["LBTC", "eBTC"]);
+
+// RoleGranted event count emitted by VIP-616 per chain:
+//     1  DEFAULT_ADMIN_ROLE grant          (VIP-level grantRole(0x00, configurator))
+//   + 51 base permission grants            (12 sentinel admin + 8 sentinelOracle admin
+//                                           + 4 uniswapOracle admin + 4 ebrake→comptroller
+//                                           + 12 reset + 3 sentinel→ebrake + 8 multisig)
+//   + 4  if cfg.curveOracle present        (CurveOracle admin × 4 govAccounts)
+//   + 4  if cfg.aerodromeOracle present    (AerodromeSlipstreamOracle admin × 4 govAccounts)
+//   + 32 governance EBrake-action grants   (8 sigs × 4 govAccounts)
+//   + 4  transient self-grants in execute() (_selfGrantBaseTransientPermissions:
+//         DeviationSentinel×2, SentinelOracle×1, UniswapOracle×1)
+//   + 1  if cfg.curveOracle / aerodromeOracle present (_selfGrantChainSpecificTransientPermissions)
+const expectedRoleGranted = (cfg: ChainConfig): number => {
+  let n = 1 + 51 + 32 + 4; // DEFAULT_ADMIN_ROLE + base grants + governance EBrake + base transient
+  if (cfg.curveOracle) n += 4 + 1; // CurveOracle admin grants + transient self-grant
+  if (cfg.aerodromeOracle) n += 4 + 1; // AerodromeOracle admin grants + transient self-grant
   return n;
 };
+
+// RoleRevoked event count emitted by VIP-616 per chain:
+//     4  base transient self-revokes in execute() (_selfRevokeBaseTransientPermissions)
+//   + 1  if cfg.curveOracle / aerodromeOracle present (_selfRevokeChainSpecificTransientPermissions)
+//   + 1  configurator renounces DEFAULT_ADMIN_ROLE (_selfRevokeACMPermissions)
+const expectedRoleRevoked = (cfg: ChainConfig): number => {
+  let n = 4 + 1; // base transient revokes + DEFAULT_ADMIN_ROLE renounce
+  if (cfg.curveOracle || cfg.aerodromeOracle) n += 1;
+  return n;
+};
+
+// OwnershipTransferred count = 4 base contracts (DeviationSentinel, SentinelOracle,
+// UniswapOracle, EBrake) + 1 each for CurveOracle / AerodromeSlipstreamOracle.
 const expectedAcceptOwnership = (cfg: ChainConfig): number => {
   let n = 4;
   if (cfg.curveOracle) n += 1;
   if (cfg.aerodromeOracle) n += 1;
   return n;
+};
+
+const countMarketsByOracle = (markets: MonitoredMarket[], type: MonitoredMarket["oracleType"]) =>
+  markets.filter(m => (m.oracleType ?? "uniswap") === (type ?? "uniswap")).length;
+
+const dexOracleFor = (cfg: ChainConfig, market: MonitoredMarket): string => {
+  switch (market.oracleType ?? "uniswap") {
+    case "uniswap":
+      return cfg.uniswapOracle;
+    case "curve":
+      return cfg.curveOracle as string;
+    case "aerodrome":
+      return cfg.aerodromeOracle as string;
+  }
+};
+
+const tryGetAddress = (key: string): string | undefined => {
+  try {
+    return getForkedNetworkAddress(key);
+  } catch {
+    return undefined;
+  }
+};
+
+// testForkedNetworkVipCommands advances chain time past timelock delays. Past
+// that window Chainlink/RedStone heartbeats expire and ResilientOracle reverts
+// with "invalid resilient oracle price". Bump at the adapter level so main +
+// pivot + fallback slots and OneJumpOracle wrappers are all covered.
+const bumpAdapterStaleness = async (cfg: ChainConfig) => {
+  const adapters = [tryGetAddress("CHAINLINK_ORACLE"), tryGetAddress("REDSTONE_ORACLE")].filter(
+    (a): a is string => !!a,
+  );
+  for (const market of cfg.monitoredMarkets) {
+    for (const adapter of adapters) {
+      await setMaxStalePeriodInChainlinkOracle(adapter, market.token, ZERO_ADDRESS, cfg.normalTimelock);
+    }
+  }
+};
+
+const buildVTokenIndex = async (comptrollerAddress: string): Promise<Map<string, string>> => {
+  const comptroller = await ethers.getContractAt(IL_COMPTROLLER_ABI, comptrollerAddress);
+  const vTokens: string[] = await comptroller.getAllMarkets();
+  const vTokenByUnderlying = new Map<string, string>();
+  for (const vToken of vTokens) {
+    try {
+      const v = await ethers.getContractAt(VTOKEN_ABI, vToken);
+      const underlying: string = await v.underlying();
+      vTokenByUnderlying.set(underlying.toLowerCase(), vToken);
+    } catch {
+      // native-token vTokens don't expose underlying() — skip
+    }
+  }
+  return vTokenByUnderlying;
 };
 
 const collectMissingPlaceholders = (cfg: ChainConfig): string[] => {
@@ -53,6 +144,7 @@ const collectMissingPlaceholders = (cfg: ChainConfig): string[] => {
   if (cfg.uniswapOracle === ZERO_ADDRESS) missing.push("uniswapOracle");
   if (cfg.multisigPauser === ZERO_ADDRESS) missing.push("multisigPauser");
   if (cfg.keeper === ZERO_ADDRESS) missing.push("keeper");
+  if (cfg.configurator === ZERO_ADDRESS) missing.push("configurator");
   return missing;
 };
 
@@ -60,9 +152,22 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
   const missing = collectMissingPlaceholders(cfg);
   if (missing.length > 0) {
     describe.skip(`VIP-616 [${cfg.name}] — placeholder addresses missing: ${missing.join(", ")}`, () => {
-      it(`Fill ${missing.join(", ")} in addresses/${cfg.name
-        .toLowerCase()
-        .replace(/\s/g, "")}.ts to run this suite`, () => {
+      it(`Fill ${missing.join(", ")} to run this suite`, () => {
+        // intentionally empty — skip stub
+      });
+    });
+    return;
+  }
+
+  // vip616() iterates all three chains and throws if any configurator is ZERO_ADDRESS.
+  // Catch so one undeployed chain doesn't silently break another chain's sim file.
+  let proposal: Awaited<ReturnType<typeof vip616>>;
+  try {
+    proposal = await vip616();
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    describe.skip(`VIP-616 [${cfg.name}] — cannot build VIP (all configurators must be set): ${msg}`, () => {
+      it("Deploy all three configurators and update addresses/<chain>.ts", () => {
         // intentionally empty — skip stub
       });
     });
@@ -76,6 +181,9 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
   let uniswapOracle: Contract;
   let curveOracle: Contract | undefined;
   let aerodromeOracle: Contract | undefined;
+  let resilientOracle: Contract;
+  // underlying address (lowercased) → vToken address — built by walking IL Comptroller markets.
+  let vTokenByUnderlying: Map<string, string>;
 
   // ACM.isAllowedToCall(account, sig) checks msg.sender as the host contract.
   // Impersonate each host so the role lookup resolves correctly.
@@ -95,6 +203,7 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
     eBrake = await ethers.getContractAt(EBRAKE_ABI, cfg.eBrake);
     sentinelOracle = await ethers.getContractAt(SENTINEL_ORACLE_ABI, cfg.sentinelOracle);
     uniswapOracle = await ethers.getContractAt(UNISWAP_ORACLE_ABI, cfg.uniswapOracle);
+    resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, getForkedNetworkAddress("RESILIENT_ORACLE"));
 
     impersonatedDeviationSentinel = await initMainnetUser(cfg.deviationSentinel, ethers.utils.parseEther("1"));
     impersonatedSentinelOracle = await initMainnetUser(cfg.sentinelOracle, ethers.utils.parseEther("1"));
@@ -109,8 +218,38 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
       aerodromeOracle = await ethers.getContractAt(AERODROME_ORACLE_ABI, cfg.aerodromeOracle);
       impersonatedAerodromeOracle = await initMainnetUser(cfg.aerodromeOracle, ethers.utils.parseEther("1"));
     }
+
+    await bumpAdapterStaleness(cfg);
+    vTokenByUnderlying = await buildVTokenIndex(cfg.comptroller);
   });
 
+  // -------------------- Monitored-market config validity --------------------
+  describe(`VIP-616 [${cfg.name}] — Monitored markets config validity`, () => {
+    // A zero-address token or pool, or an out-of-range deviation, would be silently
+    // skipped or accepted-as-malformed by the wiring loop. Fail loud at simulation time.
+    it("Every monitored market has non-zero token, non-zero pool, and 0 < deviation ≤ 100", () => {
+      for (const market of cfg.monitoredMarkets) {
+        expect(market.token, `${market.symbol}: token is ZERO_ADDRESS`).to.not.equal(ZERO_ADDRESS);
+        expect(market.pool, `${market.symbol}: pool is ZERO_ADDRESS`).to.not.equal(ZERO_ADDRESS);
+        expect(market.token.length, `${market.symbol}: token not 20 bytes`).to.equal(42);
+        expect(market.pool.length, `${market.symbol}: pool not 20 bytes`).to.equal(42);
+        expect(market.deviationPercent, `${market.symbol}: deviation must be > 0`).to.be.greaterThan(0);
+        expect(market.deviationPercent, `${market.symbol}: deviation must be ≤ 100`).to.be.lessThanOrEqual(100);
+      }
+    });
+
+    // ResilientOracle is the reference price source for handleDeviation. If it has
+    // no feed for a monitored token, oraclePrice = 0 makes hasDeviation always true
+    // and every keeper call would pause the market.
+    it("ResilientOracle returns a non-zero price for every monitored token", async () => {
+      for (const market of cfg.monitoredMarkets) {
+        const price = await resilientOracle.getPrice(market.token);
+        expect(price, `${market.symbol}: ResilientOracle.getPrice returned 0`).to.be.gt(0);
+      }
+    });
+  });
+
+  // -------------------- Pre-VIP behaviour --------------------
   describe(`VIP-616 [${cfg.name}] — Pre-VIP behaviour`, () => {
     it("DeviationSentinel pendingOwner is Normal Timelock", async () => {
       expect(await deviationSentinel.pendingOwner()).to.equal(cfg.normalTimelock);
@@ -148,6 +287,10 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
     it("DeviationSentinel immutables wire to local EBrake + SentinelOracle", async () => {
       expect(await deviationSentinel.EBRAKE()).to.equal(cfg.eBrake);
       expect(await deviationSentinel.SENTINEL_ORACLE()).to.equal(cfg.sentinelOracle);
+    });
+
+    it("Configurator does not yet hold DEFAULT_ADMIN_ROLE on ACM", async () => {
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, cfg.configurator)).to.equal(false);
     });
 
     it("Guardian + Timelocks have no admin permissions on DeviationSentinel yet", async () => {
@@ -199,10 +342,13 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
       });
     }
 
-    it("EBrake has no permissions on the IL Comptroller yet", async () => {
-      const a = acm.connect(impersonatedComptroller);
+    // Use hasPermission (specific role lookup), not isAllowedToCall — the IL Comptroller is
+    // a live contract that may already hold wildcard grants on these sigs (Risk Steward,
+    // Guardian, etc.), and isAllowedToCall would return true off the wildcard, masking the
+    // genuine pre-VIP state of EBrake's specific perm.
+    it("EBrake has no specific permissions on the IL Comptroller yet", async () => {
       for (const sig of EBRAKE_COMPTROLLER_PERMS_IL) {
-        expect(await a.isAllowedToCall(cfg.eBrake, sig)).to.equal(false, `unexpected ${sig}`);
+        expect(await acm.hasPermission(cfg.eBrake, cfg.comptroller, sig)).to.equal(false, `unexpected ${sig}`);
       }
     });
 
@@ -226,30 +372,86 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
       }
     });
 
+    it("Guardian + Timelocks have no EBrake-specific action permissions yet", async () => {
+      for (const account of govAccounts) {
+        for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
+        }
+      }
+    });
+
     it("No accounts are whitelisted as trusted keepers yet", async () => {
       for (const account of trustedKeeperAccounts) {
         expect(await deviationSentinel.trustedKeepers(account)).to.equal(false);
       }
     });
+
+    for (const market of cfg.monitoredMarkets) {
+      it(`${market.symbol} is not wired yet`, async () => {
+        // Each oracle uses a different storage shape for its pool config:
+        //   - UniswapOracle / AerodromeSlipstreamOracle: tokenPools(token) -> address
+        //   - CurveOracle: poolConfigs(token) -> { pool, coinIndex, referenceToken, ... }
+        const oracleType = market.oracleType ?? "uniswap";
+        if (oracleType === "curve") {
+          const cfgEntry = await curveOracle!.poolConfigs(market.token);
+          expect(cfgEntry.pool).to.equal(ZERO_ADDRESS);
+        } else if (oracleType === "aerodrome") {
+          expect(await aerodromeOracle!.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+        } else {
+          expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+        }
+        const tcSentinel = await sentinelOracle.tokenConfigs(market.token);
+        expect(tcSentinel.oracle ?? tcSentinel).to.equal(ZERO_ADDRESS);
+        const tcDev = await deviationSentinel.tokenConfigs(market.token);
+        expect(tcDev.deviation).to.equal(0);
+        expect(tcDev.enabled).to.equal(false);
+      });
+    }
   });
 
-  testForkedNetworkVipCommands(`VIP-616 [${cfg.name}] Bootstrap & Permissions`, await vip616(), {
+  // -------------------- Apply VIP --------------------
+  testForkedNetworkVipCommands(`VIP-616 [${cfg.name}] Bootstrap, Permissions, Wiring`, proposal, {
     callbackAfterExecution: async txResponse => {
-      // 4 + (1 each for CurveOracle / AerodromeSlipstreamOracle) acceptOwnership() calls
+      // 4 acceptOwnership() calls, +1 each for CurveOracle / AerodromeSlipstreamOracle.
       await expectEvents(
         txResponse,
         [DEVIATION_SENTINEL_ABI],
         ["OwnershipTransferred"],
         [expectedAcceptOwnership(cfg)],
       );
-      // 5 trusted keepers whitelisted per chain
+
+      // 5 trusted keepers per chain: cfg.keeper + 4 governance accounts.
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TrustedKeeperUpdated"], [5]);
-      // RoleGranted events (Sub-A only — governance EBrake actions deferred to VIP-617).
-      // Variable per chain depending on which optional DEX oracles are present.
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [expectedPermsGranted(cfg)]);
+
+      // Total RoleGranted per chain — see expectedRoleGranted comment for the breakdown.
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [expectedRoleGranted(cfg)]);
+
+      // Configurator revokes its transient periphery perms and renounces DEFAULT_ADMIN_ROLE
+      // at the end of execute() — see expectedRoleRevoked comment for the breakdown.
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleRevoked"], [expectedRoleRevoked(cfg)]);
+
+      // Pool wiring counts. UniswapOracle and AerodromeSlipstreamOracle emit the same
+      // 2-arg `PoolConfigUpdated(address,address)` event (identical topic hash), so
+      // the UniswapOracle ABI filter decodes both. CurveOracle's 4-arg variant has its
+      // own topic and is asserted separately.
+      const uniswapMarkets = countMarketsByOracle(cfg.monitoredMarkets, "uniswap");
+      const curveMarkets = countMarketsByOracle(cfg.monitoredMarkets, "curve");
+      const aerodromeMarkets = countMarketsByOracle(cfg.monitoredMarkets, "aerodrome");
+      await expectEvents(txResponse, [UNISWAP_ORACLE_ABI], ["PoolConfigUpdated"], [uniswapMarkets + aerodromeMarkets]);
+      if (cfg.curveOracle && curveMarkets > 0) {
+        await expectEvents(txResponse, [CURVE_ORACLE_ABI], ["PoolConfigUpdated"], [curveMarkets]);
+      }
+      await expectEvents(
+        txResponse,
+        [SENTINEL_ORACLE_ABI],
+        ["TokenOracleConfigUpdated"],
+        [cfg.monitoredMarkets.length],
+      );
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenConfigUpdated"], [cfg.monitoredMarkets.length]);
     },
   });
 
+  // -------------------- Post-VIP behaviour --------------------
   describe(`VIP-616 [${cfg.name}] — Post-VIP behaviour`, () => {
     it("All bootstrap contracts have Normal Timelock as owner", async () => {
       expect(await deviationSentinel.owner()).to.equal(cfg.normalTimelock);
@@ -267,6 +469,16 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
       expect(await eBrake.pendingOwner()).to.equal(ZERO_ADDRESS);
       if (cfg.curveOracle) expect(await curveOracle!.pendingOwner()).to.equal(ZERO_ADDRESS);
       if (cfg.aerodromeOracle) expect(await aerodromeOracle!.pendingOwner()).to.equal(ZERO_ADDRESS);
+    });
+
+    // The configurator renounces DEFAULT_ADMIN_ROLE at the end of execute() via
+    // _selfRevokeACMPermissions(). Leaving it in place would be a standing
+    // ACM-mutation foothold.
+    it("Configurator no longer holds DEFAULT_ADMIN_ROLE on ACM (renounced in execute())", async () => {
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, cfg.configurator)).to.equal(
+        false,
+        "configurator still holds DEFAULT_ADMIN_ROLE",
+      );
     });
 
     it("Guardian + Timelocks have all admin permissions on DeviationSentinel", async () => {
@@ -345,6 +557,14 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
       }
     });
 
+    it("Guardian + Timelocks have all 8 IL-supported EBrake action permissions", async () => {
+      for (const account of govAccounts) {
+        for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(true, `missing ${sig} for ${account}`);
+        }
+      }
+    });
+
     it("Diamond-only EBrake permissions are intentionally NOT granted", async () => {
       for (const account of govAccounts) {
         for (const sig of DIAMOND_ONLY_EBRAKE_PERMS) {
@@ -362,38 +582,66 @@ export const runVip616Suite = async (cfg: ChainConfig) => {
       }
     });
 
-    // Sub-A intentionally does NOT grant governance EBrake action perms or wire markets
-    // — those land in VIP-617. Assert the deferred state explicitly so a regression is loud.
-    it("Guardian + Timelocks still have no EBrake-specific action permissions (deferred to VIP-617)", async () => {
-      for (const account of govAccounts) {
-        for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
-          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(
-            false,
-            `unexpected ${sig} for ${account} — should be granted by VIP-617`,
-          );
-        }
-      }
-    });
-
     for (const market of cfg.monitoredMarkets) {
-      if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
-      it(`${market.symbol} is still not wired (deferred to VIP-617)`, async () => {
-        // Each market's wiring lives on its routed DEX oracle; assert its slot is empty.
+      const expectedDexOracle = dexOracleFor(cfg, market);
+
+      it(`${market.symbol} pool is configured on the routed DEX oracle`, async () => {
         const oracleType = market.oracleType ?? "uniswap";
         if (oracleType === "curve") {
           const cfgEntry = await curveOracle!.poolConfigs(market.token);
-          expect(cfgEntry.pool).to.equal(ZERO_ADDRESS);
+          expect(ethers.utils.getAddress(cfgEntry.pool)).to.equal(ethers.utils.getAddress(market.pool));
+          expect(cfgEntry.coinIndex).to.equal(market.coinIndex);
+          expect(cfgEntry.refCoinIndex).to.equal(market.refCoinIndex);
+          expect(ethers.utils.getAddress(cfgEntry.referenceToken)).to.equal(
+            ethers.utils.getAddress(market.referenceToken as string),
+          );
+          expect(cfgEntry.assetDecimals).to.equal(market.assetDecimals);
         } else if (oracleType === "aerodrome") {
-          expect(await aerodromeOracle!.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+          const actual = await aerodromeOracle!.tokenPools(market.token);
+          expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(market.pool));
         } else {
-          expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+          const actual = await uniswapOracle.tokenPools(market.token);
+          expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(market.pool));
         }
-        const tcSentinel = await sentinelOracle.tokenConfigs(market.token);
-        expect(tcSentinel.oracle ?? tcSentinel).to.equal(ZERO_ADDRESS);
-        const tcDev = await deviationSentinel.tokenConfigs(market.token);
-        expect(tcDev.deviation).to.equal(0);
-        expect(tcDev.enabled).to.equal(false);
       });
+
+      it(`${market.symbol} oracle is configured on SentinelOracle`, async () => {
+        const tc = await sentinelOracle.tokenConfigs(market.token);
+        const actual = tc.oracle ?? tc;
+        expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(expectedDexOracle));
+      });
+
+      it(`${market.symbol} deviation threshold is configured on DeviationSentinel`, async () => {
+        const tc = await deviationSentinel.tokenConfigs(market.token);
+        expect(tc.deviation).to.equal(market.deviationPercent);
+        expect(tc.enabled).to.equal(true);
+      });
+
+      // End-to-end price-pipeline check: SentinelOracle → routed DEX oracle → pool.
+      // If the pool isn't a real Uniswap V3 / V3-compatible contract, slot0 reverts
+      // and handleDeviation would always revert (silent monitoring outage).
+      it(`${market.symbol} SentinelOracle.getPrice returns a non-zero price`, async () => {
+        const price = await sentinelOracle.getPrice(market.token);
+        expect(price, `${market.symbol}: SentinelOracle.getPrice returned 0`).to.be.gt(0);
+      });
+
+      // Full handleDeviation pre-flight: same path the keeper exercises, minus the
+      // EBrake side-effect. Skipped for fork-fragile tokens (see SKIP_CHECK_PRICE_DEVIATION).
+      if (!SKIP_CHECK_PRICE_DEVIATION.has(market.symbol)) {
+        it(`${market.symbol} DeviationSentinel.checkPriceDeviation returns hasDeviation=false at fork time`, async () => {
+          const vToken = vTokenByUnderlying.get(market.token.toLowerCase());
+          expect(vToken, `${market.symbol}: no vToken in Core Pool with underlying=${market.token}`).to.not.be
+            .undefined;
+          const [hasDeviation, oraclePrice, sentinelPrice, deviationPercent] =
+            await deviationSentinel.checkPriceDeviation(vToken);
+          expect(oraclePrice, `${market.symbol}: oraclePrice = 0`).to.be.gt(0);
+          expect(sentinelPrice, `${market.symbol}: sentinelPrice = 0`).to.be.gt(0);
+          expect(deviationPercent, `${market.symbol}: live deviation ≥ trigger threshold`).to.be.lt(
+            market.deviationPercent,
+          );
+          expect(hasDeviation, `${market.symbol}: handleDeviation would trigger right now`).to.equal(false);
+        });
+      }
     }
   });
 };

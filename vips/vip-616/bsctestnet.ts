@@ -1,8 +1,18 @@
-import { ProposalType } from "src/types";
+import { Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { SEPOLIA_CONFIG, SEPOLIA_GUARDIAN_OWNER } from "./addresses/sepolia";
-import { EBRAKE_COMPTROLLER_PERMS_IL, SENTINEL_EBRAKE_PERMS, grant } from "./bscmainnet";
+import { EBRAKE_COMPTROLLER_PERMS_IL, SENTINEL_EBRAKE_PERMS } from "./bscmainnet";
+
+// ACM `giveCallPermission` command builder. Inlined here because this VIP is
+// the only consumer — the mainnet VIP delegates all grants into the
+// configurator helper and doesn't need it.
+const grant = (acm: string, target: string, signature: string, account: string, dstChainId: LzChainId): Command => ({
+  target: acm,
+  signature: "giveCallPermission(address,string,address)",
+  params: [target, signature, account],
+  dstChainId,
+});
 
 // Exported for simulation imports.
 export const DEPLOYER_SENTINEL_ORACLE_PERMS = ["setDirectPrice(address,uint256)"];

@@ -1,9 +1,15 @@
-import { Command, ProposalType } from "src/types";
+import { ZERO_ADDRESS } from "src/networkAddresses";
+import { Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { ARBITRUMONE_CONFIG } from "./addresses/arbitrumone";
 import { BASEMAINNET_CONFIG } from "./addresses/basemainnet";
 import { ETHEREUM_CONFIG } from "./addresses/ethereum";
+
+// ---------------------------------------------------------------------------
+// Shared types + ACM permission constants. Exported for simulation use; the
+// VIP itself only delegates into per-chain DeviationSentinelConfigurator.execute().
+// ---------------------------------------------------------------------------
 
 export type OracleType = "uniswap" | "curve" | "aerodrome";
 
@@ -28,7 +34,7 @@ export interface MonitoredMarket {
 
 export interface ChainConfig {
   name: string;
-  dstChainId: number;
+  dstChainId: LzChainId;
   acm: string;
   guardian: string;
   normalTimelock: string;
@@ -39,13 +45,13 @@ export interface ChainConfig {
   eBrake: string;
   sentinelOracle: string;
   uniswapOracle: string;
-  // Optional, per-chain DEX oracles. Present only on chains that need them; bootstrap
-  // permissions + ownership transfer are conditionally added when set.
   curveOracle?: string;
   aerodromeOracle?: string;
   multisigPauser: string;
   keeper: string;
   monitoredMarkets: MonitoredMarket[];
+  // Per-chain DeviationSentinelConfigurator address. ZERO_ADDRESS until deployed.
+  configurator: string;
 }
 
 export const governanceAccounts = (cfg: ChainConfig): string[] => [
@@ -54,8 +60,6 @@ export const governanceAccounts = (cfg: ChainConfig): string[] => [
   cfg.fastTrackTimelock,
   cfg.criticalTimelock,
 ];
-
-const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, BASEMAINNET_CONFIG];
 
 // setTokenConfig uses the struct-tuple form (uint8,bool), matching DeviationSentinel.sol.
 export const SENTINEL_ADMIN_PERMS = [
@@ -120,33 +124,24 @@ export const DIAMOND_ONLY_EBRAKE_PERMS = [
   "decreaseCF(address,uint96,uint256)",
 ];
 
-export const grant = (acm: string, contract: string, sig: string, account: string, dstChainId: number) => ({
-  target: acm,
-  signature: "giveCallPermission(address,string,address)",
-  params: [contract, sig, account],
-  dstChainId,
-});
+// Per-chain configs are the single source of truth — see addresses/<chain>.ts.
+// Adding a new chain only requires creating an addresses/<chain>.ts and
+// extending this array.
+const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, BASEMAINNET_CONFIG];
 
-// VIP-616 (Sub-A): bootstrap + permissions. Kept under each chain's block gas
-// limit by deferring governance EBrake action grants and market wiring to VIP-617.
-// Per-chain command count varies with the optional CurveOracle (Ethereum) and
-// AerodromeSlipstreamOracle (Base): each adds 1 acceptOwnership + 4 admin grants.
-//   - Ethereum: 60 + 5 (CurveOracle)            = 65
-//   - Arbitrum: 60                              = 60
-//   - Base:     60 + 5 (AerodromeSlipstream)    = 65
-const buildChainCommandsA = (cfg: ChainConfig): Command[] => {
-  const { acm, dstChainId } = cfg;
-  const govAccounts = governanceAccounts(cfg);
-  const trustedKeeperAccounts = [cfg.keeper, ...govAccounts];
+const buildChainCommands = (cfg: ChainConfig): Command[] => {
+  if (cfg.configurator === ZERO_ADDRESS) {
+    throw new Error(`${cfg.name}: configurator address unset; deploy and update addresses/<chain>.ts.`);
+  }
+
+  const { acm, dstChainId, configurator } = cfg;
 
   const ownershipTargets: string[] = [cfg.deviationSentinel, cfg.sentinelOracle, cfg.uniswapOracle, cfg.eBrake];
   if (cfg.curveOracle) ownershipTargets.push(cfg.curveOracle);
   if (cfg.aerodromeOracle) ownershipTargets.push(cfg.aerodromeOracle);
 
   return [
-    // 1. Accept ownership of the newly deployed contracts. The deployer transfers
-    //    ownership to the local Normal Timelock prior to this VIP. Always 4 (the
-    //    base stack); +1 each for CurveOracle / AerodromeSlipstreamOracle when present.
+    // Accept pending-ownership
     ...ownershipTargets.map(target => ({
       target,
       signature: "acceptOwnership()",
@@ -154,80 +149,55 @@ const buildChainCommandsA = (cfg: ChainConfig): Command[] => {
       dstChainId,
     })),
 
-    // 2. Grant Guardian + governance Timelocks admin permissions on DeviationSentinel
-    ...govAccounts.flatMap(account =>
-      SENTINEL_ADMIN_PERMS.map(sig => grant(acm, cfg.deviationSentinel, sig, account, dstChainId)),
-    ),
-
-    // 3. Grant Guardian + governance Timelocks admin permissions on SentinelOracle
-    ...govAccounts.flatMap(account =>
-      SENTINEL_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.sentinelOracle, sig, account, dstChainId)),
-    ),
-
-    // 4. Grant Guardian + governance Timelocks admin permission on UniswapOracle
-    ...govAccounts.flatMap(account =>
-      UNISWAP_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.uniswapOracle, sig, account, dstChainId)),
-    ),
-
-    // 4b. Grant Guardian + governance Timelocks admin permission on CurveOracle (when present)
-    ...(cfg.curveOracle
-      ? govAccounts.flatMap(account =>
-          CURVE_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.curveOracle as string, sig, account, dstChainId)),
-        )
-      : []),
-
-    // 4c. Grant Guardian + governance Timelocks admin permission on AerodromeSlipstreamOracle (when present)
-    ...(cfg.aerodromeOracle
-      ? govAccounts.flatMap(account =>
-          AERODROME_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.aerodromeOracle as string, sig, account, dstChainId)),
-        )
-      : []),
-
-    // 5. Grant EBrake the IL-Comptroller-supported emergency-action permissions
-    ...EBRAKE_COMPTROLLER_PERMS_IL.map(sig => grant(acm, cfg.comptroller, sig, cfg.eBrake, dstChainId)),
-
-    // 6. Grant Guardian + governance Timelocks granular snapshot-reset perms on EBrake
-    ...govAccounts.flatMap(account => RESET_PERMS.map(sig => grant(acm, cfg.eBrake, sig, account, dstChainId))),
-
-    // 7. Grant DeviationSentinel the three EBrake actions handleDeviation invokes
-    ...SENTINEL_EBRAKE_PERMS.map(sig => grant(acm, cfg.eBrake, sig, cfg.deviationSentinel, dstChainId)),
-
-    // 8. Grant the per-chain 1-of-1 Multisig Pauser the IL-supported EBrake action
-    //    functions, so the Venus team can manually trigger emergency actions during
-    //    the early operational phase (mirror of VIP-610 step 7).
-    ...GOVERNANCE_EBRAKE_PERMS_IL.map(sig => grant(acm, cfg.eBrake, sig, cfg.multisigPauser, dstChainId)),
-
-    // 9. Whitelist Keeper + Guardian + governance Timelocks as trusted keepers on
-    //    DeviationSentinel so VIPs (and the off-chain keeper) can invoke handleDeviation.
-    ...trustedKeeperAccounts.map(account => ({
-      target: cfg.deviationSentinel,
-      signature: "setTrustedKeeper(address,bool)",
-      params: [account, true],
+    // Grant DEFAULT_ADMIN_ROLE on the local ACM so execute() can call giveCallPermission /
+    // revokeCallPermission (both internally call grantRole / revokeRole, which require
+    // DEFAULT_ADMIN_ROLE per OZ AccessControl). The configurator renounces this role at the
+    // very end of execute() via _selfRevokeACMPermissions().
+    {
+      target: acm,
+      signature: "grantRole(bytes32,address)",
+      params: ["0x0000000000000000000000000000000000000000000000000000000000000000", configurator],
       dstChainId,
-    })),
+    },
+
+    // Apply all grants + market wiring atomically. See DeviationSentinelConfigurator.execute().
+    {
+      target: configurator,
+      signature: "execute()",
+      params: [],
+      dstChainId,
+    },
   ];
 };
 
 export const vip616 = () => {
   const meta = {
     version: "v2",
-    title:
-      "VIP-616 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2 — Bootstrap & Permissions (1/2)",
-    description: `#### Context
+    title: "VIP-616 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2",
+    description: `#### Description
 
-Deploys the DeviationSentinel + EBrakeV2 stack on the three non-BSC chains — the same oracle-manipulation protection layer that's been running on BSC since VIP-590 / VIP-610. This VIP accepts ownership of the newly deployed contracts and wires up the permissions between Sentinel, EBrake, the IL Comptroller, governance, and the Multisig Pauser. The actual market monitoring is turned on in VIP-617.
+This VIP configures the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, and **Base**, mirroring the BSC setup from VIP-590 + VIP-610. Each chain's DeviationSentinel routes automated oracle-deviation enforcement through a local EBrakeV2, which applies per-action, per-market restrictions (pause borrow/supply, zero collateral factor) without manual intervention.
 
-#### Per-chain Actions (×3 chains)
+The full bootstrap — ownership transfer, ACM grants for Guardian + 3 Timelocks, EBrake action permissions, multisig-pauser permissions, trusted-keeper whitelisting, and per-market deviation wiring across UniswapOracle / CurveOracle / AerodromeSlipstreamOracle — is encoded inside a per-chain **DeviationSentinelConfigurator** contract deployed to venus-periphery.
 
-For each chain, the VIP performs the following 7 steps:
+The on-chain VIP needs only to (1) accept ownership of the periphery contracts, (2) grant the configurator \`DEFAULT_ADMIN_ROLE\` on the local ACM (required by OZ \`grantRole\` / \`revokeRole\`, which both \`giveCallPermission\` and \`revokeCallPermission\` wrap internally), and (3) call \`configurator.execute()\`. The configurator applies every grant and wiring atomically, then renounces \`DEFAULT_ADMIN_ROLE\` at the very end, so it retires permanently in a single transaction with no follow-up cleanup VIP required.
 
-1. **Accept ownership** of the newly deployed contracts: DeviationSentinel, SentinelOracle, UniswapOracle, EBrake (+ CurveOracle on Ethereum, + AerodromeSlipstreamOracle on Base).
-2. **Grant admin perms** to Guardian + 3 Timelocks (Normal / Fast-track / Critical) on each oracle and the DeviationSentinel — so governance can update pool configs and monitoring settings.
-3. **Authorize EBrake → IL Comptroller** for the 4 emergency action types (pause, collateral factor, borrow cap, supply cap).
-4. **Grant snapshot-reset perms on EBrake** to Guardian + 3 Timelocks — so governance can restore market config after a brake event fires.
-5. **Authorize DeviationSentinel → EBrake** for the 3 actions Sentinel auto-invokes when a deviation triggers (pause borrow, pause supply, decrease CF).
-6. **Grant the Multisig Pauser the 8 IL-supported EBrake actions** — manual emergency control during the early operational phase.
-7. **Whitelist trusted keepers** on DeviationSentinel — the off-chain keeper + Guardian + 3 Timelocks.
+This packaging keeps the cross-chain payload tiny — well under LayerZero V1's RelayerV2 payload-size ceiling — without splitting the bootstrap across multiple VIPs.
+
+In addition to UniswapOracle, two extra DEX oracles are bootstrapped on the chains that need them:
+
+- **CurveOracle (Ethereum only)** — prices eBTC against WBTC via \`get_dy\` on the eBTC/WBTC Curve StableSwap-NG pool, which the existing UniswapOracle can't read (StableSwap-NG isn't Uniswap V3 ABI-compatible).
+- **AerodromeSlipstreamOracle (Base only)** — prices cbBTC and wstETH on the most liquid Aerodrome Slipstream pools (cbBTC/USDC and wstETH/WETH). Aerodrome Slipstream's \`slot0()\` returns a 6-tuple (no \`feeProtocol\`) so the Solidity decoder reverts when read against the Uniswap V3 7-tuple ABI used by UniswapOracle.
+
+Because EBrake on these chains uses \`isIsolatedPool=true\` (single-pool IL Comptroller, not the BSC Diamond), only the IL-supported subset of EBrake action functions is granted. Diamond-only functions (\`pauseFlashLoan\`, \`disablePoolBorrow\`, \`revokeFlashLoanAccess\`, \`decreaseCF(address,uint96,uint256)\`) are omitted as they revert on IL comptrollers.
+
+#### Summary
+
+If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
+
+- Accept governance ownership of **DeviationSentinel**, **SentinelOracle**, **UniswapOracle**, and **EBrakeV2** (plus **CurveOracle** on Ethereum and **AerodromeSlipstreamOracle** on Base)
+- Grant the per-chain **DeviationSentinelConfigurator** \`DEFAULT_ADMIN_ROLE\` on the local ACM so \`execute()\` can call \`giveCallPermission\` / \`revokeCallPermission\` (both wrap OZ \`grantRole\` / \`revokeRole\`, which require that role). The configurator renounces \`DEFAULT_ADMIN_ROLE\` at the end of \`execute()\` so it retires permanently.
+- Invoke \`configurator.execute()\`, which atomically applies all admin grants, EBrake permissions, multisig-pauser permissions, trusted-keeper whitelisting, and per-market deviation wiring at the unified 10% threshold (10 markets on Ethereum, 5 on Arbitrum One, 4 on Base) — and renounces its own \`DEFAULT_ADMIN_ROLE\` at the end
 
 #### References
 
@@ -240,7 +210,7 @@ For each chain, the VIP performs the following 7 steps:
     abstainDescription: "Indifferent to execution",
   };
 
-  return makeProposal(NETWORKS.flatMap(buildChainCommandsA), meta, ProposalType.REGULAR);
+  return makeProposal(NETWORKS.flatMap(buildChainCommands), meta, ProposalType.REGULAR);
 };
 
 export default vip616;

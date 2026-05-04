@@ -1,5 +1,7 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
 import { LzChainId } from "src/types";
+
+import type { ChainConfig } from "../bscmainnet";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -72,4 +74,5 @@ export const ARBITRUMONE_CONFIG = {
   multisigPauser: ARBITRUMONE_MULTISIG_PAUSER,
   keeper: ARBITRUMONE_KEEPER,
   monitoredMarkets: ARBITRUMONE_MONITORED_MARKETS,
-} as const;
+  configurator: ZERO_ADDRESS, // TODO: deploy DeviationSentinelConfiguratorArbitrumOne and update
+} satisfies ChainConfig;

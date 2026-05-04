@@ -1,5 +1,7 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
 import { LzChainId } from "src/types";
+
+import type { ChainConfig } from "../bscmainnet";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 
@@ -73,4 +75,5 @@ export const BASEMAINNET_CONFIG = {
   multisigPauser: BASEMAINNET_MULTISIG_PAUSER,
   keeper: BASEMAINNET_KEEPER,
   monitoredMarkets: BASEMAINNET_MONITORED_MARKETS,
-} as const;
+  configurator: ZERO_ADDRESS, // TODO: deploy DeviationSentinelConfiguratorBaseMainnet and update
+} satisfies ChainConfig;
