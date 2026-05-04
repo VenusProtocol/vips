@@ -30,6 +30,15 @@ import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 const BSCTESTNET_OMNICHAIN_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
 const BSCMAINNET_OMNICHAIN_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";
 
+// LayerZero payload size cap. Verified on-chain across every destination
+// OmnichainGovernanceExecutor Venus supports (ethereum, arbitrumone, opmainnet, basemainnet,
+// zksyncmainnet, opbnbmainnet, unichainmainnet, plus the matching testnets):
+// DEFAULT_PAYLOAD_SIZE_LIMIT = 10000 and payloadSizeLimitLookup(bsc src) = 0 (no override)
+// on every executor. The LZ Relayer enforces the same 10000-byte cap on the sender side,
+// so this single constant is the binding limit for every cross-chain VIP. If any executor
+// later sets a per-source override, switch to a runtime lookup.
+const LZ_PAYLOAD_SIZE_LIMIT = 10_000;
+
 export const getOmnichainProposalSenderAddress = () => {
   if (FORKED_NETWORK === "bscmainnet" || REMOTE_MAINNET_NETWORKS.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
     return BSCMAINNET_OMNICHAIN_SENDER;
@@ -239,6 +248,19 @@ export const makeProposal = async (
         type as ProposalType,
       );
       const remoteAdapterParam = getAdapterParam(chainCommands.map(cmd => cmd.target).length);
+
+      // LZ Relayer sizes the payloadWithId envelope (the same shape estimateFees receives),
+      // not just the raw makePayload output. Reproduce that wrapping here so the byte count
+      // matches what the on-chain Relayer would check, then fail before propose is attempted.
+      const payloadWithIdSize =
+        ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [remoteParam, 0]).length / 2 - 1;
+      if (payloadWithIdSize > LZ_PAYLOAD_SIZE_LIMIT) {
+        throw new Error(
+          `LayerZero payload size ${payloadWithIdSize} bytes exceeds limit of ${LZ_PAYLOAD_SIZE_LIMIT} ` +
+            `for dstChainId=${key} (${chainCommands.length} commands). ` +
+            `Split the proposal into multiple VIPs so each cross-chain message fits within the LZ Relayer cap.`,
+        );
+      }
 
       proposal.targets.push(getOmnichainProposalSenderAddress());
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
