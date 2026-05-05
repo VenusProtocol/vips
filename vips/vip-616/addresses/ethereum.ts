@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
 import type { ChainConfig } from "../bscmainnet";
@@ -23,6 +23,7 @@ export const ETHEREUM_UNISWAP_ORACLE = "0x873993F8f5f5Ddbae0952e939ab3005Af363Af
 export const ETHEREUM_CURVE_ORACLE = "0x9F508F3146cb03276282f9237c6eE64f76E3261D";
 export const ETHEREUM_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948"; // Venus team multisig
 export const ETHEREUM_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
+export const ETHEREUM_CONFIGURATOR = "0x8E84b25144de0eA1d9D6E126b85769B60f4D604b";
 
 // Reference token for eBTC's CurveOracle entry — see CurveOracle.sol for the pricing math.
 const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
@@ -119,5 +120,5 @@ export const ETHEREUM_CONFIG = {
   multisigPauser: ETHEREUM_MULTISIG_PAUSER,
   keeper: ETHEREUM_KEEPER,
   monitoredMarkets: ETHEREUM_MONITORED_MARKETS,
-  configurator: ZERO_ADDRESS, // TODO: deploy DeviationSentinelConfiguratorEthereum and update
+  configurator: ETHEREUM_CONFIGURATOR,
 } satisfies ChainConfig;

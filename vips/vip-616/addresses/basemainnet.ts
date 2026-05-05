@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
 import type { ChainConfig } from "../bscmainnet";
@@ -23,6 +23,7 @@ export const BASEMAINNET_UNISWAP_ORACLE = "0xc3b5169a7d5f6341403c74187Db3C4Fe6d4
 export const BASEMAINNET_AERODROME_ORACLE = "0x5DE0B322A74088fD64CDD01042BE2fBc47FE82EC";
 export const BASEMAINNET_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948"; // Venus team multisig
 export const BASEMAINNET_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
+export const BASEMAINNET_CONFIGURATOR = "0x3fb0aD3828E6A62E3B527CF51F4F3d011B4a9EA1";
 
 export const BASEMAINNET_DST_CHAIN_ID = LzChainId.basemainnet;
 
@@ -75,5 +76,5 @@ export const BASEMAINNET_CONFIG = {
   multisigPauser: BASEMAINNET_MULTISIG_PAUSER,
   keeper: BASEMAINNET_KEEPER,
   monitoredMarkets: BASEMAINNET_MONITORED_MARKETS,
-  configurator: ZERO_ADDRESS, // TODO: deploy DeviationSentinelConfiguratorBaseMainnet and update
+  configurator: BASEMAINNET_CONFIGURATOR,
 } satisfies ChainConfig;

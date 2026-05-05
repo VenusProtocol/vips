@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
 import type { ChainConfig } from "../bscmainnet";
@@ -20,7 +20,7 @@ export const ARBITRUMONE_SENTINEL_ORACLE = "0x3563CAbc541a0432C66A64942ffB4070a9
 export const ARBITRUMONE_UNISWAP_ORACLE = "0xB6CFbfe6834EF519f002DBc1a8B81Ea437Ca647D";
 export const ARBITRUMONE_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948"; // Venus team multisig
 export const ARBITRUMONE_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
-
+export const ARBITRUMONE_CONFIGURATOR = "0x2AFAed4A909491E0181E55429F7F621528BEd5Ef";
 export const ARBITRUMONE_DST_CHAIN_ID = LzChainId.arbitrumone;
 
 // Eligible Core Pool markets — Uniswap V3 (Arbitrum) sources, unified 10% threshold.
@@ -74,5 +74,5 @@ export const ARBITRUMONE_CONFIG = {
   multisigPauser: ARBITRUMONE_MULTISIG_PAUSER,
   keeper: ARBITRUMONE_KEEPER,
   monitoredMarkets: ARBITRUMONE_MONITORED_MARKETS,
-  configurator: ZERO_ADDRESS, // TODO: deploy DeviationSentinelConfiguratorArbitrumOne and update
+  configurator: ARBITRUMONE_CONFIGURATOR,
 } satisfies ChainConfig;
