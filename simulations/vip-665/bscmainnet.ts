@@ -50,7 +50,7 @@ const {
   VAI_UNITROLLER,
 } = bscmainnet;
 
-const FORK_BLOCK = 95609070;
+const FORK_BLOCK = 96687252;
 const SUPPORTER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 
 // Step 1 grants: 4×3 (3TL) + 2×4 (3TL+G) + 4×5 (3TL+G+K) + 1×2 (Normal+G) = 42

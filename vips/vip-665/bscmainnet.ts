@@ -24,7 +24,7 @@ export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D6
 export const COMPTROLLER_LENS = "0x75A71Ad878f6f24616A2AE21d046C0C8E72f67F8";
 export const VAI_CONTROLLER_IMPL = "0x8A7d8589A597619A7842d3BC284b9a5a276FaE56";
 export const UNITROLLER_IMPLEMENTATION = "0x82cA18785BBbacBeD1C4f482921E2B2E989D8C08";
-export const KEEPER = "0xCab91EBcbf5d242758e22fd436AB568343463A9c"; // TBD — REPLACE WITH KEEPER ADDRESS ON MAINNET
+export const KEEPER = "0xa44eb88198a7a94dc6d2507bc0e5a216c2410d79";
 
 // ──────────────────────────────────────────────────────────────────────────
 // ACM-gated function signatures — DeviationBoundedOracle
