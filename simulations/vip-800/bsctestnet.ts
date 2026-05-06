@@ -12,6 +12,7 @@ import vip800, {
   PANCAKE_ROUTER,
   PROTOCOL_SHARE_RESERVE,
   RISK_FUND_V2,
+  SHORTFALL,
   USDT,
 } from "../../vips/vip-800/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
@@ -25,16 +26,21 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 // TODO
 const FORK_BLOCK = 0;
 
+const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
+
 forking(FORK_BLOCK, async () => {
   const acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
   const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, ethers.provider);
   const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+  const shortfall = new ethers.Contract(SHORTFALL, SHORTFALL_MIN_ABI, ethers.provider);
 
   let riskFundV2UsdtBalanceBefore: BigNumber;
+  let shortfallAuctionsPausedBefore: boolean;
 
   before(async () => {
     riskFundV2UsdtBalanceBefore = await usdt.balanceOf(RISK_FUND_V2);
+    shortfallAuctionsPausedBefore = await shortfall.auctionsPaused();
   });
 
   describe("Pre-VIP state", () => {
@@ -63,6 +69,12 @@ forking(FORK_BLOCK, async () => {
         ).to.be.false;
         expect(await acm.isAllowedToCall(OPERATOR, b, "forwardBaseAsset(address,uint256)")).to.be.false;
       }
+    });
+
+    it("captures Shortfall.auctionsPaused() pre-state (informational)", async () => {
+      // No assertion on the pre-state: isolated pools are wound down so the flag
+      // could be either value depending on prior governance actions.
+      expect(typeof shortfallAuctionsPausedBefore).to.equal("boolean");
     });
   });
 
@@ -123,6 +135,10 @@ forking(FORK_BLOCK, async () => {
     //       (skipped on testnet if amounts are below gas-worth per PRD note).
     it("legacy converter balances drained", async () => {
       // TODO
+    });
+
+    it("Shortfall auctions are paused (defense in depth)", async () => {
+      expect(await shortfall.auctionsPaused()).to.be.true;
     });
   });
 });

@@ -11,6 +11,7 @@ export const RISK_FUND_V2 = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 export const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
 export const XVS_VAULT_TREASURY = "0x317c6C4c9AA7F87170754DB08b4804dD689B68bF";
 export const PANCAKE_ROUTER = "0xD99D1c33F9fC3444f8101754aBC46c52416550D1";
+export const SHORTFALL = "0x503574a82fE2A9f968d355C8AAc1Ba0481859369";
 
 // ===== Tokens =====
 export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
@@ -79,6 +80,7 @@ If passed, this VIP replaces the community-driven Token Converter system (RiskFu
 5. **Drain legacy converters** (remaining tokens → new buyback or VTreasury).
 6. **Revoke ACM permissions** on legacy converters.
 7. **Repoint ProtocolShareReserve distributions** from legacy converters to the 10 new buybacks.
+8. **Defensively call \`Shortfall.pauseAuctions()\`** to keep the auction surface closed post-upgrade. Isolated pools are wound down on testnet as on mainnet — no live or upcoming auctions exist, so this is purely defense in depth.
 
 RiskFundConverter drain + revoke is ordered **before** the upgrade — new impl removes \`updatePoolState\`, so in-flight \`convertExactTokens\` callbacks would revert.
 
@@ -152,6 +154,13 @@ Implementation: [VenusProtocol/protocol-reserve PR #158](https://github.com/Venu
         ],
       },
       // TODO: removeDistributionConfig for any stale rows pointing at retired contracts
+
+      // 8. Defensively pause Shortfall auctions (defense in depth post-upgrade).
+      {
+        target: SHORTFALL,
+        signature: "pauseAuctions()",
+        params: [],
+      },
     ],
     meta,
     ProposalType.REGULAR,

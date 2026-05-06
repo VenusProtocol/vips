@@ -11,6 +11,7 @@ export const RISK_FUND_V2 = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 export const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 export const PANCAKE_ROUTER = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
+export const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
 
 // ===== Tokens =====
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -88,6 +89,7 @@ If passed, this VIP replaces the community-driven Token Converter system (RiskFu
 5. **Drain legacy converters** (remaining tokens → new buyback or VTreasury).
 6. **Revoke ACM permissions** on legacy converters.
 7. **Repoint ProtocolShareReserve distributions** from legacy converters to the 10 new buybacks.
+8. **Defensively call \`Shortfall.pauseAuctions()\`** to keep the auction surface closed post-upgrade. The shortfall auction mechanism is exclusive to isolated pools, and isolated pools are no longer operational; there are no ongoing or upcoming auctions, so the migration window cannot encounter a STARTED auction carrying a stale pre-upgrade \`seizedRiskFund\` snapshot. The \`auctionsPaused\` flag, the \`transferReserveForAuction\` global balance check, and any on-chain status verification step are therefore not needed in the upgrade path — \`pauseAuctions()\` is included purely as defense in depth.
 
 Because the new RiskFundV2 impl removes \`updatePoolState\`, RiskFundConverter drain + ACM revoke are ordered **before** the upgrade to prevent in-flight \`convertExactTokens\` callbacks reverting.
 
@@ -165,6 +167,16 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         ],
       },
       // TODO: removeDistributionConfig for any stale rows pointing at retired contracts
+
+      // 8. Defensively pause Shortfall auctions. Isolated pools are wound down — no live
+      //    or upcoming auctions exist — so this is purely defense in depth to keep the
+      //    auction surface closed after the RiskFundV2 upgrade. NormalTimelock already
+      //    holds `pauseAuctions()` permission (granted in VIP-170).
+      {
+        target: SHORTFALL,
+        signature: "pauseAuctions()",
+        params: [],
+      },
     ],
     meta,
     ProposalType.REGULAR,
