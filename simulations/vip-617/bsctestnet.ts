@@ -16,8 +16,8 @@ import vip665, {
   TIMELOCKS,
   UNITROLLER_IMPLEMENTATION,
   VAI_CONTROLLER_IMPL,
-} from "../../vips/vip-665/bsctestnet";
-import { cutParams } from "../../vips/vip-665/utils/cut-params-bsctestnet.json";
+} from "../../vips/vip-617/bsctestnet";
+import { cutParams } from "../../vips/vip-617/utils/cut-params-bsctestnet.json";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";

@@ -16,7 +16,7 @@ import CHAINLINK_ORACLE_ABI from "src/vip-framework/abi/chainlinkOracle.json";
 import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import VTOKEN_ABI from "src/vip-framework/abi/vToken.json";
 
-import vip665, {
+import vip617, {
   ASSET_CONFIGS,
   COMPTROLLER_DBO_SETTER,
   COMPTROLLER_LENS,
@@ -29,8 +29,8 @@ import vip665, {
   TIMELOCKS,
   UNITROLLER_IMPLEMENTATION,
   VAI_CONTROLLER_IMPL,
-} from "../../vips/vip-665/bscmainnet";
-import { cutParams } from "../../vips/vip-665/utils/cut-params-bscmainnet.json";
+} from "../../vips/vip-617/bscmainnet";
+import { cutParams } from "../../vips/vip-617/utils/cut-params-bscmainnet.json";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
@@ -83,6 +83,21 @@ type Signer = Awaited<ReturnType<typeof initMainnetUser>>;
 const FIXED_COOLDOWN = 3600; // 1h
 const FIXED_RESET_THRESHOLD = BigNumber.from("50000000000000000"); // 5%
 const TRIGGER_DEFAULT_BORROW_ONLY = BigNumber.from("166700000000000000"); // 16.67% — used when CF=0
+
+// Manual triggerThreshold overrides (deviate from the ((1/LTV)-1)/2 formula).
+const TRIGGER_OVERRIDES: Record<string, BigNumber> = {
+  CAKE: BigNumber.from("300000000000000000"), // 30% — tightened
+};
+
+// Assets whose ResilientOracle price drifts between block N (VIP seeding) and
+// later reads (e.g. yield-bearing PT tokens). Compared with 1bp tolerance.
+const TIME_VARYING_ORACLE_ASSETS = new Set(["vPT-clisBNB-25JUN2026"]);
+const PRICE_DRIFT_TOLERANCE_BPS = BigNumber.from(1); // 0.01%
+const expectClose = (actual: BigNumber, expected: BigNumber, label: string) => {
+  const tolerance = expected.mul(PRICE_DRIFT_TOLERANCE_BPS).div(10000).add(1);
+  const diff = actual.sub(expected).abs();
+  expect(diff.lte(tolerance), `${label}: |${actual} - ${expected}| = ${diff} > tol ${tolerance}`).to.equal(true);
+};
 
 // triggerThreshold = ((1/LTV) - 1) / 2  →  (1e36/cf - 1e18) / 2
 const ONE_E18 = BigNumber.from(10).pow(18);
@@ -241,7 +256,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-665 DBO Rollout on BSC mainnet", await vip665(), {
+  testVip("VIP-617 DBO Rollout on BSC mainnet", await vip617(), {
     supporter: SUPPORTER,
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // Step 1 — ACM grants (BSC mainnet ACM emits OZ RoleGranted, not PermissionGranted)
@@ -424,11 +439,12 @@ forking(FORK_BLOCK, async () => {
       });
 
       // Borrow-only markets (CF=0) use the 16.67% default since the formula is undefined for LTV=0.
+      // Some assets carry a manual override (TRIGGER_OVERRIDES) that bypasses the formula.
       it("triggerThreshold per asset matches ((1/LTV)-1)/2 from live Comptroller CF", async () => {
         for (const c of ASSET_CONFIGS) {
           const market = await comptroller.markets(c.vToken);
           const cf: BigNumber = market.collateralFactorMantissa;
-          const expected = cf.isZero() ? TRIGGER_DEFAULT_BORROW_ONLY : triggerFromCF(cf);
+          const expected = TRIGGER_OVERRIDES[c.name] ?? (cf.isZero() ? TRIGGER_DEFAULT_BORROW_ONLY : triggerFromCF(cf));
           const cfg = await dbo.assetProtectionConfig(c.asset);
           expect(cfg.triggerThreshold, `${c.name}.triggerThreshold (vToken=${c.vToken}, CF=${cf.toString()})`).to.equal(
             expected,
@@ -607,13 +623,23 @@ forking(FORK_BLOCK, async () => {
           if (c.isBoundedPricingEnabled) continue;
           const spot: BigNumber = await resilient.getPrice(c.asset);
           const cfg = await dbo.assetProtectionConfig(c.asset);
-          expect(cfg.minPrice, `${c.name}.minPrice`).to.equal(spot);
-          expect(cfg.maxPrice, `${c.name}.maxPrice`).to.equal(spot);
+          if (TIME_VARYING_ORACLE_ASSETS.has(c.name)) {
+            expectClose(cfg.minPrice, spot, `${c.name}.minPrice`);
+            expectClose(cfg.maxPrice, spot, `${c.name}.maxPrice`);
+          } else {
+            expect(cfg.minPrice, `${c.name}.minPrice`).to.equal(spot);
+            expect(cfg.maxPrice, `${c.name}.maxPrice`).to.equal(spot);
+          }
           expect(cfg.currentlyUsingProtectedPrice, `${c.name}.currentlyUsingProtectedPrice`).to.equal(false);
 
           const [collateral, debt] = await dbo.getBoundedPricesView(c.vToken);
-          expect(collateral, `${c.name}.collateralPrice`).to.equal(spot);
-          expect(debt, `${c.name}.debtPrice`).to.equal(spot);
+          if (TIME_VARYING_ORACLE_ASSETS.has(c.name)) {
+            expectClose(collateral, spot, `${c.name}.collateralPrice`);
+            expectClose(debt, spot, `${c.name}.debtPrice`);
+          } else {
+            expect(collateral, `${c.name}.collateralPrice`).to.equal(spot);
+            expect(debt, `${c.name}.debtPrice`).to.equal(spot);
+          }
         }
       });
     });

@@ -5,14 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { DEVIATION_BOUNDED_ORACLE } from "../../vips/vip-665/bsctestnet";
+import { DEVIATION_BOUNDED_ORACLE } from "../../vips/vip-617/bsctestnet";
 import vip665Addendum, {
   NEW_DBO_IMPLEMENTATION,
   NEW_SET_TOKEN_CONFIG_SIGS,
   OLD_SET_TOKEN_CONFIG_SIGS,
   PROXY_ADMIN,
   TIMELOCKS,
-} from "../../vips/vip-665/bsctestnet-addendum";
+} from "../../vips/vip-617/bsctestnet-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";

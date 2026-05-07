@@ -99,19 +99,37 @@ export type AssetConfig = {
 
 export const ASSET_CONFIGS: AssetConfig[] = assetConfigs as AssetConfig[];
 
-export const vip665 = () => {
+export const vip617 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-665 [BNB Chain] Deploy DeviationBoundedOracle and upgrade the Core Comptroller",
+    title: "VIP-617 [BNB Chain] Oracle Dynamic Protection Mode",
     description: `#### Summary
 
-If passed, this VIP rolls out the new **DeviationBoundedOracle (DBO)** on BNB Chain mainnet (VIP 1 of 2). The DBO wraps the existing ResilientOracle with a per-market rolling min/max price window. When spot deviates beyond a configured threshold, collateral is valued at \`min(spot, windowMin)\` and debt at \`max(spot, windowMax)\` — protecting CF/debt-path pricing against short-duration manipulation on low-liquidity collateral tokens.
+Deploys the new DeviationBoundedOracle (DBO) on BNB Chain mainnet and upgrades the Core Pool Comptroller (Diamond), VAIController, and ComptrollerLens to integrate it. The DBO wraps the existing ResilientOracle with a per-market rolling 15-minute min/max price window, returning protected (min(spot, windowMin), max(spot, windowMax)) pricing on the borrow path when spot deviates beyond the per-market threshold. Phase 1 ships DBO inactive for 23 of 24 assets and active only for **TRX** as a low-liquidity pilot — Phase 2 (separate future VIP) will activate the remaining assets after the keeper and parameters are validated.
 
-VIP 1 ships DBO live but **inactive** for all assets except one. The following asset is enabled with \`isBoundedPricingEnabled = true\` (dual pricing active) to validate the protection logic in production:
+#### Description
 
-- **TRX** — \`0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3\`
+This VIP performs a one-shot deployment of the DBO infrastructure plus the Comptroller and VAIController upgrades required to integrate it. The Comptroller upgrade routes borrow-path pricing through DBO; the liquidation path is unchanged and continues to use the existing ResilientOracle spot price. ACM permissions are granted in a single batch via ACMCommandsAggregator (42 grants total), adding a Keeper role and Guardian-callable governance setters on top of the testnet permission set. Per-asset configs are seeded in step 13: 23 assets with isBoundedPricingEnabled = false (DBO returns (spot, spot) → no behavioural change), TRX with isBoundedPricingEnabled = true (live protection active).
 
-All other 23 assets (AAVE, ADA, asBNB, BCH, BNB, BTCB, CAKE, DOGE, ETH, LINK, LTC, slisBNB, SOL, SolvBTC, TWT, UNI, vPT-clisBNB-25JUN2026, WBETH, WBNB, XAUM, XRP, xSolvBTC, XVS) are initialized with \`isBoundedPricingEnabled = false\`, so DBO returns \`(spot, spot)\` and behaviour is unchanged. VIP 2 will flip the rest of the assets to enabled once keepers and parameters are validated.
+For full design details and the threshold worked example, see the PR: [VenusProtocol/vips#697](https://github.com/VenusProtocol/vips/pull/697).
+
+#### Actions
+
+This VIP performs the following 13 actions on BNB Chain:
+
+1. **ACMCommandsAggregator: push permission batch** — load the 42 grants for the Keeper role and Guardian-callable governance setters.
+2. **Grant aggregator DEFAULT_ADMIN_ROLE** on the AccessControlManager so it can execute the grants in step 3.
+3. **Execute the batched permission grants** via ACMCommandsAggregator.
+4. **Revoke DEFAULT_ADMIN_ROLE** from the aggregator after execution.
+5. **Upgrade Unitroller implementation** to the new Diamond-based implementation (0x82cA18785BBbacBeD1C4f482921E2B2E989D8C08).
+6. **Set the new Unitroller implementation** on the Comptroller proxy.
+7. **diamondCut** — apply the facet cut from vips/vip-617/utils/cut-params-bscmainnet.json.
+8. **Wire new ComptrollerLens** (0x75A71Ad878f6f24616A2AE21d046C0C8E72f67F8) on the Comptroller.
+9. **Upgrade VAIController implementation** to 0x8A7d8589A597619A7842d3BC284b9a5a276FaE56.
+10. **Set the new VAIController implementation** on the VAIUnitroller.
+11. **Accept ownership** of the deployed DeviationBoundedOracle (0xc79Cb7efEBd121DC4B39eA141C214606595D665A) by calling acceptOwnership().
+12. **Wire DBO into Comptroller** — set the DBO address as the borrow-path price source.
+13. **Seed per-asset configs** via setTokenConfigs on DBO with 24 entries from vips/vip-617/utils/asset-configs-bscmainnet.json — 23 with isBoundedPricingEnabled = false, TRX with isBoundedPricingEnabled = true.
 
 #### Deployed contracts (populated prior to proposal)
 
@@ -229,4 +247,4 @@ All other 23 assets (AAVE, ADA, asBNB, BCH, BNB, BTCB, CAKE, DOGE, ETH, LINK, LT
   );
 };
 
-export default vip665;
+export default vip617;
