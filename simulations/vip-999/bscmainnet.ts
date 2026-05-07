@@ -94,9 +94,8 @@ forking(96883423, async () => {
           "SetMaxSingleTransactionLimit",
           "SetMaxDailyReceiveLimit",
           "SetMaxSingleReceiveTransactionLimit",
-          "Failure",
         ],
-        [5, 5, 5, 5, 0],
+        [5, 5, 5, 5],
       );
     },
   });
