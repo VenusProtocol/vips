@@ -318,5 +318,64 @@ forking(96883423, async () => {
         });
       }
     });
+
+    // Mock test: impersonates the bridge itself to call nonblockingLzReceive directly (msg.sender == address(this)).
+    // This bypasses the lzReceive → excessivelySafeCall wrapper so cap-check reverts propagate normally.
+    describe("`nonblockingLzReceive` single-tx receive cap enforcement on tightened routes", () => {
+      // 0.5 XVS — well within any new receive cap in USD terms
+      const RECV_AMOUNT = parseUnits("0.5", 18);
+      // 18 local decimals − 8 shared decimals
+      const LD_TO_SD = parseUnits("1", 10);
+
+      const receiveTightenedRoutes = remoteBridgeEntries.filter(
+        e => e.dstLzChainId !== LzChainId.arbitrumone && e.dstLzChainId !== LzChainId.basemainnet,
+      );
+
+      const overCapReceiveAmounts = new Map<number, BigNumberish>();
+      let bridgeSigner: SignerWithAddress;
+      let recvRecipient: SignerWithAddress;
+      let nonce = 100;
+
+      before(async () => {
+        [, , recvRecipient] = await ethers.getSigners();
+        bridgeSigner = await initMainnetUser(bridge.address, ethers.utils.parseEther("2"));
+
+        for (const entry of receiveTightenedRoutes) {
+          const overCap = entry.newMaxSingleReceiveTransactionLimit
+            .mul(parseUnits("1", 18))
+            .div(xvsPriceUsd18)
+            .add(parseUnits("1", 18));
+          overCapReceiveAmounts.set(entry.dstLzChainId, overCap);
+        }
+      });
+
+      for (const entry of receiveTightenedRoutes) {
+        it(`${
+          LzChainId[entry.dstLzChainId]
+        } → BSC: succeeds when incoming amount is within the reduced single-transaction receive limit`, async () => {
+          const payload = ethers.utils.solidityPack(
+            ["uint8", "bytes32", "uint64"],
+            [0, ethers.utils.hexZeroPad(recvRecipient.address, 32), RECV_AMOUNT.div(LD_TO_SD)],
+          );
+          await expect(bridge.connect(bridgeSigner).nonblockingLzReceive(entry.dstLzChainId, "0x", nonce++, payload))
+            .to.emit(bridge, "ReceiveFromChain")
+            .withArgs(entry.dstLzChainId, recvRecipient.address, RECV_AMOUNT);
+        });
+
+        it(`${
+          LzChainId[entry.dstLzChainId]
+        } → BSC: reverts when incoming amount exceeds the reduced single-transaction receive limit`, async () => {
+          const overCap = overCapReceiveAmounts.get(entry.dstLzChainId)!;
+          const amountSD = BigNumber.from(overCap).div(LD_TO_SD);
+          const payload = ethers.utils.solidityPack(
+            ["uint8", "bytes32", "uint64"],
+            [0, ethers.utils.hexZeroPad(recvRecipient.address, 32), amountSD],
+          );
+          await expect(
+            bridge.connect(bridgeSigner).nonblockingLzReceive(entry.dstLzChainId, "0x", nonce++, payload),
+          ).to.be.revertedWith("Single Transaction Limit Exceed");
+        });
+      }
+    });
   });
 });
