@@ -1,7 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import ERC1967_PROXY_ARTIFACT from "@openzeppelin/contracts/build/contracts/ERC1967Proxy.json";
-import CHAINLINK_ORACLE_ARTIFACT from "@venusprotocol/oracle/artifacts/contracts/oracles/ChainlinkOracle.sol/ChainlinkOracle.json";
 import { expect } from "chai";
 import { BigNumberish, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -12,6 +10,8 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999, { XVS_PROXY_OFT_SRC, remoteBridgeEntries } from "../../vips/vip-999/bscmainnet";
+import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
@@ -19,95 +19,68 @@ import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 const SUPPORTER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
-const XVS_HOLDER = "0x4F2F8448F857994CE83ef14cf4EBb7DF0bb14667";
+// Binance 8 hot wallet: pure EOA holding ~1.76M XVS at the fork block.
+const XVS_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
-const ONE_YEAR = 31536000;
-const ORACLE_ROLE_MAIN = 0;
-const ORACLE_ROLE_PIVOT = 1;
-const ORACLE_ROLE_FALLBACK = 2;
-
-const ACM_ABI = ["function giveCallPermission(address, string, address) external"];
-const RESILIENT_ORACLE_SET_ORACLE_ABI = ["function setOracle(address asset, address oracle, uint8 role)"];
-
-// Pin XVS to $1 so the cap is the only thing that can block `sendFrom`.
-// Deploys a fresh ChainlinkOracle (RedStone uses the same bytecode) behind
-// an ERC1967 proxy, sets a $1 direct price, then swaps it in as XVS's MAIN
-// on the live ResilientOracle with pivot + fallback cleared.
+// XVS in the BSC ResilientOracle has 3 oracles configured: main = Chainlink,
+// pivot = Binance feed registry, fallback = RedStone. We promote RedStone
+// to MAIN, disable pivot+fallback, and pin RedStone's `prices[XVS]` via
+// `setDirectPrice` so `ResilientOracle.getPrice(XVS)` returns a stable value
+// during the cap-enforcement tests. Returns the pinned USD18 price so callers
+// can convert XVS amounts to USD without re-reading the oracle (the live feed
+// path stays sensitive to staleness even after `setDirectPrice` is set).
 const overrideXvsPriceOnBsc = async () => {
-  const [deployer] = await ethers.getSigners();
-  const provider = ethers.provider;
+  const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
 
-  const implFactory = new ethers.ContractFactory(
-    CHAINLINK_ORACLE_ARTIFACT.abi,
-    CHAINLINK_ORACLE_ARTIFACT.bytecode,
-    deployer,
-  );
-  const impl = await implFactory.deploy();
-  await impl.deployed();
+  const redstone = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ORACLE_ABI, ethers.provider);
+  const xvsPrice = await redstone.getPrice(bscmainnet.XVS);
+  await redstone.connect(timelock).setDirectPrice(bscmainnet.XVS, xvsPrice);
 
-  const initData = impl.interface.encodeFunctionData("initialize", [bscmainnet.ACCESS_CONTROL_MANAGER]);
-  const proxyFactory = new ethers.ContractFactory(
-    ERC1967_PROXY_ARTIFACT.abi,
-    ERC1967_PROXY_ARTIFACT.bytecode,
-    deployer,
-  );
-  const proxy = await proxyFactory.deploy(impl.address, initData);
-  await proxy.deployed();
-
-  const xvsOracle = new ethers.Contract(proxy.address, CHAINLINK_ORACLE_ARTIFACT.abi, deployer);
-
-  const acmAdmin = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-  const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, provider);
-  await acm.connect(acmAdmin).giveCallPermission(xvsOracle.address, "setDirectPrice(address,uint256)", deployer.address);
-  await acm.connect(acmAdmin).giveCallPermission(xvsOracle.address, "setTokenConfig(TokenConfig)", deployer.address);
-
-  // ChainlinkOracle.setTokenConfig requires a non-zero feed; the feed address
-  // is never consulted once `setDirectPrice` writes a non-zero `prices[asset]`.
-  await xvsOracle.setTokenConfig({
+  const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+  await resilientOracle.connect(timelock).setTokenConfig({
     asset: bscmainnet.XVS,
-    feed: "0x0000000000000000000000000000000000000001",
-    maxStalePeriod: ONE_YEAR,
+    oracles: [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+    enableFlagsForOracles: [true, false, false],
+    cachingEnabled: false,
   });
-  await xvsOracle.setDirectPrice(bscmainnet.XVS, parseUnits("1", 18));
 
-  const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_SET_ORACLE_ABI, provider);
-  await resilientOracle.connect(acmAdmin).setOracle(bscmainnet.XVS, xvsOracle.address, ORACLE_ROLE_MAIN);
-  await resilientOracle.connect(acmAdmin).setOracle(bscmainnet.XVS, ethers.constants.AddressZero, ORACLE_ROLE_PIVOT);
-  await resilientOracle.connect(acmAdmin).setOracle(bscmainnet.XVS, ethers.constants.AddressZero, ORACLE_ROLE_FALLBACK);
-};
-
-const readLimits = async (bridge: Contract, dstLzChainId: LzChainId) => ({
-  maxDailyLimit: await bridge.chainIdToMaxDailyLimit(dstLzChainId),
-  maxSingleTransactionLimit: await bridge.chainIdToMaxSingleTransactionLimit(dstLzChainId),
-});
-
-const expectLimitsEqual = (
-  actual: Record<string, BigNumberish>,
-  expected: Record<string, BigNumberish>,
-  label: string,
-) => {
-  for (const key of Object.keys(expected)) {
-    expect(actual[key], `${label}.${key}`).to.equal(expected[key]);
-  }
+  return xvsPrice;
 };
 
 forking(96883423, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
+  let xvsPriceUsd18: BigNumberish;
+
+  // Pin XVS price BEFORE the VIP runs — `testVip` advances time past timelock delays,
+  // which pushes the fork past RedStone's staleness window. Reading `getPrice` after
+  // that point reverts; setting `setDirectPrice` while the feed is still fresh keeps
+  // the pinned value usable through post-VIP `sendFrom` calls.
+  before(async () => {
+    xvsPriceUsd18 = await overrideXvsPriceOnBsc();
+  });
 
   beforeEach(async () => {
     bridge = new ethers.Contract(XVS_PROXY_OFT_SRC, XVS_BRIDGE_SRC_ABI, provider);
   });
 
   describe("Pre-VIP behavior", () => {
-    for (const entry of remoteBridgeEntries) {
-      describe(`chain ${LzChainId[entry.dstLzChainId]} (${entry.dstLzChainId})`, () => {
-        it("matches `before` limits", async () => {
-          const onChain = await readLimits(bridge, entry.dstLzChainId);
-          expectLimitsEqual(onChain, entry.before, "before");
+    describe("Current bridge limits per remote chain", () => {
+      for (const entry of remoteBridgeEntries) {
+        it(`BSC → ${LzChainId[entry.dstLzChainId]} (${entry.dstLzChainId}) matches old limits`, async () => {
+          expect(await bridge.chainIdToMaxDailyLimit(entry.dstLzChainId)).to.equal(entry.oldMaxDailyLimit);
+          expect(await bridge.chainIdToMaxSingleTransactionLimit(entry.dstLzChainId)).to.equal(
+            entry.oldMaxSingleTransactionLimit,
+          );
+          expect(await bridge.chainIdToMaxDailyReceiveLimit(entry.dstLzChainId)).to.equal(
+            entry.oldMaxDailyReceiveLimit,
+          );
+          expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(entry.dstLzChainId)).to.equal(
+            entry.oldMaxSingleReceiveTransactionLimit,
+          );
         });
-      });
-    }
+      }
+    });
   });
 
   testVip("VIP-999 Update XVS bridge limits on BSC", await vip999(), {
@@ -116,39 +89,50 @@ forking(96883423, async () => {
       await expectEvents(
         txResponse,
         [XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_SRC_ABI],
-        ["SetMaxDailyLimit", "SetMaxSingleTransactionLimit", "Failure"],
-        [5, 5, 0],
+        [
+          "SetMaxDailyLimit",
+          "SetMaxSingleTransactionLimit",
+          "SetMaxDailyReceiveLimit",
+          "SetMaxSingleReceiveTransactionLimit",
+          "Failure",
+        ],
+        [5, 5, 5, 5, 0],
       );
     },
   });
 
   describe("Post-VIP behavior", () => {
-    for (const entry of remoteBridgeEntries) {
-      describe(`chain ${LzChainId[entry.dstLzChainId]} (${entry.dstLzChainId})`, () => {
-        it("matches `after` limits", async () => {
-          const onChain = await readLimits(bridge, entry.dstLzChainId);
-          expectLimitsEqual(onChain, entry.after, "after");
+    describe("New bridge limits per remote chain", () => {
+      for (const entry of remoteBridgeEntries) {
+        it(`BSC → ${LzChainId[entry.dstLzChainId]} (${entry.dstLzChainId}) matches new limits`, async () => {
+          expect(await bridge.chainIdToMaxDailyLimit(entry.dstLzChainId)).to.equal(entry.newMaxDailyLimit);
+          expect(await bridge.chainIdToMaxSingleTransactionLimit(entry.dstLzChainId)).to.equal(
+            entry.newMaxSingleTransactionLimit,
+          );
+          expect(await bridge.chainIdToMaxDailyReceiveLimit(entry.dstLzChainId)).to.equal(
+            entry.newMaxDailyReceiveLimit,
+          );
+          expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(entry.dstLzChainId)).to.equal(
+            entry.newMaxSingleReceiveTransactionLimit,
+          );
         });
-      });
-    }
+      }
+    });
 
-    // Live `sendFrom` exercises the cap on every changed destination:
-    //   - LOWERED (Ethereum): single-tx cap reduced but still positive — a
-    //     small-amount sendFrom should succeed under the new cap.
-    //   - ZEROED (opBNB, zkSync, Optimism, Unichain): single-tx cap is now
-    //     zero — any non-zero send must revert with "Single Transaction
-    //     Limit Exceed".
-    describe("Cap enforcement (live `sendFrom`)", () => {
-      const ZEROED = remoteBridgeEntries.filter(e => e.after.maxSingleTransactionLimit.isZero());
-      const LOWERED = remoteBridgeEntries.filter(
-        e =>
-          !e.after.maxSingleTransactionLimit.eq(e.before.maxSingleTransactionLimit) &&
-          !e.after.maxSingleTransactionLimit.isZero(),
+    // Live `sendFrom` per affected route: tightened routes must succeed within the new cap;
+    // disabled routes (single-tx cap == 0) must revert with "Single Transaction Limit Exceed".
+    describe("Single-tx cap enforcement on `sendFrom`", () => {
+      const disabledRoutes = remoteBridgeEntries.filter(entry => entry.newMaxSingleTransactionLimit.isZero());
+      const tightenedRoutes = remoteBridgeEntries.filter(
+        entry =>
+          !entry.newMaxSingleTransactionLimit.eq(entry.oldMaxSingleTransactionLimit) &&
+          !entry.newMaxSingleTransactionLimit.isZero(),
       );
-      const TESTED = [...LOWERED, ...ZEROED];
+      const affectedRoutes = [...tightenedRoutes, ...disabledRoutes];
 
       const SEND_AMOUNT = parseUnits("0.5", 18);
       const fees = new Map<number, BigNumberish>();
+      const overCapAmounts = new Map<number, BigNumberish>();
 
       let xvs: Contract;
       let xvsHolderSigner: SignerWithAddress;
@@ -161,63 +145,80 @@ forking(96883423, async () => {
         receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
         defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 
-        // Estimate LZ relay fees per destination BEFORE stubbing — these are
-        // pure `lzEndpoint.estimateFees` reads, never touching the oracle.
-        for (const e of TESTED) {
+        for (const entry of affectedRoutes) {
           const { nativeFee } = await bridge.estimateSendFee(
-            e.dstLzChainId,
+            entry.dstLzChainId,
             receiverAddressBytes32,
             SEND_AMOUNT,
             false,
             defaultAdapterParams,
           );
-          fees.set(e.dstLzChainId, nativeFee);
+          fees.set(entry.dstLzChainId, nativeFee);
         }
 
-        await overrideXvsPriceOnBsc();
+        // For each tightened route, compute an XVS amount whose USD value sits just above the new cap.
+        // Limits are USD18; oracle returns USD18 for an 18-decimal token, so amount * price / 1e18 = USD.
+        // overCap = cap * 1e18 / price + 1 XVS adds a safe cushion past rounding. Price is captured
+        // pre-VIP in the outer `before` since RedStone's feed is stale at this point in the run.
+        for (const entry of tightenedRoutes) {
+          const overCap = entry.newMaxSingleTransactionLimit
+            .mul(parseUnits("1", 18))
+            .div(xvsPriceUsd18)
+            .add(parseUnits("1", 18));
+          overCapAmounts.set(entry.dstLzChainId, overCap);
+        }
 
         xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
         xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("10"));
-
-        // Fund the test holder by impersonating the bridge
-        const impersonatedBridge = await initMainnetUser(XVS_PROXY_OFT_SRC, ethers.utils.parseEther("2"));
-        const fundAmount = SEND_AMOUNT.mul(TESTED.length).add(parseUnits("1", 18));
-        await xvs.connect(impersonatedBridge).transfer(XVS_HOLDER, fundAmount);
-
         await xvs.connect(xvsHolderSigner).approve(bridge.address, ethers.constants.MaxUint256);
       });
 
-      for (const e of LOWERED) {
-        it(`allows BSC -> ${LzChainId[e.dstLzChainId]} sendFrom within the new cap`, async () => {
+      for (const entry of tightenedRoutes) {
+        it(`BSC → ${LzChainId[entry.dstLzChainId]}: sendFrom succeeds within the lowered cap`, async () => {
           await expect(
             bridge
               .connect(xvsHolderSigner)
               .sendFrom(
                 xvsHolderSigner.address,
-                e.dstLzChainId,
+                entry.dstLzChainId,
                 receiverAddressBytes32,
                 SEND_AMOUNT,
                 [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
-                { value: fees.get(e.dstLzChainId) },
+                { value: fees.get(entry.dstLzChainId) },
               ),
           )
             .to.emit(bridge, "SendToChain")
-            .withArgs(e.dstLzChainId, XVS_HOLDER, receiverAddressBytes32, SEND_AMOUNT);
+            .withArgs(entry.dstLzChainId, XVS_HOLDER, receiverAddressBytes32, SEND_AMOUNT);
         });
-      }
 
-      for (const e of ZEROED) {
-        it(`reverts BSC -> ${LzChainId[e.dstLzChainId]} sendFrom with "Single Transaction Limit Exceed"`, async () => {
+        it(`BSC → ${LzChainId[entry.dstLzChainId]}: sendFrom reverts when amount exceeds the lowered cap`, async () => {
           await expect(
             bridge
               .connect(xvsHolderSigner)
               .sendFrom(
                 xvsHolderSigner.address,
-                e.dstLzChainId,
+                entry.dstLzChainId,
+                receiverAddressBytes32,
+                overCapAmounts.get(entry.dstLzChainId)!,
+                [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
+                { value: fees.get(entry.dstLzChainId) },
+              ),
+          ).to.be.revertedWith("Single Transaction Limit Exceed");
+        });
+      }
+
+      for (const entry of disabledRoutes) {
+        it(`BSC → ${LzChainId[entry.dstLzChainId]}: sendFrom reverts — single-tx cap is 0`, async () => {
+          await expect(
+            bridge
+              .connect(xvsHolderSigner)
+              .sendFrom(
+                xvsHolderSigner.address,
+                entry.dstLzChainId,
                 receiverAddressBytes32,
                 SEND_AMOUNT,
                 [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
-                { value: fees.get(e.dstLzChainId) },
+                { value: fees.get(entry.dstLzChainId) },
               ),
           ).to.be.revertedWith("Single Transaction Limit Exceed");
         });
