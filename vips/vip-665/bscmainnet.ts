@@ -111,7 +111,7 @@ VIP 1 ships DBO live but **inactive** for all assets except one. The following a
 
 - **TRX** — \`0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3\`
 
-All other 23 assets (AAVE, ADA, asBNB, BCH, BNB, BTCB, CAKE, DOGE, ETH, FIL, LINK, LTC, slisBNB, SOL, SolvBTC, TWT, UNI, WBETH, WBNB, XAUM, XRP, xSolvBTC, XVS) are initialized with \`isBoundedPricingEnabled = false\`, so DBO returns \`(spot, spot)\` and behaviour is unchanged. VIP 2 will flip the rest of the assets to enabled once keepers and parameters are validated.
+All other 23 assets (AAVE, ADA, asBNB, BCH, BNB, BTCB, CAKE, DOGE, ETH, LINK, LTC, slisBNB, SOL, SolvBTC, TWT, UNI, vPT-clisBNB-25JUN2026, WBETH, WBNB, XAUM, XRP, xSolvBTC, XVS) are initialized with \`isBoundedPricingEnabled = false\`, so DBO returns \`(spot, spot)\` and behaviour is unchanged. VIP 2 will flip the rest of the assets to enabled once keepers and parameters are validated.
 
 #### Deployed contracts (populated prior to proposal)
 

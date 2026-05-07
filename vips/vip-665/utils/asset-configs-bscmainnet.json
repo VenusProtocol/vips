@@ -65,7 +65,7 @@
       "asset": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
       "vToken": "0x86aC3974e2BD0d60825230fa6F355fF11409df5c",
       "cooldownPeriod": 3600,
-      "triggerThreshold": "409090909090909090",
+      "triggerThreshold": "300000000000000000",
       "resetThreshold": "50000000000000000",
       "isBoundedPricingEnabled": false,
       "cachingEnabled": false
@@ -86,16 +86,6 @@
       "vToken": "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
       "cooldownPeriod": 3600,
       "triggerThreshold": "125000000000000000",
-      "resetThreshold": "50000000000000000",
-      "isBoundedPricingEnabled": false,
-      "cachingEnabled": false
-    },
-    {
-      "name": "FIL",
-      "asset": "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
-      "vToken": "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343",
-      "cooldownPeriod": 3600,
-      "triggerThreshold": "166700000000000000",
       "resetThreshold": "50000000000000000",
       "isBoundedPricingEnabled": false,
       "cachingEnabled": false
@@ -174,6 +164,16 @@
       "name": "UNI",
       "asset": "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1",
       "vToken": "0x27FF564707786720C71A2e5c1490A63266683612",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "166700000000000000",
+      "resetThreshold": "50000000000000000",
+      "isBoundedPricingEnabled": false,
+      "cachingEnabled": false
+    },
+    {
+      "name": "vPT-clisBNB-25JUN2026",
+      "asset": "0xe052823b4aefc6e230FAf46231A57d0905E30AE0",
+      "vToken": "0x6d3BD68E90B42615cb5abF4B8DE92b154ADc435e",
       "cooldownPeriod": 3600,
       "triggerThreshold": "166700000000000000",
       "resetThreshold": "50000000000000000",
