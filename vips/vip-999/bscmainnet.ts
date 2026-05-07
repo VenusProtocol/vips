@@ -108,7 +108,7 @@ export const vip999 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-999 [BNB Chain] Sunset Phase 2.1 (opBNB, Optimism, Unichain): Update XVS bridge limits on BSC `XVSProxyOFTSrc`",
+      "VIP-999 [BNB Chain] Sunset Phase 2.1 (opBNB, Optimism, Unichain) and tighten XVS bridge limits on Ethereum and zkSync on BSC `XVSProxyOFTSrc`",
     description: `#### Summary
 
 Following VIP-615 (Core Pool sunset on opBNB, Unichain and Optimism), this VIP tightens the per-destination XVS bridge limits stored on the BSC \`XVSProxyOFTSrc\` (\`${XVS_PROXY_OFT_SRC}\`) in both directions.

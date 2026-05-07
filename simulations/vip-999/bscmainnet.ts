@@ -1,7 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumberish, Contract } from "ethers";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -120,7 +120,7 @@ forking(96883423, async () => {
 
     // Live `sendFrom` per affected route: tightened routes must succeed within the new cap;
     // disabled routes (single-tx cap == 0) must revert with "Single Transaction Limit Exceed".
-    describe("Single-tx cap enforcement on `sendFrom`", () => {
+    describe("`sendFrom` on affected routes: succeeds within lowered cap, reverts when over cap or route is disabled", () => {
       const disabledRoutes = remoteBridgeEntries.filter(entry => entry.newMaxSingleTransactionLimit.isZero());
       const tightenedRoutes = remoteBridgeEntries.filter(
         entry =>
@@ -173,7 +173,9 @@ forking(96883423, async () => {
       });
 
       for (const entry of tightenedRoutes) {
-        it(`BSC → ${LzChainId[entry.dstLzChainId]}: sendFrom succeeds within the lowered cap`, async () => {
+        it(`BSC → ${
+          LzChainId[entry.dstLzChainId]
+        }: sendFrom succeeds when outgoing amount is within the reduced single-transaction send limit`, async () => {
           await expect(
             bridge
               .connect(xvsHolderSigner)
@@ -190,7 +192,9 @@ forking(96883423, async () => {
             .withArgs(entry.dstLzChainId, XVS_HOLDER, receiverAddressBytes32, SEND_AMOUNT);
         });
 
-        it(`BSC → ${LzChainId[entry.dstLzChainId]}: sendFrom reverts when amount exceeds the lowered cap`, async () => {
+        it(`BSC → ${
+          LzChainId[entry.dstLzChainId]
+        }: sendFrom reverts when outgoing amount exceeds the reduced single-transaction send limit`, async () => {
           await expect(
             bridge
               .connect(xvsHolderSigner)
@@ -207,7 +211,9 @@ forking(96883423, async () => {
       }
 
       for (const entry of disabledRoutes) {
-        it(`BSC → ${LzChainId[entry.dstLzChainId]}: sendFrom reverts — single-tx cap is 0`, async () => {
+        it(`BSC → ${
+          LzChainId[entry.dstLzChainId]
+        }: sendFrom reverts with "Single Transaction Limit Exceed" for any amount — outgoing single-transaction send limit reduced to 0 (route disabled)`, async () => {
           await expect(
             bridge
               .connect(xvsHolderSigner)
@@ -220,6 +226,95 @@ forking(96883423, async () => {
                 { value: fees.get(entry.dstLzChainId) },
               ),
           ).to.be.revertedWith("Single Transaction Limit Exceed");
+        });
+      }
+    });
+
+    // Drain the daily outgoing send quota with repeated sends each just below the single-tx cap
+    // (so every individual send passes the single-tx check). Once the quota is exhausted, verify
+    // the next send reverts with "Daily Limit Exceed". Zeroed routes are excluded — drainAmount
+    // cannot be computed when the single-tx cap is 0, and they are already covered above.
+    describe("`sendFrom` daily outgoing send limit enforcement", () => {
+      const routesWithDailyLimit = remoteBridgeEntries.filter(entry => !entry.newMaxDailyLimit.isZero());
+
+      const fees = new Map<number, BigNumberish>();
+      const drainAmounts = new Map<number, BigNumber>();
+
+      let xvs: Contract;
+      let xvsHolderSigner: SignerWithAddress;
+      let receiver: SignerWithAddress;
+      let receiverAddressBytes32: string;
+      let defaultAdapterParams: string;
+
+      before(async () => {
+        [receiver] = await ethers.getSigners();
+        receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
+        defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
+
+        xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
+        xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("10"));
+        await xvs.connect(xvsHolderSigner).approve(bridge.address, ethers.constants.MaxUint256);
+
+        for (const entry of routesWithDailyLimit) {
+          // Each drain send must stay below the single-tx cap so it passes the single-tx check
+          // while still counting toward the daily accumulator. Subtract 1 XVS as a rounding cushion.
+          const drainAmount = entry.newMaxSingleTransactionLimit
+            .mul(parseUnits("1", 18))
+            .div(xvsPriceUsd18)
+            .sub(parseUnits("1", 18));
+          drainAmounts.set(entry.dstLzChainId, drainAmount);
+
+          const { nativeFee } = await bridge.estimateSendFee(
+            entry.dstLzChainId,
+            receiverAddressBytes32,
+            drainAmount,
+            false,
+            defaultAdapterParams,
+          );
+          fees.set(entry.dstLzChainId, nativeFee);
+        }
+      });
+
+      for (const entry of routesWithDailyLimit) {
+        it(`BSC → ${
+          LzChainId[entry.dstLzChainId]
+        }: sendFrom reverts with "Daily Limit Exceed" once the reduced daily outgoing send quota is exhausted`, async () => {
+          const drainAmount = drainAmounts.get(entry.dstLzChainId)!;
+          const fee = fees.get(entry.dstLzChainId)!;
+
+          // drainAmount is 1 XVS below the single-tx cap, so floor(dailyCap / drainAmountUsd)
+          // sends exhaust the quota while leaving less than one drainAmount of headroom — the
+          // subsequent send then trips "Daily Limit Exceed". The tiny amount already accumulated
+          // from earlier sends in this snapshot is absorbed by that same floor-division gap.
+          const drainAmountUsd = drainAmount.mul(xvsPriceUsd18).div(parseUnits("1", 18));
+          const txCount = entry.newMaxDailyLimit.div(drainAmountUsd).toNumber();
+
+          // Send txCount transactions to drain the daily quota down to less than one drainAmount.
+          for (let i = 0; i < txCount; i++) {
+            await bridge
+              .connect(xvsHolderSigner)
+              .sendFrom(
+                xvsHolderSigner.address,
+                entry.dstLzChainId,
+                receiverAddressBytes32,
+                drainAmount,
+                [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
+                { value: fee },
+              );
+          }
+
+          await expect(
+            bridge
+              .connect(xvsHolderSigner)
+              .sendFrom(
+                xvsHolderSigner.address,
+                entry.dstLzChainId,
+                receiverAddressBytes32,
+                drainAmount,
+                [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
+                { value: fee },
+              ),
+          ).to.be.revertedWith("Daily Transaction Limit Exceed");
         });
       }
     });
