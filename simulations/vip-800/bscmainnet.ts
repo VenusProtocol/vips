@@ -6,25 +6,36 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip800, {
   ALLOWED_ROUTERS,
+  BORROW_MULTIPLIER,
   BTCB_PRIME_CONVERTER,
   BUYBACKS,
   CORE_TOKENS,
   DEFAULT_PROXY_ADMIN,
   ETH_PRIME_CONVERTER,
   MIGRATION_HELPER,
+  NEW_PRIME_SPEED_FOR_U,
+  NEW_PRIME_SPEED_FOR_USDT,
   NEW_RISK_FUND_V2_IMPL,
   OPERATOR,
+  PANCAKE_V3_ROUTER,
+  PRIME,
+  PRIME_LIQUIDITY_PROVIDER,
   PROTOCOL_SHARE_RESERVE,
   RISK_FUND_BUYBACK,
   RISK_FUND_CONVERTER,
   RISK_FUND_V2,
   SHORTFALL,
+  SUPPLY_MULTIPLIER,
   TIMELOCK_OWNED_CONVERTERS,
+  U,
   USDC_PRIME_CONVERTER,
   USDT,
   USDT_PRIME_CONVERTER,
+  USDT_TO_SWEEP,
+  U_MIN_OUT,
   U_PRIME_BUYBACK,
   VTREASURY,
+  VU,
   WBNB_BURN_CONVERTER,
   XVS_BUYBACK,
   XVS_VAULT_CONVERTER,
@@ -44,6 +55,14 @@ const FORK_BLOCK = 0;
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 const CONVERTER_MIN_ABI = ["function conversionPaused() view returns (bool)"];
 const HELPER_MIN_ABI = ["function executed() view returns (bool)"];
+const PRIME_MIN_ABI = [
+  "function markets(address) view returns (uint256 supplyMultiplier, uint256 borrowMultiplier, uint256 rewardIndex, uint256 sumOfMembersScore, bool exists)",
+];
+const PLP_MIN_ABI = [
+  "function tokenDistributionSpeeds(address) view returns (uint256)",
+  "function lastAccruedBlockOrSecond(address) view returns (uint256)",
+];
+const ERC20_ALLOWANCE_ABI = ["function allowance(address,address) view returns (uint256)"];
 
 const EXECUTE_BUYBACK_SIG = "executeBuyback(address,uint256,uint256,uint256,address,bytes,address)";
 const FORWARD_BASE_ASSET_SIG = "forwardBaseAsset(address,uint256)";
@@ -94,19 +113,26 @@ forking(FORK_BLOCK, async () => {
   const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, ethers.provider);
   const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+  const usdtAllowance = new ethers.Contract(USDT, ERC20_ALLOWANCE_ABI, ethers.provider);
   const shortfall = new ethers.Contract(SHORTFALL, SHORTFALL_MIN_ABI, ethers.provider);
   const helper = new ethers.Contract(MIGRATION_HELPER, HELPER_MIN_ABI, ethers.provider);
+  const prime = new ethers.Contract(PRIME, PRIME_MIN_ABI, ethers.provider);
+  const plp = new ethers.Contract(PRIME_LIQUIDITY_PROVIDER, PLP_MIN_ABI, ethers.provider);
 
   const erc20 = (token: string) => new ethers.Contract(token, ERC20_ABI, ethers.provider);
   const converter = (addr: string) => new ethers.Contract(addr, CONVERTER_MIN_ABI, ethers.provider);
 
   let riskFundV2UsdtBalanceBefore: BigNumber;
   let shortfallAuctionsPausedBefore: boolean;
+  let plpUsdtBalanceBefore: BigNumber;
+  let plpUBalanceBefore: BigNumber;
   const recipientBalanceBefore = new Map<string, BigNumber>(); // key: token:recipient
 
   before(async () => {
     riskFundV2UsdtBalanceBefore = await usdt.balanceOf(RISK_FUND_V2);
     shortfallAuctionsPausedBefore = await shortfall.auctionsPaused();
+    plpUsdtBalanceBefore = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    plpUBalanceBefore = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
 
     for (const d of DRAIN_BY_CONVERTER) {
       for (const t of CORE_TOKENS) {
@@ -164,6 +190,21 @@ forking(FORK_BLOCK, async () => {
       // could be either value depending on prior governance actions. The post-VIP
       // assertion is what matters.
       expect(typeof shortfallAuctionsPausedBefore).to.equal("boolean");
+    });
+  });
+
+  describe("Pre-VIP Prime rewards state", () => {
+    it("vU is not yet a Prime market", async () => {
+      const m = await prime.markets(VU);
+      expect(m.exists).to.be.false;
+    });
+
+    it("U is not yet initialized in PrimeLiquidityProvider", async () => {
+      expect(await plp.lastAccruedBlockOrSecond(U)).to.equal(0);
+    });
+
+    it("PLP holds at least the USDT amount to be swept", async () => {
+      expect(plpUsdtBalanceBefore).to.be.gte(USDT_TO_SWEEP);
     });
   });
 
@@ -296,6 +337,41 @@ forking(FORK_BLOCK, async () => {
 
     it("Shortfall auctions are paused (defense in depth)", async () => {
       expect(await shortfall.auctionsPaused()).to.be.true;
+    });
+  });
+
+  describe("Post-VIP Prime rewards state", () => {
+    it("vU is registered as a Prime market with supply-only multipliers", async () => {
+      const m = await prime.markets(VU);
+      expect(m.exists).to.be.true;
+      expect(m.supplyMultiplier).to.equal(SUPPLY_MULTIPLIER);
+      expect(m.borrowMultiplier).to.equal(BORROW_MULTIPLIER);
+    });
+
+    it("U is initialized in PrimeLiquidityProvider", async () => {
+      expect(await plp.lastAccruedBlockOrSecond(U)).to.be.gt(0);
+    });
+
+    it("PLP USDT balance decreased by exactly USDT_TO_SWEEP (sweep + no inflow this VIP)", async () => {
+      const after = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(plpUsdtBalanceBefore.sub(after)).to.equal(USDT_TO_SWEEP);
+    });
+
+    it("PLP U balance increased by at least U_MIN_OUT (swap recipient = PLP)", async () => {
+      const after = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(after.sub(plpUBalanceBefore)).to.be.gte(U_MIN_OUT);
+    });
+
+    it("NormalTimelock USDT allowance to PancakeSwap V3 router is revoked", async () => {
+      expect(await usdtAllowance.allowance(bscmainnet.NORMAL_TIMELOCK, PANCAKE_V3_ROUTER)).to.equal(0);
+    });
+
+    it("Prime distribution speed for USDT matches NEW_PRIME_SPEED_FOR_USDT", async () => {
+      expect(await plp.tokenDistributionSpeeds(USDT)).to.equal(NEW_PRIME_SPEED_FOR_USDT);
+    });
+
+    it("Prime distribution speed for U matches NEW_PRIME_SPEED_FOR_U", async () => {
+      expect(await plp.tokenDistributionSpeeds(U)).to.equal(NEW_PRIME_SPEED_FOR_U);
     });
   });
 });

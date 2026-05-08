@@ -1,4 +1,3 @@
-import bscmainnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
 import { ethers } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -15,7 +14,7 @@ export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C0783
 export const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
-export const PRIME = bscmainnetDeployedContracts.addresses.Prime;
+export const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 export const CORE_COMPTROLLER = bscmainnet.UNITROLLER;
 
 // ===== Allowlisted swap routers (passed to helper.execute) =====
@@ -165,8 +164,6 @@ export const TIMELOCK_OWNED_CONVERTERS: string[] = [
 ];
 
 // ===== New TokenBuyback proxies (10 instances) =====
-// TODO: fill deployed proxy addresses from `npx hardhat deploy --tags RiskFundBuyback,
-//       PrimeBuyback,XVSBuyback,TreasuryBuyback --network bscmainnet` on feat/VPD-1087.
 export const RISK_FUND_BUYBACK = ethers.constants.AddressZero; // TODO
 export const USDT_PRIME_BUYBACK = ethers.constants.AddressZero; // TODO
 export const U_PRIME_BUYBACK = ethers.constants.AddressZero; // TODO
@@ -196,22 +193,13 @@ export const BUYBACKS: string[] = [
 export const HELPER_RETURNED_OWNERSHIPS: string[] = [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS];
 
 // ===== New RiskFundV2 implementation =====
-// TODO: fill post-deploy. New impl drops updatePoolState / sweepTokenFromPool /
-//       poolAssetsFunds mapping; transferReserveForAuction reads raw balance.
 export const NEW_RISK_FUND_V2_IMPL = ethers.constants.AddressZero; // TODO
 
 // ===== TokenBuyback migration helper =====
-// TODO: pin the deployed helper address here. The helper has no constructor
-//       arguments — every address it operates on (timelock, ACM, PSR, legacy
-//       converters, new buybacks, operator, routers, core-pool token universe)
-//       is hardcoded as a `private constant` in its source. Before deploying,
-//       fill the eleven TODO placeholders in the source (10 buyback addresses +
-//       OPERATOR).
 export const MIGRATION_HELPER = ethers.constants.AddressZero; // TODO
 
 // ===== Cron operator =====
-// TODO: finance-team EOA / multisig
-export const OPERATOR = ethers.constants.AddressZero; // TODO
+export const OPERATOR = "0x88ac9ca69a371f47798df18e5c36449af44526a4"; // TODO
 
 // AccessControl `DEFAULT_ADMIN_ROLE` (OZ AccessControl) — the admin role on the
 // AccessControlManager. Granting it to the helper lets `execute()` self-grant
@@ -282,7 +270,7 @@ The bulk of the migration (drain, router allowlisting, ACM grants, converter pau
 
 This VIP also allocates **$24.5K in Prime Rewards** for May 2026, split **50/50 between the USDT and U stablecoin supply markets** (~$12.25K each). This is the first month **U is introduced as a Prime reward market** alongside USDT, per the [community post](https://community.venus.io/). The allocation is retroactive, redistributing 20% of the [$136K](https://dune.com/xvslove_team/venus-prime) in BNB Chain reserves revenue generated during April 2026, while maintaining a 10% buffer for market price fluctuations.
 
-USDT for the U side is sourced by sweeping from PrimeLiquidityProvider and swapping on PancakeSwap V3 directly — by the time these steps run, the legacy \`*PrimeConverter\` contracts have already been drained and de-permissioned by the helper above.
+USDT for the U side is sourced by sweeping from PrimeLiquidityProvider and swapping on PancakeSwap V3 directly — by the time these steps run, the legacy \`*PrimeConverter\` contracts have already been drained and paused by the helper above.
 
 8. **Add vU as a Prime market** (\`Prime.addMarket\`) with supplyMultiplier = 2e18, borrowMultiplier = 0 — same supply-only shape as the existing USDT and USDC entries.
 9. **Initialize U in PrimeLiquidityProvider** (\`initializeTokens([U])\`) so distribution accounting is tracked against U.
@@ -355,7 +343,10 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         params: [],
       })),
 
-      // 6. Upgrade RiskFundV2 (drained + paused inside helper.execute() above).
+      // 6. Upgrade RiskFundV2 implementation. RiskFundConverter (the upstream feeder
+      //    that called `updatePoolState` on RiskFundV2) was drained and paused inside
+      //    helper.execute() above, so no in-flight `convertExactTokens` callback can
+      //    hit the removed selector after the upgrade lands.
       {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
