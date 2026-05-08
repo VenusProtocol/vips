@@ -1,4 +1,6 @@
+import bscmainnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
 import { ethers } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -13,6 +15,8 @@ export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C0783
 export const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
+export const PRIME = bscmainnetDeployedContracts.addresses.Prime;
+export const CORE_COMPTROLLER = bscmainnet.UNITROLLER;
 
 // ===== Allowlisted swap routers (passed to helper.execute) =====
 export const PANCAKE_ROUTER = "0x10ED43C718714eb63d5aA57B78B54704E256024E"; // PCS V2
@@ -76,6 +80,7 @@ export const CAKE = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82";
 export const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
 export const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
+export const VU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
 export const XAUM = "0x23AE4fd8E7844cdBc97775496eBd0E8248656028";
 export const UST = "0x3d4350cD54aeF9f9b2C29435e0fa809957B3F30a";
 export const LUNA = "0x156ab3346823B651294766e23e6Cf87254d68962";
@@ -213,6 +218,34 @@ export const OPERATOR = ethers.constants.AddressZero; // TODO
 // transient ACM permissions and renounce them at the end of the call.
 const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 
+// ===== May 2026 Prime Rewards Allocation (USDT + U) =====
+// USDT/U pool at fee tier 100 (0.01%) — pool 0xA0909f81785f87f3e79309F0E73A7d82208094E4
+// holds ~8.75M USDT + ~10.13M U with active liquidity at price ≈ 1.0. Tier 500 has no
+// pool; tier 2500 is dust (1 wei). Tier 100 is the only viable choice.
+export const PANCAKE_V3_FEE_TIER = 100;
+
+// Amounts: $24.5K total, 50/50 split between USDT and U (both $1).
+export const USDT_TO_SWEEP = parseUnits("12250", 18);
+export const USDT_TO_SWAP = parseUnits("12250", 18);
+// 1% slippage floor on a stable/stable swap. Pool is at peg with a 1bp fee, so realised
+// output should be ~12,248.7 U; the surplus above U_MIN_OUT is delivered straight to PLP
+// (recipient = PRIME_LIQUIDITY_PROVIDER), so nothing strands in NormalTimelock.
+export const U_MIN_OUT = parseUnits("12127.5", 18);
+
+// Prime multipliers for vU (matches USDT/USDC supply-only convention).
+export const SUPPLY_MULTIPLIER = parseUnits("2", 18);
+export const BORROW_MULTIPLIER = 0;
+
+// Distribution speeds (PLP is block-based on BSC).
+// BSC ≈ 0.45 s/block (empirical, sampled 100k blocks) → 192,000 blocks/day → 5,760,000 / month.
+export const REWARD_PER_MARKET_PER_MONTH = parseUnits("12250", 18);
+export const BSC_BLOCKS_PER_MONTH = 30 * 192_000;
+export const NEW_PRIME_SPEED_FOR_USDT = REWARD_PER_MARKET_PER_MONTH.div(BSC_BLOCKS_PER_MONTH);
+export const NEW_PRIME_SPEED_FOR_U = REWARD_PER_MARKET_PER_MONTH.div(BSC_BLOCKS_PER_MONTH);
+
+// 14-day swap deadline (mirrors VIP-580).
+export const SWAP_DEADLINE = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 14;
+
 // Helper.execute() — no parameters; every drain-token list and every router
 // address is hardcoded as a `constant` inside the helper source.
 const HELPER_EXECUTE_SIG = "execute()";
@@ -244,6 +277,26 @@ The bulk of the migration (drain, router allowlisting, ACM grants, converter pau
 5. **Accept ownership** of the 10 buybacks + 6 converters returned by the helper.
 6. **Upgrade RiskFundV2 implementation**. The new implementation removes \`updatePoolState\`, \`sweepTokenFromPool\`, and the \`poolAssetsFunds\` mapping (storage slot preserved as \`__deprecatedSlotPoolAssetsFunds\`). \`transferReserveForAuction\` now reads raw balance. Per-pool accounting was dead weight since isolated pools are wound down and the core pool does not auction via Shortfall. The upgrade lands *after* RiskFundConverter has been drained and paused inside the helper, so no in-flight \`convertExactTokens\` callback can hit the removed \`updatePoolState\` selector.
 7. **Defensively call \`Shortfall.pauseAuctions()\`** to keep the auction surface closed post-upgrade. The shortfall auction mechanism is exclusive to isolated pools, and isolated pools are no longer operational; there are no ongoing or upcoming auctions, so the migration window cannot encounter a STARTED auction carrying a stale pre-upgrade \`seizedRiskFund\` snapshot. \`pauseAuctions()\` is included purely as defense in depth.
+
+#### May 2026 Prime Rewards Allocation (USDT + U)
+
+This VIP also allocates **$24.5K in Prime Rewards** for May 2026, split **50/50 between the USDT and U stablecoin supply markets** (~$12.25K each). This is the first month **U is introduced as a Prime reward market** alongside USDT, per the [community post](https://community.venus.io/). The allocation is retroactive, redistributing 20% of the [$136K](https://dune.com/xvslove_team/venus-prime) in BNB Chain reserves revenue generated during April 2026, while maintaining a 10% buffer for market price fluctuations.
+
+USDT for the U side is sourced by sweeping from PrimeLiquidityProvider and swapping on PancakeSwap V3 directly — by the time these steps run, the legacy \`*PrimeConverter\` contracts have already been drained and de-permissioned by the helper above.
+
+8. **Add vU as a Prime market** (\`Prime.addMarket\`) with supplyMultiplier = 2e18, borrowMultiplier = 0 — same supply-only shape as the existing USDT and USDC entries.
+9. **Initialize U in PrimeLiquidityProvider** (\`initializeTokens([U])\`) so distribution accounting is tracked against U.
+10. **Sweep 12,250 USDT** out of PrimeLiquidityProvider to NormalTimelock for swapping.
+11. **Approve PancakeSwap V3 router** for the swap amount.
+12. **Swap 12,250 USDT → U directly into PrimeLiquidityProvider** on PancakeSwap V3 (\`exactInputSingle\`, fee tier 1 bp, recipient = PLP, ≥ 12,127.5 U min output, 14-day deadline). The router pulls USDT from NormalTimelock and delivers U straight to PLP, capturing the full output.
+13. **Revoke leftover USDT approval** to the router as defense in depth.
+14. **Set Prime distribution speeds** for USDT and U via \`setTokensDistributionSpeed\` (~0.002126736 tokens/block each, equivalent to ~$12.25K/month per market at $1 peg).
+
+##### Allocation Strategy
+
+- Focusing rewards on the **supply side** strengthens liquidity and creates conditions for lower borrow rates. Rewarding both sides creates arbitrage opportunities that artificially inflate activity and drive borrow rates up for other users.
+- The 50/50 USDT/U split is provisional for the first month of U as a Prime reward market. The split will be reviewed in coming months based on U market performance and reserve contribution.
+- Speeds are estimated at $1 = 1 USDT/U; actual realized USD value may vary with token prices between collection and conversion.
 
 Helper source: \`draft/contracts/helpers/TokenBuybackMigrationHelper.sol\` in this repository, intended to be moved to and deployed from venus-periphery. Implementation of the new RiskFundV2: [VenusProtocol/protocol-reserve PR #158](https://github.com/VenusProtocol/protocol-reserve/pull/158). Testnet sign-off gate: 24–48h of green cron operation covering at least one \`executeBuyback\` per instance and one \`forwardBaseAsset\` per destination.
 
@@ -315,6 +368,60 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         target: SHORTFALL,
         signature: "pauseAuctions()",
         params: [],
+      },
+
+      // 8. Add vU as a Prime market (supply-only, matching USDT/USDC).
+      {
+        target: PRIME,
+        signature: "addMarket(address,address,uint256,uint256)",
+        params: [CORE_COMPTROLLER, VU, SUPPLY_MULTIPLIER, BORROW_MULTIPLIER],
+      },
+
+      // 9. Initialize U in PrimeLiquidityProvider so it can be assigned a distribution speed.
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "initializeTokens(address[])",
+        params: [[U]],
+      },
+
+      // 10. Withdraw 12,250 USDT from PLP to NormalTimelock for swapping.
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [USDT, bscmainnet.NORMAL_TIMELOCK, USDT_TO_SWEEP],
+      },
+
+      // 11. Approve PancakeSwap V3 router for the swap amount.
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [PANCAKE_V3_ROUTER, USDT_TO_SWAP],
+      },
+
+      // 12. Swap USDT → U; recipient = PLP so the full output (incl. surplus above
+      //     U_MIN_OUT) lands in PLP without a separate transfer step.
+      {
+        target: PANCAKE_V3_ROUTER,
+        signature: "exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160))",
+        params: [[USDT, U, PANCAKE_V3_FEE_TIER, PRIME_LIQUIDITY_PROVIDER, SWAP_DEADLINE, USDT_TO_SWAP, U_MIN_OUT, 0n]],
+      },
+
+      // 13. Revoke residual USDT approval (router consumes exactly USDT_TO_SWAP, but
+      //     reset to 0 as defense in depth so no future call can spend on the Timelock's behalf).
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [PANCAKE_V3_ROUTER, 0],
+      },
+
+      // 14. Set Prime distribution speeds for both USDT and U.
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "setTokensDistributionSpeed(address[],uint256[])",
+        params: [
+          [USDT, U],
+          [NEW_PRIME_SPEED_FOR_USDT, NEW_PRIME_SPEED_FOR_U],
+        ],
       },
     ],
     meta,
