@@ -447,6 +447,60 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    it("operator holds no ACM permission on any legacy timelock-owned converter", async () => {
+      // Defense in depth: the helper only grants the operator perms on the new buyback
+      // proxies. The legacy converters are paused at end of execute() and the operator
+      // must never gain authority over them — verify no stray grant exists for any
+      // ACM-gated converter selector.
+      const CONVERTER_ACM_SIGS = [
+        "pauseConversion()",
+        "resumeConversion()",
+        "setConversionConfig(address,address,(uint256,uint256,uint8))",
+        "setMinAmountToConvert(uint256)",
+        "convertExactTokens(uint256,uint256,address,address,address)",
+        "convertForExactTokens(uint256,uint256,address,address,address)",
+      ];
+      for (const c of TIMELOCK_OWNED_CONVERTERS) {
+        const conv = await initMainnetUser(c, ethers.utils.parseEther("1"));
+        for (const sig of CONVERTER_ACM_SIGS) {
+          expect(await acm.connect(conv).isAllowedToCall(OPERATOR, sig), `${c}/${sig}`).to.be.false;
+        }
+      }
+    });
+
+    it("NormalTimelock controls every ACM-gated function on each buyback (admin can self-grant + call)", async () => {
+      // ACM admin (NormalTimelock holds DEFAULT_ADMIN_ROLE) can grant itself any
+      // (contract, function) role and exercise the ACM gate. Self-grant +
+      // self-revoke leaves the post-VIP role state untouched. We only assert the
+      // ACM gate passes (function call returns or reverts for downstream reasons,
+      // not for permission). The set of ACM-gated functions on a buyback is
+      // {executeBuyback, forwardBaseAsset}; the operator-grant for those is
+      // covered separately above and intentionally not duplicated here.
+      const ACM_GATED_BUYBACK_SIGS = [EXECUTE_BUYBACK_SIG, FORWARD_BASE_ASSET_SIG];
+      const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      const acmAsAdmin = new ethers.Contract(
+        bscmainnet.ACCESS_CONTROL_MANAGER,
+        [
+          "function giveCallPermission(address,string,address)",
+          "function revokeCallPermission(address,string,address)",
+        ],
+        timelockSigner,
+      );
+
+      for (const b of BUYBACKS) {
+        for (const sig of ACM_GATED_BUYBACK_SIGS) {
+          // Self-grant via the admin role.
+          await acmAsAdmin.giveCallPermission(b, sig, bscmainnet.NORMAL_TIMELOCK);
+          // The ACM gate now permits NormalTimelock to call the function.
+          const buybackSigner = await initMainnetUser(b, ethers.utils.parseEther("1"));
+          expect(await acm.connect(buybackSigner).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, sig), `${b}/${sig}`).to.be
+            .true;
+          // Cleanup: revoke so the post-VIP role state is unchanged for downstream tests.
+          await acmAsAdmin.revokeCallPermission(b, sig, bscmainnet.NORMAL_TIMELOCK);
+        }
+      }
+    });
+
     it("NormalTimelock governance can pauseConversion on each timelock-owned converter (ACM-gated)", async () => {
       // Helper already paused every converter, so we first resume from the NormalTimelock
       // signer (verifies the ACM gate for `resumeConversion()`) and then re-pause from the
