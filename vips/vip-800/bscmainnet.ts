@@ -164,16 +164,16 @@ export const TIMELOCK_OWNED_CONVERTERS: string[] = [
 ];
 
 // ===== New TokenBuyback proxies (10 instances) =====
-export const RISK_FUND_BUYBACK = ethers.constants.AddressZero; // TODO
-export const USDT_PRIME_BUYBACK = ethers.constants.AddressZero; // TODO
-export const U_PRIME_BUYBACK = ethers.constants.AddressZero; // TODO
-export const XVS_BUYBACK = ethers.constants.AddressZero; // TODO
-export const U_TREASURY_BUYBACK = ethers.constants.AddressZero; // TODO
-export const BTCB_TREASURY_BUYBACK = ethers.constants.AddressZero; // TODO
-export const ETH_TREASURY_BUYBACK = ethers.constants.AddressZero; // TODO
-export const USDT_TREASURY_BUYBACK = ethers.constants.AddressZero; // TODO
-export const USDC_TREASURY_BUYBACK = ethers.constants.AddressZero; // TODO
-export const XVS_TREASURY_BUYBACK = ethers.constants.AddressZero; // TODO
+export const RISK_FUND_BUYBACK     = "0xfffB20c23650B27126815994f3F07eF6B46aea60";
+export const USDT_PRIME_BUYBACK    = "0x0191Bb3CD28A96691F5EC5066ad42A0373ae11C6";
+export const U_PRIME_BUYBACK       = "0xFd50bd4107705929df73Ac683BD505232BA9E9dB";
+export const XVS_BUYBACK           = "0xBaAc819aE93b29fA6512a095CA00255a4F05b027";
+export const U_TREASURY_BUYBACK    = "0xef7cb42a7EBD4b011905D20Fc8038a603c3f22E4";
+export const BTCB_TREASURY_BUYBACK = "0x69739FF52e90BC93dCaEd5a2431072b5082d326D";
+export const ETH_TREASURY_BUYBACK  = "0x9e0543F9E09fb5b8a58F73d11967DC894dbD40a7";
+export const USDT_TREASURY_BUYBACK = "0xBF858c95D778022b48E6Ad343D3d644017fb0ca7";
+export const USDC_TREASURY_BUYBACK = "0xFB5FA544dBf39983198BDD01e2c26E3AB597e22A";
+export const XVS_TREASURY_BUYBACK  = "0x01D0f07D389692D386EB8D09Da3bbCa5C83be551";
 
 export const BUYBACKS: string[] = [
   RISK_FUND_BUYBACK,
@@ -193,13 +193,12 @@ export const BUYBACKS: string[] = [
 export const HELPER_RETURNED_OWNERSHIPS: string[] = [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS];
 
 // ===== New RiskFundV2 implementation =====
-export const NEW_RISK_FUND_V2_IMPL = ethers.constants.AddressZero; // TODO
-
+export const NEW_RISK_FUND_V2_IMPL = "0x01BE9c56A0844040b2c1a684B1a72cE88489486a"; 
 // ===== TokenBuyback migration helper =====
-export const MIGRATION_HELPER = ethers.constants.AddressZero; // TODO
+export const MIGRATION_HELPER = "0x34c62aFcF8Bb18614329fC4d3266a9aFd82A8bdc";
 
 // ===== Cron operator =====
-export const OPERATOR = "0x88ac9ca69a371f47798df18e5c36449af44526a4"; // TODO
+export const OPERATOR = "0x88ac9ca69a371f47798df18e5c36449af44526a4"; 
 
 // AccessControl `DEFAULT_ADMIN_ROLE` (OZ AccessControl) — the admin role on the
 // AccessControlManager. Granting it to the helper lets `execute()` self-grant

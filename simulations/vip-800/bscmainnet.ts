@@ -48,9 +48,7 @@ import BUYBACK_ABI from "./abi/TokenBuyback.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// TODO: pin after deploy on feat/VPD-1087 so fork includes deployed buyback proxies,
-//       new RiskFundV2 impl, and the migration helper.
-const FORK_BLOCK = 0;
+const FORK_BLOCK = 97106909;
 
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 const CONVERTER_MIN_ABI = ["function conversionPaused() view returns (bool)"];
