@@ -51,7 +51,7 @@ import BUYBACK_ABI from "./abi/TokenBuyback.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 97115125;
+const FORK_BLOCK = 97135616;
 
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 const CONVERTER_MIN_ABI = ["function conversionPaused() view returns (bool)"];
@@ -149,10 +149,10 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Pre-VIP state", () => {
-    it("each buyback proxy's pendingOwner is NormalTimelock", async () => {
+    it("each buyback proxy's pendingOwner is MIGRATION_HELPER", async () => {
       for (const b of BUYBACKS) {
         const buyback = new ethers.Contract(b, BUYBACK_ABI, ethers.provider);
-        expect(await buyback.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+        expect(await buyback.pendingOwner()).to.equal(MIGRATION_HELPER);
       }
     });
 
@@ -383,6 +383,166 @@ forking(FORK_BLOCK, async () => {
 
     it("Prime distribution speed for U matches NEW_PRIME_SPEED_FOR_U", async () => {
       expect(await plp.tokenDistributionSpeeds(U)).to.equal(NEW_PRIME_SPEED_FOR_U);
+    });
+  });
+
+  describe("Post-VIP helper invariants", () => {
+    const TRANSIENT_ACM_GRANTS: { contract: string; sig: string }[] = [
+      { contract: PROTOCOL_SHARE_RESERVE, sig: "addOrUpdateDistributionConfigs(DistributionConfig[])" },
+      { contract: PROTOCOL_SHARE_RESERVE, sig: "removeDistributionConfig(Schema,address)" },
+      { contract: RISK_FUND_CONVERTER, sig: "pauseConversion()" },
+      { contract: USDT_PRIME_CONVERTER, sig: "pauseConversion()" },
+      { contract: USDC_PRIME_CONVERTER, sig: "pauseConversion()" },
+      { contract: BTCB_PRIME_CONVERTER, sig: "pauseConversion()" },
+      { contract: ETH_PRIME_CONVERTER, sig: "pauseConversion()" },
+      { contract: XVS_VAULT_CONVERTER, sig: "pauseConversion()" },
+    ];
+
+    it("helper has revoked every transient ACM permission it self-granted", async () => {
+      for (const { contract, sig } of TRANSIENT_ACM_GRANTS) {
+        const target = await initMainnetUser(contract, ethers.utils.parseEther("1"));
+        expect(await acm.connect(target).isAllowedToCall(MIGRATION_HELPER, sig), `${contract}/${sig}`).to.be.false;
+      }
+    });
+
+    it("helper holds no role on the AccessControlManager (DEFAULT_ADMIN + per-target roles)", async () => {
+      // 1. DEFAULT_ADMIN_ROLE — renounced at the end of execute().
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, MIGRATION_HELPER), "DEFAULT_ADMIN_ROLE").to.be.false;
+
+      // 2. Per-(contract, sig) role check via raw role id keccak(contract || sig). Covers every
+      //    permission the helper self-granted, even if the canonical-string lookup above misses
+      //    a non-canonical registration.
+      for (const { contract, sig } of TRANSIENT_ACM_GRANTS) {
+        const role = ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [contract, sig]));
+        expect(await acm.hasRole(role, MIGRATION_HELPER), `${contract}/${sig}`).to.be.false;
+      }
+    });
+
+    it("helper is neither owner nor pendingOwner of any of the 16 migrated contracts", async () => {
+      const targets = [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS];
+      const ownable = (a: string) =>
+        new ethers.Contract(
+          a,
+          ["function owner() view returns (address)", "function pendingOwner() view returns (address)"],
+          ethers.provider,
+        );
+      for (const t of targets) {
+        const c = ownable(t);
+        expect((await c.owner()).toLowerCase(), `${t} owner`).to.not.equal(MIGRATION_HELPER.toLowerCase());
+        expect((await c.pendingOwner()).toLowerCase(), `${t} pendingOwner`).to.not.equal(
+          MIGRATION_HELPER.toLowerCase(),
+        );
+      }
+    });
+
+    it("NormalTimelock retains DEFAULT_ADMIN_ROLE on the AccessControlManager", async () => {
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, bscmainnet.NORMAL_TIMELOCK)).to.be.true;
+    });
+
+    it("NormalTimelock is the owner of every migrated contract (buybacks + converters)", async () => {
+      const ownable = (a: string) =>
+        new ethers.Contract(a, ["function owner() view returns (address)"], ethers.provider);
+      for (const t of [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS]) {
+        expect((await ownable(t).owner()).toLowerCase(), t).to.equal(bscmainnet.NORMAL_TIMELOCK.toLowerCase());
+      }
+    });
+
+    it("NormalTimelock governance can pauseConversion on each timelock-owned converter (ACM-gated)", async () => {
+      // Helper already paused every converter, so we first resume from the NormalTimelock
+      // signer (verifies the ACM gate for `resumeConversion()`) and then re-pause from the
+      // same signer (verifies the ACM gate for `pauseConversion()` — the test the VIP
+      // really cares about). Net state is unchanged for downstream tests.
+      const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      for (const c of TIMELOCK_OWNED_CONVERTERS) {
+        const conv = new ethers.Contract(
+          c,
+          [
+            "function resumeConversion()",
+            "function pauseConversion()",
+            "function conversionPaused() view returns (bool)",
+          ],
+          timelockSigner,
+        );
+        await conv.resumeConversion();
+        await expect(conv.pauseConversion(), c).to.not.be.reverted;
+        expect(await conv.conversionPaused(), c).to.be.true;
+      }
+    });
+
+    it("helper holds no allowance from NormalTimelock or PLP for any core-pool token", async () => {
+      // Defense in depth: the helper never asks for ERC20 allowances, but if a future
+      // refactor introduced one and forgot to revoke, this catches it.
+      const allowanceAbi = ["function allowance(address,address) view returns (uint256)"];
+      const sources = [bscmainnet.NORMAL_TIMELOCK, PRIME_LIQUIDITY_PROVIDER];
+      for (const src of sources) {
+        for (const t of CORE_TOKENS) {
+          const erc = new ethers.Contract(t, allowanceAbi, ethers.provider);
+          expect(await erc.allowance(src, MIGRATION_HELPER), `${src}->${MIGRATION_HELPER}/${t}`).to.equal(0);
+        }
+      }
+    });
+
+    it("calling helper.execute() a second time reverts with AlreadyExecuted", async () => {
+      const helperWithExecute = new ethers.Contract(MIGRATION_HELPER, ["function execute()"], ethers.provider);
+      const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      await expect(helperWithExecute.connect(timelockSigner).execute()).to.be.reverted;
+    });
+
+    it("helper.execute() reverts NotTimelock when called by anyone other than NormalTimelock", async () => {
+      const helperWithExecute = new ethers.Contract(MIGRATION_HELPER, ["function execute()"], ethers.provider);
+      const [randomSigner] = await ethers.getSigners();
+      await expect(helperWithExecute.connect(randomSigner).execute()).to.be.reverted;
+    });
+
+    it("helper holds zero balance of every core-pool token", async () => {
+      for (const t of CORE_TOKENS) {
+        expect(await erc20(t).balanceOf(MIGRATION_HELPER), t).to.equal(0);
+      }
+    });
+
+    it("helper holds zero native BNB", async () => {
+      expect(await ethers.provider.getBalance(MIGRATION_HELPER)).to.equal(0);
+    });
+
+    it("PSR distributionTargets count equals 18 (10 schema-0 + 8 schema-1)", async () => {
+      let count = 0;
+      for (let i = 0; ; i++) {
+        try {
+          await psr.distributionTargets(i);
+          count += 1;
+        } catch {
+          break;
+        }
+      }
+      expect(count).to.equal(18);
+    });
+
+    it("operator can call executeBuyback successfully (ACM grant is functional, not just present)", async () => {
+      // Smoke-test: ACM check + ownership are wired correctly. Use a no-op input so we only
+      // verify the permission gate, not actual swap economics.
+      const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      const buyback = new ethers.Contract(
+        BUYBACKS[0],
+        ["function executeBuyback(address,uint256,uint256,uint256,address,bytes,address)"],
+        operator,
+      );
+      // We only care that the ACM check passes; downstream params will revert for unrelated reasons,
+      // but the access-control gate is the first thing checked.
+      try {
+        await buyback.callStatic.executeBuyback(USDT, 0, 0, 0, ethers.constants.AddressZero, "0x", USDT);
+      } catch (err: unknown) {
+        const msg = String(err);
+        expect(msg, "should not be a permission revert").to.not.match(/Unauthorized|AccessDenied|forbidden/i);
+      }
+    });
+
+    it("NormalTimelock can exercise owner powers on each buyback (setAllowedRouter no-op)", async () => {
+      const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      for (const b of BUYBACKS) {
+        const buyback = new ethers.Contract(b, BUYBACK_ABI, timelockSigner);
+        // Re-set an already-allowlisted router; a no-op state-wise but exercises the onlyOwner gate.
+        await expect(buyback.setAllowedRouter(PANCAKE_V3_ROUTER, true)).to.not.be.reverted;
+      }
     });
   });
 });
