@@ -25,7 +25,14 @@ import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
-const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
+// XVS Vault stakes erode over time, so a single default supporter no longer reliably
+// clears quorum (600,000 XVS) when combined with the proposer at recent fork blocks.
+// Two supporters give the framework headroom across blocks. Override per-test by passing
+// `supporter` (single, legacy) or `supporters` (array) to `testVip`.
+const DEFAULT_SUPPORTER_ADDRESSES = [
+  "0xc444949e0054a23c44fc45789738bdf64aed2391",
+  "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
+];
 const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
@@ -65,6 +72,10 @@ export interface TestingOptions {
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
+  // Optional list of additional supporters. Used when proposer + single supporter no longer
+  // clears quorum at the chosen fork block (XVS Vault stakes shift over time). If both
+  // `supporter` and `supporters` are set, `supporters` wins.
+  supporters?: string[];
   callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
@@ -128,19 +139,22 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   let impersonatedTimelock: SignerWithAddress;
   let governorProxy: Contract;
   let proposer: SignerWithAddress;
-  let supporter: SignerWithAddress;
+  let supporters: SignerWithAddress[];
 
   const governanceFixture = async (): Promise<void> => {
     const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
 
-    const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
+    const supporterAddresses =
+      options.supporters ?? (options.supporter ? [options.supporter] : DEFAULT_SUPPORTER_ADDRESSES);
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
       [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
       [ProposalType.CRITICAL]: CRITICAL_TIMELOCK,
     }[proposal.type || ProposalType.REGULAR];
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
-    supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
+    supporters = await Promise.all(
+      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
+    );
     impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
@@ -195,7 +209,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const votingDelay = await proposalConfig.votingDelay;
       await mine(votingDelay);
       await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
-      await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
+      for (const s of supporters) {
+        await expect(governorProxy.connect(s).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
+      }
     });
 
     it("should be queued successfully", async () => {
