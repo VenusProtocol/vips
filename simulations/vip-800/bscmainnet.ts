@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip800, {
@@ -28,10 +29,12 @@ import vip800, {
   SUPPLY_MULTIPLIER,
   TIMELOCK_OWNED_CONVERTERS,
   U,
+  USDC,
   USDC_PRIME_CONVERTER,
+  USDC_TO_SWEEP,
   USDT,
+  USDT_MIN_OUT,
   USDT_PRIME_CONVERTER,
-  USDT_TO_SWEEP,
   U_MIN_OUT,
   U_PRIME_BUYBACK,
   VTREASURY,
@@ -48,7 +51,7 @@ import BUYBACK_ABI from "./abi/TokenBuyback.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 97106909;
+const FORK_BLOCK = 97115125;
 
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 const CONVERTER_MIN_ABI = ["function conversionPaused() view returns (bool)"];
@@ -111,7 +114,8 @@ forking(FORK_BLOCK, async () => {
   const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, ethers.provider);
   const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
-  const usdtAllowance = new ethers.Contract(USDT, ERC20_ALLOWANCE_ABI, ethers.provider);
+  const usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
+  const usdcAllowance = new ethers.Contract(USDC, ERC20_ALLOWANCE_ABI, ethers.provider);
   const shortfall = new ethers.Contract(SHORTFALL, SHORTFALL_MIN_ABI, ethers.provider);
   const helper = new ethers.Contract(MIGRATION_HELPER, HELPER_MIN_ABI, ethers.provider);
   const prime = new ethers.Contract(PRIME, PRIME_MIN_ABI, ethers.provider);
@@ -122,6 +126,7 @@ forking(FORK_BLOCK, async () => {
 
   let riskFundV2UsdtBalanceBefore: BigNumber;
   let shortfallAuctionsPausedBefore: boolean;
+  let plpUsdcBalanceBefore: BigNumber;
   let plpUsdtBalanceBefore: BigNumber;
   let plpUBalanceBefore: BigNumber;
   const recipientBalanceBefore = new Map<string, BigNumber>(); // key: token:recipient
@@ -129,6 +134,7 @@ forking(FORK_BLOCK, async () => {
   before(async () => {
     riskFundV2UsdtBalanceBefore = await usdt.balanceOf(RISK_FUND_V2);
     shortfallAuctionsPausedBefore = await shortfall.auctionsPaused();
+    plpUsdcBalanceBefore = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     plpUsdtBalanceBefore = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     plpUBalanceBefore = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
 
@@ -161,8 +167,9 @@ forking(FORK_BLOCK, async () => {
 
     it("operator has no executeBuyback / forwardBaseAsset grants yet", async () => {
       for (const b of BUYBACKS) {
-        expect(await acm.isAllowedToCall(OPERATOR, b, EXECUTE_BUYBACK_SIG)).to.be.false;
-        expect(await acm.isAllowedToCall(OPERATOR, b, FORWARD_BASE_ASSET_SIG)).to.be.false;
+        const buybackSigner = await initMainnetUser(b, ethers.utils.parseEther("1"));
+        expect(await acm.connect(buybackSigner).isAllowedToCall(OPERATOR, EXECUTE_BUYBACK_SIG)).to.be.false;
+        expect(await acm.connect(buybackSigner).isAllowedToCall(OPERATOR, FORWARD_BASE_ASSET_SIG)).to.be.false;
       }
     });
 
@@ -201,8 +208,8 @@ forking(FORK_BLOCK, async () => {
       expect(await plp.lastAccruedBlockOrSecond(U)).to.equal(0);
     });
 
-    it("PLP holds at least the USDT amount to be swept", async () => {
-      expect(plpUsdtBalanceBefore).to.be.gte(USDT_TO_SWEEP);
+    it("PLP holds at least the USDC amount to be swept", async () => {
+      expect(plpUsdcBalanceBefore).to.be.gte(USDC_TO_SWEEP);
     });
   });
 
@@ -242,8 +249,9 @@ forking(FORK_BLOCK, async () => {
 
     it("operator granted executeBuyback + forwardBaseAsset on each buyback", async () => {
       for (const b of BUYBACKS) {
-        expect(await acm.isAllowedToCall(OPERATOR, b, EXECUTE_BUYBACK_SIG)).to.be.true;
-        expect(await acm.isAllowedToCall(OPERATOR, b, FORWARD_BASE_ASSET_SIG)).to.be.true;
+        const buybackSigner = await initMainnetUser(b, ethers.utils.parseEther("1"));
+        expect(await acm.connect(buybackSigner).isAllowedToCall(OPERATOR, EXECUTE_BUYBACK_SIG)).to.be.true;
+        expect(await acm.connect(buybackSigner).isAllowedToCall(OPERATOR, FORWARD_BASE_ASSET_SIG)).to.be.true;
       }
     });
 
@@ -350,18 +358,23 @@ forking(FORK_BLOCK, async () => {
       expect(await plp.lastAccruedBlockOrSecond(U)).to.be.gt(0);
     });
 
-    it("PLP USDT balance decreased by exactly USDT_TO_SWEEP (sweep + no inflow this VIP)", async () => {
-      const after = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      expect(plpUsdtBalanceBefore.sub(after)).to.equal(USDT_TO_SWEEP);
+    it("PLP USDC balance decreased by exactly USDC_TO_SWEEP (sweep + no inflow this VIP)", async () => {
+      const after = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(plpUsdcBalanceBefore.sub(after)).to.equal(USDC_TO_SWEEP);
     });
 
-    it("PLP U balance increased by at least U_MIN_OUT (swap recipient = PLP)", async () => {
+    it("PLP USDT balance increased by at least USDT_MIN_OUT (USDC -> USDT swap recipient = PLP)", async () => {
+      const after = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(after.sub(plpUsdtBalanceBefore)).to.be.gte(USDT_MIN_OUT);
+    });
+
+    it("PLP U balance increased by at least U_MIN_OUT (USDC -> U swap recipient = PLP)", async () => {
       const after = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
       expect(after.sub(plpUBalanceBefore)).to.be.gte(U_MIN_OUT);
     });
 
-    it("NormalTimelock USDT allowance to PancakeSwap V3 router is revoked", async () => {
-      expect(await usdtAllowance.allowance(bscmainnet.NORMAL_TIMELOCK, PANCAKE_V3_ROUTER)).to.equal(0);
+    it("NormalTimelock USDC allowance to PancakeSwap V3 router is revoked", async () => {
+      expect(await usdcAllowance.allowance(bscmainnet.NORMAL_TIMELOCK, PANCAKE_V3_ROUTER)).to.equal(0);
     });
 
     it("Prime distribution speed for USDT matches NEW_PRIME_SPEED_FOR_USDT", async () => {
