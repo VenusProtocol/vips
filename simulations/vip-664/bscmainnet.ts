@@ -8,16 +8,13 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip664, {
   ACM_AGGREGATOR,
-  ADAPTER_FUNCTIONS,
-  ADAPTER_GUARDIAN_FUNCTIONS,
-  CONTROLLER_FUNCTIONS,
-  CONTROLLER_GUARDIAN_FUNCTIONS,
   DEFAULT_ADMIN_ROLE,
   EXPECTED_PERMISSION_GRANTED_EVENTS,
   INSTITUTIONAL_VAULT_CONTROLLER,
   INSTITUTION_POSITION_TOKEN,
   LIQUIDATION_ADAPTER,
   LIQUIDATOR_WHITELIST,
+  PERMISSION_ENTRIES,
   SETTLER_WHITELIST,
 } from "../../vips/vip-664/bscmainnet";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
@@ -26,10 +23,23 @@ import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json"
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import LIQUIDATION_ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
-const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, ACCESS_CONTROL_MANAGER } = bscmainnet;
+const {
+  NORMAL_TIMELOCK: NORMAL,
+  FAST_TRACK_TIMELOCK: FAST_TRACK,
+  CRITICAL_TIMELOCK: CRITICAL,
+  GUARDIAN,
+  ACCESS_CONTROL_MANAGER,
+} = NETWORK_ADDRESSES.bscmainnet;
 
 const FORK_BLOCK = 96701105;
+
+// To make test names readable.
+const LABEL: Record<string, string> = {
+  [NORMAL]: "Normal",
+  [FAST_TRACK]: "FastTrack",
+  [CRITICAL]: "Critical",
+  [GUARDIAN]: "Guardian",
+};
 
 forking(FORK_BLOCK, async () => {
   let accessControlManager: Contract;
@@ -48,77 +58,56 @@ forking(FORK_BLOCK, async () => {
     positionToken = new ethers.Contract(INSTITUTION_POSITION_TOKEN, INSTITUTION_POSITION_TOKEN_ABI, ethers.provider);
   });
 
-  // ──────────────────────────────────────────────────────────────────────
-  // Pre-VIP: verify deployments
-  // ──────────────────────────────────────────────────────────────────────
+  // Contracts deployed and deploy-script state is in place.
   describe("Pre-VIP: verify deployments", () => {
     it("InstitutionalVaultController proxy should be deployed", async () => {
-      const code = await ethers.provider.getCode(INSTITUTIONAL_VAULT_CONTROLLER);
-      expect(code).to.not.equal("0x");
+      expect(await ethers.provider.getCode(INSTITUTIONAL_VAULT_CONTROLLER)).to.not.equal("0x");
     });
 
     it("LiquidationAdapter proxy should be deployed", async () => {
-      const code = await ethers.provider.getCode(LIQUIDATION_ADAPTER);
-      expect(code).to.not.equal("0x");
+      expect(await ethers.provider.getCode(LIQUIDATION_ADAPTER)).to.not.equal("0x");
     });
 
     it("InstitutionPositionToken should be deployed", async () => {
-      const code = await ethers.provider.getCode(INSTITUTION_POSITION_TOKEN);
-      expect(code).to.not.equal("0x");
+      expect(await ethers.provider.getCode(INSTITUTION_POSITION_TOKEN)).to.not.equal("0x");
     });
 
-    it("InstitutionPositionToken pending owner should be the controller proxy (transferOwnership was called in deploy script)", async () => {
-      const pendingOwner = await positionToken.pendingOwner();
-      expect(pendingOwner).to.equal(INSTITUTIONAL_VAULT_CONTROLLER);
+    it("InstitutionPositionToken pendingOwner should be the controller proxy", async () => {
+      expect(await positionToken.pendingOwner()).to.equal(INSTITUTIONAL_VAULT_CONTROLLER);
     });
 
-    it("NORMAL_TIMELOCK should not yet have setLiquidationAdapter permission on controller", async () => {
-      const allowed = await accessControlManager.hasPermission(
-        NORMAL_TIMELOCK,
-        INSTITUTIONAL_VAULT_CONTROLLER,
-        "setLiquidationAdapter(address)",
-      );
-      expect(allowed).to.be.false;
+    it("controller pendingOwner should be Normal timelock", async () => {
+      expect(await controller.pendingOwner()).to.equal(NORMAL);
     });
 
-    it("NORMAL_TIMELOCK should not yet have acceptPositionTokenOwnership permission on controller", async () => {
-      const allowed = await accessControlManager.hasPermission(
-        NORMAL_TIMELOCK,
-        INSTITUTIONAL_VAULT_CONTROLLER,
-        "acceptPositionTokenOwnership()",
-      );
-      expect(allowed).to.be.false;
-    });
-
-    it("controller pendingOwner should be NORMAL_TIMELOCK (transferOwnership was called in deploy script)", async () => {
-      const pendingOwner = await controller.pendingOwner();
-      expect(pendingOwner).to.equal(NORMAL_TIMELOCK);
-    });
-
-    it("liquidationAdapter pendingOwner should be NORMAL_TIMELOCK (transferOwnership was called in deploy script)", async () => {
-      const pendingOwner = await liquidationAdapter.pendingOwner();
-      expect(pendingOwner).to.equal(NORMAL_TIMELOCK);
+    it("liquidationAdapter pendingOwner should be Normal timelock", async () => {
+      expect(await liquidationAdapter.pendingOwner()).to.equal(NORMAL);
     });
 
     it("liquidationAdapter protocolLiquidationShare should be 0.5e18", async () => {
-      const share = await liquidationAdapter.protocolLiquidationShare();
-      expect(share).to.equal(parseEther("0.5"));
+      expect(await liquidationAdapter.protocolLiquidationShare()).to.equal(parseEther("0.5"));
     });
 
     it("liquidationAdapter closeFactor should be 0.5e18", async () => {
-      const factor = await liquidationAdapter.closeFactor();
-      expect(factor).to.equal(parseEther("0.5"));
+      expect(await liquidationAdapter.closeFactor()).to.equal(parseEther("0.5"));
     });
 
     it("controller liquidationAdapter should be address(0) before VIP", async () => {
-      const adapter = await controller.liquidationAdapter();
-      expect(adapter).to.equal(ethers.constants.AddressZero);
+      expect(await controller.liquidationAdapter()).to.equal(ethers.constants.AddressZero);
     });
   });
 
-  // ──────────────────────────────────────────────────────────────────────
-  // VIP execution
-  // ──────────────────────────────────────────────────────────────────────
+  // None of the planned grants exist yet.
+  describe("Pre-VIP: ACM permissions not yet granted", () => {
+    for (const { target, fn, callers } of PERMISSION_ENTRIES) {
+      for (const account of callers) {
+        it(`${LABEL[account]} should NOT yet have permission: ${fn} on ${target}`, async () => {
+          expect(await accessControlManager.hasPermission(account, target, fn)).to.be.false;
+        });
+      }
+    }
+  });
+
   testVip("VIP-664 [BNB Chain] Configure Institutional Fixed Rate Vault System", await vip664(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
@@ -136,147 +125,58 @@ forking(FORK_BLOCK, async () => {
     },
   });
 
-  // ──────────────────────────────────────────────────────────────────────
-  // Post-VIP: ACM permission and system wiring checks
-  // ──────────────────────────────────────────────────────────────────────
-
-  describe("Post-VIP: verify setup", () => {
-    describe("InstitutionalVaultController — NORMAL_TIMELOCK permissions", () => {
-      for (const funcSig of CONTROLLER_FUNCTIONS) {
-        it(`NORMAL_TIMELOCK should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(
-            NORMAL_TIMELOCK,
-            INSTITUTIONAL_VAULT_CONTROLLER,
-            funcSig,
-          );
-          expect(allowed).to.be.true;
+  // Every planned grant is now active.
+  describe("Post-VIP: ACM permissions granted", () => {
+    for (const { target, fn, callers } of PERMISSION_ENTRIES) {
+      for (const account of callers) {
+        it(`${LABEL[account]} should have permission: ${fn} on ${target}`, async () => {
+          expect(await accessControlManager.hasPermission(account, target, fn)).to.be.true;
         });
       }
+    }
+  });
+
+  // Ownership accepted, adapter wired, admin role revoked.
+  describe("Post-VIP: ownership and wiring", () => {
+    it("controller owner should be Normal timelock", async () => {
+      expect(await controller.owner()).to.equal(NORMAL);
     });
 
-    describe("InstitutionalVaultController — FAST_TRACK_TIMELOCK permissions", () => {
-      for (const funcSig of CONTROLLER_FUNCTIONS) {
-        it(`FAST_TRACK_TIMELOCK should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(
-            FAST_TRACK_TIMELOCK,
-            INSTITUTIONAL_VAULT_CONTROLLER,
-            funcSig,
-          );
-          expect(allowed).to.be.true;
-        });
-      }
+    it("liquidationAdapter owner should be Normal timelock", async () => {
+      expect(await liquidationAdapter.owner()).to.equal(NORMAL);
     });
 
-    describe("InstitutionalVaultController — CRITICAL_TIMELOCK permissions", () => {
-      for (const funcSig of CONTROLLER_FUNCTIONS) {
-        it(`CRITICAL_TIMELOCK should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(
-            CRITICAL_TIMELOCK,
-            INSTITUTIONAL_VAULT_CONTROLLER,
-            funcSig,
-          );
-          expect(allowed).to.be.true;
-        });
-      }
+    it("InstitutionPositionToken owner should be the controller proxy", async () => {
+      expect(await positionToken.owner()).to.equal(INSTITUTIONAL_VAULT_CONTROLLER);
     });
 
-    describe("InstitutionalVaultController — GUARDIAN permissions", () => {
-      for (const funcSig of CONTROLLER_GUARDIAN_FUNCTIONS) {
-        it(`GUARDIAN should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(GUARDIAN, INSTITUTIONAL_VAULT_CONTROLLER, funcSig);
-          expect(allowed).to.be.true;
-        });
-      }
+    it("controller liquidationAdapter should be set to the adapter proxy", async () => {
+      expect(await controller.liquidationAdapter()).to.equal(LIQUIDATION_ADAPTER);
     });
 
-    describe("LiquidationAdapter — NORMAL_TIMELOCK permissions", () => {
-      for (const funcSig of ADAPTER_FUNCTIONS) {
-        it(`NORMAL_TIMELOCK should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(NORMAL_TIMELOCK, LIQUIDATION_ADAPTER, funcSig);
-          expect(allowed).to.be.true;
-        });
-      }
+    it("DEFAULT_ADMIN_ROLE should be revoked from ACM Aggregator", async () => {
+      expect(await accessControlManager.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
     });
+  });
 
-    describe("LiquidationAdapter — CRITICAL_TIMELOCK permissions", () => {
-      for (const funcSig of ADAPTER_FUNCTIONS) {
-        it(`CRITICAL_TIMELOCK should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(CRITICAL_TIMELOCK, LIQUIDATION_ADAPTER, funcSig);
-          expect(allowed).to.be.true;
-        });
-      }
-    });
-
-    describe("LiquidationAdapter — FAST_TRACK_TIMELOCK permissions", () => {
-      for (const funcSig of ADAPTER_FUNCTIONS) {
-        it(`FAST_TRACK_TIMELOCK should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(FAST_TRACK_TIMELOCK, LIQUIDATION_ADAPTER, funcSig);
-          expect(allowed).to.be.true;
-        });
-      }
-    });
-
-    describe("LiquidationAdapter — GUARDIAN permissions", () => {
-      for (const funcSig of ADAPTER_GUARDIAN_FUNCTIONS) {
-        it(`GUARDIAN should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(GUARDIAN, LIQUIDATION_ADAPTER, funcSig);
-          expect(allowed).to.be.true;
-        });
-      }
-    });
-
-    describe("Ownership acceptance", () => {
-      it("controller owner should be NORMAL_TIMELOCK", async () => {
-        const owner = await controller.owner();
-        expect(owner).to.equal(NORMAL_TIMELOCK);
+  // Dedicated operator addresses whitelisted; Guardian explicitly is not.
+  describe("Post-VIP: liquidator/settler whitelists", () => {
+    for (const account of LIQUIDATOR_WHITELIST) {
+      it(`${account} should be a whitelisted liquidator`, async () => {
+        expect(await liquidationAdapter.liquidatorWhitelist(account)).to.be.true;
       });
-
-      it("liquidationAdapter owner should be NORMAL_TIMELOCK", async () => {
-        const owner = await liquidationAdapter.owner();
-        expect(owner).to.equal(NORMAL_TIMELOCK);
-      });
+    }
+    it("GUARDIAN should NOT be a whitelisted liquidator", async () => {
+      expect(await liquidationAdapter.liquidatorWhitelist(GUARDIAN)).to.be.false;
     });
 
-    describe("ACM Aggregator cleanup", () => {
-      it("DEFAULT_ADMIN_ROLE should be revoked from ACM Aggregator", async () => {
-        expect(await accessControlManager.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
+    for (const account of SETTLER_WHITELIST) {
+      it(`${account} should be a whitelisted settler`, async () => {
+        expect(await liquidationAdapter.settlerWhitelist(account)).to.be.true;
       });
-    });
-
-    describe("System wiring", () => {
-      it("controller liquidationAdapter should be set to the adapter proxy", async () => {
-        const adapter = await controller.liquidationAdapter();
-        expect(adapter).to.equal(LIQUIDATION_ADAPTER);
-      });
-
-      it("InstitutionPositionToken owner should be the controller proxy (ownership accepted)", async () => {
-        const owner = await positionToken.owner();
-        expect(owner).to.equal(INSTITUTIONAL_VAULT_CONTROLLER);
-      });
-    });
-
-    describe("Liquidator whitelist", () => {
-      for (const account of LIQUIDATOR_WHITELIST) {
-        it(`${account} should be a whitelisted liquidator`, async () => {
-          expect(await liquidationAdapter.liquidatorWhitelist(account)).to.be.true;
-        });
-      }
-
-      it("GUARDIAN should NOT be a whitelisted liquidator", async () => {
-        expect(await liquidationAdapter.liquidatorWhitelist(GUARDIAN)).to.be.false;
-      });
-    });
-
-    describe("Settler whitelist", () => {
-      for (const account of SETTLER_WHITELIST) {
-        it(`${account} should be a whitelisted settler`, async () => {
-          expect(await liquidationAdapter.settlerWhitelist(account)).to.be.true;
-        });
-      }
-
-      it("GUARDIAN should NOT be a whitelisted settler", async () => {
-        expect(await liquidationAdapter.settlerWhitelist(GUARDIAN)).to.be.false;
-      });
+    }
+    it("GUARDIAN should NOT be a whitelisted settler", async () => {
+      expect(await liquidationAdapter.settlerWhitelist(GUARDIAN)).to.be.false;
     });
   });
 });
