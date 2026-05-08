@@ -195,7 +195,7 @@ export const HELPER_RETURNED_OWNERSHIPS: string[] = [...BUYBACKS, ...TIMELOCK_OW
 // ===== New RiskFundV2 implementation =====
 export const NEW_RISK_FUND_V2_IMPL = "0x01BE9c56A0844040b2c1a684B1a72cE88489486a";
 // ===== TokenBuyback migration helper =====
-export const MIGRATION_HELPER = "0x34c62aFcF8Bb18614329fC4d3266a9aFd82A8bdc";
+export const MIGRATION_HELPER = "0x352d2188A5C838854B8565dCD88cD3c9c996e83A";
 
 // ===== Cron operator =====
 export const OPERATOR = "0x88ac9ca69a371f47798df18e5c36449af44526a4";
@@ -269,9 +269,8 @@ The bulk of the migration (drain, router allowlisting, ACM grants, converter pau
 #### Proposed Changes
 
 1. **Grant \`DEFAULT_ADMIN_ROLE\`** on the AccessControlManager to the helper, so it can self-grant the transient ACM permissions it needs (\`pauseConversion\` per converter, \`addOrUpdateDistributionConfigs\`, \`removeDistributionConfig\`).
-2. **Accept ownership** of each of the 10 new buyback proxies (the deploy script already called \`transferOwnership(NormalTimelock)\`).
-3. **Transfer ownership** of each of the 10 buybacks plus the 6 timelock-owned legacy converters to the helper. The 7th legacy converter, WBNBBurnConverter, is owned by the Venus Guardian multisig and is intentionally not handed to the helper; its sub-dollar dust is drained in a follow-up multisig transaction and its PSR row is zeroed by the helper.
-4. **\`helper.execute()\`** — runs the full migration atomically in a single transaction:
+2. **Transfer ownership** of the 6 timelock-owned legacy converters to the helper. The 10 buyback proxies are deployed with \`pendingOwner = MIGRATION_HELPER\` directly, so the helper accepts them inside \`execute()\` without an intermediate NormalTimelock claim — this avoids the Timelock queue collision that would otherwise occur from a duplicate \`acceptOwnership()\` per buyback (pre- and post-helper). The 7th legacy converter, WBNBBurnConverter, is owned by the Venus Guardian multisig and is intentionally not handed to the helper; its sub-dollar dust is drained in a follow-up multisig transaction and its PSR row is zeroed by the helper.
+3. **\`helper.execute()\`** — runs the full migration atomically in a single transaction:
     - Accepts ownership of all 16 contracts.
     - Drains every non-zero ERC20 balance from the 6 timelock-owned converters into the corresponding new buyback (RiskFundConverter → \`RISK_FUND_BUYBACK\`; the four \`*PrimeConverter\` → \`U_PRIME_BUYBACK\` to consolidate Prime liquidity into U; \`XVSVaultConverter\` → \`XVS_BUYBACK\`).
     - Allowlists 9 swap routers on every buyback (PancakeSwap V2 / V3 / Smart / Universal, Uniswap V2 SwapRouter02 / V3 SwapRouter02 / V4 / Universal, 1inch v5).
@@ -280,9 +279,9 @@ The bulk of the migration (drain, router allowlisting, ACM grants, converter pau
     - Repoints ProtocolShareReserve distributions: 18 new buyback rows are added and 12 stale rows (VTreasury direct destination + every legacy converter) are zeroed in a single \`addOrUpdateDistributionConfigs\` call so the per-schema percentage invariant (1e4 or 0) holds atomically; \`removeDistributionConfig\` then deletes the zeroed array entries.
     - Transfers ownership of all 16 contracts back to NormalTimelock.
     - Renounces \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager so the helper retains no residual privilege.
-5. **Accept ownership** of the 10 buybacks + 6 converters returned by the helper.
-6. **Upgrade RiskFundV2 implementation**. The new implementation removes \`updatePoolState\`, \`sweepTokenFromPool\`, and the \`poolAssetsFunds\` mapping (storage slot preserved as \`__deprecatedSlotPoolAssetsFunds\`). \`transferReserveForAuction\` now reads raw balance. Per-pool accounting was dead weight since isolated pools are wound down and the core pool does not auction via Shortfall. The upgrade lands *after* RiskFundConverter has been drained and paused inside the helper, so no in-flight \`convertExactTokens\` callback can hit the removed \`updatePoolState\` selector.
-7. **Defensively call \`Shortfall.pauseAuctions()\`** to keep the auction surface closed post-upgrade. The shortfall auction mechanism is exclusive to isolated pools, and isolated pools are no longer operational; there are no ongoing or upcoming auctions, so the migration window cannot encounter a STARTED auction carrying a stale pre-upgrade \`seizedRiskFund\` snapshot. \`pauseAuctions()\` is included purely as defense in depth.
+4. **Accept ownership** of the 10 buybacks + 6 converters returned by the helper.
+5. **Upgrade RiskFundV2 implementation**. The new implementation removes \`updatePoolState\`, \`sweepTokenFromPool\`, and the \`poolAssetsFunds\` mapping (storage slot preserved as \`__deprecatedSlotPoolAssetsFunds\`). \`transferReserveForAuction\` now reads raw balance. Per-pool accounting was dead weight since isolated pools are wound down and the core pool does not auction via Shortfall. The upgrade lands *after* RiskFundConverter has been drained and paused inside the helper, so no in-flight \`convertExactTokens\` callback can hit the removed \`updatePoolState\` selector.
+6. **Defensively call \`Shortfall.pauseAuctions()\`** to keep the auction surface closed post-upgrade. The shortfall auction mechanism is exclusive to isolated pools, and isolated pools are no longer operational; there are no ongoing or upcoming auctions, so the migration window cannot encounter a STARTED auction carrying a stale pre-upgrade \`seizedRiskFund\` snapshot. \`pauseAuctions()\` is included purely as defense in depth.
 
 #### May 2026 Prime Rewards Allocation (USDC + U)
 
@@ -290,13 +289,13 @@ This VIP also allocates **$24.5K in Prime Rewards** for May 2026, split **50/50 
 
 USDC for the U side is sourced by sweeping from PrimeLiquidityProvider and swapping on PancakeSwap V3 directly — by the time these steps run, the legacy \`*PrimeConverter\` contracts have already been drained and paused by the helper above.
 
-8. **Add vU as a Prime market** (\`Prime.addMarket\`) with supplyMultiplier = 2e18, borrowMultiplier = 0 — same supply-only shape as the existing USDT and USDC entries.
-9. **Initialize U in PrimeLiquidityProvider** (\`initializeTokens([U])\`) so distribution accounting is tracked against U.
-10. **Sweep 12,250 USDC** out of PrimeLiquidityProvider to NormalTimelock for swapping.
-11. **Approve PancakeSwap V3 router** for the swap amount.
-12. **Swap 12,250 USDC → U directly into PrimeLiquidityProvider** on PancakeSwap V3 (\`exactInputSingle\`, fee tier 1 bp, recipient = PLP, ≥ 12,127.5 U min output, 14-day deadline). The router pulls USDC from NormalTimelock and delivers U straight to PLP, capturing the full output.
-13. **Revoke leftover USDC approval** to the router as defense in depth.
-14. **Set Prime distribution speeds** for USDC and U via \`setTokensDistributionSpeed\` (~0.002126736 tokens/block each, equivalent to ~$12.25K/month per market at $1 peg). Existing USDT speed is left unchanged.
+7. **Add vU as a Prime market** (\`Prime.addMarket\`) with supplyMultiplier = 2e18, borrowMultiplier = 0 — same supply-only shape as the existing USDT and USDC entries.
+8. **Initialize U in PrimeLiquidityProvider** (\`initializeTokens([U])\`) so distribution accounting is tracked against U.
+9. **Sweep the full USDC balance** out of PrimeLiquidityProvider to NormalTimelock for swapping.
+10. **Approve PancakeSwap V3 router** for the swap amount.
+11. **Batch swap on PancakeSwap V3** via \`multicall\`: half USDC -> USDT and half USDC -> U, both with recipient = PLP and a 1% slippage floor.
+12. **Revoke leftover USDC approval** to the router as defense in depth.
+13. **Set Prime distribution speeds** for USDT and U via \`setTokensDistributionSpeed\`. Speeds match the per-leg PLP funding so reward accrual is fully covered for the month.
 
 ##### Allocation Strategy
 
@@ -328,40 +327,34 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         params: [DEFAULT_ADMIN_ROLE, MIGRATION_HELPER],
       },
 
-      // 2. Accept ownership of the 10 buyback proxies (deploy set pendingOwner = NormalTimelock).
-      ...BUYBACKS.map(b => ({
-        target: b,
-        signature: "acceptOwnership()",
-        params: [],
-      })),
-
-      // 3. Transfer ownership of buybacks + timelock-owned converters to the helper.
-      ...BUYBACKS.map(b => ({
-        target: b,
-        signature: "transferOwnership(address)",
-        params: [MIGRATION_HELPER],
-      })),
+      // 2. Transfer ownership of the 6 timelock-owned legacy converters to the helper.
+      //    The 10 buyback proxies are deployed with `pendingOwner = MIGRATION_HELPER`
+      //    directly (deploy script change), so the helper accepts them inside
+      //    `execute()` without an intermediate NormalTimelock claim. This avoids the
+      //    Timelock queue collision that would otherwise occur because the post-helper
+      //    `acceptOwnership()` in step 4 would have an identical
+      //    (target, value, sig, calldata, eta) tuple to a pre-helper accept.
       ...TIMELOCK_OWNED_CONVERTERS.map(c => ({
         target: c,
         signature: "transferOwnership(address)",
         params: [MIGRATION_HELPER],
       })),
 
-      // 4. helper.execute() — atomic migration.
+      // 3. helper.execute() — atomic migration.
       {
         target: MIGRATION_HELPER,
         signature: HELPER_EXECUTE_SIG,
         params: [],
       },
 
-      // 5. Accept ownership of the 16 contracts handed back by the helper.
+      // 4. Accept ownership of the 16 contracts handed back by the helper.
       ...HELPER_RETURNED_OWNERSHIPS.map(a => ({
         target: a,
         signature: "acceptOwnership()",
         params: [],
       })),
 
-      // 6. Upgrade RiskFundV2 implementation. RiskFundConverter (the upstream feeder
+      // 5. Upgrade RiskFundV2 implementation. RiskFundConverter (the upstream feeder
       //    that called `updatePoolState` on RiskFundV2) was drained and paused inside
       //    helper.execute() above, so no in-flight `convertExactTokens` callback can
       //    hit the removed selector after the upgrade lands.
@@ -371,7 +364,7 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         params: [RISK_FUND_V2, NEW_RISK_FUND_V2_IMPL],
       },
 
-      // 7. Defensively pause Shortfall auctions. NormalTimelock holds the
+      // 6. Defensively pause Shortfall auctions. NormalTimelock holds the
       //    `pauseAuctions()` ACM permission (granted in VIP-170).
       {
         target: SHORTFALL,
@@ -379,35 +372,35 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         params: [],
       },
 
-      // 8. Add vU as a Prime market (supply-only, matching USDT/USDC).
+      // 7. Add vU as a Prime market (supply-only, matching USDT/USDC).
       {
         target: PRIME,
         signature: "addMarket(address,address,uint256,uint256)",
         params: [CORE_COMPTROLLER, VU, SUPPLY_MULTIPLIER, BORROW_MULTIPLIER],
       },
 
-      // 9. Initialize U in PrimeLiquidityProvider so it can be assigned a distribution speed.
+      // 8. Initialize U in PrimeLiquidityProvider so it can be assigned a distribution speed.
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "initializeTokens(address[])",
         params: [[U]],
       },
 
-      // 10. Sweep the full USDC balance from PLP to NormalTimelock for swapping.
+      // 9. Sweep the full USDC balance from PLP to NormalTimelock for swapping.
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "sweepToken(address,address,uint256)",
         params: [USDC, bscmainnet.NORMAL_TIMELOCK, USDC_TO_SWEEP],
       },
 
-      // 11. Approve PancakeSwap V3 router for the full sweep amount (covers both legs).
+      // 10. Approve PancakeSwap V3 router for the full sweep amount (covers both legs).
       {
         target: USDC,
         signature: "approve(address,uint256)",
         params: [PANCAKE_V3_ROUTER, USDC_TO_SWEEP],
       },
 
-      // 12. Both swap legs (USDC -> USDT, USDC -> U) batched in one router multicall.
+      // 11. Both swap legs (USDC -> USDT, USDC -> U) batched in one router multicall.
       //     Recipient on each leg = PLP, so output lands in PLP without an extra transfer.
       {
         target: PANCAKE_V3_ROUTER,
@@ -420,14 +413,14 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         ],
       },
 
-      // 13. Revoke residual USDC approval as defense in depth.
+      // 12. Revoke residual USDC approval as defense in depth.
       {
         target: USDC,
         signature: "approve(address,uint256)",
         params: [PANCAKE_V3_ROUTER, 0],
       },
 
-      // 14. Set Prime distribution speeds for USDT and U at the original $12,250/month
+      // 13. Set Prime distribution speeds for USDT and U at the original $12,250/month
       //     per-market target. Any PLP shortfall vs accrual is topped up later via the
       //     buyback flow.
       {
