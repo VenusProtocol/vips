@@ -1,6 +1,5 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
 import { JsonRpcProvider, TransactionResponse } from "@ethersproject/providers";
-import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
@@ -392,83 +391,104 @@ export const getForkedNetworkAddress = (contractName: string) => {
   throw new Error(`${contractName} address not found on forked ${FORKED_NETWORK}`);
 };
 
+const NORMAL_TIMELOCK_NETWORKS = [
+  "bscmainnet",
+  "bsctestnet",
+  "arbitrumone",
+  "arbitrumsepolia",
+  "ethereum",
+  "sepolia",
+  "opbnbmainnet",
+  "opbnbtestnet",
+  "opmainnet",
+  "opsepolia",
+  "zksyncmainnet",
+  "zksyncsepolia",
+  "basemainnet",
+  "basesepolia",
+];
+
+const tryGetForkedNetworkAddress = (name: string): string => {
+  try {
+    return getForkedNetworkAddress(name);
+  } catch {
+    return ethers.constants.AddressZero;
+  }
+};
+
 export const setMaxStalePeriod = async (
   resilientOracle: Contract,
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  let binanceOracle: string = ethers.constants.AddressZero;
-  let chainlinkOracle: string = ethers.constants.AddressZero;
-  let redstoneOracle: string = ethers.constants.AddressZero;
+  const knownOracles = {
+    binance: tryGetForkedNetworkAddress("BINANCE_ORACLE"),
+    chainlink: tryGetForkedNetworkAddress("CHAINLINK_ORACLE"),
+    redstone: tryGetForkedNetworkAddress("REDSTONE_ORACLE"),
+  };
 
-  try {
-    binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
-  } catch {
-    console.log(`Binance Oracle is not available on ${FORKED_NETWORK}`);
-  }
+  const adminKey = NORMAL_TIMELOCK_NETWORKS.includes(FORKED_NETWORK ?? "") ? "NORMAL_TIMELOCK" : "GUARDIAN";
+  const admin = getForkedNetworkAddress(adminKey);
 
-  try {
-    chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
-  } catch {
-    console.log(`Chainlink Oracle is not available on ${FORKED_NETWORK}`);
-  }
-
-  try {
-    redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
-  } catch {
-    console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
-  }
-
-  const normalTimelock =
-    FORKED_NETWORK == "bscmainnet" ||
-    FORKED_NETWORK == "bsctestnet" ||
-    FORKED_NETWORK == "arbitrumone" ||
-    FORKED_NETWORK == "arbitrumsepolia" ||
-    FORKED_NETWORK == "ethereum" ||
-    FORKED_NETWORK == "sepolia" ||
-    FORKED_NETWORK == "opbnbmainnet" ||
-    FORKED_NETWORK == "opbnbtestnet" ||
-    FORKED_NETWORK == "opmainnet" ||
-    FORKED_NETWORK == "opsepolia" ||
-    FORKED_NETWORK == "zksyncmainnet" ||
-    FORKED_NETWORK == "zksyncsepolia" ||
-    FORKED_NETWORK == "basemainnet" ||
-    FORKED_NETWORK == "basesepolia"
-      ? getForkedNetworkAddress("NORMAL_TIMELOCK")
-      : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
-  if (tokenConfig.asset !== ethers.constants.AddressZero) {
-    const mainOracle = tokenConfig.oracles[0];
-    if (mainOracle === binanceOracle) {
-      const symbol = await underlyingAsset.symbol();
-      await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
-    } else if (mainOracle === chainlinkOracle || mainOracle === redstoneOracle) {
+  if (tokenConfig.asset === ethers.constants.AddressZero) return;
+
+  for (let i = 0; i < tokenConfig.oracles.length; i++) {
+    const oracle = tokenConfig.oracles[i];
+    const enabled = tokenConfig.enableFlagsForOracles[i];
+    if (!enabled || oracle === ethers.constants.AddressZero) continue;
+
+    if (oracle === knownOracles.binance) {
+      const symbol =
+        underlyingAsset.address.toLowerCase() === ORACLE_BNB.toLowerCase() ? "BNB" : await underlyingAsset.symbol();
+      await setMaxStalePeriodInBinanceOracle(oracle, symbol, maxStalePeriodInSeconds);
+    } else if (oracle === knownOracles.chainlink || oracle === knownOracles.redstone) {
       await setMaxStalePeriodInChainlinkOracle(
-        mainOracle,
+        oracle,
         underlyingAsset.address,
         ethers.constants.AddressZero,
-        normalTimelock,
+        admin,
         maxStalePeriodInSeconds,
       );
-
-      if (underlyingAsset.address === ORACLE_BNB) {
-        await setMaxStalePeriodInChainlinkOracle(
-          tokenConfig.oracles[1],
-          underlyingAsset.address,
-          ethers.constants.AddressZero,
-          normalTimelock,
-          maxStalePeriodInSeconds,
-        );
-      }
     }
   }
-  await mine(100);
 };
 
 export const setMaxStalePeriodForAllAssets = async (resilientOracle: Contract, assets: Contract[]): Promise<void> => {
   for (const asset of assets) {
     await setMaxStalePeriod(resilientOracle, asset);
   }
+};
+
+// Fork-only escape hatch: destructively rewrites the asset's token config and pins the price via Redstone — use only when setMaxStalePeriod is insufficient (e.g. main feed broken or unrecognizable oracle type).
+export const pinResilientOraclePriceViaRedstone = async (resilientOracle: Contract, asset: string): Promise<void> => {
+  const currentPrice: BigNumber = await resilientOracle.getPrice(asset);
+
+  const redstoneOracleAddr = getForkedNetworkAddress("REDSTONE_ORACLE");
+  const adminKey = NORMAL_TIMELOCK_NETWORKS.includes(FORKED_NETWORK ?? "") ? "NORMAL_TIMELOCK" : "GUARDIAN";
+  const admin = await initMainnetUser(getForkedNetworkAddress(adminKey), ethers.utils.parseEther("1"));
+
+  const tokenConfig: Record<string, unknown> = {
+    asset,
+    oracles: [redstoneOracleAddr, ethers.constants.AddressZero, ethers.constants.AddressZero],
+    enableFlagsForOracles: [true, false, false],
+  };
+  // Newer ResilientOracle adds a cachingEnabled flag — include it only when the ABI declares it.
+  const setTokenConfigInput = resilientOracle.interface.getFunction("setTokenConfig").inputs[0];
+  if (setTokenConfigInput.components?.some(c => c.name === "cachingEnabled")) {
+    tokenConfig.cachingEnabled = false;
+  }
+  await resilientOracle.connect(admin).setTokenConfig(tokenConfig);
+
+  const tokenDecimals: number =
+    asset.toLowerCase() === ORACLE_BNB.toLowerCase()
+      ? 18
+      : await new ethers.Contract(asset, ["function decimals() view returns (uint8)"], ethers.provider).decimals();
+  const decimalDelta = 18 - tokenDecimals;
+  const storedPrice = decimalDelta > 0 ? currentPrice.div(parseUnits("1", decimalDelta)) : currentPrice;
+
+  const redstoneOracle = new ethers.Contract(redstoneOracleAddr, CHAINLINK_ORACLE_ABI, ethers.provider);
+  await redstoneOracle.connect(admin).setDirectPrice(asset, storedPrice);
 };
 
 export const expectEvents = async (
