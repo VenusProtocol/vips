@@ -263,54 +263,57 @@ const encodeExactInputSingle = (
     [tokenIn, tokenOut, PANCAKE_V3_FEE_TIER, PRIME_LIQUIDITY_PROVIDER, SWAP_DEADLINE, amountIn, amountOutMinimum, 0n],
   ]);
 
-export const vip800 = () => {
+export const vip618 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 TokenBuyback migration",
+    title: "VIP-618 [BNB Chain] TokenBuyback Migration & May Prime Allocation",
     description: `#### Summary
 
 If passed, this VIP replaces the community-driven Token Converter system (RiskFundConverter + 4 *PrimeConverter + XVSVaultConverter + WBNBBurnConverter + ConverterNetwork) with **10 ACM-authorized TokenBuyback proxies** driven by a finance-team cron. BSC-only; this VIP targets **BNB Chain**.
 
-The bulk of the migration (drain, router allowlisting, ACM grants, converter pause, ProtocolShareReserve rewiring, ownership normalization) is performed atomically by a single one-shot helper contract, **TokenBuybackMigrationHelper**. The helper is gated by NormalTimelock, runs in a single \`execute()\` call, hands all ownership back, and renounces its ACM admin role before returning. After this VIP executes, the helper holds no privileges and no balances.
+The bulk of the migration (drain, router allowlisting, ACM grants, converter pause, ProtocolShareReserve rewiring, ownership normalization) is performed atomically by a single one-shot helper contract, **TokenBuybackMigrationHelper**. The helper is gated by NormalTimelock, runs in a single execute() call, hands all ownership back, and renounces its ACM admin role before returning. After this VIP executes, the helper holds no privileges and no balances.
 
 #### Proposed Changes
 
-1. **Grant \`DEFAULT_ADMIN_ROLE\`** on the AccessControlManager to the helper, so it can self-grant the transient ACM permissions it needs (\`pauseConversion\` per converter, \`addOrUpdateDistributionConfigs\`, \`removeDistributionConfig\`).
-2. **Transfer ownership** of the 6 timelock-owned legacy converters to the helper. The 10 buyback proxies are deployed with \`pendingOwner = MIGRATION_HELPER\` directly, so the helper accepts them inside \`execute()\` without an intermediate NormalTimelock claim — this avoids the Timelock queue collision that would otherwise occur from a duplicate \`acceptOwnership()\` per buyback (pre- and post-helper). The 7th legacy converter, WBNBBurnConverter, is owned by the Venus Guardian multisig and is intentionally not handed to the helper; its sub-dollar dust is drained in a follow-up multisig transaction and its PSR row is zeroed by the helper.
-3. **\`helper.execute()\`** — runs the full migration atomically in a single transaction:
+1. **Grant DEFAULT_ADMIN_ROLE** on the AccessControlManager to the helper, so it can self-grant the transient ACM permissions it needs (pauseConversion per converter, addOrUpdateDistributionConfigs, removeDistributionConfig).
+2. **Transfer ownership** of the 6 timelock-owned legacy converters to the helper. The 10 buyback proxies are deployed with pendingOwner = MIGRATION_HELPER directly, so the helper accepts them inside execute() without an intermediate NormalTimelock claim — this avoids the Timelock queue collision that would otherwise occur from a duplicate acceptOwnership() per buyback (pre- and post-helper). The 7th legacy converter, WBNBBurnConverter, is owned by the Venus Guardian multisig and is intentionally not handed to the helper; its sub-dollar dust is drained in a follow-up multisig transaction and its PSR row is zeroed by the helper.
+3. **helper.execute()** — runs the full migration atomically in a single transaction:
     - Accepts ownership of all 16 contracts.
-    - Drains every non-zero ERC20 balance from the 6 timelock-owned converters into the corresponding new buyback (RiskFundConverter → \`RISK_FUND_BUYBACK\`; the four \`*PrimeConverter\` → \`U_PRIME_BUYBACK\` to consolidate Prime liquidity into U; \`XVSVaultConverter\` → \`XVS_BUYBACK\`).
+    - Drains every non-zero ERC20 balance from the 6 timelock-owned converters into the corresponding new buyback (RiskFundConverter → RISK_FUND_BUYBACK; the four *PrimeConverter → U_PRIME_BUYBACK to consolidate Prime liquidity into U; XVSVaultConverter → XVS_BUYBACK).
     - Allowlists 9 swap routers on every buyback (PancakeSwap V2 / V3 / Smart / Universal, Uniswap V2 SwapRouter02 / V3 SwapRouter02 / V4 / Universal, 1inch v5).
-    - Grants \`executeBuyback\` and \`forwardBaseAsset\` ACM permissions to the cron operator on every buyback.
-    - Calls \`pauseConversion()\` on every timelock-owned converter, closing the only sensitive surface (token conversion); other ACM grants on these converters are limited to internal configuration and become inert once the converter is no longer routed to.
-    - Repoints ProtocolShareReserve distributions: 18 new buyback rows are added and 12 stale rows (VTreasury direct destination + every legacy converter) are zeroed in a single \`addOrUpdateDistributionConfigs\` call so the per-schema percentage invariant (1e4 or 0) holds atomically; \`removeDistributionConfig\` then deletes the zeroed array entries.
+    - Grants executeBuyback and forwardBaseAsset ACM permissions to the cron operator on every buyback.
+    - Calls pauseConversion() on every timelock-owned converter, closing the only sensitive surface (token conversion); other ACM grants on these converters are limited to internal configuration and become inert once the converter is no longer routed to.
+    - Repoints ProtocolShareReserve distributions: 18 new buyback rows are added and 12 stale rows (VTreasury direct destination + every legacy converter) are zeroed in a single addOrUpdateDistributionConfigs call so the per-schema percentage invariant (1e4 or 0) holds atomically; removeDistributionConfig then deletes the zeroed array entries.
     - Transfers ownership of all 16 contracts back to NormalTimelock.
-    - Renounces \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager so the helper retains no residual privilege.
+    - Renounces DEFAULT_ADMIN_ROLE on the AccessControlManager so the helper retains no residual privilege.
 4. **Accept ownership** of the 10 buybacks + 6 converters returned by the helper.
-5. **Upgrade RiskFundV2 implementation**. The new implementation removes \`updatePoolState\`, \`sweepTokenFromPool\`, and the \`poolAssetsFunds\` mapping (storage slot preserved as \`__deprecatedSlotPoolAssetsFunds\`). \`transferReserveForAuction\` now reads raw balance. Per-pool accounting was dead weight since isolated pools are wound down and the core pool does not auction via Shortfall. The upgrade lands *after* RiskFundConverter has been drained and paused inside the helper, so no in-flight \`convertExactTokens\` callback can hit the removed \`updatePoolState\` selector.
-6. **Defensively call \`Shortfall.pauseAuctions()\`** to keep the auction surface closed post-upgrade. The shortfall auction mechanism is exclusive to isolated pools, and isolated pools are no longer operational; there are no ongoing or upcoming auctions, so the migration window cannot encounter a STARTED auction carrying a stale pre-upgrade \`seizedRiskFund\` snapshot. \`pauseAuctions()\` is included purely as defense in depth.
+5. **Upgrade RiskFundV2 implementation**. The new implementation removes updatePoolState, sweepTokenFromPool, and the poolAssetsFunds mapping (storage slot preserved as __deprecatedSlotPoolAssetsFunds). transferReserveForAuction now reads raw balance. Per-pool accounting was dead weight since isolated pools are wound down and the core pool does not auction via Shortfall. The upgrade lands *after* RiskFundConverter has been drained and paused inside the helper, so no in-flight convertExactTokens callback can hit the removed updatePoolState selector.
+6. **Defensively call Shortfall.pauseAuctions()** to keep the auction surface closed post-upgrade. The shortfall auction mechanism is exclusive to isolated pools, and isolated pools are no longer operational; there are no ongoing or upcoming auctions, so the migration window cannot encounter a STARTED auction carrying a stale pre-upgrade seizedRiskFund snapshot. pauseAuctions() is included purely as defense in depth.
 
-#### May 2026 Prime Rewards Allocation (USDC + U)
+#### May 2026 Prime Rewards Allocation (USDT + U)
 
-This VIP also allocates **$24.5K in Prime Rewards** for May 2026, split **50/50 between the USDC and U stablecoin supply markets** (~$12.25K each). This is the first month **U is introduced as a Prime reward market** alongside USDC, per the [community post](https://community.venus.io/). The allocation is retroactive, redistributing 20% of the [$136K](https://dune.com/xvslove_team/venus-prime) in BNB Chain reserves revenue generated during April 2026, while maintaining a 10% buffer for market price fluctuations.
+This VIP also allocates **$24.5K in Prime Rewards** for May 2026, split **50/50 between the USDT and U stablecoin supply markets** (~$12.25K each). This is the **first month U is introduced as a Prime reward market** alongside USDT, per the plan outlined in April.
 
-USDC for the U side is sourced by sweeping from PrimeLiquidityProvider and swapping on PancakeSwap V3 directly — by the time these steps run, the legacy \`*PrimeConverter\` contracts have already been drained and paused by the helper above.
+The allocation is retroactive: in April 2026, Venus generated **$136K** in BNB Chain reserves revenue, of which **$27.2K (20%)** is allocated to Prime. Of that, **$24.5K** is distributed as rewards in May 2026 while maintaining a **10% buffer** to absorb price fluctuations between revenue collection and reward conversion. The current Prime budget stands at **$43.72K**.
 
-7. **Add vU as a Prime market** (\`Prime.addMarket\`) with supplyMultiplier = 2e18, borrowMultiplier = 0 — same supply-only shape as the existing USDT and USDC entries.
-8. **Initialize U in PrimeLiquidityProvider** (\`initializeTokens([U])\`) so distribution accounting is tracked against U.
+USDC for the swap source is held by PrimeLiquidityProvider and swept to NormalTimelock for the swap — by the time these steps run, the legacy *PrimeConverter contracts have already been drained and paused by the helper above.
+
+7. **Add vU as a Prime market** (Prime.addMarket) with supplyMultiplier = 2e18, borrowMultiplier = 0 — same supply-only shape as the existing USDT and USDC entries.
+8. **Initialize U in PrimeLiquidityProvider** (initializeTokens([U])) so distribution accounting is tracked against U.
 9. **Sweep the full USDC balance** out of PrimeLiquidityProvider to NormalTimelock for swapping.
 10. **Approve PancakeSwap V3 router** for the swap amount.
-11. **Batch swap on PancakeSwap V3** via \`multicall\`: half USDC -> USDT and half USDC -> U, both with recipient = PLP and a 1% slippage floor.
+11. **Batch swap on PancakeSwap V3** via multicall: half USDC -> USDT and half USDC -> U, both with recipient = PLP and a 1% slippage floor.
 12. **Revoke leftover USDC approval** to the router as defense in depth.
-13. **Set Prime distribution speeds** for USDT and U via \`setTokensDistributionSpeed\`. Speeds match the per-leg PLP funding so reward accrual is fully covered for the month.
+13. **Set Prime distribution speeds** for USDT and U via setTokensDistributionSpeed. Speeds match the per-leg PLP funding so reward accrual is fully covered for the month.
 
 ##### Allocation Strategy
 
-- Focusing rewards on the **supply side** strengthens liquidity and creates conditions for lower borrow rates. Rewarding both sides creates arbitrage opportunities that artificially inflate activity and drive borrow rates up for other users.
-- The 50/50 USDC/U split is provisional for the first month of U as a Prime reward market. The split will be reviewed in coming months based on U market performance and reserve contribution.
-- Speeds are estimated at $1 = 1 USDC/U; actual realized USD value may vary with token prices between collection and conversion.
+- **Supply-side focus**: Rewards target the supply side to strengthen liquidity and create conditions for lower borrow rates. Rewarding both sides creates arbitrage opportunities that artificially inflate activity and drive borrow rates up for other users.
+- **50/50 USDT/U split**: Provisional for the first month of U as a Prime reward market. The split will be reviewed in coming months based on U market performance and reserve contribution.
+- **USDT market context** (April 2026 → May 2026): Overall USDT supply declined from **$232.5M to $221.8M (-4.6%)** while borrowing held roughly flat at **$124.1M → $123.8M (-0.2%)**. Prime user supply held steady at **$56.5M → $56.8M (+0.5%)**, continuing to outperform the overall market and demonstrating Prime's ability to retain sticky USDT supply. USDT reserve revenue was essentially flat at **$38.0K → $37.9K (-0.3%)** — the market remains the dominant revenue contributor and continues to justify the majority of Prime rewards.
+- Speeds are estimated at $1 = 1 USDT/U; actual realized USD value may vary with token prices between collection and conversion.
 
-Helper source: \`draft/contracts/helpers/TokenBuybackMigrationHelper.sol\` in this repository, intended to be moved to and deployed from venus-periphery. Implementation of the new RiskFundV2: [VenusProtocol/protocol-reserve PR #158](https://github.com/VenusProtocol/protocol-reserve/pull/158). Testnet sign-off gate: 24–48h of green cron operation covering at least one \`executeBuyback\` per instance and one \`forwardBaseAsset\` per destination.
+Helper source: draft/contracts/helpers/TokenBuybackMigrationHelper.sol in this repository, intended to be moved to and deployed from venus-periphery. Implementation of the new RiskFundV2: [VenusProtocol/protocol-reserve PR #158](https://github.com/VenusProtocol/protocol-reserve/pull/158). Testnet sign-off gate: 24–48h of green cron operation covering at least one executeBuyback per instance and one forwardBaseAsset per destination.
 
 #### Retired contracts
 
@@ -456,4 +459,4 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
   );
 };
 
-export default vip800;
+export default vip618;

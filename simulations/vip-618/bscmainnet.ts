@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip800, {
+import vip618, {
   ALLOWED_ROUTERS,
   BORROW_MULTIPLIER,
   BTCB_PRIME_CONVERTER,
@@ -43,7 +43,7 @@ import vip800, {
   WBNB_BURN_CONVERTER,
   XVS_BUYBACK,
   XVS_VAULT_CONVERTER,
-} from "../../vips/vip-800/bscmainnet";
+} from "../../vips/vip-618/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -215,7 +215,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-800 TokenBuyback migration", await vip800());
+  testVip("VIP-618 TokenBuyback migration & May Prime Allocation", await vip618());
 
   describe("Post-VIP state", () => {
     it("helper.executed flag is true and a second execute() would revert", async () => {
