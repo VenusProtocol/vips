@@ -226,6 +226,13 @@ export const U_MIN_OUT = parseUnits("7418", 18);
 export const SUPPLY_MULTIPLIER = parseUnits("2", 18);
 export const BORROW_MULTIPLIER = 0;
 
+// Match the convention used by every existing Prime token on BSC and Ethereum
+// (USDT/USDC/BTCB/ETH on BSC; WBTC/WETH/USDC/USDT on Ethereum — all 1e18).
+// This equals DEFAULT_MAX_DISTRIBUTION_SPEED in PrimeLiquidityProvider.sol and
+// matches what _setTokenDistributionSpeed would auto-fallback to; setting it
+// explicitly makes the bound governable and audit-visible.
+export const U_MAX_DISTRIBUTION_SPEED = parseUnits("1", 18);
+
 // Distribution speeds (PLP is block-based on BSC).
 // BSC ≈ 0.45 s/block (empirical, sampled 100k blocks) → 192,000 blocks/day → 5,760,000 / month.
 export const REWARD_PER_MARKET_PER_MONTH = parseUnits("12250", 18);
@@ -384,6 +391,18 @@ Replaces a complex multi-contract converter system with 10 single-purpose buybac
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "initializeTokens(address[])",
         params: [[U]],
+      },
+
+      // 8b. Set U's max distribution speed to 1e18, matching every other Prime
+      //     token across BSC and Ethereum. Without this, _setTokenDistributionSpeed
+      //     would auto-default to the same value when step 13 runs, but setting
+      //     it explicitly here makes the bound governable and audit-visible and
+      //     mirrors the canonical initialize -> setMax -> setSpeed order used in
+      //     PrimeLiquidityProvider.initialize().
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "setMaxTokensDistributionSpeed(address[],uint256[])",
+        params: [[U], [U_MAX_DISTRIBUTION_SPEED]],
       },
 
       // 9. Sweep the full USDC balance from PLP to NormalTimelock for swapping.

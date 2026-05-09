@@ -35,6 +35,7 @@ import vip800, {
   USDT,
   USDT_MIN_OUT,
   USDT_PRIME_CONVERTER,
+  U_MAX_DISTRIBUTION_SPEED,
   U_MIN_OUT,
   U_PRIME_BUYBACK,
   VTREASURY,
@@ -61,6 +62,7 @@ const PRIME_MIN_ABI = [
 ];
 const PLP_MIN_ABI = [
   "function tokenDistributionSpeeds(address) view returns (uint256)",
+  "function maxTokenDistributionSpeeds(address) view returns (uint256)",
   "function lastAccruedBlockOrSecond(address) view returns (uint256)",
 ];
 const ERC20_ALLOWANCE_ABI = ["function allowance(address,address) view returns (uint256)"];
@@ -383,6 +385,10 @@ forking(FORK_BLOCK, async () => {
 
     it("Prime distribution speed for U matches NEW_PRIME_SPEED_FOR_U", async () => {
       expect(await plp.tokenDistributionSpeeds(U)).to.equal(NEW_PRIME_SPEED_FOR_U);
+    });
+
+    it("Prime max distribution speed for U is set to U_MAX_DISTRIBUTION_SPEED (1e18)", async () => {
+      expect(await plp.maxTokenDistributionSpeeds(U)).to.equal(U_MAX_DISTRIBUTION_SPEED);
     });
   });
 
