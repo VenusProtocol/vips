@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip800, {
+import vip618, {
   BUYBACKS,
   DEFAULT_PROXY_ADMIN,
   NEW_RISK_FUND_V2_IMPL,
@@ -14,7 +14,7 @@ import vip800, {
   RISK_FUND_V2,
   SHORTFALL,
   USDT,
-} from "../../vips/vip-800/bsctestnet";
+} from "../../vips/vip-618/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -78,7 +78,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-800 [BNB Chain Testnet] TokenBuyback migration", await vip800());
+  testVip("VIP-618 [BNB Chain Testnet] TokenBuyback Migration & May Prime Allocation", await vip618());
 
   describe("Post-VIP state", () => {
     it("NormalTimelock owns each buyback proxy", async () => {

@@ -63,10 +63,10 @@ export const OPERATOR = ethers.constants.AddressZero; // TODO: finance-team cron
 const EXECUTE_BUYBACK_SIG = "executeBuyback(address,uint256,uint256,uint256,address,bytes,address)";
 const FORWARD_BASE_ASSET_SIG = "forwardBaseAsset(address,uint256)";
 
-export const vip800 = () => {
+export const vip618 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 [BNB Chain Testnet] TokenBuyback migration",
+    title: "VIP-618 [BNB Chain Testnet] TokenBuyback Migration & May Prime Allocation",
     description: `#### Summary
 
 If passed, this VIP replaces the community-driven Token Converter system (RiskFundConverter + 4 *PrimeConverter + XVSVaultConverter + WBNBBurnConverter + ConverterNetwork) with **10 ACM-authorized TokenBuyback proxies** driven by a finance-team cron. BSC-only; this VIP targets **BNB Chain Testnet**.
@@ -167,4 +167,4 @@ Implementation: [VenusProtocol/protocol-reserve PR #158](https://github.com/Venu
   );
 };
 
-export default vip800;
+export default vip618;
