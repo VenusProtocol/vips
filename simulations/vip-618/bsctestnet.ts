@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
@@ -7,40 +6,31 @@ import { forking, testVip } from "src/vip-framework";
 import vip618, {
   BUYBACKS,
   DEFAULT_PROXY_ADMIN,
+  LEGACY_CONVERTERS,
   NEW_RISK_FUND_V2_IMPL,
-  OPERATOR,
-  PANCAKE_ROUTER,
-  PROTOCOL_SHARE_RESERVE,
   RISK_FUND_V2,
   SHORTFALL,
-  USDT,
 } from "../../vips/vip-618/bsctestnet";
-import ACM_ABI from "./abi/AccessControlManager.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
-import ERC20_ABI from "./abi/ERC20.json";
-import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import BUYBACK_ABI from "./abi/TokenBuyback.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-// TODO
-const FORK_BLOCK = 0;
+const FORK_BLOCK = 106811121;
 
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 
 forking(FORK_BLOCK, async () => {
-  const acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
   const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, ethers.provider);
-  const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
-  const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
   const shortfall = new ethers.Contract(SHORTFALL, SHORTFALL_MIN_ABI, ethers.provider);
 
-  let riskFundV2UsdtBalanceBefore: BigNumber;
   let shortfallAuctionsPausedBefore: boolean;
+  let riskFundV2ImplBefore: string;
 
   before(async () => {
-    riskFundV2UsdtBalanceBefore = await usdt.balanceOf(RISK_FUND_V2);
     shortfallAuctionsPausedBefore = await shortfall.auctionsPaused();
+    riskFundV2ImplBefore = await proxyAdmin.getProxyImplementation(RISK_FUND_V2);
   });
 
   describe("Pre-VIP state", () => {
@@ -51,23 +41,14 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("PancakeSwap router is not yet allowlisted on buybacks", async () => {
-      for (const b of BUYBACKS) {
-        const buyback = new ethers.Contract(b, BUYBACK_ABI, ethers.provider);
-        expect(await buyback.allowedRouters(PANCAKE_ROUTER)).to.be.false;
-      }
+    it("RiskFundV2 currently points at the old implementation", async () => {
+      expect(riskFundV2ImplBefore).to.not.equal(NEW_RISK_FUND_V2_IMPL);
     });
 
-    it("operator has no executeBuyback / forwardBaseAsset grants yet", async () => {
-      for (const b of BUYBACKS) {
-        expect(
-          await acm.isAllowedToCall(
-            OPERATOR,
-            b,
-            "executeBuyback(address,uint256,uint256,uint256,address,bytes,address)",
-          ),
-        ).to.be.false;
-        expect(await acm.isAllowedToCall(OPERATOR, b, "forwardBaseAsset(address,uint256)")).to.be.false;
+    it("legacy converters are not yet paused", async () => {
+      for (const c of LEGACY_CONVERTERS) {
+        const converter = new ethers.Contract(c, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        expect(await converter.conversionPaused()).to.be.false;
       }
     });
 
@@ -78,9 +59,13 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-618 [BNB Chain Testnet] TokenBuyback Migration & May Prime Allocation", await vip618());
+  testVip("VIP-618 [BNB Chain Testnet] TokenBuyback Migration", await vip618());
 
   describe("Post-VIP state", () => {
+    it("RiskFundV2 proxy upgraded to new implementation", async () => {
+      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_V2)).to.equal(NEW_RISK_FUND_V2_IMPL);
+    });
+
     it("NormalTimelock owns each buyback proxy", async () => {
       for (const b of BUYBACKS) {
         const buyback = new ethers.Contract(b, BUYBACK_ABI, ethers.provider);
@@ -88,53 +73,11 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("PancakeSwap V2 router allowlisted on each buyback", async () => {
-      for (const b of BUYBACKS) {
-        const buyback = new ethers.Contract(b, BUYBACK_ABI, ethers.provider);
-        expect(await buyback.allowedRouters(PANCAKE_ROUTER)).to.be.true;
+    it("each legacy converter is paused", async () => {
+      for (const c of LEGACY_CONVERTERS) {
+        const converter = new ethers.Contract(c, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        expect(await converter.conversionPaused()).to.be.true;
       }
-    });
-
-    it("operator granted executeBuyback + forwardBaseAsset on each buyback", async () => {
-      for (const b of BUYBACKS) {
-        expect(
-          await acm.isAllowedToCall(
-            OPERATOR,
-            b,
-            "executeBuyback(address,uint256,uint256,uint256,address,bytes,address)",
-          ),
-        ).to.be.true;
-        expect(await acm.isAllowedToCall(OPERATOR, b, "forwardBaseAsset(address,uint256)")).to.be.true;
-      }
-    });
-
-    it("RiskFundV2 proxy upgraded to new implementation", async () => {
-      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_V2)).to.equal(NEW_RISK_FUND_V2_IMPL);
-    });
-
-    it("RiskFundV2 USDT balance non-decreasing across upgrade", async () => {
-      // New impl keeps funds physically in the contract (no migration).
-      const after = await usdt.balanceOf(RISK_FUND_V2);
-      expect(after).to.be.gte(riskFundV2UsdtBalanceBefore);
-    });
-
-    // TODO: enumerate PSR.distributionTargets(i) and assert each of the 10 new buybacks
-    //       is a destination, no legacy converter remains, and percentages sum to 1e4
-    //       per schema. Placeholder assertion below; flesh out after PSR rows filled.
-    it("PSR distribution configs repointed", async () => {
-      // Example shape — iterate until the getter reverts to enumerate:
-      //   const rows = [];
-      //   for (let i = 0; ; i++) {
-      //     try { rows.push(await psr.distributionTargets(i)); } catch { break; }
-      //   }
-      //   expect(rows.map(r => r.destination)).to.include.members(BUYBACKS);
-      void psr;
-    });
-
-    // TODO: legacy converter residual balances == 0 for drained tokens
-    //       (skipped on testnet if amounts are below gas-worth per PRD note).
-    it("legacy converter balances drained", async () => {
-      // TODO
     });
 
     it("Shortfall auctions are paused (defense in depth)", async () => {
