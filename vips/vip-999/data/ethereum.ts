@@ -121,7 +121,7 @@ export const cfChanges: CFEntry[] = [
   },
 ];
 
-export const capChanges: CapEntry[] = [
+export const marketCapChanges: CapEntry[] = [
   {
     symbol: "USDT",
     vToken: vUSDT,

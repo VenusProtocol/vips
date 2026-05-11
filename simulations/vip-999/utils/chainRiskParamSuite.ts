@@ -22,7 +22,7 @@ export interface ChainData {
   COMPTROLLER: string;
   delistAssets?: DelistEntry[];
   cfChanges?: CFEntry[];
-  capChanges: CapEntry[];
+  marketCapChanges: CapEntry[];
   borrowPauseChanges: PauseEntry[];
 }
 
@@ -37,7 +37,7 @@ const pinOraclePrices = async (chainKey: ChainKey, data: ChainData): Promise<voi
   const vTokens = new Set<string>([
     ...(data.delistAssets ?? []).map(a => a.vToken),
     ...(data.cfChanges ?? []).map(c => c.vToken),
-    ...data.capChanges.map(c => c.vToken),
+    ...data.marketCapChanges.map(c => c.vToken),
     ...data.borrowPauseChanges.map(c => c.vToken),
   ]);
 
@@ -83,14 +83,14 @@ export const runChainRiskParamSuite = async (
     });
 
     it("matches current supply caps", async () => {
-      for (const c of data.capChanges) {
+      for (const c of data.marketCapChanges) {
         if (!c.supplyCap) continue;
         expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.old, `${c.symbol} supplyCap`);
       }
     });
 
     it("matches current borrow caps", async () => {
-      for (const c of data.capChanges) {
+      for (const c of data.marketCapChanges) {
         if (!c.borrowCap) continue;
         expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.old, `${c.symbol} borrowCap`);
       }
@@ -132,9 +132,9 @@ export const runChainRiskParamSuite = async (
         [
           (data.cfChanges ?? []).length +
             (data.delistAssets ?? []).filter(a => !BigNumber.from(a.oldCollateralFactor).eq(0)).length,
-          data.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).length +
+          data.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).length +
             (data.delistAssets ?? []).filter(a => !BigNumber.from(a.oldSupplyCap).eq(0)).length,
-          data.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length +
+          data.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length +
             (data.delistAssets ?? []).filter(a => !BigNumber.from(a.oldBorrowCap).eq(0)).length,
           data.borrowPauseChanges.length + (data.delistAssets ?? []).filter(a => !a.borrowAlreadyPaused).length,
         ],
@@ -156,13 +156,13 @@ export const runChainRiskParamSuite = async (
     });
 
     it("applies expected supply caps", async () => {
-      for (const c of data.capChanges) {
+      for (const c of data.marketCapChanges) {
         expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.new, `${c.symbol} supplyCap`);
       }
     });
 
     it("applies expected borrow caps", async () => {
-      for (const c of data.capChanges) {
+      for (const c of data.marketCapChanges) {
         expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.new, `${c.symbol} borrowCap`);
       }
     });

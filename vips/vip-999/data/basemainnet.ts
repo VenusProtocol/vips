@@ -25,7 +25,7 @@ export const delistAssets: DelistEntry[] = [
   },
 ];
 
-export const capChanges: CapEntry[] = [
+export const marketCapChanges: CapEntry[] = [
   {
     symbol: "cbBTC",
     vToken: vcbBTC,
