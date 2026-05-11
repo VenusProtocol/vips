@@ -18,8 +18,7 @@ const BORROW_ACTION = 2;
 export interface ChainData {
   COMPTROLLER: string;
   cfChanges: CFEntry[];
-  supplyCapChanges: CapEntry[];
-  borrowCapChanges: CapEntry[];
+  capChanges: CapEntry[];
   borrowPauseChanges: PauseEntry[];
 }
 
@@ -33,8 +32,7 @@ const pinOraclePrices = async (chainKey: ChainKey, data: ChainData): Promise<voi
 
   const vTokens = new Set<string>([
     ...data.cfChanges.map(c => c.vToken),
-    ...data.supplyCapChanges.map(c => c.vToken),
-    ...data.borrowCapChanges.map(c => c.vToken),
+    ...data.capChanges.map(c => c.vToken),
     ...data.borrowPauseChanges.map(c => c.vToken),
   ]);
 
@@ -71,29 +69,31 @@ export const describeChainExecution = async (
       comptroller = new ethers.Contract(data.COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
     });
 
-    it("on-chain CF & LT match recorded `before`", async () => {
+    it("matches current collateral factors and liquidation thresholds", async () => {
       for (const c of data.cfChanges) {
         const md = await comptroller.markets(c.vToken);
-        expect(md.collateralFactorMantissa.toString()).to.equal(c.before, `${c.symbol} CF`);
+        expect(md.collateralFactorMantissa.toString()).to.equal(c.old, `${c.symbol} CF`);
         expect(md.liquidationThresholdMantissa.toString()).to.equal(c.liquidationThreshold, `${c.symbol} LT`);
       }
     });
 
-    it("on-chain supplyCap matches recorded `before`", async () => {
-      for (const c of data.supplyCapChanges) {
-        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.before, `${c.symbol} supplyCap`);
+    it("matches current supply caps", async () => {
+      for (const c of data.capChanges) {
+        if (!c.supplyCap) continue;
+        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.old, `${c.symbol} supplyCap`);
       }
     });
 
-    it("on-chain borrowCap matches recorded `before`", async () => {
-      for (const c of data.borrowCapChanges) {
-        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.before, `${c.symbol} borrowCap`);
+    it("matches current borrow caps", async () => {
+      for (const c of data.capChanges) {
+        if (!c.borrowCap) continue;
+        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.old, `${c.symbol} borrowCap`);
       }
     });
 
-    it("on-chain borrow pause matches recorded `before`", async () => {
+    it("matches current borrow pause flags", async () => {
       for (const c of data.borrowPauseChanges) {
-        expect(await comptroller.actionPaused(c.vToken, BORROW_ACTION)).to.equal(c.before, `${c.symbol} pause`);
+        expect(await comptroller.actionPaused(c.vToken, BORROW_ACTION)).to.equal(c.old, `${c.symbol} pause`);
       }
     });
   });
@@ -106,8 +106,8 @@ export const describeChainExecution = async (
         ["NewCollateralFactor", "NewSupplyCap", "NewBorrowCap", "ActionPausedMarket"],
         [
           data.cfChanges.length,
-          data.supplyCapChanges.length,
-          data.borrowCapChanges.length,
+          data.capChanges.filter(c => c.supplyCap).length,
+          data.capChanges.filter(c => c.borrowCap).length,
           data.borrowPauseChanges.length,
         ],
       ),
@@ -119,29 +119,31 @@ export const describeChainExecution = async (
       comptroller = new ethers.Contract(data.COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
     });
 
-    it("CF moves to recorded `after`; LT unchanged", async () => {
+    it("applies new collateral factors (LT preserved)", async () => {
       for (const c of data.cfChanges) {
         const md = await comptroller.markets(c.vToken);
-        expect(md.collateralFactorMantissa.toString()).to.equal(c.after, `${c.symbol} CF`);
+        expect(md.collateralFactorMantissa.toString()).to.equal(c.new, `${c.symbol} CF`);
         expect(md.liquidationThresholdMantissa.toString()).to.equal(c.liquidationThreshold, `${c.symbol} LT`);
       }
     });
 
-    it("supplyCap matches recorded `after`", async () => {
-      for (const c of data.supplyCapChanges) {
-        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.after, `${c.symbol} supplyCap`);
+    it("applies new supply caps", async () => {
+      for (const c of data.capChanges) {
+        if (!c.supplyCap) continue;
+        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.new, `${c.symbol} supplyCap`);
       }
     });
 
-    it("borrowCap matches recorded `after`", async () => {
-      for (const c of data.borrowCapChanges) {
-        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.after, `${c.symbol} borrowCap`);
+    it("applies new borrow caps", async () => {
+      for (const c of data.capChanges) {
+        if (!c.borrowCap) continue;
+        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.new, `${c.symbol} borrowCap`);
       }
     });
 
-    it("borrow pause matches recorded `after`", async () => {
+    it("applies new borrow pause flags", async () => {
       for (const c of data.borrowPauseChanges) {
-        expect(await comptroller.actionPaused(c.vToken, BORROW_ACTION)).to.equal(c.after, `${c.symbol} pause`);
+        expect(await comptroller.actionPaused(c.vToken, BORROW_ACTION)).to.equal(c.new, `${c.symbol} pause`);
       }
     });
   });
@@ -154,9 +156,9 @@ export const describeChainExecution = async (
       signer = (await ethers.getSigners())[0].address;
     });
 
-    it("preBorrowHook reverts for every market freshly paused", async () => {
+    it("newly paused markets reject borrow attempts", async () => {
       for (const c of data.borrowPauseChanges) {
-        if (!c.after) continue;
+        if (!c.new) continue;
         await expect(comptroller.callStatic.preBorrowHook(c.vToken, signer, 1)).to.be.reverted;
       }
     });

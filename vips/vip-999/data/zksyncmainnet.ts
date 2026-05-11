@@ -4,7 +4,7 @@ import { CFEntry, CapEntry, PauseEntry } from "../bscmainnet";
 
 export const COMPTROLLER = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
 
-// ─── vToken addresses
+// ─── vToken addresses (zkSync Era Core)
 const vwUSDM = "0x183dE3C349fCf546aAe925E1c7F364EA6FB4033c";
 const vZK = "0x697a70779C1A03Ba2BD28b7627a902BFf831b616";
 const vWETH = "0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8";
@@ -16,86 +16,84 @@ const vwstETH = "0x03CAd66259f7F34EE075f8B62D133563D249eDa4";
 const vzkETH = "0xCEb7Da150d16aCE58F090754feF2775C23C8b631";
 
 export const cfChanges: CFEntry[] = [
-  // Full delist of ZK / wstETH. LTs preserved at current values.
+  // Full delist ZK / wstETH. wUSDM / zkETH CF already 0 — re-write is a no-op
+  // but emits the event for explicit affirmation.
   {
     symbol: "ZK",
     vToken: vZK,
-    before: parseUnits("0.4", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.45", 18).toString(),
+    old: parseUnits("0.4", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.45", 18),
   },
   {
     symbol: "wstETH",
     vToken: vwstETH,
-    before: parseUnits("0.71", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.76", 18).toString(),
+    old: parseUnits("0.71", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.76", 18),
   },
-  // wUSDM and zkETH per the fetched on-chain state: CF=0 already
-  { symbol: "wUSDM", vToken: vwUSDM, before: "0", after: "0", liquidationThreshold: parseUnits("0.78", 18).toString() },
-  { symbol: "zkETH", vToken: vzkETH, before: "0", after: "0", liquidationThreshold: parseUnits("0.75", 18).toString() },
+  { symbol: "wUSDM", vToken: vwUSDM, old: "0", new: "0", liquidationThreshold: parseUnits("0.78", 18) },
+  { symbol: "zkETH", vToken: vzkETH, old: "0", new: "0", liquidationThreshold: parseUnits("0.75", 18) },
 ];
 
-export const supplyCapChanges: CapEntry[] = [
-  { symbol: "WETH", vToken: vWETH, before: parseUnits("6000", 18).toString(), after: parseUnits("450", 18).toString() },
+export const capChanges: CapEntry[] = [
+  // zkETH borrow cap already 0 on-chain — supplyCap-only entry.
+  {
+    symbol: "wUSDM",
+    vToken: vwUSDM,
+    supplyCap: { old: parseUnits("5000000", 18), new: "0" },
+    borrowCap: { old: parseUnits("4000000", 18), new: "0" },
+  },
+  {
+    symbol: "ZK",
+    vToken: vZK,
+    supplyCap: { old: parseUnits("300000000", 18), new: "0" },
+    borrowCap: { old: parseUnits("100000000", 18), new: "0" },
+  },
+  {
+    symbol: "wstETH",
+    vToken: vwstETH,
+    supplyCap: { old: parseUnits("350", 18), new: "0" },
+    borrowCap: { old: parseUnits("35", 18), new: "0" },
+  },
+  { symbol: "zkETH", vToken: vzkETH, supplyCap: { old: parseUnits("650", 18), new: "0" } },
+  // WBTC borrow cap -> 0 (kept paused).
+  {
+    symbol: "WETH",
+    vToken: vWETH,
+    supplyCap: { old: parseUnits("6000", 18), new: parseUnits("450", 18) },
+    borrowCap: { old: parseUnits("3400", 18), new: parseUnits("225", 18) },
+  },
   {
     symbol: "USDT",
     vToken: vUSDT,
-    before: parseUnits("4000000", 6).toString(),
-    after: parseUnits("1000000", 6).toString(),
+    supplyCap: { old: parseUnits("4000000", 6), new: parseUnits("1000000", 6) },
+    borrowCap: { old: parseUnits("3300000", 6), new: parseUnits("800000", 6) },
   },
   {
     symbol: "USDC.e",
     vToken: vUSDC_e,
-    before: parseUnits("31000000", 6).toString(),
-    after: parseUnits("1000000", 6).toString(),
+    supplyCap: { old: parseUnits("31000000", 6), new: parseUnits("1000000", 6) },
+    borrowCap: { old: parseUnits("28000000", 6), new: parseUnits("800000", 6) },
   },
-  { symbol: "WBTC", vToken: vWBTC, before: parseUnits("90", 8).toString(), after: parseUnits("5", 8).toString() },
+  {
+    symbol: "WBTC",
+    vToken: vWBTC,
+    supplyCap: { old: parseUnits("90", 8), new: parseUnits("5", 8) },
+    borrowCap: { old: parseUnits("45", 8), new: "0" },
+  },
   {
     symbol: "USDC",
     vToken: vUSDC,
-    before: parseUnits("35000000", 6).toString(),
-    after: parseUnits("1000000", 6).toString(),
+    supplyCap: { old: parseUnits("35000000", 6), new: parseUnits("1000000", 6) },
+    borrowCap: { old: parseUnits("27000000", 6), new: parseUnits("800000", 6) },
   },
-  // Full delist quartet
-  { symbol: "wUSDM", vToken: vwUSDM, before: parseUnits("5000000", 18).toString(), after: "0" },
-  { symbol: "ZK", vToken: vZK, before: parseUnits("300000000", 18).toString(), after: "0" },
-  { symbol: "wstETH", vToken: vwstETH, before: parseUnits("350", 18).toString(), after: "0" },
-  { symbol: "zkETH", vToken: vzkETH, before: parseUnits("650", 18).toString(), after: "0" },
-];
-
-export const borrowCapChanges: CapEntry[] = [
-  { symbol: "WETH", vToken: vWETH, before: parseUnits("3400", 18).toString(), after: parseUnits("225", 18).toString() },
-  {
-    symbol: "USDT",
-    vToken: vUSDT,
-    before: parseUnits("3300000", 6).toString(),
-    after: parseUnits("800000", 6).toString(),
-  },
-  {
-    symbol: "USDC.e",
-    vToken: vUSDC_e,
-    before: parseUnits("28000000", 6).toString(),
-    after: parseUnits("800000", 6).toString(),
-  },
-  { symbol: "WBTC", vToken: vWBTC, before: parseUnits("45", 8).toString(), after: "0" },
-  {
-    symbol: "USDC",
-    vToken: vUSDC,
-    before: parseUnits("27000000", 6).toString(),
-    after: parseUnits("800000", 6).toString(),
-  },
-  // Full delist
-  { symbol: "wUSDM", vToken: vwUSDM, before: parseUnits("4000000", 18).toString(), after: "0" },
-  { symbol: "ZK", vToken: vZK, before: parseUnits("100000000", 18).toString(), after: "0" },
-  { symbol: "wstETH", vToken: vwstETH, before: parseUnits("35", 18).toString(), after: "0" },
-  // zkETH borrow cap already 0 on-chain (no-op).
 ];
 
 // Borrow pause changes
 export const borrowPauseChanges: PauseEntry[] = [
-  { symbol: "WETH", vToken: vWETH, before: true, after: false },
-  { symbol: "USDT", vToken: vUSDT, before: true, after: false },
-  { symbol: "USDC.e", vToken: vUSDC_e, before: true, after: false },
-  { symbol: "USDC", vToken: vUSDC, before: true, after: false },
+  { symbol: "WETH", vToken: vWETH, old: true, new: false },
+  { symbol: "USDT", vToken: vUSDT, old: true, new: false },
+  { symbol: "USDC.e", vToken: vUSDC_e, old: true, new: false },
+  { symbol: "USDC", vToken: vUSDC, old: true, new: false },
 ];

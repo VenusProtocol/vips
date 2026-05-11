@@ -12,59 +12,47 @@ const vwstETH = "0x133d3BCD77158D125B75A17Cb517fFD4B4BE64C5";
 const vwsuperOETHb = "0x75201D81B3B0b9D17b179118837Be37f64fc4930";
 
 export const cfChanges: CFEntry[] = [
-  // Full delist of wsuperOETHb. LT preserved at current 78%.
+  // wsuperOETHb full delist: CF -> 0, LT preserved at current 78%.
   {
     symbol: "wsuperOETHb",
     vToken: vwsuperOETHb,
-    before: parseUnits("0.73", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.78", 18).toString(),
+    old: parseUnits("0.73", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.78", 18),
   },
 ];
 
-export const supplyCapChanges: CapEntry[] = [
-  { symbol: "cbBTC", vToken: vcbBTC, before: parseUnits("400", 8).toString(), after: parseUnits("65", 8).toString() },
+export const capChanges: CapEntry[] = [
+  { symbol: "wsuperOETHb", vToken: vwsuperOETHb, supplyCap: { old: parseUnits("2000", 18), new: "0" } },
+  {
+    symbol: "cbBTC",
+    vToken: vcbBTC,
+    supplyCap: { old: parseUnits("400", 8), new: parseUnits("65", 8) },
+    borrowCap: { old: parseUnits("200", 8), new: parseUnits("52", 8) },
+  },
   {
     symbol: "USDC",
     vToken: vUSDC,
-    before: parseUnits("30000000", 6).toString(),
-    after: parseUnits("5000000", 6).toString(),
+    supplyCap: { old: parseUnits("30000000", 6), new: parseUnits("5000000", 6) },
+    borrowCap: { old: parseUnits("27000000", 6), new: parseUnits("4000000", 6) },
   },
   {
     symbol: "WETH",
     vToken: vWETH,
-    before: parseUnits("10000", 18).toString(),
-    after: parseUnits("2100", 18).toString(),
+    supplyCap: { old: parseUnits("10000", 18), new: parseUnits("2100", 18) },
+    borrowCap: { old: parseUnits("9000", 18), new: parseUnits("1600", 18) },
   },
   {
     symbol: "wstETH",
     vToken: vwstETH,
-    before: parseUnits("2600", 18).toString(),
-    after: parseUnits("1700", 18).toString(),
+    supplyCap: { old: parseUnits("2600", 18), new: parseUnits("1700", 18) },
+    borrowCap: { old: parseUnits("260", 18), new: "0" },
   },
-  { symbol: "wsuperOETHb", vToken: vwsuperOETHb, before: parseUnits("2000", 18).toString(), after: "0" },
-];
-
-export const borrowCapChanges: CapEntry[] = [
-  { symbol: "cbBTC", vToken: vcbBTC, before: parseUnits("200", 8).toString(), after: parseUnits("52", 8).toString() },
-  {
-    symbol: "USDC",
-    vToken: vUSDC,
-    before: parseUnits("27000000", 6).toString(),
-    after: parseUnits("4000000", 6).toString(),
-  },
-  {
-    symbol: "WETH",
-    vToken: vWETH,
-    before: parseUnits("9000", 18).toString(),
-    after: parseUnits("1600", 18).toString(),
-  },
-  { symbol: "wstETH", vToken: vwstETH, before: parseUnits("260", 18).toString(), after: "0" },
 ];
 
 // Borrow pause changes
 export const borrowPauseChanges: PauseEntry[] = [
-  { symbol: "cbBTC", vToken: vcbBTC, before: true, after: false },
-  { symbol: "USDC", vToken: vUSDC, before: true, after: false },
-  { symbol: "WETH", vToken: vWETH, before: true, after: false },
+  { symbol: "cbBTC", vToken: vcbBTC, old: true, new: false },
+  { symbol: "USDC", vToken: vUSDC, old: true, new: false },
+  { symbol: "WETH", vToken: vWETH, old: true, new: false },
 ];

@@ -1,4 +1,5 @@
-import { Command, LzChainId, ProposalType } from "src/types";
+import { BigNumberish } from "ethers";
+import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import * as arb from "./data/arbitrumone";
@@ -10,70 +11,26 @@ import * as zk from "./data/zksyncmainnet";
 export interface CFEntry {
   symbol: string;
   vToken: string;
-  before: string;
-  after: string;
-  liquidationThreshold: string;
+  old: BigNumberish;
+  new: BigNumberish;
+  liquidationThreshold: BigNumberish;
 }
 
 export interface CapEntry {
   symbol: string;
   vToken: string;
-  before: string;
-  after: string;
+  supplyCap?: { old: BigNumberish; new: BigNumberish };
+  borrowCap?: { old: BigNumberish; new: BigNumberish };
 }
 
 export interface PauseEntry {
   symbol: string;
   vToken: string;
-  before: boolean;
-  after: boolean;
+  old: boolean;
+  new: boolean;
 }
 
-const BORROW_ACTION = 2;
-
-// ─── Semantic command builders ──────────────────────────────────────────────
-
-const buildCollateralFactorCommands = (comptroller: string, changes: CFEntry[]): Command[] =>
-  changes.map(c => ({
-    target: comptroller,
-    signature: "setCollateralFactor(address,uint256,uint256)",
-    params: [c.vToken, c.after, c.liquidationThreshold],
-  }));
-
-const buildSupplyCapCommands = (comptroller: string, changes: CapEntry[]): Command[] => [
-  {
-    target: comptroller,
-    signature: "setMarketSupplyCaps(address[],uint256[])",
-    params: [changes.map(c => c.vToken), changes.map(c => c.after)],
-  },
-];
-
-const buildBorrowCapCommands = (comptroller: string, changes: CapEntry[]): Command[] => [
-  {
-    target: comptroller,
-    signature: "setMarketBorrowCaps(address[],uint256[])",
-    params: [changes.map(c => c.vToken), changes.map(c => c.after)],
-  },
-];
-
-// Pause changes are batched per target state
-const buildBorrowPauseCommands = (comptroller: string, changes: PauseEntry[]): Command[] =>
-  [true, false].flatMap(targetState => {
-    const vTokens = changes.filter(c => c.after === targetState).map(c => c.vToken);
-    if (vTokens.length === 0) return [];
-    return [
-      {
-        target: comptroller,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [vTokens, [BORROW_ACTION], targetState],
-      },
-    ];
-  });
-
-// Tag every command with dstChainId so the OmnichainProposalSender routes
-// the batch to the target chain via LayerZero.
-const withDstChain = (commands: Command[], dstChainId: LzChainId): Command[] =>
-  commands.map(c => ({ ...c, dstChainId }));
+const BORROW = 2;
 
 const meta = {
   version: "v2",
@@ -100,80 +57,211 @@ Liquidation thresholds are not touched. CF -> 0 removes new-borrow power only; e
 export const vip999 = () =>
   makeProposal(
     [
-      //
-      // BNB Chain (Diamond Comptroller, governance hub — no dstChainId)
-      //
-      ...buildCollateralFactorCommands(bsc.COMPTROLLER, bsc.cfChanges),
+      // ──────────────────────────────────────────────────────────────────────────
+      // BNB Chain Core
+      // ──────────────────────────────────────────────────────────────────────────
 
-      ...buildSupplyCapCommands(bsc.COMPTROLLER, bsc.supplyCapChanges),
+      // Step 1: set collateral factors.
+      ...bsc.cfChanges.map(c => ({
+        target: bsc.COMPTROLLER,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [c.vToken, c.new, c.liquidationThreshold],
+      })),
 
-      ...buildBorrowCapCommands(bsc.COMPTROLLER, bsc.borrowCapChanges),
-
-      ...buildBorrowPauseCommands(bsc.COMPTROLLER, bsc.borrowPauseChanges),
-
-      //
-      // Ethereum
-      //
-      ...withDstChain(
-        [
-          ...buildCollateralFactorCommands(eth.COMPTROLLER, eth.cfChanges),
-
-          ...buildSupplyCapCommands(eth.COMPTROLLER, eth.supplyCapChanges),
-
-          ...buildBorrowCapCommands(eth.COMPTROLLER, eth.borrowCapChanges),
-
-          ...buildBorrowPauseCommands(eth.COMPTROLLER, eth.borrowPauseChanges),
+      // Step 2: set supply caps.
+      {
+        target: bsc.COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [
+          bsc.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
+          bsc.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
         ],
-        LzChainId.ethereum,
-      ),
+      },
 
-      //
-      // Arbitrum
-      //
-      ...withDstChain(
-        [
-          ...buildCollateralFactorCommands(arb.COMPTROLLER, arb.cfChanges),
-
-          ...buildSupplyCapCommands(arb.COMPTROLLER, arb.supplyCapChanges),
-
-          ...buildBorrowCapCommands(arb.COMPTROLLER, arb.borrowCapChanges),
-
-          ...buildBorrowPauseCommands(arb.COMPTROLLER, arb.borrowPauseChanges),
+      // Step 3: set borrow caps.
+      {
+        target: bsc.COMPTROLLER,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [
+          bsc.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
+          bsc.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
         ],
-        LzChainId.arbitrumone,
-      ),
+      },
 
-      //
-      // Base
-      //
-      ...withDstChain(
-        [
-          ...buildCollateralFactorCommands(base.COMPTROLLER, base.cfChanges),
+      // Step 4: pause borrow on TUSD / FIL.
+      {
+        target: bsc.COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [bsc.borrowPauseChanges.filter(c => c.new).map(c => c.vToken), [BORROW], true],
+      },
 
-          ...buildSupplyCapCommands(base.COMPTROLLER, base.supplyCapChanges),
+      // ──────────────────────────────────────────────────────────────────────────
+      // Ethereum Core
+      // ──────────────────────────────────────────────────────────────────────────
 
-          ...buildBorrowCapCommands(base.COMPTROLLER, base.borrowCapChanges),
+      // Step 1: set collateral factors.
+      ...eth.cfChanges.map(c => ({
+        target: eth.COMPTROLLER,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [c.vToken, c.new, c.liquidationThreshold],
+        dstChainId: LzChainId.ethereum,
+      })),
 
-          ...buildBorrowPauseCommands(base.COMPTROLLER, base.borrowPauseChanges),
+      // Step 2: set supply caps.
+      {
+        target: eth.COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [
+          eth.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
+          eth.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
         ],
-        LzChainId.basemainnet,
-      ),
+        dstChainId: LzChainId.ethereum,
+      },
 
-      //
-      // zkSync Era
-      //
-      ...withDstChain(
-        [
-          ...buildCollateralFactorCommands(zk.COMPTROLLER, zk.cfChanges),
-
-          ...buildSupplyCapCommands(zk.COMPTROLLER, zk.supplyCapChanges),
-
-          ...buildBorrowCapCommands(zk.COMPTROLLER, zk.borrowCapChanges),
-
-          ...buildBorrowPauseCommands(zk.COMPTROLLER, zk.borrowPauseChanges),
+      // Step 3: set borrow caps.
+      {
+        target: eth.COMPTROLLER,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [
+          eth.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
+          eth.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
         ],
-        LzChainId.zksyncmainnet,
-      ),
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // Step 4: re-enable borrow on healthy markets.
+      {
+        target: eth.COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [eth.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // Arbitrum Core
+      // ──────────────────────────────────────────────────────────────────────────
+
+      // Step 1: set collateral factors.
+      ...arb.cfChanges.map(c => ({
+        target: arb.COMPTROLLER,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [c.vToken, c.new, c.liquidationThreshold],
+        dstChainId: LzChainId.arbitrumone,
+      })),
+
+      // Step 2: set supply caps.
+      {
+        target: arb.COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [
+          arb.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
+          arb.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
+
+      // Step 3: set borrow caps.
+      {
+        target: arb.COMPTROLLER,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [
+          arb.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
+          arb.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
+
+      // Step 4: re-enable borrow on USD₮0 / WBTC / WETH / USDC.
+      {
+        target: arb.COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [arb.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        dstChainId: LzChainId.arbitrumone,
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // Base Core
+      // ──────────────────────────────────────────────────────────────────────────
+
+      // Step 1: set collateral factors.
+      ...base.cfChanges.map(c => ({
+        target: base.COMPTROLLER,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [c.vToken, c.new, c.liquidationThreshold],
+        dstChainId: LzChainId.basemainnet,
+      })),
+
+      // Step 2: set supply caps.
+      {
+        target: base.COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [
+          base.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
+          base.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+        ],
+        dstChainId: LzChainId.basemainnet,
+      },
+
+      // Step 3: set borrow caps.
+      {
+        target: base.COMPTROLLER,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [
+          base.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
+          base.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+        ],
+        dstChainId: LzChainId.basemainnet,
+      },
+
+      // Step 4: re-enable borrow on cbBTC / USDC / WETH.
+      {
+        target: base.COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [base.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        dstChainId: LzChainId.basemainnet,
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // zkSync Era Core
+      // ──────────────────────────────────────────────────────────────────────────
+
+      // Step 1: set collateral factors.
+      ...zk.cfChanges.map(c => ({
+        target: zk.COMPTROLLER,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [c.vToken, c.new, c.liquidationThreshold],
+        dstChainId: LzChainId.zksyncmainnet,
+      })),
+
+      // Step 2: set supply caps.
+      {
+        target: zk.COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [
+          zk.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
+          zk.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+
+      // Step 3: set borrow caps.
+      {
+        target: zk.COMPTROLLER,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [
+          zk.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
+          zk.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+
+      // Step 4: re-enable borrow
+      {
+        target: zk.COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [zk.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
     ],
     meta,
     ProposalType.REGULAR,

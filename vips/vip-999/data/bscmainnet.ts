@@ -30,208 +30,139 @@ const vFIL = "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343";
 const vDAI = "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1";
 
 export const cfChanges: CFEntry[] = [
-  // DAI: 75% -> 0% (deprecated, demote from collateral).
+  // Demote DAI to borrow-only.
   {
     symbol: "DAI",
     vToken: vDAI,
-    before: parseUnits("0.75", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.75", 18).toString(),
+    old: parseUnits("0.75", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.75", 18),
   },
 ];
 
-export const supplyCapChanges: CapEntry[] = [
+export const capChanges: CapEntry[] = [
+  {
+    symbol: "THE",
+    vToken: vTHE,
+    supplyCap: { old: parseUnits("14500000", 18), new: "0" },
+    borrowCap: { old: parseUnits("8000000", 18), new: "0" },
+  },
+  {
+    symbol: "TUSD",
+    vToken: vTUSD,
+    supplyCap: { old: parseUnits("750000", 18), new: "0" },
+    borrowCap: { old: parseUnits("600000", 18), new: "0" },
+  },
+  {
+    symbol: "FIL",
+    vToken: vFIL,
+    supplyCap: { old: parseUnits("1200000", 18), new: "0" },
+    borrowCap: { old: parseUnits("90000", 18), new: "0" },
+  },
+
+  // BTCB / ADA / xSolvBTC / asBNB borrow caps unchanged — supplyCap-only entries.
   {
     symbol: "BTCB",
     vToken: vBTCB,
-    before: parseUnits("22770", 18).toString(),
-    after: parseUnits("13000", 18).toString(),
+    supplyCap: { old: parseUnits("22770", 18), new: parseUnits("13000", 18) },
   },
   {
     symbol: "BNB",
     vToken: vBNB,
-    before: parseUnits("2672000", 18).toString(),
-    after: parseUnits("1600000", 18).toString(),
+    supplyCap: { old: parseUnits("2672000", 18), new: parseUnits("1600000", 18) },
+    borrowCap: { old: parseUnits("2008000", 18), new: parseUnits("800000", 18) },
   },
   {
     symbol: "WBNB",
     vToken: vWBNB,
-    before: parseUnits("2672000", 18).toString(),
-    after: parseUnits("300000", 18).toString(),
+    supplyCap: { old: parseUnits("2672000", 18), new: parseUnits("300000", 18) },
+    borrowCap: { old: parseUnits("2008000", 18), new: parseUnits("150000", 18) },
   },
   {
     symbol: "ETH",
     vToken: vETH,
-    before: parseUnits("100000", 18).toString(),
-    after: parseUnits("72000", 18).toString(),
+    supplyCap: { old: parseUnits("100000", 18), new: parseUnits("72000", 18) },
+    borrowCap: { old: parseUnits("60000", 18), new: parseUnits("37000", 18) },
   },
   {
     symbol: "USDC",
     vToken: vUSDC,
-    before: parseUnits("360000000", 18).toString(),
-    after: parseUnits("180000000", 18).toString(),
+    supplyCap: { old: parseUnits("360000000", 18), new: parseUnits("180000000", 18) },
+    borrowCap: { old: parseUnits("324000000", 18), new: parseUnits("110000000", 18) },
   },
   {
     symbol: "asBNB",
     vToken: vasBNB,
-    before: parseUnits("216000", 18).toString(),
-    after: parseUnits("130000", 18).toString(),
+    supplyCap: { old: parseUnits("216000", 18), new: parseUnits("130000", 18) },
   },
   {
     symbol: "xSolvBTC",
     vToken: vxSolvBTC,
-    before: parseUnits("2000", 18).toString(),
-    after: parseUnits("1200", 18).toString(),
+    supplyCap: { old: parseUnits("2000", 18), new: parseUnits("1200", 18) },
   },
   {
     symbol: "wBETH",
     vToken: vwBETH,
-    before: parseUnits("40000", 18).toString(),
-    after: parseUnits("10000", 18).toString(),
+    supplyCap: { old: parseUnits("40000", 18), new: parseUnits("10000", 18) },
+    borrowCap: { old: parseUnits("16000", 18), new: parseUnits("1000", 18) },
   },
   {
     symbol: "CAKE",
     vToken: vCAKE,
-    before: parseUnits("24000000", 18).toString(),
-    after: parseUnits("18000000", 18).toString(),
+    supplyCap: { old: parseUnits("24000000", 18), new: parseUnits("18000000", 18) },
+    borrowCap: { old: parseUnits("19200000", 18), new: parseUnits("500000", 18) },
   },
   {
     symbol: "FDUSD",
     vToken: vFDUSD,
-    before: parseUnits("100000000", 18).toString(),
-    after: parseUnits("37000000", 18).toString(),
+    supplyCap: { old: parseUnits("100000000", 18), new: parseUnits("37000000", 18) },
+    borrowCap: { old: parseUnits("80000000", 18), new: parseUnits("20000000", 18) },
   },
   {
     symbol: "XRP",
     vToken: vXRP,
-    before: parseUnits("24000000", 18).toString(),
-    after: parseUnits("7500000", 18).toString(),
+    supplyCap: { old: parseUnits("24000000", 18), new: parseUnits("7500000", 18) },
+    borrowCap: { old: parseUnits("6000000", 18), new: parseUnits("1000000", 18) },
   },
   {
     symbol: "USD1",
     vToken: vUSD1,
-    before: parseUnits("16000000", 18).toString(),
-    after: parseUnits("5000000", 18).toString(),
+    supplyCap: { old: parseUnits("16000000", 18), new: parseUnits("5000000", 18) },
+    borrowCap: { old: parseUnits("14400000", 18), new: parseUnits("4000000", 18) },
   },
   {
     symbol: "lisUSD",
     vToken: vlisUSD,
-    before: parseUnits("12000000", 18).toString(),
-    after: parseUnits("5000000", 18).toString(),
+    supplyCap: { old: parseUnits("12000000", 18), new: parseUnits("5000000", 18) },
+    borrowCap: { old: parseUnits("10000000", 18), new: parseUnits("4000000", 18) },
   },
   {
     symbol: "DOGE",
     vToken: vDOGE,
-    before: parseUnits("120000000", 8).toString(),
-    after: parseUnits("80000000", 8).toString(),
+    supplyCap: { old: parseUnits("120000000", 8), new: parseUnits("80000000", 8) },
+    borrowCap: { old: parseUnits("4500000", 8), new: parseUnits("3000000", 8) },
   },
   {
     symbol: "ADA",
     vToken: vADA,
-    before: parseUnits("37510000", 18).toString(),
-    after: parseUnits("15000000", 18).toString(),
+    supplyCap: { old: parseUnits("37510000", 18), new: parseUnits("15000000", 18) },
   },
   {
     symbol: "LTC",
     vToken: vLTC,
-    before: parseUnits("240000", 18).toString(),
-    after: parseUnits("50000", 18).toString(),
+    supplyCap: { old: parseUnits("240000", 18), new: parseUnits("50000", 18) },
+    borrowCap: { old: parseUnits("20000", 18), new: parseUnits("8000", 18) },
   },
   {
     symbol: "LINK",
     vToken: vLINK,
-    before: parseUnits("900000", 18).toString(),
-    after: parseUnits("400000", 18).toString(),
+    supplyCap: { old: parseUnits("900000", 18), new: parseUnits("400000", 18) },
+    borrowCap: { old: parseUnits("80000", 18), new: parseUnits("20000", 18) },
   },
-  // Wind-down: supply cap -> 0
-  { symbol: "THE", vToken: vTHE, before: parseUnits("14500000", 18).toString(), after: "0" },
-  { symbol: "TUSD", vToken: vTUSD, before: parseUnits("750000", 18).toString(), after: "0" },
-  { symbol: "FIL", vToken: vFIL, before: parseUnits("1200000", 18).toString(), after: "0" },
 ];
 
-export const borrowCapChanges: CapEntry[] = [
-  // BTCB / ADA / SolvBTC borrow caps unchanged (no-op).
-  {
-    symbol: "BNB",
-    vToken: vBNB,
-    before: parseUnits("2008000", 18).toString(),
-    after: parseUnits("800000", 18).toString(),
-  },
-  {
-    symbol: "WBNB",
-    vToken: vWBNB,
-    before: parseUnits("2008000", 18).toString(),
-    after: parseUnits("150000", 18).toString(),
-  },
-  {
-    symbol: "ETH",
-    vToken: vETH,
-    before: parseUnits("60000", 18).toString(),
-    after: parseUnits("37000", 18).toString(),
-  },
-  {
-    symbol: "USDC",
-    vToken: vUSDC,
-    before: parseUnits("324000000", 18).toString(),
-    after: parseUnits("110000000", 18).toString(),
-  },
-  {
-    symbol: "wBETH",
-    vToken: vwBETH,
-    before: parseUnits("16000", 18).toString(),
-    after: parseUnits("1000", 18).toString(),
-  },
-  {
-    symbol: "CAKE",
-    vToken: vCAKE,
-    before: parseUnits("19200000", 18).toString(),
-    after: parseUnits("500000", 18).toString(),
-  },
-  {
-    symbol: "FDUSD",
-    vToken: vFDUSD,
-    before: parseUnits("80000000", 18).toString(),
-    after: parseUnits("20000000", 18).toString(),
-  },
-  {
-    symbol: "XRP",
-    vToken: vXRP,
-    before: parseUnits("6000000", 18).toString(),
-    after: parseUnits("1000000", 18).toString(),
-  },
-  {
-    symbol: "USD1",
-    vToken: vUSD1,
-    before: parseUnits("14400000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
-  },
-  {
-    symbol: "lisUSD",
-    vToken: vlisUSD,
-    before: parseUnits("10000000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
-  },
-  {
-    symbol: "DOGE",
-    vToken: vDOGE,
-    before: parseUnits("4500000", 8).toString(),
-    after: parseUnits("3000000", 8).toString(),
-  },
-  { symbol: "LTC", vToken: vLTC, before: parseUnits("20000", 18).toString(), after: parseUnits("8000", 18).toString() },
-  {
-    symbol: "LINK",
-    vToken: vLINK,
-    before: parseUnits("80000", 18).toString(),
-    after: parseUnits("20000", 18).toString(),
-  },
-  // Wind-down assets (MATIC already at 0 on-chain — skipped)
-  { symbol: "THE", vToken: vTHE, before: parseUnits("8000000", 18).toString(), after: "0" },
-  { symbol: "TUSD", vToken: vTUSD, before: parseUnits("600000", 18).toString(), after: "0" },
-  { symbol: "FIL", vToken: vFIL, before: parseUnits("90000", 18).toString(), after: "0" },
-];
-
-// Borrow pause changes — BSC was operational. THE and MATIC are already paused (no-ops).
+// THE / MATIC already paused — no-op.
 export const borrowPauseChanges: PauseEntry[] = [
-  { symbol: "TUSD", vToken: vTUSD, before: false, after: true },
-  { symbol: "FIL", vToken: vFIL, before: false, after: true },
+  { symbol: "TUSD", vToken: vTUSD, old: false, new: true },
+  { symbol: "FIL", vToken: vFIL, old: false, new: true },
 ];

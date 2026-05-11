@@ -28,182 +28,163 @@ const vyvUSDT_1 = "0x475d0C68a8CD275c15D1F01F4f291804E445F677";
 const vyvWETH_1 = "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0";
 
 export const cfChanges: CFEntry[] = [
-  // Full delist: CF -> 0
+  // Full delist on TUSD / EIGEN. BAL CF already 0 — no-op.
+  // Demote DAI / crvUSD / USDe to borrow-only.
   {
     symbol: "TUSD",
     vToken: vTUSD,
-    before: parseUnits("0.75", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.77", 18).toString(),
+    old: parseUnits("0.75", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.77", 18),
   },
   {
     symbol: "EIGEN",
     vToken: vEIGEN,
-    before: parseUnits("0.5", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.6", 18).toString(),
+    old: parseUnits("0.5", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.6", 18),
   },
-  // BAL CF already 0 (no-op).
-  // Demote from collateral (keep as borrow asset): CF -> 0
+
   {
     symbol: "DAI",
     vToken: vDAI,
-    before: parseUnits("0.75", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.77", 18).toString(),
+    old: parseUnits("0.75", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.77", 18),
   },
   {
     symbol: "crvUSD",
     vToken: vcrvUSD,
-    before: parseUnits("0.78", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.8", 18).toString(),
+    old: parseUnits("0.78", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.8", 18),
   },
   {
     symbol: "USDe",
     vToken: vUSDe,
-    before: parseUnits("0.72", 18).toString(),
-    after: "0",
-    liquidationThreshold: parseUnits("0.75", 18).toString(),
+    old: parseUnits("0.72", 18),
+    new: "0",
+    liquidationThreshold: parseUnits("0.75", 18),
   },
 ];
 
-export const supplyCapChanges: CapEntry[] = [
+export const capChanges: CapEntry[] = [
+  {
+    symbol: "TUSD",
+    vToken: vTUSD,
+    supplyCap: { old: parseUnits("2000000", 18), new: "0" },
+    borrowCap: { old: parseUnits("1800000", 18), new: "0" },
+  },
+  {
+    symbol: "EIGEN",
+    vToken: vEIGEN,
+    supplyCap: { old: parseUnits("3000000", 18), new: "0" },
+    borrowCap: { old: parseUnits("1500000", 18), new: "0" },
+  },
+  {
+    symbol: "BAL",
+    vToken: vBAL,
+    supplyCap: { old: parseUnits("4100000", 18), new: "0" },
+    borrowCap: { old: parseUnits("700000", 18), new: "0" },
+  },
+  // yv* markets: borrow caps already 0 on-chain — supplyCap-only entries.
+  { symbol: "yvUSDS-1", vToken: vyvUSDS_1, supplyCap: { old: parseUnits("640000", 18), new: "0" } },
+  { symbol: "yvUSDC-1", vToken: vyvUSDC_1, supplyCap: { old: parseUnits("400000", 6), new: "0" } },
+  { symbol: "yvUSDT-1", vToken: vyvUSDT_1, supplyCap: { old: parseUnits("630000", 6), new: "0" } },
+  { symbol: "yvWETH-1", vToken: vyvWETH_1, supplyCap: { old: parseUnits("56", 18), new: "0" } },
+
+  // DAI supply cap unchanged — borrowCap-only entry.
+  // sFRAX borrow cap unchanged — supplyCap-only entry.
+  // sUSDS / weETHs / LBTC / sUSDe: supply-only changes (borrow caps unchanged).
   {
     symbol: "USDT",
     vToken: vUSDT,
-    before: parseUnits("50000000", 6).toString(),
-    after: parseUnits("5000000", 6).toString(),
+    supplyCap: { old: parseUnits("50000000", 6), new: parseUnits("5000000", 6) },
+    borrowCap: { old: parseUnits("45000000", 6), new: parseUnits("4000000", 6) },
   },
   {
     symbol: "WETH",
     vToken: vWETH,
-    before: parseUnits("20000", 18).toString(),
-    after: parseUnits("2100", 18).toString(),
+    supplyCap: { old: parseUnits("20000", 18), new: parseUnits("2100", 18) },
+    borrowCap: { old: parseUnits("18000", 18), new: parseUnits("1600", 18) },
   },
   {
     symbol: "sUSDS",
     vToken: vsUSDS,
-    before: parseUnits("30000000", 18).toString(),
-    after: parseUnits("4500000", 18).toString(),
+    supplyCap: { old: parseUnits("30000000", 18), new: parseUnits("4500000", 18) },
   },
-  { symbol: "WBTC", vToken: vWBTC, before: parseUnits("1000", 8).toString(), after: parseUnits("65", 8).toString() },
+  {
+    symbol: "WBTC",
+    vToken: vWBTC,
+    supplyCap: { old: parseUnits("1000", 8), new: parseUnits("65", 8) },
+    borrowCap: { old: parseUnits("850", 8), new: parseUnits("52", 8) },
+  },
   {
     symbol: "USDC",
     vToken: vUSDC,
-    before: parseUnits("50000000", 6).toString(),
-    after: parseUnits("5000000", 6).toString(),
+    supplyCap: { old: parseUnits("50000000", 6), new: parseUnits("5000000", 6) },
+    borrowCap: { old: parseUnits("45000000", 6), new: parseUnits("4000000", 6) },
   },
   {
     symbol: "weETHs",
     vToken: vweETHs,
-    before: parseUnits("2800", 18).toString(),
-    after: parseUnits("2000", 18).toString(),
-  },
-  { symbol: "LBTC", vToken: vLBTC, before: parseUnits("450", 8).toString(), after: parseUnits("65", 8).toString() },
-  // DAI supply cap unchanged (no-op).
-  {
-    symbol: "crvUSD",
-    vToken: vcrvUSD,
-    before: parseUnits("10000000", 18).toString(),
-    after: parseUnits("5000000", 18).toString(),
+    supplyCap: { old: parseUnits("2800", 18), new: parseUnits("2000", 18) },
   },
   {
-    symbol: "USDe",
-    vToken: vUSDe,
-    before: parseUnits("30000000", 18).toString(),
-    after: parseUnits("5000000", 18).toString(),
-  },
-  {
-    symbol: "sUSDe",
-    vToken: vsUSDe,
-    before: parseUnits("20000000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
-  },
-  { symbol: "tBTC", vToken: vtBTC, before: parseUnits("120", 18).toString(), after: parseUnits("65", 18).toString() },
-  {
-    symbol: "USDS",
-    vToken: vUSDS,
-    before: parseUnits("65000000", 18).toString(),
-    after: parseUnits("5000000", 18).toString(),
-  },
-  {
-    symbol: "sFRAX",
-    vToken: vsFRAX,
-    before: parseUnits("10000000", 18).toString(),
-    after: parseUnits("4300000", 18).toString(),
-  },
-  // Full delist: supply cap -> 0
-  { symbol: "TUSD", vToken: vTUSD, before: parseUnits("2000000", 18).toString(), after: "0" },
-  { symbol: "EIGEN", vToken: vEIGEN, before: parseUnits("3000000", 18).toString(), after: "0" },
-  { symbol: "BAL", vToken: vBAL, before: parseUnits("4100000", 18).toString(), after: "0" },
-  { symbol: "yvUSDS-1", vToken: vyvUSDS_1, before: parseUnits("640000", 18).toString(), after: "0" },
-  { symbol: "yvUSDC-1", vToken: vyvUSDC_1, before: parseUnits("400000", 6).toString(), after: "0" },
-  { symbol: "yvUSDT-1", vToken: vyvUSDT_1, before: parseUnits("630000", 6).toString(), after: "0" },
-  { symbol: "yvWETH-1", vToken: vyvWETH_1, before: parseUnits("56", 18).toString(), after: "0" },
-];
-
-export const borrowCapChanges: CapEntry[] = [
-  {
-    symbol: "USDT",
-    vToken: vUSDT,
-    before: parseUnits("45000000", 6).toString(),
-    after: parseUnits("4000000", 6).toString(),
-  },
-  {
-    symbol: "WETH",
-    vToken: vWETH,
-    before: parseUnits("18000", 18).toString(),
-    after: parseUnits("1600", 18).toString(),
-  },
-  { symbol: "WBTC", vToken: vWBTC, before: parseUnits("850", 8).toString(), after: parseUnits("52", 8).toString() },
-  {
-    symbol: "USDC",
-    vToken: vUSDC,
-    before: parseUnits("45000000", 6).toString(),
-    after: parseUnits("4000000", 6).toString(),
+    symbol: "LBTC",
+    vToken: vLBTC,
+    supplyCap: { old: parseUnits("450", 8), new: parseUnits("65", 8) },
   },
   {
     symbol: "DAI",
     vToken: vDAI,
-    before: parseUnits("4500000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
+    borrowCap: { old: parseUnits("4500000", 18), new: parseUnits("4000000", 18) },
   },
   {
     symbol: "crvUSD",
     vToken: vcrvUSD,
-    before: parseUnits("9000000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
+    supplyCap: { old: parseUnits("10000000", 18), new: parseUnits("5000000", 18) },
+    borrowCap: { old: parseUnits("9000000", 18), new: parseUnits("4000000", 18) },
   },
   {
     symbol: "USDe",
     vToken: vUSDe,
-    before: parseUnits("25000000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
+    supplyCap: { old: parseUnits("30000000", 18), new: parseUnits("5000000", 18) },
+    borrowCap: { old: parseUnits("25000000", 18), new: parseUnits("4000000", 18) },
   },
-  { symbol: "tBTC", vToken: vtBTC, before: parseUnits("60", 18).toString(), after: parseUnits("52", 18).toString() },
+  {
+    symbol: "sUSDe",
+    vToken: vsUSDe,
+    supplyCap: { old: parseUnits("20000000", 18), new: parseUnits("4000000", 18) },
+  },
+  {
+    symbol: "tBTC",
+    vToken: vtBTC,
+    supplyCap: { old: parseUnits("120", 18), new: parseUnits("65", 18) },
+    borrowCap: { old: parseUnits("60", 18), new: parseUnits("52", 18) },
+  },
   {
     symbol: "USDS",
     vToken: vUSDS,
-    before: parseUnits("7680000", 18).toString(),
-    after: parseUnits("4000000", 18).toString(),
+    supplyCap: { old: parseUnits("65000000", 18), new: parseUnits("5000000", 18) },
+    borrowCap: { old: parseUnits("7680000", 18), new: parseUnits("4000000", 18) },
   },
-  // sFRAX borrow cap unchanged (no-op).
-  // Full delist: borrow cap -> 0
-  { symbol: "TUSD", vToken: vTUSD, before: parseUnits("1800000", 18).toString(), after: "0" },
-  { symbol: "EIGEN", vToken: vEIGEN, before: parseUnits("1500000", 18).toString(), after: "0" },
-  { symbol: "BAL", vToken: vBAL, before: parseUnits("700000", 18).toString(), after: "0" },
+  {
+    symbol: "sFRAX",
+    vToken: vsFRAX,
+    supplyCap: { old: parseUnits("10000000", 18), new: parseUnits("4300000", 18) },
+  },
 ];
 
 // Borrow pause changes
 export const borrowPauseChanges: PauseEntry[] = [
-  { symbol: "USDT", vToken: vUSDT, before: true, after: false },
-  { symbol: "WETH", vToken: vWETH, before: true, after: false },
-  { symbol: "WBTC", vToken: vWBTC, before: true, after: false },
-  { symbol: "USDC", vToken: vUSDC, before: true, after: false },
-  { symbol: "DAI", vToken: vDAI, before: true, after: false },
-  { symbol: "crvUSD", vToken: vcrvUSD, before: true, after: false },
-  { symbol: "USDe", vToken: vUSDe, before: true, after: false },
-  { symbol: "tBTC", vToken: vtBTC, before: true, after: false },
-  { symbol: "USDS", vToken: vUSDS, before: true, after: false },
+  { symbol: "USDT", vToken: vUSDT, old: true, new: false },
+  { symbol: "WETH", vToken: vWETH, old: true, new: false },
+  { symbol: "WBTC", vToken: vWBTC, old: true, new: false },
+  { symbol: "USDC", vToken: vUSDC, old: true, new: false },
+  { symbol: "DAI", vToken: vDAI, old: true, new: false },
+  { symbol: "crvUSD", vToken: vcrvUSD, old: true, new: false },
+  { symbol: "USDe", vToken: vUSDe, old: true, new: false },
+  { symbol: "tBTC", vToken: vtBTC, old: true, new: false },
+  { symbol: "USDS", vToken: vUSDS, old: true, new: false },
 ];
