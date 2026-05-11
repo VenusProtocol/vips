@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { CFEntry, CapEntry, PauseEntry } from "../bscmainnet";
+import { CFEntry, CapEntry, DelistEntry, PauseEntry } from "../bscmainnet";
 
 export const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 
@@ -27,24 +27,77 @@ const vyvUSDC_1 = "0xf87c0a64dc3a8622D6c63265FA29137788163879";
 const vyvUSDT_1 = "0x475d0C68a8CD275c15D1F01F4f291804E445F677";
 const vyvWETH_1 = "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0";
 
-export const cfChanges: CFEntry[] = [
-  // Full delist on TUSD / EIGEN. BAL CF already 0 — no-op.
-  // Demote DAI / crvUSD / USDe to borrow-only.
+// Full delist: borrow was already paused by the 2026-03-20 emergency pause.
+// TUSD / EIGEN have non-zero CF and need a setCollateralFactor call.
+// BAL / yv* have CF already 0.
+export const delistAssets: DelistEntry[] = [
   {
     symbol: "TUSD",
     vToken: vTUSD,
-    old: parseUnits("0.75", 18),
-    new: "0",
+    oldCollateralFactor: parseUnits("0.75", 18),
     liquidationThreshold: parseUnits("0.77", 18),
+    oldSupplyCap: parseUnits("2000000", 18),
+    oldBorrowCap: parseUnits("1800000", 18),
+    borrowAlreadyPaused: true,
   },
   {
     symbol: "EIGEN",
     vToken: vEIGEN,
-    old: parseUnits("0.5", 18),
-    new: "0",
+    oldCollateralFactor: parseUnits("0.5", 18),
     liquidationThreshold: parseUnits("0.6", 18),
+    oldSupplyCap: parseUnits("3000000", 18),
+    oldBorrowCap: parseUnits("1500000", 18),
+    borrowAlreadyPaused: true,
   },
+  {
+    symbol: "BAL",
+    vToken: vBAL,
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.59", 18),
+    oldSupplyCap: parseUnits("4100000", 18),
+    oldBorrowCap: parseUnits("700000", 18),
+    borrowAlreadyPaused: true,
+  },
+  {
+    symbol: "yvUSDS-1",
+    vToken: vyvUSDS_1,
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.6", 18),
+    oldSupplyCap: parseUnits("640000", 18),
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
+  },
+  {
+    symbol: "yvUSDC-1",
+    vToken: vyvUSDC_1,
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.6", 18),
+    oldSupplyCap: parseUnits("400000", 6),
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
+  },
+  {
+    symbol: "yvUSDT-1",
+    vToken: vyvUSDT_1,
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.6", 18),
+    oldSupplyCap: parseUnits("630000", 6),
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
+  },
+  {
+    symbol: "yvWETH-1",
+    vToken: vyvWETH_1,
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.6", 18),
+    oldSupplyCap: parseUnits("56", 18),
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
+  },
+];
 
+// Demote to borrow-only (CF -> 0, kept as borrow assets).
+export const cfChanges: CFEntry[] = [
   {
     symbol: "DAI",
     vToken: vDAI,
@@ -69,48 +122,6 @@ export const cfChanges: CFEntry[] = [
 ];
 
 export const capChanges: CapEntry[] = [
-  {
-    symbol: "TUSD",
-    vToken: vTUSD,
-    supplyCap: { old: parseUnits("2000000", 18), new: "0" },
-    borrowCap: { old: parseUnits("1800000", 18), new: "0" },
-  },
-  {
-    symbol: "EIGEN",
-    vToken: vEIGEN,
-    supplyCap: { old: parseUnits("3000000", 18), new: "0" },
-    borrowCap: { old: parseUnits("1500000", 18), new: "0" },
-  },
-  {
-    symbol: "BAL",
-    vToken: vBAL,
-    supplyCap: { old: parseUnits("4100000", 18), new: "0" },
-    borrowCap: { old: parseUnits("700000", 18), new: "0" },
-  },
-  {
-    symbol: "yvUSDS-1",
-    vToken: vyvUSDS_1,
-    supplyCap: { old: parseUnits("640000", 18), new: "0" },
-    borrowCap: { old: "0", new: "0" },
-  },
-  {
-    symbol: "yvUSDC-1",
-    vToken: vyvUSDC_1,
-    supplyCap: { old: parseUnits("400000", 6), new: "0" },
-    borrowCap: { old: "0", new: "0" },
-  },
-  {
-    symbol: "yvUSDT-1",
-    vToken: vyvUSDT_1,
-    supplyCap: { old: parseUnits("630000", 6), new: "0" },
-    borrowCap: { old: "0", new: "0" },
-  },
-  {
-    symbol: "yvWETH-1",
-    vToken: vyvWETH_1,
-    supplyCap: { old: parseUnits("56", 18), new: "0" },
-    borrowCap: { old: "0", new: "0" },
-  },
   {
     symbol: "USDT",
     vToken: vUSDT,

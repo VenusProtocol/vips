@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { CFEntry, CapEntry, PauseEntry } from "../bscmainnet";
+import { CapEntry, DelistEntry, PauseEntry } from "../bscmainnet";
 
 export const COMPTROLLER = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
 
@@ -15,53 +15,49 @@ const vUSDC = "0x84064c058F2EFea4AB648bB6Bd7e40f83fFDe39a";
 const vwstETH = "0x03CAd66259f7F34EE075f8B62D133563D249eDa4";
 const vzkETH = "0xCEb7Da150d16aCE58F090754feF2775C23C8b631";
 
-export const cfChanges: CFEntry[] = [
-  // Full delist ZK / wstETH. wUSDM / zkETH CF already 0 — re-write is a no-op
-  // but emits the event for explicit affirmation.
+// Full delist: borrow was already paused by the 2026-03-20 emergency pause.
+// ZK / wstETH have non-zero CF and need a setCollateralFactor call.
+// wUSDM / zkETH have CF already 0.
+export const delistAssets: DelistEntry[] = [
   {
     symbol: "ZK",
     vToken: vZK,
-    old: parseUnits("0.4", 18),
-    new: "0",
+    oldCollateralFactor: parseUnits("0.40", 18),
     liquidationThreshold: parseUnits("0.45", 18),
+    oldSupplyCap: parseUnits("300000000", 18),
+    oldBorrowCap: parseUnits("100000000", 18),
+    borrowAlreadyPaused: true,
   },
   {
     symbol: "wstETH",
     vToken: vwstETH,
-    old: parseUnits("0.71", 18),
-    new: "0",
+    oldCollateralFactor: parseUnits("0.71", 18),
     liquidationThreshold: parseUnits("0.76", 18),
+    oldSupplyCap: parseUnits("350", 18),
+    oldBorrowCap: parseUnits("35", 18),
+    borrowAlreadyPaused: true,
   },
-  { symbol: "wUSDM", vToken: vwUSDM, old: "0", new: "0", liquidationThreshold: parseUnits("0.78", 18) },
-  { symbol: "zkETH", vToken: vzkETH, old: "0", new: "0", liquidationThreshold: parseUnits("0.75", 18) },
-];
-
-export const capChanges: CapEntry[] = [
   {
     symbol: "wUSDM",
     vToken: vwUSDM,
-    supplyCap: { old: parseUnits("5000000", 18), new: "0" },
-    borrowCap: { old: parseUnits("4000000", 18), new: "0" },
-  },
-  {
-    symbol: "ZK",
-    vToken: vZK,
-    supplyCap: { old: parseUnits("300000000", 18), new: "0" },
-    borrowCap: { old: parseUnits("100000000", 18), new: "0" },
-  },
-  {
-    symbol: "wstETH",
-    vToken: vwstETH,
-    supplyCap: { old: parseUnits("350", 18), new: "0" },
-    borrowCap: { old: parseUnits("35", 18), new: "0" },
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.78", 18),
+    oldSupplyCap: parseUnits("5000000", 18),
+    oldBorrowCap: parseUnits("4000000", 18),
+    borrowAlreadyPaused: true,
   },
   {
     symbol: "zkETH",
     vToken: vzkETH,
-    supplyCap: { old: parseUnits("650", 18), new: "0" },
-    borrowCap: { old: "0", new: "0" },
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.75", 18),
+    oldSupplyCap: parseUnits("650", 18),
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
   },
-  // WBTC borrow cap -> 0 (kept paused).
+];
+
+export const capChanges: CapEntry[] = [
   {
     symbol: "WETH",
     vToken: vWETH,

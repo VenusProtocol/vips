@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { CFEntry, CapEntry, PauseEntry } from "../bscmainnet";
+import { CapEntry, DelistEntry, PauseEntry } from "../bscmainnet";
 
 export const COMPTROLLER = "0x0C7973F9598AA62f9e03B94E92C967fD5437426C";
 
@@ -11,24 +11,21 @@ const vWETH = "0xEB8A79bD44cF4500943bf94a2b4434c95C008599";
 const vwstETH = "0x133d3BCD77158D125B75A17Cb517fFD4B4BE64C5";
 const vwsuperOETHb = "0x75201D81B3B0b9D17b179118837Be37f64fc4930";
 
-export const cfChanges: CFEntry[] = [
-  // wsuperOETHb full delist: CF -> 0, LT preserved at current 78%.
+// Full delist: borrow was already paused by the emergency pause.
+// wsuperOETHb has non-zero CF (73%) and needs a setCollateralFactor call.
+export const delistAssets: DelistEntry[] = [
   {
     symbol: "wsuperOETHb",
     vToken: vwsuperOETHb,
-    old: parseUnits("0.73", 18),
-    new: "0",
+    oldCollateralFactor: parseUnits("0.73", 18),
     liquidationThreshold: parseUnits("0.78", 18),
+    oldSupplyCap: parseUnits("2000", 18),
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
   },
 ];
 
 export const capChanges: CapEntry[] = [
-  {
-    symbol: "wsuperOETHb",
-    vToken: vwsuperOETHb,
-    supplyCap: { old: parseUnits("2000", 18), new: "0" },
-    borrowCap: { old: "0", new: "0" },
-  },
   {
     symbol: "cbBTC",
     vToken: vcbBTC,

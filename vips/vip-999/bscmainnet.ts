@@ -30,20 +30,82 @@ export interface PauseEntry {
   new: boolean;
 }
 
+// An asset being fully off-boarded: caps → 0, borrow disabled, CF → 0 if not already 0.
+export interface DelistEntry {
+  symbol: string;
+  vToken: string;
+  oldCollateralFactor: BigNumberish;
+  liquidationThreshold: BigNumberish;
+  oldSupplyCap: BigNumberish;
+  oldBorrowCap: BigNumberish;
+  borrowAlreadyPaused: boolean;
+}
+
 const BORROW = 2;
+
+// Generates the four canonical delist actions: CF → 0 (if needed), supply cap → 0,
+// borrow cap → 0, pause borrow (if needed). Each action is skipped when already a no-op.
+function delistCommands(comptroller: string, assets: DelistEntry[], dstChainId?: LzChainId) {
+  const chain = dstChainId !== undefined ? { dstChainId } : {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const commands: any[] = [];
+
+  for (const a of assets.filter(a => !BigNumber.from(a.oldCollateralFactor).eq(0))) {
+    commands.push({
+      target: comptroller,
+      signature: "setCollateralFactor(address,uint256,uint256)",
+      params: [a.vToken, "0", a.liquidationThreshold],
+      ...chain,
+    });
+  }
+
+  const supplyCapAssets = assets.filter(a => !BigNumber.from(a.oldSupplyCap).eq(0));
+  if (supplyCapAssets.length > 0) {
+    commands.push({
+      target: comptroller,
+      signature: "setMarketSupplyCaps(address[],uint256[])",
+      params: [supplyCapAssets.map(a => a.vToken), supplyCapAssets.map(() => "0")],
+      ...chain,
+    });
+  }
+
+  const borrowCapAssets = assets.filter(a => !BigNumber.from(a.oldBorrowCap).eq(0));
+  if (borrowCapAssets.length > 0) {
+    commands.push({
+      target: comptroller,
+      signature: "setMarketBorrowCaps(address[],uint256[])",
+      params: [borrowCapAssets.map(a => a.vToken), borrowCapAssets.map(() => "0")],
+      ...chain,
+    });
+  }
+
+  const pauseAssets = assets.filter(a => !a.borrowAlreadyPaused);
+  if (pauseAssets.length > 0) {
+    commands.push({
+      target: comptroller,
+      signature: "setActionsPaused(address[],uint8[],bool)",
+      params: [pauseAssets.map(a => a.vToken), [BORROW], true],
+      ...chain,
+    });
+  }
+
+  return commands;
+}
 
 const meta = {
   version: "v2",
-  title: "VIP-999 Multi-Chain Core Pool Risk Parameter Cleanup",
+  title: "VIP-999 May 2026 Risk Parameter Update & Asset Off-boarding",
   description: `#### Summary
 
-Cleanup pass across the five Venus Core deployments (BNB Chain, Ethereum, Arbitrum, Base, zkSync Era). Following the 2026-03-15 THE market exploit, the four non-BNB Core deployments have been in emergency-pause since 2026-03-20. This proposal formalises off-boarding of impaired / deprecated assets, right-sizes caps with the standard ~2x 3-month max-observed rule (subject to a $5M stables / 2,100 WETH / 65 WBTC notional ceiling on non-BNB chains), and re-enables borrowing on the chosen subset of healthy markets on the four paused chains.
+The four active non-BNB Chain Venus deployments (Ethereum, Arbitrum, Base, zkSync) have been in an emergency-paused state since 2026-03-20, following the THE market exploit on 2026-03-15. BNB Core remained operational with parameter-level mitigations across several markets. This proposal specifies the formal off-boarding, parameter restoration, and cap right-sizing across all five Core deployments, and is a prerequisite cleanup pass ahead of unpausing the four chains.
 
 Liquidation thresholds are not touched. CF -> 0 removes new-borrow power only; existing positions are unaffected.
 
+More information: [Venus Community Forum](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785)
+
 #### Actions per chain
 
-- **BNB Chain Core** (Unitroller \`0xfD36E2c2a6789Db23113685031d7F16329158384\`): CF -> 0 on DAI; full wind-down (caps -> 0 + pause borrow) on THE/TUSD/FIL/MATIC; cap right-sizing on the rest.
+- **BNB Chain Core** (Unitroller \`0xfD36E2c2a6789Db23113685031d7F16329158384\`): CF -> 0 on DAI; soft delist (caps -> 0 + pause borrow) on THE/TUSD/FIL/MATIC; cap right-sizing on the rest.
 - **Ethereum Core** (\`0x687a01ecF6d3907658f7A7c714749fAC32336D1B\`): full delist of TUSD/EIGEN/BAL/yvUSDS-1/yvUSDC-1/yvUSDT-1/yvWETH-1; CF -> 0 on DAI/crvUSD/USDe; cap right-sizing; re-enable borrow on USDT/WETH/WBTC/USDC/DAI/crvUSD/USDe/tBTC/USDS.
 - **Arbitrum Core** (\`0x317c1A5739F39046E20b08ac9BeEa3f10fD43326\`): CF 55% -> 25% on ARB (borrow stays paused); cap right-sizing; re-enable borrow on USD₮0/WBTC/WETH/USDC.
 - **Base Core** (\`0x0C7973F9598AA62f9e03B94E92C967fD5437426C\`): full delist of wsuperOETHb; cap right-sizing (wstETH borrow stays paused); re-enable borrow on cbBTC/USDC/WETH.
@@ -61,14 +123,17 @@ export const vip999 = () =>
       // BNB Chain Core
       // ──────────────────────────────────────────────────────────────────────────
 
-      // Step 1: set collateral factors.
+      // soft delist of THE / TUSD / FIL (CF already 0; zeros caps, pauses TUSD/FIL).
+      ...delistCommands(bsc.COMPTROLLER, bsc.delistAssets),
+
+      // set collateral factors (DAI: CF -> 0).
       ...bsc.cfChanges.map(c => ({
         target: bsc.COMPTROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [c.vToken, c.new, c.liquidationThreshold],
       })),
 
-      // Step 2: set supply caps (skip no-op entries where old === new).
+      // set supply caps (skip no-op entries where old === new).
       {
         target: bsc.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
@@ -80,7 +145,7 @@ export const vip999 = () =>
         ],
       },
 
-      // Step 3: set borrow caps (skip no-op entries where old === new).
+      // set borrow caps (skip no-op entries where old === new).
       {
         target: bsc.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
@@ -92,18 +157,14 @@ export const vip999 = () =>
         ],
       },
 
-      // Step 4: pause borrow on TUSD / FIL.
-      {
-        target: bsc.COMPTROLLER,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [bsc.borrowPauseChanges.map(c => c.vToken), [BORROW], true],
-      },
-
       // ──────────────────────────────────────────────────────────────────────────
       // Ethereum Core
       // ──────────────────────────────────────────────────────────────────────────
 
-      // Step 1: set collateral factors.
+      // soft delist of TUSD / EIGEN / BAL / yvUSDS-1 / yvUSDC-1 / yvUSDT-1 / yvWETH-1.
+      ...delistCommands(eth.COMPTROLLER, eth.delistAssets, LzChainId.ethereum),
+
+      // set collateral factors (DAI / crvUSD / USDe: CF -> 0, kept as borrow assets).
       ...eth.cfChanges.map(c => ({
         target: eth.COMPTROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
@@ -111,7 +172,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.ethereum,
       })),
 
-      // Step 2: set supply caps (skip no-op entries where old === new).
+      // set supply caps (skip no-op entries where old === new).
       {
         target: eth.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
@@ -122,7 +183,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.ethereum,
       },
 
-      // Step 3: set borrow caps (skip no-op entries where old === new).
+      // set borrow caps (skip no-op entries where old === new).
       {
         target: eth.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
@@ -133,7 +194,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.ethereum,
       },
 
-      // Step 4: re-enable borrow on healthy markets.
+      // re-enable borrow on healthy markets.
       {
         target: eth.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
@@ -145,7 +206,7 @@ export const vip999 = () =>
       // Arbitrum Core
       // ──────────────────────────────────────────────────────────────────────────
 
-      // Step 1: set collateral factors.
+      // set collateral factors (ARB: 55% -> 25%, borrow stays paused).
       ...arb.cfChanges.map(c => ({
         target: arb.COMPTROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
@@ -153,7 +214,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.arbitrumone,
       })),
 
-      // Step 2: set supply caps (skip no-op entries where old === new).
+      // set supply caps (skip no-op entries where old === new).
       {
         target: arb.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
@@ -164,7 +225,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.arbitrumone,
       },
 
-      // Step 3: set borrow caps (skip no-op entries where old === new).
+      // set borrow caps (skip no-op entries where old === new).
       {
         target: arb.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
@@ -175,7 +236,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.arbitrumone,
       },
 
-      // Step 4: re-enable borrow on USD₮0 / WBTC / WETH / USDC.
+      // re-enable borrow on USD₮0 / WBTC / WETH / USDC.
       {
         target: arb.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
@@ -187,15 +248,10 @@ export const vip999 = () =>
       // Base Core
       // ──────────────────────────────────────────────────────────────────────────
 
-      // Step 1: set collateral factors.
-      ...base.cfChanges.map(c => ({
-        target: base.COMPTROLLER,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [c.vToken, c.new, c.liquidationThreshold],
-        dstChainId: LzChainId.basemainnet,
-      })),
+      // soft delist of wsuperOETHb.
+      ...delistCommands(base.COMPTROLLER, base.delistAssets, LzChainId.basemainnet),
 
-      // Step 2: set supply caps (skip no-op entries where old === new).
+      // set supply caps (skip no-op entries where old === new).
       {
         target: base.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
@@ -206,7 +262,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.basemainnet,
       },
 
-      // Step 3: set borrow caps (skip no-op entries where old === new).
+      // set borrow caps (skip no-op entries where old === new).
       {
         target: base.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
@@ -217,7 +273,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.basemainnet,
       },
 
-      // Step 4: re-enable borrow on cbBTC / USDC / WETH.
+      // re-enable borrow on cbBTC / USDC / WETH.
       {
         target: base.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
@@ -226,18 +282,13 @@ export const vip999 = () =>
       },
 
       // ──────────────────────────────────────────────────────────────────────────
-      // zkSync Era Core
+      // zkSync
       // ──────────────────────────────────────────────────────────────────────────
 
-      // Step 1: set collateral factors.
-      ...zk.cfChanges.map(c => ({
-        target: zk.COMPTROLLER,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [c.vToken, c.new, c.liquidationThreshold],
-        dstChainId: LzChainId.zksyncmainnet,
-      })),
+      // soft delist of ZK / wstETH / wUSDM / zkETH.
+      ...delistCommands(zk.COMPTROLLER, zk.delistAssets, LzChainId.zksyncmainnet),
 
-      // Step 2: set supply caps (skip no-op entries where old === new).
+      // set supply caps (skip no-op entries where old === new).
       {
         target: zk.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
@@ -248,7 +299,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.zksyncmainnet,
       },
 
-      // Step 3: set borrow caps (skip no-op entries where old === new).
+      // set borrow caps (skip no-op entries where old === new).
       {
         target: zk.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
@@ -259,7 +310,7 @@ export const vip999 = () =>
         dstChainId: LzChainId.zksyncmainnet,
       },
 
-      // Step 4: re-enable borrow
+      // re-enable borrow on WETH / USDT / USDC.e / USDC.
       {
         target: zk.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",

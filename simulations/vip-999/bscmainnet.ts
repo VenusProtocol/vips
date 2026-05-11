@@ -38,9 +38,20 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("matches current borrow pause flags", async () => {
-      for (const c of data.borrowPauseChanges) {
-        expect(await comptroller.actionPaused(c.vToken, BORROW_ACTION)).to.equal(c.old, `${c.symbol} pause`);
+    it("soft-delist assets have expected CF, LT, borrow pause, supply cap, and borrow cap", async () => {
+      for (const a of data.delistAssets) {
+        const md = await comptroller.markets(a.vToken);
+        expect(md.collateralFactorMantissa.toString()).to.equal("0", `${a.symbol} CF`);
+        expect(md.liquidationThresholdMantissa.toString()).to.equal(
+          a.liquidationThreshold.toString(),
+          `${a.symbol} LT`,
+        );
+        expect(await comptroller.actionPaused(a.vToken, BORROW_ACTION)).to.equal(
+          a.borrowAlreadyPaused,
+          `${a.symbol} pause`,
+        );
+        expect((await comptroller.supplyCaps(a.vToken)).toString()).to.equal(a.oldSupplyCap, `${a.symbol} supplyCap`);
+        expect((await comptroller.borrowCaps(a.vToken)).toString()).to.equal(a.oldBorrowCap, `${a.symbol} borrowCap`);
       }
     });
   });
@@ -53,9 +64,11 @@ forking(FORK_BLOCK, async () => {
         ["NewCollateralFactor", "NewSupplyCap", "NewBorrowCap", "ActionPausedMarket"],
         [
           data.cfChanges.length,
-          data.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).length,
-          data.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length,
-          data.borrowPauseChanges.length,
+          data.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).length +
+            data.delistAssets.filter(a => !BigNumber.from(a.oldSupplyCap).eq(0)).length,
+          data.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length +
+            data.delistAssets.filter(a => !BigNumber.from(a.oldBorrowCap).eq(0)).length,
+          data.delistAssets.filter(a => !a.borrowAlreadyPaused).length,
         ],
       ),
   });
@@ -69,54 +82,36 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("applies new supply caps on changed entries", async () => {
+    it("applies expected supply caps", async () => {
       for (const c of data.marketCapChanges) {
-        if (BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)) continue;
         expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.new, `${c.symbol} supplyCap`);
       }
     });
 
-    it("leaves no-op supply caps at their pre-VIP value", async () => {
+    it("applies expected borrow caps", async () => {
       for (const c of data.marketCapChanges) {
-        if (!BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)) continue;
-        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(
-          c.supplyCap.old,
-          `${c.symbol} supplyCap unchanged`,
-        );
-      }
-    });
-
-    it("applies new borrow caps on changed entries", async () => {
-      for (const c of data.marketCapChanges) {
-        if (BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)) continue;
         expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.new, `${c.symbol} borrowCap`);
       }
     });
 
-    it("leaves no-op borrow caps at their pre-VIP value", async () => {
-      for (const c of data.marketCapChanges) {
-        if (!BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)) continue;
-        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(
-          c.borrowCap.old,
-          `${c.symbol} borrowCap unchanged`,
+    it("soft-delist assets have CF zeroed, LT preserved, borrow paused, supply cap zeroed, and borrow cap zeroed", async () => {
+      for (const a of data.delistAssets) {
+        const md = await comptroller.markets(a.vToken);
+        expect(md.collateralFactorMantissa.toString()).to.equal("0", `${a.symbol} CF`);
+        expect(md.liquidationThresholdMantissa.toString()).to.equal(
+          a.liquidationThreshold.toString(),
+          `${a.symbol} LT`,
         );
+        expect(await comptroller.actionPaused(a.vToken, BORROW_ACTION)).to.equal(true, `${a.symbol} borrow paused`);
+        expect((await comptroller.supplyCaps(a.vToken)).toString()).to.equal("0", `${a.symbol} supplyCap`);
+        expect((await comptroller.borrowCaps(a.vToken)).toString()).to.equal("0", `${a.symbol} borrowCap`);
       }
     });
 
-    it("applies new borrow pause flags", async () => {
-      for (const c of data.borrowPauseChanges) {
-        expect(await comptroller.actionPaused(c.vToken, BORROW_ACTION)).to.equal(c.new, `${c.symbol} pause`);
-      }
-    });
-  });
-
-  describe("E2E behaviour (bscmainnet)", () => {
-    // The BSC Comptroller checks the pause flag before any collateral/cap check,
-    // so a borrow attempt from any account reverts immediately on a paused market.
-    it("newly paused markets reject borrow attempts", async () => {
+    it("soft-delist markets reject borrow attempts", async () => {
       const [signer] = await ethers.getSigners();
-      for (const c of data.borrowPauseChanges) {
-        const vToken = new ethers.Contract(c.vToken, VTOKEN_ABI, ethers.provider);
+      for (const a of data.delistAssets) {
+        const vToken = new ethers.Contract(a.vToken, VTOKEN_ABI, ethers.provider);
         await expect(vToken.connect(signer).borrow(1)).to.be.reverted;
       }
     });

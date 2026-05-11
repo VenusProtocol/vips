@@ -10,10 +10,6 @@ const vWBTC = "0xaDa57840B372D4c28623E87FC175dE8490792811";
 const vWETH = "0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0";
 const vUSDC = "0x7D8609f8da70fF9027E9bc5229Af4F6727662707";
 const vARB = "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6";
-// vgmBTC-USDC_Core (0x4f3a73f318C5EA67A86eaaCE24309F29f89900dF) and
-// vgmETH-USDC_Core (0x9bb8cEc9C0d46F53b4f2173BB2A0221F66c353cC) have no
-// active changes in this proposal — supply caps unchanged, borrow caps
-// already 0, borrow paused already true.
 
 export const cfChanges: CFEntry[] = [
   // ARB: 55% -> 25%. LT preserved at current 60%.

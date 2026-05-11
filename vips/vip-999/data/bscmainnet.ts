@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { CFEntry, CapEntry, PauseEntry } from "../bscmainnet";
+import { CFEntry, CapEntry, DelistEntry } from "../bscmainnet";
 
 export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
@@ -27,7 +27,49 @@ const vLINK = "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f";
 const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
 const vTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
 const vFIL = "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343";
+const vMATIC = "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8";
 const vDAI = "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1";
+
+// CF already 0 on-chain; this proposal zeros caps and pauses TUSD / FIL borrow.
+// THE borrow is already paused; TUSD and FIL require an explicit pause action.
+export const delistAssets: DelistEntry[] = [
+  {
+    symbol: "MATIC",
+    vToken: vMATIC,
+    oldCollateralFactor: "0",
+    liquidationThreshold: "650000000000000000",
+    oldSupplyCap: "0",
+    oldBorrowCap: "0",
+    borrowAlreadyPaused: true,
+  },
+  {
+    symbol: "THE",
+    vToken: vTHE,
+    oldCollateralFactor: "0",
+    liquidationThreshold: "530000000000000000",
+    oldSupplyCap: parseUnits("14500000", 18),
+    oldBorrowCap: parseUnits("8000000", 18),
+    borrowAlreadyPaused: true,
+  },
+  {
+    symbol: "TUSD",
+    vToken: vTUSD,
+    oldCollateralFactor: "0",
+    liquidationThreshold: "750000000000000000",
+    oldSupplyCap: parseUnits("750000", 18),
+    oldBorrowCap: parseUnits("600000", 18),
+    borrowAlreadyPaused: false,
+  },
+  {
+    symbol: "FIL",
+    vToken: vFIL,
+    oldCollateralFactor: "0",
+    liquidationThreshold: "630000000000000000",
+    oldSupplyCap: parseUnits("1200000", 18),
+    oldBorrowCap: parseUnits("90000", 18),
+    borrowAlreadyPaused: false,
+  },
+];
 
 export const cfChanges: CFEntry[] = [
   // Demote DAI to borrow-only.
@@ -41,25 +83,6 @@ export const cfChanges: CFEntry[] = [
 ];
 
 export const marketCapChanges: CapEntry[] = [
-  {
-    symbol: "THE",
-    vToken: vTHE,
-    supplyCap: { old: parseUnits("14500000", 18), new: "0" },
-    borrowCap: { old: parseUnits("8000000", 18), new: "0" },
-  },
-  {
-    symbol: "TUSD",
-    vToken: vTUSD,
-    supplyCap: { old: parseUnits("750000", 18), new: "0" },
-    borrowCap: { old: parseUnits("600000", 18), new: "0" },
-  },
-  {
-    symbol: "FIL",
-    vToken: vFIL,
-    supplyCap: { old: parseUnits("1200000", 18), new: "0" },
-    borrowCap: { old: parseUnits("90000", 18), new: "0" },
-  },
-
   {
     symbol: "BTCB",
     vToken: vBTCB,
@@ -162,10 +185,4 @@ export const marketCapChanges: CapEntry[] = [
     supplyCap: { old: parseUnits("900000", 18), new: parseUnits("400000", 18) },
     borrowCap: { old: parseUnits("80000", 18), new: parseUnits("20000", 18) },
   },
-];
-
-// THE / MATIC already paused — no-op.
-export const borrowPauseChanges: PauseEntry[] = [
-  { symbol: "TUSD", vToken: vTUSD, old: false, new: true },
-  { symbol: "FIL", vToken: vFIL, old: false, new: true },
 ];
