@@ -87,15 +87,30 @@ export const capChanges: CapEntry[] = [
     supplyCap: { old: parseUnits("4100000", 18), new: "0" },
     borrowCap: { old: parseUnits("700000", 18), new: "0" },
   },
-  // yv* markets: borrow caps already 0 on-chain — supplyCap-only entries.
-  { symbol: "yvUSDS-1", vToken: vyvUSDS_1, supplyCap: { old: parseUnits("640000", 18), new: "0" } },
-  { symbol: "yvUSDC-1", vToken: vyvUSDC_1, supplyCap: { old: parseUnits("400000", 6), new: "0" } },
-  { symbol: "yvUSDT-1", vToken: vyvUSDT_1, supplyCap: { old: parseUnits("630000", 6), new: "0" } },
-  { symbol: "yvWETH-1", vToken: vyvWETH_1, supplyCap: { old: parseUnits("56", 18), new: "0" } },
-
-  // DAI supply cap unchanged — borrowCap-only entry.
-  // sFRAX borrow cap unchanged — supplyCap-only entry.
-  // sUSDS / weETHs / LBTC / sUSDe: supply-only changes (borrow caps unchanged).
+  {
+    symbol: "yvUSDS-1",
+    vToken: vyvUSDS_1,
+    supplyCap: { old: parseUnits("640000", 18), new: "0" },
+    borrowCap: { old: "0", new: "0" },
+  },
+  {
+    symbol: "yvUSDC-1",
+    vToken: vyvUSDC_1,
+    supplyCap: { old: parseUnits("400000", 6), new: "0" },
+    borrowCap: { old: "0", new: "0" },
+  },
+  {
+    symbol: "yvUSDT-1",
+    vToken: vyvUSDT_1,
+    supplyCap: { old: parseUnits("630000", 6), new: "0" },
+    borrowCap: { old: "0", new: "0" },
+  },
+  {
+    symbol: "yvWETH-1",
+    vToken: vyvWETH_1,
+    supplyCap: { old: parseUnits("56", 18), new: "0" },
+    borrowCap: { old: "0", new: "0" },
+  },
   {
     symbol: "USDT",
     vToken: vUSDT,
@@ -112,6 +127,7 @@ export const capChanges: CapEntry[] = [
     symbol: "sUSDS",
     vToken: vsUSDS,
     supplyCap: { old: parseUnits("30000000", 18), new: parseUnits("4500000", 18) },
+    borrowCap: { old: "0", new: "0" },
   },
   {
     symbol: "WBTC",
@@ -129,15 +145,18 @@ export const capChanges: CapEntry[] = [
     symbol: "weETHs",
     vToken: vweETHs,
     supplyCap: { old: parseUnits("2800", 18), new: parseUnits("2000", 18) },
+    borrowCap: { old: "0", new: "0" },
   },
   {
     symbol: "LBTC",
     vToken: vLBTC,
     supplyCap: { old: parseUnits("450", 8), new: parseUnits("65", 8) },
+    borrowCap: { old: "0", new: "0" },
   },
   {
     symbol: "DAI",
     vToken: vDAI,
+    supplyCap: { old: parseUnits("5000000", 18), new: parseUnits("5000000", 18) },
     borrowCap: { old: parseUnits("4500000", 18), new: parseUnits("4000000", 18) },
   },
   {
@@ -156,6 +175,7 @@ export const capChanges: CapEntry[] = [
     symbol: "sUSDe",
     vToken: vsUSDe,
     supplyCap: { old: parseUnits("20000000", 18), new: parseUnits("4000000", 18) },
+    borrowCap: { old: "0", new: "0" },
   },
   {
     symbol: "tBTC",
@@ -173,6 +193,7 @@ export const capChanges: CapEntry[] = [
     symbol: "sFRAX",
     vToken: vsFRAX,
     supplyCap: { old: parseUnits("10000000", 18), new: parseUnits("4300000", 18) },
+    borrowCap: { old: parseUnits("2000000", 18), new: parseUnits("2000000", 18) },
   },
 ];
 

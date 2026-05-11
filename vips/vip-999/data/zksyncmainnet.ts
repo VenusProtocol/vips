@@ -37,7 +37,6 @@ export const cfChanges: CFEntry[] = [
 ];
 
 export const capChanges: CapEntry[] = [
-  // zkETH borrow cap already 0 on-chain — supplyCap-only entry.
   {
     symbol: "wUSDM",
     vToken: vwUSDM,
@@ -56,7 +55,12 @@ export const capChanges: CapEntry[] = [
     supplyCap: { old: parseUnits("350", 18), new: "0" },
     borrowCap: { old: parseUnits("35", 18), new: "0" },
   },
-  { symbol: "zkETH", vToken: vzkETH, supplyCap: { old: parseUnits("650", 18), new: "0" } },
+  {
+    symbol: "zkETH",
+    vToken: vzkETH,
+    supplyCap: { old: parseUnits("650", 18), new: "0" },
+    borrowCap: { old: "0", new: "0" },
+  },
   // WBTC borrow cap -> 0 (kept paused).
   {
     symbol: "WETH",

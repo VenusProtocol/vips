@@ -40,7 +40,7 @@ export const cfChanges: CFEntry[] = [
   },
 ];
 
-export const capChanges: CapEntry[] = [
+export const marketCapChanges: CapEntry[] = [
   {
     symbol: "THE",
     vToken: vTHE,
@@ -60,11 +60,11 @@ export const capChanges: CapEntry[] = [
     borrowCap: { old: parseUnits("90000", 18), new: "0" },
   },
 
-  // BTCB / ADA / xSolvBTC / asBNB borrow caps unchanged — supplyCap-only entries.
   {
     symbol: "BTCB",
     vToken: vBTCB,
     supplyCap: { old: parseUnits("22770", 18), new: parseUnits("13000", 18) },
+    borrowCap: { old: parseUnits("3531", 18), new: parseUnits("3531", 18) },
   },
   {
     symbol: "BNB",
@@ -94,11 +94,13 @@ export const capChanges: CapEntry[] = [
     symbol: "asBNB",
     vToken: vasBNB,
     supplyCap: { old: parseUnits("216000", 18), new: parseUnits("130000", 18) },
+    borrowCap: { old: "0", new: "0" },
   },
   {
     symbol: "xSolvBTC",
     vToken: vxSolvBTC,
     supplyCap: { old: parseUnits("2000", 18), new: parseUnits("1200", 18) },
+    borrowCap: { old: "0", new: "0" },
   },
   {
     symbol: "wBETH",
@@ -146,6 +148,7 @@ export const capChanges: CapEntry[] = [
     symbol: "ADA",
     vToken: vADA,
     supplyCap: { old: parseUnits("37510000", 18), new: parseUnits("15000000", 18) },
+    borrowCap: { old: parseUnits("3000000", 18), new: parseUnits("3000000", 18) },
   },
   {
     symbol: "LTC",

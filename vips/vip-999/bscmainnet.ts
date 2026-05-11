@@ -1,4 +1,4 @@
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -19,8 +19,8 @@ export interface CFEntry {
 export interface CapEntry {
   symbol: string;
   vToken: string;
-  supplyCap?: { old: BigNumberish; new: BigNumberish };
-  borrowCap?: { old: BigNumberish; new: BigNumberish };
+  supplyCap: { old: BigNumberish; new: BigNumberish };
+  borrowCap: { old: BigNumberish; new: BigNumberish };
 }
 
 export interface PauseEntry {
@@ -68,23 +68,27 @@ export const vip999 = () =>
         params: [c.vToken, c.new, c.liquidationThreshold],
       })),
 
-      // Step 2: set supply caps.
+      // Step 2: set supply caps (skip no-op entries where old === new).
       {
         target: bsc.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
-          bsc.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
-          bsc.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+          bsc.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
+          bsc.marketCapChanges
+            .filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new))
+            .map(c => c.supplyCap.new),
         ],
       },
 
-      // Step 3: set borrow caps.
+      // Step 3: set borrow caps (skip no-op entries where old === new).
       {
         target: bsc.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
         params: [
-          bsc.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
-          bsc.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+          bsc.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
+          bsc.marketCapChanges
+            .filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new))
+            .map(c => c.borrowCap.new),
         ],
       },
 
@@ -92,7 +96,7 @@ export const vip999 = () =>
       {
         target: bsc.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [bsc.borrowPauseChanges.filter(c => c.new).map(c => c.vToken), [BORROW], true],
+        params: [bsc.borrowPauseChanges.map(c => c.vToken), [BORROW], true],
       },
 
       // ──────────────────────────────────────────────────────────────────────────
@@ -107,24 +111,24 @@ export const vip999 = () =>
         dstChainId: LzChainId.ethereum,
       })),
 
-      // Step 2: set supply caps.
+      // Step 2: set supply caps (skip no-op entries where old === new).
       {
         target: eth.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
-          eth.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
-          eth.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+          eth.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
+          eth.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.supplyCap.new),
         ],
         dstChainId: LzChainId.ethereum,
       },
 
-      // Step 3: set borrow caps.
+      // Step 3: set borrow caps (skip no-op entries where old === new).
       {
         target: eth.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
         params: [
-          eth.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
-          eth.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+          eth.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
+          eth.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.borrowCap.new),
         ],
         dstChainId: LzChainId.ethereum,
       },
@@ -133,7 +137,7 @@ export const vip999 = () =>
       {
         target: eth.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [eth.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        params: [eth.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
         dstChainId: LzChainId.ethereum,
       },
 
@@ -149,24 +153,24 @@ export const vip999 = () =>
         dstChainId: LzChainId.arbitrumone,
       })),
 
-      // Step 2: set supply caps.
+      // Step 2: set supply caps (skip no-op entries where old === new).
       {
         target: arb.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
-          arb.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
-          arb.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+          arb.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
+          arb.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.supplyCap.new),
         ],
         dstChainId: LzChainId.arbitrumone,
       },
 
-      // Step 3: set borrow caps.
+      // Step 3: set borrow caps (skip no-op entries where old === new).
       {
         target: arb.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
         params: [
-          arb.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
-          arb.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+          arb.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
+          arb.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.borrowCap.new),
         ],
         dstChainId: LzChainId.arbitrumone,
       },
@@ -175,7 +179,7 @@ export const vip999 = () =>
       {
         target: arb.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [arb.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        params: [arb.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
         dstChainId: LzChainId.arbitrumone,
       },
 
@@ -191,24 +195,24 @@ export const vip999 = () =>
         dstChainId: LzChainId.basemainnet,
       })),
 
-      // Step 2: set supply caps.
+      // Step 2: set supply caps (skip no-op entries where old === new).
       {
         target: base.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
-          base.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
-          base.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+          base.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
+          base.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.supplyCap.new),
         ],
         dstChainId: LzChainId.basemainnet,
       },
 
-      // Step 3: set borrow caps.
+      // Step 3: set borrow caps (skip no-op entries where old === new).
       {
         target: base.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
         params: [
-          base.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
-          base.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+          base.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
+          base.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.borrowCap.new),
         ],
         dstChainId: LzChainId.basemainnet,
       },
@@ -217,7 +221,7 @@ export const vip999 = () =>
       {
         target: base.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [base.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        params: [base.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
         dstChainId: LzChainId.basemainnet,
       },
 
@@ -233,24 +237,24 @@ export const vip999 = () =>
         dstChainId: LzChainId.zksyncmainnet,
       })),
 
-      // Step 2: set supply caps.
+      // Step 2: set supply caps (skip no-op entries where old === new).
       {
         target: zk.COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
-          zk.capChanges.filter(c => c.supplyCap).map(c => c.vToken),
-          zk.capChanges.filter(c => c.supplyCap).map(c => c.supplyCap!.new),
+          zk.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
+          zk.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.supplyCap.new),
         ],
         dstChainId: LzChainId.zksyncmainnet,
       },
 
-      // Step 3: set borrow caps.
+      // Step 3: set borrow caps (skip no-op entries where old === new).
       {
         target: zk.COMPTROLLER,
         signature: "setMarketBorrowCaps(address[],uint256[])",
         params: [
-          zk.capChanges.filter(c => c.borrowCap).map(c => c.vToken),
-          zk.capChanges.filter(c => c.borrowCap).map(c => c.borrowCap!.new),
+          zk.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
+          zk.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.borrowCap.new),
         ],
         dstChainId: LzChainId.zksyncmainnet,
       },
@@ -259,7 +263,7 @@ export const vip999 = () =>
       {
         target: zk.COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [zk.borrowPauseChanges.filter(c => !c.new).map(c => c.vToken), [BORROW], false],
+        params: [zk.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
         dstChainId: LzChainId.zksyncmainnet,
       },
     ],

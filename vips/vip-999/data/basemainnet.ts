@@ -23,7 +23,12 @@ export const cfChanges: CFEntry[] = [
 ];
 
 export const capChanges: CapEntry[] = [
-  { symbol: "wsuperOETHb", vToken: vwsuperOETHb, supplyCap: { old: parseUnits("2000", 18), new: "0" } },
+  {
+    symbol: "wsuperOETHb",
+    vToken: vwsuperOETHb,
+    supplyCap: { old: parseUnits("2000", 18), new: "0" },
+    borrowCap: { old: "0", new: "0" },
+  },
   {
     symbol: "cbBTC",
     vToken: vcbBTC,

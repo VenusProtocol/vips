@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -12,6 +12,9 @@ import CHAINLINK_ORACLE_ABI from "../abi/ChainlinkOracle.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import RESILIENT_ORACLE_ABI from "../abi/ResilientOracle.json";
 import VTOKEN_ABI from "../abi/VToken.json";
+
+// Minimal WETH ABI — only the two functions needed to wrap ETH and approve a spender.
+const WETH_ABI = ["function deposit() payable", "function approve(address spender, uint256 amount) returns (bool)"];
 
 const BORROW_ACTION = 2;
 
@@ -106,8 +109,8 @@ export const describeChainExecution = async (
         ["NewCollateralFactor", "NewSupplyCap", "NewBorrowCap", "ActionPausedMarket"],
         [
           data.cfChanges.length,
-          data.capChanges.filter(c => c.supplyCap).length,
-          data.capChanges.filter(c => c.borrowCap).length,
+          data.capChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).length,
+          data.capChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length,
           data.borrowPauseChanges.length,
         ],
       ),
@@ -127,17 +130,37 @@ export const describeChainExecution = async (
       }
     });
 
-    it("applies new supply caps", async () => {
+    it("applies new supply caps on changed entries", async () => {
       for (const c of data.capChanges) {
-        if (!c.supplyCap) continue;
+        if (BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)) continue;
         expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.new, `${c.symbol} supplyCap`);
       }
     });
 
-    it("applies new borrow caps", async () => {
+    it("leaves no-op supply caps at their pre-VIP value", async () => {
       for (const c of data.capChanges) {
-        if (!c.borrowCap) continue;
+        if (!BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)) continue;
+        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(
+          c.supplyCap.old,
+          `${c.symbol} supplyCap unchanged`,
+        );
+      }
+    });
+
+    it("applies new borrow caps on changed entries", async () => {
+      for (const c of data.capChanges) {
+        if (BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)) continue;
         expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.new, `${c.symbol} borrowCap`);
+      }
+    });
+
+    it("leaves no-op borrow caps at their pre-VIP value", async () => {
+      for (const c of data.capChanges) {
+        if (!BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)) continue;
+        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(
+          c.borrowCap.old,
+          `${c.symbol} borrowCap unchanged`,
+        );
       }
     });
 
@@ -149,17 +172,41 @@ export const describeChainExecution = async (
   });
 
   describe(`E2E behaviour (${chainKey})`, () => {
-    let comptroller: Contract;
-    let signer: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let borrower: any;
+
     before(async () => {
-      comptroller = new ethers.Contract(data.COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
-      signer = (await ethers.getSigners())[0].address;
+      const comptroller = new ethers.Contract(data.COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+      const addrs = NETWORK_ADDRESSES[chainKey];
+      borrower = await initMainnetUser(addrs.NORMAL_TIMELOCK, ethers.utils.parseEther("10"));
+
+      // Supply WETH (wrap ETH via deposit()) as collateral so the borrower has
+      // enough liquidity to borrow 1 wei from each newly-unpaused market.
+      const wethEntry = data.borrowPauseChanges.find(c => c.symbol === "WETH");
+      if (wethEntry) {
+        const vWETH = new ethers.Contract(wethEntry.vToken, VTOKEN_ABI, ethers.provider);
+        const weth = new ethers.Contract(await vWETH.underlying(), WETH_ABI, ethers.provider);
+        const deposit = ethers.utils.parseEther("5");
+        await weth.connect(borrower).deposit({ value: deposit });
+        await weth.connect(borrower).approve(wethEntry.vToken, deposit);
+        await vWETH.connect(borrower).mint(deposit);
+        await comptroller.connect(borrower).enterMarkets([wethEntry.vToken]);
+      }
     });
 
     it("newly paused markets reject borrow attempts", async () => {
       for (const c of data.borrowPauseChanges) {
         if (!c.new) continue;
-        await expect(comptroller.callStatic.preBorrowHook(c.vToken, signer, 1)).to.be.reverted;
+        const vToken = new ethers.Contract(c.vToken, VTOKEN_ABI, ethers.provider);
+        await expect(vToken.connect(borrower).borrow(1)).to.be.reverted;
+      }
+    });
+
+    it("newly unpaused markets accept borrows", async () => {
+      for (const c of data.borrowPauseChanges) {
+        if (c.new) continue;
+        const vToken = new ethers.Contract(c.vToken, VTOKEN_ABI, ethers.provider);
+        await expect(vToken.connect(borrower).borrow(1)).to.not.be.reverted;
       }
     });
   });

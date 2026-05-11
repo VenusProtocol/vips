@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
@@ -6,6 +7,7 @@ import { forking, testVip } from "src/vip-framework";
 import vip999 from "../../vips/vip-999/bscmainnet";
 import * as data from "../../vips/vip-999/data/bscmainnet";
 import BSC_COMPTROLLER_ABI from "./abi/BscComptroller.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const FORK_BLOCK = 97618563;
 const BORROW_ACTION = 2;
@@ -23,14 +25,14 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("matches current supply caps", async () => {
-      for (const c of data.capChanges) {
+      for (const c of data.marketCapChanges) {
         if (!c.supplyCap) continue;
         expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.old, `${c.symbol} supplyCap`);
       }
     });
 
     it("matches current borrow caps", async () => {
-      for (const c of data.capChanges) {
+      for (const c of data.marketCapChanges) {
         if (!c.borrowCap) continue;
         expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.old, `${c.symbol} borrowCap`);
       }
@@ -51,8 +53,8 @@ forking(FORK_BLOCK, async () => {
         ["NewCollateralFactor", "NewSupplyCap", "NewBorrowCap", "ActionPausedMarket"],
         [
           data.cfChanges.length,
-          data.capChanges.filter(c => c.supplyCap).length,
-          data.capChanges.filter(c => c.borrowCap).length,
+          data.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).length,
+          data.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length,
           data.borrowPauseChanges.length,
         ],
       ),
@@ -67,17 +69,37 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("applies new supply caps", async () => {
-      for (const c of data.capChanges) {
-        if (!c.supplyCap) continue;
+    it("applies new supply caps on changed entries", async () => {
+      for (const c of data.marketCapChanges) {
+        if (BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)) continue;
         expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(c.supplyCap.new, `${c.symbol} supplyCap`);
       }
     });
 
-    it("applies new borrow caps", async () => {
-      for (const c of data.capChanges) {
-        if (!c.borrowCap) continue;
+    it("leaves no-op supply caps at their pre-VIP value", async () => {
+      for (const c of data.marketCapChanges) {
+        if (!BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)) continue;
+        expect((await comptroller.supplyCaps(c.vToken)).toString()).to.equal(
+          c.supplyCap.old,
+          `${c.symbol} supplyCap unchanged`,
+        );
+      }
+    });
+
+    it("applies new borrow caps on changed entries", async () => {
+      for (const c of data.marketCapChanges) {
+        if (BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)) continue;
         expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(c.borrowCap.new, `${c.symbol} borrowCap`);
+      }
+    });
+
+    it("leaves no-op borrow caps at their pre-VIP value", async () => {
+      for (const c of data.marketCapChanges) {
+        if (!BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)) continue;
+        expect((await comptroller.borrowCaps(c.vToken)).toString()).to.equal(
+          c.borrowCap.old,
+          `${c.symbol} borrowCap unchanged`,
+        );
       }
     });
 
@@ -89,15 +111,13 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("E2E behaviour (bscmainnet)", () => {
-    let signer: string;
-    before(async () => {
-      signer = (await ethers.getSigners())[0].address;
-    });
-
+    // The BSC Comptroller checks the pause flag before any collateral/cap check,
+    // so a borrow attempt from any account reverts immediately on a paused market.
     it("newly paused markets reject borrow attempts", async () => {
+      const [signer] = await ethers.getSigners();
       for (const c of data.borrowPauseChanges) {
-        if (!c.new) continue;
-        await expect(comptroller.callStatic.preBorrowHook(c.vToken, signer, 1)).to.be.reverted;
+        const vToken = new ethers.Contract(c.vToken, VTOKEN_ABI, ethers.provider);
+        await expect(vToken.connect(signer).borrow(1)).to.be.reverted;
       }
     });
   });
