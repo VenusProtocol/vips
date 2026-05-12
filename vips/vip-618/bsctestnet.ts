@@ -1,18 +1,36 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 export const DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 export const RISK_FUND_V2 = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 export const SHORTFALL = "0x503574a82fE2A9f968d355C8AAc1Ba0481859369";
 
-// ===== Legacy converters (timelock-owned, paused in this VIP) =====
-// WBNBBurnConverter is guardian-owned and intentionally not paused here.
+// Multisig acting as buyback cron operator on testnet (same Safe used as GUARDIAN / default proposer).
+export const OPERATOR = bsctestnet.GUARDIAN;
+
+// Operator (cron) signatures — granted to the multisig OPERATOR.
+export const EXECUTE_BUYBACK_SIG = "executeBuyback(address,uint256,uint256,uint256,address,bytes,address)";
+export const FORWARD_BASE_ASSET_SIG = "forwardBaseAsset(address,uint256)";
+
+// Admin/config signatures — ACM-gated; granted to NormalTimelock so governance can tune buyback config
+// without further VIPs. (setAllowedRouter and sweepToken are onlyOwner on TokenBuyback, not ACM-gated,
+// so they need no grant — NormalTimelock owns each buyback proxy and can call them directly.)
+export const SET_DAILY_CAP_USD_SIG = "setDailyCapUsd(uint256)";
+export const SET_SLIPPAGE_EVENT_USD_SIG = "setSlippageEventUsd(uint256)";
+
+// ===== Legacy converters (NormalTimelock-owned on bsctestnet, paused in this VIP) =====
+// Note: on mainnet WBNBBurnConverter is Guardian-owned and excluded by the migration helper,
+// but on bsctestnet it is NormalTimelock-owned (verified on-chain), so we include it here.
 export const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
 export const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
 export const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
 export const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
 export const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
 export const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
+export const WBNB_BURN_CONVERTER = "0x42DBA48e7cCeB030eC73AaAe29d4A3F0cD4facba";
 
 export const LEGACY_CONVERTERS: string[] = [
   RISK_FUND_CONVERTER,
@@ -21,6 +39,7 @@ export const LEGACY_CONVERTERS: string[] = [
   BTCB_PRIME_CONVERTER,
   ETH_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
+  WBNB_BURN_CONVERTER,
 ];
 
 // ===== New TokenBuyback proxies =====
@@ -56,14 +75,21 @@ export const vip618 = () => {
     title: "VIP-618 [BNB Chain Testnet] TokenBuyback Migration",
     description: `#### Summary
 
-If passed, this VIP retires the legacy Token Converter system on **BNB Chain Testnet** and hands the ten new TokenBuyback proxies to NormalTimelock. This is the **only** VIP-618 action on BNB Chain Testnet — there is no follow-up. Router allowlisting, ACM operator grants on the new buybacks, draining of legacy converters, ACM revocations on legacy converters, and the repointing of \`ProtocolShareReserve\` distribution configs will **not** happen on testnet.
+If passed, this VIP retires the legacy Token Converter system on **BNB Chain Testnet** and hands the ten new TokenBuyback proxies to NormalTimelock. This is the **only** VIP-618 action on BNB Chain Testnet — there is no follow-up. Router allowlisting, draining of legacy converters, ACM revocations on legacy converters, and the repointing of \`ProtocolShareReserve\` distribution configs will **not** happen on testnet.
 
 #### Proposed Changes
 
-1. **Pause legacy converters** — call \`pauseConversion()\` on each of the six timelock-owned converters (RiskFundConverter + four \`*PrimeConverter\` + XVSVaultConverter). WBNBBurnConverter is guardian-owned and is not touched by this VIP.
+1. **Pause legacy converters** — call \`pauseConversion()\` on each of the seven NormalTimelock-owned converters: RiskFundConverter, four \`*PrimeConverter\`, XVSVaultConverter, and WBNBBurnConverter. (On mainnet WBNBBurnConverter is Guardian-owned and excluded from the migration helper; on BNB Chain Testnet it is NormalTimelock-owned, so it is included here.)
 2. **Upgrade RiskFundV2 implementation** — new impl removes \`updatePoolState\`, \`sweepTokenFromPool\`, and the \`poolAssetsFunds\` mapping (storage slot preserved as \`__deprecatedSlotPoolAssetsFunds\`). \`transferReserveForAuction\` now reads raw balance.
 3. **Accept ownership** on each of the ten new TokenBuyback proxies (deploy script already called \`transferOwnership(NormalTimelock)\`).
-4. **Pause Shortfall auctions** as defense in depth post-upgrade. Isolated pools are wound down on testnet — no live or upcoming auctions exist.
+4. **Grant ACM permissions on each of the ten buybacks**:
+   - Operator (multisig \`${OPERATOR}\`): \`executeBuyback\` + \`forwardBaseAsset\`.
+   - NormalTimelock: \`setDailyCapUsd\` + \`setSlippageEventUsd\` (admin/config so governance can tune cron caps without further VIPs).
+
+   \`setAllowedRouter\` and \`sweepToken\` are \`onlyOwner\` on \`TokenBuyback\`, not ACM-gated — NormalTimelock owns each buyback proxy after step 3 and can call them directly, so no ACM grant is needed for those.
+
+   Router is **not** allowlisted in this VIP, so \`executeBuyback\` will still revert at the router check until governance calls \`setAllowedRouter\` directly; \`forwardBaseAsset\` is callable now.
+5. **Pause Shortfall auctions** as defense in depth post-upgrade. Isolated pools are wound down on testnet — no live or upcoming auctions exist.
 
 The pause step runs **before** the RiskFundV2 upgrade so that RiskFundConverter cannot enter \`convertExactTokens\` against the new impl (which no longer exposes \`updatePoolState\`) between transactions outside this proposal.
 
@@ -96,7 +122,36 @@ Implementation: [VenusProtocol/protocol-reserve PR #158](https://github.com/Venu
         params: [],
       })),
 
-      // 4. Pause Shortfall auctions (defense in depth post-upgrade)
+      // 4a. Operator (multisig) grants: executeBuyback + forwardBaseAsset on each buyback.
+      ...BUYBACKS.flatMap(b => [
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [b, EXECUTE_BUYBACK_SIG, OPERATOR],
+        },
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [b, FORWARD_BASE_ASSET_SIG, OPERATOR],
+        },
+      ]),
+
+      // 4b. NormalTimelock admin/config grants (ACM-gated only): setDailyCapUsd + setSlippageEventUsd.
+      //     setAllowedRouter and sweepToken are onlyOwner on TokenBuyback and need no ACM grant.
+      ...BUYBACKS.flatMap(b => [
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [b, SET_DAILY_CAP_USD_SIG, bsctestnet.NORMAL_TIMELOCK],
+        },
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [b, SET_SLIPPAGE_EVENT_USD_SIG, bsctestnet.NORMAL_TIMELOCK],
+        },
+      ]),
+
+      // 5. Pause Shortfall auctions (defense in depth post-upgrade)
       {
         target: SHORTFALL,
         signature: "pauseAuctions()",
