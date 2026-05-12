@@ -79,10 +79,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("eMode pool markets currently allow borrow", async () => {
+    it("eMode pool labels and borrow-allowed flags match expected pre-VIP state", async () => {
       for (const e of data.emodeBorrowAllowedChanges) {
+        const pool = await comptroller.pools(e.poolId);
+        expect(pool.label).to.equal(e.poolLabel, `pool ${e.poolId} label`);
         const md = await comptroller.poolMarkets(e.poolId, e.vToken);
-        expect(md.isBorrowAllowed).to.equal(e.old, `${e.symbol} pool ${e.poolId}`);
+        expect(md.isBorrowAllowed).to.equal(e.old, `${e.symbol} pool ${e.poolId} isBorrowAllowed`);
       }
     });
   });
@@ -161,10 +163,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("eMode pool isBorrowAllowed flags applied", async () => {
+    it("eMode pool labels unchanged and borrow-allowed flags applied", async () => {
       for (const e of data.emodeBorrowAllowedChanges) {
+        const pool = await comptroller.pools(e.poolId);
+        expect(pool.label).to.equal(e.poolLabel, `pool ${e.poolId} label`);
         const md = await comptroller.poolMarkets(e.poolId, e.vToken);
-        expect(md.isBorrowAllowed).to.equal(e.new, `${e.symbol} pool ${e.poolId}`);
+        expect(md.isBorrowAllowed).to.equal(e.new, `${e.symbol} pool ${e.poolId} isBorrowAllowed`);
       }
     });
   });

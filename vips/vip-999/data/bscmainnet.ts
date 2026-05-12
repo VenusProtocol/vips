@@ -352,6 +352,6 @@ export const marketCapChanges: CapEntry[] = [
 
 // eMode borrow allowance toggles.
 export const emodeBorrowAllowedChanges: EmodeBorrowAllowedEntry[] = [
-  { symbol: "THE", poolId: 15, vToken: vTHE, old: true, new: false },
-  { symbol: "FIL", poolId: 12, vToken: vFIL, old: true, new: false },
+  { symbol: "THE", poolId: 15, poolLabel: "THE", vToken: vTHE, old: true, new: false },
+  { symbol: "FIL", poolId: 12, poolLabel: "FIL", vToken: vFIL, old: true, new: false },
 ];

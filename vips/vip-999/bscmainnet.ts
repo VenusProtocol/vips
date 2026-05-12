@@ -55,6 +55,7 @@ export interface EmodeCFEntry {
 export interface EmodeBorrowAllowedEntry {
   symbol: string;
   poolId: number;
+  poolLabel: string;
   vToken: string;
   old: boolean;
   new: boolean;
