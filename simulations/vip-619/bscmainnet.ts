@@ -9,7 +9,7 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, { XVS_PROXY_OFT_SRC, remoteBridgeEntries } from "../../vips/vip-999/bscmainnet";
+import vip619, { XVS_PROXY_OFT_SRC, remoteBridgeEntries } from "../../vips/vip-619/bscmainnet";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -83,7 +83,7 @@ forking(96883423, async () => {
     });
   });
 
-  testVip("VIP-999 Update XVS bridge limits on BSC", await vip999(), {
+  testVip("VIP-619 Update XVS bridge limits on BSC", await vip619(), {
     supporter: SUPPORTER,
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(

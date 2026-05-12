@@ -104,49 +104,65 @@ const newBridgeLimits = remoteBridgeEntries.filter(
   e => e.dstLzChainId !== LzChainId.arbitrumone && e.dstLzChainId !== LzChainId.basemainnet,
 );
 
-export const vip999 = () => {
+export const vip619 = () => {
   const meta = {
     version: "v2",
-    title:
-      "VIP-999 [BNB Chain] Sunset Phase 2.1 (opBNB, Optimism, Unichain) and tighten XVS bridge limits on Ethereum and zkSync on BSC `XVSProxyOFTSrc`",
+    title: "VIP-619 [BNB Chain] XVS Bridge: Close opBNB / Optimism / Unichain / zkSync, Tighten Ethereum",
     description: `#### Summary
 
-Following VIP-615 (Core Pool sunset on opBNB, Unichain and Optimism), this VIP tightens the per-destination XVS bridge limits stored on the BSC \`XVSProxyOFTSrc\` (\`${XVS_PROXY_OFT_SRC}\`) in both directions.
+This proposal adjusts the per-destination XVS bridge limits stored on the BSC XVSProxyOFTSrc. Outbound caps to opBNB, Optimism, Unichain, and zkSync are reduced to zero; Ethereum is tightened in both directions; Arbitrum and Base are unchanged.
 
-Limits on this contract are **denominated in USD with 18 decimals** — the bridge converts the transferred XVS amount to USD via the \`ResilientOracle\` and compares it against these caps. From BSC's perspective: *Send* = BSC → destination, *Receive* = destination → BSC.
+#### Description
 
-Outbound (send) caps to the chains being wound down (opBNB, zkSync, Optimism, Unichain) are zeroed. Inbound (receive) caps for those same chains are reduced to a small non-zero amount so existing holders can still bridge their XVS back to BSC under tighter caps. Ethereum send and receive are both reduced. Arbitrum and Base are untouched in both directions.
+All caps live on XVSProxyOFTSrc (${XVS_PROXY_OFT_SRC}) and are denominated in USD with 18 decimals. Outbound (BSC → destination) caps on opBNB, Optimism, Unichain, and zkSync are set to zero, disabling new sends to those chains; inbound (destination → BSC) caps on the same four chains are reduced to small non-zero values so existing holders can return XVS to BSC. The outbound closure on zkSync is driven by the absence of an XVS price oracle on that chain rather than by a Core Pool sunset. Ethereum is tightened in both directions while remaining operational. Arbitrum and Base are unchanged. No remote-chain bridge admins are touched.
 
-#### Changes (per destination chain)
+New per-destination limits:
 
-| Destination | Daily Send | Single Send | Daily Receive | Single Receive |
-| --- | --- | --- | --- | --- |
-| Ethereum (101) | $1,000,000 → $150,000 | $100,000 → $30,000 | $1,020,000 → $50,000 | $102,000 → $20,000 |
-| opBNB (202) | $50,000 → $0 | $10,000 → $0 | $51,000 → $1,000 | $10,200 → $1,000 |
-| Arbitrum (110) | unchanged | unchanged | unchanged | unchanged |
-| zkSync (165) | $100,000 → $0 | $20,000 → $0 | $102,000 → $10,000 | $20,400 → $10,000 |
-| Optimism (111) | $100,000 → $0 | $20,000 → $0 | $102,000 → $2,000 | $20,400 → $2,000 |
-| Base (184) | unchanged | unchanged | unchanged | unchanged |
-| Unichain (320) | $100,000 → $0 | $20,000 → $0 | $102,000 → $10,000 | $20,400 → $10,000 |
+- **Ethereum (101)**
+  - Daily Send: $1,000,000 → $150,000
+  - Single Send: $100,000 → $30,000
+  - Daily Receive: $1,020,000 → $50,000
+  - Single Receive: $102,000 → $20,000
+- **opBNB (202)**
+  - Daily Send: $50,000 → $0
+  - Single Send: $10,000 → $0
+  - Daily Receive: $51,000 → $1,000
+  - Single Receive: $10,200 → $1,000
+- **Arbitrum (110)** — unchanged
+- **zkSync (165)**
+  - Daily Send: $100,000 → $0
+  - Single Send: $20,000 → $0
+  - Daily Receive: $102,000 → $10,000
+  - Single Receive: $20,400 → $10,000
+- **Optimism (111)**
+  - Daily Send: $100,000 → $0
+  - Single Send: $20,000 → $0
+  - Daily Receive: $102,000 → $2,000
+  - Single Receive: $20,400 → $2,000
+- **Base (184)** — unchanged
+- **Unichain (320)**
+  - Daily Send: $100,000 → $0
+  - Single Send: $20,000 → $0
+  - Daily Receive: $102,000 → $10,000
+  - Single Receive: $20,400 → $10,000
 
 #### Actions
 
-For each changed destination, this VIP calls the corresponding setters on the BSC \`XVSBridgeAdmin\` (\`${XVS_BRIDGE_ADMIN}\`):
+For each of Ethereum (101), opBNB (202), zkSync (165), Optimism (111), Unichain (320), this proposal calls the following four setters on XVSBridgeAdmin (${XVS_BRIDGE_ADMIN}) with the destination LzChainId and the new USD18 cap:
 
-- \`setMaxDailyLimit(uint16,uint256)\`
-- \`setMaxSingleTransactionLimit(uint16,uint256)\`
-- \`setMaxDailyReceiveLimit(uint16,uint256)\`
-- \`setMaxSingleReceiveTransactionLimit(uint16,uint256)\`
+- setMaxSingleTransactionLimit(uint16,uint256)
+- setMaxDailyLimit(uint16,uint256)
+- setMaxSingleReceiveTransactionLimit(uint16,uint256)
+- setMaxDailyReceiveLimit(uint16,uint256)
 
-Five destinations × four setters = **20 commands**. Arbitrum and Base are unchanged and emit zero commands. No remote-chain bridge admins are touched.
+Total: 5 destinations × 4 setters = **20 calls**. Arbitrum (110) and Base (184) are unchanged and emit no calls.
 
 #### References
 
-- [BSC \`XVSProxyOFTSrc\`](https://bscscan.com/address/${XVS_PROXY_OFT_SRC})
-- [BSC \`XVSBridgeAdmin\`](https://bscscan.com/address/${XVS_BRIDGE_ADMIN})
-- [XVS omnichain deployed contracts](https://docs-v4.venus.io/deployed-contracts/xvs-omnichain)
-- VIP-407 — original bridge limit configuration
-- VIP-615 — Core Pool sunset Phase 1 Step 2`,
+- [GitHub PR #704](https://github.com/VenusProtocol/vips/pull/704)
+- [BSC XVSProxyOFTSrc on BscScan](https://bscscan.com/address/${XVS_PROXY_OFT_SRC})
+- [BSC XVSBridgeAdmin on BscScan](https://bscscan.com/address/${XVS_BRIDGE_ADMIN})
+- [XVS omnichain deployed contracts](https://docs-v4.venus.io/deployed-contracts/xvs-omnichain)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -180,4 +196,4 @@ Five destinations × four setters = **20 commands**. Arbitrum and Base are uncha
   );
 };
 
-export default vip999;
+export default vip619;
