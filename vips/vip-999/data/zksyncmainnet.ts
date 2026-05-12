@@ -27,6 +27,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("300000000", 18),
     oldBorrowCap: parseUnits("100000000", 18),
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: false,
   },
   {
     symbol: "wstETH",
@@ -36,6 +37,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("350", 18),
     oldBorrowCap: parseUnits("35", 18),
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: false,
   },
   {
     symbol: "wUSDM",
@@ -45,6 +47,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("5000000", 18),
     oldBorrowCap: parseUnits("4000000", 18),
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
   },
   {
     symbol: "zkETH",
@@ -54,6 +57,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("650", 18),
     oldBorrowCap: "0",
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
   },
 ];
 

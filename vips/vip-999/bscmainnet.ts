@@ -39,9 +39,29 @@ export interface DelistEntry {
   oldSupplyCap: BigNumberish;
   oldBorrowCap: BigNumberish;
   borrowAlreadyPaused: boolean;
+  supplyAlreadyPaused: boolean;
+}
+
+// eMode pool CF change on the BSC diamond..
+export interface EmodeCFEntry {
+  symbol: string;
+  poolId: number;
+  vToken: string;
+  old: BigNumberish;
+  new: BigNumberish;
+  liquidationThreshold: BigNumberish;
+}
+
+export interface EmodeBorrowAllowedEntry {
+  symbol: string;
+  poolId: number;
+  vToken: string;
+  old: boolean;
+  new: boolean;
 }
 
 const BORROW = 2;
+const MINT = 0;
 
 // Generates the four canonical delist actions: CF → 0 (if needed), supply cap → 0,
 // borrow cap → 0, pause borrow (if needed). Each action is skipped when already a no-op.
@@ -79,12 +99,22 @@ function delistCommands(comptroller: string, assets: DelistEntry[], dstChainId?:
     });
   }
 
-  const pauseAssets = assets.filter(a => !a.borrowAlreadyPaused);
-  if (pauseAssets.length > 0) {
+  const borrowPauseAssets = assets.filter(a => !a.borrowAlreadyPaused);
+  if (borrowPauseAssets.length > 0) {
     commands.push({
       target: comptroller,
       signature: "setActionsPaused(address[],uint8[],bool)",
-      params: [pauseAssets.map(a => a.vToken), [BORROW], true],
+      params: [borrowPauseAssets.map(a => a.vToken), [BORROW], true],
+      ...chain,
+    });
+  }
+
+  const supplyPauseAssets = assets.filter(a => !a.supplyAlreadyPaused);
+  if (supplyPauseAssets.length > 0) {
+    commands.push({
+      target: comptroller,
+      signature: "setActionsPaused(address[],uint8[],bool)",
+      params: [supplyPauseAssets.map(a => a.vToken), [MINT], true],
       ...chain,
     });
   }
@@ -105,8 +135,14 @@ More information: [Venus Community Forum](https://community.venus.io/t/may-2026-
 
 #### Actions per chain
 
-- **BNB Chain Core** (Unitroller \`0xfD36E2c2a6789Db23113685031d7F16329158384\`): CF -> 0 on DAI; soft delist (caps -> 0 + pause borrow) on THE/TUSD/FIL/MATIC; cap right-sizing on the rest.
-- **Ethereum Core** (\`0x687a01ecF6d3907658f7A7c714749fAC32336D1B\`): full delist of TUSD/EIGEN/BAL/yvUSDS-1/yvUSDC-1/yvUSDT-1/yvWETH-1; CF -> 0 on DAI/crvUSD/USDe; cap right-sizing; re-enable borrow on USDT/WETH/WBTC/USDC/DAI/crvUSD/USDe/tBTC/USDS.
+- **BNB Chain Core** (Unitroller \`0xfD36E2c2a6789Db23113685031d7F16329158384\`):
+  - Core CF: DAI 75%->0%, CAKE 55%->50%, XVS 60%->55%, lisUSD 0%->50%.
+  - Soft delist (caps->0 + pause borrow) on TUSD.
+  - Core cap right-sizing on FDUSD/USD1/lisUSD/ETH/XRP/slisBNB/SolvBTC/xSolvBTC/wBETH.
+  - eMode CF (pool-scoped): LINK Pool 4 63%->60%, UNI Pool 5 0%->50%, AAVE Pool 6 0%->50%, DOGE Pool 7 43%->40%, BCH Pool 8 0%->50%, TWT Pool 9 0%->30%, ADA Pool 10 63%->50%, LTC Pool 11 0%->50%, TRX Pool 13 52.5%->45%, DOT Pool 14 0%->55%.
+  - Market-wide cap reductions on BCH/TRX/LTC/LINK/TWT/ADA/DOGE; full off-board caps (->0) on FIL and THE.
+  - eMode Pool 12 FIL and Pool 15 THE: setIsBorrowAllowed(false). Market-wide FIL supply pause.
+- **Ethereum Core** (\`0x687a01ecF6d3907658f7A7c714749fAC32336D1B\`): full delist of TUSD/EIGEN/BAL/sFRAX/yvUSDS-1/yvUSDC-1/yvUSDT-1/yvWETH-1; CF -> 0 on DAI/crvUSD/USDe; cap right-sizing; re-enable borrow on USDT/WETH/WBTC/USDC/DAI/crvUSD/USDe/tBTC/USDS.
 - **Arbitrum Core** (\`0x317c1A5739F39046E20b08ac9BeEa3f10fD43326\`): CF 55% -> 25% on ARB (borrow stays paused); cap right-sizing; re-enable borrow on USD₮0/WBTC/WETH/USDC.
 - **Base Core** (\`0x0C7973F9598AA62f9e03B94E92C967fD5437426C\`): full delist of wsuperOETHb; cap right-sizing (wstETH borrow stays paused); re-enable borrow on cbBTC/USDC/WETH.
 - **zkSync Era Core** (\`0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1\`): full delist of ZK/wUSDM/zkETH/wstETH; WBTC cap reduction (borrow stays paused); re-enable borrow on WETH/USDT/USDC.e/USDC.
@@ -126,11 +162,18 @@ export const vip999 = () =>
       // soft delist of THE / TUSD / FIL (CF already 0; zeros caps, pauses TUSD/FIL).
       ...delistCommands(bsc.COMPTROLLER, bsc.delistAssets),
 
-      // set collateral factors (DAI: CF -> 0).
+      // Core-pool CF changes (DAI -> 0, CAKE 55%->50%, XVS 60%->55%, lisUSD 0%->50%).
       ...bsc.cfChanges.map(c => ({
         target: bsc.COMPTROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [c.vToken, c.new, c.liquidationThreshold],
+      })),
+
+      // eMode-pool CF changes.
+      ...bsc.emodeCfChanges.map(c => ({
+        target: bsc.COMPTROLLER,
+        signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+        params: [c.poolId, c.vToken, c.new, c.liquidationThreshold],
       })),
 
       // set supply caps (skip no-op entries where old === new).
@@ -156,6 +199,13 @@ export const vip999 = () =>
             .map(c => c.borrowCap.new),
         ],
       },
+
+      // eMode Pool 12 FIL and Pool 15 THE: disable isolated-pool borrow.
+      ...bsc.emodeBorrowAllowedChanges.map(e => ({
+        target: bsc.COMPTROLLER,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [e.poolId, e.vToken, e.new],
+      })),
 
       // ──────────────────────────────────────────────────────────────────────────
       // Ethereum Core

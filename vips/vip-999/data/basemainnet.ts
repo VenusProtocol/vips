@@ -22,6 +22,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("2000", 18),
     oldBorrowCap: "0",
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: false,
   },
 ];
 

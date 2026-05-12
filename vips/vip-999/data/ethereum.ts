@@ -39,6 +39,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("2000000", 18),
     oldBorrowCap: parseUnits("1800000", 18),
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: false,
   },
   {
     symbol: "EIGEN",
@@ -48,6 +49,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("3000000", 18),
     oldBorrowCap: parseUnits("1500000", 18),
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: false,
   },
   {
     symbol: "BAL",
@@ -57,6 +59,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("4100000", 18),
     oldBorrowCap: parseUnits("700000", 18),
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: false,
   },
   {
     symbol: "yvUSDS-1",
@@ -66,6 +69,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("640000", 18),
     oldBorrowCap: "0",
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
   },
   {
     symbol: "yvUSDC-1",
@@ -75,6 +79,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("400000", 6),
     oldBorrowCap: "0",
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
   },
   {
     symbol: "yvUSDT-1",
@@ -84,6 +89,7 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("630000", 6),
     oldBorrowCap: "0",
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
   },
   {
     symbol: "yvWETH-1",
@@ -93,6 +99,17 @@ export const delistAssets: DelistEntry[] = [
     oldSupplyCap: parseUnits("56", 18),
     oldBorrowCap: "0",
     borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
+  },
+  {
+    symbol: "sFRAX",
+    vToken: vsFRAX,
+    oldCollateralFactor: "0",
+    liquidationThreshold: parseUnits("0.8", 18),
+    oldSupplyCap: parseUnits("10000000", 18),
+    oldBorrowCap: parseUnits("2000000", 18),
+    borrowAlreadyPaused: true,
+    supplyAlreadyPaused: true,
   },
 ];
 
@@ -199,12 +216,6 @@ export const marketCapChanges: CapEntry[] = [
     vToken: vUSDS,
     supplyCap: { old: parseUnits("65000000", 18), new: parseUnits("5000000", 18) },
     borrowCap: { old: parseUnits("7680000", 18), new: parseUnits("4000000", 18) },
-  },
-  {
-    symbol: "sFRAX",
-    vToken: vsFRAX,
-    supplyCap: { old: parseUnits("10000000", 18), new: parseUnits("4300000", 18) },
-    borrowCap: { old: parseUnits("2000000", 18), new: parseUnits("2000000", 18) },
   },
 ];
 

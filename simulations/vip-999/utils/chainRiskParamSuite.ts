@@ -17,6 +17,7 @@ import VTOKEN_ABI from "../abi/VToken.json";
 const WETH_ABI = ["function deposit() payable", "function approve(address spender, uint256 amount) returns (bool)"];
 
 const BORROW_ACTION = 2;
+const MINT_ACTION = 0;
 
 export interface ChainData {
   COMPTROLLER: string;
@@ -26,9 +27,9 @@ export interface ChainData {
   borrowPauseChanges: PauseEntry[];
 }
 
-type ChainKey = "ethereum" | "arbitrumone" | "basemainnet" | "zksyncmainnet";
+export type ChainKey = "ethereum" | "arbitrumone" | "basemainnet" | "zksyncmainnet" | "bscmainnet";
 
-const pinOraclePrices = async (chainKey: ChainKey, data: ChainData): Promise<void> => {
+export const pinOraclePrices = async (chainKey: ChainKey, data: ChainData): Promise<void> => {
   const addrs = NETWORK_ADDRESSES[chainKey];
   const resilient = new ethers.Contract(addrs.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const chainlink = new ethers.Contract(addrs.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -102,7 +103,7 @@ export const runChainRiskParamSuite = async (
       }
     });
 
-    it("soft-delist assets have expected CF, LT, borrow pause, supply cap, and borrow cap", async () => {
+    it("soft-delist assets have expected CF, LT, pause flags, supply cap, and borrow cap", async () => {
       for (const a of data.delistAssets ?? []) {
         const md = await comptroller.markets(a.vToken);
         expect(md.collateralFactorMantissa.toString()).to.equal(
@@ -115,7 +116,11 @@ export const runChainRiskParamSuite = async (
         );
         expect(await comptroller.actionPaused(a.vToken, BORROW_ACTION)).to.equal(
           a.borrowAlreadyPaused,
-          `${a.symbol} pause`,
+          `${a.symbol} borrow pause`,
+        );
+        expect(await comptroller.actionPaused(a.vToken, MINT_ACTION)).to.equal(
+          a.supplyAlreadyPaused,
+          `${a.symbol} mint pause`,
         );
         expect((await comptroller.supplyCaps(a.vToken)).toString()).to.equal(a.oldSupplyCap, `${a.symbol} supplyCap`);
         expect((await comptroller.borrowCaps(a.vToken)).toString()).to.equal(a.oldBorrowCap, `${a.symbol} borrowCap`);
@@ -136,7 +141,9 @@ export const runChainRiskParamSuite = async (
             (data.delistAssets ?? []).filter(a => !BigNumber.from(a.oldSupplyCap).eq(0)).length,
           data.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).length +
             (data.delistAssets ?? []).filter(a => !BigNumber.from(a.oldBorrowCap).eq(0)).length,
-          data.borrowPauseChanges.length + (data.delistAssets ?? []).filter(a => !a.borrowAlreadyPaused).length,
+          data.borrowPauseChanges.length +
+            (data.delistAssets ?? []).filter(a => !a.borrowAlreadyPaused).length +
+            (data.delistAssets ?? []).filter(a => !a.supplyAlreadyPaused).length,
         ],
       ),
   });
@@ -173,7 +180,7 @@ export const runChainRiskParamSuite = async (
       }
     });
 
-    it("soft-delist assets have CF zeroed, LT preserved, borrow paused, supply cap zeroed, and borrow cap zeroed", async () => {
+    it("soft-delist assets have CF zeroed, LT preserved, borrow + mint paused, supply cap zeroed, and borrow cap zeroed", async () => {
       for (const a of data.delistAssets ?? []) {
         const md = await comptroller.markets(a.vToken);
         expect(md.collateralFactorMantissa.toString()).to.equal("0", `${a.symbol} CF`);
@@ -182,6 +189,7 @@ export const runChainRiskParamSuite = async (
           `${a.symbol} LT`,
         );
         expect(await comptroller.actionPaused(a.vToken, BORROW_ACTION)).to.equal(true, `${a.symbol} borrow paused`);
+        expect(await comptroller.actionPaused(a.vToken, MINT_ACTION)).to.equal(true, `${a.symbol} mint paused`);
         expect((await comptroller.supplyCaps(a.vToken)).toString()).to.equal("0", `${a.symbol} supplyCap`);
         expect((await comptroller.borrowCaps(a.vToken)).toString()).to.equal("0", `${a.symbol} borrowCap`);
       }
