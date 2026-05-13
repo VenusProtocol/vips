@@ -164,16 +164,16 @@ export const TIMELOCK_OWNED_CONVERTERS: string[] = [
 ];
 
 // ===== New TokenBuyback proxies (10 instances) =====
-export const RISK_FUND_BUYBACK = "0xfffB20c23650B27126815994f3F07eF6B46aea60";
-export const USDT_PRIME_BUYBACK = "0x0191Bb3CD28A96691F5EC5066ad42A0373ae11C6";
-export const U_PRIME_BUYBACK = "0xFd50bd4107705929df73Ac683BD505232BA9E9dB";
-export const XVS_BUYBACK = "0xBaAc819aE93b29fA6512a095CA00255a4F05b027";
-export const U_TREASURY_BUYBACK = "0xef7cb42a7EBD4b011905D20Fc8038a603c3f22E4";
-export const BTCB_TREASURY_BUYBACK = "0x69739FF52e90BC93dCaEd5a2431072b5082d326D";
-export const ETH_TREASURY_BUYBACK = "0x9e0543F9E09fb5b8a58F73d11967DC894dbD40a7";
-export const USDT_TREASURY_BUYBACK = "0xBF858c95D778022b48E6Ad343D3d644017fb0ca7";
-export const USDC_TREASURY_BUYBACK = "0xFB5FA544dBf39983198BDD01e2c26E3AB597e22A";
-export const XVS_TREASURY_BUYBACK = "0x01D0f07D389692D386EB8D09Da3bbCa5C83be551";
+export const RISK_FUND_BUYBACK = "0x0c71EFabD00329E839745ef23aB946d3ed24A805";
+export const USDT_PRIME_BUYBACK = "0xD721932C7CA41Eb5305867287010587a266346a8";
+export const U_PRIME_BUYBACK = "0xBC9fFBfb799B2d189669D3816E2B7273c69041bd";
+export const XVS_BUYBACK = "0x637E6246BBb0F9aBae9d764F5e1bB6347f028C12";
+export const U_TREASURY_BUYBACK = "0xec63411423D03327De19135446dDdA3055D2feA8";
+export const BTCB_TREASURY_BUYBACK = "0x1F306a0d929a7098a0A0b12248Ba97600AB79026";
+export const ETH_TREASURY_BUYBACK = "0x41954F0bf26959dF2e1B8302DEBf736B5b154B64";
+export const USDT_TREASURY_BUYBACK = "0xB3dDf13E8B6b8dE10F5826087C202b80F1D1b490";
+export const USDC_TREASURY_BUYBACK = "0xd7aC40f9bd9A1beb8E2d121b4446CF90417cf169";
+export const XVS_TREASURY_BUYBACK = "0x6D2d239c16453062cF145A7a5128A6a60710d236";
 
 export const BUYBACKS: string[] = [
   RISK_FUND_BUYBACK,
@@ -214,13 +214,18 @@ const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 // the new TokenBuyback flow once the cron starts.
 export const PANCAKE_V3_FEE_TIER = 100;
 
-// PLP holds ~14,987 USDC at the snapshot block; sweep 14,986 USDC and split
-// 7,493 USDC per leg, leaving ~1 USDC of dust in PLP.
-export const USDC_TO_SWEEP = parseUnits("14986", 18);
+// PLP holds ~14.9k USDC at the snapshot block; ~4k of that is reserved for
+// unclaimed user rewards so the VIP sweeps 10k into the V2 helper. PLP already
+// holds ~25k USDT — enough for the May 2026 distribution — so the helper now
+// runs a single USDC -> USDT -> U multihop instead of two legs.
+export const USDC_TO_SWEEP = parseUnits("10000", 18);
+// Legacy two-leg constants kept for the (unexecutable) vip-618 wiring below;
+// the V2 helper hardcodes USDC_TO_SWAP = 10_000e18 and U_MIN_OUT = 9_900e18
+// directly and ignores these.
 export const USDC_PER_LEG = parseUnits("7493", 18);
-// 1% slippage floor on each stable/stable leg.
 export const USDT_MIN_OUT = parseUnits("7418", 18);
-export const U_MIN_OUT = parseUnits("7418", 18);
+// 1% slippage floor under the 9,996.60 U quote (QuoterV2, 2026-05-13).
+export const U_MIN_OUT = parseUnits("9900", 18);
 
 // Prime multipliers for vU (matches USDT/USDC supply-only convention).
 export const SUPPLY_MULTIPLIER = parseUnits("2", 18);

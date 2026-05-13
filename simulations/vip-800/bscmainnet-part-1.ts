@@ -5,7 +5,6 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import HELPER_V3_ARTIFACT from "../../artifacts/contracts/helpers/TokenBuybackMigrationHelper.sol/TokenBuybackMigrationHelper.json";
 import {
   BTCB_PRIME_CONVERTER,
   ETH_PRIME_CONVERTER,
@@ -41,6 +40,7 @@ import DEFAULT_PROXY_ADMIN_ABI from "../vip-618/abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "../vip-618/abi/ERC20.json";
 import PSR_ABI from "../vip-618/abi/ProtocolShareReserve.json";
 import BUYBACK_ABI from "../vip-618/abi/TokenBuyback.json";
+import TOKEN_BUYBACK_MIGRATION_HELPER_ABI from "./abi/TokenBuybackMigrationHelper.json";
 
 // Re-export so part-2 sim can pick up the same address universe without
 // duplicating imports.
@@ -48,21 +48,14 @@ export { BUYBACKS, MIGRATION_HELPER_V2, TIMELOCK_OWNED_CONVERTERS };
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Real-env fork block: V2 helper bytecode exists on chain at MIGRATION_HELPER_V2
-// (deployed at block 97983412). The compiled bytecode in the helper artifact
-// folds in the May 2026 Prime allocation block; on-chain bytecode at this fork
-// block does not yet include that update. The `before` hook etches the freshly
-// compiled bytecode at MIGRATION_HELPER_V2 so the sim exercises the helper
-// version that will land on chain when the new artifact is redeployed.
-const FORK_BLOCK = 97988051;
+// Fork block must be past the latest TokenBuybackMigrationHelper redeploy
+// (protocol-reserve PR #164, commit 746fe99 — rebuilt after the USDT-leg
+// drop) at BSC block 98038965, and past every PR #162 buyback redeploy
+// (97999686 – 98000650).
+const FORK_BLOCK = 98041000;
 
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 const CONVERTER_MIN_ABI = ["function conversionPaused() view returns (bool)"];
-const HELPER_MIN_ABI = [
-  "function executed1() view returns (bool)",
-  "function executed2() view returns (bool)",
-  "event StepFailed(string step, bytes reason)",
-];
 const PRIME_MIN_ABI = [
   "function markets(address) view returns (uint256 supplyMultiplier, uint256 borrowMultiplier, uint256 rewardIndex, uint256 sumOfMembersScore, bool exists)",
 ];
@@ -121,7 +114,7 @@ forking(FORK_BLOCK, async () => {
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
   const usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
   const shortfall = new ethers.Contract(SHORTFALL, SHORTFALL_MIN_ABI, ethers.provider);
-  const helper = new ethers.Contract(MIGRATION_HELPER_V2, HELPER_MIN_ABI, ethers.provider);
+  const helper = new ethers.Contract(MIGRATION_HELPER_V2, TOKEN_BUYBACK_MIGRATION_HELPER_ABI, ethers.provider);
   const prime = new ethers.Contract(PRIME, PRIME_MIN_ABI, ethers.provider);
   const plp = new ethers.Contract(PRIME_LIQUIDITY_PROVIDER, PLP_MIN_ABI, ethers.provider);
 
@@ -132,25 +125,14 @@ forking(FORK_BLOCK, async () => {
   let riskFundV2UsdtBalanceBefore: BigNumber;
   let plpUsdcBalanceBefore: BigNumber;
   let plpUsdtBalanceBefore: BigNumber;
+  let plpUBalanceBefore: BigNumber;
   let timelockUsdcBalanceBefore: BigNumber;
   const converterBalanceBefore = new Map<string, BigNumber>();
 
   before(async () => {
-    // Etch the freshly compiled V3 helper bytecode at the canonical
-    // MIGRATION_HELPER_V2 address. The on-chain bytecode at this fork block is
-    // an earlier V2 cut without the Prime allocation block; the freshly
-    // compiled artifact in `artifacts/contracts/helpers/...` is the version
-    // that will land on chain when the helper is redeployed. Storage is
-    // preserved (executed1/executed2 default to false; ReentrancyGuard
-    // _status = 0 → OZ treats as NOT_ENTERED on first entry).
-    await ethers.provider.send("hardhat_setCode", [
-      MIGRATION_HELPER_V2,
-      (HELPER_V3_ARTIFACT as { deployedBytecode: string }).deployedBytecode,
-    ]);
-
     // Pre-condition the deploy script will fulfil on chain: every buyback's
     // pendingOwner must point at MIGRATION_HELPER_V2 so helper.execute1() can
-    // accept ownership. At the fork block buybacks still point at the V1
+    // accept ownership. At the fork block buybacks still point at the previous
     // helper, so impersonate the current owner and re-point each one.
     for (const b of BUYBACKS) {
       const buybackOwnable = new ethers.Contract(b, OWNABLE_MIN_ABI, ethers.provider);
@@ -165,6 +147,7 @@ forking(FORK_BLOCK, async () => {
     riskFundV2UsdtBalanceBefore = await usdt.balanceOf(RISK_FUND_V2);
     plpUsdcBalanceBefore = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     plpUsdtBalanceBefore = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    plpUBalanceBefore = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
     timelockUsdcBalanceBefore = await usdc.balanceOf(bscmainnet.NORMAL_TIMELOCK);
 
     for (const d of DRAIN_BY_CONVERTER) {
@@ -189,8 +172,9 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("helper has not yet executed phase 1 or phase 2", async () => {
+    it("helper has not yet executed phase 1, swap, or phase 2", async () => {
       expect(await helper.executed1()).to.be.false;
+      expect(await helper.executedSwap()).to.be.false;
       expect(await helper.executed2()).to.be.false;
     });
 
@@ -211,8 +195,9 @@ forking(FORK_BLOCK, async () => {
   testVip("VIP-800 part 1 — non-drain migration & May Prime allocation", await vip800Part1());
 
   describe("Post-VIP state (part 1)", () => {
-    it("helper.executed1 is true; executed2 still false", async () => {
+    it("helper.executed1 and helper.executedSwap are true; executed2 still false", async () => {
       expect(await helper.executed1()).to.be.true;
+      expect(await helper.executedSwap()).to.be.true;
       expect(await helper.executed2()).to.be.false;
     });
 
@@ -220,13 +205,13 @@ forking(FORK_BLOCK, async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, MIGRATION_HELPER_V2)).to.be.false;
     });
 
-    it("NormalTimelock owns each buyback proxy", async () => {
+    it("helper still owns each buyback (handback deferred to part 2)", async () => {
       for (const b of BUYBACKS) {
-        expect(await ownable(b).owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+        expect(await ownable(b).owner()).to.equal(MIGRATION_HELPER_V2);
       }
     });
 
-    it("helper still owns each timelock-owned legacy converter (handed back in part 2)", async () => {
+    it("helper still owns each timelock-owned legacy converter (handback deferred to part 2)", async () => {
       for (const c of TIMELOCK_OWNED_CONVERTERS) {
         expect(await ownable(c).owner()).to.equal(MIGRATION_HELPER_V2);
       }
@@ -305,7 +290,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("Post-VIP Prime allocation (run inside execute1)", () => {
+  describe("Post-VIP Prime allocation", () => {
     it("vU is registered as a Prime market", async () => {
       const m = await prime.markets(VU);
       expect(m.exists).to.be.true;
@@ -315,20 +300,22 @@ forking(FORK_BLOCK, async () => {
       expect(await plp.lastAccruedBlockOrSecond(U)).to.be.gt(0);
     });
 
-    it("PLP USDC balance decreased (helper swept USDC out for swaps)", async () => {
+    it("PLP USDC balance decreased (VIP swept USDC into the helper for swaps)", async () => {
       const after = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
       expect(after).to.be.lt(plpUsdcBalanceBefore);
     });
 
-    it("PLP USDT balance increased iff USDC->USDT swap leg succeeded", async () => {
-      // Soft-fail leg: if USDT pool quote was healthy, PLP USDT balance went
-      // up. If StepFailed("swapUSDCtoUSDT") fired, balance is unchanged.
-      // Don't require either outcome — just sanity-check non-negative delta.
+    it("PLP USDT balance is unchanged (USDT swap leg was dropped — PLP already holds enough)", async () => {
       const after = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      expect(after).to.be.gte(plpUsdtBalanceBefore);
+      expect(after).to.equal(plpUsdtBalanceBefore);
     });
 
-    it("Helper holds zero USDC after execute1 (leftover forwarded back to NormalTimelock)", async () => {
+    it("PLP U balance non-decreasing (USDC -> USDT -> U multihop is soft-fail)", async () => {
+      const after = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(after).to.be.gte(plpUBalanceBefore);
+    });
+
+    it("Helper holds zero USDC after executeSwap (leftover forwarded back to NormalTimelock)", async () => {
       expect(await usdc.balanceOf(MIGRATION_HELPER_V2)).to.equal(0);
     });
 
@@ -339,12 +326,9 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Post-VIP helper invariants (part 1)", () => {
-    it("helper is NOT owner/pendingOwner of any buyback (handed back in execute1)", async () => {
+    it("helper IS owner of every buyback (handback deferred to part 2)", async () => {
       for (const b of BUYBACKS) {
-        expect((await ownable(b).owner()).toLowerCase(), `${b} owner`).to.not.equal(MIGRATION_HELPER_V2.toLowerCase());
-        expect((await ownable(b).pendingOwner()).toLowerCase(), `${b} pendingOwner`).to.not.equal(
-          MIGRATION_HELPER_V2.toLowerCase(),
-        );
+        expect((await ownable(b).owner()).toLowerCase(), `${b} owner`).to.equal(MIGRATION_HELPER_V2.toLowerCase());
       }
     });
 
@@ -358,6 +342,16 @@ forking(FORK_BLOCK, async () => {
       const helperWithExecute1 = new ethers.Contract(MIGRATION_HELPER_V2, ["function execute1()"], ethers.provider);
       const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       await expect(helperWithExecute1.connect(timelockSigner).execute1()).to.be.reverted;
+    });
+
+    it("calling helper.executeSwap() a second time reverts", async () => {
+      const helperWithExecuteSwap = new ethers.Contract(
+        MIGRATION_HELPER_V2,
+        ["function executeSwap()"],
+        ethers.provider,
+      );
+      const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      await expect(helperWithExecuteSwap.connect(timelockSigner).executeSwap()).to.be.reverted;
     });
   });
 });

@@ -5,11 +5,19 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import HELPER_V3_ARTIFACT from "../../artifacts/contracts/helpers/TokenBuybackMigrationHelper.sol/TokenBuybackMigrationHelper.json";
 import {
   BTCB_PRIME_CONVERTER,
   ETH_PRIME_CONVERTER,
+  ONEINCH_ROUTER,
+  PANCAKE_ROUTER,
+  PANCAKE_SMART_ROUTER,
+  PANCAKE_UNIVERSAL_ROUTER,
+  PANCAKE_V3_ROUTER,
   RISK_FUND_CONVERTER,
+  UNIV2_SWAP_ROUTER_02,
+  UNIV3_SWAP_ROUTER_02,
+  UNIV4_SWAP_ROUTER,
+  UNI_UNIVERSAL_ROUTER,
   USDC_PRIME_CONVERTER,
   USDT_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
@@ -26,16 +34,30 @@ import vip800Part1, {
 import vip800Part2 from "../../vips/vip-800/bscmainnet-part-2";
 import ACM_ABI from "../vip-618/abi/AccessControlManager.json";
 import ERC20_ABI from "../vip-618/abi/ERC20.json";
+import TOKEN_BUYBACK_MIGRATION_HELPER_ABI from "./abi/TokenBuybackMigrationHelper.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Real-env block: V2 helper (MIGRATION_HELPER_V2) is on chain.
-// Match part-1 sim's FORK_BLOCK.
-const FORK_BLOCK = 97988051;
+// Match part-1 sim's FORK_BLOCK. Must be past the latest helper redeploy
+// (block 98038965, commit 746fe99) and the PR #162 buyback redeploys
+// (97999686 – 98000650).
+const FORK_BLOCK = 98041000;
 
-const HELPER_MIN_ABI = ["function executed1() view returns (bool)", "function executed2() view returns (bool)"];
+const BUYBACK_ROUTERS_ABI = ["function allowedRouters(address) view returns (bool)"];
 const OWNABLE_MIN_ABI = ["function owner() view returns (address)", "function pendingOwner() view returns (address)"];
 const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
+
+const ALL_ROUTERS = [
+  PANCAKE_ROUTER,
+  PANCAKE_V3_ROUTER,
+  PANCAKE_SMART_ROUTER,
+  PANCAKE_UNIVERSAL_ROUTER,
+  ONEINCH_ROUTER,
+  UNIV2_SWAP_ROUTER_02,
+  UNIV3_SWAP_ROUTER_02,
+  UNIV4_SWAP_ROUTER,
+  UNI_UNIVERSAL_ROUTER,
+];
 
 const DRAIN_BY_CONVERTER: { converter: string; recipient: string }[] = [
   { converter: RISK_FUND_CONVERTER, recipient: RISK_FUND_BUYBACK },
@@ -48,10 +70,11 @@ const DRAIN_BY_CONVERTER: { converter: string; recipient: string }[] = [
 
 forking(FORK_BLOCK, async () => {
   const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
-  const helper = new ethers.Contract(MIGRATION_HELPER_V2, HELPER_MIN_ABI, ethers.provider);
+  const helper = new ethers.Contract(MIGRATION_HELPER_V2, TOKEN_BUYBACK_MIGRATION_HELPER_ABI, ethers.provider);
 
   const erc20 = (token: string) => new ethers.Contract(token, ERC20_ABI, ethers.provider);
   const ownable = (a: string) => new ethers.Contract(a, OWNABLE_MIN_ABI, ethers.provider);
+  const buybackRouters = (b: string) => new ethers.Contract(b, BUYBACK_ROUTERS_ABI, ethers.provider);
 
   // Per-(token, recipient) snapshot taken AFTER part-1 executes (which leaves
   // converter balances untouched) so that the post-part-2 delta isolates the
@@ -60,18 +83,11 @@ forking(FORK_BLOCK, async () => {
   const converterBalanceAfterPart1 = new Map<string, BigNumber>();
 
   before(async () => {
-    // Etch the freshly compiled V3 helper bytecode at MIGRATION_HELPER_V2
-    // (mirrors part-1 sim).
-    await ethers.provider.send("hardhat_setCode", [
-      MIGRATION_HELPER_V2,
-      (HELPER_V3_ARTIFACT as { deployedBytecode: string }).deployedBytecode,
-    ]);
-
     // Pre-condition the deploy script will fulfil on chain: every buyback's
     // pendingOwner must point at MIGRATION_HELPER_V2 so part-1's
     // helper.execute1() can accept ownership. At the fork block buybacks may
-    // still point at the V1 helper, so re-point each one via impersonation.
-    // Idempotent: skips buybacks already pointed at V2.
+    // still point at the previous helper, so re-point each one via
+    // impersonation. Idempotent: skips buybacks already pointed at V2.
     for (const b of BUYBACKS) {
       const buybackOwnable = new ethers.Contract(b, OWNABLE_MIN_ABI, ethers.provider);
       const currentPending = await buybackOwnable.pendingOwner();
@@ -83,8 +99,8 @@ forking(FORK_BLOCK, async () => {
       await buybackAsOwner.transferOwnership(MIGRATION_HELPER_V2);
     }
 
-    // Apply part-1 from NormalTimelock so helper.execute1() passes the
-    // `msg.sender == NORMAL_TIMELOCK` gate.
+    // Apply part-1 from NormalTimelock so helper.execute1() / executeSwap()
+    // pass the `msg.sender == NORMAL_TIMELOCK` gate.
     await pretendExecutingVip(await vip800Part1(), bscmainnet.NORMAL_TIMELOCK);
 
     for (const d of DRAIN_BY_CONVERTER) {
@@ -100,14 +116,23 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Pre-VIP state (part 2, after part-1 has executed)", () => {
-    it("helper.executed1 is true and executed2 is false", async () => {
+    it("helper.executed1 and helper.executedSwap are true; executed2 is false", async () => {
       expect(await helper.executed1()).to.be.true;
+      expect(await helper.executedSwap()).to.be.true;
       expect(await helper.executed2()).to.be.false;
     });
 
-    it("helper still owns each timelock-owned legacy converter", async () => {
-      for (const c of TIMELOCK_OWNED_CONVERTERS) {
-        expect((await ownable(c).owner()).toLowerCase()).to.equal(MIGRATION_HELPER_V2.toLowerCase());
+    it("helper still owns every buyback and every timelock-owned converter", async () => {
+      for (const a of [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS]) {
+        expect((await ownable(a).owner()).toLowerCase()).to.equal(MIGRATION_HELPER_V2.toLowerCase());
+      }
+    });
+
+    it("no router is allowlisted on any buyback yet (allowlist deferred to execute2)", async () => {
+      for (const b of BUYBACKS) {
+        for (const r of ALL_ROUTERS) {
+          expect(await buybackRouters(b).allowedRouters(r), `${b}/${r}`).to.be.false;
+        }
       }
     });
 
@@ -116,7 +141,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-800 part 2 — drain converters and hand back ownership", await vip800Part2());
+  testVip("VIP-800 part 2 — router allowlist, drain, and hand back ownership", await vip800Part2());
 
   describe("Post-VIP state (part 2)", () => {
     it("helper.executed2 is true; second execute2() reverts", async () => {
@@ -124,6 +149,14 @@ forking(FORK_BLOCK, async () => {
       const helperWithExecute2 = new ethers.Contract(MIGRATION_HELPER_V2, ["function execute2()"], ethers.provider);
       const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       await expect(helperWithExecute2.connect(timelockSigner).execute2()).to.be.reverted;
+    });
+
+    it("every router is allowlisted on every buyback", async () => {
+      for (const b of BUYBACKS) {
+        for (const r of ALL_ROUTERS) {
+          expect(await buybackRouters(b).allowedRouters(r), `${b}/${r}`).to.be.true;
+        }
+      }
     });
 
     it("each timelock-owned converter has zero residual balance for every core-pool token", async () => {
@@ -136,8 +169,8 @@ forking(FORK_BLOCK, async () => {
 
     it("recipient buybacks received the drained balances (delta >= pre-part-2 converter balance)", async () => {
       // Aggregate expected inflow per (token, recipient) by summing every
-      // converter that maps to the same recipient (e.g. four PrimeConverters
-      // all flow to U_PRIME_BUYBACK).
+      // converter that maps to the same recipient (four PrimeConverters all
+      // flow to U_PRIME_BUYBACK).
       const expectedInflow = new Map<string, BigNumber>();
       for (const d of DRAIN_BY_CONVERTER) {
         for (const t of CORE_TOKENS) {
@@ -156,15 +189,14 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("NormalTimelock owns each timelock-owned legacy converter", async () => {
-      for (const c of TIMELOCK_OWNED_CONVERTERS) {
-        expect((await ownable(c).owner()).toLowerCase()).to.equal(bscmainnet.NORMAL_TIMELOCK.toLowerCase());
+    it("NormalTimelock owns each buyback and each timelock-owned converter", async () => {
+      for (const a of [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS]) {
+        expect((await ownable(a).owner()).toLowerCase()).to.equal(bscmainnet.NORMAL_TIMELOCK.toLowerCase());
       }
     });
 
     it("helper is neither owner nor pendingOwner of any of the 16 migrated contracts", async () => {
-      const targets = [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS];
-      for (const t of targets) {
+      for (const t of [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS]) {
         expect((await ownable(t).owner()).toLowerCase(), `${t} owner`).to.not.equal(MIGRATION_HELPER_V2.toLowerCase());
         expect((await ownable(t).pendingOwner()).toLowerCase(), `${t} pendingOwner`).to.not.equal(
           MIGRATION_HELPER_V2.toLowerCase(),
