@@ -5,6 +5,9 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+// Prefer vip-800/bscmainnet-part-1 for anything it exports; fall back to the
+// frozen vip-618 only for what vip-800 does not re-export (legacy converters
+// and the 9 swap routers).
 import {
   BTCB_PRIME_CONVERTER,
   ETH_PRIME_CONVERTER,
@@ -125,7 +128,7 @@ forking(FORK_BLOCK, async () => {
 
     it("helper still owns every buyback and every timelock-owned converter", async () => {
       for (const a of [...BUYBACKS, ...TIMELOCK_OWNED_CONVERTERS]) {
-        expect((await ownable(a).owner()).toLowerCase()).to.equal(MIGRATION_HELPER_V2.toLowerCase());
+        expect((await ownable(a).owner()).toLowerCase(), a).to.equal(MIGRATION_HELPER_V2.toLowerCase());
       }
     });
 
@@ -140,6 +143,15 @@ forking(FORK_BLOCK, async () => {
     it("helper does NOT hold DEFAULT_ADMIN_ROLE on the ACM", async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, MIGRATION_HELPER_V2)).to.be.false;
     });
+
+    it("helper holds zero balance of every core-pool token and zero native BNB", async () => {
+      // After part-1's executeSwap, any leftover USDC has been forwarded back
+      // to NormalTimelock — helper should be empty heading into part-2's drain.
+      for (const t of CORE_TOKENS) {
+        expect(await erc20(t).balanceOf(MIGRATION_HELPER_V2), t).to.equal(0);
+      }
+      expect(await ethers.provider.getBalance(MIGRATION_HELPER_V2), "native BNB").to.equal(0);
+    });
   });
 
   testVip("VIP-800 part 2 — router allowlist, drain, and hand back ownership", await vip800Part2());
@@ -150,6 +162,17 @@ forking(FORK_BLOCK, async () => {
       const helperWithExecute2 = new ethers.Contract(MIGRATION_HELPER_V2, ["function execute2()"], ethers.provider);
       const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       await expect(helperWithExecute2.connect(timelockSigner).execute2()).to.be.reverted;
+    });
+
+    it("all three helper entrypoints revert on re-entry (AlreadyExecuted)", async () => {
+      const helperAllEntrypoints = new ethers.Contract(
+        MIGRATION_HELPER_V2,
+        ["function execute1()", "function executeSwap()"],
+        ethers.provider,
+      );
+      const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      await expect(helperAllEntrypoints.connect(timelockSigner).execute1(), "execute1").to.be.reverted;
+      await expect(helperAllEntrypoints.connect(timelockSigner).executeSwap(), "executeSwap").to.be.reverted;
     });
 
     it("every router is allowlisted on every buyback", async () => {

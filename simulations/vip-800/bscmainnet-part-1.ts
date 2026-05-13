@@ -6,12 +6,17 @@ import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
+  BORROW_MULTIPLIER,
   BTCB_PRIME_CONVERTER,
   ETH_PRIME_CONVERTER,
+  NEW_PRIME_SPEED_FOR_U,
+  NEW_PRIME_SPEED_FOR_USDT,
   PRIME,
   RISK_FUND_CONVERTER,
+  SUPPLY_MULTIPLIER,
   USDC_PRIME_CONVERTER,
   USDT_PRIME_CONVERTER,
+  U_MAX_DISTRIBUTION_SPEED,
   VTREASURY,
   VU,
   WBNB_BURN_CONVERTER,
@@ -31,7 +36,9 @@ import vip800Part1, {
   TIMELOCK_OWNED_CONVERTERS,
   U,
   USDC,
+  USDC_TO_SWEEP,
   USDT,
+  U_MIN_OUT,
   U_PRIME_BUYBACK,
   XVS_BUYBACK,
 } from "../../vips/vip-800/bscmainnet-part-1";
@@ -41,10 +48,6 @@ import ERC20_ABI from "../vip-618/abi/ERC20.json";
 import PSR_ABI from "../vip-618/abi/ProtocolShareReserve.json";
 import BUYBACK_ABI from "../vip-618/abi/TokenBuyback.json";
 import TOKEN_BUYBACK_MIGRATION_HELPER_ABI from "./abi/TokenBuybackMigrationHelper.json";
-
-// Re-export so part-2 sim can pick up the same address universe without
-// duplicating imports.
-export { BUYBACKS, MIGRATION_HELPER_V2, TIMELOCK_OWNED_CONVERTERS };
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -171,13 +174,19 @@ forking(FORK_BLOCK, async () => {
     it("each buyback proxy's pendingOwner is MIGRATION_HELPER_V2", async () => {
       for (const b of BUYBACKS) {
         const buyback = new ethers.Contract(b, BUYBACK_ABI, ethers.provider);
-        expect(await buyback.pendingOwner()).to.equal(MIGRATION_HELPER_V2);
+        expect((await buyback.pendingOwner()).toLowerCase(), b).to.equal(MIGRATION_HELPER_V2.toLowerCase());
+      }
+    });
+
+    it("each timelock-owned converter is owned by NormalTimelock (pre-transfer)", async () => {
+      for (const c of TIMELOCK_OWNED_CONVERTERS) {
+        expect((await ownable(c).owner()).toLowerCase(), c).to.equal(bscmainnet.NORMAL_TIMELOCK.toLowerCase());
       }
     });
 
     it("each timelock-owned legacy converter is not yet paused", async () => {
       for (const c of TIMELOCK_OWNED_CONVERTERS) {
-        expect(await converter(c).conversionPaused()).to.be.false;
+        expect(await converter(c).conversionPaused(), c).to.be.false;
       }
     });
 
@@ -191,6 +200,11 @@ forking(FORK_BLOCK, async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, MIGRATION_HELPER_V2)).to.be.false;
     });
 
+    it("helper holds zero USDC and zero native BNB pre-VIP", async () => {
+      expect(await usdc.balanceOf(MIGRATION_HELPER_V2)).to.equal(0);
+      expect(await ethers.provider.getBalance(MIGRATION_HELPER_V2)).to.equal(0);
+    });
+
     it("vU is not yet a Prime market", async () => {
       const m = await prime.markets(VU);
       expect(m.exists).to.be.false;
@@ -198,6 +212,10 @@ forking(FORK_BLOCK, async () => {
 
     it("U is not yet initialized in PrimeLiquidityProvider", async () => {
       expect(await plp.lastAccruedBlockOrSecond(U)).to.equal(0);
+    });
+
+    it("Shortfall auctions are not yet paused (set inside execute1)", async () => {
+      expect(await shortfall.auctionsPaused()).to.be.false;
     });
   });
 
@@ -216,13 +234,13 @@ forking(FORK_BLOCK, async () => {
 
     it("helper still owns each buyback (handback deferred to part 2)", async () => {
       for (const b of BUYBACKS) {
-        expect(await ownable(b).owner()).to.equal(MIGRATION_HELPER_V2);
+        expect((await ownable(b).owner()).toLowerCase(), b).to.equal(MIGRATION_HELPER_V2.toLowerCase());
       }
     });
 
     it("helper still owns each timelock-owned legacy converter (handback deferred to part 2)", async () => {
       for (const c of TIMELOCK_OWNED_CONVERTERS) {
-        expect(await ownable(c).owner()).to.equal(MIGRATION_HELPER_V2);
+        expect((await ownable(c).owner()).toLowerCase(), c).to.equal(MIGRATION_HELPER_V2.toLowerCase());
       }
     });
 
@@ -235,7 +253,9 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("RiskFundV2 proxy upgraded to new implementation", async () => {
-      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_V2)).to.equal(NEW_RISK_FUND_V2_IMPL);
+      expect((await proxyAdmin.getProxyImplementation(RISK_FUND_V2)).toLowerCase()).to.equal(
+        NEW_RISK_FUND_V2_IMPL.toLowerCase(),
+      );
     });
 
     it("RiskFundV2 USDT balance non-decreasing across upgrade", async () => {
@@ -300,37 +320,51 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Post-VIP Prime allocation", () => {
-    it("vU is registered as a Prime market", async () => {
+    it("vU is registered as a Prime market with the expected multipliers", async () => {
       const m = await prime.markets(VU);
-      expect(m.exists).to.be.true;
+      expect(m.exists, "exists").to.be.true;
+      expect(m.supplyMultiplier, "supplyMultiplier").to.equal(SUPPLY_MULTIPLIER);
+      expect(m.borrowMultiplier, "borrowMultiplier").to.equal(BORROW_MULTIPLIER);
     });
 
     it("U is initialized in PrimeLiquidityProvider", async () => {
       expect(await plp.lastAccruedBlockOrSecond(U)).to.be.gt(0);
     });
 
-    it("PLP USDC balance decreased (VIP swept USDC into the helper for swaps)", async () => {
-      const after = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      expect(after).to.be.lt(plpUsdcBalanceBefore);
+    it("PLP max distribution speed for U is set", async () => {
+      expect(await plp.maxTokenDistributionSpeeds(U)).to.equal(U_MAX_DISTRIBUTION_SPEED);
     });
 
-    it("PLP USDT balance is unchanged (USDT swap leg was dropped — PLP already holds enough)", async () => {
+    it("PLP distribution speeds set for USDT and U", async () => {
+      expect(await plp.tokenDistributionSpeeds(USDT), "USDT speed").to.equal(NEW_PRIME_SPEED_FOR_USDT);
+      expect(await plp.tokenDistributionSpeeds(U), "U speed").to.equal(NEW_PRIME_SPEED_FOR_U);
+    });
+
+    it("PLP USDC balance decreased by exactly USDC_TO_SWEEP", async () => {
+      const after = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(plpUsdcBalanceBefore.sub(after)).to.equal(USDC_TO_SWEEP);
+    });
+
+    it("PLP USDT balance is unchanged (V3 multihop routes USDT through, doesn't deposit it)", async () => {
       const after = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
       expect(after).to.equal(plpUsdtBalanceBefore);
     });
 
-    it("PLP U balance non-decreasing (USDC -> USDT -> U multihop is soft-fail)", async () => {
+    it("PLP U balance increased by at least U_MIN_OUT (strict — soft-fail of executeSwap would surface here)", async () => {
       const after = await erc20(U).balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      expect(after).to.be.gte(plpUBalanceBefore);
+      expect(after.sub(plpUBalanceBefore)).to.be.gte(U_MIN_OUT);
     });
 
-    it("Helper holds zero USDC after executeSwap (leftover forwarded back to NormalTimelock)", async () => {
+    it("Helper holds zero USDC after executeSwap", async () => {
       expect(await usdc.balanceOf(MIGRATION_HELPER_V2)).to.equal(0);
     });
 
-    it("NormalTimelock USDC balance is non-decreasing (helper forwards leftover here)", async () => {
+    it("NormalTimelock USDC balance is unchanged (swap succeeded — no leftover forwarded)", async () => {
+      // On soft-fail of executeSwap, helper forwards USDC_TO_SWEEP back to
+      // NormalTimelock. The strict U-min-out assertion above rules that out,
+      // so Timelock USDC delta should be exactly zero.
       const after = await usdc.balanceOf(bscmainnet.NORMAL_TIMELOCK);
-      expect(after).to.be.gte(timelockUsdcBalanceBefore);
+      expect(after).to.equal(timelockUsdcBalanceBefore);
     });
   });
 
