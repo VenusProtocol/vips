@@ -41,7 +41,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // Match part-1 sim's FORK_BLOCK. Must be past the latest helper redeploy
 // (block 98038965, commit 746fe99) and the PR #162 buyback redeploys
 // (97999686 – 98000650).
-const FORK_BLOCK = 98041000;
+const FORK_BLOCK = 98045598;
 
 const BUYBACK_ROUTERS_ABI = ["function allowedRouters(address) view returns (bool)"];
 const OWNABLE_MIN_ABI = ["function owner() view returns (address)", "function pendingOwner() view returns (address)"];
@@ -83,20 +83,21 @@ forking(FORK_BLOCK, async () => {
   const converterBalanceAfterPart1 = new Map<string, BigNumber>();
 
   before(async () => {
-    // Pre-condition the deploy script will fulfil on chain: every buyback's
-    // pendingOwner must point at MIGRATION_HELPER_V2 so part-1's
-    // helper.execute1() can accept ownership. At the fork block buybacks may
-    // still point at the previous helper, so re-point each one via
-    // impersonation. Idempotent: skips buybacks already pointed at V2.
+    // Production pre-condition (enforced — no fork-only impersonation patch):
+    // every buyback proxy's pendingOwner must already point at
+    // MIGRATION_HELPER_V2. Same off-chain step as part-1; mirrored here because
+    // part-2's `pretendExecutingVip(part1)` re-enters helper.execute1() which
+    // calls acceptOwnership() on every buyback.
     for (const b of BUYBACKS) {
       const buybackOwnable = new ethers.Contract(b, OWNABLE_MIN_ABI, ethers.provider);
-      const currentPending = await buybackOwnable.pendingOwner();
-      if (currentPending.toLowerCase() === MIGRATION_HELPER_V2.toLowerCase()) continue;
-
-      const currentOwner = await buybackOwnable.owner();
-      const ownerSigner = await initMainnetUser(currentOwner, ethers.utils.parseEther("1"));
-      const buybackAsOwner = new ethers.Contract(b, ["function transferOwnership(address)"], ownerSigner);
-      await buybackAsOwner.transferOwnership(MIGRATION_HELPER_V2);
+      const pending: string = await buybackOwnable.pendingOwner();
+      if (pending.toLowerCase() !== MIGRATION_HELPER_V2.toLowerCase()) {
+        throw new Error(
+          `pre-condition unmet: buyback ${b} pendingOwner=${pending}, expected ${MIGRATION_HELPER_V2}. ` +
+            `The buyback deploy script (protocol-reserve PR #162) must call ` +
+            `transferOwnership(${MIGRATION_HELPER_V2}) on every proxy before VIP-800 part-1 is queued.`,
+        );
+      }
     }
 
     // Apply part-1 from NormalTimelock so helper.execute1() / executeSwap()

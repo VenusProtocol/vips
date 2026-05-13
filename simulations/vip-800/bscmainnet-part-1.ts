@@ -52,7 +52,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // (protocol-reserve PR #164, commit 746fe99 — rebuilt after the USDT-leg
 // drop) at BSC block 98038965, and past every PR #162 buyback redeploy
 // (97999686 – 98000650).
-const FORK_BLOCK = 98041000;
+const FORK_BLOCK = 98045598;
 
 const SHORTFALL_MIN_ABI = ["function auctionsPaused() view returns (bool)"];
 const CONVERTER_MIN_ABI = ["function conversionPaused() view returns (bool)"];
@@ -130,18 +130,27 @@ forking(FORK_BLOCK, async () => {
   const converterBalanceBefore = new Map<string, BigNumber>();
 
   before(async () => {
-    // Pre-condition the deploy script will fulfil on chain: every buyback's
-    // pendingOwner must point at MIGRATION_HELPER_V2 so helper.execute1() can
-    // accept ownership. At the fork block buybacks still point at the previous
-    // helper, so impersonate the current owner and re-point each one.
+    // Production pre-condition (enforced — no fork-only impersonation patch):
+    // every buyback proxy's pendingOwner must already point at
+    // MIGRATION_HELPER_V2 so helper.execute1() can accept ownership. The
+    // protocol-reserve PR #162 deploy script is responsible for calling
+    // transferOwnership(MIGRATION_HELPER_V2) on each proxy before this VIP is
+    // queued. The buybacks' current owner is the deployer EOA — NormalTimelock
+    // cannot transfer it from within the VIP — so this is an off-chain step.
+    //
+    // If this fails, fix the deploy script (preferred) or run an EOA tx that
+    // sets pendingOwner on each proxy. The "Pre-VIP state > pendingOwner" test
+    // below also asserts the same invariant; both surfaces exist on purpose.
     for (const b of BUYBACKS) {
       const buybackOwnable = new ethers.Contract(b, OWNABLE_MIN_ABI, ethers.provider);
-      const currentPending = await buybackOwnable.pendingOwner();
-      if (currentPending.toLowerCase() === MIGRATION_HELPER_V2.toLowerCase()) continue;
-      const currentOwner = await buybackOwnable.owner();
-      const ownerSigner = await initMainnetUser(currentOwner, ethers.utils.parseEther("1"));
-      const buybackAsOwner = new ethers.Contract(b, ["function transferOwnership(address)"], ownerSigner);
-      await buybackAsOwner.transferOwnership(MIGRATION_HELPER_V2);
+      const pending: string = await buybackOwnable.pendingOwner();
+      if (pending.toLowerCase() !== MIGRATION_HELPER_V2.toLowerCase()) {
+        throw new Error(
+          `pre-condition unmet: buyback ${b} pendingOwner=${pending}, expected ${MIGRATION_HELPER_V2}. ` +
+            `The buyback deploy script (protocol-reserve PR #162) must call ` +
+            `transferOwnership(${MIGRATION_HELPER_V2}) on every proxy before VIP-800 part-1 is queued.`,
+        );
+      }
     }
 
     riskFundV2UsdtBalanceBefore = await usdt.balanceOf(RISK_FUND_V2);
