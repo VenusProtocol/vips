@@ -44,6 +44,14 @@ const OMNICHAIN_GOVERNANCE_EXECUTOR =
 // Previous voting period: 115,200
 // New voting period: 115,200 * 1.67 = 192,384
 const VOTING_PERIOD = 192384;
+const BNB_GOVERNANCE_TX_GAS_LIMIT = BigNumber.from(16_000_000);
+
+const checkGasLimit = (operation: string, gasUsed: BigNumber): void => {
+  console.log(`\n  [BNB Gas] Governor Bravo ${operation} — gas used: ${gasUsed.toString()}`);
+  if (gasUsed.gt(BNB_GOVERNANCE_TX_GAS_LIMIT)) {
+    throw new Error(`[BNB Gas] Governor Bravo "${operation}" gas used (${gasUsed.toString()}) exceeds the 16M limit`);
+  }
+};
 
 export const {
   DEFAULT_PROPOSER_ADDRESS,
@@ -185,21 +193,20 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("can be proposed", async () => {
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
-      let tx;
 
-      // Validates target address
       await validateTargetAddresses(targets, signatures);
 
-      if (proposal.type === undefined || proposal.type === null) {
-        tx = await governorProxy
-          .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta));
-      } else {
-        tx = await governorProxy
-          .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type);
-      }
-      await tx.wait();
+      const calldatas = getCalldatas(proposal);
+      const metaJson = JSON.stringify(meta);
+      const withType = proposal.type != null;
+
+      const tx = withType
+        ? await governorProxy.connect(proposer).propose(targets, values, signatures, calldatas, metaJson, proposal.type)
+        : await governorProxy.connect(proposer).propose(targets, values, signatures, calldatas, metaJson);
+
+      const receipt = await tx.wait();
+      checkGasLimit("propose", receipt.gasUsed);
+
       proposalId = await governorProxy.callStatic.proposalCount();
       expect(proposalIdBefore.add(1)).to.equal(proposalId);
     });
@@ -217,7 +224,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("should be queued successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
-      await tx.wait();
+      const receipt = await tx.wait();
+      checkGasLimit("queue", receipt.gasUsed);
     });
 
     it("should be executed successfully", async () => {
@@ -225,6 +233,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
+      const receipt = await tx.wait();
+      checkGasLimit("execute", receipt.gasUsed);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);

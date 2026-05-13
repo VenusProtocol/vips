@@ -21,8 +21,8 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 });
 
 const BLOCK_GAS_LIMIT_PER_NETWORK = {
-  bsctestnet: 140000000,
-  bscmainnet: 140000000,
+  bsctestnet: 30000000,
+  bscmainnet: 30000000,
   sepolia: 30000000,
   ethereum: 30000000,
   opbnbtestnet: 100000000,
