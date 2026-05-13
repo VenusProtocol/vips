@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { forking, testVip } from "src/vip-framework";
 
 // Prefer vip-800/bscmainnet-part-1 for anything it exports; fall back to the
 // frozen vip-618 only for what vip-800 does not re-export (legacy converters
@@ -88,9 +88,8 @@ forking(FORK_BLOCK, async () => {
   before(async () => {
     // Production pre-condition (enforced — no fork-only impersonation patch):
     // every buyback proxy's pendingOwner must already point at
-    // MIGRATION_HELPER_V2. Same off-chain step as part-1; mirrored here because
-    // part-2's `pretendExecutingVip(part1)` re-enters helper.execute1() which
-    // calls acceptOwnership() on every buyback.
+    // MIGRATION_HELPER_V2. Mirrored here because part-1 (run below via testVip)
+    // re-enters helper.execute1() which calls acceptOwnership() on every buyback.
     for (const b of BUYBACKS) {
       const buybackOwnable = new ethers.Contract(b, OWNABLE_MIN_ABI, ethers.provider);
       const pending: string = await buybackOwnable.pendingOwner();
@@ -102,21 +101,27 @@ forking(FORK_BLOCK, async () => {
         );
       }
     }
+  });
 
-    // Apply part-1 from NormalTimelock so helper.execute1() / executeSwap()
-    // pass the `msg.sender == NORMAL_TIMELOCK` gate.
-    await pretendExecutingVip(await vip800Part1(), bscmainnet.NORMAL_TIMELOCK);
-
-    for (const d of DRAIN_BY_CONVERTER) {
-      for (const t of CORE_TOKENS) {
-        const recipientKey = `${t.toLowerCase()}:${d.recipient.toLowerCase()}`;
-        if (!recipientBalanceAfterPart1.has(recipientKey)) {
-          recipientBalanceAfterPart1.set(recipientKey, await erc20(t).balanceOf(d.recipient));
+  // Apply part-1 via the full governance flow so part-2 runs against the same
+  // post-part-1 state that mainnet will see. testVip(part1) state persists into
+  // testVip(part2) because each testVip uses its own loadFixture function — the
+  // part-2 fixture's first snapshot is taken AFTER part-1 has executed.
+  // Capture post-part-1 balances in callbackAfterExecution so the post-part-2
+  // delta isolates the drain.
+  testVip("VIP-800 part 1 (setup for part-2 sim)", await vip800Part1(), {
+    callbackAfterExecution: async () => {
+      for (const d of DRAIN_BY_CONVERTER) {
+        for (const t of CORE_TOKENS) {
+          const recipientKey = `${t.toLowerCase()}:${d.recipient.toLowerCase()}`;
+          if (!recipientBalanceAfterPart1.has(recipientKey)) {
+            recipientBalanceAfterPart1.set(recipientKey, await erc20(t).balanceOf(d.recipient));
+          }
+          const converterKey = `${d.converter.toLowerCase()}:${t.toLowerCase()}`;
+          converterBalanceAfterPart1.set(converterKey, await erc20(t).balanceOf(d.converter));
         }
-        const converterKey = `${d.converter.toLowerCase()}:${t.toLowerCase()}`;
-        converterBalanceAfterPart1.set(converterKey, await erc20(t).balanceOf(d.converter));
       }
-    }
+    },
   });
 
   describe("Pre-VIP state (part 2, after part-1 has executed)", () => {
