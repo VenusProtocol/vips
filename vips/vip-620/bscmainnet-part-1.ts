@@ -5,7 +5,7 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 // vip-618 is on-chain (proposed, execution failed) and its constants are
-// frozen. VIP-800 imports only the values that survived the redeploy unchanged
+// frozen. VIP-620 imports only the values that survived the redeploy unchanged
 // and redefines the buyback addresses and swap-budget constants locally below.
 import {
   BORROW_MULTIPLIER,
@@ -33,7 +33,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 // ===== New TokenBuyback proxies (PR #162 redeploy — supersedes vip-618) =====
 // vip-618 hard-codes the original proxy addresses; the redeploy from
-// protocol-reserve PR #162 changed every one of them, so VIP-800 carries its
+// protocol-reserve PR #162 changed every one of them, so VIP-620 carries its
 // own canonical list. Order is preserved (same index → same buyback role) so
 // PSR-row indices in the sim line up across both VIPs.
 export const RISK_FUND_BUYBACK = "0x0c71EFabD00329E839745ef23aB946d3ed24A805";
@@ -102,18 +102,18 @@ const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 const HELPER_EXECUTE1_SIG = "execute1()";
 const HELPER_EXECUTE_SWAP_SIG = "executeSwap()";
 
-export const VIP_NUMBER = "vip-800-part-1";
+export const VIP_NUMBER = "vip-620";
 
-export const vip800Part1 = () => {
+export const vip620 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 [BNB Chain] TokenBuyback Migration Part 1 & May Prime Allocation",
+    title: "VIP-620 [BNB Chain] TokenBuyback Migration Part 1 & May Prime Allocation",
     description: `#### Summary
 
-Replaces VIP-618 (unexecutable on-chain because its single helper.execute() exceeds BSC's Osaka per-tx gas cap of 16,777,216). VIP-800 splits the migration into two proposals:
+Replaces VIP-618 (unexecutable on-chain because its single helper.execute() exceeds BSC's Osaka per-tx gas cap of 16,777,216). The migration is split into two proposals — VIP-620 (this VIP) and VIP-621:
 
-- **Part 1 (this VIP)**: every migration step except draining the 6 timelock-owned converters and allowlisting swap routers on the 10 buyback proxies. The May 2026 Prime Rewards Allocation is driven by the VIP itself: Prime.addMarket(vU), PLP.initializeTokens/setMax/setSpeed and PLP.sweepToken are called directly from NormalTimelock; the helper only wraps a single soft-failing USDC → USDT → U multihop in executeSwap() so a thin-pool revert can't unwind the rest of the migration. PLP already holds ~25k USDT for the May 2026 distribution, so only U is bought.
-- **Part 2 (vip-800-part-2)**: allowlisting 9 swap routers on every buyback, the converter drain, and the final return of all 16 (10 buybacks + 6 converters) ownership to NormalTimelock.
+- **Part 1 (VIP-620, this VIP)**: every migration step except draining the 6 timelock-owned converters and allowlisting swap routers on the 10 buyback proxies. The May 2026 Prime Rewards Allocation is driven by the VIP itself: Prime.addMarket(vU), PLP.initializeTokens/setMax/setSpeed and PLP.sweepToken are called directly from NormalTimelock; the helper only wraps a single soft-failing USDC → USDT → U multihop in executeSwap() so a thin-pool revert can't unwind the rest of the migration. PLP already holds ~25k USDT for the May 2026 distribution, so only U is bought.
+- **Part 2 (VIP-621)**: allowlisting 9 swap routers on every buyback, the converter drain, and the final return of all 16 (10 buybacks + 6 converters) ownership to NormalTimelock.
 
 Between part 1 and part 2 the 6 legacy converters are paused (no inbound conversion can occur), PSR is already repointed away from them, and Shortfall auctions are paused. Balances are frozen and there is no economic surface from them. The helper retains ownership of all 16 contracts across the gap but holds no ACM privileges (DEFAULT_ADMIN_ROLE is renounced at the end of execute1()) and has no external entrypoints beyond the one-shot execute1 / executeSwap / execute2.
 
@@ -246,4 +246,4 @@ BSC's Osaka hardfork enforces a hard per-tx gas cap of 2^24 = 16,777,216. The or
   );
 };
 
-export default vip800Part1;
+export default vip620;

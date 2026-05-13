@@ -5,8 +5,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-// Prefer vip-800/bscmainnet-part-1 for anything it exports; fall back to the
-// frozen vip-618 only for what vip-800 does not re-export (legacy converters
+// Prefer vip-620/bscmainnet-part-1 for anything it exports; fall back to the
+// frozen vip-618 only for what vip-620 does not re-export (legacy converters
 // and the 9 swap routers).
 import {
   BTCB_PRIME_CONVERTER,
@@ -25,7 +25,7 @@ import {
   USDT_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
 } from "../../vips/vip-618/bscmainnet";
-import vip800Part1, {
+import vip620, {
   BUYBACKS,
   CORE_TOKENS,
   MIGRATION_HELPER_V2,
@@ -33,8 +33,8 @@ import vip800Part1, {
   TIMELOCK_OWNED_CONVERTERS,
   U_PRIME_BUYBACK,
   XVS_BUYBACK,
-} from "../../vips/vip-800/bscmainnet-part-1";
-import vip800Part2 from "../../vips/vip-800/bscmainnet-part-2";
+} from "../../vips/vip-620/bscmainnet-part-1";
+import vip621 from "../../vips/vip-620/bscmainnet-part-2";
 import ACM_ABI from "../vip-618/abi/AccessControlManager.json";
 import ERC20_ABI from "../vip-618/abi/ERC20.json";
 import TOKEN_BUYBACK_MIGRATION_HELPER_ABI from "./abi/TokenBuybackMigrationHelper.json";
@@ -97,7 +97,7 @@ forking(FORK_BLOCK, async () => {
         throw new Error(
           `pre-condition unmet: buyback ${b} pendingOwner=${pending}, expected ${MIGRATION_HELPER_V2}. ` +
             `The buyback deploy script (protocol-reserve PR #162) must call ` +
-            `transferOwnership(${MIGRATION_HELPER_V2}) on every proxy before VIP-800 part-1 is queued.`,
+            `transferOwnership(${MIGRATION_HELPER_V2}) on every proxy before VIP-620 is queued.`,
         );
       }
     }
@@ -109,7 +109,7 @@ forking(FORK_BLOCK, async () => {
   // part-2 fixture's first snapshot is taken AFTER part-1 has executed.
   // Capture post-part-1 balances in callbackAfterExecution so the post-part-2
   // delta isolates the drain.
-  testVip("VIP-800 part 1 (setup for part-2 sim)", await vip800Part1(), {
+  testVip("VIP-620 (setup for part-2 sim)", await vip620(), {
     callbackAfterExecution: async () => {
       for (const d of DRAIN_BY_CONVERTER) {
         for (const t of CORE_TOKENS) {
@@ -159,7 +159,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-800 part 2 — router allowlist, drain, and hand back ownership", await vip800Part2());
+  testVip("VIP-621 — router allowlist, drain, and hand back ownership", await vip621());
 
   describe("Post-VIP state (part 2)", () => {
     it("helper.executed2 is true; second execute2() reverts", async () => {

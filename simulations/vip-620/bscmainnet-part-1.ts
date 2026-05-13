@@ -22,7 +22,7 @@ import {
   WBNB_BURN_CONVERTER,
   XVS_VAULT_CONVERTER,
 } from "../../vips/vip-618/bscmainnet";
-import vip800Part1, {
+import vip620, {
   BUYBACKS,
   CORE_TOKENS,
   DEFAULT_PROXY_ADMIN,
@@ -41,7 +41,7 @@ import vip800Part1, {
   U_MIN_OUT,
   U_PRIME_BUYBACK,
   XVS_BUYBACK,
-} from "../../vips/vip-800/bscmainnet-part-1";
+} from "../../vips/vip-620/bscmainnet-part-1";
 import ACM_ABI from "../vip-618/abi/AccessControlManager.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../vip-618/abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "../vip-618/abi/ERC20.json";
@@ -151,7 +151,7 @@ forking(FORK_BLOCK, async () => {
         throw new Error(
           `pre-condition unmet: buyback ${b} pendingOwner=${pending}, expected ${MIGRATION_HELPER_V2}. ` +
             `The buyback deploy script (protocol-reserve PR #162) must call ` +
-            `transferOwnership(${MIGRATION_HELPER_V2}) on every proxy before VIP-800 part-1 is queued.`,
+            `transferOwnership(${MIGRATION_HELPER_V2}) on every proxy before VIP-620 is queued.`,
         );
       }
     }
@@ -219,7 +219,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-800 part 1 — non-drain migration & May Prime allocation", await vip800Part1());
+  testVip("VIP-620 — non-drain migration & May Prime allocation", await vip620());
 
   describe("Post-VIP state (part 1)", () => {
     it("helper.executed1 and helper.executedSwap are true; executed2 still false", async () => {

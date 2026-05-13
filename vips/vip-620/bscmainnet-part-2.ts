@@ -7,17 +7,17 @@ export { BUYBACKS, MIGRATION_HELPER_V2, TIMELOCK_OWNED_CONVERTERS };
 
 const HELPER_EXECUTE2_SIG = "execute2()";
 
-export const VIP_NUMBER = "vip-800-part-2";
+export const VIP_NUMBER = "vip-621";
 
-export const vip800Part2 = () => {
+export const vip621 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 [BNB Chain] TokenBuyback Migration Part 2 (router allowlist + drain + handback)",
+    title: "VIP-621 [BNB Chain] TokenBuyback Migration Part 2 (router allowlist + drain + handback)",
     description: `#### Summary
 
-Final step of the VIP-800 TokenBuyback migration. Allowlists 9 swap routers on every buyback, drains every non-zero ERC20 balance from the 6 timelock-owned legacy converters into the corresponding new buyback proxies, and returns ownership of all 16 contracts (10 buybacks + 6 converters) to NormalTimelock.
+Final step of the TokenBuyback migration begun in VIP-620. Allowlists 9 swap routers on every buyback, drains every non-zero ERC20 balance from the 6 timelock-owned legacy converters into the corresponding new buyback proxies, and returns ownership of all 16 contracts (10 buybacks + 6 converters) to NormalTimelock.
 
-This VIP must be queued and executed **after** vip-800-part-1, which:
+This VIP must be queued and executed **after** VIP-620, which:
 - Granted the V2 helper DEFAULT_ADMIN_ROLE on the ACM (renounced at end of execute1) and converter ownership.
 - Accepted ownership of the 10 buyback proxies (deployed with pendingOwner = V2 helper) and the 6 timelock-owned converters.
 - Paused every timelock-owned converter (no inbound conversion since pause) and Shortfall auctions.
@@ -75,4 +75,4 @@ BSC's Osaka hardfork enforces a hard per-tx gas cap of 2^24 = 16,777,216. The or
   );
 };
 
-export default vip800Part2;
+export default vip621;
