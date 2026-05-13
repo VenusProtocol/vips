@@ -1,11 +1,14 @@
 import { ethers } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+// vip-618 is on-chain (proposed, execution failed) and its constants are
+// frozen. VIP-800 imports only the values that survived the redeploy unchanged
+// and redefines the buyback addresses and swap-budget constants locally below.
 import {
   BORROW_MULTIPLIER,
-  BUYBACKS,
   CORE_COMPTROLLER,
   CORE_TOKENS,
   DEFAULT_PROXY_ADMIN,
@@ -15,41 +18,72 @@ import {
   PRIME,
   PRIME_LIQUIDITY_PROVIDER,
   PROTOCOL_SHARE_RESERVE,
-  RISK_FUND_BUYBACK,
   RISK_FUND_V2,
   SHORTFALL,
   SUPPLY_MULTIPLIER,
   TIMELOCK_OWNED_CONVERTERS,
   U,
   USDC,
-  USDC_TO_SWEEP,
   USDT,
   U_MAX_DISTRIBUTION_SPEED,
-  U_PRIME_BUYBACK,
   VU,
-  XVS_BUYBACK,
 } from "../vip-618/bscmainnet";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
+// ===== New TokenBuyback proxies (PR #162 redeploy — supersedes vip-618) =====
+// vip-618 hard-codes the original proxy addresses; the redeploy from
+// protocol-reserve PR #162 changed every one of them, so VIP-800 carries its
+// own canonical list. Order is preserved (same index → same buyback role) so
+// PSR-row indices in the sim line up across both VIPs.
+export const RISK_FUND_BUYBACK = "0x0c71EFabD00329E839745ef23aB946d3ed24A805";
+export const USDT_PRIME_BUYBACK = "0xD721932C7CA41Eb5305867287010587a266346a8";
+export const U_PRIME_BUYBACK = "0xBC9fFBfb799B2d189669D3816E2B7273c69041bd";
+export const XVS_BUYBACK = "0x637E6246BBb0F9aBae9d764F5e1bB6347f028C12";
+export const U_TREASURY_BUYBACK = "0xec63411423D03327De19135446dDdA3055D2feA8";
+export const BTCB_TREASURY_BUYBACK = "0x1F306a0d929a7098a0A0b12248Ba97600AB79026";
+export const ETH_TREASURY_BUYBACK = "0x41954F0bf26959dF2e1B8302DEBf736B5b154B64";
+export const USDT_TREASURY_BUYBACK = "0xB3dDf13E8B6b8dE10F5826087C202b80F1D1b490";
+export const USDC_TREASURY_BUYBACK = "0xd7aC40f9bd9A1beb8E2d121b4446CF90417cf169";
+export const XVS_TREASURY_BUYBACK = "0x6D2d239c16453062cF145A7a5128A6a60710d236";
+
+export const BUYBACKS: string[] = [
+  RISK_FUND_BUYBACK,
+  USDT_PRIME_BUYBACK,
+  U_PRIME_BUYBACK,
+  XVS_BUYBACK,
+  U_TREASURY_BUYBACK,
+  BTCB_TREASURY_BUYBACK,
+  ETH_TREASURY_BUYBACK,
+  USDT_TREASURY_BUYBACK,
+  USDC_TREASURY_BUYBACK,
+  XVS_TREASURY_BUYBACK,
+];
+
+// ===== May 2026 swap-budget constants (retuned for single multihop) =====
+// PLP holds ~14.9k USDC at the snapshot block; ~4k is reserved for unclaimed
+// user rewards so the VIP sweeps 10k into the V2 helper. PLP already holds
+// ~25k USDT, so the helper runs a single USDC -> USDT -> U multihop instead
+// of two legs — vip-618's 14,986 USDC / 7,418 U_MIN_OUT were sized for the
+// dropped two-leg path.
+export const USDC_TO_SWEEP = parseUnits("10000", 18);
+// 1% slippage floor under the 9,996.60 U QuoterV2 read (2026-05-13).
+export const U_MIN_OUT = parseUnits("9900", 18);
+
 // Re-export the address universe so simulations and downstream tooling have a
 // single import surface for both halves of the migration.
 export {
-  BUYBACKS,
   CORE_TOKENS,
   DEFAULT_PROXY_ADMIN,
   NEW_RISK_FUND_V2_IMPL,
   PRIME_LIQUIDITY_PROVIDER,
   PROTOCOL_SHARE_RESERVE,
-  RISK_FUND_BUYBACK,
   RISK_FUND_V2,
   SHORTFALL,
   TIMELOCK_OWNED_CONVERTERS,
   U,
   USDC,
   USDT,
-  U_PRIME_BUYBACK,
-  XVS_BUYBACK,
 };
 
 // Latest TokenBuybackMigrationHelper redeploy (protocol-reserve PR #164,
