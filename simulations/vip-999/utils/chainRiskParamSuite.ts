@@ -7,7 +7,14 @@ import { Proposal } from "src/types";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { CFEntry, CapEntry, DelistEntry, PauseEntry } from "../../../vips/vip-999/bscmainnet";
+import {
+  AUXILIARY_AGGREGATOR,
+  CFEntry,
+  COMPTROLLER_SIGS,
+  CapEntry,
+  DelistEntry,
+  PauseEntry,
+} from "../../../vips/vip-999/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "../abi/ChainlinkOracle.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import RESILIENT_ORACLE_ABI from "../abi/ResilientOracle.json";
@@ -15,6 +22,12 @@ import VTOKEN_ABI from "../abi/VToken.json";
 
 // Minimal WETH ABI — only the two functions needed to wrap ETH and approve a spender.
 const WETH_ABI = ["function deposit() payable", "function approve(address spender, uint256 amount) returns (bool)"];
+
+const AGGREGATOR_ABI = ["function batchCount() external view returns (uint256)"];
+const ACM_ABI = [
+  "function hasPermission(address account, address contractAddress, string calldata functionSig) external view returns (bool)",
+  "function hasRole(bytes32 role, address account) external view returns (bool)",
+];
 
 const BORROW_ACTION = 2;
 const MINT_ACTION = 0;
@@ -65,6 +78,8 @@ export const runChainRiskParamSuite = async (
   data: ChainData,
   vip: Proposal,
 ) => {
+  const aggregatorAddress = (AUXILIARY_AGGREGATOR as Record<string, string | undefined>)[chainKey];
+
   before(async () => {
     await pinOraclePrices(chainKey, data);
   });
@@ -126,6 +141,31 @@ export const runChainRiskParamSuite = async (
         expect((await comptroller.borrowCaps(a.vToken)).toString()).to.equal(a.oldBorrowCap, `${a.symbol} borrowCap`);
       }
     });
+
+    if (aggregatorAddress) {
+      it("auxiliary aggregator has batchCount of 2 (batches 0 and 1 seeded)", async () => {
+        const aggregator = new ethers.Contract(aggregatorAddress, AGGREGATOR_ABI, ethers.provider);
+        expect(await aggregator.batchCount()).to.equal(2);
+      });
+
+      it("ACM does not grant aggregator call permissions pre-VIP", async () => {
+        const acm = new ethers.Contract(NETWORK_ADDRESSES[chainKey].ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        for (const sig of COMPTROLLER_SIGS) {
+          expect(await acm.hasPermission(aggregatorAddress, data.COMPTROLLER, sig)).to.equal(
+            false,
+            `${sig} should not be permitted pre-VIP`,
+          );
+        }
+      });
+
+      it("ACM does not grant aggregator admin role pre-VIP", async () => {
+        const acm = new ethers.Contract(NETWORK_ADDRESSES[chainKey].ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        expect(await acm.hasRole(ethers.constants.HashZero, aggregatorAddress)).to.equal(
+          false,
+          "aggregator should not have admin role pre-VIP",
+        );
+      });
+    }
   });
 
   testForkedNetworkVipCommands(description, vip, {
@@ -194,6 +234,26 @@ export const runChainRiskParamSuite = async (
         expect((await comptroller.borrowCaps(a.vToken)).toString()).to.equal("0", `${a.symbol} borrowCap`);
       }
     });
+
+    if (aggregatorAddress) {
+      it("ACM call permissions for aggregator are revoked post-VIP", async () => {
+        const acm = new ethers.Contract(NETWORK_ADDRESSES[chainKey].ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        for (const sig of COMPTROLLER_SIGS) {
+          expect(await acm.hasPermission(aggregatorAddress, data.COMPTROLLER, sig)).to.equal(
+            false,
+            `${sig} should be revoked post-VIP`,
+          );
+        }
+      });
+
+      it("ACM does not grant aggregator admin role post-VIP", async () => {
+        const acm = new ethers.Contract(NETWORK_ADDRESSES[chainKey].ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        expect(await acm.hasRole(ethers.constants.HashZero, aggregatorAddress)).to.equal(
+          false,
+          "aggregator should not have admin role post-VIP",
+        );
+      });
+    }
   });
 
   describe(`E2E behaviour (${chainKey})`, () => {

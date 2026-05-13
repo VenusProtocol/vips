@@ -10,7 +10,7 @@ import BSC_COMPTROLLER_ABI from "./abi/BscComptroller.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import { pinOraclePrices } from "./utils/chainRiskParamSuite";
 
-const FORK_BLOCK = 97618563;
+const FORK_BLOCK = 98045352;
 const BORROW_ACTION = 2;
 const MINT_ACTION = 0;
 

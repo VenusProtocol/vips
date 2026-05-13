@@ -1,12 +1,42 @@
 import { BigNumber, BigNumberish } from "ethers";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import * as arb from "./data/arbitrumone";
-import * as base from "./data/basemainnet";
 import * as bsc from "./data/bscmainnet";
-import * as eth from "./data/ethereum";
 import * as zk from "./data/zksyncmainnet";
+
+export const AUXILIARY_AGGREGATOR = {
+  ethereum: "0x884E46c8639c8CaFcf249e34c22575f4dD09E87D",
+  arbitrumone: "0xFAC9571b6406aD7c135a34859A121739FFf3C47a",
+  basemainnet: "0x26FA3316c344B5d3261c44e67c6a72C926EEB89c",
+};
+
+// Remote-chain commands are pre-seeded in AuxiliaryCommandsAggregator instances deployed on
+// each destination chain (see scripts/vip-999/seed-aggregators.ts). The batch stored in the
+// aggregator already contains the per-function ACM grant/revoke commands wrapping the actual
+// risk-param calls. The VIP simply grants the aggregator the DEFAULT_ADMIN_ROLE (so it can
+// call giveCallPermission / revokeCallPermission), fires executeBatch(1), then revokes admin.
+
+// ACM permission lookup uses uint256[] in the signature string; the actual call encoding
+// accepts uint8[] or uint256[] interchangeably because the parameter is an enum.
+export const COMPTROLLER_SIGS = [
+  "setCollateralFactor(address,uint256,uint256)",
+  "setMarketSupplyCaps(address[],uint256[])",
+  "setMarketBorrowCaps(address[],uint256[])",
+  "setActionsPaused(address[],uint256[],bool)",
+];
+
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+function remoteChainCommands(acm: string, aggregator: string, chainId: LzChainId) {
+  const chain = { dstChainId: chainId };
+  return [
+    { target: acm, signature: "grantRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, aggregator], ...chain },
+    { target: aggregator, signature: "executeBatch(uint256)", params: [1], ...chain },
+    { target: acm, signature: "revokeRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, aggregator], ...chain },
+  ];
+}
 
 export interface CFEntry {
   symbol: string;
@@ -66,7 +96,7 @@ const MINT = 0;
 
 // Generates the four canonical delist actions: CF → 0 (if needed), supply cap → 0,
 // borrow cap → 0, pause borrow (if needed). Each action is skipped when already a no-op.
-function delistCommands(comptroller: string, assets: DelistEntry[], dstChainId?: LzChainId) {
+export function delistCommands(comptroller: string, assets: DelistEntry[], dstChainId?: LzChainId) {
   const chain = dstChainId !== undefined ? { dstChainId } : {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const commands: any[] = [];
@@ -209,140 +239,33 @@ export const vip999 = () =>
       })),
 
       // ──────────────────────────────────────────────────────────────────────────
-      // Ethereum Core
+      // Ethereum Core — via AuxiliaryCommandsAggregator
       // ──────────────────────────────────────────────────────────────────────────
-
-      // soft delist of TUSD / EIGEN / BAL / yvUSDS-1 / yvUSDC-1 / yvUSDT-1 / yvWETH-1.
-      ...delistCommands(eth.COMPTROLLER, eth.delistAssets, LzChainId.ethereum),
-
-      // set collateral factors (DAI / crvUSD / USDe: CF -> 0, kept as borrow assets).
-      ...eth.cfChanges.map(c => ({
-        target: eth.COMPTROLLER,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [c.vToken, c.new, c.liquidationThreshold],
-        dstChainId: LzChainId.ethereum,
-      })),
-
-      // set supply caps (skip no-op entries where old === new).
-      {
-        target: eth.COMPTROLLER,
-        signature: "setMarketSupplyCaps(address[],uint256[])",
-        params: [
-          eth.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
-          eth.marketCapChanges
-            .filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new))
-            .map(c => c.supplyCap.new),
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-
-      // set borrow caps (skip no-op entries where old === new).
-      {
-        target: eth.COMPTROLLER,
-        signature: "setMarketBorrowCaps(address[],uint256[])",
-        params: [
-          eth.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
-          eth.marketCapChanges
-            .filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new))
-            .map(c => c.borrowCap.new),
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-
-      // re-enable borrow on healthy markets.
-      {
-        target: eth.COMPTROLLER,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [eth.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
-        dstChainId: LzChainId.ethereum,
-      },
+      ...remoteChainCommands(
+        NETWORK_ADDRESSES.ethereum.ACCESS_CONTROL_MANAGER,
+        AUXILIARY_AGGREGATOR.ethereum,
+        LzChainId.ethereum,
+      ),
 
       // ──────────────────────────────────────────────────────────────────────────
       // Arbitrum Core
       // ──────────────────────────────────────────────────────────────────────────
 
-      // set collateral factors (ARB: 55% -> 25%, borrow stays paused).
-      ...arb.cfChanges.map(c => ({
-        target: arb.COMPTROLLER,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [c.vToken, c.new, c.liquidationThreshold],
-        dstChainId: LzChainId.arbitrumone,
-      })),
-
-      // set supply caps (skip no-op entries where old === new).
-      {
-        target: arb.COMPTROLLER,
-        signature: "setMarketSupplyCaps(address[],uint256[])",
-        params: [
-          arb.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
-          arb.marketCapChanges
-            .filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new))
-            .map(c => c.supplyCap.new),
-        ],
-        dstChainId: LzChainId.arbitrumone,
-      },
-
-      // set borrow caps (skip no-op entries where old === new).
-      {
-        target: arb.COMPTROLLER,
-        signature: "setMarketBorrowCaps(address[],uint256[])",
-        params: [
-          arb.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
-          arb.marketCapChanges
-            .filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new))
-            .map(c => c.borrowCap.new),
-        ],
-        dstChainId: LzChainId.arbitrumone,
-      },
-
-      // re-enable borrow on USD₮0 / WBTC / WETH / USDC.
-      {
-        target: arb.COMPTROLLER,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [arb.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
-        dstChainId: LzChainId.arbitrumone,
-      },
+      ...remoteChainCommands(
+        NETWORK_ADDRESSES.arbitrumone.ACCESS_CONTROL_MANAGER,
+        AUXILIARY_AGGREGATOR.arbitrumone,
+        LzChainId.arbitrumone,
+      ),
 
       // ──────────────────────────────────────────────────────────────────────────
       // Base Core
       // ──────────────────────────────────────────────────────────────────────────
 
-      // soft delist of wsuperOETHb.
-      ...delistCommands(base.COMPTROLLER, base.delistAssets, LzChainId.basemainnet),
-
-      // set supply caps (skip no-op entries where old === new).
-      {
-        target: base.COMPTROLLER,
-        signature: "setMarketSupplyCaps(address[],uint256[])",
-        params: [
-          base.marketCapChanges.filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new)).map(c => c.vToken),
-          base.marketCapChanges
-            .filter(c => !BigNumber.from(c.supplyCap.old).eq(c.supplyCap.new))
-            .map(c => c.supplyCap.new),
-        ],
-        dstChainId: LzChainId.basemainnet,
-      },
-
-      // set borrow caps (skip no-op entries where old === new).
-      {
-        target: base.COMPTROLLER,
-        signature: "setMarketBorrowCaps(address[],uint256[])",
-        params: [
-          base.marketCapChanges.filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new)).map(c => c.vToken),
-          base.marketCapChanges
-            .filter(c => !BigNumber.from(c.borrowCap.old).eq(c.borrowCap.new))
-            .map(c => c.borrowCap.new),
-        ],
-        dstChainId: LzChainId.basemainnet,
-      },
-
-      // re-enable borrow on cbBTC / USDC / WETH.
-      {
-        target: base.COMPTROLLER,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [base.borrowPauseChanges.map(c => c.vToken), [BORROW], false],
-        dstChainId: LzChainId.basemainnet,
-      },
+      ...remoteChainCommands(
+        NETWORK_ADDRESSES.basemainnet.ACCESS_CONTROL_MANAGER,
+        AUXILIARY_AGGREGATOR.basemainnet,
+        LzChainId.basemainnet,
+      ),
 
       // ──────────────────────────────────────────────────────────────────────────
       // zkSync
