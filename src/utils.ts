@@ -86,11 +86,11 @@ const _perTxGasCapCache = new Map<string, number>();
 /// Resolve the per-tx gas cap that the simulation should mirror.
 ///
 /// Resolution order:
-///   1. EIP-8123 `eth_txGasLimitCap` RPC (auto picks up future hardforks the
+///   1. EIP-7825 `eth_txGasLimitCap` RPC (auto picks up future hardforks the
 ///      day a client ships it). Errors and null/undefined responses fall
 ///      through to step 2.
 ///   2. Static `PER_TX_GAS_CAP_BY_NETWORK` map in `src/networkConfig.ts`
-///      (current authoritative source — no client implements EIP-8123 yet).
+///      (current authoritative source — no client implements EIP-7825 yet).
 ///   3. `Number.POSITIVE_INFINITY` — no enforcement (L2s today).
 ///
 /// Logged once per network when first resolved, so CI output records which
@@ -109,7 +109,7 @@ export const resolvePerTxGasCap = async (forkedNetwork: string | undefined): Pro
       const parsed = BigNumber.from(raw).toNumber();
       if (parsed > 0) {
         cap = parsed;
-        source = "eth_txGasLimitCap (EIP-8123)";
+        source = "eth_txGasLimitCap (EIP-7825)";
       }
     }
   } catch {

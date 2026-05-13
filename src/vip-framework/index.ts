@@ -7,7 +7,7 @@ import { BigNumber, Contract, ContractInterface } from "ethers";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
-import { NETWORK_CONFIG, PER_TX_GAS_CAP_2_24, PER_TX_GAS_CAP_BY_NETWORK } from "../networkConfig";
+import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal, ProposalType, REMOTE_NETWORKS, SUPPORTED_NETWORKS } from "../types";
 import {
   calculateGasForAdapterParam,
@@ -45,15 +45,6 @@ const OMNICHAIN_GOVERNANCE_EXECUTOR =
 // Previous voting period: 115,200
 // New voting period: 115,200 * 1.67 = 192,384
 const VOTING_PERIOD = 192384;
-
-// Per-tx gas cap source: see `PER_TX_GAS_CAP_BY_NETWORK` in
-// `src/networkConfig.ts` for the static fallback table, and
-// `resolvePerTxGasCap` in `src/utils.ts` for the runtime resolver that prefers
-// EIP-8123 (`eth_txGasLimitCap`) when supported.
-//
-// Re-exported here for backwards compatibility with any caller that imported
-// from `src/vip-framework/index.ts` before the move.
-export { PER_TX_GAS_CAP_2_24, PER_TX_GAS_CAP_BY_NETWORK };
 
 export const {
   DEFAULT_PROPOSER_ADDRESS,
@@ -135,23 +126,39 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
   bar.start(proposal.signatures.length, 0);
 
+  // Each command runs as its own tx here (not bundled like `governorBravo.execute`),
+  // so the per-tx cap applies per command, not to the sum. Track per-cmd max and
+  // flag any individual command that exceeds the cap.
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
   let totalGas = BigNumber.from(0);
+  let maxCmdGas = BigNumber.from(0);
+  let maxCmdIdx = -1;
   for (let i = 0; i < proposal.signatures.length; ++i) {
     const txResponse = await executeCommand(impersonatedTimelock, proposal, i);
     const receipt = await txResponse.wait();
     totalGas = totalGas.add(receipt.gasUsed);
+    if (receipt.gasUsed.gt(maxCmdGas)) {
+      maxCmdGas = receipt.gasUsed;
+      maxCmdIdx = i;
+    }
+    if (Number.isFinite(cap) && receipt.gasUsed.gt(cap)) {
+      console.warn(
+        `[gas] WARNING cmd[${i}] (${proposal.signatures[i]}) gasUsed=${receipt.gasUsed.toString()} ` +
+          `exceeds ${FORKED_NETWORK} per-tx cap ${cap}`,
+      );
+    }
     txResponses.push(txResponse);
     bar.update(i + 1);
   }
 
   bar.stop();
-  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
-  const capSuffix = Number.isFinite(cap)
-    ? ` (${totalGas.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+  const maxSuffix = Number.isFinite(cap)
+    ? ` (${maxCmdGas.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
     : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
   console.log(
-    `[gas] pretendExecutingVip totalGasUsed=${totalGas.toString()} across ${proposal.signatures.length} ` +
-      `commands${capSuffix}`,
+    `[gas] pretendExecutingVip ${proposal.signatures.length} commands, ` +
+      `maxCmdGasUsed=${maxCmdGas.toString()} (cmd[${maxCmdIdx}])${maxSuffix}, ` +
+      `totalGasUsed=${totalGas.toString()}`,
   );
   return txResponses;
 };
