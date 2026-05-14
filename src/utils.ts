@@ -9,6 +9,7 @@ import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
+import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
   Command,
   LzChainId,
@@ -18,6 +19,7 @@ import {
   REMOTE_MAINNET_NETWORKS,
   REMOTE_NETWORKS,
   REMOTE_TESTNET_NETWORKS,
+  SUPPORTED_NETWORKS,
   TokenConfig,
 } from "./types";
 import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
@@ -75,6 +77,57 @@ export async function setForkBlock(_blockNumber: number) {
     ],
   });
 }
+
+// Resolved per-tx gas cap, cached per FORKED_NETWORK for the lifetime of the
+// hardhat process. The fork doesn't change within a sim, so a single resolve
+// per network is enough.
+const _perTxGasCapCache = new Map<string, number>();
+
+/// Resolve the per-tx gas cap that the simulation should mirror.
+///
+/// Resolution order:
+///   1. EIP-7825 `eth_txGasLimitCap` RPC (auto picks up future hardforks the
+///      day a client ships it). Errors and null/undefined responses fall
+///      through to step 2.
+///   2. Static `PER_TX_GAS_CAP_BY_NETWORK` map in `src/networkConfig.ts`
+///      (current authoritative source — no client implements EIP-7825 yet).
+///   3. `Number.POSITIVE_INFINITY` — no enforcement (L2s today).
+///
+/// Logged once per network when first resolved, so CI output records which
+/// branch fired.
+export const resolvePerTxGasCap = async (forkedNetwork: string | undefined): Promise<number> => {
+  const key = forkedNetwork ?? "<unknown>";
+  const cached = _perTxGasCapCache.get(key);
+  if (cached !== undefined) return cached;
+
+  let cap: number = Number.POSITIVE_INFINITY;
+  let source = "no enforcement";
+
+  try {
+    const raw = await ethers.provider.send("eth_txGasLimitCap", []);
+    if (raw !== null && raw !== undefined) {
+      const parsed = BigNumber.from(raw).toNumber();
+      if (parsed > 0) {
+        cap = parsed;
+        source = "eth_txGasLimitCap (EIP-7825)";
+      }
+    }
+  } catch {
+    // RPC method not supported (today's reality on every client). Drop to map.
+  }
+
+  if (!Number.isFinite(cap)) {
+    const fromMap = PER_TX_GAS_CAP_BY_NETWORK[forkedNetwork as SUPPORTED_NETWORKS];
+    if (fromMap !== undefined) {
+      cap = fromMap;
+      source = "PER_TX_GAS_CAP_BY_NETWORK (static)";
+    }
+  }
+
+  console.log(`[gas] per-tx cap for ${key}: ${Number.isFinite(cap) ? cap : "unbounded"} (source: ${source})`);
+  _perTxGasCapCache.set(key, cap);
+  return cap;
+};
 
 export const getSourceChainId = (network: REMOTE_NETWORKS) => {
   if (REMOTE_MAINNET_NETWORKS.includes(network as string)) {

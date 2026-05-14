@@ -18,6 +18,7 @@ import {
   initMainnetUser,
   mineBlocks,
   mineOnZksync,
+  resolvePerTxGasCap,
   setForkBlock,
   validateTargetAddresses,
 } from "../utils";
@@ -125,13 +126,40 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
   bar.start(proposal.signatures.length, 0);
 
+  // Each command runs as its own tx here (not bundled like `governorBravo.execute`),
+  // so the per-tx cap applies per command, not to the sum. Track per-cmd max and
+  // flag any individual command that exceeds the cap.
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+  let totalGas = BigNumber.from(0);
+  let maxCmdGas = BigNumber.from(0);
+  let maxCmdIdx = -1;
   for (let i = 0; i < proposal.signatures.length; ++i) {
     const txResponse = await executeCommand(impersonatedTimelock, proposal, i);
+    const receipt = await txResponse.wait();
+    totalGas = totalGas.add(receipt.gasUsed);
+    if (receipt.gasUsed.gt(maxCmdGas)) {
+      maxCmdGas = receipt.gasUsed;
+      maxCmdIdx = i;
+    }
+    if (Number.isFinite(cap) && receipt.gasUsed.gt(cap)) {
+      console.warn(
+        `[gas] WARNING cmd[${i}] (${proposal.signatures[i]}) gasUsed=${receipt.gasUsed.toString()} ` +
+          `exceeds ${FORKED_NETWORK} per-tx cap ${cap}`,
+      );
+    }
     txResponses.push(txResponse);
     bar.update(i + 1);
   }
 
   bar.stop();
+  const maxSuffix = Number.isFinite(cap)
+    ? ` (${maxCmdGas.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+    : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+  console.log(
+    `[gas] pretendExecutingVip ${proposal.signatures.length} commands, ` +
+      `maxCmdGasUsed=${maxCmdGas.toString()} (cmd[${maxCmdIdx}])${maxSuffix}, ` +
+      `totalGasUsed=${totalGas.toString()}`,
+  );
   return txResponses;
 };
 
@@ -224,7 +252,28 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type || 0]);
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
-      const tx = await governorProxy.connect(proposer).execute(proposalId);
+
+      // Mirror the chain's protocol per-tx cap by capping tx.gasLimit. Hardhat
+      // fork does not enforce protocol per-tx caps (those are consensus rules,
+      // not tx fields), so without this an over-cap proposal passes simulation
+      // but OOGs on chain. Setting gasLimit = cap forces hardhat to revert
+      // out-of-gas exactly as mainnet would. Build the tx via
+      // `populateTransaction` so the override is applied at the raw-tx layer
+      // (passing it as a second arg to the contract method gets misinterpreted
+      // as a positional fn arg by ethers v5).
+      const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+      const populated = await governorProxy.connect(proposer).populateTransaction.execute(proposalId);
+      if (Number.isFinite(cap)) {
+        populated.gasLimit = BigNumber.from(cap);
+      }
+      const tx = await proposer.sendTransaction(populated);
+      const receipt = await tx.wait();
+
+      const gasUsed = receipt.gasUsed.toString();
+      const capSuffix = Number.isFinite(cap)
+        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+      console.log(`[gas] ${description} execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
@@ -312,14 +361,29 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       await mineBlocks();
 
       const feeData = await ethers.provider.getFeeData();
-      const txnParams: { maxFeePerGas?: BigNumber } = {};
+      const txnParams: { maxFeePerGas?: BigNumber; gasLimit?: number } = {};
 
       if (feeData.maxFeePerGas) {
         // Sometimes the gas estimation is wrong with some networks like zksync
         txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
       }
 
+      // Mirror the chain's protocol per-tx cap by capping tx.gasLimit. Hardhat
+      // fork does not enforce protocol per-tx caps, so without this an over-cap
+      // remote payload passes simulation but OOGs on chain.
+      const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+      if (Number.isFinite(cap)) {
+        txnParams.gasLimit = cap;
+      }
+
       const tx = await executor.execute(proposalId, txnParams);
+      const receipt = await tx.wait();
+
+      const gasUsed = receipt.gasUsed.toString();
+      const capSuffix = Number.isFinite(cap)
+        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+      console.log(`[gas] ${description} executor.execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
