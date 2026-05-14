@@ -12,11 +12,11 @@ export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
 
 // Executor — tighten-only validation layer between off-chain signal monitors and EBrake
 // TODO: replace with deployed Executor address once deployment VIP merges
-export const EXECUTOR = "0x0000000000000000000000000000000000000000";
+export const EXECUTOR = "0xDd541A1b065F9587b01815a390a4d4559D7b630F";
 
 // Off-chain signal monitor authorized to call Executor action handlers
 // TODO: replace with final monitor EOA/contract address
-export const SIGNAL_MONITOR = "0x0000000000000000000000000000000000000000";
+export const SIGNAL_MONITOR = "0x61859C84E0C6aB7B5A9801A962C660477f31a2D3";
 
 // Executor action functions the signal monitor invokes
 export const EXECUTOR_MONITOR_PERMS = [

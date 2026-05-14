@@ -20,8 +20,8 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
 const EXECUTOR_GOVERNANCE_ACCOUNTS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
-// TODO: set to a block after Executor is deployed on BSC mainnet
-const BLOCK_NUMBER = 0;
+// block after Executor is deployed on BSC mainnet
+const BLOCK_NUMBER = 98248415;
 
 forking(BLOCK_NUMBER, async () => {
   let accessControlManager: Contract;
