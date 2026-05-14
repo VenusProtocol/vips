@@ -14,7 +14,7 @@ import {
   CapEntry,
   DelistEntry,
   PauseEntry,
-} from "../../../vips/vip-999/bscmainnet";
+} from "../../../vips/vip-622/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "../abi/ChainlinkOracle.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import RESILIENT_ORACLE_ABI from "../abi/ResilientOracle.json";

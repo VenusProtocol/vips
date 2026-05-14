@@ -155,35 +155,60 @@ export function delistCommands(comptroller: string, assets: DelistEntry[], dstCh
 
 const meta = {
   version: "v2",
-  title: "VIP-999 May 2026 Risk Parameter Update & Asset Off-boarding",
-  description: `#### Summary
+  title: "VIP-622 [BNB Chain] May 2026 Risk Parameter Update & Asset Off-boarding",
+  description: `#### Background
 
 The four active non-BNB Chain Venus deployments (Ethereum, Arbitrum, Base, zkSync) have been in an emergency-paused state since 2026-03-20, following the THE market exploit on 2026-03-15. BNB Core remained operational with parameter-level mitigations across several markets. This proposal specifies the formal off-boarding, parameter restoration, and cap right-sizing across all five Core deployments, and is a prerequisite cleanup pass ahead of unpausing the four chains.
 
-Liquidation thresholds are not touched. CF -> 0 removes new-borrow power only; existing positions are unaffected.
+Full rationale and cap-by-cap detail: [Venus Community Forum](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785). Liquidation thresholds are unchanged; CF → 0 actions affect new borrow power only and do not trigger liquidations on existing positions.
 
-More information: [Venus Community Forum](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785)
+#### BNB Chain Core Pool
 
-#### Actions per chain
+- **Off-board as collateral** (CF → 0%): DAI (Sky DAI → USDS deprecation).
+- **Already-deprecated assets** (caps → 0, borrows disabled): THE, TUSD, FIL, MATIC (MATIC → POL rebrand).
+- **Core cap right-sizing**: BTCB, BNB, WBNB, ETH, USDC, asBNB, xSolvBTC, wBETH, Cake, FDUSD, XRP, USD1, lisUSD, DOGE, ADA, LTC, LINK.
 
-- **BNB Chain Core** (Unitroller \`0xfD36E2c2a6789Db23113685031d7F16329158384\`):
-  - Core CF: DAI 75%->0%, CAKE 55%->50%, XVS 60%->55%, lisUSD 0%->50%.
-  - Soft delist (caps->0 + pause borrow) on TUSD.
-  - Core cap right-sizing on FDUSD/USD1/lisUSD/ETH/XRP/slisBNB/SolvBTC/xSolvBTC/wBETH.
-  - eMode CF (pool-scoped): LINK Pool 4 63%->60%, UNI Pool 5 0%->50%, AAVE Pool 6 0%->50%, DOGE Pool 7 43%->40%, BCH Pool 8 0%->50%, TWT Pool 9 0%->30%, ADA Pool 10 63%->50%, LTC Pool 11 0%->50%, TRX Pool 13 52.5%->45%, DOT Pool 14 0%->55%.
-  - Market-wide cap reductions on BCH/TRX/LTC/LINK/TWT/ADA/DOGE; full off-board caps (->0) on FIL and THE.
-  - eMode Pool 12 FIL and Pool 15 THE: setIsBorrowAllowed(false). Market-wide FIL supply pause.
-- **Ethereum Core** (\`0x687a01ecF6d3907658f7A7c714749fAC32336D1B\`): full delist of TUSD/EIGEN/BAL/sFRAX/yvUSDS-1/yvUSDC-1/yvUSDT-1/yvWETH-1; CF -> 0 on DAI/crvUSD/USDe; cap right-sizing; re-enable borrow on USDT/WETH/WBTC/USDC/DAI/crvUSD/USDe/tBTC/USDS.
-- **Arbitrum Core** (\`0x317c1A5739F39046E20b08ac9BeEa3f10fD43326\`): CF 55% -> 25% on ARB (borrow stays paused); cap right-sizing; re-enable borrow on USD₮0/WBTC/WETH/USDC.
-- **Base Core** (\`0x0C7973F9598AA62f9e03B94E92C967fD5437426C\`): full delist of wsuperOETHb; cap right-sizing (wstETH borrow stays paused); re-enable borrow on cbBTC/USDC/WETH.
-- **zkSync Era Core** (\`0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1\`): full delist of ZK/wUSDM/zkETH/wstETH; WBTC cap reduction (borrow stays paused); re-enable borrow on WETH/USDT/USDC.e/USDC.
+#### Ethereum Core Pool
+
+- **Full delist** (CF → 0%, caps → 0, borrow disabled): TUSD (impaired issuer), EIGEN (dust usage), BAL (project leadership shutdown), yvUSDS-1, yvUSDC-1, yvUSDT-1, yvWETH-1 (empty markets).
+- **Remove as collateral, keep as borrow asset**: DAI (Sky deprecation), crvUSD, USDe (less-robust non-yield stables).
+- **Cap right-sizing** on USDT, WETH, sUSDS, WBTC, USDC, weETHs, LBTC, DAI, crvUSD, USDe, sUSDe, tBTC, USDS, sFRAX.
+- **Re-enable borrowing** for USDT, WETH, WBTC, USDC, DAI, crvUSD, USDe, tBTC, USDS.
+
+#### Arbitrum Core Pool
+
+- **Reduce CF** on ARB 55% → 25% (borrow stays disabled — structurally weak demand).
+- **Cap right-sizing** on USD₮0, GM (0x47c0), WBTC, GM (0x70d9), WETH, USDC, ARB.
+- **Re-enable borrowing** for USD₮0, WBTC, WETH, USDC.
+
+#### Base Core Pool
+
+- **Full delist**: wsuperOETHb (near-zero demand, stressed on-chain liquidity).
+- **Keep borrow disabled (CF retained)**: wstETH (no organic borrow demand).
+- **Cap right-sizing** on cbBTC, USDC, WETH, wstETH.
+- **Re-enable borrowing** for cbBTC, USDC, WETH.
+
+#### zkSync Era Core Pool
+
+- **Full delist**: ZK (low DEX liquidity), wUSDM (shut-down protocol), zkETH (deprecated), wstETH (chain-wide liquidity insufficient).
+- **Keep borrow disabled (CF retained)**: WBTC.
+- **Cap right-sizing** on WETH, USDT, USDC.e, WBTC, USDC. zkSync caps sit below the standard non-BNB benchmark, reflecting chain-wide liquidity constraints.
+- **Re-enable borrowing** for WETH, USDT, USDC.e, USDC.
+
+#### Methodology
+
+Active caps generally set to ~2× the maximum observed supply / borrow over the past 3 months, tightened where on-chain liquidity, concentration, or liquidator capacity would be stressed. Non-BNB deployments are additionally bounded around ~$5M notional for stables, 2,100 WETH, and 65 WBTC, conditional on liquidity. Full-offboarded assets have caps set to zero.
+
+#### Disclosure
+
+Allez Labs has not been compensated by any third party for publishing this report.
 `,
   forDescription: "I agree that Venus Protocol should proceed with this proposal",
   againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
 };
 
-export const vip999 = () =>
+export const vip622 = () =>
   makeProposal(
     [
       // ──────────────────────────────────────────────────────────────────────────
@@ -312,4 +337,4 @@ export const vip999 = () =>
     ProposalType.REGULAR,
   );
 
-export default vip999;
+export default vip622;

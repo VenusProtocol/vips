@@ -4,8 +4,8 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999 from "../../vips/vip-999/bscmainnet";
-import * as data from "../../vips/vip-999/data/bscmainnet";
+import vip622 from "../../vips/vip-622/bscmainnet";
+import * as data from "../../vips/vip-622/data/bscmainnet";
 import BSC_COMPTROLLER_ABI from "./abi/BscComptroller.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import { pinOraclePrices } from "./utils/chainRiskParamSuite";
@@ -89,7 +89,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-999 BNB Chain Core", await vip999(), {
+  testVip("VIP-622 BNB Chain Core", await vip622(), {
     callbackAfterExecution: async tx =>
       expectEvents(
         tx,
