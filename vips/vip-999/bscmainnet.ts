@@ -13,10 +13,10 @@ export const AUXILIARY_AGGREGATOR = {
 };
 
 // Remote-chain commands are pre-seeded in AuxiliaryCommandsAggregator instances deployed on
-// each destination chain (see scripts/vip-999/seed-aggregators.ts). The batch stored in the
-// aggregator already contains the per-function ACM grant/revoke commands wrapping the actual
-// risk-param calls. The VIP simply grants the aggregator the DEFAULT_ADMIN_ROLE (so it can
-// call giveCallPermission / revokeCallPermission), fires executeBatch(1), then revokes admin.
+// each destination chain. The batch stored in the aggregator already contains the per-function
+// ACM grant/revoke commands wrapping the actual risk-param calls. The VIP simply grants the
+// aggregator the DEFAULT_ADMIN_ROLE (so it can call giveCallPermission / revokeCallPermission),
+// fires executeBatch(1), then revokes admin.
 
 // ACM permission lookup uses uint256[] in the signature string; the actual call encoding
 // accepts uint8[] or uint256[] interchangeably because the parameter is an enum.
