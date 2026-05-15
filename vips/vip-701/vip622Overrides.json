@@ -1,0 +1,124 @@
+{
+  "_meta": {
+    "source": "Hardcoded from VIP-622 (PR https://github.com/VenusProtocol/vips/pull/706) post-VIP caps",
+    "rationale": "VIP-622 right-sizes caps on these markets but is not yet executed on-chain, so coreMarketCaps.json (which reads live state) still reflects the pre-VIP-622 caps. For these markets we override the script-derived 20% floors with 20% of the post-VIP-622 caps; for every other market the script values from coreMarketCaps.json are used as-is.",
+    "appliesTo": "vips/vip-701/coreMarketCaps.json",
+    "decimalsNote": "Values are in raw wei. DOGE uses 8 dp, TRX uses 6 dp, everything else 18 dp."
+  },
+  "markets": [
+    {
+      "address": "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec",
+      "symbol": "vADA",
+      "minBorrowCap": "600000000000000000000000",
+      "minSupplyCap": "3000000000000000000000000"
+    },
+    {
+      "address": "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176",
+      "symbol": "vBCH",
+      "minBorrowCap": "200000000000000000000",
+      "minSupplyCap": "1000000000000000000000"
+    },
+    {
+      "address": "0xec3422Ef92B2fb59e84c8B02Ba73F1fE84Ed8D71",
+      "symbol": "vDOGE",
+      "minBorrowCap": "60000000000000",
+      "minSupplyCap": "1600000000000000"
+    },
+    {
+      "address": "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
+      "symbol": "vETH",
+      "minBorrowCap": "7400000000000000000000",
+      "minSupplyCap": "14400000000000000000000"
+    },
+    {
+      "address": "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
+      "symbol": "vFDUSD",
+      "minBorrowCap": "4000000000000000000000000",
+      "minSupplyCap": "7400000000000000000000000"
+    },
+    {
+      "address": "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343",
+      "symbol": "vFIL",
+      "minBorrowCap": "0",
+      "minSupplyCap": "0"
+    },
+    {
+      "address": "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f",
+      "symbol": "vLINK",
+      "minBorrowCap": "4000000000000000000000",
+      "minSupplyCap": "80000000000000000000000"
+    },
+    {
+      "address": "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab",
+      "symbol": "vlisUSD",
+      "minBorrowCap": "800000000000000000000000",
+      "minSupplyCap": "1000000000000000000000000"
+    },
+    {
+      "address": "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B",
+      "symbol": "vLTC",
+      "minBorrowCap": "1600000000000000000000",
+      "minSupplyCap": "10000000000000000000000"
+    },
+    {
+      "address": "0x89c910Eb8c90df818b4649b508Ba22130Dc73Adc",
+      "symbol": "vslisBNB",
+      "minBorrowCap": "0",
+      "minSupplyCap": "400000000000000000000"
+    },
+    {
+      "address": "0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea",
+      "symbol": "vSolvBTC",
+      "minBorrowCap": "4000000000000000000",
+      "minSupplyCap": "600000000000000000000"
+    },
+    {
+      "address": "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f",
+      "symbol": "vTHE",
+      "minBorrowCap": "0",
+      "minSupplyCap": "0"
+    },
+    {
+      "address": "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
+      "symbol": "vTRX",
+      "minBorrowCap": "200000000000",
+      "minSupplyCap": "600000000000"
+    },
+    {
+      "address": "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E",
+      "symbol": "vTUSD",
+      "minBorrowCap": "0",
+      "minSupplyCap": "0"
+    },
+    {
+      "address": "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc",
+      "symbol": "vTWT",
+      "minBorrowCap": "10000000000000000000000",
+      "minSupplyCap": "400000000000000000000000"
+    },
+    {
+      "address": "0x0C1DA220D301155b87318B90692Da8dc43B67340",
+      "symbol": "vUSD1",
+      "minBorrowCap": "800000000000000000000000",
+      "minSupplyCap": "1000000000000000000000000"
+    },
+    {
+      "address": "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0",
+      "symbol": "vWBETH",
+      "minBorrowCap": "200000000000000000000",
+      "minSupplyCap": "8000000000000000000000"
+    },
+    {
+      "address": "0xB248a295732e0225acd3337607cc01068e3b9c10",
+      "symbol": "vXRP",
+      "minBorrowCap": "200000000000000000000000",
+      "minSupplyCap": "1500000000000000000000000"
+    },
+    {
+      "address": "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5",
+      "symbol": "vxSolvBTC",
+      "minBorrowCap": "0",
+      "minSupplyCap": "240000000000000000000"
+    }
+  ]
+}

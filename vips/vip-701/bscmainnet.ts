@@ -3,6 +3,7 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import coreMarketCaps from "./coreMarketCaps.json";
+import vip622Overrides from "./vip622Overrides.json";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -43,21 +44,37 @@ export const EBRAKE_EXECUTOR_PERMS = [
   "setMarketSupplyCaps(address[],uint256[])",
 ];
 
-// Per-market Executor configs sourced from scripts/fetchCoreMarketCaps.ts.
-// The JSON snapshot lives in this folder; re-run the script to refresh it before publishing.
-// minBorrowCap / minSupplyCap are 20% of the live caps at the snapshot block;
-// markets that aren't listed in the core pool (poolId 0) are dropped by the script.
+// Per-market Executor configs.
+//
+// Default source: scripts/fetchCoreMarketCaps.ts → coreMarketCaps.json (20% of live on-chain caps).
+// Override source: vip622Overrides.json (20% of post-VIP-622 caps, hardcoded for markets that
+// PR #706 right-sizes but hasn't executed on-chain yet). Override wins per address.
+const overrideByAddress = new Map(vip622Overrides.markets.map(o => [o.address.toLowerCase(), o] as const));
+
 export const CORE_POOL_MARKET_CONFIGS: {
   address: string;
   symbol: string;
   minBorrowCap: string;
   minSupplyCap: string;
-}[] = coreMarketCaps.markets.map(m => ({
-  address: m.address,
-  symbol: m.symbol,
-  minBorrowCap: m.minBorrowCap,
-  minSupplyCap: m.minSupplyCap,
-}));
+  source: "script" | "vip-622";
+}[] = coreMarketCaps.markets.map(m => {
+  const override = overrideByAddress.get(m.address.toLowerCase());
+  return override
+    ? {
+        address: m.address,
+        symbol: m.symbol,
+        minBorrowCap: override.minBorrowCap,
+        minSupplyCap: override.minSupplyCap,
+        source: "vip-622",
+      }
+    : {
+        address: m.address,
+        symbol: m.symbol,
+        minBorrowCap: m.minBorrowCap,
+        minSupplyCap: m.minSupplyCap,
+        source: "script",
+      };
+});
 
 const giveCallPermission = (contract: string, sig: string, account: string) => ({
   target: ACM,
@@ -93,7 +110,7 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
 **5. Initialise Executor market configs for every Core Pool market**
 
-- Call \`setMarketConfig\` on the Executor for each listed Core Pool vToken with \`enabled = true\` and per-market floors set to **20% of the current borrow/supply cap** at the snapshot block. Per-market values are produced by [scripts/fetchCoreMarketCaps.ts](scripts/fetchCoreMarketCaps.ts) and committed to [vips/vip-701/coreMarketCaps.json](vips/vip-701/coreMarketCaps.json); zero-cap markets stay at floor 0.
+- Call \`setMarketConfig\` on the Executor for each listed Core Pool vToken with \`enabled = true\` and per-market floors set to **20% of the effective borrow/supply cap**. Default source is [scripts/fetchCoreMarketCaps.ts](scripts/fetchCoreMarketCaps.ts) → [vips/vip-701/coreMarketCaps.json](vips/vip-701/coreMarketCaps.json) (20% of live caps). For markets being right-sized by VIP-622 (PR #706) but not yet executed, [vips/vip-701/vip622Overrides.json](vips/vip-701/vip622Overrides.json) hardcodes 20% of the post-VIP-622 caps so VIP-701 can publish without waiting for VIP-622 to land on-chain.
 
 **6. Transfer 25,000 USDT from Venus Treasury to Flux marketing wallet**
 
