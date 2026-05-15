@@ -7,7 +7,7 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import { vip622 } from "../../vips/vip-622/bscmainnet";
-import vip701, {
+import vip623, {
   ACM,
   CORE_POOL_MARKET_CONFIGS,
   EBRAKE,
@@ -19,8 +19,8 @@ import vip701, {
   SIGNAL_MONITOR,
   USDT,
   USDT_AMOUNT,
-} from "../../vips/vip-701/bscmainnet";
-import coreMarketCaps from "../../vips/vip-701/coreMarketCaps.json";
+} from "../../vips/vip-623/bscmainnet";
+import coreMarketCaps from "../../vips/vip-623/coreMarketCaps.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
@@ -79,7 +79,7 @@ forking(BLOCK_NUMBER, async () => {
 
     // VIP-622 is queued at this fork block. coreMarketCaps.json was built off the same
     // VIP-622 data file, so pre-executing it here makes on-chain caps match the snapshot
-    // the VIP-701 floors were computed from — the post-VIP-701 assertion below can then
+    // the VIP-623 floors were computed from — the post-VIP-623 assertion below can then
     // verify each stored floor equals 20% of the comptroller's live cap.
     await pretendExecutingVip(await vip622(), NORMAL_TIMELOCK);
 
@@ -126,7 +126,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-701 [BNB Chain] Configure tighten-only Executor", await vip701(), {
+  testVip("VIP-623 [BNB Chain] EBrake Executor Phase -1 Activation & Flux Campaign Funding", await vip623(), {
     callbackAfterExecution: async txResponse => {
       // 13 RoleGranted, 2 OwnershipTransferred (Executor + EBrake), 1 MarketConfigSet per Core Pool market.
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [13]);
@@ -188,7 +188,7 @@ forking(BLOCK_NUMBER, async () => {
 
   describe("Post-VIP Core Pool market configs", () => {
     // With VIP-622 pre-executed in `before`, the comptroller's borrow/supply caps now reflect
-    // the post-VIP-622 state. The script computed VIP-701's floors off the same VIP-622 data,
+    // the post-VIP-622 state. The script computed VIP-623's floors off the same VIP-622 data,
     // so the Executor's stored floor for every configured market must equal 20% of the live cap
     // and the live cap must equal the snapshot the script saw. Catches drift between the two.
     it("every Core Pool market's stored floors equal 20% of the post-VIP-622 on-chain caps", async () => {

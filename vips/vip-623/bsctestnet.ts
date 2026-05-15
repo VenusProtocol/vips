@@ -41,10 +41,10 @@ const giveCallPermission = (contract: string, sig: string, account: string) => (
   params: [contract, sig, account],
 });
 
-export const vip701Testnet = () => {
+export const vip623Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-701 [BNB Testnet] Configure tighten-only Executor for signal-driven risk parameter control",
+    title: "VIP-623 [BNB Testnet] Configure tighten-only Executor for signal-driven risk parameter control",
     description: `#### Summary
 
 Configures the **Executor** contract on BSC testnet — tighten-only validation layer between off-chain signal monitors and EBrake.
@@ -80,4 +80,4 @@ Configures the **Executor** contract on BSC testnet — tighten-only validation 
   );
 };
 
-export default vip701Testnet;
+export default vip623Testnet;

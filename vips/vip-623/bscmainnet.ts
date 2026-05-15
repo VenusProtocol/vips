@@ -65,15 +65,38 @@ const giveCallPermission = (contract: string, sig: string, account: string) => (
   params: [contract, sig, account],
 });
 
-export const vip701 = () => {
+export const vip623 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-701 [BNB Chain] Configure tighten-only Executor for signal-driven risk parameter control",
-    description: `#### Description
+    title: "VIP-623 [BNB Chain] EBrake Executor Phase -1 Activation & Flux Campaign Funding",
+    description: `#### Summary
 
-This VIP configures the **Executor** contract on BNB Chain mainnet — the validation layer between off-chain signal monitors and EBrake. It validates bounds on-chain and routes tightening actions to EBrake; it cannot loosen parameters. Recovery is exclusively through governance VIPs.
+This VIP bundles two BNB Chain actions:
 
-Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
+1. **EBrake Executor Contract — Phase -1 Activation** — Bring the new tighten-only Executor contract into governance control, enabling off-chain signal monitors to route emergency tightening actions through pre-validated on-chain bounds. The Executor cannot loosen parameters; all recovery still requires a governance VIP.
+2. **Binance Wallet × Flux Campaign Funding** — Transfer of 25,000 USDT from the Venus Treasury to the joint Binance Wallet × Flux campaign address. Fluid Protocol contributes the matching amount to the same address as partner funding.
+
+#### Description
+
+**EBrake Executor Contract — Phase -1 Activation**
+
+The Executor is the validation layer between off-chain signal monitors and the EBrake contract. It validates parameter bounds on-chain and routes tightening actions to EBrake. The contract is tighten-only: it cannot raise LTV, raise caps, or unpause. All recovery actions go through a governance VIP.
+
+Once activated, a signal that detects a breach (e.g. supply cap exceeded via oracle drift) invokes the Executor, which validates the current on-chain state and forwards the tightening call to EBrake within a single transaction — without VIP latency.
+
+- Source PR: [VenusProtocol/venus-periphery#61](https://github.com/VenusProtocol/venus-periphery/pull/61) (VPD-925)
+- Audits: CertiK (2026-04-27), Hashdit (2026-05-08) — reports filed in the PR under audits/
+- Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0)
+
+**Binance Wallet × Flux Campaign Funding**
+
+Venus is co-funding a joint campaign with Binance Wallet and Fluid Protocol (Flux) on BNB Chain. Funding flows to a shared multisig address; Fluid contributes the matching amount via their own treasury action, outside this VIP.
+
+- From: Venus Treasury
+- To: 0xBE0EdB1F457334B8d2DfEb3627567137E745A00B
+- Token: USDT
+- Amount: 25,000 USDT
+- Partner contribution: Fluid Protocol — 25,000 USDT to the same address (separate action)
 
 #### Proposed Changes
 
@@ -81,27 +104,28 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
 **2. Grant Signal Monitor permissions on Executor action handlers**
 
-- Authorize the off-chain monitor to call \`handleLTVAdjust\`, \`handleCapAdjust\`, \`handleSupplyCapExceeding\`, \`handleBorrowCapExceeding\`
+- Authorize the off-chain monitor to call handleLTVAdjust, handleCapAdjust, handleSupplyCapExceeding, handleBorrowCapExceeding
 
 **3. Grant Executor permissions on EBrake**
 
-- Authorize the Executor to call \`pauseBorrow\`, \`pauseSupply\`, \`decreaseCF\`, \`setMarketBorrowCaps\`, \`setMarketSupplyCaps\` on EBrake
+- Authorize the Executor to call pauseBorrow, pauseSupply, decreaseCF, setMarketBorrowCaps, setMarketSupplyCaps on EBrake
 
-**4. Grant Guardian and all three Timelocks (Normal, Fast Track, Critical) permission to call \`setMarketConfig\` on Executor**
+**4. Grant Guardian and all three Timelocks (Normal, Fast Track, Critical) permission to call setMarketConfig on Executor**
 
-- Lets governance set per-market bounds (\`minBorrowCap\`, \`minSupplyCap\`, \`enabled\`). Granting to all three timelocks + Guardian mirrors VIP-610 and lets Critical (~1h) disable a compromised market's automation instead of waiting 48h on Normal.
+- Lets governance set per-market bounds (minBorrowCap, minSupplyCap, enabled). Granting to all three timelocks + Guardian mirrors VIP-610 and lets Critical (~1h) disable a compromised market's automation instead of waiting 48h on Normal.
 
 **5. Initialise Executor market configs for every Core Pool market**
 
-- Call \`setMarketConfig\` on the Executor for each listed Core Pool vToken with \`enabled = true\` and per-market floors set to **20% of the effective borrow/supply cap**. Default source is [scripts/fetchCoreMarketCaps.ts](scripts/fetchCoreMarketCaps.ts) → [vips/vip-701/coreMarketCaps.json](vips/vip-701/coreMarketCaps.json) (20% of live caps). For markets being right-sized by VIP-622 (PR #706) but not yet executed, [vips/vip-701/vip622Overrides.json](vips/vip-701/vip622Overrides.json) hardcodes 20% of the post-VIP-622 caps so VIP-701 can publish without waiting for VIP-622 to land on-chain.
+- Call setMarketConfig on the Executor for each listed Core Pool vToken with enabled = true and per-market floors set to **20% of the effective borrow/supply cap**. Floors are baked by [scripts/fetchCoreMarketCaps.ts](scripts/fetchCoreMarketCaps.ts) into [vips/vip-623/coreMarketCaps.json](vips/vip-623/coreMarketCaps.json); the script already applies VIP-622 (PR #706) post-cap targets where applicable and drops unlisted / zero-floor markets, so this VIP can publish ahead of VIP-622 landing on-chain.
 
 **6. Transfer 25,000 USDT from Venus Treasury to Flux marketing wallet**
 
-- Funds the incoming Flux marketing campaign. Recipient: \`0xBE0EdB1F457334B8d2DfEb3627567137E745A00B\` (multisig shared with Fluid team).
+- Funds the incoming Flux marketing campaign. Recipient: 0xBE0EdB1F457334B8d2DfEb3627567137E745A00B (multisig shared with Fluid team).
 
 #### References
 
 - [GitHub PR: VenusProtocol/venus-periphery#61](https://github.com/VenusProtocol/venus-periphery/pull/61)
+- [Community post: May 2026 Risk Parameter Update / Asset Off-boarding](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785)
 - VPD-925 — Phase -1 Executor`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -144,4 +168,4 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
   );
 };
 
-export default vip701;
+export default vip623;

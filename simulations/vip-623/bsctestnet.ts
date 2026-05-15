@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip701Testnet, {
+import vip623Testnet, {
   ACM,
   EBRAKE,
   EBRAKE_EXECUTOR_PERMS,
@@ -14,7 +14,7 @@ import vip701Testnet, {
   EXECUTOR_GOVERNANCE_PERMS,
   EXECUTOR_MONITOR_PERMS,
   SIGNAL_MONITOR,
-} from "../../vips/vip-701/bsctestnet";
+} from "../../vips/vip-623/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bsctestnet;
@@ -64,7 +64,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-701 [BNB Testnet] Configure tighten-only Executor", await vip701Testnet(), {
+  testVip("VIP-623 [BNB Testnet] Configure tighten-only Executor", await vip623Testnet(), {
     callbackAfterExecution: async txResponse => {
       // RoleGranted: 4 (monitor on Executor) + 5 (Executor on EBrake) + 4 (Guardian + 3 timelocks setMarketConfig) = 13
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [13]);
