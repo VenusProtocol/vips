@@ -18,6 +18,7 @@ import {
   initMainnetUser,
   mineBlocks,
   mineOnZksync,
+  resolvePerTxGasCap,
   setForkBlock,
   validateTargetAddresses,
 } from "../utils";
@@ -25,7 +26,14 @@ import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
-const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
+// XVS Vault stakes erode over time, so a single default supporter no longer reliably
+// clears quorum (600,000 XVS) when combined with the proposer at recent fork blocks.
+// Two supporters give the framework headroom across blocks. Override per-test by passing
+// `supporter` (single, legacy) or `supporters` (array) to `testVip`.
+const DEFAULT_SUPPORTER_ADDRESSES = [
+  "0xc444949e0054a23c44fc45789738bdf64aed2391",
+  "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
+];
 const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
@@ -65,6 +73,10 @@ export interface TestingOptions {
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
+  // Optional list of additional supporters. Used when proposer + single supporter no longer
+  // clears quorum at the chosen fork block (XVS Vault stakes shift over time). If both
+  // `supporter` and `supporters` are set, `supporters` wins.
+  supporters?: string[];
   callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
@@ -114,13 +126,40 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
   bar.start(proposal.signatures.length, 0);
 
+  // Each command runs as its own tx here (not bundled like `governorBravo.execute`),
+  // so the per-tx cap applies per command, not to the sum. Track per-cmd max and
+  // flag any individual command that exceeds the cap.
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+  let totalGas = BigNumber.from(0);
+  let maxCmdGas = BigNumber.from(0);
+  let maxCmdIdx = -1;
   for (let i = 0; i < proposal.signatures.length; ++i) {
     const txResponse = await executeCommand(impersonatedTimelock, proposal, i);
+    const receipt = await txResponse.wait();
+    totalGas = totalGas.add(receipt.gasUsed);
+    if (receipt.gasUsed.gt(maxCmdGas)) {
+      maxCmdGas = receipt.gasUsed;
+      maxCmdIdx = i;
+    }
+    if (Number.isFinite(cap) && receipt.gasUsed.gt(cap)) {
+      console.warn(
+        `[gas] WARNING cmd[${i}] (${proposal.signatures[i]}) gasUsed=${receipt.gasUsed.toString()} ` +
+          `exceeds ${FORKED_NETWORK} per-tx cap ${cap}`,
+      );
+    }
     txResponses.push(txResponse);
     bar.update(i + 1);
   }
 
   bar.stop();
+  const maxSuffix = Number.isFinite(cap)
+    ? ` (${maxCmdGas.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+    : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+  console.log(
+    `[gas] pretendExecutingVip ${proposal.signatures.length} commands, ` +
+      `maxCmdGasUsed=${maxCmdGas.toString()} (cmd[${maxCmdIdx}])${maxSuffix}, ` +
+      `totalGasUsed=${totalGas.toString()}`,
+  );
   return txResponses;
 };
 
@@ -128,19 +167,22 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   let impersonatedTimelock: SignerWithAddress;
   let governorProxy: Contract;
   let proposer: SignerWithAddress;
-  let supporter: SignerWithAddress;
+  let supporters: SignerWithAddress[];
 
   const governanceFixture = async (): Promise<void> => {
     const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
 
-    const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
+    const supporterAddresses =
+      options.supporters ?? (options.supporter ? [options.supporter] : DEFAULT_SUPPORTER_ADDRESSES);
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
       [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
       [ProposalType.CRITICAL]: CRITICAL_TIMELOCK,
     }[proposal.type || ProposalType.REGULAR];
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
-    supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
+    supporters = await Promise.all(
+      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
+    );
     impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
@@ -195,7 +237,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const votingDelay = await proposalConfig.votingDelay;
       await mine(votingDelay);
       await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
-      await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
+      for (const s of supporters) {
+        await expect(governorProxy.connect(s).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
+      }
     });
 
     it("should be queued successfully", async () => {
@@ -208,7 +252,28 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type || 0]);
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
-      const tx = await governorProxy.connect(proposer).execute(proposalId);
+
+      // Mirror the chain's protocol per-tx cap by capping tx.gasLimit. Hardhat
+      // fork does not enforce protocol per-tx caps (those are consensus rules,
+      // not tx fields), so without this an over-cap proposal passes simulation
+      // but OOGs on chain. Setting gasLimit = cap forces hardhat to revert
+      // out-of-gas exactly as mainnet would. Build the tx via
+      // `populateTransaction` so the override is applied at the raw-tx layer
+      // (passing it as a second arg to the contract method gets misinterpreted
+      // as a positional fn arg by ethers v5).
+      const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+      const populated = await governorProxy.connect(proposer).populateTransaction.execute(proposalId);
+      if (Number.isFinite(cap)) {
+        populated.gasLimit = BigNumber.from(cap);
+      }
+      const tx = await proposer.sendTransaction(populated);
+      const receipt = await tx.wait();
+
+      const gasUsed = receipt.gasUsed.toString();
+      const capSuffix = Number.isFinite(cap)
+        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+      console.log(`[gas] ${description} execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
@@ -296,14 +361,29 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       await mineBlocks();
 
       const feeData = await ethers.provider.getFeeData();
-      const txnParams: { maxFeePerGas?: BigNumber } = {};
+      const txnParams: { maxFeePerGas?: BigNumber; gasLimit?: number } = {};
 
       if (feeData.maxFeePerGas) {
         // Sometimes the gas estimation is wrong with some networks like zksync
         txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
       }
 
+      // Mirror the chain's protocol per-tx cap by capping tx.gasLimit. Hardhat
+      // fork does not enforce protocol per-tx caps, so without this an over-cap
+      // remote payload passes simulation but OOGs on chain.
+      const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+      if (Number.isFinite(cap)) {
+        txnParams.gasLimit = cap;
+      }
+
       const tx = await executor.execute(proposalId, txnParams);
+      const receipt = await tx.wait();
+
+      const gasUsed = receipt.gasUsed.toString();
+      const capSuffix = Number.isFinite(cap)
+        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+      console.log(`[gas] ${description} executor.execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);

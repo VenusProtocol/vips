@@ -24,6 +24,22 @@ The simulations and create commands require the function creating the VIP to be 
 npx hardhat test simulations/<simulation-path> --fork <network>
 ```
 
+### Run Simulations for ZKSync
+
+ZKSync simulations require a local `anvil-zksync` node to be installed. Skip if already installed.
+
+Set the `chainId` in [hardhat.config.zksync.ts:175](hardhat.config.zksync.ts#L175) to match the target network (`300` for zksyncsepolia, `324` for zksyncmainnet), then run the node and simulation in separate terminals:
+
+```bash
+# Start local forked node
+yarn local-anvil-node:zksyncsepolia --fork-block-number <block-number>
+yarn local-anvil-node:zksyncmainnet --fork-block-number <block-number>
+
+# Run simulation
+npx hardhat test simulations/<vip-path>/zksyncsepolia.ts --network zksynctestnode --fork zksyncsepolia --config hardhat.config.zksync.ts
+npx hardhat test simulations/<vip-path>/zksyncmainnet.ts --network zksynctestnode --fork zksyncmainnet --config hardhat.config.zksync.ts
+```
+
 ### Run Simulations for Multisig
 
 Simulations for multisig transactions can be run individually or sequentially. Running test for proposals can be done by passing in the index file of the network's simulation dir where each proposal test is imported.

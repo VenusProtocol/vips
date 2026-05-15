@@ -1,0 +1,95 @@
+{
+  "pools": [
+    {
+      "name": "Core",
+      "comptroller": "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe",
+      "markets": [
+        {
+          "name": "vWETH_Core",
+          "address": "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "6000000000000000000000",
+          "borrowCap": "4000000000000000000000",
+          "collateralFactor": "700000000000000000",
+          "liquidationThreshold": "750000000000000000"
+        },
+        {
+          "name": "vUSDC_Core",
+          "address": "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "30000000000000",
+          "borrowCap": "27000000000000",
+          "collateralFactor": "700000000000000000",
+          "liquidationThreshold": "750000000000000000"
+        },
+        {
+          "name": "vUNI_Core",
+          "address": "0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "4000000000000000000000000",
+          "borrowCap": "2000000000000000000000000",
+          "collateralFactor": "500000000000000000",
+          "liquidationThreshold": "550000000000000000"
+        },
+        {
+          "name": "vweETH_Core",
+          "address": "0x0170398083eb0D0387709523baFCA6426146C218",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "4000000000000000000000",
+          "borrowCap": "400000000000000000000",
+          "collateralFactor": "700000000000000000",
+          "liquidationThreshold": "750000000000000000"
+        },
+        {
+          "name": "vwstETH_Core",
+          "address": "0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "14000000000000000000000",
+          "borrowCap": "7000000000000000000000",
+          "collateralFactor": "700000000000000000",
+          "liquidationThreshold": "725000000000000000"
+        },
+        {
+          "name": "vWBTC_Core",
+          "address": "0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "40000000000",
+          "borrowCap": "4000000000",
+          "collateralFactor": "770000000000000000",
+          "liquidationThreshold": "800000000000000000"
+        },
+        {
+          "name": "vUSD₮0_Core",
+          "address": "0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "50000000000000",
+          "borrowCap": "45000000000000",
+          "collateralFactor": "770000000000000000",
+          "liquidationThreshold": "800000000000000000"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "totalMintPaused": 7,
+    "totalBorrowPaused": 0,
+    "totalEnterMarketPaused": 7,
+    "totalSupplyCap": 7,
+    "totalBorrowCap": 7,
+    "totalCollateralFactor": 7
+  }
+}
