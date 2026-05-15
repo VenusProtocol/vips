@@ -13,14 +13,19 @@ import vip701, {
   EXECUTOR,
   EXECUTOR_GOVERNANCE_PERMS,
   EXECUTOR_MONITOR_PERMS,
+  FLUX_MARKETING_WALLET,
   SIGNAL_MONITOR,
+  USDT,
+  USDT_AMOUNT,
 } from "../../vips/vip-701/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import EXECUTOR_ABI from "./abi/Executor.json";
 
-const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, UNITROLLER } = NETWORK_ADDRESSES.bscmainnet;
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, UNITROLLER, VTREASURY } =
+  NETWORK_ADDRESSES.bscmainnet;
 const EXECUTOR_GOVERNANCE_ACCOUNTS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
 // Listed Core Pool markets used for behavioural assertions.
@@ -40,6 +45,7 @@ forking(BLOCK_NUMBER, async () => {
   let executor: Contract;
   let eBrake: Contract;
   let comptroller: Contract;
+  let usdt: Contract;
 
   // BSC mainnet ACM's isAllowedToCall keys on msg.sender == target contract.
   // We impersonate the relevant target contract for each permission lookup.
@@ -50,11 +56,16 @@ forking(BLOCK_NUMBER, async () => {
   let criticalTimelockSigner: SignerWithAddress;
   let randomSigner: SignerWithAddress;
 
+  // Captured before VIP execution so post-VIP assertions can verify the delta.
+  let treasuryUsdtBefore: BigNumber;
+  let fluxWalletUsdtBefore: BigNumber;
+
   before(async () => {
     accessControlManager = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
     executor = await ethers.getContractAt(EXECUTOR_ABI, EXECUTOR);
     eBrake = await ethers.getContractAt(EBRAKE_ABI, EBRAKE);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
 
     impersonatedExecutor = await initMainnetUser(EXECUTOR, ethers.utils.parseEther("1"));
     impersonatedEBrake = await initMainnetUser(EBRAKE, ethers.utils.parseEther("1"));
@@ -62,6 +73,9 @@ forking(BLOCK_NUMBER, async () => {
     monitorSigner = await initMainnetUser(SIGNAL_MONITOR, ethers.utils.parseEther("1"));
     criticalTimelockSigner = await initMainnetUser(CRITICAL_TIMELOCK, ethers.utils.parseEther("1"));
     randomSigner = await initMainnetUser("0x000000000000000000000000000000000000bEEF", ethers.utils.parseEther("1"));
+
+    treasuryUsdtBefore = await usdt.balanceOf(VTREASURY);
+    fluxWalletUsdtBefore = await usdt.balanceOf(FLUX_MARKETING_WALLET);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -305,6 +319,16 @@ forking(BLOCK_NUMBER, async () => {
         executor,
         "MarketDisabled",
       );
+    });
+  });
+
+  describe("Post-VIP behaviour — treasury transfer", () => {
+    it("treasury USDT balance decreased by 25,000 USDT", async () => {
+      expect(await usdt.balanceOf(VTREASURY)).to.equal(treasuryUsdtBefore.sub(USDT_AMOUNT));
+    });
+
+    it("Flux marketing wallet received 25,000 USDT", async () => {
+      expect(await usdt.balanceOf(FLUX_MARKETING_WALLET)).to.equal(fluxWalletUsdtBefore.add(USDT_AMOUNT));
     });
   });
 });

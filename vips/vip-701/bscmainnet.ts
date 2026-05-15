@@ -2,10 +2,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
 // Access Control Manager
 export const ACM = NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER;
+
+// Marketing transfer
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const FLUX_MARKETING_WALLET = "0xBE0EdB1F457334B8d2DfEb3627567137E745A00B";
+export const USDT_AMOUNT = "25000000000000000000000"; // 25,000 USDT (18 decimals)
 
 // EBrake (configured in VIP-610)
 export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
@@ -68,6 +73,10 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
 - Lets governance set per-market bounds (\`minBorrowCap\`, \`minSupplyCap\`, \`enabled\`). Granting to all three timelocks + Guardian mirrors VIP-610 and lets Critical (~1h) disable a compromised market's automation instead of waiting 48h on Normal.
 
+**5. Transfer 25,000 USDT from Venus Treasury to Flux marketing wallet**
+
+- Funds the incoming Flux marketing campaign. Recipient: \`0xBE0EdB1F457334B8d2DfEb3627567137E745A00B\` (multisig shared with Fluid team).
+
 #### References
 
 - [GitHub PR: VenusProtocol/venus-periphery#61](https://github.com/VenusProtocol/venus-periphery/pull/61)
@@ -93,6 +102,13 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
       ...[GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].flatMap(account =>
         EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, account)),
       ),
+
+      // 5. Transfer 25,000 USDT to Flux marketing wallet for upcoming campaign
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, USDT_AMOUNT, FLUX_MARKETING_WALLET],
+      },
     ],
     meta,
     ProposalType.REGULAR,
