@@ -17,6 +17,7 @@ import vip701, {
 } from "../../vips/vip-701/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import EBRAKE_ABI from "./abi/EBrake.json";
 import EXECUTOR_ABI from "./abi/Executor.json";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, UNITROLLER } = NETWORK_ADDRESSES.bscmainnet;
@@ -37,6 +38,7 @@ const BLOCK_NUMBER = 98248415;
 forking(BLOCK_NUMBER, async () => {
   let accessControlManager: Contract;
   let executor: Contract;
+  let eBrake: Contract;
   let comptroller: Contract;
 
   // BSC mainnet ACM's isAllowedToCall keys on msg.sender == target contract.
@@ -51,6 +53,7 @@ forking(BLOCK_NUMBER, async () => {
   before(async () => {
     accessControlManager = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
     executor = await ethers.getContractAt(EXECUTOR_ABI, EXECUTOR);
+    eBrake = await ethers.getContractAt(EBRAKE_ABI, EBRAKE);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
 
     impersonatedExecutor = await initMainnetUser(EXECUTOR, ethers.utils.parseEther("1"));
@@ -91,12 +94,20 @@ forking(BLOCK_NUMBER, async () => {
     it("Signal monitor cannot call Executor handlers before the VIP runs", async () => {
       await expect(executor.connect(monitorSigner).handleLTVAdjust(VUSDC, 0)).to.be.reverted;
     });
+
+    it("Executor and EBrake are not yet owned by Normal Timelock (pendingOwner is set)", async () => {
+      expect(await executor.owner()).to.not.equal(NORMAL_TIMELOCK);
+      expect(await executor.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await eBrake.owner()).to.not.equal(NORMAL_TIMELOCK);
+      expect(await eBrake.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+    });
   });
 
   testVip("VIP-701 [BNB Chain] Configure tighten-only Executor", await vip701(), {
     callbackAfterExecution: async txResponse => {
-      // RoleGranted: 4 (monitor on Executor) + 5 (Executor on EBrake) + 4 (Guardian + 3 timelocks setMarketConfig) = 13
+      // 13 RoleGranted (4 monitor + 5 EBrake + 4 setMarketConfig) and 2 OwnershipTransferred (Executor + EBrake).
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [13]);
+      await expectEvents(txResponse, [EXECUTOR_ABI], ["OwnershipTransferred"], [2]);
     },
   });
 
@@ -136,6 +147,18 @@ forking(BLOCK_NUMBER, async () => {
 
     it("Executor.IS_CORE_POOL should be true (BSC Diamond comptroller)", async () => {
       expect(await executor.IS_CORE_POOL()).to.equal(true);
+    });
+  });
+
+  describe("Post-VIP ownership state", () => {
+    it("Executor.owner() is Normal Timelock and pendingOwner is cleared", async () => {
+      expect(await executor.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await executor.pendingOwner()).to.equal(ethers.constants.AddressZero);
+    });
+
+    it("EBrake.owner() is Normal Timelock and pendingOwner is cleared", async () => {
+      expect(await eBrake.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await eBrake.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
   });
 

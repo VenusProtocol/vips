@@ -54,15 +54,17 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
 #### Proposed Changes
 
-**1. Grant Signal Monitor permissions on Executor action handlers**
+**1. Accept ownership of Executor and EBrake**
+
+**2. Grant Signal Monitor permissions on Executor action handlers**
 
 - Authorize the off-chain monitor to call \`handleLTVAdjust\`, \`handleCapAdjust\`, \`handleSupplyCapExceeding\`, \`handleBorrowCapExceeding\`
 
-**2. Grant Executor permissions on EBrake**
+**3. Grant Executor permissions on EBrake**
 
 - Authorize the Executor to call \`pauseBorrow\`, \`pauseSupply\`, \`decreaseCF\`, \`setMarketBorrowCaps\`, \`setMarketSupplyCaps\` on EBrake
 
-**3. Grant Guardian and all three Timelocks (Normal, Fast Track, Critical) permission to call \`setMarketConfig\` on Executor**
+**4. Grant Guardian and all three Timelocks (Normal, Fast Track, Critical) permission to call \`setMarketConfig\` on Executor**
 
 - Lets governance set per-market bounds (\`minBorrowCap\`, \`minSupplyCap\`, \`enabled\`). Granting to all three timelocks + Guardian mirrors VIP-610 and lets Critical (~1h) disable a compromised market's automation instead of waiting 48h on Normal.
 
@@ -77,13 +79,17 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
   return makeProposal(
     [
-      // 1. Signal monitor → Executor action handlers
+      // 1. Accept ownership
+      { target: EXECUTOR, signature: "acceptOwnership()", params: [] },
+      { target: EBRAKE, signature: "acceptOwnership()", params: [] },
+
+      // 2. Signal monitor → Executor action handlers
       ...EXECUTOR_MONITOR_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, SIGNAL_MONITOR)),
 
-      // 2. Executor → EBrake
+      // 3. Executor → EBrake
       ...EBRAKE_EXECUTOR_PERMS.map(sig => giveCallPermission(EBRAKE, sig, EXECUTOR)),
 
-      // 3. Guardian + all timelocks → Executor governance function
+      // 4. Guardian + all timelocks → Executor governance function
       ...[GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].flatMap(account =>
         EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, account)),
       ),
