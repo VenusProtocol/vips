@@ -1,26 +1,33 @@
 /**
- * Fetch BSC Core Pool markets and compute 20% floors of their current borrow/supply caps.
+ * Build the Executor's per-market 20% floor table for VIP-701.
+ *
+ * Pipeline (per vToken returned by Unitroller.getAllMarkets()):
+ *   1. Skip if not listed in the core pool (poolMarkets(0, vToken).isListed === false).
+ *   2. Pick the effective caps:
+ *        - If the market is touched by queued VIP-622 (marketCapChanges or delistAssets in
+ *          vips/vip-622/data/bscmainnet.ts), use the post-VIP-622 caps from that file.
+ *        - Otherwise read the live caps from Comptroller.borrowCaps / supplyCaps.
+ *   3. Compute 20% floors. Integer division means a 1-wei dust cap rounds to 0.
+ *   4. Skip the market entirely if both 20% floors are zero — covers fully delisted
+ *      markets (THE/TUSD/FIL via VIP-622) and dormant zero-cap stubs
+ *      (BUSD/SXP/MATIC/TUSDOLD/TRXOLD/vBETH).
  *
  * Run:
  *   npx hardhat run scripts/fetchCoreMarketCaps.ts --network bscmainnet
  *
- * Reads on-chain:
- *   - Unitroller.getAllMarkets()
- *   - For each market: poolMarkets(0, vToken) to keep only core-pool-listed entries
- *   - For each kept market: borrowCaps(vToken), supplyCaps(vToken), vToken.symbol()
- *
- * Writes:
- *   vips/vip-701/coreMarketCaps.json — consumed by vips/vip-701/bscmainnet.ts
- *
- * 20% of zero is zero, so uncapped markets stay at minCap=0 (which still permits monitor
- * tightening on the LTV and cap-exceeding paths — only handleCapAdjust becomes a no-op).
+ * Output:
+ *   vips/vip-701/coreMarketCaps.json — consumed directly by vips/vip-701/bscmainnet.ts.
  */
+import { BigNumber } from "ethers";
 import fs from "fs";
 import { ethers } from "hardhat";
 import path from "path";
 
+import { delistAssets, marketCapChanges } from "../vips/vip-622/data/bscmainnet";
+
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const CORE_POOL_ID = 0;
+const FLOOR_PERCENT = 20;
 
 const COMPTROLLER_ABI = [
   "function getAllMarkets() view returns (address[])",
@@ -28,62 +35,113 @@ const COMPTROLLER_ABI = [
   "function borrowCaps(address) view returns (uint256)",
   "function supplyCaps(address) view returns (uint256)",
 ];
-
 const VTOKEN_ABI = ["function symbol() view returns (string)"];
 
-interface MarketEntry {
+interface PostVip622Cap {
+  symbol: string;
+  borrowCap: BigNumber;
+  supplyCap: BigNumber;
+}
+
+interface KeptMarket {
   address: string;
   symbol: string;
-  currentBorrowCap: string;
-  currentSupplyCap: string;
-  minBorrowCap: string; // 20% of currentBorrowCap, floored to wei
-  minSupplyCap: string; // 20% of currentSupplyCap, floored to wei
+  capSource: "live" | "vip-622";
+  effectiveBorrowCap: string;
+  effectiveSupplyCap: string;
+  minBorrowCap: string;
+  minSupplyCap: string;
+}
+interface SkippedMarket {
+  address: string;
+  symbol?: string;
+  reason: string;
+}
+
+// Build the VIP-622 override map directly from PR #706's data file.
+// Single source of truth: any future edit to vips/vip-622/data/bscmainnet.ts flows here.
+function buildVip622Overrides(): Map<string, PostVip622Cap> {
+  const overrides = new Map<string, PostVip622Cap>();
+  for (const m of marketCapChanges) {
+    overrides.set(m.vToken.toLowerCase(), {
+      symbol: m.symbol,
+      borrowCap: BigNumber.from(m.borrowCap.new),
+      supplyCap: BigNumber.from(m.supplyCap.new),
+    });
+  }
+  for (const d of delistAssets) {
+    // delistAssets force caps to 0; marketCapChanges may also list the same vToken (no-op),
+    // but the delist intent wins so we overwrite unconditionally.
+    overrides.set(d.vToken.toLowerCase(), {
+      symbol: d.symbol,
+      borrowCap: BigNumber.from(0),
+      supplyCap: BigNumber.from(0),
+    });
+  }
+  return overrides;
 }
 
 async function main() {
   const provider = ethers.provider;
   const comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, provider);
-
   const block = await provider.getBlockNumber();
   console.log(`Fetching at block ${block}…`);
 
-  // step 1: get all markets
+  const vip622Overrides = buildVip622Overrides();
+  console.log(`VIP-622 supplies post-caps for ${vip622Overrides.size} markets`);
+
   const allMarkets: string[] = await comptroller.getAllMarkets();
   console.log(`getAllMarkets() returned ${allMarkets.length} markets`);
 
-  const kept: MarketEntry[] = [];
-  const skipped: { address: string; reason: string }[] = [];
+  const kept: KeptMarket[] = [];
+  const skipped: SkippedMarket[] = [];
 
   for (const market of allMarkets) {
-    // step 2: check if it's listed in the core pool (poolId 0)
     const [isListed] = await comptroller.poolMarkets(CORE_POOL_ID, market);
     if (!isListed) {
       skipped.push({ address: market, reason: "not listed in core pool (poolId 0)" });
       continue;
     }
 
-    // step 3: fetch current caps and symbol
-    const [currentBorrowCap, currentSupplyCap, symbol] = await Promise.all([
-      comptroller.borrowCaps(market),
-      comptroller.supplyCaps(market),
-      new ethers.Contract(market, VTOKEN_ABI, provider).symbol(),
-    ]);
+    const override = vip622Overrides.get(market.toLowerCase());
+    let borrowCap: BigNumber;
+    let supplyCap: BigNumber;
+    let capSource: "live" | "vip-622";
+    if (override) {
+      borrowCap = override.borrowCap;
+      supplyCap = override.supplyCap;
+      capSource = "vip-622";
+    } else {
+      [borrowCap, supplyCap] = await Promise.all([comptroller.borrowCaps(market), comptroller.supplyCaps(market)]);
+      capSource = "live";
+    }
 
-    // step 4: Compute 20% floors, rounding down to the nearest integer (wei)
-    const minBorrowCap = currentBorrowCap.mul(20).div(100);
-    const minSupplyCap = currentSupplyCap.mul(20).div(100);
+    const minBorrowCap = borrowCap.mul(FLOOR_PERCENT).div(100);
+    const minSupplyCap = supplyCap.mul(FLOOR_PERCENT).div(100);
+
+    const symbol = await new ethers.Contract(market, VTOKEN_ABI, provider).symbol();
+
+    if (minBorrowCap.isZero() && minSupplyCap.isZero()) {
+      skipped.push({
+        address: market,
+        symbol,
+        reason: `${capSource} 20% floors are both zero (delisted / dormant)`,
+      });
+      continue;
+    }
 
     kept.push({
       address: market,
       symbol,
-      currentBorrowCap: currentBorrowCap.toString(),
-      currentSupplyCap: currentSupplyCap.toString(),
+      capSource,
+      effectiveBorrowCap: borrowCap.toString(),
+      effectiveSupplyCap: supplyCap.toString(),
       minBorrowCap: minBorrowCap.toString(),
       minSupplyCap: minSupplyCap.toString(),
     });
   }
 
-  console.log(`Kept ${kept.length} core-pool-listed markets, skipped ${skipped.length}`);
+  console.log(`Kept ${kept.length} markets, skipped ${skipped.length}`);
   console.log("Skipped:", skipped);
 
   const out = {
@@ -93,7 +151,8 @@ async function main() {
       corePoolId: CORE_POOL_ID,
       block,
       fetchedAt: new Date().toISOString(),
-      floorPercent: 20,
+      floorPercent: FLOOR_PERCENT,
+      vip622DataSource: "vips/vip-622/data/bscmainnet.ts (PR https://github.com/VenusProtocol/vips/pull/706)",
     },
     markets: kept,
     skipped,
@@ -103,11 +162,10 @@ async function main() {
   fs.writeFileSync(outPath, `${JSON.stringify(out, null, 2)}\n`);
   console.log(`Wrote ${outPath}`);
 
-  // Print a human-readable summary table so the result is reviewable in the run log.
-  console.log("\n--- 20% floors per market ---");
-  console.log("symbol".padEnd(28), "minBorrowCap".padEnd(28), "minSupplyCap");
+  console.log("\n--- Per-market 20% floors ---");
+  console.log("symbol".padEnd(28), "source".padEnd(10), "minBorrowCap".padEnd(28), "minSupplyCap");
   for (const m of kept) {
-    console.log(m.symbol.padEnd(28), m.minBorrowCap.padEnd(28), m.minSupplyCap);
+    console.log(m.symbol.padEnd(28), m.capSource.padEnd(10), m.minBorrowCap.padEnd(28), m.minSupplyCap);
   }
 }
 

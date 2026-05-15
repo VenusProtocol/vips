@@ -3,7 +3,6 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import coreMarketCaps from "./coreMarketCaps.json";
-import vip622Overrides from "./vip622Overrides.json";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -44,37 +43,21 @@ export const EBRAKE_EXECUTOR_PERMS = [
   "setMarketSupplyCaps(address[],uint256[])",
 ];
 
-// Per-market Executor configs.
-//
-// Default source: scripts/fetchCoreMarketCaps.ts → coreMarketCaps.json (20% of live on-chain caps).
-// Override source: vip622Overrides.json (20% of post-VIP-622 caps, hardcoded for markets that
-// PR #706 right-sizes but hasn't executed on-chain yet). Override wins per address.
-const overrideByAddress = new Map(vip622Overrides.markets.map(o => [o.address.toLowerCase(), o] as const));
-
+// Per-market Executor configs — fully baked by scripts/fetchCoreMarketCaps.ts.
+// The script already applies VIP-622 overrides and drops unlisted / zero-floor markets,
+// so the VIP just emits one setMarketConfig per entry. Each entry's `capSource` in
+// coreMarketCaps.json records whether the floor came from live state or VIP-622.
 export const CORE_POOL_MARKET_CONFIGS: {
   address: string;
   symbol: string;
   minBorrowCap: string;
   minSupplyCap: string;
-  source: "script" | "vip-622";
-}[] = coreMarketCaps.markets.map(m => {
-  const override = overrideByAddress.get(m.address.toLowerCase());
-  return override
-    ? {
-        address: m.address,
-        symbol: m.symbol,
-        minBorrowCap: override.minBorrowCap,
-        minSupplyCap: override.minSupplyCap,
-        source: "vip-622",
-      }
-    : {
-        address: m.address,
-        symbol: m.symbol,
-        minBorrowCap: m.minBorrowCap,
-        minSupplyCap: m.minSupplyCap,
-        source: "script",
-      };
-});
+}[] = coreMarketCaps.markets.map(m => ({
+  address: m.address,
+  symbol: m.symbol,
+  minBorrowCap: m.minBorrowCap,
+  minSupplyCap: m.minSupplyCap,
+}));
 
 const giveCallPermission = (contract: string, sig: string, account: string) => ({
   target: ACM,

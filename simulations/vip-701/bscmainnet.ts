@@ -4,8 +4,9 @@ import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import { vip622 } from "../../vips/vip-622/bscmainnet";
 import vip701, {
   ACM,
   CORE_POOL_MARKET_CONFIGS,
@@ -19,6 +20,7 @@ import vip701, {
   USDT,
   USDT_AMOUNT,
 } from "../../vips/vip-701/bscmainnet";
+import coreMarketCaps from "../../vips/vip-701/coreMarketCaps.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
@@ -74,6 +76,12 @@ forking(BLOCK_NUMBER, async () => {
     monitorSigner = await initMainnetUser(SIGNAL_MONITOR, ethers.utils.parseEther("1"));
     criticalTimelockSigner = await initMainnetUser(CRITICAL_TIMELOCK, ethers.utils.parseEther("1"));
     randomSigner = await initMainnetUser("0x000000000000000000000000000000000000bEEF", ethers.utils.parseEther("1"));
+
+    // VIP-622 is queued at this fork block. coreMarketCaps.json was built off the same
+    // VIP-622 data file, so pre-executing it here makes on-chain caps match the snapshot
+    // the VIP-701 floors were computed from — the post-VIP-701 assertion below can then
+    // verify each stored floor equals 20% of the comptroller's live cap.
+    await pretendExecutingVip(await vip622(), NORMAL_TIMELOCK);
 
     treasuryUsdtBefore = await usdt.balanceOf(VTREASURY);
     fluxWalletUsdtBefore = await usdt.balanceOf(FLUX_MARKETING_WALLET);
@@ -179,12 +187,76 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Post-VIP Core Pool market configs", () => {
-    it("every Core Pool market matches the floors from coreMarketCaps.json", async () => {
+    // With VIP-622 pre-executed in `before`, the comptroller's borrow/supply caps now reflect
+    // the post-VIP-622 state. The script computed VIP-701's floors off the same VIP-622 data,
+    // so the Executor's stored floor for every configured market must equal 20% of the live cap
+    // and the live cap must equal the snapshot the script saw. Catches drift between the two.
+    it("every Core Pool market's stored floors equal 20% of the post-VIP-622 on-chain caps", async () => {
       for (const m of CORE_POOL_MARKET_CONFIGS) {
-        const cfg = await executor.marketConfigs(m.address);
-        expect(cfg.minBorrowCap).to.equal(m.minBorrowCap, `minBorrowCap for ${m.symbol} (${m.address})`);
-        expect(cfg.minSupplyCap).to.equal(m.minSupplyCap, `minSupplyCap for ${m.symbol} (${m.address})`);
+        const [liveBorrowCap, liveSupplyCap, cfg] = await Promise.all([
+          comptroller.borrowCaps(m.address),
+          comptroller.supplyCaps(m.address),
+          executor.marketConfigs(m.address),
+        ]);
+        const expectedMinBorrow = liveBorrowCap.mul(20).div(100);
+        const expectedMinSupply = liveSupplyCap.mul(20).div(100);
+
+        expect(cfg.minBorrowCap).to.equal(
+          expectedMinBorrow,
+          `minBorrowCap for ${m.symbol} (${
+            m.address
+          }): stored ${cfg.minBorrowCap.toString()} vs 20% of live ${liveBorrowCap.toString()}`,
+        );
+        expect(cfg.minSupplyCap).to.equal(
+          expectedMinSupply,
+          `minSupplyCap for ${m.symbol} (${
+            m.address
+          }): stored ${cfg.minSupplyCap.toString()} vs 20% of live ${liveSupplyCap.toString()}`,
+        );
         expect(cfg.enabled).to.equal(true, `enabled for ${m.symbol} (${m.address})`);
+      }
+    });
+  });
+
+  describe("Skipped markets are skipped for the right reason", () => {
+    for (const s of coreMarketCaps.skipped) {
+      const label = `${s.symbol ?? "(unknown symbol)"} ${s.address}`;
+      if (s.reason.includes("not listed in core pool")) {
+        it(`${label}: isListed === false in core pool`, async () => {
+          const [isListed] = await comptroller.markets(s.address);
+          expect(isListed).to.equal(false);
+        });
+      } else if (s.reason.includes("20% floors are both zero")) {
+        // VIP-622 has been pre-executed, so live caps already reflect the effective state
+        // the script used. Both 20% values must round to zero — otherwise the script
+        // dropped a market that should have stayed in.
+        it(`${label}: 20% of live borrow & supply caps both round to zero`, async () => {
+          const [liveBorrow, liveSupply] = await Promise.all([
+            comptroller.borrowCaps(s.address),
+            comptroller.supplyCaps(s.address),
+          ]);
+          expect(liveBorrow.mul(20).div(100)).to.equal(
+            0,
+            `unexpected non-zero 20% borrow floor (cap ${liveBorrow.toString()})`,
+          );
+          expect(liveSupply.mul(20).div(100)).to.equal(
+            0,
+            `unexpected non-zero 20% supply floor (cap ${liveSupply.toString()})`,
+          );
+        });
+      } else {
+        it(`${label}: unknown skip reason "${s.reason}"`, () => {
+          throw new Error(`Unhandled skip reason: ${s.reason}. Update the test or the script.`);
+        });
+      }
+    }
+
+    it("Executor was NOT configured for any skipped market", async () => {
+      for (const s of coreMarketCaps.skipped) {
+        const cfg = await executor.marketConfigs(s.address);
+        expect(cfg.enabled).to.equal(false, `${s.symbol ?? s.address} should be unconfigured`);
+        expect(cfg.minBorrowCap).to.equal(0, `${s.symbol ?? s.address} should have zero stored borrow floor`);
+        expect(cfg.minSupplyCap).to.equal(0, `${s.symbol ?? s.address} should have zero stored supply floor`);
       }
     });
   });
