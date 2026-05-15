@@ -2,6 +2,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import coreMarketCaps from "./coreMarketCaps.json";
+
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
 // Access Control Manager
@@ -41,6 +43,22 @@ export const EBRAKE_EXECUTOR_PERMS = [
   "setMarketSupplyCaps(address[],uint256[])",
 ];
 
+// Per-market Executor configs sourced from scripts/fetchCoreMarketCaps.ts.
+// The JSON snapshot lives in this folder; re-run the script to refresh it before publishing.
+// minBorrowCap / minSupplyCap are 20% of the live caps at the snapshot block;
+// markets that aren't listed in the core pool (poolId 0) are dropped by the script.
+export const CORE_POOL_MARKET_CONFIGS: {
+  address: string;
+  symbol: string;
+  minBorrowCap: string;
+  minSupplyCap: string;
+}[] = coreMarketCaps.markets.map(m => ({
+  address: m.address,
+  symbol: m.symbol,
+  minBorrowCap: m.minBorrowCap,
+  minSupplyCap: m.minSupplyCap,
+}));
+
 const giveCallPermission = (contract: string, sig: string, account: string) => ({
   target: ACM,
   signature: "giveCallPermission(address,string,address)",
@@ -73,7 +91,11 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
 - Lets governance set per-market bounds (\`minBorrowCap\`, \`minSupplyCap\`, \`enabled\`). Granting to all three timelocks + Guardian mirrors VIP-610 and lets Critical (~1h) disable a compromised market's automation instead of waiting 48h on Normal.
 
-**5. Transfer 25,000 USDT from Venus Treasury to Flux marketing wallet**
+**5. Initialise Executor market configs for every Core Pool market**
+
+- Call \`setMarketConfig\` on the Executor for each listed Core Pool vToken with \`enabled = true\` and per-market floors set to **20% of the current borrow/supply cap** at the snapshot block. Per-market values are produced by [scripts/fetchCoreMarketCaps.ts](scripts/fetchCoreMarketCaps.ts) and committed to [vips/vip-701/coreMarketCaps.json](vips/vip-701/coreMarketCaps.json); zero-cap markets stay at floor 0.
+
+**6. Transfer 25,000 USDT from Venus Treasury to Flux marketing wallet**
 
 - Funds the incoming Flux marketing campaign. Recipient: \`0xBE0EdB1F457334B8d2DfEb3627567137E745A00B\` (multisig shared with Fluid team).
 
@@ -103,7 +125,14 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
         EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, account)),
       ),
 
-      // 5. Transfer 25,000 USDT to Flux marketing wallet for upcoming campaign
+      // 5. Initialise Executor market configs for every Core Pool market (20% floors from script snapshot)
+      ...CORE_POOL_MARKET_CONFIGS.map(m => ({
+        target: EXECUTOR,
+        signature: "setMarketConfig(address,(uint256,uint256,bool))",
+        params: [m.address, [m.minBorrowCap, m.minSupplyCap, true]],
+      })),
+
+      // 6. Transfer 25,000 USDT to Flux marketing wallet for upcoming campaign
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",

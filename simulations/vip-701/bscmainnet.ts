@@ -8,6 +8,7 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip701, {
   ACM,
+  CORE_POOL_MARKET_CONFIGS,
   EBRAKE,
   EBRAKE_EXECUTOR_PERMS,
   EXECUTOR,
@@ -28,10 +29,10 @@ const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, UNITR
   NETWORK_ADDRESSES.bscmainnet;
 const EXECUTOR_GOVERNANCE_ACCOUNTS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
-// Listed Core Pool markets used for behavioural assertions.
-// vUSDC drives the happy-path round-trip; vBNB stays unconfigured to exercise MarketNotConfigured.
+// Listed Core Pool market driving the happy-path round-trip.
 const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
-const VBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
+// Unlisted address used to exercise MarketNotConfigured (every Core Pool market is configured by the VIP).
+const UNLISTED_MARKET = "0x000000000000000000000000000000000000bEEF";
 
 // IExecutor.CapType wire values — load-bearing.
 const CAP_TYPE_BORROW = 0;
@@ -119,9 +120,10 @@ forking(BLOCK_NUMBER, async () => {
 
   testVip("VIP-701 [BNB Chain] Configure tighten-only Executor", await vip701(), {
     callbackAfterExecution: async txResponse => {
-      // 13 RoleGranted (4 monitor + 5 EBrake + 4 setMarketConfig) and 2 OwnershipTransferred (Executor + EBrake).
+      // 13 RoleGranted, 2 OwnershipTransferred (Executor + EBrake), 1 MarketConfigSet per Core Pool market.
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [13]);
       await expectEvents(txResponse, [EXECUTOR_ABI], ["OwnershipTransferred"], [2]);
+      await expectEvents(txResponse, [EXECUTOR_ABI], ["MarketConfigSet"], [CORE_POOL_MARKET_CONFIGS.length]);
     },
   });
 
@@ -173,6 +175,17 @@ forking(BLOCK_NUMBER, async () => {
     it("EBrake.owner() is Normal Timelock and pendingOwner is cleared", async () => {
       expect(await eBrake.owner()).to.equal(NORMAL_TIMELOCK);
       expect(await eBrake.pendingOwner()).to.equal(ethers.constants.AddressZero);
+    });
+  });
+
+  describe("Post-VIP Core Pool market configs", () => {
+    it("every Core Pool market matches the floors from coreMarketCaps.json", async () => {
+      for (const m of CORE_POOL_MARKET_CONFIGS) {
+        const cfg = await executor.marketConfigs(m.address);
+        expect(cfg.minBorrowCap).to.equal(m.minBorrowCap, `minBorrowCap for ${m.symbol} (${m.address})`);
+        expect(cfg.minSupplyCap).to.equal(m.minSupplyCap, `minSupplyCap for ${m.symbol} (${m.address})`);
+        expect(cfg.enabled).to.equal(true, `enabled for ${m.symbol} (${m.address})`);
+      }
     });
   });
 
@@ -238,8 +251,8 @@ forking(BLOCK_NUMBER, async () => {
       await expect(executor.connect(randomSigner).handleBorrowCapExceeding(VUSDC)).to.be.reverted;
     });
 
-    it("handler reverts with MarketNotConfigured for a market never registered (vBNB)", async () => {
-      await expect(executor.connect(monitorSigner).handleLTVAdjust(VBNB, 0)).to.be.revertedWithCustomError(
+    it("handler reverts with MarketNotConfigured for a market never registered", async () => {
+      await expect(executor.connect(monitorSigner).handleLTVAdjust(UNLISTED_MARKET, 0)).to.be.revertedWithCustomError(
         executor,
         "MarketNotConfigured",
       );
