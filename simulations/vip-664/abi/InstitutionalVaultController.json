@@ -1,0 +1,505 @@
+[
+  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+  { "inputs": [], "name": "InvalidAddress", "type": "error" },
+  { "inputs": [], "name": "InvalidConfig", "type": "error" },
+  { "inputs": [], "name": "InvalidLatePenaltyRate", "type": "error" },
+  { "inputs": [], "name": "InvalidLiquidationIncentive", "type": "error" },
+  { "inputs": [], "name": "InvalidLiquidationThreshold", "type": "error" },
+  { "inputs": [], "name": "OwnershipCannotBeRenounced", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "sender", "type": "address" },
+      { "internalType": "address", "name": "calledContract", "type": "address" },
+      { "internalType": "string", "name": "methodSignature", "type": "string" }
+    ],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  { "inputs": [], "name": "VaultNotRegistered", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldComptroller", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newComptroller", "type": "address" }
+    ],
+    "name": "ComptrollerUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint8", "name": "version", "type": "uint8" }],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "vault", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "newRate", "type": "uint256" }
+    ],
+    "name": "LatePenaltyRateUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldAdapter", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newAdapter", "type": "address" }
+    ],
+    "name": "LiquidationAdapterUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "vault", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "newLI", "type": "uint256" }
+    ],
+    "name": "LiquidationIncentiveUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "vault", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "newLT", "type": "uint256" }
+    ],
+    "name": "LiquidationThresholdUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "oldAccessControlManager", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "newAccessControlManager", "type": "address" }
+    ],
+    "name": "NewAccessControlManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldOracle", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOracle", "type": "address" }
+    ],
+    "name": "OracleUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldPSR", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newPSR", "type": "address" }
+    ],
+    "name": "ProtocolShareReserveUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldTreasury", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newTreasury", "type": "address" }
+    ],
+    "name": "TreasuryUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "vault", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "institution", "type": "address" }
+    ],
+    "name": "VaultCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldImpl", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newImpl", "type": "address" }
+    ],
+    "name": "VaultImplementationUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MANTISSA_ONE",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MANTISSA_ONE_AND_HALF",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_APY_BPS",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  { "inputs": [], "name": "acceptOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [],
+    "name": "acceptPositionTokenOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "accessControlManager",
+    "outputs": [{ "internalType": "contract IAccessControlManagerV8", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "allVaults",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "allVaultsLength",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "approvePositionTransfer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "closeVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "completePauseVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "comptroller",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "contract IERC20", "name": "supplyAsset", "type": "address" },
+          { "internalType": "uint256", "name": "fixedAPY", "type": "uint256" },
+          { "internalType": "uint256", "name": "reserveFactor", "type": "uint256" },
+          { "internalType": "uint256", "name": "minBorrowCap", "type": "uint256" },
+          { "internalType": "uint256", "name": "maxBorrowCap", "type": "uint256" },
+          { "internalType": "uint256", "name": "minSupplierDeposit", "type": "uint256" },
+          { "internalType": "uint40", "name": "openDuration", "type": "uint40" },
+          { "internalType": "uint40", "name": "lockDuration", "type": "uint40" },
+          { "internalType": "uint40", "name": "settlementWindow", "type": "uint40" }
+        ],
+        "internalType": "struct VaultConfig",
+        "name": "_vaultConfig",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          { "internalType": "contract IERC20", "name": "collateralAsset", "type": "address" },
+          { "internalType": "uint256", "name": "idealCollateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "marginRate", "type": "uint256" },
+          { "internalType": "address", "name": "institutionOperator", "type": "address" },
+          { "internalType": "uint256", "name": "positionTokenId", "type": "uint256" }
+        ],
+        "internalType": "struct InstitutionalConfig",
+        "name": "_instConfig",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          { "internalType": "uint256", "name": "liquidationThreshold", "type": "uint256" },
+          { "internalType": "uint256", "name": "liquidationIncentive", "type": "uint256" },
+          { "internalType": "uint256", "name": "latePenaltyRate", "type": "uint256" }
+        ],
+        "internalType": "struct RiskConfig",
+        "name": "_riskConfig",
+        "type": "tuple"
+      },
+      { "internalType": "string", "name": "_name", "type": "string" },
+      { "internalType": "string", "name": "_symbol", "type": "string" }
+    ],
+    "name": "createVault",
+    "outputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAggregatedVaultStates",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "vault", "type": "address" },
+          { "internalType": "enum VaultState", "name": "state", "type": "uint8" },
+          { "internalType": "address", "name": "institutionOperator", "type": "address" },
+          { "internalType": "uint256", "name": "totalRaised", "type": "uint256" },
+          { "internalType": "uint256", "name": "outstandingDebt", "type": "uint256" }
+        ],
+        "internalType": "struct VaultStateInfo[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "vaultImplementation_", "type": "address" },
+      { "internalType": "address", "name": "oracle_", "type": "address" },
+      { "internalType": "address", "name": "protocolShareReserve_", "type": "address" },
+      { "internalType": "address", "name": "comptroller_", "type": "address" },
+      { "internalType": "address", "name": "treasury_", "type": "address" },
+      { "internalType": "address", "name": "positionToken_", "type": "address" },
+      { "internalType": "address", "name": "acm_", "type": "address" }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "institutionNonce",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "isRegistered",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "liquidationAdapter",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "openVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oracle",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "partialPauseVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "positionToken",
+    "outputs": [{ "internalType": "contract IInstitutionPositionToken", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "institution", "type": "address" }],
+    "name": "predictVaultAddress",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolShareReserve",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "revokePositionTransfer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "accessControlManager_", "type": "address" }],
+    "name": "setAccessControlManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "comptroller_", "type": "address" }],
+    "name": "setComptroller",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "vault", "type": "address" },
+      { "internalType": "uint256", "name": "newRate", "type": "uint256" }
+    ],
+    "name": "setLatePenaltyRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "adapter", "type": "address" }],
+    "name": "setLiquidationAdapter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "vault", "type": "address" },
+      { "internalType": "uint256", "name": "newLI", "type": "uint256" }
+    ],
+    "name": "setLiquidationIncentive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "vault", "type": "address" },
+      { "internalType": "uint256", "name": "newLT", "type": "uint256" }
+    ],
+    "name": "setLiquidationThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "oracle_", "type": "address" }],
+    "name": "setOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "psr", "type": "address" }],
+    "name": "setProtocolShareReserve",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "treasury_", "type": "address" }],
+    "name": "setTreasury",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "impl", "type": "address" }],
+    "name": "setVaultImplementation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "vault", "type": "address" },
+      { "internalType": "address", "name": "token", "type": "address" }
+    ],
+    "name": "sweep",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasury",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }],
+    "name": "unpauseVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vaultImplementation",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
