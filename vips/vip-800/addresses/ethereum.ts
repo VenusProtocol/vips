@@ -27,8 +27,8 @@ export const SUSDE = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const SUSDS = "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD";
 export const PYUSD = "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8";
 
-// Thin/Not-Eligible tokens (carried in the table only as `skip` entries with Delist
-// rec metadata so the spec survives task.md deletion).
+// Thin/Not-Eligible tokens (carried in the table only as `skip` entries so the
+// market list is self-documenting).
 export const TUSD = "0x0000000000085d4780B73119b644AE5ecd22b376";
 export const WEETHS = "0xe1B4d34E8754600962Cd944B535180Bd758E6c2e";
 export const BAL = "0xba100000625a3754423978a60c9317c58a424e3D";
@@ -42,10 +42,10 @@ const POOL_WBTC_USDC = "0x99ac8ca7087fa4a2a1fb6357269965a2014abc35"; // UniV3 0.
 const POOL_USDC_USDT = "0x3416cf6c708da44db2624d63ea0aaef7113527c6"; // UniV3 0.01% (shared USDC/USDT)
 const POOL_LBTC_WBTC = "0x87428a53e14d24ab19c6ca4939b4df93b8996ca9"; // UniV3
 const POOL_USDE_USDC = "0xe6d7ebb9f1a9519dc06d557e03c522d53520e76a"; // UniV3
-const POOL_EBTC_WBTC = "0x7704d01908afd31bf647d969c295bb45230cd2d6"; // Curve StableSwap-NG
+const POOL_EBTC_WBTC = "0x7704d01908afd31bf647d969c295bb45230cd2d6"; // wired by VIP-616; retune only, no pool re-registration in VIP-800
 const POOL_DAI_USDC = "0x5777d92f208679db4b9778590fa3cab3ac9e2168"; // UniV3
 const POOL_TBTC_WETH = "0x97944213d2caeea773da1c9b11b0525f25b749cc"; // UniV3
-// crvUSD pool from task spec (0x4dece6…) was an EIP-1167 proxy, not a UniV3 pool;
+// Earlier-proposed crvUSD pool (0x4dece6…) was an EIP-1167 proxy, not a UniV3 pool;
 // canonical UniV3 crvUSD/USDC 0.01% pool from factory is used instead.
 const POOL_CRVUSD_USDC = "0x432Bddd0210063dDd4678EB2033578686C55A9FF"; // UniV3 0.01%
 // EIGEN pool's fee tier is 1% (= 10000 bps) rather than the stable 0.01% — confirmed
@@ -61,7 +61,7 @@ const POOL_PYUSD_USDS_NEW = "0xa632d59b9b804a956bfaa9b48af3a1b74808fc1f"; // Cur
 const POOL_SUSDS_USDT = "0x00836fe54625be242bcfa286207795405ca4fd10"; // Curve sUSDS/USDT NG
 
 // ============================================================
-// Ethereum market table — full task spec (14 eligible + 3 thin/not-eligible)
+// Ethereum market table (14 eligible + 3 thin/not-eligible)
 //
 // Pre-VIP state (from VIP-616): 10 markets wired at 10% (WETH, WBTC, USDC, USDT, LBTC,
 // USDe, eBTC, DAI, tBTC, USDS). crvUSD and EIGEN were intentionally excluded by
@@ -119,7 +119,7 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
 
   // ── Pool swap: USDS UniV3 DAI/USDS → Curve PYUSD/USDS, retune to 1% ───
   // Old pool TVL $211K (below $250K gate); Curve pool TVL $99.7M (~400× deeper).
-  // Inherits PYUSD-pricing dependency — see task spec / keeper mitigation note.
+  // Inherits PYUSD-pricing dependency (see top-level keeper mitigation note in VIP description).
   {
     symbol: "USDS",
     token: USDS,
@@ -154,10 +154,9 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
     token: EIGEN,
     pool: POOL_EIGEN_USDC,
     currentPct: 0,
-    targetPct: 10,
-    action: "promote",
-    oracleType: "uniswap",
-    note: "VIP-616 excluded; promoted at 10%. Delist rec applies but tracked separately.",
+    targetPct: 0,
+    action: "skip",
+    note: "already delisted; no on-chain action",
   },
   {
     symbol: "sUSDe",

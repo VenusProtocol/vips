@@ -15,7 +15,7 @@ export const WETH = "0x4200000000000000000000000000000000000006";
 export const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 export const CBBTC = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf";
 export const WSTETH = "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452";
-export const WSUPER_OETH_B = "0x6e6Cf2EEC6Aa17D5e63CC5A6df1a76a3a4DC9bce"; // tracked as `skip` for spec preservation
+export const WSUPER_OETH_B = "0x6e6cf2eec6aa17d5e63cc5a6df1a76a3a4dc9bce"; // tracked as `skip` for spec preservation
 
 // ============================================================
 // Pool addresses

@@ -56,6 +56,6 @@ export const ARBITRUMONE_MARKETS: MarketEntry[] = [
     currentPct: 10,
     targetPct: 10,
     action: "skip",
-    note: "10% unchanged; sub-$1M pool noted in task spec but stays in scope",
+    note: "10% unchanged; sub-$1M pool but stays in scope",
   },
 ];

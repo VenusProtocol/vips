@@ -9,8 +9,8 @@ export const PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
 
 // ============================================================
 // Underlying token addresses (BSC mainnet)
-// Re-exported here as the source of truth for VIP-800 — task.md's pool / token
-// table is mirrored below in BSC_MARKETS so the spec survives task.md deletion.
+// The full per-market pool / token table is mirrored below in BSC_MARKETS so this
+// file is self-contained.
 // ============================================================
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
@@ -41,6 +41,8 @@ export const DOT = "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402";
 export const FIL = "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153";
 export const BCH = "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+// AAVE on BSC (Binance-Peg)
+export const AAVE = "0xfb6115445Bff7b52FeB98650C87f44907E58f802";
 
 // ============================================================
 // PancakeSwap V3 pool addresses
@@ -49,7 +51,7 @@ export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const POOL_USDT_USDC_001 = "0x92b7807bf19b7dddf89b706143896d05228f3121";
 const POOL_U_USDT_001 = "0xa0909f81785f87f3e79309f0e73a7d82208094e4";
 // USDT and WBNB share this pool — asymmetric tiers (1% USDT vs 10% WBNB) mean any
-// shared-pool deviation event trips USDT first. Documented co-trip per task spec.
+// shared-pool deviation event trips USDT first.
 const POOL_USDT_WBNB_001 = "0x172fcd41e0913e95784454622d1c3724f546f849";
 const POOL_BTCB_WBNB_005 = "0x6bbc40579ad1bbd243895ca0acb086bb6300d636";
 const POOL_ETH_WBNB_005 = "0xd0e226f674bbf064f54ab47f42473ff80db98cba";
@@ -76,9 +78,11 @@ const POOL_DOT_WBNB_025 = "0x62f0546cbcd684f7c394d8549119e072527c41bc";
 const POOL_FIL_WBNB_005 = "0x16d7c51e9c59be9f18b19b608d53b37fa9890b8a";
 const POOL_BCH_WBNB_025 = "0x14cfad9a4fcb5fb4f702f5d0e90dcc633e1ded9a";
 const POOL_XVS_WBNB_025 = "0x77d5b2560e4b84b3fc58875cb0133f39560e8ae3";
+// AAVE/WBNB 0.05% (PCS V3) — verified on-chain: factory=0x0BFb…1865, token0=WBNB, token1=AAVE
+const POOL_AAVE_WBNB_005 = "0x8B22c20cB60Ae915524FB46e1C1b101b50168445";
 
 // ============================================================
-// Full BSC market table (29 entries from task spec)
+// Full BSC market table (30 entries — every Core Pool market with a PCS V3 reference pool)
 // Pre-VIP state: VIP-613 wired 25 markets at 10% (everything except the 4 pending-delist
 // pairs TWT/DOT/FIL/BCH, which were never configured). CAKE's on-chain threshold is 20%
 // per VIP-590; VIP-613 (queued ahead of VIP-800) tightens it to 10% before VIP-800 runs.
@@ -137,16 +141,40 @@ export const BSC_MARKETS: MarketEntry[] = [
   { symbol: "ADA", token: ADA, pool: POOL_ADA_USDT_025, currentPct: 10, targetPct: 10, action: "skip" },
   { symbol: "LTC", token: LTC, pool: POOL_LTC_WBNB_025, currentPct: 10, targetPct: 10, action: "skip" },
 
-  // ── Excluded — pending delist, never wired by VIP-613 ─────────────────
+  // ── Promote at 10% (new wires) ────────────────────────────────────────
+  // TWT, BCH, AAVE — thin/illiquid markets with no prior wiring. Promoted at 10%
+  // so the keeper has a pause lever; occasional false trips are preferred to no
+  // monitoring at all on these markets.
   {
     symbol: "TWT",
     token: TWT,
     pool: POOL_TWT_WBNB_025,
     currentPct: 0,
-    targetPct: 0,
-    action: "skip",
-    note: "pending delist; never configured by VIP-613",
+    targetPct: 10,
+    action: "promote",
+    oracleType: "uniswap",
   },
+  {
+    symbol: "BCH",
+    token: BCH,
+    pool: POOL_BCH_WBNB_025,
+    currentPct: 0,
+    targetPct: 10,
+    action: "promote",
+    oracleType: "uniswap",
+  },
+  {
+    symbol: "AAVE",
+    token: AAVE,
+    pool: POOL_AAVE_WBNB_005,
+    currentPct: 0,
+    targetPct: 10,
+    action: "promote",
+    oracleType: "uniswap",
+    note: "AAVE/WBNB 0.05% PCS V3 (AAVE = token1)",
+  },
+
+  // ── Already delisted — no on-chain action ────────────────────────────
   {
     symbol: "DOT",
     token: DOT,
@@ -154,7 +182,7 @@ export const BSC_MARKETS: MarketEntry[] = [
     currentPct: 0,
     targetPct: 0,
     action: "skip",
-    note: "pending delist; never configured by VIP-613",
+    note: "already delisted; never configured by VIP-613",
   },
   {
     symbol: "FIL",
@@ -163,29 +191,20 @@ export const BSC_MARKETS: MarketEntry[] = [
     currentPct: 0,
     targetPct: 0,
     action: "skip",
-    note: "pending delist; never configured by VIP-613",
-  },
-  {
-    symbol: "BCH",
-    token: BCH,
-    pool: POOL_BCH_WBNB_025,
-    currentPct: 0,
-    targetPct: 0,
-    action: "skip",
-    note: "pending delist; never configured by VIP-613",
+    note: "already delisted; never configured by VIP-613",
   },
 
-  // ── Deferred — wired at 10% by VIP-613 but pool TVL is below $250K gate ─
-  // Disable monitoring (and zero the threshold as fail-safe). A future VIP can
-  // re-enable at the appropriate tier once pool depth crosses the gate.
+  // ── Thin pools kept enabled at 10% ──────────
+  // Wired by VIP-613 at 10%; no threshold change. Monitoring stays on because the
+  // alternative — un-monitored thin pool — is the worse failure mode.
   {
     symbol: "TRX",
     token: TRX,
     pool: POOL_TRX_WBNB_025,
     currentPct: 10,
     targetPct: 10,
-    action: "disable",
-    note: "TVL $201K < $250K gate",
+    action: "skip",
+    note: "TVL $201K < $250K gate; kept enabled at 10%",
   },
   {
     symbol: "FDUSD",
@@ -193,8 +212,8 @@ export const BSC_MARKETS: MarketEntry[] = [
     pool: POOL_FDUSD_USDT_001,
     currentPct: 10,
     targetPct: 10,
-    action: "disable",
-    note: "TVL $127K < $250K gate",
+    action: "skip",
+    note: "TVL $127K < $250K gate; kept enabled at 10%",
   },
   {
     symbol: "UNI",
@@ -202,8 +221,8 @@ export const BSC_MARKETS: MarketEntry[] = [
     pool: POOL_UNI_WBNB_025,
     currentPct: 10,
     targetPct: 10,
-    action: "disable",
-    note: "TVL $132K < $250K gate",
+    action: "skip",
+    note: "TVL $132K < $250K gate; kept enabled at 10%",
   },
   {
     symbol: "DAI",
@@ -211,8 +230,8 @@ export const BSC_MARKETS: MarketEntry[] = [
     pool: POOL_DAI_USDT_001,
     currentPct: 10,
     targetPct: 10,
-    action: "disable",
-    note: "TVL $130K < $250K gate",
+    action: "skip",
+    note: "TVL $130K < $250K gate; kept enabled at 10%",
   },
   {
     symbol: "XVS",
@@ -220,7 +239,7 @@ export const BSC_MARKETS: MarketEntry[] = [
     pool: POOL_XVS_WBNB_025,
     currentPct: 10,
     targetPct: 10,
-    action: "disable",
-    note: "TVL $133K < $250K gate",
+    action: "skip",
+    note: "TVL $133K < $250K gate; kept enabled at 10%",
   },
 ];

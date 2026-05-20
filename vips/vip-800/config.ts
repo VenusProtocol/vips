@@ -1,39 +1,36 @@
+import type { LzChainId } from "src/types";
+
 // VIP-800 — DeviationSentinel parameter retune
 //
-// Shared types used by per-chain market tables. Each chain's `addresses/<chain>.ts`
-// re-exports an array of MarketEntry describing every market from the task spec,
-// even the no-op ones. The proposal builder filters by `action` and emits commands
+// Shared shapes used by the proposal builder, address files, and the simulation
+// suite. Per-chain market tables live in `addresses/<chain>.ts` and each entry
+// describes one in-scope market — even no-op ones — so the chain manifest is
+// self-documenting. The proposal builder filters by `action` and emits commands
 // only for entries that require an on-chain write.
 //
 // Action semantics:
 //   retune    — market is already wired (via VIP-613 / VIP-616). Change threshold only.
 //               1 call: DeviationSentinel.setTokenConfig(token, (newPct, true))
-//   disable   — market is wired; switch off monitoring. The stored threshold is left
-//               untouched (the contract reverts setTokenConfig with deviation=0 via
-//               ZeroDeviation, so we use the single-purpose toggle instead).
-//               1 call: DeviationSentinel.setTokenMonitoringEnabled(token, false)
 //   promote   — market not currently wired; full new wire.
 //               3 calls: <DexOracle>.setPoolConfig(...) → SentinelOracle.setTokenOracleConfig
 //                        → DeviationSentinel.setTokenConfig(token, (pct, true))
 //   poolSwap  — wired, but moving to a different pool (and possibly different DEX oracle).
 //               3 calls: same shape as promote — re-register pool, repoint SentinelOracle,
 //                        set new threshold.
-//   skip      — present in the spec for completeness but no on-chain action:
-//                 • threshold unchanged (e.g. 10% → 10%) and pool unchanged → no-op write
-//                 • market is pending delist and was never wired (e.g. BSC TWT/DOT/FIL/BCH)
+//   skip      — no on-chain action; entry exists for documentation only.
 
-export type MarketAction = "retune" | "disable" | "promote" | "poolSwap" | "skip";
+export type MarketAction = "retune" | "promote" | "poolSwap" | "skip";
 
 export type OracleType = "uniswap" | "curve" | "aerodrome";
 
-// Common shape for every entry. `targetPct` is the post-VIP threshold; `currentPct`
-// is the pre-VIP value (for documentation / simulation pre-assertions only).
+// Common shape for every market entry. `targetPct` is the post-VIP threshold;
+// `currentPct` is the pre-VIP value (for documentation + simulation pre-assertions only).
 export interface MarketEntry {
   symbol: string;
   token: string;
   pool: string;
   currentPct: number; // pre-VIP-800 on-chain threshold (0 if never wired)
-  targetPct: number; // post-VIP-800 threshold (ignored when action = disable/skip)
+  targetPct: number; // post-VIP-800 threshold (ignored when action = skip)
   action: MarketAction;
   // Required for promote / poolSwap.
   oracleType?: OracleType;
@@ -45,6 +42,18 @@ export interface MarketEntry {
   referenceToken?: string;
   // Curve-only: ERC-20 decimals of the priced asset.
   assetDecimals?: number;
-  // Free-form note from the task spec (TVL, delist status, co-trip pool, etc.).
+  // Free-form note (TVL, delist status, co-trip pool, etc.).
   note?: string;
+}
+
+// Per-chain runtime context — bundles the addresses + market table + LayerZero dest.
+export interface ChainContext {
+  name: string;
+  deviationSentinel: string;
+  sentinelOracle: string;
+  uniswapOracle: string;
+  curveOracle?: string;
+  aerodromeOracle?: string;
+  markets: MarketEntry[];
+  dstChainId?: LzChainId; // omitted for BSC
 }
