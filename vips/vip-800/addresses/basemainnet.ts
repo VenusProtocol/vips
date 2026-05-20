@@ -19,9 +19,6 @@ export const WSUPER_OETH_B = "0x6e6cf2eec6aa17d5e63cc5a6df1a76a3a4dc9bce"; // tr
 
 // ============================================================
 // Pool addresses
-// WETH and USDC share Uniswap V3 pool 0x6c56…1372 — verified on-chain as genuine
-// UniV3 (7-tuple slot0, factory = 0x3312…6FDfD). Task spec's "source correction" to
-// Aerodrome Slipstream is incorrect; VIP-616 wiring via UniswapOracle is correct.
 // ============================================================
 const POOL_WETH_USDC_UNIV3 = "0x6c561b446416e1a00e8e93e221854d6ea4171372";
 const POOL_CBBTC_USDC_AERO = "0x4e962bb3889bf030368f56810a9c96b83cb3e778";

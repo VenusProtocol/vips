@@ -9,8 +9,6 @@ export const PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
 
 // ============================================================
 // Underlying token addresses (BSC mainnet)
-// The full per-market pool / token table is mirrored below in BSC_MARKETS so this
-// file is self-contained.
 // ============================================================
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
@@ -50,8 +48,6 @@ export const AAVE = "0xfb6115445Bff7b52FeB98650C87f44907E58f802";
 // ============================================================
 const POOL_USDT_USDC_001 = "0x92b7807bf19b7dddf89b706143896d05228f3121";
 const POOL_U_USDT_001 = "0xa0909f81785f87f3e79309f0e73a7d82208094e4";
-// USDT and WBNB share this pool — asymmetric tiers (1% USDT vs 10% WBNB) mean any
-// shared-pool deviation event trips USDT first.
 const POOL_USDT_WBNB_001 = "0x172fcd41e0913e95784454622d1c3724f546f849";
 const POOL_BTCB_WBNB_005 = "0x6bbc40579ad1bbd243895ca0acb086bb6300d636";
 const POOL_ETH_WBNB_005 = "0xd0e226f674bbf064f54ab47f42473ff80db98cba";
@@ -78,14 +74,12 @@ const POOL_DOT_WBNB_025 = "0x62f0546cbcd684f7c394d8549119e072527c41bc";
 const POOL_FIL_WBNB_005 = "0x16d7c51e9c59be9f18b19b608d53b37fa9890b8a";
 const POOL_BCH_WBNB_025 = "0x14cfad9a4fcb5fb4f702f5d0e90dcc633e1ded9a";
 const POOL_XVS_WBNB_025 = "0x77d5b2560e4b84b3fc58875cb0133f39560e8ae3";
-// AAVE/WBNB 0.05% (PCS V3) — verified on-chain: factory=0x0BFb…1865, token0=WBNB, token1=AAVE
 const POOL_AAVE_WBNB_005 = "0x8B22c20cB60Ae915524FB46e1C1b101b50168445";
 
 // ============================================================
-// Full BSC market table (30 entries — every Core Pool market with a PCS V3 reference pool)
-// Pre-VIP state: VIP-613 wired 25 markets at 10% (everything except the 4 pending-delist
-// pairs TWT/DOT/FIL/BCH, which were never configured). CAKE's on-chain threshold is 20%
-// per VIP-590; VIP-613 (queued ahead of VIP-800) tightens it to 10% before VIP-800 runs.
+// BSC market table
+// Pre-VIP state: VIP-613 wired 25 markets at 10%; the 4 pending-delist pairs
+// (TWT/DOT/FIL/BCH) and AAVE were never configured.
 // ============================================================
 export const BSC_MARKETS: MarketEntry[] = [
   // ── Stables: retune 10% → 1% ──────────────────────────────────────────
@@ -110,9 +104,7 @@ export const BSC_MARKETS: MarketEntry[] = [
   { symbol: "wBETH", token: WBETH, pool: POOL_WBETH_ETH_005, currentPct: 10, targetPct: 3, action: "retune" },
 
   // ── Volatile majors: target 10% (no-op writes skipped) ────────────────
-  // All 10% markets are already wired by VIP-613, including CAKE (VIP-590 set CAKE
-  // to 20%; VIP-613 tightened it to 10%, which has executed on mainnet). WBNB inherits
-  // a 1% co-trip via the shared USDT/WBNB pool.
+  // All wired by VIP-613 at 10%. WBNB inherits a 1% co-trip via the shared USDT/WBNB pool.
   {
     symbol: "WBNB",
     token: WBNB,

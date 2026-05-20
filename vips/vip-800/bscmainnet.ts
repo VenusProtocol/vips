@@ -52,7 +52,6 @@ const CHAINS: readonly ChainContext[] = [BSC_CTX, ETHEREUM_CTX, ARBITRUMONE_CTX,
 
 // ──────────────────────────────────────────────────────────────────────────
 // Command builders
-// Each MarketEntry expands to 0–3 commands depending on its `action`.
 // ──────────────────────────────────────────────────────────────────────────
 
 const assertNever = (x: never, message: string): never => {
@@ -132,13 +131,7 @@ const commandsForMarket = (ctx: ChainContext, m: MarketEntry): Command[] => {
 
 const buildChainCommands = (ctx: ChainContext): Command[] => ctx.markets.flatMap(m => commandsForMarket(ctx, m));
 
-// Exposed for the simulation suite so tests can assert against the same shape
-// the proposal builder consumes (e.g. total-command-count assertions per chain).
 export const buildAllCommands = (): Command[] => CHAINS.flatMap(buildChainCommands);
-
-// ──────────────────────────────────────────────────────────────────────────
-// VIP-800
-// ──────────────────────────────────────────────────────────────────────────
 
 export const vip800 = () => {
   const meta = {
@@ -168,7 +161,7 @@ No new contracts are deployed and no ACM grants change — every setter used was
 
 - Retune to **1%**: USDC, USDT, USDe, DAI
 - Retune to **3%**: WBTC, LBTC, eBTC, tBTC
-- USDS pool swap: UniV3 DAI/USDS → Curve PYUSD/USDS (~400× deeper), threshold **1%**
+- Repoint USDS oracle: UniV3 DAI/USDS → Curve PYUSD/USDS (~400× deeper), threshold **1%**
 - Promote (new wire): crvUSD → **1%**, sUSDe → **1%**, sUSDS → **1%**
 
 **Arbitrum One — 3 commands**

@@ -42,32 +42,23 @@ const POOL_WBTC_USDC = "0x99ac8ca7087fa4a2a1fb6357269965a2014abc35"; // UniV3 0.
 const POOL_USDC_USDT = "0x3416cf6c708da44db2624d63ea0aaef7113527c6"; // UniV3 0.01% (shared USDC/USDT)
 const POOL_LBTC_WBTC = "0x87428a53e14d24ab19c6ca4939b4df93b8996ca9"; // UniV3
 const POOL_USDE_USDC = "0xe6d7ebb9f1a9519dc06d557e03c522d53520e76a"; // UniV3
-const POOL_EBTC_WBTC = "0x7704d01908afd31bf647d969c295bb45230cd2d6"; // wired by VIP-616; retune only, no pool re-registration in VIP-800
+const POOL_EBTC_WBTC = "0x7704d01908afd31bf647d969c295bb45230cd2d6"; // wired by VIP-616
 const POOL_DAI_USDC = "0x5777d92f208679db4b9778590fa3cab3ac9e2168"; // UniV3
 const POOL_TBTC_WETH = "0x97944213d2caeea773da1c9b11b0525f25b749cc"; // UniV3
-// Earlier-proposed crvUSD pool (0x4dece6…) was an EIP-1167 proxy, not a UniV3 pool;
-// canonical UniV3 crvUSD/USDC 0.01% pool from factory is used instead.
 const POOL_CRVUSD_USDC = "0x432Bddd0210063dDd4678EB2033578686C55A9FF"; // UniV3 0.01%
-// EIGEN pool's fee tier is 1% (= 10000 bps) rather than the stable 0.01% — confirmed
-// canonical via factory; fee tier doesn't affect DeviationSentinel reads.
 const POOL_EIGEN_USDC = "0xd640333b71b015092d9b3afcff3e427036304370"; // UniV3 1%
 const POOL_SUSDE_USDT = "0x7eb59373d63627be64b42406b108b602174b4ccc"; // UniV3 0.01%
 
-// USDS pool swap: from the thin UniV3 DAI/USDS pool ($211K, sub-gate) to the deep
-// Curve PYUSD/USDS StableSwap-NG ($99.7M). Old pool retained as `currentPool` in the
-// entry for documentation.
+// USDS oracle repoint: from a thin UniV3 DAI/USDS pool (sub-$250K gate) to a deep
+// Curve PYUSD/USDS StableSwap-NG pool. Old pool address kept here for documentation.
 const POOL_USDS_DAI_OLD = "0xe9f1e2ef814f5686c30ce6fb7103d0f780836c67"; // UniV3 (current)
 const POOL_PYUSD_USDS_NEW = "0xa632d59b9b804a956bfaa9b48af3a1b74808fc1f"; // Curve PYUSD/USDS NG
 const POOL_SUSDS_USDT = "0x00836fe54625be242bcfa286207795405ca4fd10"; // Curve sUSDS/USDT NG
 
 // ============================================================
-// Ethereum market table (14 eligible + 3 thin/not-eligible)
-//
-// Pre-VIP state (from VIP-616): 10 markets wired at 10% (WETH, WBTC, USDC, USDT, LBTC,
-// USDe, eBTC, DAI, tBTC, USDS). crvUSD and EIGEN were intentionally excluded by
-// VIP-616 per market spec (see vip-616/addresses/ethereum.ts:34); on-chain reads
-// confirm DeviationSentinel.tokenConfigs(crvUSD/EIGEN) = (0, false). VIP-800
-// promotes them per the new spec.
+// Ethereum market table
+// Pre-VIP state (from VIP-616): 10 markets wired at 10%. crvUSD and EIGEN were
+// not configured by VIP-616; VIP-800 promotes crvUSD and leaves EIGEN as `skip`
 // ============================================================
 export const ETHEREUM_MARKETS: MarketEntry[] = [
   // ── Volatile majors: skip (no threshold change, already wired) ────────
@@ -117,9 +108,9 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
     note: "Delist rec (handled separately)",
   },
 
-  // ── Pool swap: USDS UniV3 DAI/USDS → Curve PYUSD/USDS, retune to 1% ───
-  // Old pool TVL $211K (below $250K gate); Curve pool TVL $99.7M (~400× deeper).
-  // Inherits PYUSD-pricing dependency (see top-level keeper mitigation note in VIP description).
+  // ── Repoint USDS oracle: UniV3 DAI/USDS → Curve PYUSD/USDS, retune to 1% ──
+  // Old pool sat below the $250K depth gate; new Curve pool is ~400× deeper.
+  // Inherits PYUSD-pricing dependency (see top-level note in VIP description).
   {
     symbol: "USDS",
     token: USDS,
@@ -132,13 +123,12 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
     refCoinIndex: 0, // PYUSD sits at coins(0)
     referenceToken: PYUSD,
     assetDecimals: 18,
-    note: `swap from UniV3 DAI/USDS pool ${POOL_USDS_DAI_OLD} to Curve PYUSD/USDS; introduces PYUSD-peg dependency`,
+    note: `repoint from UniV3 DAI/USDS pool ${POOL_USDS_DAI_OLD} to Curve PYUSD/USDS; introduces PYUSD-peg dependency`,
   },
 
   // ── Promotions (not currently wired; full new wire — 3 calls each) ────
-  // crvUSD/EIGEN: VIP-616 deliberately excluded; VIP-800 wires them per new spec.
-  // sUSDe/sUSDS: ERC-4626 wrappers, no underlying-quoted pool exists. New pools
-  //              against USDT introduce USDT-pricing dependency (mirrors USDS swap).
+  // sUSDe / sUSDS: ERC-4626 wrappers — no underlying-quoted pool exists; the
+  // USDT-quoted pools introduce a USDT-pricing dependency (mirrors USDS repoint).
   {
     symbol: "crvUSD",
     token: CRVUSD,

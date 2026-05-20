@@ -240,7 +240,7 @@ export const runPreVipAssertions = (cfg: TestConfig) => {
     }
 
     for (const m of p.poolSwaps) {
-      it(`${m.symbol}: currently wired at ${m.currentPct}% (will pool-swap)`, async () => {
+      it(`${m.symbol}: currently wired at ${m.currentPct}% (oracle will repoint)`, async () => {
         await expectTokenConfig(c.deviationSentinel, m.token, m.currentPct, true, m.symbol);
       });
     }

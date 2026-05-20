@@ -1,6 +1,6 @@
 import type { LzChainId } from "src/types";
 
-// VIP-800 — DeviationSentinel parameter retune
+// DeviationSentinel parameter retune
 //
 // Shared shapes used by the proposal builder, address files, and the simulation
 // suite. Per-chain market tables live in `addresses/<chain>.ts` and each entry
@@ -29,8 +29,8 @@ export interface MarketEntry {
   symbol: string;
   token: string;
   pool: string;
-  currentPct: number; // pre-VIP-800 on-chain threshold (0 if never wired)
-  targetPct: number; // post-VIP-800 threshold (ignored when action = skip)
+  currentPct: number; // pre on-chain threshold (0 if never wired)
+  targetPct: number; // post on-chain threshold (ignored when action = skip)
   action: MarketAction;
   // Required for promote / poolSwap.
   oracleType?: OracleType;
