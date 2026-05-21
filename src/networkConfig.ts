@@ -1,29 +1,33 @@
 import { ProposalType, SUPPORTED_NETWORKS } from "./types";
 
 // Per-network per-tx gas cap (single transaction limit enforced by the
-// chain's protocol rules). `governorBravo.execute(proposalId)` runs every
-// command in a single tx, so any proposal whose gasUsed exceeds the
-// destination cap is unexecutable on chain.
+// chain's protocol rules). `governorBravo.execute(proposalId)` and the
+// destination chain's `OmnichainGovernanceExecutor.execute(proposalId)` each
+// run every command of their bundle in a single tx, so any per-chain bundle
+// whose gasUsed exceeds the destination cap is unexecutable on chain.
 //
-// Sources:
-//   - bscmainnet / bsctestnet: BSC Maxwell + Osaka hardforks introduced a
-//     hard per-tx cap of 2^24 = 16,777,216.
-//   - ethereum / sepolia: Fusaka hardfork ships EIP-7825 with the same
-//     2^24 = 16,777,216 per-tx cap.
-//   - L2s (arbitrumone, opmainnet, basemainnet, opbnbmainnet, zksyncmainnet,
-//     unichainmainnet) currently have effective per-tx limits well above the
-//     L1 cap (driven by the L2 block gas limit, not a protocol per-tx rule).
-//     Left unset (no enforcement) until a concrete per-tx rule lands.
+// Sources (verified against the originating EIP / BEP / client release):
+//   - bscmainnet / bsctestnet: Osaka/Mendel hardfork — BEP-652 implements
+//     EIP-7825 with a 2^24 = 16,777,216 per-tx cap.
+//   - ethereum / sepolia: Fusaka hardfork — EIP-7825 ships the same
+//     2^24 = 16,777,216 cap.
+//   - opbnbmainnet / opbnbtestnet: bnb-chain/op-geth v0.5.10 enforces
+//     EIP-7825 (16,777,216) at tx-pool admission and block packing.
 //
-// Used as the fallback table for `resolvePerTxGasCap` in `src/utils.ts`,
-// which prefers the EIP-8123 `eth_txGasLimitCap` RPC method when supported
-// and falls back to this map otherwise.
+// Other L2s in this repo (arbitrumone, opmainnet, basemainnet, zksyncmainnet,
+// unichainmainnet) are left unset — no per-tx cap confirmed against a
+// primary source yet. Revisit when a chain ships an EIP-7825-equivalent rule.
+//
+// Used as the fallback for `resolvePerTxGasCap` in `src/utils.ts`, which
+// prefers the `eth_txGasLimitCap` RPC method (EIP-8123) when supported.
 export const PER_TX_GAS_CAP_2_24 = 16_777_216;
 export const PER_TX_GAS_CAP_BY_NETWORK: Partial<Record<SUPPORTED_NETWORKS, number>> = {
   bscmainnet: PER_TX_GAS_CAP_2_24,
   bsctestnet: PER_TX_GAS_CAP_2_24,
   ethereum: PER_TX_GAS_CAP_2_24,
   sepolia: PER_TX_GAS_CAP_2_24,
+  opbnbmainnet: PER_TX_GAS_CAP_2_24,
+  opbnbtestnet: PER_TX_GAS_CAP_2_24,
 };
 
 export const NETWORK_CONFIG = {
