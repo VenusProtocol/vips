@@ -45,7 +45,7 @@ const POOL_USDE_USDC = "0xe6d7ebb9f1a9519dc06d557e03c522d53520e76a"; // UniV3
 const POOL_EBTC_WBTC = "0x7704d01908afd31bf647d969c295bb45230cd2d6"; // wired by VIP-616
 const POOL_DAI_USDC = "0x5777d92f208679db4b9778590fa3cab3ac9e2168"; // UniV3
 const POOL_TBTC_WETH = "0x97944213d2caeea773da1c9b11b0525f25b749cc"; // UniV3
-const POOL_CRVUSD_USDC = "0x432Bddd0210063dDd4678EB2033578686C55A9FF"; // UniV3 0.01%
+const POOL_CRVUSD_USDC = "0x4dece678ceceb27446b35c672dc7d61f30bad69e"; // Curve crvUSD/USDC
 const POOL_EIGEN_USDC = "0xd640333b71b015092d9b3afcff3e427036304370"; // UniV3 1%
 const POOL_SUSDE_USDT = "0x7eb59373d63627be64b42406b108b602174b4ccc"; // UniV3 0.01%
 
@@ -136,8 +136,12 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
     currentPct: 0,
     targetPct: 1,
     action: "promote",
-    oracleType: "uniswap",
-    note: "VIP-616 excluded; promoted in VIP-800 per new spec",
+    oracleType: "curve",
+    coinIndex: 1, // crvUSD sits at coins(1) on the Curve pool
+    refCoinIndex: 0, // USDC sits at coins(0)
+    referenceToken: USDC,
+    assetDecimals: 18,
+    note: "VIP-616 excluded; promoted in VIP-800 via Curve crvUSD/USDC pool",
   },
   {
     symbol: "EIGEN",
