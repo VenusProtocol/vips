@@ -30,14 +30,13 @@ const TEST_CONFIG: TestConfig = {
   // Chainlink/RedStone. Excluded:
   //   - sUSDe / sUSDS  (ERC-4626 wrappers, not yet listed as Venus markets)
   //   - LBTC, eBTC, tBTC (OneJumpOracle ratio × BTC/USD — inner staleness opaque)
-  //   - USDS           (consistently stale at fork time after the oracle repoint)
   // Structural tests still cover all of these. Follows VIP-616's SKIP_CHECK_PRICE_DEVIATION precedent.
   expectVToken: new Set(["USDC", "USDT", "USDe", "DAI", "WBTC", "crvUSD"]),
 };
 
 forking(FORK_BLOCK, async () => {
   runConfigSanity(TEST_CONFIG);
-  runCommandCountAssertion("Ethereum", 20);
+  runCommandCountAssertion("Ethereum", 17);
   runPreVipAssertions(TEST_CONFIG);
 
   testForkedNetworkVipCommands("VIP-800 [Ethereum] DeviationSentinel Parameter Recommendation", await vip800(), {

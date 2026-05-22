@@ -25,7 +25,6 @@ export const CRVUSD = "0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E";
 export const EIGEN = "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83";
 export const SUSDE = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const SUSDS = "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD";
-export const PYUSD = "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8";
 
 // Thin/Not-Eligible tokens (carried in the table only as `skip` entries so the
 // market list is self-documenting).
@@ -49,16 +48,16 @@ const POOL_CRVUSD_USDC = "0x4dece678ceceb27446b35c672dc7d61f30bad69e"; // Curve 
 const POOL_EIGEN_USDC = "0xd640333b71b015092d9b3afcff3e427036304370"; // UniV3 1%
 const POOL_SUSDE_USDT = "0x7eb59373d63627be64b42406b108b602174b4ccc"; // UniV3 0.01%
 
-// USDS oracle repoint: from a thin UniV3 DAI/USDS pool (sub-$250K gate) to a deep
-// Curve PYUSD/USDS StableSwap-NG pool. Old pool address kept here for documentation.
-const POOL_USDS_DAI_OLD = "0xe9f1e2ef814f5686c30ce6fb7103d0f780836c67"; // UniV3 (current)
-const POOL_PYUSD_USDS_NEW = "0xa632d59b9b804a956bfaa9b48af3a1b74808fc1f"; // Curve PYUSD/USDS NG
+// USDS stays on its existing UniV3 DAI/USDS pool (skipped this VIP).
+const POOL_USDS_DAI = "0xe9f1e2ef814f5686c30ce6fb7103d0f780836c67"; // UniV3 (current)
 const POOL_SUSDS_USDT = "0x00836fe54625be242bcfa286207795405ca4fd10"; // Curve sUSDS/USDT NG
 
 // ============================================================
 // Ethereum market table
 // Pre-VIP state (from VIP-616): 10 markets wired at 10%. crvUSD and EIGEN were
-// not configured by VIP-616; VIP-800 promotes crvUSD and leaves EIGEN as `skip`
+// not configured by VIP-616; VIP-800 promotes crvUSD and leaves EIGEN as `skip`.
+// USDS is left as `skip` until ResilientOracle has a feed for the candidate
+// repoint pool's reference token (PYUSD).
 // ============================================================
 export const ETHEREUM_MARKETS: MarketEntry[] = [
   // ── Volatile majors: skip (no threshold change, already wired) ────────
@@ -108,22 +107,19 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
     note: "Delist rec (handled separately)",
   },
 
-  // ── Repoint USDS oracle: UniV3 DAI/USDS → Curve PYUSD/USDS, retune to 1% ──
-  // Old pool sat below the $250K depth gate; new Curve pool is ~400× deeper.
-  // Inherits PYUSD-pricing dependency (see top-level note in VIP description).
+  // ── USDS: skip (candidate repoint deferred) ──
+  // Current wiring (UniV3 DAI/USDS, 10%) is below the $250K depth gate, but the
+  // candidate replacement (Curve PYUSD/USDS) prices against PYUSD, which has no
+  // feed in ResilientOracle on Ethereum — `checkPriceDeviation` would revert.
+  // Revisit once PYUSD is onboarded into ResilientOracle.
   {
     symbol: "USDS",
     token: USDS,
-    pool: POOL_PYUSD_USDS_NEW,
+    pool: POOL_USDS_DAI,
     currentPct: 10,
-    targetPct: 1,
-    action: "poolSwap",
-    oracleType: "curve",
-    coinIndex: 1, // USDS sits at coins(1)
-    refCoinIndex: 0, // PYUSD sits at coins(0)
-    referenceToken: PYUSD,
-    assetDecimals: 18,
-    note: `repoint from UniV3 DAI/USDS pool ${POOL_USDS_DAI_OLD} to Curve PYUSD/USDS; introduces PYUSD-peg dependency`,
+    targetPct: 10,
+    action: "skip",
+    note: "deferred: candidate Curve PYUSD/USDS pool requires PYUSD feed in ResilientOracle",
   },
 
   // ── Promotions (not currently wired; full new wire — 3 calls each) ────

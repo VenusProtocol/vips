@@ -143,7 +143,7 @@ Retunes **DeviationSentinel** thresholds from a uniform 10% (set in VIP-590 / VI
 
 | Tier | Threshold | Applies to |
 | --- | --- | --- |
-| Stable | **1%** | USDC, USDT, USDe, DAI, USD1, TUSD, lisUSD, U, USD₮0, crvUSD, USDS, sUSDe, sUSDS |
+| Stable | **1%** | USDC, USDT, USDe, DAI, USD1, TUSD, lisUSD, U, USD₮0, crvUSD, sUSDe, sUSDS |
 | Wrapped / ratio-fed | **3%** | WBTC, LBTC, eBTC, tBTC, cbBTC, solvBTC, wstETH, wBETH, slisBNB |
 | Volatile | **10%** | WETH, WBNB, BTCB, ETH, CAKE, XRP, SOL, LINK, DOGE, XAUM, ADA, LTC, ARB, TWT, BCH, AAVE |
 
@@ -157,12 +157,12 @@ No new contracts are deployed and no ACM grants change — every setter used was
 - Retune to **3%**: solvBTC, slisBNB, wBETH
 - Promote (new wire at 10%): TWT, BCH, AAVE
 
-**Ethereum — 20 commands**
+**Ethereum — 17 commands**
 
 - Retune to **1%**: USDC, USDT, USDe, DAI
 - Retune to **3%**: WBTC, LBTC, eBTC, tBTC
-- Repoint USDS oracle: UniV3 DAI/USDS → Curve PYUSD/USDS (~400× deeper), threshold **1%**
 - Promote (new wire): crvUSD → **1%**, sUSDe → **1%**, sUSDS → **1%**
+- USDS: deferred — candidate Curve PYUSD/USDS repoint requires a PYUSD feed in ResilientOracle (not yet onboarded)
 
 **Arbitrum One — 3 commands**
 
@@ -178,7 +178,7 @@ No new contracts are deployed and no ACM grants change — every setter used was
 
 - **Thin BSC pools** (TRX, FDUSD, UNI, DAI, XVS) stay enabled at 10% with no on-chain change — false-positive risk on shallow pools is preferred to leaving these markets unmonitored.
 - **Co-trip pools** (shared between markets at different tiers): USDT (1%) / WBNB (10%) on BSC pool \`0x172f…f849\`; WETH (10%) / USDC (1%) on Base pool \`0x6c56…1372\`. A deviation event on the shared pool trips the stable first.
-- **Quote-asset dependency** on Ethereum: USDS, sUSDe, sUSDS price against PYUSD / USDT / USDT respectively. If the reference asset is the off-peg party, the keeper should respond via \`SentinelOracle.setDirectPrice\` rather than tightening the wrapper market.
+- **Quote-asset dependency** on Ethereum: sUSDe and sUSDS price against USDT. If USDT is the off-peg party, the keeper should respond via \`SentinelOracle.setDirectPrice\` rather than tightening the wrapper market.
 - **zkSync** stays out of scope until pool depth crosses the $250K gate.
 
 #### References
