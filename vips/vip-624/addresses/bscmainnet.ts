@@ -44,7 +44,7 @@ export const AAVE = "0xfb6115445Bff7b52FeB98650C87f44907E58f802";
 
 // ============================================================
 // PancakeSwap V3 pool addresses
-// (mirrors vips/vip-613/config.ts; pool selection is unchanged in VIP-800)
+// (mirrors vips/vip-613/config.ts; pool selection is unchanged in VIP-624)
 // ============================================================
 const POOL_USDT_USDC_001 = "0x92b7807bf19b7dddf89b706143896d05228f3121";
 const POOL_U_USDT_001 = "0xa0909f81785f87f3e79309f0e73a7d82208094e4";

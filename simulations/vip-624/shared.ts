@@ -10,8 +10,8 @@ import {
   setMaxStalePeriodInChainlinkOracle,
 } from "src/utils";
 
-import { buildAllCommands } from "../../vips/vip-800/bscmainnet";
-import type { ChainContext, MarketEntry } from "../../vips/vip-800/config";
+import { buildAllCommands } from "../../vips/vip-624/bscmainnet";
+import type { ChainContext, MarketEntry } from "../../vips/vip-624/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import AERODROME_ORACLE_ABI from "./abi/AerodromeSlipstreamOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -28,7 +28,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 // Test-only chain config: addresses needed to run live behavior tests.
 // Kept separate from ChainContext so VIP runtime types don't carry test-only
 // fields. Each entry file (`bscmainnet.ts`, `ethereum.ts`, …) builds one of
-// these and hands it to `runVip800Suite`.
+// these and hands it to `runVip624Suite`.
 // ──────────────────────────────────────────────────────────────────────────
 
 export interface TestConfig {
@@ -172,7 +172,7 @@ const expectTokenConfig = async (
 export const runConfigSanity = (cfg: TestConfig) => {
   const { ctx } = cfg;
 
-  describe(`VIP-800 [${ctx.name}] — Config sanity`, () => {
+  describe(`VIP-624 [${ctx.name}] — Config sanity`, () => {
     it("every market has well-formed token, pool, and threshold fields", () => {
       for (const m of ctx.markets) {
         expect(m.token.length, `${m.symbol}: token not 20 bytes`).to.equal(42);
@@ -206,7 +206,7 @@ export const runConfigSanity = (cfg: TestConfig) => {
 export const runPreVipAssertions = (cfg: TestConfig) => {
   const p = partition(cfg.ctx.markets);
 
-  describe(`VIP-800 [${cfg.ctx.name}] — Pre-VIP state`, () => {
+  describe(`VIP-624 [${cfg.ctx.name}] — Pre-VIP state`, () => {
     let c: ChainContracts;
 
     before(async () => {
@@ -261,14 +261,14 @@ interface SkipSnapshot {
 export const runPostVipAssertions = (cfg: TestConfig) => {
   const p = partition(cfg.ctx.markets);
 
-  describe(`VIP-800 [${cfg.ctx.name}] — Post-VIP state`, () => {
+  describe(`VIP-624 [${cfg.ctx.name}] — Post-VIP state`, () => {
     let c: ChainContracts;
     let skipSnapshots: SkipSnapshot[];
 
     before(async () => {
       c = await buildContracts(cfg);
       // Snapshot post-VIP state of every skip market — we'll assert that the (deviation,
-      // enabled) tuple matches the pre-VIP-800 baseline encoded in `currentPct`. A stray
+      // enabled) tuple matches the pre-VIP-624 baseline encoded in `currentPct`. A stray
       // command targeting a skip market would surface here.
       skipSnapshots = await Promise.all(
         p.skips.map(async m => {
@@ -373,7 +373,7 @@ export const runBehaviorTests = (cfg: TestConfig) => {
   const p = partition(cfg.ctx.markets);
   const writeable = [...p.retunes, ...p.promotes, ...p.poolSwaps];
 
-  describe(`VIP-800 [${cfg.ctx.name}] — Threshold behavior`, () => {
+  describe(`VIP-624 [${cfg.ctx.name}] — Threshold behavior`, () => {
     let c: ChainContracts;
     let timelock: SignerWithAddress;
     let vTokenByUnderlying: Map<string, string>;
@@ -513,7 +513,7 @@ const EXPECTED_DST_CHAIN_ID: Record<string, number | undefined> = {
 };
 
 export const runCommandCountAssertion = (chainName: string, expected: number) => {
-  describe(`VIP-800 [${chainName}] — Command count`, () => {
+  describe(`VIP-624 [${chainName}] — Command count`, () => {
     it(`emits exactly ${expected} commands for this chain`, () => {
       const expectedDst = EXPECTED_DST_CHAIN_ID[chainName];
       const actual = buildAllCommands().filter(c => c.dstChainId === expectedDst).length;

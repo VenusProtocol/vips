@@ -1,7 +1,7 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip800, { BASEMAINNET_CTX } from "../../vips/vip-800/bscmainnet";
+import vip624, { ARBITRUMONE_CTX } from "../../vips/vip-624/bscmainnet";
 import {
   TestConfig,
   buildPostExecutionEventChecks,
@@ -12,30 +12,27 @@ import {
   runPreVipAssertions,
 } from "./shared";
 
-const FORK_BLOCK = 46204283;
+const FORK_BLOCK = 464476747;
 
-const a = NETWORK_ADDRESSES.basemainnet;
+const a = NETWORK_ADDRESSES.arbitrumone;
 
 const TEST_CONFIG: TestConfig = {
-  ctx: BASEMAINNET_CTX,
+  ctx: ARBITRUMONE_CTX,
   resilientOracle: a.RESILIENT_ORACLE,
   chainlinkOracle: a.CHAINLINK_ORACLE,
   redstoneOracle: a.REDSTONE_ORACLE,
   timelock: a.NORMAL_TIMELOCK,
   comptrollers: [{ address: a.CORE_COMPTROLLER, type: "il" }],
-  // wstETH excluded — its price routes through a ratio oracle (wstETH/ETH × ETH/USD)
-  // whose internal staleness can't be overridden from the fork. Structural tests still
-  // cover it. Follows VIP-616's SKIP_CHECK_PRICE_DEVIATION precedent.
-  expectVToken: new Set(["USDC", "cbBTC"]),
+  expectVToken: new Set(["USDC", "USD₮0", "WBTC"]),
 };
 
 forking(FORK_BLOCK, async () => {
   runConfigSanity(TEST_CONFIG);
-  runCommandCountAssertion("Base", 3);
+  runCommandCountAssertion("Arbitrum One", 3);
   runPreVipAssertions(TEST_CONFIG);
 
-  testForkedNetworkVipCommands("VIP-800 [Base] DeviationSentinel Parameter Recommendation", await vip800(), {
-    callbackAfterExecution: buildPostExecutionEventChecks(BASEMAINNET_CTX),
+  testForkedNetworkVipCommands("VIP-624 [Arbitrum One] DeviationSentinel Parameter Recommendation", await vip624(), {
+    callbackAfterExecution: buildPostExecutionEventChecks(ARBITRUMONE_CTX),
   });
 
   runPostVipAssertions(TEST_CONFIG);

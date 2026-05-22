@@ -133,19 +133,19 @@ const buildChainCommands = (ctx: ChainContext): Command[] => ctx.markets.flatMap
 
 export const buildAllCommands = (): Command[] => CHAINS.flatMap(buildChainCommands);
 
-export const vip800 = () => {
+export const vip624 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 [BNB Chain, Ethereum, Arbitrum One, Base] DeviationSentinel Parameter Recommendation",
+    title: "VIP-624 [BNB Chain, Ethereum, Arbitrum One, Base] DeviationSentinel Parameter Recommendation",
     description: `#### Summary
 
 Retunes **DeviationSentinel** thresholds from a uniform 10% (set in VIP-590 / VIP-613 on BSC and VIP-616 on Ethereum / Arbitrum / Base) to volatility-matched tiers, and wires three previously-unmonitored BSC markets (TWT, BCH, AAVE) at 10%.
 
-| Tier | Threshold | Applies to |
-| --- | --- | --- |
-| Stable | **1%** | USDC, USDT, USDe, DAI, USD1, TUSD, lisUSD, U, USD₮0, crvUSD, sUSDe, sUSDS |
-| Wrapped / ratio-fed | **3%** | WBTC, LBTC, eBTC, tBTC, cbBTC, solvBTC, wstETH, wBETH, slisBNB |
-| Volatile | **10%** | WETH, WBNB, BTCB, ETH, CAKE, XRP, SOL, LINK, DOGE, XAUM, ADA, LTC, ARB, TWT, BCH, AAVE |
+Tier assignments:
+
+- **Stable (1%)**: USDC, USDT, USDe, DAI, USD1, TUSD, lisUSD, U, USD₮0, crvUSD, sUSDe, sUSDS
+- **Wrapped / ratio-fed (3%)**: WBTC, LBTC, eBTC, tBTC, cbBTC, solvBTC, wstETH, wBETH, slisBNB
+- **Volatile (10%)**: WETH, WBNB, BTCB, ETH, CAKE, XRP, SOL, LINK, DOGE, XAUM, ADA, LTC, ARB, TWT, BCH, AAVE
 
 No new contracts are deployed and no ACM grants change — every setter used was permissioned in VIP-590 (BSC) or VIP-616 (remote chains).
 
@@ -177,8 +177,8 @@ No new contracts are deployed and no ACM grants change — every setter used was
 #### Notes
 
 - **Thin BSC pools** (TRX, FDUSD, UNI, DAI, XVS) stay enabled at 10% with no on-chain change — false-positive risk on shallow pools is preferred to leaving these markets unmonitored.
-- **Co-trip pools** (shared between markets at different tiers): USDT (1%) / WBNB (10%) on BSC pool \`0x172f…f849\`; WETH (10%) / USDC (1%) on Base pool \`0x6c56…1372\`. A deviation event on the shared pool trips the stable first.
-- **Quote-asset dependency** on Ethereum: sUSDe and sUSDS price against USDT. If USDT is the off-peg party, the keeper should respond via \`SentinelOracle.setDirectPrice\` rather than tightening the wrapper market.
+- **Co-trip pools** (shared between markets at different tiers): USDT (1%) / WBNB (10%) on BSC pool 0x172f…f849; WETH (10%) / USDC (1%) on Base pool 0x6c56…1372. A deviation event on the shared pool trips the stable first.
+- **Quote-asset dependency** on Ethereum: sUSDe and sUSDS price against USDT. If USDT is the off-peg party, the keeper should respond via SentinelOracle.setDirectPrice rather than tightening the wrapper market.
 - **zkSync** stays out of scope until pool depth crosses the $250K gate.
 
 #### References
@@ -196,4 +196,4 @@ No new contracts are deployed and no ACM grants change — every setter used was
   return makeProposal(buildAllCommands(), meta, ProposalType.REGULAR);
 };
 
-export default vip800;
+export default vip624;

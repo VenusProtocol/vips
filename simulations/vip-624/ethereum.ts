@@ -1,7 +1,7 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip800, { ETHEREUM_CTX } from "../../vips/vip-800/bscmainnet";
+import vip624, { ETHEREUM_CTX } from "../../vips/vip-624/bscmainnet";
 import {
   TestConfig,
   buildPostExecutionEventChecks,
@@ -17,7 +17,7 @@ const FORK_BLOCK = 25129613;
 
 const a = NETWORK_ADDRESSES.ethereum;
 
-// Every VIP-800 Ethereum writeable market has a vToken in the Core IL pool
+// Every VIP-624 Ethereum writeable market has a vToken in the Core IL pool
 // (including crvUSD, which is in both Core and Curve — Core is sufficient).
 const TEST_CONFIG: TestConfig = {
   ctx: ETHEREUM_CTX,
@@ -39,7 +39,7 @@ forking(FORK_BLOCK, async () => {
   runCommandCountAssertion("Ethereum", 17);
   runPreVipAssertions(TEST_CONFIG);
 
-  testForkedNetworkVipCommands("VIP-800 [Ethereum] DeviationSentinel Parameter Recommendation", await vip800(), {
+  testForkedNetworkVipCommands("VIP-624 [Ethereum] DeviationSentinel Parameter Recommendation", await vip624(), {
     callbackAfterExecution: buildPostExecutionEventChecks(ETHEREUM_CTX),
   });
 

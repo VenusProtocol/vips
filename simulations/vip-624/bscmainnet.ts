@@ -1,7 +1,7 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip800, { BSC_CTX } from "../../vips/vip-800/bscmainnet";
+import vip624, { BSC_CTX } from "../../vips/vip-624/bscmainnet";
 import {
   TestConfig,
   buildPostExecutionEventChecks,
@@ -75,7 +75,7 @@ forking(FORK_BLOCK, async () => {
   runCommandCountAssertion("BSC", 18);
   runPreVipAssertions(TEST_CONFIG);
 
-  testVip("VIP-800 [BSC] DeviationSentinel Parameter Recommendation", await vip800(), {
+  testVip("VIP-624 [BSC] DeviationSentinel Parameter Recommendation", await vip624(), {
     callbackAfterExecution: buildPostExecutionEventChecks(BSC_CTX),
   });
 

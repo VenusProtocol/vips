@@ -55,7 +55,7 @@ const POOL_SUSDS_USDT = "0x00836fe54625be242bcfa286207795405ca4fd10"; // Curve s
 // ============================================================
 // Ethereum market table
 // Pre-VIP state (from VIP-616): 10 markets wired at 10%. crvUSD and EIGEN were
-// not configured by VIP-616; VIP-800 promotes crvUSD and leaves EIGEN as `skip`.
+// not configured by VIP-616; VIP-624 promotes crvUSD and leaves EIGEN as `skip`.
 // USDS is left as `skip` until ResilientOracle has a feed for the candidate
 // repoint pool's reference token (PYUSD).
 // ============================================================
@@ -137,7 +137,7 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
     refCoinIndex: 0, // USDC sits at coins(0)
     referenceToken: USDC,
     assetDecimals: 18,
-    note: "VIP-616 excluded; promoted in VIP-800 via Curve crvUSD/USDC pool",
+    note: "VIP-616 excluded; promoted in VIP-624 via Curve crvUSD/USDC pool",
   },
   {
     symbol: "EIGEN",
@@ -174,7 +174,7 @@ export const ETHEREUM_MARKETS: MarketEntry[] = [
   },
 
   // ── Thin / Not-Eligible — carried for spec preservation, no on-chain action ──
-  // Each has a separate Delist recommendation; tracked outside VIP-800.
+  // Each has a separate Delist recommendation; tracked outside VIP-624.
   {
     symbol: "TUSD",
     token: TUSD,
