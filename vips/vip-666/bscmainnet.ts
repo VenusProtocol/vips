@@ -9,20 +9,16 @@ export type AssetToEnable = {
   vToken: string;
 };
 
-export const ASSETS_TO_ENABLE: AssetToEnable[] = assetsToEnable as AssetToEnable[];
+export const ASSETS_TO_ENABLE = assetsToEnable as AssetToEnable[];
 export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
 
 export const vip666 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-666 [BNB Chain] Enable bounded pricing on the remaining 23 core-pool assets",
+    title: "VIP-666 [BNB Chain] Enable bounded pricing on isolated pool assets",
     description: `#### Summary
 
-Follow-up to VIP-665. Activates DeviationBoundedOracle protection on the 23 core-pool assets that were left disabled at rollout. After this VIP executes, all 24 core-pool assets (including TRX from VIP-665) will have \`isBoundedPricingEnabled = true\` and the DeviationBoundedOracle will start clipping collateral / debt prices when spot deviates beyond each asset's seeded \`triggerThreshold\`.
-
-#### Assets enabled
-
-${ASSETS_TO_ENABLE.map(c => `- ${c.name} \`${c.asset}\``).join("\n")}
+Activates DeviationBoundedOracle protection on a targeted set of isolated pool assets: AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI. After this VIP executes, these 8 assets (alongside TRX, already enabled) will have \`isBoundedPricingEnabled = true\` and the DeviationBoundedOracle will start clipping collateral / debt prices when spot deviates beyond each asset's seeded \`triggerThreshold\`.
 
 #### Deployed contracts
 
