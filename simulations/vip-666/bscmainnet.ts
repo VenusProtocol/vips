@@ -31,6 +31,9 @@ const SUPPORTER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 const TRX = {
   name: "TRX",
   asset: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
+  minPrice: BigNumber.from("347438690000000000000000000000"),
+  maxPrice: BigNumber.from("365749520000000000000000000000"),
+  currentlyUsingProtectedPrice: false,
 };
 
 forking(FORK_BLOCK, async () => {
@@ -38,7 +41,6 @@ forking(FORK_BLOCK, async () => {
 
   let dbo: Contract;
   let resilient: Contract;
-  let trxSnapshot: { minPrice: BigNumber; maxPrice: BigNumber; currentlyUsingProtectedPrice: boolean };
 
   before(async () => {
     dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, provider);
@@ -51,13 +53,6 @@ forking(FORK_BLOCK, async () => {
 
     const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
     await pinResilientOraclePriceViaRedstone(resilient, TWT);
-
-    const trxCfg = await dbo.assetProtectionConfig(TRX.asset);
-    trxSnapshot = {
-      minPrice: trxCfg.minPrice,
-      maxPrice: trxCfg.maxPrice,
-      currentlyUsingProtectedPrice: trxCfg.currentlyUsingProtectedPrice,
-    };
   });
 
   // ────────────────────────────────────────────────────────────────────
@@ -70,8 +65,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("TRX is already enabled", async () => {
+    it("TRX is already enabled and matches the on-chain window", async () => {
       expect(await dbo.isBoundedPricingEnabled(TRX.asset)).to.equal(true);
+      const cfg = await dbo.assetProtectionConfig(TRX.asset);
+      expect(cfg.minPrice).to.equal(TRX.minPrice);
+      expect(cfg.maxPrice).to.equal(TRX.maxPrice);
+      expect(cfg.currentlyUsingProtectedPrice).to.equal(TRX.currentlyUsingProtectedPrice);
     });
 
     it("each disabled asset has minPrice == maxPrice and protection inactive", async () => {
@@ -144,12 +143,12 @@ forking(FORK_BLOCK, async () => {
     });
 
     describe("TRX state untouched across the VIP", () => {
-      it("TRX flag, window, and protection state unchanged", async () => {
+      it("TRX flag, window, and protection state still match the hardcoded values", async () => {
         expect(await dbo.isBoundedPricingEnabled(TRX.asset)).to.equal(true);
         const cfg = await dbo.assetProtectionConfig(TRX.asset);
-        expect(cfg.minPrice).to.equal(trxSnapshot.minPrice);
-        expect(cfg.maxPrice).to.equal(trxSnapshot.maxPrice);
-        expect(cfg.currentlyUsingProtectedPrice).to.equal(trxSnapshot.currentlyUsingProtectedPrice);
+        expect(cfg.minPrice).to.equal(TRX.minPrice);
+        expect(cfg.maxPrice).to.equal(TRX.maxPrice);
+        expect(cfg.currentlyUsingProtectedPrice).to.equal(TRX.currentlyUsingProtectedPrice);
       });
     });
   });
