@@ -6,9 +6,9 @@ const {
   NORMAL_TIMELOCK: NORMAL,
   FAST_TRACK_TIMELOCK: FAST_TRACK,
   CRITICAL_TIMELOCK: CRITICAL,
-  CRITICAL_GUARDIAN,
+  GUARDIAN,
   ACCESS_CONTROL_MANAGER,
-} = NETWORK_ADDRESSES.bscmainnet;
+} = NETWORK_ADDRESSES.bsctestnet;
 
 export interface PermissionEntry {
   target: string;
@@ -16,19 +16,21 @@ export interface PermissionEntry {
   callers: string[];
 }
 
-// Deployed addresses
-export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
-export const LIQUIDATION_ADAPTER = "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd";
-export const INSTITUTION_POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
+// Redeployed addresses (TODO: replace once new testnet deployment is complete)
+export const INSTITUTIONAL_VAULT_CONTROLLER = "0xf77dED2A00F94e33C392126238360D4642c16Ba2";
+export const LIQUIDATION_ADAPTER = "0x4b302b56315Ca16A0A4565108e62404496916491";
+export const INSTITUTION_POSITION_TOKEN = "0x71dA473257a96e975558C8edD8491AD0880EFCe5";
 
-// ACM aggregator (mainnet)
-export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
+// ACM aggregator (existing testnet deployment).
+// Index is incremented because index 1 was consumed by the original VIP-664 pre-load.
+export const ACM_AGGREGATOR = "0xB59523628D92f914ec6624Be4281397E8aFD71EF";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-
 export const ACM_AGGREGATOR_INDEX = 2;
 
-export const LIQUIDATOR_WHITELIST: string[] = [CRITICAL_GUARDIAN];
-export const SETTLER_WHITELIST: string[] = [CRITICAL_GUARDIAN];
+// Liquidator/settler addresses whitelisted on the `LiquidationAdapter`.
+// Guardian is whitelisted on testnet for operational convenience.
+export const LIQUIDATOR_WHITELIST: string[] = [GUARDIAN];
+export const SETTLER_WHITELIST: string[] = [GUARDIAN];
 
 export const PERMISSION_ENTRIES: PermissionEntry[] = [
   // InstitutionalVaultController
@@ -36,100 +38,95 @@ export const PERMISSION_ENTRIES: PermissionEntry[] = [
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "createVault(VaultConfig,InstitutionalConfig,RiskConfig,string,string)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "openVault(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "partialPauseVault(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "completePauseVault(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "unpauseVault(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "closeVault(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "sweep(address,address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "approvePositionTransfer(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "revokePositionTransfer(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "setLiquidationThreshold(address,uint256)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "setLiquidationIncentive(address,uint256)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "setLatePenaltyRate(address,uint256)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "setVaultImplementation(address)",
     callers: [NORMAL, FAST_TRACK, CRITICAL],
   },
-  {
-    target: INSTITUTIONAL_VAULT_CONTROLLER,
-    fn: "setLiquidationAdapter(address)",
-    callers: [NORMAL, CRITICAL_GUARDIAN],
-  },
-  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setOracle(address)", callers: [NORMAL, CRITICAL_GUARDIAN] },
-  {
-    target: INSTITUTIONAL_VAULT_CONTROLLER,
-    fn: "setProtocolShareReserve(address)",
-    callers: [NORMAL, CRITICAL_GUARDIAN],
-  },
-  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setComptroller(address)", callers: [NORMAL, CRITICAL_GUARDIAN] },
-  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setTreasury(address)", callers: [NORMAL, CRITICAL_GUARDIAN] },
+  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setLiquidationAdapter(address)", callers: [NORMAL, GUARDIAN] },
+  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setOracle(address)", callers: [NORMAL, GUARDIAN] },
+  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setProtocolShareReserve(address)", callers: [NORMAL, GUARDIAN] },
+  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setComptroller(address)", callers: [NORMAL, GUARDIAN] },
+  { target: INSTITUTIONAL_VAULT_CONTROLLER, fn: "setTreasury(address)", callers: [NORMAL, GUARDIAN] },
 
   // LiquidationAdapter
   {
     target: LIQUIDATION_ADAPTER,
     fn: "setLiquidatorWhitelist(address,bool)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
     target: LIQUIDATION_ADAPTER,
     fn: "setSettlerWhitelist(address,bool)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
-  { target: LIQUIDATION_ADAPTER, fn: "setProtocolLiquidationShare(uint256)", callers: [NORMAL, FAST_TRACK, CRITICAL] },
-  // NORMAL already holds setCloseFactor globally on mainnet.
-  { target: LIQUIDATION_ADAPTER, fn: "setCloseFactor(uint256)", callers: [FAST_TRACK, CRITICAL] },
+  {
+    target: LIQUIDATION_ADAPTER,
+    fn: "setProtocolLiquidationShare(uint256)",
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
+  },
+  { target: LIQUIDATION_ADAPTER, fn: "setCloseFactor(uint256)", callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN] },
   {
     target: LIQUIDATION_ADAPTER,
     fn: "sweepProtocolShareToReserve(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
 ];
 
@@ -140,26 +137,34 @@ export const PERMISSIONS: [string, string, string][] = buildPermissions(PERMISSI
 
 export const EXPECTED_PERMISSION_GRANTED_EVENTS = PERMISSIONS.length;
 
-export const vip664 = () => {
+export const vip664TestnetAddendum = () => {
   const meta = {
     version: "v1",
-    title: "VIP-664 [BNB Chain] Configure Institutional Fixed Rate Vault System",
+    title: "VIP-664 Addendum [BNB Chain Testnet] Configure redeployed Institutional Fixed Rate Vault System",
     description: `#### Summary
 
-If passed, this VIP will configure the Institutional Fixed Rate Vault system on BNB Chain:
+The Institutional Fixed Rate Vault contracts were redeployed on BNB Chain Testnet. This addendum
+re-runs the configuration against the new contract addresses, following the same on-chain flow used
+in the [VIP-664 BNB mainnet proposal](../bscmainnet.ts) where permissions are loaded into the ACM
+aggregator inline via the VIP itself rather than via a pre-load script.
 
-1. Grant ACM permissions (${EXPECTED_PERMISSION_GRANTED_EVENTS} total) via \`ACMCommandsAggregator\` to the appropriate set of timelocks (Normal, Fast-track, Critical) and the Critical Guardian (which also holds the \`createVault\` permission) for each access-controlled function on \`InstitutionalVaultController\` and \`LiquidationAdapter\`.
+If passed, this VIP will:
+
+1. Load and execute the ACM permission batch (${EXPECTED_PERMISSION_GRANTED_EVENTS} total grants) via \`ACMCommandsAggregator\`:
+   - \`addGrantPermissions\` to load the batch onto the aggregator
+   - \`grantRole(DEFAULT_ADMIN_ROLE, aggregator)\` so the aggregator can apply grants
+   - \`executeGrantPermissions\` to apply all permissions atomically
+   - \`revokeRole(DEFAULT_ADMIN_ROLE, aggregator)\` to remove the elevated role
 2. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
 3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
 4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
-5. Whitelist the Critical Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
+5. Whitelist the Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
 
-#### Deployed Contracts
+#### Deployed Contracts (redeployed)
 
 - **InstitutionalVaultController** (proxy): ${INSTITUTIONAL_VAULT_CONTROLLER}
 - **LiquidationAdapter** (proxy): ${LIQUIDATION_ADAPTER}
-- **InstitutionPositionToken**: ${INSTITUTION_POSITION_TOKEN}
-- **Critical Guardian**: ${CRITICAL_GUARDIAN}`,
+- **InstitutionPositionToken**: ${INSTITUTION_POSITION_TOKEN}`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -189,7 +194,7 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
       },
 
-      // Step 2 — Complete Ownable2Step transfers.
+      // Step 2 — Complete Ownable2Step transfers (initiated in deploy script).
       { target: INSTITUTIONAL_VAULT_CONTROLLER, signature: "acceptOwnership()", params: [] },
       { target: LIQUIDATION_ADAPTER, signature: "acceptOwnership()", params: [] },
 
@@ -222,4 +227,4 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
   );
 };
 
-export default vip664;
+export default vip664TestnetAddendum;

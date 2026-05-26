@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip664TestnetAddendum, {
   ACM_AGGREGATOR,
   DEFAULT_ADMIN_ROLE,
   EXPECTED_PERMISSION_GRANTED_EVENTS,
@@ -16,7 +16,7 @@ import vip664, {
   LIQUIDATOR_WHITELIST,
   PERMISSION_ENTRIES,
   SETTLER_WHITELIST,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-664/bsctestnet-addendum";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
@@ -27,21 +27,19 @@ const {
   NORMAL_TIMELOCK: NORMAL,
   FAST_TRACK_TIMELOCK: FAST_TRACK,
   CRITICAL_TIMELOCK: CRITICAL,
-  CRITICAL_GUARDIAN,
+  GUARDIAN,
   ACCESS_CONTROL_MANAGER,
-} = NETWORK_ADDRESSES.bscmainnet;
+} = NETWORK_ADDRESSES.bsctestnet;
 
-const FORK_BLOCK = 100523019;
+const FORK_BLOCK = 109652392;
 
 // To make test names readable.
 const LABEL: Record<string, string> = {
   [NORMAL]: "Normal",
   [FAST_TRACK]: "FastTrack",
   [CRITICAL]: "Critical",
-  [CRITICAL_GUARDIAN]: "CriticalGuardian",
+  [GUARDIAN]: "Guardian",
 };
-
-const SUPPORTER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 
 forking(FORK_BLOCK, async () => {
   let accessControlManager: Contract;
@@ -60,8 +58,8 @@ forking(FORK_BLOCK, async () => {
     positionToken = new ethers.Contract(INSTITUTION_POSITION_TOKEN, INSTITUTION_POSITION_TOKEN_ABI, ethers.provider);
   });
 
-  // Contracts deployed and deploy-script state is in place.
-  describe("Pre-VIP: verify deployments", () => {
+  // Contracts redeployed and deploy-script state is in place.
+  describe("Pre-VIP: verify redeployments", () => {
     it("InstitutionalVaultController proxy should be deployed", async () => {
       expect(await ethers.provider.getCode(INSTITUTIONAL_VAULT_CONTROLLER)).to.not.equal("0x");
     });
@@ -99,41 +97,44 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  // None of the planned grants exist yet.
+  // None of the planned grants exist yet against the redeployed contracts.
   describe("Pre-VIP: ACM permissions not yet granted", () => {
     for (const { target, fn, callers } of PERMISSION_ENTRIES) {
       for (const account of callers) {
-        it(`${LABEL[account]} should NOT yet have permission: ${fn} on ${target}`, async () => {
-          expect(await accessControlManager.isAllowedToCall(account, fn, { from: target })).to.be.false;
+        it(`${LABEL[account] ?? account} should NOT yet have permission: ${fn} on ${target}`, async () => {
+          expect(await accessControlManager.hasPermission(account, target, fn)).to.be.false;
         });
       }
     }
   });
 
-  testVip("VIP-664 [BNB Chain] Configure Institutional Fixed Rate Vault System", await vip664(), {
-    supporter: SUPPORTER,
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [ACCESS_CONTROL_MANAGER_ABI],
-        ["RoleGranted", "RoleRevoked"],
-        [EXPECTED_PERMISSION_GRANTED_EVENTS + 1, 1],
-      );
-      await expectEvents(
-        txResponse,
-        [ACM_AGGREGATOR_ABI],
-        ["GrantPermissionsAdded", "GrantPermissionsExecuted"],
-        [1, 1],
-      );
+  testVip(
+    "VIP-664 Addendum [BNB Chain Testnet] Configure redeployed Institutional Fixed Rate Vault System",
+    await vip664TestnetAddendum(),
+    {
+      callbackAfterExecution: async txResponse => {
+        await expectEvents(
+          txResponse,
+          [ACCESS_CONTROL_MANAGER_ABI],
+          ["PermissionGranted", "RoleGranted", "RoleRevoked"],
+          [EXPECTED_PERMISSION_GRANTED_EVENTS, EXPECTED_PERMISSION_GRANTED_EVENTS + 1, 1],
+        );
+        await expectEvents(
+          txResponse,
+          [ACM_AGGREGATOR_ABI],
+          ["GrantPermissionsAdded", "GrantPermissionsExecuted"],
+          [1, 1],
+        );
+      },
     },
-  });
+  );
 
   // Every planned grant is now active.
   describe("Post-VIP: ACM permissions granted", () => {
     for (const { target, fn, callers } of PERMISSION_ENTRIES) {
       for (const account of callers) {
-        it(`${LABEL[account]} should have permission: ${fn} on ${target}`, async () => {
-          expect(await accessControlManager.isAllowedToCall(account, fn, { from: target })).to.be.true;
+        it(`${LABEL[account] ?? account} should have permission: ${fn} on ${target}`, async () => {
+          expect(await accessControlManager.hasPermission(account, target, fn)).to.be.true;
         });
       }
     }
@@ -162,23 +163,24 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  // Dedicated operator addresses whitelisted.
   describe("Post-VIP: liquidator/settler whitelists", () => {
     for (const account of LIQUIDATOR_WHITELIST) {
-      it(`${account} should be a whitelisted liquidator`, async () => {
+      it(`${LABEL[account] ?? account} should be a whitelisted liquidator`, async () => {
         expect(await liquidationAdapter.isWhitelistedLiquidator(account)).to.be.true;
       });
     }
 
     for (const account of SETTLER_WHITELIST) {
-      it(`${account} should be a whitelisted settler`, async () => {
+      it(`${LABEL[account] ?? account} should be a whitelisted settler`, async () => {
         expect(await liquidationAdapter.isWhitelistedSettler(account)).to.be.true;
       });
     }
   });
 
   describe("Post-VIP: createVault ACM gating", () => {
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
-    const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+    const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+    const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 
     const ONE_DAY = 24 * 60 * 60;
     const vaultConfig = {
@@ -188,24 +190,24 @@ forking(FORK_BLOCK, async () => {
       minBorrowCap: parseEther("1000"), // 1,000 USDT
       maxBorrowCap: parseEther("10000000"), // 10M USDT
       minSupplierDeposit: parseEther("100"), // 100 USDT
-      openDuration: 7 * ONE_DAY,
-      lockDuration: 30 * ONE_DAY,
-      settlementWindow: ONE_DAY,
+      openDuration: 7 * ONE_DAY, // 7 days
+      lockDuration: 30 * ONE_DAY, // 30 days
+      settlementWindow: ONE_DAY, // 1 day
     };
     const instConfig = {
       collateralAsset: USDC,
-      idealCollateralAmount: parseEther("100000"),
+      idealCollateralAmount: parseEther("100000"), // 100k USDC
       marginRate: parseEther("1.5"),
-      institutionOperator: CRITICAL_GUARDIAN,
+      institutionOperator: GUARDIAN,
       positionTokenId: 1,
     };
     const riskConfig = {
-      liquidationThreshold: parseEther("0.85"),
-      liquidationIncentive: parseEther("1.08"),
-      latePenaltyRate: parseEther("1.15"),
+      liquidationThreshold: parseEther("0.85"), // 85%
+      liquidationIncentive: parseEther("1.08"), // 8% incentive
+      latePenaltyRate: parseEther("1.15"), // 15% late penalty
     };
 
-    it("random address should revert with Unauthorized when trying to create vault", async () => {
+    it("unauthorized caller should revert when trying to create vault", async () => {
       const stranger = await initMainnetUser(
         "0x000000000000000000000000000000000000dEaD",
         ethers.utils.parseEther("1"),
@@ -215,11 +217,9 @@ forking(FORK_BLOCK, async () => {
       ).to.be.revertedWithCustomError(controller, "Unauthorized");
     });
 
-    it("CriticalGuardian should be able to create vault", async () => {
-      const criticalGuardian = await initMainnetUser(CRITICAL_GUARDIAN, ethers.utils.parseEther("1"));
-      const call = controller
-        .connect(criticalGuardian)
-        .createVault(vaultConfig, instConfig, riskConfig, "Test", "TEST");
+    it("Guardian should be able to create vault", async () => {
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      const call = controller.connect(guardian).createVault(vaultConfig, instConfig, riskConfig, "Test", "TEST");
       await expect(call).to.not.be.revertedWithCustomError(controller, "Unauthorized");
     });
   });
