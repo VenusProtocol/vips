@@ -147,7 +147,7 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
       // ──────────────────────────────────────────────────────────────────────
       // Phase 1 — ACM permissions via Aggregator
       // ──────────────────────────────────────────────────────────────────────
-      // Permissions were pre-loaded into ACM Aggregator via addGrantPermissions.ts.
+      // Permissions were pre-loaded into ACM Aggregator.
       // Grant admin role, execute batched permissions, then revoke admin role.
 
       {
