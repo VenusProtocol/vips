@@ -15,7 +15,7 @@ import CHAINLINK_ORACLE_ABI from "src/vip-framework/abi/chainlinkOracle.json";
 import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import VTOKEN_ABI from "src/vip-framework/abi/vToken.json";
 
-import vip666, { ASSETS_TO_ENABLE, DEVIATION_BOUNDED_ORACLE } from "../../vips/vip-666/bscmainnet";
+import vip626, { ASSETS_TO_ENABLE, DEVIATION_BOUNDED_ORACLE } from "../../vips/vip-626/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
@@ -91,7 +91,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-666 Enable bounded pricing for long-tail assets", await vip666(), {
+  testVip("VIP-626 Enable bounded pricing for long-tail assets", await vip626(), {
     supporter: SUPPORTER,
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DBO_ABI], ["BoundedPricingWhitelistUpdated"], [ASSETS_TO_ENABLE.length]);
