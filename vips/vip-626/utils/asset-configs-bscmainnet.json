@@ -1,0 +1,44 @@
+{
+  "assetsToEnable": [
+    {
+      "name": "AAVE",
+      "asset": "0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+      "vToken": "0x26DA28954763B92139ED49283625ceCAf52C6f94"
+    },
+    {
+      "name": "ADA",
+      "asset": "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+      "vToken": "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec"
+    },
+    {
+      "name": "BCH",
+      "asset": "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf",
+      "vToken": "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176"
+    },
+    {
+      "name": "DOGE",
+      "asset": "0xbA2aE424d960c26247Dd6c32edC70B295c744C43",
+      "vToken": "0xec3422Ef92B2fb59e84c8B02Ba73F1fE84Ed8D71"
+    },
+    {
+      "name": "LINK",
+      "asset": "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+      "vToken": "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f"
+    },
+    {
+      "name": "LTC",
+      "asset": "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94",
+      "vToken": "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B"
+    },
+    {
+      "name": "TWT",
+      "asset": "0x4B0F1812e5Df2A09796481Ff14017e6005508003",
+      "vToken": "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc"
+    },
+    {
+      "name": "UNI",
+      "asset": "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1",
+      "vToken": "0x27FF564707786720C71A2e5c1490A63266683612"
+    }
+  ]
+}
