@@ -27,10 +27,9 @@ export const PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 export const NEW_PSR_IMPLEMENTATION = "0x6eFa596c53E6A753DdA643e3e3FEcA1570879b7C";
 
 // ACM aggregator (existing testnet deployment).
-// Index is incremented because index 1 was consumed by the original VIP-664 pre-load.
 export const ACM_AGGREGATOR = "0xB59523628D92f914ec6624Be4281397E8aFD71EF";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR_INDEX = 2;
+export const ACM_AGGREGATOR_INDEX = 3;
 
 // Liquidator/settler addresses whitelisted on the `LiquidationAdapter`.
 // Guardian is whitelisted on testnet for operational convenience.
@@ -48,6 +47,11 @@ export const PERMISSION_ENTRIES: PermissionEntry[] = [
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "openVault(address)",
+    callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
+  },
+  {
+    target: INSTITUTIONAL_VAULT_CONTROLLER,
+    fn: "cancelVault(address)",
     callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {
@@ -77,7 +81,7 @@ export const PERMISSION_ENTRIES: PermissionEntry[] = [
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
-    fn: "approvePositionTransfer(address)",
+    fn: "approvePositionTransfer(address,address)",
     callers: [NORMAL, FAST_TRACK, CRITICAL, GUARDIAN],
   },
   {

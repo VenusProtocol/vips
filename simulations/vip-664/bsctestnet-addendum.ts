@@ -37,7 +37,7 @@ const {
   ACCESS_CONTROL_MANAGER,
 } = NETWORK_ADDRESSES.bsctestnet;
 
-const FORK_BLOCK = 109829264;
+const FORK_BLOCK = 109840621;
 
 // To make test names readable.
 const LABEL: Record<string, string> = {

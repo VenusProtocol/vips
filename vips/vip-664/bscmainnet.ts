@@ -30,7 +30,7 @@ export const NEW_PSR_IMPLEMENTATION = "0x4eC6D748a2647000895b455c408f85602A144Ed
 export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-export const ACM_AGGREGATOR_INDEX = 2;
+export const ACM_AGGREGATOR_INDEX = 3;
 
 export const LIQUIDATOR_WHITELIST: string[] = [CRITICAL_GUARDIAN];
 export const SETTLER_WHITELIST: string[] = [CRITICAL_GUARDIAN];
@@ -46,6 +46,11 @@ export const PERMISSION_ENTRIES: PermissionEntry[] = [
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
     fn: "openVault(address)",
+    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
+  },
+  {
+    target: INSTITUTIONAL_VAULT_CONTROLLER,
+    fn: "cancelVault(address)",
     callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
   },
   {
@@ -75,8 +80,8 @@ export const PERMISSION_ENTRIES: PermissionEntry[] = [
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
-    fn: "approvePositionTransfer(address)",
-    callers: [NORMAL, FAST_TRACK, CRITICAL],
+    fn: "approvePositionTransfer(address,address)",
+    callers: [NORMAL, FAST_TRACK, CRITICAL, CRITICAL_GUARDIAN],
   },
   {
     target: INSTITUTIONAL_VAULT_CONTROLLER,
