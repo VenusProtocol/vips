@@ -149,6 +149,13 @@
   },
   {
     "type": "function",
+    "name": "cancelVault",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "claimRaisedFunds",
     "inputs": [],
     "outputs": [],
@@ -623,11 +630,6 @@
           },
           {
             "name": "minimumCollateralRequired",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "idealCollateralValuation",
             "type": "uint256",
             "internalType": "uint256"
           },
@@ -1750,6 +1752,25 @@
   },
   {
     "type": "event",
+    "name": "VaultCancelled",
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "collateralAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "VaultClosed",
     "inputs": [
       {
@@ -1965,11 +1986,6 @@
   },
   {
     "type": "error",
-    "name": "PositionTokenIdNotSet",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "SameStateTransition",
     "inputs": []
   },
@@ -1986,11 +2002,6 @@
   {
     "type": "error",
     "name": "WithdrawalWouldBreachLT",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ZeroAddress",
     "inputs": []
   },
   {
