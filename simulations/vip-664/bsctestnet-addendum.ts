@@ -15,8 +15,11 @@ import vip664TestnetAddendum, {
   INSTITUTION_POSITION_TOKEN,
   LIQUIDATION_ADAPTER,
   LIQUIDATOR_WHITELIST,
+  NEW_PSR_IMPLEMENTATION,
   PERMISSIONS,
   PERMISSION_ENTRIES,
+  PROTOCOL_SHARE_RESERVE,
+  PROXY_ADMIN,
   SETTLER_WHITELIST,
 } from "../../vips/vip-664/bsctestnet-addendum";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
@@ -24,6 +27,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import LIQUIDATION_ADAPTER_ABI from "./abi/LiquidationAdapter.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 
 const {
   NORMAL_TIMELOCK: NORMAL,
@@ -33,7 +37,7 @@ const {
   ACCESS_CONTROL_MANAGER,
 } = NETWORK_ADDRESSES.bsctestnet;
 
-const FORK_BLOCK = 109821310;
+const FORK_BLOCK = 109829264;
 
 // To make test names readable.
 const LABEL: Record<string, string> = {
@@ -49,6 +53,7 @@ forking(FORK_BLOCK, async () => {
   let liquidationAdapter: Contract;
   let positionToken: Contract;
   let acmAggregator: Contract;
+  let proxyAdmin: Contract;
 
   before(async () => {
     accessControlManager = new ethers.Contract(ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
@@ -60,6 +65,7 @@ forking(FORK_BLOCK, async () => {
     liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, LIQUIDATION_ADAPTER_ABI, ethers.provider);
     positionToken = new ethers.Contract(INSTITUTION_POSITION_TOKEN, INSTITUTION_POSITION_TOKEN_ABI, ethers.provider);
     acmAggregator = new ethers.Contract(ACM_AGGREGATOR, ACM_AGGREGATOR_ABI, ethers.provider);
+    proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, ethers.provider);
   });
 
   // Contracts redeployed and deploy-script state is in place.
@@ -98,6 +104,10 @@ forking(FORK_BLOCK, async () => {
 
     it("controller liquidationAdapter should be address(0) before VIP", async () => {
       expect(await controller.liquidationAdapter()).to.equal(ethers.constants.AddressZero);
+    });
+
+    it("ProtocolShareReserve should not yet point to the new implementation", async () => {
+      expect(await proxyAdmin.getProxyImplementation(PROTOCOL_SHARE_RESERVE)).to.not.equal(NEW_PSR_IMPLEMENTATION);
     });
   });
 
@@ -168,6 +178,10 @@ forking(FORK_BLOCK, async () => {
 
     it("DEFAULT_ADMIN_ROLE should be revoked from ACM Aggregator", async () => {
       expect(await accessControlManager.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
+    });
+
+    it("ProtocolShareReserve should point to the new implementation", async () => {
+      expect(await proxyAdmin.getProxyImplementation(PROTOCOL_SHARE_RESERVE)).to.equal(NEW_PSR_IMPLEMENTATION);
     });
   });
 

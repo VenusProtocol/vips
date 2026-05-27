@@ -21,6 +21,11 @@ export const INSTITUTIONAL_VAULT_CONTROLLER = "0xf77dED2A00F94e33C392126238360D4
 export const LIQUIDATION_ADAPTER = "0x4b302b56315Ca16A0A4565108e62404496916491";
 export const INSTITUTION_POSITION_TOKEN = "0x71dA473257a96e975558C8edD8491AD0880EFCe5";
 
+// ProtocolShareReserve upgrade (adds support for the institutional-vault liquidation income type).
+export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+export const PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
+export const NEW_PSR_IMPLEMENTATION = "0x6eFa596c53E6A753DdA643e3e3FEcA1570879b7C";
+
 // ACM aggregator (existing testnet deployment).
 // Index is incremented because index 1 was consumed by the original VIP-664 pre-load.
 export const ACM_AGGREGATOR = "0xB59523628D92f914ec6624Be4281397E8aFD71EF";
@@ -158,12 +163,15 @@ If passed, this VIP will:
 3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
 4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
 5. Whitelist the Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
+6. Upgrade the \`ProtocolShareReserve\` proxy to a new implementation that supports the institutional-vault liquidation income type.
 
 #### Deployed Contracts (redeployed)
 
 - **InstitutionalVaultController** (proxy): ${INSTITUTIONAL_VAULT_CONTROLLER}
 - **LiquidationAdapter** (proxy): ${LIQUIDATION_ADAPTER}
-- **InstitutionPositionToken**: ${INSTITUTION_POSITION_TOKEN}`,
+- **InstitutionPositionToken**: ${INSTITUTION_POSITION_TOKEN}
+- **ProtocolShareReserve** (proxy): ${PROTOCOL_SHARE_RESERVE}
+- **New ProtocolShareReserve implementation**: ${NEW_PSR_IMPLEMENTATION}`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -216,6 +224,13 @@ If passed, this VIP will:
         signature: "setSettlerWhitelist(address,bool)",
         params: [account, true],
       })),
+
+      // Step 5 — Upgrade the ProtocolShareReserve
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [PROTOCOL_SHARE_RESERVE, NEW_PSR_IMPLEMENTATION],
+      },
     ],
     meta,
     ProposalType.REGULAR,

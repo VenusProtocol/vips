@@ -21,6 +21,11 @@ export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E69
 export const LIQUIDATION_ADAPTER = "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd";
 export const INSTITUTION_POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
 
+// ProtocolShareReserve upgrade
+export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const PROXY_ADMIN = "0x6beb6d2695b67feb73ad4f172e8e2975497187e4";
+export const NEW_PSR_IMPLEMENTATION = "0x4eC6D748a2647000895b455c408f85602A144Ed6";
+
 // ACM aggregator (mainnet)
 export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -153,13 +158,16 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
 3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
 4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
 5. Whitelist the Critical Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
+6. Upgrade the \`ProtocolShareReserve\` proxy to a new implementation that supports the institutional-vault liquidation income type.
 
 #### Deployed Contracts
 
 - **InstitutionalVaultController** (proxy): ${INSTITUTIONAL_VAULT_CONTROLLER}
 - **LiquidationAdapter** (proxy): ${LIQUIDATION_ADAPTER}
 - **InstitutionPositionToken**: ${INSTITUTION_POSITION_TOKEN}
-- **Critical Guardian**: ${CRITICAL_GUARDIAN}`,
+- **Critical Guardian**: ${CRITICAL_GUARDIAN}
+- **ProtocolShareReserve** (proxy): ${PROTOCOL_SHARE_RESERVE}
+- **New ProtocolShareReserve implementation**: ${NEW_PSR_IMPLEMENTATION}`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -212,6 +220,13 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
         signature: "setSettlerWhitelist(address,bool)",
         params: [account, true],
       })),
+
+      // Step 5 — Upgrade the ProtocolShareReserve
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [PROTOCOL_SHARE_RESERVE, NEW_PSR_IMPLEMENTATION],
+      },
     ],
     meta,
     ProposalType.REGULAR,
