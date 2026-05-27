@@ -8,12 +8,14 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip664, {
   ACM_AGGREGATOR,
+  ACM_AGGREGATOR_INDEX,
   DEFAULT_ADMIN_ROLE,
   EXPECTED_PERMISSION_GRANTED_EVENTS,
   INSTITUTIONAL_VAULT_CONTROLLER,
   INSTITUTION_POSITION_TOKEN,
   LIQUIDATION_ADAPTER,
   LIQUIDATOR_WHITELIST,
+  PERMISSIONS,
   PERMISSION_ENTRIES,
   SETTLER_WHITELIST,
 } from "../../vips/vip-664/bscmainnet";
@@ -31,7 +33,7 @@ const {
   ACCESS_CONTROL_MANAGER,
 } = NETWORK_ADDRESSES.bscmainnet;
 
-const FORK_BLOCK = 100523019;
+const FORK_BLOCK = 100682646;
 
 // To make test names readable.
 const LABEL: Record<string, string> = {
@@ -48,6 +50,7 @@ forking(FORK_BLOCK, async () => {
   let controller: Contract;
   let liquidationAdapter: Contract;
   let positionToken: Contract;
+  let acmAggregator: Contract;
 
   before(async () => {
     accessControlManager = new ethers.Contract(ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
@@ -58,6 +61,7 @@ forking(FORK_BLOCK, async () => {
     );
     liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, LIQUIDATION_ADAPTER_ABI, ethers.provider);
     positionToken = new ethers.Contract(INSTITUTION_POSITION_TOKEN, INSTITUTION_POSITION_TOKEN_ABI, ethers.provider);
+    acmAggregator = new ethers.Contract(ACM_AGGREGATOR, ACM_AGGREGATOR_ABI, ethers.provider);
   });
 
   // Contracts deployed and deploy-script state is in place.
@@ -99,8 +103,17 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  // None of the planned grants exist yet.
+  // Permissions are pre-loaded in the Aggregator but not yet applied to the ACM.
   describe("Pre-VIP: ACM permissions not yet granted", () => {
+    it("aggregator should hold the pre-loaded batch at ACM_AGGREGATOR_INDEX", async () => {
+      for (let i = 0; i < PERMISSIONS.length; i++) {
+        const stored = await acmAggregator.grantPermissions(ACM_AGGREGATOR_INDEX, i);
+        expect(stored.contractAddress.toLowerCase()).to.equal(PERMISSIONS[i][0].toLowerCase());
+        expect(stored.functionSig).to.equal(PERMISSIONS[i][1]);
+        expect(stored.account.toLowerCase()).to.equal(PERMISSIONS[i][2].toLowerCase());
+      }
+    });
+
     for (const { target, fn, callers } of PERMISSION_ENTRIES) {
       for (const account of callers) {
         it(`${LABEL[account]} should NOT yet have permission: ${fn} on ${target}`, async () => {
@@ -119,12 +132,7 @@ forking(FORK_BLOCK, async () => {
         ["RoleGranted", "RoleRevoked"],
         [EXPECTED_PERMISSION_GRANTED_EVENTS + 1, 1],
       );
-      await expectEvents(
-        txResponse,
-        [ACM_AGGREGATOR_ABI],
-        ["GrantPermissionsAdded", "GrantPermissionsExecuted"],
-        [1, 1],
-      );
+      await expectEvents(txResponse, [ACM_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
     },
   });
 

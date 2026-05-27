@@ -167,12 +167,8 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
 
   return makeProposal(
     [
-      // Step 1 — Load and execute the ACM permission batch via the aggregator.
-      {
-        target: ACM_AGGREGATOR,
-        signature: "addGrantPermissions((address,string,address)[])",
-        params: [PERMISSIONS],
-      },
+      // Step 1 — Execute the ACM permission batch via the aggregator.
+      // Permissions are pre-loaded into the aggregator off-chain via addGrantPermissions.ts.
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "grantRole(bytes32,address)",

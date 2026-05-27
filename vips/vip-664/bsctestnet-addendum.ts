@@ -144,14 +144,13 @@ export const vip664TestnetAddendum = () => {
     description: `#### Summary
 
 The Institutional Fixed Rate Vault contracts were redeployed on BNB Chain Testnet. This addendum
-re-runs the configuration against the new contract addresses, following the same on-chain flow used
-in the [VIP-664 BNB mainnet proposal](../bscmainnet.ts) where permissions are loaded into the ACM
-aggregator inline via the VIP itself rather than via a pre-load script.
+re-runs the configuration against the new contract addresses, following the same flow used in the
+[VIP-664 BNB mainnet proposal](../bscmainnet.ts). Permissions are pre-loaded into the
+\`ACMCommandsAggregator\` off-chain via \`addGrantPermissions.ts\`; the VIP only executes the batch.
 
 If passed, this VIP will:
 
-1. Load and execute the ACM permission batch (${EXPECTED_PERMISSION_GRANTED_EVENTS} total grants) via \`ACMCommandsAggregator\`:
-   - \`addGrantPermissions\` to load the batch onto the aggregator
+1. Execute the pre-loaded ACM permission batch (${EXPECTED_PERMISSION_GRANTED_EVENTS} total grants) via \`ACMCommandsAggregator\`:
    - \`grantRole(DEFAULT_ADMIN_ROLE, aggregator)\` so the aggregator can apply grants
    - \`executeGrantPermissions\` to apply all permissions atomically
    - \`revokeRole(DEFAULT_ADMIN_ROLE, aggregator)\` to remove the elevated role
@@ -172,12 +171,8 @@ If passed, this VIP will:
 
   return makeProposal(
     [
-      // Step 1 — Load and execute the ACM permission batch via the aggregator.
-      {
-        target: ACM_AGGREGATOR,
-        signature: "addGrantPermissions((address,string,address)[])",
-        params: [PERMISSIONS],
-      },
+      // Step 1 — Execute the ACM permission batch via the aggregator.
+      // Permissions are pre-loaded into the aggregator off-chain via addGrantPermissions.ts.
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "grantRole(bytes32,address)",
