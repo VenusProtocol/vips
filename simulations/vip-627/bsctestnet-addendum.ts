@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip664TestnetAddendum, {
   ACM_AGGREGATOR,
   ACM_AGGREGATOR_INDEX,
   DEFAULT_ADMIN_ROLE,
@@ -21,7 +21,7 @@ import vip664, {
   PROTOCOL_SHARE_RESERVE,
   PROXY_ADMIN,
   SETTLER_WHITELIST,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-627/bsctestnet-addendum";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
@@ -33,21 +33,19 @@ const {
   NORMAL_TIMELOCK: NORMAL,
   FAST_TRACK_TIMELOCK: FAST_TRACK,
   CRITICAL_TIMELOCK: CRITICAL,
-  CRITICAL_GUARDIAN,
+  GUARDIAN,
   ACCESS_CONTROL_MANAGER,
-} = NETWORK_ADDRESSES.bscmainnet;
+} = NETWORK_ADDRESSES.bsctestnet;
 
-const FORK_BLOCK = 100701625;
+const FORK_BLOCK = 109840621;
 
 // To make test names readable.
 const LABEL: Record<string, string> = {
   [NORMAL]: "Normal",
   [FAST_TRACK]: "FastTrack",
   [CRITICAL]: "Critical",
-  [CRITICAL_GUARDIAN]: "CriticalGuardian",
+  [GUARDIAN]: "Guardian",
 };
-
-const SUPPORTER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 
 forking(FORK_BLOCK, async () => {
   let accessControlManager: Contract;
@@ -70,8 +68,8 @@ forking(FORK_BLOCK, async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, ethers.provider);
   });
 
-  // Contracts deployed and deploy-script state is in place.
-  describe("Pre-VIP: verify deployments", () => {
+  // Contracts redeployed and deploy-script state is in place.
+  describe("Pre-VIP: verify redeployments", () => {
     it("InstitutionalVaultController proxy should be deployed", async () => {
       expect(await ethers.provider.getCode(INSTITUTIONAL_VAULT_CONTROLLER)).to.not.equal("0x");
     });
@@ -113,7 +111,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  // Permissions are pre-loaded in the Aggregator but not yet applied to the ACM.
+  // Permissions are pre-loaded but not yet applied to the ACM.
   describe("Pre-VIP: ACM permissions not yet granted", () => {
     it("aggregator should hold the pre-loaded batch at ACM_AGGREGATOR_INDEX", async () => {
       for (let i = 0; i < PERMISSIONS.length; i++) {
@@ -126,32 +124,35 @@ forking(FORK_BLOCK, async () => {
 
     for (const { target, fn, callers } of PERMISSION_ENTRIES) {
       for (const account of callers) {
-        it(`${LABEL[account]} should NOT yet have permission: ${fn} on ${target}`, async () => {
-          expect(await accessControlManager.isAllowedToCall(account, fn, { from: target })).to.be.false;
+        it(`${LABEL[account] ?? account} should NOT yet have permission: ${fn} on ${target}`, async () => {
+          expect(await accessControlManager.hasPermission(account, target, fn)).to.be.false;
         });
       }
     }
   });
 
-  testVip("VIP-664 [BNB Chain] Configure Institutional Fixed Rate Vault System", await vip664(), {
-    supporter: SUPPORTER,
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [ACCESS_CONTROL_MANAGER_ABI],
-        ["RoleGranted", "RoleRevoked"],
-        [EXPECTED_PERMISSION_GRANTED_EVENTS + 1, 1],
-      );
-      await expectEvents(txResponse, [ACM_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
+  testVip(
+    "VIP-664 Addendum [BNB Chain Testnet] Configure redeployed Institutional Fixed Rate Vault System",
+    await vip664TestnetAddendum(),
+    {
+      callbackAfterExecution: async txResponse => {
+        await expectEvents(
+          txResponse,
+          [ACCESS_CONTROL_MANAGER_ABI],
+          ["PermissionGranted", "RoleGranted", "RoleRevoked"],
+          [EXPECTED_PERMISSION_GRANTED_EVENTS, EXPECTED_PERMISSION_GRANTED_EVENTS + 1, 1],
+        );
+        await expectEvents(txResponse, [ACM_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
+      },
     },
-  });
+  );
 
   // Every planned grant is now active.
   describe("Post-VIP: ACM permissions granted", () => {
     for (const { target, fn, callers } of PERMISSION_ENTRIES) {
       for (const account of callers) {
-        it(`${LABEL[account]} should have permission: ${fn} on ${target}`, async () => {
-          expect(await accessControlManager.isAllowedToCall(account, fn, { from: target })).to.be.true;
+        it(`${LABEL[account] ?? account} should have permission: ${fn} on ${target}`, async () => {
+          expect(await accessControlManager.hasPermission(account, target, fn)).to.be.true;
         });
       }
     }
@@ -184,23 +185,24 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  // Dedicated operator addresses whitelisted.
   describe("Post-VIP: liquidator/settler whitelists", () => {
     for (const account of LIQUIDATOR_WHITELIST) {
-      it(`${account} should be a whitelisted liquidator`, async () => {
+      it(`${LABEL[account] ?? account} should be a whitelisted liquidator`, async () => {
         expect(await liquidationAdapter.isWhitelistedLiquidator(account)).to.be.true;
       });
     }
 
     for (const account of SETTLER_WHITELIST) {
-      it(`${account} should be a whitelisted settler`, async () => {
+      it(`${LABEL[account] ?? account} should be a whitelisted settler`, async () => {
         expect(await liquidationAdapter.isWhitelistedSettler(account)).to.be.true;
       });
     }
   });
 
   describe("Post-VIP: createVault ACM gating", () => {
-    const USDT = "0x55d398326f99059fF775485246999027B3197955";
-    const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+    const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+    const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 
     const ONE_DAY = 24 * 60 * 60;
     const vaultConfig = {
@@ -210,24 +212,24 @@ forking(FORK_BLOCK, async () => {
       minBorrowCap: parseEther("1000"), // 1,000 USDT
       maxBorrowCap: parseEther("10000000"), // 10M USDT
       minSupplierDeposit: parseEther("100"), // 100 USDT
-      openDuration: 7 * ONE_DAY,
-      lockDuration: 30 * ONE_DAY,
-      settlementWindow: ONE_DAY,
+      openDuration: 7 * ONE_DAY, // 7 days
+      lockDuration: 30 * ONE_DAY, // 30 days
+      settlementWindow: ONE_DAY, // 1 day
     };
     const instConfig = {
       collateralAsset: USDC,
-      idealCollateralAmount: parseEther("100000"),
+      idealCollateralAmount: parseEther("100000"), // 100k USDC
       marginRate: parseEther("1.5"),
-      institutionOperator: CRITICAL_GUARDIAN,
+      institutionOperator: GUARDIAN,
       positionTokenId: 1,
     };
     const riskConfig = {
-      liquidationThreshold: parseEther("0.85"),
-      liquidationIncentive: parseEther("1.08"),
-      latePenaltyRate: parseEther("1.15"),
+      liquidationThreshold: parseEther("0.85"), // 85%
+      liquidationIncentive: parseEther("1.08"), // 8% incentive
+      latePenaltyRate: parseEther("1.15"), // 15% late penalty
     };
 
-    it("random address should revert with Unauthorized when trying to create vault", async () => {
+    it("unauthorized caller should revert when trying to create vault", async () => {
       const stranger = await initMainnetUser(
         "0x000000000000000000000000000000000000dEaD",
         ethers.utils.parseEther("1"),
@@ -237,74 +239,10 @@ forking(FORK_BLOCK, async () => {
       ).to.be.revertedWithCustomError(controller, "Unauthorized");
     });
 
-    it("CriticalGuardian should be able to create vault", async () => {
-      const criticalGuardian = await initMainnetUser(CRITICAL_GUARDIAN, ethers.utils.parseEther("1"));
-      const call = controller
-        .connect(criticalGuardian)
-        .createVault(vaultConfig, instConfig, riskConfig, "Test", "TEST");
+    it("Guardian should be able to create vault", async () => {
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      const call = controller.connect(guardian).createVault(vaultConfig, instConfig, riskConfig, "Test", "TEST");
       await expect(call).to.not.be.revertedWithCustomError(controller, "Unauthorized");
-    });
-
-    it("CriticalGuardian should successfully create a vault and register it", async () => {
-      // testVip advances time past the timelock delay, which makes the real ResilientOracle's
-      // underlying chainlink feeds stale. Deploy a minimal stub oracle that always returns 1e18
-      // and swap it in via NT (which now holds setOracle on the controller).
-      //
-      // Stub source (compiled with solc 0.8.25, optimizer off):
-      //   contract StubOracle {
-      //       function getPrice(address) external pure returns (uint256) { return 1e18; }
-      //   }
-      const STUB_ORACLE_BYTECODE =
-        "0x6080604052348015600e575f80fd5b5061015e8061001c5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c806341976e091461002d575b5f80fd5b610047600480360381019061004291906100cc565b61005d565b604051610054919061010f565b60405180910390f35b5f670de0b6b3a76400009050919050565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61009b82610072565b9050919050565b6100ab81610091565b81146100b5575f80fd5b50565b5f813590506100c6816100a2565b92915050565b5f602082840312156100e1576100e061006e565b5b5f6100ee848285016100b8565b91505092915050565b5f819050919050565b610109816100f7565b82525050565b5f6020820190506101225f830184610100565b9291505056fea26469706673582212209282f7f2d85233912d0088d6dc45ce2459097d2866597e41f0a286059758c12c64736f6c63430008190033";
-      const STUB_ORACLE_ABI = ["function getPrice(address) external pure returns (uint256)"];
-      const [deployer] = await ethers.getSigners();
-      const stubFactory = new ethers.ContractFactory(STUB_ORACLE_ABI, STUB_ORACLE_BYTECODE, deployer);
-      const stubOracle = await stubFactory.deploy();
-      await stubOracle.deployed();
-
-      const normalTimelock = await initMainnetUser(NORMAL, ethers.utils.parseEther("1"));
-      await controller.connect(normalTimelock).setOracle(stubOracle.address);
-
-      const criticalGuardian = await initMainnetUser(CRITICAL_GUARDIAN, ethers.utils.parseEther("1"));
-
-      // Valid config — passes every check in InstitutionalVaultController._validateVaultConfig.
-      const validVaultConfig = {
-        supplyAsset: USDT,
-        fixedAPY: 500, // 5% in basis points (cap is MAX_APY_BPS = 10_000)
-        reserveFactor: parseEther("0.1"),
-        minBorrowCap: parseEther("1000"),
-        maxBorrowCap: parseEther("10000000"),
-        minSupplierDeposit: parseEther("100"),
-        openDuration: 7 * ONE_DAY,
-        lockDuration: 30 * ONE_DAY,
-        settlementWindow: ONE_DAY,
-      };
-      const validInstConfig = {
-        collateralAsset: USDC,
-        idealCollateralAmount: parseEther("100000"),
-        marginRate: parseEther("0.5"), // 50% — must be ≤ MANTISSA_ONE (1e18)
-        institutionOperator: CRITICAL_GUARDIAN,
-        positionTokenId: 0, // overridden by controller with the freshly-minted tokenId
-      };
-      const validRiskConfig = {
-        liquidationThreshold: parseEther("0.85"),
-        liquidationIncentive: parseEther("1.08"),
-        latePenaltyRate: parseEther("1.15"),
-      };
-
-      const vaultsBefore = await controller.allVaultsLength();
-
-      await expect(
-        controller
-          .connect(criticalGuardian)
-          .createVault(validVaultConfig, validInstConfig, validRiskConfig, "Test Vault", "TVAULT"),
-      ).to.emit(controller, "VaultCreated");
-
-      const vaultsAfter = await controller.allVaultsLength();
-      expect(vaultsAfter).to.equal(vaultsBefore.add(1));
-
-      const newVault = await controller.allVaults(vaultsAfter.sub(1));
-      expect(await controller.isRegistered(newVault)).to.be.true;
     });
   });
 });

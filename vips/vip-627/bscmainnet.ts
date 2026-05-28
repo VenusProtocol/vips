@@ -150,29 +150,57 @@ export const PERMISSIONS: [string, string, string][] = buildPermissions(PERMISSI
 
 export const EXPECTED_PERMISSION_GRANTED_EVENTS = PERMISSIONS.length;
 
-export const vip664 = () => {
+export const vip627 = () => {
   const meta = {
     version: "v1",
-    title: "VIP-664 [BNB Chain] Configure Institutional Fixed Rate Vault System",
+    title: "VIP-627 [BNB Chain] Activate Institutional Fixed Rate Vault System",
     description: `#### Summary
 
-If passed, this VIP will configure the Institutional Fixed Rate Vault system on BNB Chain:
+If passed, this VIP activates the Institutional Fixed Rate Vault system on BNB Chain and upgrades the Protocol Share Reserve to support it. The new system introduces fixed-rate, time-bound vaults intended for whitelisted institutional borrowers, with a dedicated liquidation flow separate from the existing core pool.
 
-1. Grant ACM permissions (${EXPECTED_PERMISSION_GRANTED_EVENTS} total) via \`ACMCommandsAggregator\` to the appropriate set of timelocks (Normal, Fast-track, Critical) and the Critical Guardian (which also holds the \`createVault\` permission) for each access-controlled function on \`InstitutionalVaultController\` and \`LiquidationAdapter\`.
-2. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
-3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
-4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
-5. Whitelist the Critical Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
-6. Upgrade the \`ProtocolShareReserve\` proxy to a new implementation that supports the institutional-vault liquidation income type.
+#### Description
 
-#### Deployed Contracts
+The proposal performs the following on-chain actions:
 
-- **InstitutionalVaultController** (proxy): ${INSTITUTIONAL_VAULT_CONTROLLER}
-- **LiquidationAdapter** (proxy): ${LIQUIDATION_ADAPTER}
-- **InstitutionPositionToken**: ${INSTITUTION_POSITION_TOKEN}
-- **Critical Guardian**: ${CRITICAL_GUARDIAN}
-- **ProtocolShareReserve** (proxy): ${PROTOCOL_SHARE_RESERVE}
-- **New ProtocolShareReserve implementation**: ${NEW_PSR_IMPLEMENTATION}`,
+**1. Grant ACM permissions via the ACMCommandsAggregator**
+
+Permissions for the new InstitutionalVaultController and LiquidationAdapter contracts have been pre-loaded off-chain into the ACMCommandsAggregator (index ${ACM_AGGREGATOR_INDEX}). The VIP temporarily grants the aggregator the DEFAULT_ADMIN_ROLE on the AccessControlManager, executes the batch, and revokes the role in the same proposal. This grants role-based access (${EXPECTED_PERMISSION_GRANTED_EVENTS} permissions in total) over all administrative functions of both contracts to the Normal / Fast-track / Critical timelocks and, where appropriate, the Critical Guardian.
+
+- Vault lifecycle and operations (createVault, openVault, cancelVault, partialPauseVault, completePauseVault, unpauseVault, closeVault, sweep, approvePositionTransfer, revokePositionTransfer) — granted to all three timelocks and the Critical Guardian.
+- Risk parameter setters (setLiquidationThreshold, setLiquidationIncentive, setLatePenaltyRate, setVaultImplementation) — granted to the three timelocks only.
+- Plumbing setters (setLiquidationAdapter, setOracle, setProtocolShareReserve, setComptroller, setTreasury) — granted to the Normal Timelock and Critical Guardian.
+- LiquidationAdapter controls (setLiquidatorWhitelist, setSettlerWhitelist, setProtocolLiquidationShare, setCloseFactor, sweepProtocolShareToReserve) — granted to the timelocks, with the whitelist and sweep functions also granted to the Critical Guardian.
+
+**2. Complete two-step ownership transfers**
+
+The InstitutionalVaultController, the LiquidationAdapter, and the InstitutionPositionToken were deployed with their Ownable2Step pending owner set to the Normal Timelock. The VIP calls acceptOwnership() on the controller and adapter, and acceptPositionTokenOwnership() on the controller (which in turn accepts ownership of the position-token NFT).
+
+**3. Wire the LiquidationAdapter into the controller**
+
+Call setLiquidationAdapter on the InstitutionalVaultController, pointing it at the newly deployed LiquidationAdapter.
+
+**4. Whitelist the Critical Guardian as the initial liquidator and settler**
+
+Whitelist the Critical Guardian on the LiquidationAdapter as both an authorized liquidator and an authorized settler, so that the dedicated liquidation flow can run under operational control while remaining governance-bounded.
+
+**5. Upgrade the ProtocolShareReserve implementation**
+
+Upgrade the ProtocolShareReserve proxy to a new implementation that recognises an additional income type produced by institutional-vault liquidations, so that protocol-share income flowing in from the LiquidationAdapter is routed and accounted for correctly.
+
+#### Security and additional considerations
+
+- The DEFAULT_ADMIN_ROLE grant to the ACMCommandsAggregator is scoped to this proposal: it is granted, used once to apply a pre-loaded permission batch, and revoked in the same transaction sequence.
+- All sensitive risk-parameter changes (liquidation threshold, liquidation incentive, late-penalty rate, vault implementation) are restricted to timelock callers only and are not exposed to the Critical Guardian.
+- The Critical Guardian initially fills the liquidator and settler roles on the LiquidationAdapter; additional whitelisted parties can be added later via subsequent VIPs.
+
+#### Deployed contracts (BNB Chain)
+
+- InstitutionalVaultController (proxy): ${INSTITUTIONAL_VAULT_CONTROLLER}
+- LiquidationAdapter (proxy): ${LIQUIDATION_ADAPTER}
+- InstitutionPositionToken: ${INSTITUTION_POSITION_TOKEN}
+- ProtocolShareReserve (proxy): ${PROTOCOL_SHARE_RESERVE}
+- New ProtocolShareReserve implementation: ${NEW_PSR_IMPLEMENTATION}
+- ACMCommandsAggregator: ${ACM_AGGREGATOR} (batch index ${ACM_AGGREGATOR_INDEX})`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -238,4 +266,4 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
   );
 };
 
-export default vip664;
+export default vip627;

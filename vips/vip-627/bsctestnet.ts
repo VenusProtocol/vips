@@ -105,10 +105,10 @@ export const PERMISSIONS: [string, string, string][] = [
   ...ADAPTER_GUARDIAN_FUNCTIONS.map(sig => [LIQUIDATION_ADAPTER, sig, GUARDIAN] as [string, string, string]),
 ];
 
-export const vip664 = () => {
+export const vip627 = () => {
   const meta = {
     version: "v1",
-    title: "VIP-664 [BNB Chain Testnet] Configure Institutional Fixed Rate Vault System",
+    title: "VIP-627 [BNB Chain Testnet] Configure Institutional Fixed Rate Vault System",
     description: `#### Summary
 
 If passed, this VIP will configure the Institutional Fixed Rate Vault system on BNB Chain Testnet:
@@ -220,4 +220,4 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
   );
 };
 
-export default vip664;
+export default vip627;
