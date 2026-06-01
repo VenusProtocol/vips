@@ -2,7 +2,7 @@ import { ARBITRUM_BOUND_VALIDATOR, ARBITRUM_MIGRATIONS } from "../../vips/vip-99
 import { runRemoteOracleSuite } from "./utils/remoteSuite";
 
 runRemoteOracleSuite({
-  blockNumber: 464476747,
+  blockNumber: 468888361,
   networkKey: "arbitrumone",
   boundValidator: ARBITRUM_BOUND_VALIDATOR,
   migrations: ARBITRUM_MIGRATIONS,
