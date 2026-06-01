@@ -5,6 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
 import vip675, {
+  COMPTROLLER,
   LEGACY_PRIME,
   MINT_DEADLINE,
   MINT_THRESHOLD,
@@ -12,10 +13,16 @@ import vip675, {
   PRIME_LEADERBOARD,
   PRIME_MARKETS,
   PRIME_V2,
+  XVS_VAULT,
 } from "../../vips/vip-675/bsctestnet";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-const ACM_ABI = ["function hasRole(bytes32 role, address account) view returns (bool)"];
+const ACM_ABI = [
+  "function hasRole(bytes32 role, address account) view returns (bool)",
+  "event PermissionGranted(address account, address contractAddress, string functionSig)",
+];
+const VAULT_ABI = ["function primeToken() view returns (address)"];
+const COMPTROLLER_ABI = ["function prime() view returns (address)"];
 
 // Minimal inline ABIs
 const PRIME_V2_ABI = [
@@ -46,6 +53,8 @@ forking(BLOCK_NUMBER, async () => {
   let plp: Contract;
   let legacyPrime: Contract;
   let acm: Contract;
+  let xvsVault: Contract;
+  let comptroller: Contract;
 
   before(async () => {
     primeV2 = new ethers.Contract(PRIME_V2, PRIME_V2_ABI, ethers.provider);
@@ -53,6 +62,8 @@ forking(BLOCK_NUMBER, async () => {
     plp = new ethers.Contract(PLP, PLP_ABI, ethers.provider);
     legacyPrime = new ethers.Contract(LEGACY_PRIME, LEGACY_PRIME_ABI, ethers.provider);
     acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+    xvsVault = new ethers.Contract(XVS_VAULT, VAULT_ABI, ethers.provider);
+    comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   });
 
   const roleFor = (target: string, signature: string) =>
@@ -74,6 +85,14 @@ forking(BLOCK_NUMBER, async () => {
     it("legacy Prime is active (unpaused)", async () => {
       expect(await legacyPrime.paused()).to.equal(false);
     });
+
+    it("XVSVault prime hook still points at legacy Prime", async () => {
+      expect(await xvsVault.primeToken()).to.equal(LEGACY_PRIME);
+    });
+
+    it("Comptroller prime still points at legacy Prime", async () => {
+      expect(await comptroller.prime()).to.equal(LEGACY_PRIME);
+    });
   });
 
   testVip("VIP-675 [Testnet] PrimeV2 + PrimeLeaderboard setup", await vip675(), {
@@ -87,6 +106,11 @@ forking(BLOCK_NUMBER, async () => {
           .to.emit(primeV2, "MarketAdded")
           .withArgs(market.vToken, market.supplyMultiplier, market.borrowMultiplier);
       }
+      // ACM emits PermissionGranted for every ACM-gated function granted by this VIP;
+      // spot-check the Guardian's issue(address) grant on PrimeV2.
+      await expect(txResponse)
+        .to.emit(acm, "PermissionGranted")
+        .withArgs(bsctestnet.GUARDIAN, PRIME_V2, "issue(address)");
     },
   });
 
@@ -117,8 +141,14 @@ forking(BLOCK_NUMBER, async () => {
       expect(await primeV2.mintDeadline()).to.equal(MINT_DEADLINE);
     });
 
-    it("Guardian can call issue / burn / setMintThreshold on PrimeV2", async () => {
-      for (const sig of ["issue(address)", "burn(address)", "setMintThreshold(uint256,uint256)"]) {
+    it("Guardian can call epoch ops on PrimeV2 (issue / burn / setMintThreshold)", async () => {
+      for (const sig of [
+        "issue(address)",
+        "issueBatch(address[])",
+        "burn(address)",
+        "burnBatch(address[])",
+        "setMintThreshold(uint256,uint256)",
+      ]) {
         expect(await acm.hasRole(roleFor(PRIME_V2, sig), bsctestnet.GUARDIAN)).to.equal(true);
       }
     });
@@ -127,6 +157,24 @@ forking(BLOCK_NUMBER, async () => {
       for (const sig of ["initializeStakers(address[],uint256[],uint64[])", "finalizeInitialization()"]) {
         expect(await acm.hasRole(roleFor(PRIME_LEADERBOARD, sig), bsctestnet.GUARDIAN)).to.equal(true);
       }
+    });
+
+    it("NormalTimelock can configure PrimeLeaderboard (tiers / primeV2 / maxLoops)", async () => {
+      for (const sig of [
+        "setMultiplierTiers(uint256[],uint256[])",
+        "setPrimeV2(address)",
+        "setMaxLoopsLimit(uint256)",
+      ]) {
+        expect(await acm.hasRole(roleFor(PRIME_LEADERBOARD, sig), bsctestnet.NORMAL_TIMELOCK)).to.equal(true);
+      }
+    });
+
+    it("XVSVault prime hook points at PrimeLeaderboard", async () => {
+      expect(await xvsVault.primeToken()).to.equal(PRIME_LEADERBOARD);
+    });
+
+    it("Comptroller prime points at PrimeV2", async () => {
+      expect(await comptroller.prime()).to.equal(PRIME_V2);
     });
 
     it("legacy Prime is decommissioned (paused)", async () => {

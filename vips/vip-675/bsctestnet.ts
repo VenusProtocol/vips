@@ -22,6 +22,10 @@ export const PRIME_LEADERBOARD = "0x45E9b8A46558c359b6Ee30580A599AAa1e5d9cDE";
 // Existing contracts reused by PrimeV2
 export const PLP = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E"; // PrimeLiquidityProvider (existing)
 export const LEGACY_PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad"; // current Prime (to be replaced)
+export const COMPTROLLER = bsctestnet.UNITROLLER;
+export const XVS_VAULT = bsctestnet.XVS_VAULT_PROXY;
+export const XVS = bsctestnet.XVS;
+export const XVS_VAULT_POOL_ID = 1;
 
 // Permissionless mint window config for PrimeV2.setMintThreshold(mintThreshold, mintDeadline)
 export const MINT_THRESHOLD = parseUnits("1", 18).toString(); // 1 XVS effective stake (testnet)
@@ -49,7 +53,8 @@ export const PRIME_MARKETS: PrimeMarket[] = [
 
 const ALL_TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
-// Grant a single ACM permission for `target.signature` to every timelock in `accounts`.
+// Grant ACM permission for `target.signature` to every account in `accounts`
+// (defaults to NormalTimelock only).
 const grant = (target: string, signature: string, accounts: string[] = [NORMAL_TIMELOCK]) =>
   accounts.map(account => ({
     target: ACM,
@@ -95,18 +100,20 @@ const vip675 = () => {
     title: "VIP-675 [Testnet] Deploy and configure PrimeV2 and PrimeLeaderboard",
     description: `#### Summary
 
-If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts live on BNB Chain testnet: it accepts their ownership, grants the required ACM permissions, wires the two contracts together, points the existing PrimeLiquidityProvider at PrimeV2, configures the Prime markets, opens the permissionless mint window, and pauses the legacy Prime.
+If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts live on BNB Chain testnet: it accepts their ownership, grants the required ACM permissions, wires the two contracts together, points the existing PrimeLiquidityProvider at PrimeV2, configures the Prime markets, opens the permissionless mint window, switches the XVS Vault hook and the Core pool Comptroller from the legacy Prime to the new contracts, and pauses the legacy Prime.
 
 #### Description
 
 If passed, this VIP will:
 
-- Accept ownership of PrimeV2 and PrimeLeaderboard (previously transferred to the Normal Timelock).
+- Accept ownership of PrimeV2 and PrimeLeaderboard (previously transferred to the Normal Timelock by the deploy script).
 - Grant ACM permissions: configuration functions to the Normal Timelock; the epoch operations (issue/issueBatch/burn/burnBatch and setMintThreshold on PrimeV2, and initializeStakers/finalizeInitialization on PrimeLeaderboard) to both the Normal Timelock and the Guardian; pause/unpause to all three timelocks.
 - Wire the contracts together by setting PrimeLeaderboard on PrimeV2 and PrimeV2 on PrimeLeaderboard.
 - Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
 - Add the Core pool markets to PrimeV2 (vUSDT, vUSDC, vBTC, vETH) with the same supply/borrow multipliers used by the legacy Prime.
 - Open the permissionless mint window via setMintThreshold (minimum effective stake of 1 XVS, no deadline).
+- Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 1).
+- Update the Core pool Comptroller's prime address from the legacy Prime to PrimeV2, so market hooks call the new contract.
 - Pause the legacy Prime to decommission it.
 
 The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and the PrimeV2 token limit (500) are set in the contracts' initializers, so they are not re-set here. Seeding existing stakers into PrimeLeaderboard (initializeStakers + finalizeInitialization) is performed off-chain by the Guardian using a staker snapshot built from XVS vault history.
@@ -172,12 +179,29 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
         params: [MINT_THRESHOLD, MINT_DEADLINE],
       },
 
+      // 7. Switch the XVS Vault hook from the legacy Prime to PrimeLeaderboard, so vault
+      // deposit/withdraw events update the leaderboard (which in turn calls PrimeV2).
+      // setPrimeToken on the vault is onlyAdmin (admin = NormalTimelock).
+      {
+        target: XVS_VAULT,
+        signature: "setPrimeToken(address,address,uint256)",
+        params: [PRIME_LEADERBOARD, XVS, XVS_VAULT_POOL_ID],
+      },
+
+      // 8. Point the Core pool Comptroller at PrimeV2 so market hooks call the new contract.
+      // setPrimeToken is admin-gated (admin = NormalTimelock); no ACM grant needed.
+      {
+        target: COMPTROLLER,
+        signature: "setPrimeToken(address)",
+        params: [PRIME_V2],
+      },
+
       // Note: PrimeLeaderboard staker seeding (initializeStakers + finalizeInitialization) is
       // NOT done in this VIP. The full staker snapshot (addresses, amounts, timestamps) must be
       // built off-chain from XVS vault logs and submitted in batches by the Guardian, which holds
       // the initializeStakers / finalizeInitialization ACM permissions granted above.
 
-      // 7. Decommission the legacy Prime: pause it (halts claim / score updates / issuance).
+      // 9. Decommission the legacy Prime: pause it (halts claim / score updates / issuance).
       // NormalTimelock already holds the togglePause ACM permission, so no grant is needed.
       // Legacy Prime is currently unpaused, so a single togglePause pauses it.
       {
