@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip627, {
   ACM_AGGREGATOR,
   ACM_AGGREGATOR_INDEX,
   ADAPTER_FUNCTIONS,
@@ -19,7 +19,7 @@ import vip664, {
   INSTITUTION_POSITION_TOKEN,
   LIQUIDATION_ADAPTER,
   PERMISSIONS,
-} from "../../vips/vip-664/bsctestnet";
+} from "../../vips/vip-627/bsctestnet";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
@@ -139,7 +139,7 @@ forking(FORK_BLOCK, async () => {
   // ──────────────────────────────────────────────────────────────────────
   // VIP execution
   // ──────────────────────────────────────────────────────────────────────
-  testVip("VIP-664 [BNB Chain Testnet] Configure Institutional Fixed Rate Vault System", await vip664(), {
+  testVip("VIP-627 [BNB Chain Testnet] Configure Institutional Fixed Rate Vault System", await vip627(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
