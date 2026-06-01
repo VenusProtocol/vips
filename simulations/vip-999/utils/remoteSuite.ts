@@ -24,7 +24,7 @@ export const runRemoteOracleSuite = (opts: {
   migrations: AssetMigration[];
   assertPrices: boolean;
 }) => {
-  const net = NETWORK_ADDRESSES[opts.networkKey];
+  const networkAddresses = NETWORK_ADDRESSES[opts.networkKey];
 
   forking(opts.blockNumber, async () => {
     let resilientOracle: Contract;
@@ -33,12 +33,12 @@ export const runRemoteOracleSuite = (opts: {
     const preVipPrice: Record<string, BigNumber> = {};
 
     before(async () => {
-      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, net.RESILIENT_ORACLE);
-      redstoneOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, net.REDSTONE_ORACLE);
+      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, networkAddresses.RESILIENT_ORACLE);
+      redstoneOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, networkAddresses.REDSTONE_ORACLE);
       boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, opts.boundValidator);
       if (opts.assertPrices) {
-        for (const m of opts.migrations) {
-          preVipPrice[m.asset] = await resilientOracle.getPrice(m.asset);
+        for (const migration of opts.migrations) {
+          preVipPrice[migration.asset] = await resilientOracle.getPrice(migration.asset);
         }
       }
     });
@@ -47,15 +47,15 @@ export const runRemoteOracleSuite = (opts: {
     // PRE-VIP — MAIN-only layout, empty PIVOT, no RedStone feed, no bound config
     // =====================================================================================
     describe("Pre-VIP behavior", () => {
-      for (const m of opts.migrations) {
-        it(`${m.symbol}: MAIN-only, PIVOT empty, no RedStone feed, no bound config`, async () => {
-          const config = await resilientOracle.getTokenConfig(m.asset);
-          expect(config.oracles.map((o: string) => o.toLowerCase())).to.deep.equal(
-            m.oldOracles.map(o => o.toLowerCase()),
+      for (const migration of opts.migrations) {
+        it(`${migration.symbol}: MAIN-only, PIVOT empty, no RedStone feed, no bound config`, async () => {
+          const config = await resilientOracle.getTokenConfig(migration.asset);
+          expect(config.oracles.map((oracle: string) => oracle.toLowerCase())).to.deep.equal(
+            migration.oldOracles.map(oracle => oracle.toLowerCase()),
           );
-          expect(config.enableFlagsForOracles).to.deep.equal(m.oldFlags);
-          expect((await redstoneOracle.tokenConfigs(m.asset)).feed).to.equal(ethers.constants.AddressZero);
-          expect((await boundValidator.validateConfigs(m.asset)).upperBoundRatio).to.equal(0);
+          expect(config.enableFlagsForOracles).to.deep.equal(migration.oldFlags);
+          expect((await redstoneOracle.tokenConfigs(migration.asset)).feed).to.equal(ethers.constants.AddressZero);
+          expect((await boundValidator.validateConfigs(migration.asset)).upperBoundRatio).to.equal(0);
         });
       }
     });
@@ -69,49 +69,49 @@ export const runRemoteOracleSuite = (opts: {
     // POST-VIP — assert the new on-chain layout (config)
     // =====================================================================================
     describe("Post-VIP config", () => {
-      for (const m of opts.migrations) {
-        it(`${m.symbol}: RedStone enabled as PIVOT with feed + bound config`, async () => {
-          const config = await resilientOracle.getTokenConfig(m.asset);
-          expect(config.oracles.map((o: string) => o.toLowerCase())).to.deep.equal(
-            m.newOracles.map(o => o.toLowerCase()),
+      for (const migration of opts.migrations) {
+        it(`${migration.symbol}: RedStone enabled as PIVOT with feed + bound config`, async () => {
+          const config = await resilientOracle.getTokenConfig(migration.asset);
+          expect(config.oracles.map((oracle: string) => oracle.toLowerCase())).to.deep.equal(
+            migration.newOracles.map(oracle => oracle.toLowerCase()),
           );
-          expect(config.enableFlagsForOracles).to.deep.equal(m.newFlags);
+          expect(config.enableFlagsForOracles).to.deep.equal(migration.newFlags);
 
-          const rs = await redstoneOracle.tokenConfigs(m.asset);
-          expect(rs.feed.toLowerCase()).to.equal(m.redstoneFeed!.feed.toLowerCase());
-          expect(rs.maxStalePeriod).to.equal(m.redstoneFeed!.maxStalePeriod);
+          const redstoneConfig = await redstoneOracle.tokenConfigs(migration.asset);
+          expect(redstoneConfig.feed.toLowerCase()).to.equal(migration.redstoneFeed!.feed.toLowerCase());
+          expect(redstoneConfig.maxStalePeriod).to.equal(migration.redstoneFeed!.maxStalePeriod);
 
-          const bv = await boundValidator.validateConfigs(m.asset);
-          expect(bv.upperBoundRatio).to.equal(m.boundConfig!.upperBoundRatio);
-          expect(bv.lowerBoundRatio).to.equal(m.boundConfig!.lowerBoundRatio);
+          const onChainBound = await boundValidator.validateConfigs(migration.asset);
+          expect(onChainBound.upperBoundRatio).to.equal(migration.boundConfig!.upperBoundRatio);
+          expect(onChainBound.lowerBoundRatio).to.equal(migration.boundConfig!.lowerBoundRatio);
         });
       }
     });
 
     (opts.assertPrices ? describe : describe.skip)("Post-VIP prices", () => {
       before(async () => {
-        const timelock = await initMainnetUser(net.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-        const redstone = new ethers.Contract(net.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
-        for (const m of opts.migrations) {
+        const timelock = await initMainnetUser(networkAddresses.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        const redstone = new ethers.Contract(networkAddresses.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+        for (const migration of opts.migrations) {
           await setMaxStalePeriodInChainlinkOracle(
-            net.CHAINLINK_ORACLE,
-            m.asset,
+            networkAddresses.CHAINLINK_ORACLE,
+            migration.asset,
             ethers.constants.AddressZero,
-            net.NORMAL_TIMELOCK,
+            networkAddresses.NORMAL_TIMELOCK,
             STALE_PERIOD_OVERRIDE,
           );
-          const token = new ethers.Contract(m.asset, ERC20_ABI, ethers.provider);
+          const token = new ethers.Contract(migration.asset, ERC20_ABI, ethers.provider);
           const decimals: number = await token.decimals();
-          const directPrice = preVipPrice[m.asset].div(BigNumber.from(10).pow(18 - decimals));
-          await redstone.setDirectPrice(m.asset, directPrice);
+          const directPrice = preVipPrice[migration.asset].div(BigNumber.from(10).pow(18 - decimals));
+          await redstone.setDirectPrice(migration.asset, directPrice);
         }
       });
 
-      for (const m of opts.migrations) {
-        it(`${m.symbol}: price still resolves (pivot anchor passes) and stays within tolerance`, async () => {
-          const price = await resilientOracle.getPrice(m.asset);
+      for (const migration of opts.migrations) {
+        it(`${migration.symbol}: price still resolves (pivot anchor passes) and stays within tolerance`, async () => {
+          const price = await resilientOracle.getPrice(migration.asset);
           expect(price).to.be.gt(0);
-          const before = preVipPrice[m.asset];
+          const before = preVipPrice[migration.asset];
           expect(price.sub(before).abs().mul(10000)).to.be.lte(before.mul(PRICE_TOLERANCE_BPS));
         });
       }

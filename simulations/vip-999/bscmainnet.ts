@@ -22,7 +22,7 @@ const SOLVBTC_FUNDAMENTAL_CHAINLINK_ORACLE = "0x4521589226ef07d9805936de42F1ACF3
 const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
 
-const atlasMigrations = BSC_MIGRATIONS.filter(m => m.atlasFeed);
+const atlasMigrations = BSC_MIGRATIONS.filter(migration => migration.atlasFeed);
 
 forking(BLOCK_NUMBER, async () => {
   let resilientOracle: Contract;
@@ -34,8 +34,8 @@ forking(BLOCK_NUMBER, async () => {
   before(async () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
     atlasOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, ATLAS_ORACLE);
-    for (const m of BSC_MIGRATIONS) {
-      preVipPrice[m.asset] = await resilientOracle.getPrice(m.asset);
+    for (const migration of BSC_MIGRATIONS) {
+      preVipPrice[migration.asset] = await resilientOracle.getPrice(migration.asset);
     }
     const fundamentalOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, SOLVBTC_FUNDAMENTAL_CHAINLINK_ORACLE);
     solvBtcFundamentalPrice = await fundamentalOracle.getPrice(SOLVBTC);
@@ -45,19 +45,19 @@ forking(BLOCK_NUMBER, async () => {
   // PRE-VIP — assert the live on-chain oracle layout before the proposal executes
   // =====================================================================================
   describe("Pre-VIP behavior", () => {
-    for (const m of BSC_MIGRATIONS) {
-      it(`${m.symbol}: ResilientOracle config matches the verified on-chain state`, async () => {
-        const config = await resilientOracle.getTokenConfig(m.asset);
-        expect(config.oracles.map((o: string) => o.toLowerCase())).to.deep.equal(
-          m.oldOracles.map(o => o.toLowerCase()),
+    for (const migration of BSC_MIGRATIONS) {
+      it(`${migration.symbol}: ResilientOracle config matches the verified on-chain state`, async () => {
+        const config = await resilientOracle.getTokenConfig(migration.asset);
+        expect(config.oracles.map((oracle: string) => oracle.toLowerCase())).to.deep.equal(
+          migration.oldOracles.map(oracle => oracle.toLowerCase()),
         );
-        expect(config.enableFlagsForOracles).to.deep.equal(m.oldFlags);
+        expect(config.enableFlagsForOracles).to.deep.equal(migration.oldFlags);
       });
     }
 
     it("Atlas feeds are not yet configured", async () => {
-      for (const m of atlasMigrations) {
-        const config = await atlasOracle.tokenConfigs(m.asset);
+      for (const migration of atlasMigrations) {
+        const config = await atlasOracle.tokenConfigs(migration.asset);
         expect(config.feed).to.equal(ethers.constants.AddressZero);
       }
     });
@@ -79,21 +79,21 @@ forking(BLOCK_NUMBER, async () => {
   // POST-VIP — assert the new on-chain layout (config)
   // =====================================================================================
   describe("Post-VIP config", () => {
-    for (const m of BSC_MIGRATIONS) {
-      it(`${m.symbol}: ResilientOracle config updated to the new layout`, async () => {
-        const config = await resilientOracle.getTokenConfig(m.asset);
-        expect(config.oracles.map((o: string) => o.toLowerCase())).to.deep.equal(
-          m.newOracles.map(o => o.toLowerCase()),
+    for (const migration of BSC_MIGRATIONS) {
+      it(`${migration.symbol}: ResilientOracle config updated to the new layout`, async () => {
+        const config = await resilientOracle.getTokenConfig(migration.asset);
+        expect(config.oracles.map((oracle: string) => oracle.toLowerCase())).to.deep.equal(
+          migration.newOracles.map(oracle => oracle.toLowerCase()),
         );
-        expect(config.enableFlagsForOracles).to.deep.equal(m.newFlags);
+        expect(config.enableFlagsForOracles).to.deep.equal(migration.newFlags);
       });
     }
 
     it("Atlas feeds are configured with the expected feed + max stale period", async () => {
-      for (const m of atlasMigrations) {
-        const config = await atlasOracle.tokenConfigs(m.asset);
-        expect(config.feed.toLowerCase()).to.equal(m.atlasFeed!.feed.toLowerCase());
-        expect(config.maxStalePeriod).to.equal(m.atlasFeed!.maxStalePeriod);
+      for (const migration of atlasMigrations) {
+        const config = await atlasOracle.tokenConfigs(migration.asset);
+        expect(config.feed.toLowerCase()).to.equal(migration.atlasFeed!.feed.toLowerCase());
+        expect(config.maxStalePeriod).to.equal(migration.atlasFeed!.maxStalePeriod);
       }
     });
   });
@@ -102,11 +102,11 @@ forking(BLOCK_NUMBER, async () => {
     before(async () => {
       const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
 
-      for (const m of BSC_MIGRATIONS) {
+      for (const migration of BSC_MIGRATIONS) {
         for (const oracleAddr of [bscmainnet.CHAINLINK_ORACLE, bscmainnet.REDSTONE_ORACLE, ATLAS_ORACLE]) {
           await setMaxStalePeriodInChainlinkOracle(
             oracleAddr,
-            m.asset,
+            migration.asset,
             ethers.constants.AddressZero,
             bscmainnet.NORMAL_TIMELOCK,
             STALE_PERIOD_OVERRIDE,
@@ -125,11 +125,11 @@ forking(BLOCK_NUMBER, async () => {
       await fundamentalOracle.setDirectPrice(SOLVBTC, solvBtcFundamentalPrice);
     });
 
-    for (const m of BSC_MIGRATIONS) {
-      it(`${m.symbol}: price still resolves and stays within tolerance`, async () => {
-        const price = await resilientOracle.getPrice(m.asset);
+    for (const migration of BSC_MIGRATIONS) {
+      it(`${migration.symbol}: price still resolves and stays within tolerance`, async () => {
+        const price = await resilientOracle.getPrice(migration.asset);
         expect(price).to.be.gt(0);
-        const before = preVipPrice[m.asset];
+        const before = preVipPrice[migration.asset];
         expect(price.sub(before).abs().mul(10000)).to.be.lte(before.mul(PRICE_TOLERANCE_BPS));
       });
     }

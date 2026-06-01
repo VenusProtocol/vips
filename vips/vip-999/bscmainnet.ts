@@ -33,7 +33,7 @@ All configuration values were established by reading the current on-chain Resili
 
 **BNB Chain actions**
 
-- Configure ${BSC_MIGRATIONS.filter(m => m.atlasFeed).length} Atlas feeds on the Atlas Oracle.
+- Configure ${BSC_MIGRATIONS.filter(migration => migration.atlasFeed).length} Atlas feeds on the Atlas Oracle.
 - Update the ResilientOracle token config for ${
       BSC_MIGRATIONS.length
     } BNB Chain markets (Atlas migration, Chainlink/RedStone reorder, and the solvBTC MAIN/PIVOT swap).
@@ -70,79 +70,90 @@ All configuration values were established by reading the current on-chain Resili
         target: ATLAS_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
         params: [
-          BSC_MIGRATIONS.filter(m => m.atlasFeed).map(m => [m.asset, m.atlasFeed!.feed, m.atlasFeed!.maxStalePeriod]),
+          BSC_MIGRATIONS.filter(migration => migration.atlasFeed).map(migration => [
+            migration.asset,
+            migration.atlasFeed!.feed,
+            migration.atlasFeed!.maxStalePeriod,
+          ]),
         ],
       },
       // Re-wire the ResilientOracle for every BNB Chain market
       {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
-        params: [BSC_MIGRATIONS.map(m => [m.asset, m.newOracles, m.newFlags, m.cachingEnabled])],
+        params: [
+          BSC_MIGRATIONS.map(migration => [
+            migration.asset,
+            migration.newOracles,
+            migration.newFlags,
+            migration.cachingEnabled,
+          ]),
+        ],
       },
 
       // =====================================================================================
       // RedStone added as PIVOT on Ethereum (via LayerZero)
       // =====================================================================================
-      ...ETHEREUM_MIGRATIONS.map(m => ({
+      ...ETHEREUM_MIGRATIONS.map(migration => ({
         target: ETHEREUM_BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[m.asset, m.boundConfig!.upperBoundRatio, m.boundConfig!.lowerBoundRatio]],
+        params: [[migration.asset, migration.boundConfig!.upperBoundRatio, migration.boundConfig!.lowerBoundRatio]],
         dstChainId: LzChainId.ethereum,
       })),
-      ...ETHEREUM_MIGRATIONS.map(m => ({
+      ...ETHEREUM_MIGRATIONS.map(migration => ({
         target: ethereum.REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[m.asset, m.redstoneFeed!.feed, m.redstoneFeed!.maxStalePeriod]],
+        params: [[migration.asset, migration.redstoneFeed!.feed, migration.redstoneFeed!.maxStalePeriod]],
         dstChainId: LzChainId.ethereum,
       })),
-      ...ETHEREUM_MIGRATIONS.map(m => ({
+      ...ETHEREUM_MIGRATIONS.map(migration => ({
         target: ethereum.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[m.asset, m.newOracles, m.newFlags, m.cachingEnabled]],
+        params: [[migration.asset, migration.newOracles, migration.newFlags, migration.cachingEnabled]],
         dstChainId: LzChainId.ethereum,
       })),
 
       // =====================================================================================
       // RedStone added as PIVOT on Arbitrum One (via LayerZero)
       // =====================================================================================
-      ...ARBITRUM_MIGRATIONS.map(m => ({
+      ...ARBITRUM_MIGRATIONS.map(migration => ({
         target: ARBITRUM_BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[m.asset, m.boundConfig!.upperBoundRatio, m.boundConfig!.lowerBoundRatio]],
+        params: [[migration.asset, migration.boundConfig!.upperBoundRatio, migration.boundConfig!.lowerBoundRatio]],
         dstChainId: LzChainId.arbitrumone,
       })),
-      ...ARBITRUM_MIGRATIONS.map(m => ({
+      ...ARBITRUM_MIGRATIONS.map(migration => ({
         target: arbitrumone.REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[m.asset, m.redstoneFeed!.feed, m.redstoneFeed!.maxStalePeriod]],
+        params: [[migration.asset, migration.redstoneFeed!.feed, migration.redstoneFeed!.maxStalePeriod]],
         dstChainId: LzChainId.arbitrumone,
       })),
-      ...ARBITRUM_MIGRATIONS.map(m => ({
+      ...ARBITRUM_MIGRATIONS.map(migration => ({
         target: arbitrumone.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[m.asset, m.newOracles, m.newFlags, m.cachingEnabled]],
+        params: [[migration.asset, migration.newOracles, migration.newFlags, migration.cachingEnabled]],
         dstChainId: LzChainId.arbitrumone,
       })),
 
       // =====================================================================================
       // RedStone added as PIVOT on Base (via LayerZero)
       // =====================================================================================
-      ...BASE_MIGRATIONS.map(m => ({
+      ...BASE_MIGRATIONS.map(migration => ({
         target: BASE_BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[m.asset, m.boundConfig!.upperBoundRatio, m.boundConfig!.lowerBoundRatio]],
+        params: [[migration.asset, migration.boundConfig!.upperBoundRatio, migration.boundConfig!.lowerBoundRatio]],
         dstChainId: LzChainId.basemainnet,
       })),
-      ...BASE_MIGRATIONS.map(m => ({
+      ...BASE_MIGRATIONS.map(migration => ({
         target: basemainnet.REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[m.asset, m.redstoneFeed!.feed, m.redstoneFeed!.maxStalePeriod]],
+        params: [[migration.asset, migration.redstoneFeed!.feed, migration.redstoneFeed!.maxStalePeriod]],
         dstChainId: LzChainId.basemainnet,
       })),
-      ...BASE_MIGRATIONS.map(m => ({
+      ...BASE_MIGRATIONS.map(migration => ({
         target: basemainnet.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[m.asset, m.newOracles, m.newFlags, m.cachingEnabled]],
+        params: [[migration.asset, migration.newOracles, migration.newFlags, migration.cachingEnabled]],
         dstChainId: LzChainId.basemainnet,
       })),
     ],
