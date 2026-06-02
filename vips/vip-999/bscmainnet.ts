@@ -32,7 +32,11 @@ export const NEW_AGGREGATOR: Record<RemoteChainKey, string> = {
 };
 
 // Same batcher addresses across all (EVM) chains.
-export const NEW_AGGREGATOR_BATCHERS: string[] = [bscmainnet.GUARDIAN];
+export const NEW_AGGREGATOR_BATCHERS: string[] = [
+  "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de",
+  "0xb0767a856E5D4cCaF2c11355510d28C4E2922D62",
+  "0x9b0A3EAE7f174937d31745B710BbeA68e9D1BEf7",
+];
 
 export const NEW_AGGREGATOR_TIMELOCK_SIGS = [
   "executeBatch(uint256)",

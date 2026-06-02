@@ -16,27 +16,18 @@ import vip999, {
 import { buildSeedBatch } from "../../../vips/vip-999/scripts/seed-aggregators";
 import { encodeSeedCommands } from "../../../vips/vip-999/utils/auxiliary-aggregator";
 import { AssetMigration } from "../../../vips/vip-999/utils/data";
+import AGGREGATOR_ABI from "../abi/AuxiliaryCommandsAggregator.json";
+import ACM_ABI from "../abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "../abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "../abi/chainlinkOracle.json";
+import ERC20_ABI from "../abi/erc20.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 
 const STALE_PERIOD_OVERRIDE = 315360000; // 10 years
 const PRICE_TOLERANCE_BPS = 500; // 5%
-const ERC20_ABI = ["function decimals() view returns (uint8)"];
 
 const BOUND_VALIDATOR_PERM_SIG = "setValidateConfig(ValidateConfig)";
 const ORACLE_TOKEN_CONFIG_PERM_SIG = "setTokenConfig(TokenConfig)";
-
-const ACM_ABI = [
-  "function hasPermission(address account, address contractAddress, string functionSig) view returns (bool)",
-  "function hasRole(bytes32 role, address account) view returns (bool)",
-];
-const AGGREGATOR_ABI = [
-  "function batchCount() view returns (uint256)",
-  "function getBatch(uint256 index) view returns ((address target, bytes data)[])",
-  "function authorizedBatchers(address account) view returns (bool)",
-  "function owner() view returns (address)",
-];
 
 export const runRemoteOracleSuite = (opts: {
   blockNumber: number;
@@ -181,6 +172,44 @@ export const runRemoteOracleSuite = (opts: {
         for (const batcher of batchers) {
           expect(await aggregator.authorizedBatchers(batcher)).to.equal(true);
         }
+      });
+    });
+
+    describe("Post-VIP new aggregator is operational (e2e)", () => {
+      // Replays the same grantRole -> executeBatch -> revokeRole flow the VIP uses on the old aggregator,
+      // proving the freshly wired new aggregator is a working
+      const PROBE_TARGET = ethers.utils.getAddress("0x000000000000000000000000000000000000dead");
+      const PROBE_ACCOUNT = ethers.utils.getAddress("0x00000000000000000000000000000000deadbeef");
+      const PROBE_SIG = "e2eProbe(uint256)";
+
+      it("authorized batcher seeds a batch and a timelock executes it", async () => {
+        const acmRead = new ethers.Contract(networkAddresses.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        expect(await acmRead.hasPermission(PROBE_ACCOUNT, PROBE_TARGET, PROBE_SIG)).to.equal(false);
+
+        // 1. An authorized batcher appends a probe batch (giveCallPermission, runs as the new aggregator).
+        const batcher = await initMainnetUser(batchers[0], ethers.utils.parseEther("1"));
+        const aggAsBatcher = new ethers.Contract(newAggregator, AGGREGATOR_ABI, batcher);
+        const probeData = new ethers.utils.Interface(ACM_ABI).encodeFunctionData("giveCallPermission", [
+          PROBE_TARGET,
+          PROBE_SIG,
+          PROBE_ACCOUNT,
+        ]);
+        const newIndex = (await aggAsBatcher.batchCount()).toNumber();
+        await aggAsBatcher["addBatch((address,bytes)[])"]([
+          { target: networkAddresses.ACCESS_CONTROL_MANAGER, data: probeData },
+        ]);
+
+        // 2. The Normal Timelock grants admin, executes the batch, then revokes — exactly as the VIP does.
+        const timelock = await initMainnetUser(networkAddresses.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        const acm = new ethers.Contract(networkAddresses.ACCESS_CONTROL_MANAGER, ACM_ABI, timelock);
+        const aggAsTimelock = new ethers.Contract(newAggregator, AGGREGATOR_ABI, timelock);
+        await acm.grantRole(ethers.constants.HashZero, newAggregator);
+        await aggAsTimelock.executeBatch(newIndex);
+        await acm.revokeRole(ethers.constants.HashZero, newAggregator);
+
+        // 3. The probe permission landed and the new aggregator no longer holds admin.
+        expect(await acmRead.hasPermission(PROBE_ACCOUNT, PROBE_TARGET, PROBE_SIG)).to.equal(true);
+        expect(await acmRead.hasRole(ethers.constants.HashZero, newAggregator)).to.equal(false);
       });
     });
 
