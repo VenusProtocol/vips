@@ -45,7 +45,7 @@ const PRIME_LEADERBOARD_ABI = [
 const PLP_ABI = ["function prime() view returns (address)"];
 const LEGACY_PRIME_ABI = ["function paused() view returns (bool)"];
 
-const BLOCK_NUMBER = 110244560;
+const BLOCK_NUMBER = 111010308;
 
 forking(BLOCK_NUMBER, async () => {
   let primeV2: Contract;
