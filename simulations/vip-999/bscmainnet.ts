@@ -12,7 +12,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const BLOCK_NUMBER = 101640486;
+const BLOCK_NUMBER = 101850504;
 const STALE_PERIOD_OVERRIDE = 315360000; // 10 years
 const PRICE_TOLERANCE_BPS = 500; // 5%
 

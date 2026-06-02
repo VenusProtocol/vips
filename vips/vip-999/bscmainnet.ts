@@ -2,18 +2,74 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import {
-  ARBITRUM_BOUND_VALIDATOR,
-  ARBITRUM_MIGRATIONS,
-  ATLAS_ORACLE,
-  BASE_BOUND_VALIDATOR,
-  BASE_MIGRATIONS,
-  BSC_MIGRATIONS,
-  ETHEREUM_BOUND_VALIDATOR,
-  ETHEREUM_MIGRATIONS,
-} from "./utils/data";
+import { ARBITRUM_MIGRATIONS, ATLAS_ORACLE, BASE_MIGRATIONS, BSC_MIGRATIONS, ETHEREUM_MIGRATIONS } from "./utils/data";
 
-const { bscmainnet, ethereum, arbitrumone, basemainnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+export type RemoteChainKey = "ethereum" | "arbitrumone" | "basemainnet";
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const DST_CHAIN_ID: Record<RemoteChainKey, LzChainId> = {
+  ethereum: LzChainId.ethereum,
+  arbitrumone: LzChainId.arbitrumone,
+  basemainnet: LzChainId.basemainnet,
+};
+
+// Old aggregators that execute this VIP's remote oracle migration.
+export const AUXILIARY_AGGREGATOR: Record<RemoteChainKey, string> = {
+  ethereum: "0x884E46c8639c8CaFcf249e34c22575f4dD09E87D",
+  arbitrumone: "0xFAC9571b6406aD7c135a34859A121739FFf3C47a",
+  basemainnet: "0x26FA3316c344B5d3261c44e67c6a72C926EEB89c",
+};
+
+// Index the aggregator batch
+export const REMOTE_BATCH_INDEX = 3;
+
+// New aggregators, pre-wired for future use.
+export const NEW_AGGREGATOR: Record<RemoteChainKey, string> = {
+  ethereum: "0xc79Cb7efEBd121DC4B39eA141C214606595D665A",
+  arbitrumone: "0x768FEf3a88ea92cCF9CAcDf0aB15C4B29B3C1379",
+  basemainnet: "0x768FEf3a88ea92cCF9CAcDf0aB15C4B29B3C1379",
+};
+
+// Same batcher addresses across all (EVM) chains.
+export const NEW_AGGREGATOR_BATCHERS: string[] = [bscmainnet.GUARDIAN];
+
+export const NEW_AGGREGATOR_TIMELOCK_SIGS = [
+  "executeBatch(uint256)",
+  "addAuthorizedBatchers(address[])",
+  "removeAuthorizedBatchers(address[])",
+];
+
+// Commands to execute on each remote chain.
+function remoteChainCommands(chainKey: RemoteChainKey) {
+  const { ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES[chainKey];
+  const aggregator = AUXILIARY_AGGREGATOR[chainKey];
+  const newAggregator = NEW_AGGREGATOR[chainKey];
+  const dstChainId = DST_CHAIN_ID[chainKey];
+
+  return [
+    {
+      target: ACCESS_CONTROL_MANAGER,
+      signature: "grantRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, aggregator],
+      dstChainId,
+    },
+    { target: aggregator, signature: "executeBatch(uint256)", params: [REMOTE_BATCH_INDEX], dstChainId },
+    {
+      target: ACCESS_CONTROL_MANAGER,
+      signature: "revokeRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, aggregator],
+      dstChainId,
+    },
+    { target: newAggregator, signature: "acceptOwnership()", params: [], dstChainId },
+    {
+      target: newAggregator,
+      signature: "addAuthorizedBatchers(address[])",
+      params: [NEW_AGGREGATOR_BATCHERS],
+      dstChainId,
+    },
+  ];
+}
 
 export const vip999 = () => {
   const meta = {
@@ -92,70 +148,11 @@ All configuration values were established by reading the current on-chain Resili
       },
 
       // =====================================================================================
-      // RedStone added as PIVOT on Ethereum (via LayerZero)
+      // Ethereum / Arbitrum One / Base (via LayerZero)
       // =====================================================================================
-      ...ETHEREUM_MIGRATIONS.map(migration => ({
-        target: ETHEREUM_BOUND_VALIDATOR,
-        signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[migration.asset, migration.boundConfig!.upperBoundRatio, migration.boundConfig!.lowerBoundRatio]],
-        dstChainId: LzChainId.ethereum,
-      })),
-      ...ETHEREUM_MIGRATIONS.map(migration => ({
-        target: ethereum.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[migration.asset, migration.redstoneFeed!.feed, migration.redstoneFeed!.maxStalePeriod]],
-        dstChainId: LzChainId.ethereum,
-      })),
-      ...ETHEREUM_MIGRATIONS.map(migration => ({
-        target: ethereum.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[migration.asset, migration.newOracles, migration.newFlags, migration.cachingEnabled]],
-        dstChainId: LzChainId.ethereum,
-      })),
-
-      // =====================================================================================
-      // RedStone added as PIVOT on Arbitrum One (via LayerZero)
-      // =====================================================================================
-      ...ARBITRUM_MIGRATIONS.map(migration => ({
-        target: ARBITRUM_BOUND_VALIDATOR,
-        signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[migration.asset, migration.boundConfig!.upperBoundRatio, migration.boundConfig!.lowerBoundRatio]],
-        dstChainId: LzChainId.arbitrumone,
-      })),
-      ...ARBITRUM_MIGRATIONS.map(migration => ({
-        target: arbitrumone.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[migration.asset, migration.redstoneFeed!.feed, migration.redstoneFeed!.maxStalePeriod]],
-        dstChainId: LzChainId.arbitrumone,
-      })),
-      ...ARBITRUM_MIGRATIONS.map(migration => ({
-        target: arbitrumone.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[migration.asset, migration.newOracles, migration.newFlags, migration.cachingEnabled]],
-        dstChainId: LzChainId.arbitrumone,
-      })),
-
-      // =====================================================================================
-      // RedStone added as PIVOT on Base (via LayerZero)
-      // =====================================================================================
-      ...BASE_MIGRATIONS.map(migration => ({
-        target: BASE_BOUND_VALIDATOR,
-        signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[migration.asset, migration.boundConfig!.upperBoundRatio, migration.boundConfig!.lowerBoundRatio]],
-        dstChainId: LzChainId.basemainnet,
-      })),
-      ...BASE_MIGRATIONS.map(migration => ({
-        target: basemainnet.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[migration.asset, migration.redstoneFeed!.feed, migration.redstoneFeed!.maxStalePeriod]],
-        dstChainId: LzChainId.basemainnet,
-      })),
-      ...BASE_MIGRATIONS.map(migration => ({
-        target: basemainnet.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[migration.asset, migration.newOracles, migration.newFlags, migration.cachingEnabled]],
-        dstChainId: LzChainId.basemainnet,
-      })),
+      ...remoteChainCommands("ethereum"),
+      ...remoteChainCommands("arbitrumone"),
+      ...remoteChainCommands("basemainnet"),
     ],
     meta,
     ProposalType.REGULAR,
