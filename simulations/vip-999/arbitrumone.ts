@@ -6,5 +6,4 @@ runRemoteOracleSuite({
   networkKey: "arbitrumone",
   boundValidator: ARBITRUM_BOUND_VALIDATOR,
   migrations: ARBITRUM_MIGRATIONS,
-  assertPrices: false,
 });

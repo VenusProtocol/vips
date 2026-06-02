@@ -6,5 +6,4 @@ runRemoteOracleSuite({
   networkKey: "ethereum",
   boundValidator: ETHEREUM_BOUND_VALIDATOR,
   migrations: ETHEREUM_MIGRATIONS,
-  assertPrices: true,
 });

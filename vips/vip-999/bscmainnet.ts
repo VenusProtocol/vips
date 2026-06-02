@@ -90,18 +90,26 @@ function remoteChainCommands(chainKey: RemoteChainKey) {
 export const vip999 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [Multichain] Oracle Migration: Atlas, Chainlink OEV & RedStone Pivots",
+    title: "VIP-999 [Multichain] Oracle Migration: Atlas, Chainlink OEV & RedStone Pivots + CommandsAggregator Wiring",
     description: `#### Summary
 
-This VIP consolidates three oracle configuration migrations into a single proposal, covering 44 markets across BNB Chain, Ethereum, Arbitrum One and Base.
+This VIP bundles two pieces of work into a single proposal.
+
+**Part A — Oracle configuration migrations** (${
+      BSC_MIGRATIONS.length + ETHEREUM_MIGRATIONS.length + ARBITRUM_MIGRATIONS.length + BASE_MIGRATIONS.length
+    } markets across BNB Chain, Ethereum, Arbitrum One and Base):
 
 1. **Atlas replaces Binance (BNB Chain).** The Binance Oracle has been rebuilt and renamed Atlas Oracle and the Binance Oracle will be sunset. Every BNB Chain market that referenced the Binance Oracle is migrated to the Atlas Oracle (already owned by the Normal Timelock with ACM permission since VIP-612). Low-confidence Atlas feeds are placed in the Fallback slot where a trusted third oracle exists (DAI, XVS, BTCB).
-2. **Chainlink promoted to MAIN (BNB Chain).** Expanding the Chainlink OEV cooperation, for ADA, BNB, CAKE, USD1, USDC, WBNB and XRP the ResilientOracle MAIN and PIVOT slots are swapped — Chainlink becomes MAIN and RedStone becomes PIVOT. The underlying adapter feeds are unchanged (verified on-chain); this is purely a reordering.
-3. **RedStone added as PIVOT (Ethereum / Arbitrum / Base).** 15 single-source markets currently price from a single MAIN oracle with an empty PIVOT. RedStone is added as PIVOT to those markets. These commands are executed on the remote chains via LayerZero.
+2. **Chainlink promoted to MAIN (BNB Chain).** Expanding the Chainlink OEV cooperation, for ADA, BNB, CAKE, USD1, USDC, WBNB and XRP the ResilientOracle MAIN and PIVOT slots are swapped — Chainlink becomes MAIN and RedStone becomes PIVOT. The underlying adapter feeds are unchanged (verified on-chain); this is purely a reordering. The solvBTC market is also reordered (Chainlink OneJump promoted to MAIN, RedStone fundamental moved to PIVOT) between existing adapters.
+3. **RedStone added as PIVOT (Ethereum / Arbitrum One / Base).** ${
+      ETHEREUM_MIGRATIONS.length + ARBITRUM_MIGRATIONS.length + BASE_MIGRATIONS.length
+    } single-source markets currently price from a single MAIN oracle with an empty PIVOT. RedStone is added as PIVOT to those markets. These changes are executed on each remote chain via LayerZero through that chain's pre-seeded auxiliary CommandsAggregator batch.
+
+**Part B — CommandsAggregator infrastructure migration** (BNB Chain, Ethereum, Arbitrum One, Base and zkSync Era): a newly deployed CommandsAggregator is brought into service on every chain. Ownership is accepted, the Normal / FastTrack / Critical timelocks are granted \`executeBatch\`, \`addAuthorizedBatchers\` and \`removeAuthorizedBatchers\` permission, and the batcher allowlist is seeded. On the remote chains the existing (old) auxiliary aggregator is used one final time to execute its pre-seeded batch and is then de-authorized. **zkSync Era has no oracle changes in this VIP — its commands exist solely to wire the new CommandsAggregator.**
 
 #### Description
 
-All configuration values were established by reading the current on-chain ResilientOracle and adapter configs and cross-verifying them against the Venus Oracle Mastersheet, atlasoracle.io/feeds and app.redstone.finance push-feeds. Unchanged oracle slots are preserved exactly as configured on-chain.
+All oracle configuration values were established by reading the current on-chain ResilientOracle and adapter configs and cross-verifying them against the Venus Oracle Mastersheet, atlasoracle.io/feeds and app.redstone.finance push-feeds. Unchanged oracle slots are preserved exactly as configured on-chain.
 
 **BNB Chain actions**
 
@@ -109,18 +117,27 @@ All configuration values were established by reading the current on-chain Resili
 - Update the ResilientOracle token config for ${
       BSC_MIGRATIONS.length
     } BNB Chain markets (Atlas migration, Chainlink/RedStone reorder, and the solvBTC MAIN/PIVOT swap).
+- Accept ownership of the new CommandsAggregator, grant its three management functions (\`executeBatch\`, \`addAuthorizedBatchers\`, \`removeAuthorizedBatchers\`) to the Normal, FastTrack and Critical timelocks, and seed the batcher allowlist.
 
-**Ethereum / Arbitrum One / Base actions (via LayerZero)**
+**Ethereum / Arbitrum One / Base / zkSync Era actions (via LayerZero)**
 
-- For ${ETHEREUM_MIGRATIONS.length} Ethereum, ${ARBITRUM_MIGRATIONS.length} Arbitrum One and ${
+For each remote chain the proposal:
+
+1. Grants the old auxiliary CommandsAggregator the ACM default-admin role.
+2. Calls \`executeBatch\` on that aggregator to run its pre-seeded batch. On Ethereum (${
+      ETHEREUM_MIGRATIONS.length
+    }), Arbitrum One (${ARBITRUM_MIGRATIONS.length}) and Base (${
       BASE_MIGRATIONS.length
-    } Base markets: set the BoundValidator anchor config (required to enable a pivot — stablecoins ±1%, other assets ±5%), configure the RedStone feed on each chain's RedStone Oracle, and enable RedStone as PIVOT in the ResilientOracle.
+    }) the batch sets the BoundValidator anchor config (stablecoins ±1%, other assets ±5%), configures the RedStone feed on each chain's RedStone Oracle, enables RedStone as PIVOT in the ResilientOracle, and grants the new CommandsAggregator's management functions to the three timelocks. **On zkSync Era there is no oracle migration at all — the batch contains only the new-aggregator timelock grants, so zkSync's commands are purely the CommandsAggregator wiring.**
+3. Revokes the old aggregator's admin role.
+4. Accepts ownership of the new CommandsAggregator and seeds its batcher allowlist.
 
 #### Notes
 
 - **TWT** and **lisUSD**: Atlas becomes MAIN on an interim basis (no Chainlink adapter is wired yet).
 - **asBNB**: unchanged — Atlas has no asBNB feed, so the Binance Oracle remains in place.
 - **xSolvBTC** and the Chainlink TWT promotion are out of scope (require new adapters not yet deployed).
+- The old auxiliary aggregators only ever hold the admin role transiently within a single transaction (granted, used, then revoked); the simulation asserts they hold no role before or after execution.
 
 #### Voting options
 

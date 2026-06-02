@@ -20,7 +20,6 @@ import AGGREGATOR_ABI from "../abi/AuxiliaryCommandsAggregator.json";
 import ACM_ABI from "../abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "../abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "../abi/chainlinkOracle.json";
-import ERC20_ABI from "../abi/erc20.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 
 const STALE_PERIOD_OVERRIDE = 315360000; // 10 years
@@ -34,7 +33,6 @@ export const runRemoteOracleSuite = (opts: {
   networkKey: RemoteChainKey;
   boundValidator: string;
   migrations: AssetMigration[];
-  assertPrices: boolean;
 }) => {
   const networkAddresses = NETWORK_ADDRESSES[opts.networkKey];
   const aggregatorAddress = AUXILIARY_AGGREGATOR[opts.networkKey];
@@ -48,15 +46,29 @@ export const runRemoteOracleSuite = (opts: {
     let redstoneOracle: Contract;
     let boundValidator: Contract;
     const preVipPrice: Record<string, BigNumber> = {};
+    const redstoneFeedPrice: Record<string, BigNumber> = {};
 
     before(async () => {
       resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, networkAddresses.RESILIENT_ORACLE);
       redstoneOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, networkAddresses.REDSTONE_ORACLE);
       boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, opts.boundValidator);
-      if (opts.assertPrices) {
-        for (const migration of opts.migrations) {
-          preVipPrice[migration.asset] = await resilientOracle.getPrice(migration.asset);
-        }
+      const feedAbi = [
+        "function latestRoundData() external view returns (uint80, int256 answer, uint256, uint256, uint80)",
+        "function decimals() external view returns (uint8)",
+      ];
+      for (const migration of opts.migrations) {
+        await setMaxStalePeriodInChainlinkOracle(
+          networkAddresses.CHAINLINK_ORACLE,
+          migration.asset,
+          ethers.constants.AddressZero,
+          networkAddresses.NORMAL_TIMELOCK,
+          STALE_PERIOD_OVERRIDE,
+        );
+        preVipPrice[migration.asset] = await resilientOracle.getPrice(migration.asset);
+        const feed = new ethers.Contract(migration.redstoneFeed!.feed, feedAbi, ethers.provider);
+        const [, answer] = await feed.latestRoundData();
+        const feedDecimals: number = await feed.decimals();
+        redstoneFeedPrice[migration.asset] = BigNumber.from(answer).mul(BigNumber.from(10).pow(18 - feedDecimals));
       }
     });
 
@@ -213,22 +225,17 @@ export const runRemoteOracleSuite = (opts: {
       });
     });
 
-    (opts.assertPrices ? describe : describe.skip)("Post-VIP prices", () => {
+    describe("Post-VIP prices", () => {
       before(async () => {
         const timelock = await initMainnetUser(networkAddresses.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
         const redstone = new ethers.Contract(networkAddresses.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
         for (const migration of opts.migrations) {
-          await setMaxStalePeriodInChainlinkOracle(
-            networkAddresses.CHAINLINK_ORACLE,
-            migration.asset,
-            ethers.constants.AddressZero,
-            networkAddresses.NORMAL_TIMELOCK,
-            STALE_PERIOD_OVERRIDE,
-          );
-          const token = new ethers.Contract(migration.asset, ERC20_ABI, ethers.provider);
-          const decimals: number = await token.decimals();
-          const directPrice = preVipPrice[migration.asset].div(BigNumber.from(10).pow(18 - decimals));
-          await redstone.setDirectPrice(migration.asset, directPrice);
+          try {
+            await resilientOracle.getPrice(migration.asset);
+          } catch {
+            // Set direct price to bypass the staleness check on the forked block
+            await redstone.setDirectPrice(migration.asset, redstoneFeedPrice[migration.asset]);
+          }
         }
       });
 

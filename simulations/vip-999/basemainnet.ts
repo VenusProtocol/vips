@@ -6,5 +6,4 @@ runRemoteOracleSuite({
   networkKey: "basemainnet",
   boundValidator: BASE_BOUND_VALIDATOR,
   migrations: BASE_MIGRATIONS,
-  assertPrices: true,
 });
