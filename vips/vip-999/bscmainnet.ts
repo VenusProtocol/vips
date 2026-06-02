@@ -6,37 +6,39 @@ import { ARBITRUM_MIGRATIONS, ATLAS_ORACLE, BASE_MIGRATIONS, BSC_MIGRATIONS, ETH
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-export type RemoteChainKey = "ethereum" | "arbitrumone" | "basemainnet";
+export type RemoteChainKey = "ethereum" | "arbitrumone" | "basemainnet" | "zksyncmainnet";
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const DST_CHAIN_ID: Record<RemoteChainKey, LzChainId> = {
   ethereum: LzChainId.ethereum,
   arbitrumone: LzChainId.arbitrumone,
   basemainnet: LzChainId.basemainnet,
+  zksyncmainnet: LzChainId.zksyncmainnet,
 };
 
-// Old aggregators that execute this VIP's remote oracle migration.
+// Old aggregators that execute each chain's pre-seeded batch.
 export const AUXILIARY_AGGREGATOR: Record<RemoteChainKey, string> = {
   ethereum: "0x884E46c8639c8CaFcf249e34c22575f4dD09E87D",
   arbitrumone: "0xFAC9571b6406aD7c135a34859A121739FFf3C47a",
   basemainnet: "0x26FA3316c344B5d3261c44e67c6a72C926EEB89c",
+  zksyncmainnet: "0x0EDD39D9b68e8591B6E71dAd83814B9350b9dD94",
 };
 
-// Index the aggregator batch
-export const REMOTE_BATCH_INDEX = 3;
+// Index of this VIP's batch on each old aggregator.
+export const REMOTE_BATCH_INDEX: Record<RemoteChainKey, number> = {
+  ethereum: 3,
+  arbitrumone: 3,
+  basemainnet: 3,
+  zksyncmainnet: 0,
+};
 
-// New aggregators, pre-wired for future use.
-export const NEW_AGGREGATOR: Record<RemoteChainKey, string> = {
+// New aggregators, pre-wired for future use (bscmainnet is configured directly, the rest via LayerZero).
+export const NEW_AGGREGATOR: Record<RemoteChainKey | "bscmainnet", string> = {
   ethereum: "0xc79Cb7efEBd121DC4B39eA141C214606595D665A",
   arbitrumone: "0x768FEf3a88ea92cCF9CAcDf0aB15C4B29B3C1379",
   basemainnet: "0x768FEf3a88ea92cCF9CAcDf0aB15C4B29B3C1379",
+  zksyncmainnet: "0x0B906d55025cE88bF713764AAc6F23918a25fA49",
+  bscmainnet: "0x528A428748dfE73DFcc844176B401475D1831057",
 };
-
-// Same batcher addresses across all (EVM) chains.
-export const NEW_AGGREGATOR_BATCHERS: string[] = [
-  "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de",
-  "0xb0767a856E5D4cCaF2c11355510d28C4E2922D62",
-  "0x9b0A3EAE7f174937d31745B710BbeA68e9D1BEf7",
-];
 
 export const NEW_AGGREGATOR_TIMELOCK_SIGS = [
   "executeBatch(uint256)",
@@ -44,7 +46,17 @@ export const NEW_AGGREGATOR_TIMELOCK_SIGS = [
   "removeAuthorizedBatchers(address[])",
 ];
 
-// Commands to execute on each remote chain.
+// Batchers authorized on each new aggregator
+const COMMON_BATCHERS: string[] = [
+  "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de",
+  "0xb0767a856E5D4cCaF2c11355510d28C4E2922D62",
+  "0x9b0A3EAE7f174937d31745B710BbeA68e9D1BEf7",
+];
+export function newAggregatorBatchers(chainKey: RemoteChainKey | "bscmainnet"): string[] {
+  const { GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES[chainKey];
+  return [...COMMON_BATCHERS, GUARDIAN, NORMAL_TIMELOCK];
+}
+
 function remoteChainCommands(chainKey: RemoteChainKey) {
   const { ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES[chainKey];
   const aggregator = AUXILIARY_AGGREGATOR[chainKey];
@@ -58,7 +70,7 @@ function remoteChainCommands(chainKey: RemoteChainKey) {
       params: [DEFAULT_ADMIN_ROLE, aggregator],
       dstChainId,
     },
-    { target: aggregator, signature: "executeBatch(uint256)", params: [REMOTE_BATCH_INDEX], dstChainId },
+    { target: aggregator, signature: "executeBatch(uint256)", params: [REMOTE_BATCH_INDEX[chainKey]], dstChainId },
     {
       target: ACCESS_CONTROL_MANAGER,
       signature: "revokeRole(bytes32,address)",
@@ -69,7 +81,7 @@ function remoteChainCommands(chainKey: RemoteChainKey) {
     {
       target: newAggregator,
       signature: "addAuthorizedBatchers(address[])",
-      params: [NEW_AGGREGATOR_BATCHERS],
+      params: [newAggregatorBatchers(chainKey)],
       dstChainId,
     },
   ];
@@ -150,13 +162,28 @@ All configuration values were established by reading the current on-chain Resili
           ]),
         ],
       },
+      // Wire the new CommandsAggregator on BNB Chain
+      { target: NEW_AGGREGATOR.bscmainnet, signature: "acceptOwnership()", params: [] },
+      ...NEW_AGGREGATOR_TIMELOCK_SIGS.flatMap(signature =>
+        [bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(timelock => ({
+          target: bscmainnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [NEW_AGGREGATOR.bscmainnet, signature, timelock],
+        })),
+      ),
+      {
+        target: NEW_AGGREGATOR.bscmainnet,
+        signature: "addAuthorizedBatchers(address[])",
+        params: [newAggregatorBatchers("bscmainnet")],
+      },
 
       // =====================================================================================
-      // Ethereum / Arbitrum One / Base (via LayerZero)
+      // Ethereum / Arbitrum One / Base / zkSync (via LayerZero)
       // =====================================================================================
       ...remoteChainCommands("ethereum"),
       ...remoteChainCommands("arbitrumone"),
       ...remoteChainCommands("basemainnet"),
+      ...remoteChainCommands("zksyncmainnet"),
     ],
     meta,
     ProposalType.REGULAR,

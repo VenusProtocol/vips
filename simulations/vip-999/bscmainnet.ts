@@ -5,14 +5,22 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999 from "../../vips/vip-999/bscmainnet";
+import vip999, {
+  NEW_AGGREGATOR,
+  NEW_AGGREGATOR_TIMELOCK_SIGS,
+  newAggregatorBatchers,
+} from "../../vips/vip-999/bscmainnet";
 import { ATLAS_ORACLE, BSC_MIGRATIONS } from "../../vips/vip-999/utils/data";
+import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
+import ACM_ABI from "./abi/accessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
+const NEW_AGGREGATOR_BSC = NEW_AGGREGATOR.bscmainnet;
+
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const BLOCK_NUMBER = 101850504;
+const BLOCK_NUMBER = 101860000;
 const STALE_PERIOD_OVERRIDE = 315360000; // 10 years
 const PRICE_TOLERANCE_BPS = 500; // 5%
 
@@ -95,6 +103,69 @@ forking(BLOCK_NUMBER, async () => {
         expect(config.feed.toLowerCase()).to.equal(migration.atlasFeed!.feed.toLowerCase());
         expect(config.maxStalePeriod).to.equal(migration.atlasFeed!.maxStalePeriod);
       }
+    });
+  });
+
+  describe("Post-VIP new aggregator wiring", () => {
+    const timelocks = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK];
+    const batchers = newAggregatorBatchers("bscmainnet");
+
+    it("ownership accepted by the Normal Timelock", async () => {
+      const aggregator = new ethers.Contract(NEW_AGGREGATOR_BSC, AGGREGATOR_ABI, ethers.provider);
+      expect((await aggregator.owner()).toLowerCase()).to.equal(bscmainnet.NORMAL_TIMELOCK.toLowerCase());
+    });
+
+    it("executeBatch / add / removeAuthorizedBatchers granted to all three timelocks", async () => {
+      const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+      for (const signature of NEW_AGGREGATOR_TIMELOCK_SIGS) {
+        for (const timelock of timelocks) {
+          expect(await acm.isAllowedToCall(timelock, signature, { from: NEW_AGGREGATOR_BSC })).to.equal(
+            true,
+            `${signature} ${timelock}`,
+          );
+        }
+      }
+    });
+
+    it("batcher allowlist seeded", async () => {
+      const aggregator = new ethers.Contract(NEW_AGGREGATOR_BSC, AGGREGATOR_ABI, ethers.provider);
+      for (const batcher of batchers) {
+        expect(await aggregator.authorizedBatchers(batcher)).to.equal(true);
+      }
+    });
+  });
+
+  describe("Post-VIP new aggregator is operational (e2e)", () => {
+    const batchers = newAggregatorBatchers("bscmainnet");
+    const PROBE_TARGET = ethers.utils.getAddress("0x000000000000000000000000000000000000dead");
+    const PROBE_ACCOUNT = ethers.utils.getAddress("0x00000000000000000000000000000000deadbeef");
+    const PROBE_SIG = "e2eProbe(uint256)";
+
+    it("authorized batcher seeds a batch and a timelock executes it", async () => {
+      const acmRead = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+      expect(await acmRead.isAllowedToCall(PROBE_ACCOUNT, PROBE_SIG, { from: PROBE_TARGET })).to.equal(false);
+
+      const batcher = await initMainnetUser(batchers[0], ethers.utils.parseEther("1"));
+      const aggAsBatcher = new ethers.Contract(NEW_AGGREGATOR_BSC, AGGREGATOR_ABI, batcher);
+      const probeData = new ethers.utils.Interface(ACM_ABI).encodeFunctionData("giveCallPermission", [
+        PROBE_TARGET,
+        PROBE_SIG,
+        PROBE_ACCOUNT,
+      ]);
+      const newIndex = (await aggAsBatcher.batchCount()).toNumber();
+      await aggAsBatcher["addBatch((address,bytes)[])"]([
+        { target: bscmainnet.ACCESS_CONTROL_MANAGER, data: probeData },
+      ]);
+
+      const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, timelock);
+      const aggAsTimelock = new ethers.Contract(NEW_AGGREGATOR_BSC, AGGREGATOR_ABI, timelock);
+      await acm.grantRole(ethers.constants.HashZero, NEW_AGGREGATOR_BSC);
+      await aggAsTimelock.executeBatch(newIndex);
+      await acm.revokeRole(ethers.constants.HashZero, NEW_AGGREGATOR_BSC);
+
+      expect(await acmRead.isAllowedToCall(PROBE_ACCOUNT, PROBE_SIG, { from: PROBE_TARGET })).to.equal(true);
+      expect(await acm.hasRole(ethers.constants.HashZero, NEW_AGGREGATOR_BSC)).to.equal(false);
     });
   });
 

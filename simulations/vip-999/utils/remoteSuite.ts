@@ -8,10 +8,10 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import vip999, {
   AUXILIARY_AGGREGATOR,
   NEW_AGGREGATOR,
-  NEW_AGGREGATOR_BATCHERS,
   NEW_AGGREGATOR_TIMELOCK_SIGS,
   REMOTE_BATCH_INDEX,
   RemoteChainKey,
+  newAggregatorBatchers,
 } from "../../../vips/vip-999/bscmainnet";
 import { buildSeedBatch } from "../../../vips/vip-999/scripts/seed-aggregators";
 import { encodeSeedCommands } from "../../../vips/vip-999/utils/auxiliary-aggregator";
@@ -39,9 +39,9 @@ export const runRemoteOracleSuite = (opts: {
   const networkAddresses = NETWORK_ADDRESSES[opts.networkKey];
   const aggregatorAddress = AUXILIARY_AGGREGATOR[opts.networkKey];
   const newAggregator = NEW_AGGREGATOR[opts.networkKey];
-  const batchers = NEW_AGGREGATOR_BATCHERS;
+  const batchers = newAggregatorBatchers(opts.networkKey);
   const seededBatch = buildSeedBatch(opts.networkKey);
-  const batchIndex = REMOTE_BATCH_INDEX;
+  const batchIndex = REMOTE_BATCH_INDEX[opts.networkKey];
 
   forking(opts.blockNumber, async () => {
     let resilientOracle: Contract;
