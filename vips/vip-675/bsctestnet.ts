@@ -15,7 +15,9 @@ const GUARDIAN = bsctestnet.GUARDIAN;
 // initiates transferOwnership of both contracts to the NormalTimelock (pending acceptance),
 // but does NOT wire them — the setPrimeV2 / setPrimeLeaderboard wiring is ACM-gated and done
 // here. This VIP accepts ownership, grants ACM permissions, wires PrimeV2 <-> PrimeLeaderboard,
-// configures the Prime markets, opens the mint window, and pauses the legacy Prime.
+// repoints the PrimeLiquidityProvider, configures the Prime markets, opens the mint window,
+// switches the XVS Vault hook and the Core pool Comptroller to the new contracts, and pauses
+// the legacy Prime.
 export const PRIME_V2 = "0x878e6B88f8F9e85c88bb21396A7637330b9Cd5Ec";
 export const PRIME_LEADERBOARD = "0x45E9b8A46558c359b6Ee30580A599AAa1e5d9cDE";
 

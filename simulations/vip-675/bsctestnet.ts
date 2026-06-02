@@ -78,8 +78,18 @@ forking(BLOCK_NUMBER, async () => {
       expect(await primeLeaderboard.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
 
-    it("PLP prime token is not yet PrimeV2", async () => {
-      expect(await plp.prime()).to.not.equal(PRIME_V2);
+    it("PLP prime token is still the legacy Prime", async () => {
+      expect(await plp.prime()).to.equal(LEGACY_PRIME);
+    });
+
+    it("PrimeV2 <-> PrimeLeaderboard are not yet wired", async () => {
+      expect(await primeV2.primeLeaderboard()).to.equal(constants.AddressZero);
+      expect(await primeLeaderboard.primeV2()).to.equal(constants.AddressZero);
+    });
+
+    it("PrimeV2 mint window is not yet open", async () => {
+      expect(await primeV2.mintThreshold()).to.equal(0);
+      expect(await primeV2.mintDeadline()).to.equal(0);
     });
 
     it("legacy Prime is active (unpaused)", async () => {
@@ -141,7 +151,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await primeV2.mintDeadline()).to.equal(MINT_DEADLINE);
     });
 
-    it("Guardian can call epoch ops on PrimeV2 (issue / burn / setMintThreshold)", async () => {
+    it("Guardian can call epoch ops on PrimeV2 (issue / issueBatch / burn / burnBatch / setMintThreshold)", async () => {
       for (const sig of [
         "issue(address)",
         "issueBatch(address[])",
