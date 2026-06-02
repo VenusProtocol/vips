@@ -99,17 +99,13 @@ This VIP bundles two pieces of work into a single proposal.
       BSC_MIGRATIONS.length + ETHEREUM_MIGRATIONS.length + ARBITRUM_MIGRATIONS.length + BASE_MIGRATIONS.length
     } markets across BNB Chain, Ethereum, Arbitrum One and Base):
 
-1. **Atlas replaces Binance (BNB Chain).** The Binance Oracle has been rebuilt and renamed Atlas Oracle and the Binance Oracle will be sunset. Every BNB Chain market that referenced the Binance Oracle is migrated to the Atlas Oracle (already owned by the Normal Timelock with ACM permission since VIP-612). Low-confidence Atlas feeds are placed in the Fallback slot where a trusted third oracle exists (DAI, XVS, BTCB).
+1. **Atlas replaces Binance (BNB Chain).** The Binance Oracle has been rebuilt and renamed the Atlas Oracle; the Binance Oracle will be sunset. Every BNB Chain market that referenced the Binance Oracle is migrated to the Atlas Oracle (already owned by the Normal Timelock with ACM permission since VIP-612). Atlas takes the slot Binance previously held in each market, except for DAI and XVS, where RedStone is promoted to PIVOT and the lower-confidence Atlas feed is demoted to FALLBACK.
 2. **Chainlink promoted to MAIN (BNB Chain).** Expanding the Chainlink OEV cooperation, for ADA, BNB, CAKE, USD1, USDC, WBNB and XRP the ResilientOracle MAIN and PIVOT slots are swapped — Chainlink becomes MAIN and RedStone becomes PIVOT. The underlying adapter feeds are unchanged (verified on-chain); this is purely a reordering. The solvBTC market is also reordered (Chainlink OneJump promoted to MAIN, RedStone fundamental moved to PIVOT) between existing adapters.
 3. **RedStone added as PIVOT (Ethereum / Arbitrum One / Base).** ${
       ETHEREUM_MIGRATIONS.length + ARBITRUM_MIGRATIONS.length + BASE_MIGRATIONS.length
     } single-source markets currently price from a single MAIN oracle with an empty PIVOT. RedStone is added as PIVOT to those markets. These changes are executed on each remote chain via LayerZero through that chain's pre-seeded auxiliary CommandsAggregator batch.
 
-**Part B — CommandsAggregator infrastructure migration** (BNB Chain, Ethereum, Arbitrum One, Base and zkSync Era): a newly deployed CommandsAggregator is brought into service on every chain. Ownership is accepted, the Normal / FastTrack / Critical timelocks are granted \`executeBatch\`, \`addAuthorizedBatchers\` and \`removeAuthorizedBatchers\` permission, and the batcher allowlist is seeded. On the remote chains the existing (old) auxiliary aggregator is used one final time to execute its pre-seeded batch and is then de-authorized. **zkSync Era has no oracle changes in this VIP — its commands exist solely to wire the new CommandsAggregator.**
-
-#### Description
-
-All oracle configuration values were established by reading the current on-chain ResilientOracle and adapter configs and cross-verifying them against the Venus Oracle Mastersheet, atlasoracle.io/feeds and app.redstone.finance push-feeds. Unchanged oracle slots are preserved exactly as configured on-chain.
+**Part B — CommandsAggregator infrastructure migration** (BNB Chain, Ethereum, Arbitrum One, Base and zkSync Era): a newly deployed CommandsAggregator is brought into service on every chain. Ownership is accepted, the Normal / FastTrack / Critical timelocks are granted \`executeBatch\`, \`addAuthorizedBatchers\` and \`removeAuthorizedBatchers\` permission, and the batcher allowlist is seeded. On the remote chains the existing (old) auxiliary aggregator is used one final time to execute its pre-seeded batch and is then de-authorized. zkSync Era participates in Part B only — it carries no oracle changes in this VIP.
 
 **BNB Chain actions**
 
@@ -117,7 +113,8 @@ All oracle configuration values were established by reading the current on-chain
 - Update the ResilientOracle token config for ${
       BSC_MIGRATIONS.length
     } BNB Chain markets (Atlas migration, Chainlink/RedStone reorder, and the solvBTC MAIN/PIVOT swap).
-- Accept ownership of the new CommandsAggregator, grant its three management functions (\`executeBatch\`, \`addAuthorizedBatchers\`, \`removeAuthorizedBatchers\`) to the Normal, FastTrack and Critical timelocks, and seed the batcher allowlist.
+- Accept ownership of the new CommandsAggregator and seed its batcher allowlist.
+- Grant the new CommandsAggregator's three management functions to the timelocks via 9 ACM \`giveCallPermission(aggregator, signature, timelock)\` calls — \`executeBatch(uint256)\`, \`addAuthorizedBatchers(address[])\` and \`removeAuthorizedBatchers(address[])\`, each granted to the Normal, FastTrack and Critical timelocks.
 
 **Ethereum / Arbitrum One / Base / zkSync Era actions (via LayerZero)**
 
@@ -128,7 +125,14 @@ For each remote chain the proposal:
       ETHEREUM_MIGRATIONS.length
     }), Arbitrum One (${ARBITRUM_MIGRATIONS.length}) and Base (${
       BASE_MIGRATIONS.length
-    }) the batch sets the BoundValidator anchor config (stablecoins ±1%, other assets ±5%), configures the RedStone feed on each chain's RedStone Oracle, enables RedStone as PIVOT in the ResilientOracle, and grants the new CommandsAggregator's management functions to the three timelocks. **On zkSync Era there is no oracle migration at all — the batch contains only the new-aggregator timelock grants, so zkSync's commands are purely the CommandsAggregator wiring.**
+    } markets) the batch performs, in order:
+   - grants the old aggregator transient ACM permission for \`setValidateConfig\` on the BoundValidator and \`setTokenConfig\` on the RedStone and Resilient oracles;
+   - sets the BoundValidator anchor config (stablecoins ±1%, other assets ±5%);
+   - configures the RedStone feed on the chain's RedStone Oracle and enables RedStone as PIVOT in the ResilientOracle;
+   - revokes those three transient permissions;
+   - issues the 9 ACM \`giveCallPermission\` calls for the new CommandsAggregator (each of \`executeBatch\`, \`addAuthorizedBatchers\` and \`removeAuthorizedBatchers\` granted to the Normal, FastTrack and Critical timelocks).
+
+   On zkSync Era the pre-seeded batch contains only those 9 \`giveCallPermission\` calls — no oracle migration.
 3. Revokes the old aggregator's admin role.
 4. Accepts ownership of the new CommandsAggregator and seeds its batcher allowlist.
 

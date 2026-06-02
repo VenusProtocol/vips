@@ -36,6 +36,9 @@ forking(BLOCK_NUMBER, async () => {
   let resilientOracle: Contract;
   let atlasOracle: Contract;
   const preVipPrice: Record<string, BigNumber> = {};
+  // THE/TWT pin a RedStone direct price post-warp; capture it from the RedStone oracle itself (not the
+  // ResilientOracle, whose MAIN is Binance for TWT) so the pinned value is the actual RedStone price.
+  const redstonePrice: Record<string, BigNumber> = {};
   // solvBTC's fundamental leaf returns a value on its own scale (not USD), captured fresh pre-warp.
   let solvBtcFundamentalPrice: BigNumber;
 
@@ -45,6 +48,9 @@ forking(BLOCK_NUMBER, async () => {
     for (const migration of BSC_MIGRATIONS) {
       preVipPrice[migration.asset] = await resilientOracle.getPrice(migration.asset);
     }
+    const redstoneOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, bscmainnet.REDSTONE_ORACLE);
+    redstonePrice[THE] = await redstoneOracle.getPrice(THE);
+    redstonePrice[TWT] = await redstoneOracle.getPrice(TWT);
     const fundamentalOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, SOLVBTC_FUNDAMENTAL_CHAINLINK_ORACLE);
     solvBtcFundamentalPrice = await fundamentalOracle.getPrice(SOLVBTC);
   });
@@ -186,8 +192,8 @@ forking(BLOCK_NUMBER, async () => {
       }
 
       const redstoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
-      await redstoneOracle.setDirectPrice(THE, preVipPrice[THE]);
-      await redstoneOracle.setDirectPrice(TWT, preVipPrice[TWT]);
+      await redstoneOracle.setDirectPrice(THE, redstonePrice[THE]);
+      await redstoneOracle.setDirectPrice(TWT, redstonePrice[TWT]);
       const fundamentalOracle = new ethers.Contract(
         SOLVBTC_FUNDAMENTAL_CHAINLINK_ORACLE,
         CHAINLINK_ORACLE_ABI,
