@@ -18,9 +18,6 @@ const SOLVBTC_FUNDAMENTAL_ORACLE = "0x1f785B1AFE0808d69d1188db9e47b7B9Dd95ab09";
 const SOLVBTC_CHAINLINK_OJ_ORACLE = "0x3f4bC081E749032cffF29dcA2E8408Ec375e745A"; // OneJumpOracle (Chainlink ER)
 const SOLVBTC_REDSTONE_OJ_ORACLE = "0xA3E6F08e3C1baD83e1971909483F27Cdd19937FC"; // OneJumpOracle (RedStone cross-market)
 
-// Special non-BSC MAIN oracle (eBTC on Ethereum uses a dedicated adapter, not the generic ChainlinkOracle)
-const ETHEREUM_EBTC_MAIN_ORACLE = "0x04d6096A6F089047C7af6E4644D18fB766B8d4cE";
-
 // BoundValidator per chain. Enabling a PIVOT requires a per-asset anchor-bound config.
 export const ETHEREUM_BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
 export const ARBITRUM_BOUND_VALIDATOR = "0x2245FA2420925Cd3C2D889Ddc5bA1aefEF0E14CF";
@@ -370,17 +367,6 @@ export const BSC_MIGRATIONS: AssetMigration[] = [
 // =====================================================================================================
 export const ETHEREUM_MIGRATIONS: AssetMigration[] = [
   {
-    symbol: "EIGEN",
-    asset: "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83",
-    oldOracles: [ethereum.CHAINLINK_ORACLE, ZERO, ZERO],
-    oldFlags: [true, false, false],
-    newOracles: [ethereum.CHAINLINK_ORACLE, ethereum.REDSTONE_ORACLE, ZERO],
-    newFlags: [true, true, false],
-    cachingEnabled: NO_CACHE,
-    redstoneFeed: { feed: "0x2ee5Ce6556599E16c226579BA14F94926d8Cb86d", maxStalePeriod: 86700 },
-    boundConfig: BOUND_DEFAULT,
-  },
-  {
     symbol: "USDC",
     asset: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     oldOracles: [ethereum.CHAINLINK_ORACLE, ZERO, ZERO],
@@ -422,28 +408,6 @@ export const ETHEREUM_MIGRATIONS: AssetMigration[] = [
     newFlags: [true, true, false],
     cachingEnabled: NO_CACHE,
     redstoneFeed: { feed: "0x67F6838e58859d612E4ddF04dA396d6DABB66Dc4", maxStalePeriod: 86700 },
-    boundConfig: BOUND_DEFAULT,
-  },
-  {
-    symbol: "eBTC",
-    asset: "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642",
-    oldOracles: [ETHEREUM_EBTC_MAIN_ORACLE, ZERO, ZERO],
-    oldFlags: [true, false, false],
-    newOracles: [ETHEREUM_EBTC_MAIN_ORACLE, ethereum.REDSTONE_ORACLE, ZERO],
-    newFlags: [true, true, false],
-    cachingEnabled: NO_CACHE,
-    redstoneFeed: { feed: "0xAB7f623fb2F6fea6601D4350FA0E2290663C28Fc", maxStalePeriod: 86700 },
-    boundConfig: BOUND_DEFAULT,
-  },
-  {
-    symbol: "tBTC",
-    asset: "0x18084fbA666a33d37592fA2633fD49a74DD93a88",
-    oldOracles: [ethereum.CHAINLINK_ORACLE, ZERO, ZERO],
-    oldFlags: [true, false, false],
-    newOracles: [ethereum.CHAINLINK_ORACLE, ethereum.REDSTONE_ORACLE, ZERO],
-    newFlags: [true, true, false],
-    cachingEnabled: NO_CACHE,
-    redstoneFeed: { feed: "0xAB7f623fb2F6fea6601D4350FA0E2290663C28Fc", maxStalePeriod: 86700 },
     boundConfig: BOUND_DEFAULT,
   },
 ];

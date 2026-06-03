@@ -25,7 +25,7 @@ export const AUXILIARY_AGGREGATOR: Record<RemoteChainKey, string> = {
 
 // Index of this VIP's batch on each old aggregator.
 export const REMOTE_BATCH_INDEX: Record<RemoteChainKey, number> = {
-  ethereum: 3,
+  ethereum: 4,
   arbitrumone: 3,
   basemainnet: 3,
   zksyncmainnet: 0,
