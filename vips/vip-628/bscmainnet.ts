@@ -17,9 +17,10 @@ export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 
 // ===== Markets =====
-// vBNB is the core-pool market for native BNB. WBNB is the ERC20 reward token
-// distributed to vBNB suppliers via PrimeLiquidityProvider.
-export const VBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
+// vWBNB_CORE is the core-pool ERC20 wBNB market (distinct from vBNB, the
+// native BNB market). The Prime entry tracks vWBNB_CORE; WBNB is also the
+// reward token paid via PrimeLiquidityProvider.
+export const VWBNB_CORE = "0x6bCa74586218dB34cdB402295796b79663d816e9";
 
 // ===== PancakeSwap V3 routing for U -> WBNB =====
 // Direct U/WBNB fee=500 pool (0x882e23dbA77BFe0e514cF5BcDad7a58acEB01522) quotes
@@ -55,7 +56,7 @@ export const NEW_PRIME_SPEED_FOR_WBNB = WBNB_EXPECTED_OUT.div(BSC_BLOCKS_PER_MON
 // U speed: zero this month — U is taking a one-month break to fund WBNB rewards.
 export const NEW_PRIME_SPEED_FOR_U = 0;
 
-// Prime multipliers for vBNB. Supply-only, matching the USDT / USDC / vU
+// Prime multipliers for vWBNB_CORE. Supply-only, matching the USDT / USDC / vU
 // convention established in VIP-618 / VIP-620.
 export const SUPPLY_MULTIPLIER = parseUnits("2", 18);
 export const BORROW_MULTIPLIER = 0;
@@ -72,7 +73,7 @@ export const U_TO_SWEEP = parseUnits("12500", 18);
 // 3% slippage floor on the U -> WBNB direct swap. Wider than VIP-618's 1%
 // stable/stable buffer because BNB can move 2-3% across the 48-72h normal
 // timelock window; the VIP is atomic, so a swap revert would also unwind
-// Prime.addMarket(vBNB). Tighten before queue using a fresh QuoterV2 read.
+// Prime.addMarket(vWBNB_CORE). Tighten before queue using a fresh QuoterV2 read.
 export const WBNB_MIN_OUT = WBNB_EXPECTED_OUT.mul(97).div(100);
 
 // 14-day swap deadline (mirrors VIP-580 / VIP-618).
@@ -106,15 +107,15 @@ This allocation is an estimate based on token prices at the time the reserves we
 - Prime user supply fell from $66.0M to $44.9M (-32%) and Prime borrowing from $28.6M to $22.6M (-21%) — a sharper pullback than the broader market, driven by a few large positions unwinding. This warrants monitoring, though USDT remains the largest Prime market by participation.
 - USDT reserve revenue rose from $37.9K to $39.4K (+4.1%) MoM and remains the dominant revenue contributor, justifying half of Prime rewards.
 
-**WBNB Market** (first inclusion)
+**wBNB Market** (first inclusion)
 
-- Overall BNB supply grew from $358.2M to $417.8M (+16.6%) and borrowing from $108.4M to $117.6M (+8.5%) — the market is expanding organically without incentives.
-- BNB was the second-largest reserve revenue contributor in May at ~$25.0K (≈18% of total BNB Chain reserves), supporting its inclusion as a Prime reward market.
-- Prime user BNB supply grew from $8.3M to $10.9M (+31%). Supply-side rewards are intended to deepen this Prime-held BNB supply liquidity.
+- Overall wBNB supply grew from $358.2M to $417.8M (+16.6%) and borrowing from $108.4M to $117.6M (+8.5%) — the market is expanding organically without incentives.
+- wBNB was the second-largest reserve revenue contributor in May at ~$25.0K (≈18% of total BNB Chain reserves), supporting its inclusion as a Prime reward market.
+- Prime user wBNB supply grew from $8.3M to $10.9M (+31%). Supply-side rewards are intended to deepen this Prime-held wBNB supply liquidity.
 
 #### Proposed Changes
 
-1. **Prime.addMarket(coreComptroller, vBNB, supplyMultiplier=2e18, borrowMultiplier=0)** — register vBNB as a Prime-eligible market with the same supply-only shape as USDT / USDC / vU.
+1. **Prime.addMarket(coreComptroller, vWBNB_CORE, supplyMultiplier=2e18, borrowMultiplier=0)** — register vWBNB_CORE as a Prime-eligible market with the same supply-only shape as USDT / USDC / vU.
 2. **PLP.initializeTokens([WBNB])** — track WBNB as a distributable reward token in PrimeLiquidityProvider.
 3. **PLP.setMaxTokensDistributionSpeed([WBNB], [1e18])** — set explicit max, matching every other Prime reward token across BSC and Ethereum.
 4. **PLP.sweepToken(U, NormalTimelock, 12,500e18)** — sweep 12,500 U from PLP to NormalTimelock; this U was seeded into PLP by VIP-620's USDC -> U swap.
@@ -131,11 +132,11 @@ The off-chain batch score update is performed after VIP execution and is intenti
 
   return makeProposal(
     [
-      // 1. Add vBNB as a Prime market (supply-only, matching USDT/USDC/vU).
+      // 1. Add vWBNB_CORE as a Prime market (supply-only, matching USDT/USDC/vU).
       {
         target: PRIME,
         signature: "addMarket(address,address,uint256,uint256)",
-        params: [CORE_COMPTROLLER, VBNB, SUPPLY_MULTIPLIER, BORROW_MULTIPLIER],
+        params: [CORE_COMPTROLLER, VWBNB_CORE, SUPPLY_MULTIPLIER, BORROW_MULTIPLIER],
       },
 
       // 2. Initialize WBNB in PrimeLiquidityProvider so distribution accounting tracks it.

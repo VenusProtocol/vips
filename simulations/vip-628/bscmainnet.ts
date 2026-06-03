@@ -18,7 +18,7 @@ import vip628, {
   U,
   USDT,
   U_TO_SWEEP,
-  VBNB,
+  VWBNB_CORE,
   WBNB,
   WBNB_MAX_DISTRIBUTION_SPEED,
   WBNB_MIN_OUT,
@@ -60,8 +60,8 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Pre-VIP state", () => {
-    it("vBNB is not yet a Prime market", async () => {
-      const m = await prime.markets(VBNB);
+    it("vWBNB_CORE is not yet a Prime market", async () => {
+      const m = await prime.markets(VWBNB_CORE);
       expect(m.exists).to.be.false;
     });
 
@@ -92,8 +92,8 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Post-VIP state", () => {
-    it("vBNB registered as a Prime market with supply-only multipliers", async () => {
-      const m = await prime.markets(VBNB);
+    it("vWBNB_CORE registered as a Prime market with supply-only multipliers", async () => {
+      const m = await prime.markets(VWBNB_CORE);
       expect(m.exists, "exists").to.be.true;
       expect(m.supplyMultiplier, "supplyMultiplier").to.equal(SUPPLY_MULTIPLIER);
       expect(m.borrowMultiplier, "borrowMultiplier").to.equal(BORROW_MULTIPLIER);
