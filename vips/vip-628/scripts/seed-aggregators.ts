@@ -103,7 +103,7 @@ async function main() {
   const chainKey = SUPPORTED[network];
   if (!chainKey) {
     throw new Error(
-      `Unsupported network for VIP-999 seeding: ${network}. Use ethereum | arbitrumone | basemainnet | zksyncmainnet.`,
+      `Unsupported network for VIP-628 seeding: ${network}. Use ethereum | arbitrumone | basemainnet | zksyncmainnet.`,
     );
   }
 

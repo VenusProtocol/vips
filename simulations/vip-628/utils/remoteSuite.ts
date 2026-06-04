@@ -5,17 +5,17 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip999, {
+import vip628, {
   AUXILIARY_AGGREGATOR,
   NEW_AGGREGATOR,
   NEW_AGGREGATOR_TIMELOCK_SIGS,
   REMOTE_BATCH_INDEX,
   RemoteChainKey,
   newAggregatorBatchers,
-} from "../../../vips/vip-999/bscmainnet";
-import { buildSeedBatch } from "../../../vips/vip-999/scripts/seed-aggregators";
-import { encodeSeedCommands } from "../../../vips/vip-999/utils/auxiliary-aggregator";
-import { AssetMigration } from "../../../vips/vip-999/utils/data";
+} from "../../../vips/vip-628/bscmainnet";
+import { buildSeedBatch } from "../../../vips/vip-628/scripts/seed-aggregators";
+import { encodeSeedCommands } from "../../../vips/vip-628/utils/auxiliary-aggregator";
+import { AssetMigration } from "../../../vips/vip-628/utils/data";
 import AGGREGATOR_ABI from "../abi/AuxiliaryCommandsAggregator.json";
 import ACM_ABI from "../abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "../abi/boundValidator.json";
@@ -114,7 +114,7 @@ export const runRemoteOracleSuite = (opts: {
     // =====================================================================================
     // EXECUTION
     // =====================================================================================
-    testForkedNetworkVipCommands("vip999", await vip999());
+    testForkedNetworkVipCommands("vip628", await vip628());
 
     // =====================================================================================
     // POST-VIP — assert the new on-chain layout (config)

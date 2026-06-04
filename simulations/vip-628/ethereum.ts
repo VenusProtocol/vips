@@ -1,4 +1,4 @@
-import { ETHEREUM_BOUND_VALIDATOR, ETHEREUM_MIGRATIONS } from "../../vips/vip-999/utils/data";
+import { ETHEREUM_BOUND_VALIDATOR, ETHEREUM_MIGRATIONS } from "../../vips/vip-628/utils/data";
 import { runRemoteOracleSuite } from "./utils/remoteSuite";
 
 runRemoteOracleSuite({

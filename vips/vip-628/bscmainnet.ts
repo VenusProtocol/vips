@@ -87,10 +87,10 @@ function remoteChainCommands(chainKey: RemoteChainKey) {
   ];
 }
 
-export const vip999 = () => {
+export const vip628 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [Multichain] Oracle Migration: Atlas, Chainlink OEV & RedStone Pivots + CommandsAggregator Wiring",
+    title: "VIP-628 [Multichain] Oracle Migration: Atlas, Chainlink OEV & RedStone Pivots + CommandsAggregator Wiring",
     description: `#### Summary
 
 This VIP bundles two pieces of work into a single proposal.
@@ -105,7 +105,7 @@ This VIP bundles two pieces of work into a single proposal.
       ETHEREUM_MIGRATIONS.length + ARBITRUM_MIGRATIONS.length + BASE_MIGRATIONS.length
     } single-source markets currently price from a single MAIN oracle with an empty PIVOT. RedStone is added as PIVOT to those markets. These changes are executed on each remote chain via LayerZero through that chain's pre-seeded auxiliary CommandsAggregator batch.
 
-**Part B — CommandsAggregator infrastructure migration** (BNB Chain, Ethereum, Arbitrum One, Base and zkSync Era): a newly deployed CommandsAggregator is brought into service on every chain. Ownership is accepted, the Normal / FastTrack / Critical timelocks are granted \`executeBatch\`, \`addAuthorizedBatchers\` and \`removeAuthorizedBatchers\` permission, and the batcher allowlist is seeded. On the remote chains the existing (old) auxiliary aggregator is used one final time to execute its pre-seeded batch and is then de-authorized. zkSync Era participates in Part B only — it carries no oracle changes in this VIP.
+**Part B — CommandsAggregator infrastructure migration** (BNB Chain, Ethereum, Arbitrum One, Base and zkSync Era): a newly deployed CommandsAggregator is brought into service on every chain. Ownership is accepted, the Normal / FastTrack / Critical timelocks are granted executeBatch, addAuthorizedBatchers and removeAuthorizedBatchers permission, and the batcher allowlist is seeded. On the remote chains the existing (old) auxiliary aggregator is used one final time to execute its pre-seeded batch and is then de-authorized. zkSync Era participates in Part B only — it carries no oracle changes in this VIP.
 
 **BNB Chain actions**
 
@@ -114,25 +114,25 @@ This VIP bundles two pieces of work into a single proposal.
       BSC_MIGRATIONS.length
     } BNB Chain markets (Atlas migration, Chainlink/RedStone reorder, and the solvBTC MAIN/PIVOT swap).
 - Accept ownership of the new CommandsAggregator and seed its batcher allowlist.
-- Grant the new CommandsAggregator's three management functions to the timelocks via 9 ACM \`giveCallPermission(aggregator, signature, timelock)\` calls — \`executeBatch(uint256)\`, \`addAuthorizedBatchers(address[])\` and \`removeAuthorizedBatchers(address[])\`, each granted to the Normal, FastTrack and Critical timelocks.
+- Grant the new CommandsAggregator's three management functions to the timelocks via 9 ACM giveCallPermission(aggregator, signature, timelock) calls — executeBatch(uint256), addAuthorizedBatchers(address[]) and removeAuthorizedBatchers(address[]), each granted to the Normal, FastTrack and Critical timelocks.
 
 **Ethereum / Arbitrum One / Base / zkSync Era actions (via LayerZero)**
 
 For each remote chain the proposal:
 
 1. Grants the old auxiliary CommandsAggregator the ACM default-admin role.
-2. Calls \`executeBatch\` on that aggregator to run its pre-seeded batch. On Ethereum (${
+2. Calls executeBatch on that aggregator to run its pre-seeded batch. On Ethereum (${
       ETHEREUM_MIGRATIONS.length
     }), Arbitrum One (${ARBITRUM_MIGRATIONS.length}) and Base (${
       BASE_MIGRATIONS.length
     } markets) the batch performs, in order:
-   - grants the old aggregator transient ACM permission for \`setValidateConfig\` on the BoundValidator and \`setTokenConfig\` on the RedStone and Resilient oracles;
+   - grants the old aggregator transient ACM permission for setValidateConfig on the BoundValidator and setTokenConfig on the RedStone and Resilient oracles;
    - sets the BoundValidator anchor config (stablecoins ±1%, other assets ±5%);
    - configures the RedStone feed on the chain's RedStone Oracle and enables RedStone as PIVOT in the ResilientOracle;
    - revokes those three transient permissions;
-   - issues the 9 ACM \`giveCallPermission\` calls for the new CommandsAggregator (each of \`executeBatch\`, \`addAuthorizedBatchers\` and \`removeAuthorizedBatchers\` granted to the Normal, FastTrack and Critical timelocks).
+   - issues the 9 ACM giveCallPermission calls for the new CommandsAggregator (each of executeBatch, addAuthorizedBatchers and removeAuthorizedBatchers granted to the Normal, FastTrack and Critical timelocks).
 
-   On zkSync Era the pre-seeded batch contains only those 9 \`giveCallPermission\` calls — no oracle migration.
+   On zkSync Era the pre-seeded batch contains only those 9 giveCallPermission calls — no oracle migration.
 3. Revokes the old aggregator's admin role.
 4. Accepts ownership of the new CommandsAggregator and seeds its batcher allowlist.
 
@@ -211,4 +211,4 @@ For each remote chain the proposal:
   );
 };
 
-export default vip999;
+export default vip628;

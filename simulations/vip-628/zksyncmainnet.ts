@@ -4,15 +4,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip999, {
+import vip628, {
   AUXILIARY_AGGREGATOR,
   NEW_AGGREGATOR,
   NEW_AGGREGATOR_TIMELOCK_SIGS,
   REMOTE_BATCH_INDEX,
   newAggregatorBatchers,
-} from "../../vips/vip-999/bscmainnet";
-import { buildSeedBatch } from "../../vips/vip-999/scripts/seed-aggregators";
-import { encodeSeedCommands } from "../../vips/vip-999/utils/auxiliary-aggregator";
+} from "../../vips/vip-628/bscmainnet";
+import { buildSeedBatch } from "../../vips/vip-628/scripts/seed-aggregators";
+import { encodeSeedCommands } from "../../vips/vip-628/utils/auxiliary-aggregator";
 import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
 import ACM_ABI from "./abi/accessControlManager.json";
 
@@ -45,7 +45,7 @@ forking(70394852, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip999", await vip999());
+  testForkedNetworkVipCommands("vip628", await vip628());
 
   describe("Post-VIP new aggregator wiring", () => {
     const timelocks = [

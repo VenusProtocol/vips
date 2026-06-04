@@ -1,4 +1,4 @@
-import { ARBITRUM_BOUND_VALIDATOR, ARBITRUM_MIGRATIONS } from "../../vips/vip-999/utils/data";
+import { ARBITRUM_BOUND_VALIDATOR, ARBITRUM_MIGRATIONS } from "../../vips/vip-628/utils/data";
 import { runRemoteOracleSuite } from "./utils/remoteSuite";
 
 runRemoteOracleSuite({

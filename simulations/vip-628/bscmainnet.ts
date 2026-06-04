@@ -5,12 +5,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip628, {
   NEW_AGGREGATOR,
   NEW_AGGREGATOR_TIMELOCK_SIGS,
   newAggregatorBatchers,
-} from "../../vips/vip-999/bscmainnet";
-import { ATLAS_ORACLE, BSC_MIGRATIONS } from "../../vips/vip-999/utils/data";
+} from "../../vips/vip-628/bscmainnet";
+import { ATLAS_ORACLE, BSC_MIGRATIONS } from "../../vips/vip-628/utils/data";
 import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
 import ACM_ABI from "./abi/accessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -80,7 +80,7 @@ forking(BLOCK_NUMBER, async () => {
   // =====================================================================================
   // EXECUTION — queue, vote, and execute the VIP; assert the emitted TokenConfigAdded events
   // =====================================================================================
-  testVip("VIP-999 Oracle Migration (BNB Chain)", await vip999(), {
+  testVip("VIP-628 Oracle Migration (BNB Chain)", await vip628(), {
     callbackAfterExecution: async txResponse => {
       // One TokenConfigAdded per BNB Chain market on the ResilientOracle.
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [BSC_MIGRATIONS.length]);
