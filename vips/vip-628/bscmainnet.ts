@@ -22,14 +22,6 @@ export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 // reward token paid via PrimeLiquidityProvider.
 export const VWBNB_CORE = "0x6bCa74586218dB34cdB402295796b79663d816e9";
 
-// ===== PancakeSwap V3 routing for U -> WBNB =====
-// Direct U/WBNB fee=500 pool (0x882e23dbA77BFe0e514cF5BcDad7a58acEB01522) quotes
-// within ~0.08% of the U -> USDT -> WBNB multihop at this swap size; single-hop
-// trades the negligible price improvement for a smaller revert surface (one
-// pool dep instead of two) and avoids the multicall wrapper.
-export const PANCAKE_V3_ROUTER = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
-export const PANCAKE_V3_FEE_U_WBNB = 500;
-
 // ===== June 2026 Prime Rewards Allocation =====
 // In May 2026, Venus generated ~$139.7K reserves revenue; 20% ($27.9K) goes to
 // Prime. Distribute ~$25K (10% buffer for price drift), split 50/50 between
@@ -44,13 +36,15 @@ export const REWARD_PER_MARKET_PER_MONTH_USD = 12500;
 export const BSC_BLOCKS_PER_MONTH = 30 * 192_000;
 export const NEW_PRIME_SPEED_FOR_USDT = parseUnits("12500", 18).div(BSC_BLOCKS_PER_MONTH);
 
-// WBNB speed: derived from the actual PCS V3 swap output, not a fixed
-// $-target — the swap turns 12,500 U into ~WBNB_EXPECTED_OUT WBNB, and that
-// total is paid out evenly over the month. WBNB_EXPECTED_OUT comes from a
-// QuoterV2 snapshot of the direct U -> WBNB (fee=500) pool at the proposal
-// snapshot block; the implied BNB price at the snapshot was ~$653. Refresh
-// this number from a fresh QuoterV2 read before queueing.
-export const WBNB_EXPECTED_OUT = parseUnits("19.13", 18);
+// WBNB speed: estimated from current BNB price (~$625, giving ~20 WBNB for
+// 12,500 U). The on-chain VIP does NOT execute the swap — it sweeps 12,500 U
+// to the Venus Team Multisig (0xCCa5...2948, the same team multisig used in
+// VIP-610 / VIP-616), which performs the U -> WBNB swap off-chain and
+// transfers the resulting WBNB into PLP. This avoids exposing the swap to
+// 48-72h of BNB price drift across the timelock window. If the realized
+// WBNB amount diverges materially from 20, the speed can be retuned in a
+// follow-up VIP.
+export const WBNB_EXPECTED_OUT = parseUnits("20", 18);
 export const NEW_PRIME_SPEED_FOR_WBNB = WBNB_EXPECTED_OUT.div(BSC_BLOCKS_PER_MONTH);
 
 // U speed: zero this month — U is taking a one-month break to fund WBNB rewards.
@@ -66,18 +60,14 @@ export const BORROW_MULTIPLIER = 0;
 // PrimeLiquidityProvider.sol). Set explicitly for audit visibility.
 export const WBNB_MAX_DISTRIBUTION_SPEED = parseUnits("1", 18);
 
-// ===== Swap budget =====
-// Sweep 12,500 U from PLP and convert to WBNB. PLP holds U from VIP-620's
-// USDC->U seed swap; this month's reallocation redirects U toward WBNB.
+// ===== Sweep budget =====
+// Sweep 12,500 U from PLP to the Venus Team Multisig. PLP holds U from
+// VIP-620's USDC->U seed swap; the Team Multisig will swap U->WBNB off-chain
+// and transfer the WBNB into PLP. Off-chain execution avoids exposing the
+// swap to 48-72h of BNB volatility across the timelock window. TEAM_MULTISIG
+// here is the same multisig referenced in VIP-610 / VIP-616.
+export const TEAM_MULTISIG = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
 export const U_TO_SWEEP = parseUnits("12500", 18);
-// 3% slippage floor on the U -> WBNB direct swap. Wider than VIP-618's 1%
-// stable/stable buffer because BNB can move 2-3% across the 48-72h normal
-// timelock window; the VIP is atomic, so a swap revert would also unwind
-// Prime.addMarket(vWBNB_CORE). Tighten before queue using a fresh QuoterV2 read.
-export const WBNB_MIN_OUT = WBNB_EXPECTED_OUT.mul(97).div(100);
-
-// 14-day swap deadline (mirrors VIP-580 / VIP-618).
-export const SWAP_DEADLINE = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 14;
 
 export const vip628 = () => {
   const meta = {
@@ -96,6 +86,7 @@ In May 2026, Venus generated **$139.7K** in reserves revenue. Of this amount, **
 - This is the **first month including WBNB as a Prime reward market**, temporarily in place of U. WBNB was the second-largest source of reserve revenue in May (~$25K, ≈18% of total), supporting its inclusion. The U market is set aside this month and will be revisited in coming months based on market performance and reserve contribution.
 - Focusing rewards on the supply side helps strengthen liquidity and create conditions for lower borrow rates. In contrast, rewarding both sides tends to create arbitrage opportunities, artificially inflating activity and driving up borrow rates for other users.
 - No buyback contract is wired up for WBNB this month; the wBNB Prime reward is funded one-shot from the existing PLP U balance and the inclusion is treated as temporary.
+- The U -> WBNB conversion is executed off-chain by the [Venus Team Multisig](https://bscscan.com/address/0xCCa5a587eBDBe80f23c8610F2e53B03158e62948) to avoid exposing the swap to 48-72h of BNB price volatility across the timelock window. The VIP only sweeps the U; the Team Multisig swaps and transfers WBNB into PLP after execution.
 
 This allocation is an estimate based on token prices at the time the reserves were collected. Actual allocations may vary due to price changes between collection and conversion into Prime reward tokens.
 
@@ -118,11 +109,8 @@ This allocation is an estimate based on token prices at the time the reserves we
 1. **Prime.addMarket(coreComptroller, vWBNB_CORE, supplyMultiplier=2e18, borrowMultiplier=0)** — register vWBNB_CORE as a Prime-eligible market with the same supply-only shape as USDT / USDC / vU.
 2. **PLP.initializeTokens([WBNB])** — track WBNB as a distributable reward token in PrimeLiquidityProvider.
 3. **PLP.setMaxTokensDistributionSpeed([WBNB], [1e18])** — set explicit max, matching every other Prime reward token across BSC and Ethereum.
-4. **PLP.sweepToken(U, NormalTimelock, 12,500e18)** — sweep 12,500 U from PLP to NormalTimelock; this U was seeded into PLP by VIP-620's USDC -> U swap.
-5. **U.approve(PancakeV3Router, 12,500e18)** — approve the router for the swap amount.
-6. **PancakeV3Router.exactInputSingle(U -> WBNB, fee=500, recipient=PLP)** — single-hop swap on the deep U/WBNB V3 pool. Min-out applies a 3% slippage buffer to absorb 48-72h of BNB volatility between proposal queue and timelock execution; verify against a fresh QuoterV2 read before queueing.
-7. **U.approve(PancakeV3Router, 0)** — revoke any residual approval as defense in depth.
-8. **PLP.setTokensDistributionSpeed([USDT, WBNB, U], [usdtSpeed, wbnbSpeed, 0])** — turn on USDT + WBNB at the $12,500/month target, zero the U speed for the month.
+4. **PLP.sweepToken(U, TeamMultisig, 12,500e18)** — sweep 12,500 U from PLP to the Venus Team Multisig (0xCCa5...2948); this U was seeded into PLP by VIP-620's USDC -> U swap. The Team Multisig swaps U -> WBNB off-chain and transfers the resulting WBNB into PLP.
+5. **PLP.setTokensDistributionSpeed([USDT, WBNB, U], [usdtSpeed, wbnbSpeed, 0])** — turn on USDT + WBNB at the $12,500/month target, zero the U speed for the month. PLP distributes WBNB only up to its on-hand balance, so distribution begins once the Team Multisig funds WBNB.
 
 The off-chain batch score update is performed after VIP execution and is intentionally out of scope here.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -153,37 +141,16 @@ The off-chain batch score update is performed after VIP execution and is intenti
         params: [[WBNB], [WBNB_MAX_DISTRIBUTION_SPEED]],
       },
 
-      // 4. Sweep 12,500 U out of PLP to NormalTimelock for swapping.
+      // 4. Sweep 12,500 U out of PLP to the Venus Team Multisig. Community
+      //    Wallet handles the U -> WBNB swap off-chain and transfers WBNB to
+      //    PLP (same flow as VIP-214 / VIP-236).
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "sweepToken(address,address,uint256)",
-        params: [U, bscmainnet.NORMAL_TIMELOCK, U_TO_SWEEP],
+        params: [U, TEAM_MULTISIG, U_TO_SWEEP],
       },
 
-      // 5. Approve PancakeSwap V3 router for the swap amount.
-      {
-        target: U,
-        signature: "approve(address,uint256)",
-        params: [PANCAKE_V3_ROUTER, U_TO_SWEEP],
-      },
-
-      // 6. Direct U -> WBNB swap on PancakeSwap V3 (fee=500 pool). Output to PLP.
-      {
-        target: PANCAKE_V3_ROUTER,
-        signature: "exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160))",
-        params: [
-          [U, WBNB, PANCAKE_V3_FEE_U_WBNB, PRIME_LIQUIDITY_PROVIDER, SWAP_DEADLINE, U_TO_SWEEP, WBNB_MIN_OUT, 0],
-        ],
-      },
-
-      // 7. Revoke residual U approval as defense in depth.
-      {
-        target: U,
-        signature: "approve(address,uint256)",
-        params: [PANCAKE_V3_ROUTER, 0],
-      },
-
-      // 8. Set Prime distribution speeds — USDT + WBNB on, U off.
+      // 5. Set Prime distribution speeds — USDT + WBNB on, U off.
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",

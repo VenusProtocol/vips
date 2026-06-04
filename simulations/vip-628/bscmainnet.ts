@@ -2,7 +2,6 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
@@ -11,23 +10,20 @@ import vip628, {
   NEW_PRIME_SPEED_FOR_U,
   NEW_PRIME_SPEED_FOR_USDT,
   NEW_PRIME_SPEED_FOR_WBNB,
-  PANCAKE_V3_ROUTER,
   PRIME,
   PRIME_LIQUIDITY_PROVIDER,
   SUPPLY_MULTIPLIER,
+  TEAM_MULTISIG,
   U,
   USDT,
   U_TO_SWEEP,
   VWBNB_CORE,
   WBNB,
   WBNB_MAX_DISTRIBUTION_SPEED,
-  WBNB_MIN_OUT,
 } from "../../vips/vip-628/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
-
-const { bscmainnet } = NETWORK_ADDRESSES;
 
 const FORK_BLOCK = 102030242;
 
@@ -50,13 +46,13 @@ forking(FORK_BLOCK, async () => {
   let plpWbnbBalanceBefore: BigNumber;
   let plpUBalanceBefore: BigNumber;
   let plpUsdtBalanceBefore: BigNumber;
-  let timelockUBalanceBefore: BigNumber;
+  let teamMultisigUBalanceBefore: BigNumber;
 
   before(async () => {
     plpWbnbBalanceBefore = await wbnb.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     plpUBalanceBefore = await u.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     plpUsdtBalanceBefore = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-    timelockUBalanceBefore = await u.balanceOf(bscmainnet.NORMAL_TIMELOCK);
+    teamMultisigUBalanceBefore = await u.balanceOf(TEAM_MULTISIG);
   });
 
   describe("Pre-VIP state", () => {
@@ -118,26 +114,19 @@ forking(FORK_BLOCK, async () => {
       expect(plpUBalanceBefore.sub(after)).to.equal(U_TO_SWEEP);
     });
 
-    it("PLP WBNB balance lands between WBNB_MIN_OUT and 103% of expected", async () => {
-      const after = await wbnb.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      const diff = after.sub(plpWbnbBalanceBefore);
-      expect(diff).to.be.gte(WBNB_MIN_OUT);
-      // Upper bound catches rate anomalies (e.g. unexpected pool reroute).
-      expect(diff).to.be.lte(WBNB_MIN_OUT.mul(106).div(100));
+    it("Team Multisig U balance increased by exactly U_TO_SWEEP", async () => {
+      const after = await u.balanceOf(TEAM_MULTISIG);
+      expect(after.sub(teamMultisigUBalanceBefore)).to.equal(U_TO_SWEEP);
     });
 
-    it("PLP USDT balance unchanged (direct U->WBNB swap does not touch USDT)", async () => {
+    it("PLP WBNB balance unchanged (swap is executed off-chain by the Team Multisig)", async () => {
+      const after = await wbnb.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      expect(after).to.equal(plpWbnbBalanceBefore);
+    });
+
+    it("PLP USDT balance unchanged (VIP does not touch USDT)", async () => {
       const after = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
       expect(after).to.equal(plpUsdtBalanceBefore);
-    });
-
-    it("NormalTimelock U balance unchanged net (sweep in, swap out — full pass-through)", async () => {
-      const after = await u.balanceOf(bscmainnet.NORMAL_TIMELOCK);
-      expect(after).to.equal(timelockUBalanceBefore);
-    });
-
-    it("residual U approval on PCS V3 router is zero", async () => {
-      expect(await u.allowance(bscmainnet.NORMAL_TIMELOCK, PANCAKE_V3_ROUTER)).to.equal(0);
     });
   });
 });
