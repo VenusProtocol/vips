@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import { Contract, Signer } from "ethers";
+import { BigNumber, Contract, Signer, Wallet } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999 from "../../vips/vip-999/bscmainnet";
@@ -37,6 +37,9 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import LEVERAGE_ABI from "./abi/LeverageStrategiesManager.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
 import TRANSPARENT_PROXY_ABI from "./abi/TransparentUpgradeableProxy.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
@@ -48,15 +51,14 @@ const XVS_VTOKEN = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D"; // vXVS
 const NEW_CLAIM_AS_COLLATERAL_SELECTOR = "0xc2dbfc50"; // claimVenusAsCollateral(address,address[])
 const NEW_SEIZE_SELECTOR = "0xf74c8f31"; // seizeVenus(address[],address,address[])
 
-const E2E_USER = "0x1111111111111111111111111111111111111112";
+const REWARD_FACET_NEW_ABI = [
+  "function seizeVenus(address[],address,address[]) returns (uint256)",
+  "function claimVenusAsCollateral(address,address[])",
+];
+
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
-const VTOKEN_ABI = [
-  "function mint(uint256) returns (uint256)",
-  "function redeem(uint256) returns (uint256)",
-  "function balanceOf(address) view returns (uint256)",
-];
 const ERC20_ABI = [
   "function approve(address,uint256) returns (bool)",
   "function balanceOf(address) view returns (uint256)",
@@ -64,25 +66,10 @@ const ERC20_ABI = [
   "function symbol() view returns (string)",
   "function transfer(address,uint256) returns (bool)",
 ];
-const SEIZE_VENUS_NEW_ABI = ["function seizeVenus(address[],address,address[]) returns (uint256)"];
-const CLAIM_AS_COLLATERAL_NEW_ABI = ["function claimVenusAsCollateral(address,address[])"];
-const MAX_ASSETS_ABI = ["function maxAssets() view returns (uint256)"];
-const READS_ABI = [
-  "function closeFactorMantissa() view returns (uint256)",
-  "function pauseGuardian() view returns (address)",
-  "function vaiController() view returns (address)",
-  "function vaiMintRate() view returns (uint256)",
-  "function getXVSAddress() view returns (address)",
-  "function getXVSVTokenAddress() view returns (address)",
-  "function getAllMarkets() view returns (address[])",
-  "function markets(address) view returns (bool isListed, uint256 collateralFactorMantissa, bool isVenus)",
-  "function supplyCaps(address) view returns (uint256)",
-  "function borrowCaps(address) view returns (uint256)",
-  "function venusSupplySpeeds(address) view returns (uint256)",
-  "function venusBorrowSpeeds(address) view returns (uint256)",
-];
 
 const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
+const SWAP_BACKEND_PK = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+let saltCounter = 0;
 
 const FACET_GROUPS = [
   { name: "MarketFacet", newFacet: NEW_MARKET_FACET, selectors: MARKET_FACET_SELECTORS },
@@ -131,9 +118,9 @@ forking(102068510, async () => {
   let leverageProxyAdmin: Contract;
   let leverageManager: Contract;
   let acm: Contract;
-  let reads: Contract;
-  let maxAssetsView: Contract;
   let comptrollerSigner: Signer;
+  let user: Signer;
+  let userAddress: string;
   let leverageOwnerBefore: string;
   let storageBefore: any;
 
@@ -144,13 +131,13 @@ forking(102068510, async () => {
     leverageProxyAdmin = await ethers.getContractAt(PROXY_ADMIN_ABI, LEVERAGE_PROXY_ADMIN);
     leverageManager = await ethers.getContractAt(LEVERAGE_ABI, LEVERAGE_STRATEGIES_MANAGER);
     acm = await ethers.getContractAt(ACM_ABI, ACCESS_CONTROL_MANAGER);
-    reads = await ethers.getContractAt(READS_ABI, UNITROLLER);
-    maxAssetsView = await ethers.getContractAt(MAX_ASSETS_ABI, UNITROLLER);
     comptrollerSigner = await initMainnetUser(UNITROLLER, ethers.utils.parseEther("1"));
+    [user] = await ethers.getSigners();
+    userAddress = await user.getAddress();
 
     leverageOwnerBefore = await leverageManager.owner();
     // Snapshot Core Pool storage pre-VIP so we can assert the diamond recut leaves every slot intact.
-    storageBefore = await readStorageSnapshot(reads);
+    storageBefore = await readStorageSnapshot(comptroller);
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -167,7 +154,7 @@ forking(102068510, async () => {
     });
 
     it("maxAssets() is currently served (the Diamond's inherited public getter still exists)", async () => {
-      expect(await maxAssetsView.maxAssets()).to.be.gte(0);
+      expect(await comptroller.maxAssets()).to.equal(100);
     });
 
     for (const { name, newFacet, selectors } of FACET_GROUPS) {
@@ -238,11 +225,11 @@ forking(102068510, async () => {
     });
 
     it("Core Pool storage is preserved across the diamond recut (slots read identically)", async () => {
-      expect(await readStorageSnapshot(reads)).to.deep.equal(storageBefore);
+      expect(await readStorageSnapshot(comptroller)).to.deep.equal(storageBefore);
     });
 
     it("maxAssets() is dropped by the storage-visibility change (public -> private)", async () => {
-      await expect(maxAssetsView.maxAssets()).to.be.reverted;
+      await expect(comptroller.maxAssets()).to.be.reverted;
     });
 
     it("ComptrollerLens is updated", async () => {
@@ -293,45 +280,50 @@ forking(102068510, async () => {
   describe("Post-VIP e2e", () => {
     it("market: a user can mint and redeem on the upgraded VBep20Delegate", async () => {
       const token = await ethers.getContractAt(ERC20_ABI, USDT);
-      const vToken = await ethers.getContractAt(VTOKEN_ABI, VUSDT);
+      const vToken = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, VUSDT);
       const whale = await initMainnetUser(USDT_WHALE, ethers.utils.parseEther("1"));
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       await comptroller.connect(timelock)._setMarketSupplyCaps([VUSDT], [ethers.constants.MaxUint256]);
 
       const amount = ethers.utils.parseUnits("1000", await token.decimals());
-      await token.connect(whale).transfer(E2E_USER, amount);
+      await token.connect(whale).transfer(userAddress, amount);
       await token.connect(user).approve(VUSDT, amount);
-      await expect(vToken.connect(user).mint(amount)).to.not.be.reverted;
-      const vBalance = await vToken.balanceOf(E2E_USER);
-      expect(vBalance).to.be.gt(0);
-      await expect(vToken.connect(user).redeem(vBalance)).to.not.be.reverted;
+      await vToken.connect(user).mint(amount);
+
+      // The full amount was supplied and the minted vTokens are worth ~that amount.
+      expect(await token.balanceOf(userAddress)).to.equal(0);
+      const vBalance = await vToken.balanceOf(userAddress);
+      expect(await vToken.callStatic.balanceOfUnderlying(userAddress)).to.be.closeTo(amount, amount.div(1000));
+
+      await vToken.connect(user).redeem(vBalance);
+      // Fully redeemed back to the underlying.
+      expect(await vToken.balanceOf(userAddress)).to.equal(0);
+      expect(await token.balanceOf(userAddress)).to.be.closeTo(amount, amount.div(1000));
     });
 
     it("comptroller: a user can enter a market on the recut diamond", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
       await comptroller.connect(user).enterMarkets([VUSDT]);
-      expect(await comptroller.checkMembership(E2E_USER, VUSDT)).to.equal(true);
+      expect(await comptroller.checkMembership(userAddress, VUSDT)).to.equal(true);
     });
 
     it("comptroller: the timelock can call the new market-filtered seizeVenus overload", async () => {
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      const diamond = await ethers.getContractAt(SEIZE_VENUS_NEW_ABI, UNITROLLER);
-      await expect(diamond.connect(timelock).seizeVenus([E2E_USER], NORMAL_TIMELOCK, [XVS_VTOKEN])).to.not.be.reverted;
+      const [, freshHolder] = await ethers.getSigners();
+      const rewardFacet = new ethers.Contract(UNITROLLER, REWARD_FACET_NEW_ABI, timelock);
+      await expect(rewardFacet.seizeVenus([await freshHolder.getAddress()], NORMAL_TIMELOCK, [XVS_VTOKEN])).to.not.be
+        .reverted;
     });
 
     it("comptroller: the new market-filtered seizeVenus overload reverts for an unauthorized caller", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
-      const diamond = await ethers.getContractAt(SEIZE_VENUS_NEW_ABI, UNITROLLER);
-      await expect(diamond.connect(user).seizeVenus([E2E_USER], E2E_USER, [XVS_VTOKEN])).to.be.revertedWith(
+      const rewardFacet = new ethers.Contract(UNITROLLER, REWARD_FACET_NEW_ABI, user);
+      await expect(rewardFacet.seizeVenus([userAddress], userAddress, [XVS_VTOKEN])).to.be.revertedWith(
         "access denied",
       );
     });
 
     it("comptroller: a user can call the new market-filtered claimVenusAsCollateral overload", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
-      const diamond = await ethers.getContractAt(CLAIM_AS_COLLATERAL_NEW_ABI, UNITROLLER);
-      await expect(diamond.connect(user).claimVenusAsCollateral(E2E_USER, [VUSDT])).to.not.be.reverted;
+      const rewardFacet = new ethers.Contract(UNITROLLER, REWARD_FACET_NEW_ABI, user);
+      await expect(rewardFacet.claimVenusAsCollateral(userAddress, [VUSDT])).to.not.be.reverted;
     });
 
     it("LSM: the owner is the Normal Timelock and can sweep tokens from the upgraded manager", async () => {
@@ -349,10 +341,144 @@ forking(102068510, async () => {
     });
 
     it("LSM: sweepToken reverts for a non-owner", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
       await expect(leverageManager.connect(user).sweepToken(USDT)).to.be.revertedWith(
         "Ownable: caller is not the owner",
       );
+    });
+  });
+
+  // Cross-asset leverage round-trip driven through the RelativePositionManager, which opens and
+  // unwinds the position via the upgraded LeverageStrategiesManager. DSA = USDC, long = WBNB, short = ETH.
+  describe("Post-VIP e2e: cross-asset leverage via RelativePositionManager", function () {
+    const RELATIVE_POSITION_MANAGER = "0x1525D804DFff218DcC8B9359940F423209356C42";
+    const DSA = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"; // USDC
+    const LONG = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
+    const vLONG = VTOKENS_TO_UPGRADE.vWBNB;
+    const SHORT = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"; // ETH
+    const vSHORT = VTOKENS_TO_UPGRADE.vETH;
+    const USDC_WHALE = "0xf322942f644a996a617bd29c16bd7d231d9f35e9"; // Venus Treasury
+    const ETH_WHALE = "0xf322942f644a996a617bd29c16bd7d231d9f35e9"; // Venus Treasury
+    const WBNB_WHALE = vLONG; // vWBNB holds the underlying WBNB
+
+    // A full close adds the 2% proportional-close tolerance plus a 0.2% interest-accrual buffer.
+    const FULL_CLOSE_BUFFER_BPS = 1022;
+
+    let rpm: Contract;
+    let swapHelper: Contract;
+    let dsa: Contract;
+    let shortVToken: Contract;
+    let alice: Signer;
+    let aliceAddress: string;
+    let domain: { name: string; version: string; chainId: number; verifyingContract: string };
+
+    // Deterministic swap: fund the SwapHelper with the output token from a whale and sign a multicall
+    // that transfers exactly amountOut to the recipient.
+    const manipulatedSwap = async (
+      tokenOut: string,
+      amountOut: BigNumber,
+      recipient: string,
+      whale: string,
+    ): Promise<string> => {
+      const whaleSigner = await initMainnetUser(whale, ethers.utils.parseEther("1"));
+      await new ethers.Contract(tokenOut, ERC20_ABI, whaleSigner).transfer(swapHelper.address, amountOut);
+
+      const swapHelperIface = new ethers.utils.Interface(SWAP_HELPER_ABI);
+      const transferData = new ethers.utils.Interface(ERC20_ABI).encodeFunctionData("transfer", [recipient, amountOut]);
+      const calls = [swapHelperIface.encodeFunctionData("genericCall", [tokenOut, transferData])];
+      const deadline = 20 * 365 * 24 * 60 * 60;
+      const salt = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256"], [++saltCounter]));
+      const types = {
+        Multicall: [
+          { name: "caller", type: "address" },
+          { name: "calls", type: "bytes[]" },
+          { name: "deadline", type: "uint256" },
+          { name: "salt", type: "bytes32" },
+        ],
+      };
+      const signature = await new Wallet(SWAP_BACKEND_PK, ethers.provider)._signTypedData(domain, types, {
+        caller: recipient,
+        calls,
+        deadline,
+        salt,
+      });
+      return swapHelperIface.encodeFunctionData("multicall", [calls, deadline, salt, signature]);
+    };
+
+    before(async () => {
+      [, alice] = await ethers.getSigners();
+      aliceAddress = await alice.getAddress();
+
+      rpm = await ethers.getContractAt(RELATIVE_POSITION_MANAGER_ABI, RELATIVE_POSITION_MANAGER);
+      dsa = await ethers.getContractAt(ERC20_ABI, DSA);
+      shortVToken = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, vSHORT);
+
+      const oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, await comptroller.oracle());
+      await setMaxStalePeriodForAllAssets(oracle, [
+        await ethers.getContractAt(ERC20_ABI, DSA),
+        await ethers.getContractAt(ERC20_ABI, LONG),
+        await ethers.getContractAt(ERC20_ABI, SHORT),
+      ]);
+
+      swapHelper = await ethers.getContractAt(SWAP_HELPER_ABI, await leverageManager.swapHelper());
+      const eip712 = await swapHelper.eip712Domain();
+      const { chainId } = await ethers.provider.getNetwork();
+      domain = { name: eip712.name, version: eip712.version, chainId, verifyingContract: swapHelper.address };
+      const swapHelperOwner = await initMainnetUser(await swapHelper.owner(), ethers.utils.parseEther("1"));
+      await swapHelper.connect(swapHelperOwner).setBackendSigner(new Wallet(SWAP_BACKEND_PK).address);
+    });
+
+    it("opens a leveraged position and fully closes it with profit", async () => {
+      const INITIAL_PRINCIPAL = ethers.utils.parseUnits("9000", 18);
+      const SHORT_AMOUNT = ethers.utils.parseUnits("4", 18); // 4 ETH flash-borrowed
+      const LONG_AMOUNT = ethers.utils.parseUnits("30", 18); // 30 WBNB collateral
+      const leverage = ethers.utils.parseUnits("1.5", 18);
+
+      const usdcWhale = await initMainnetUser(USDC_WHALE, ethers.utils.parseEther("1"));
+      await dsa.connect(usdcWhale).transfer(aliceAddress, INITIAL_PRINCIPAL);
+      await dsa.connect(alice).approve(RELATIVE_POSITION_MANAGER, INITIAL_PRINCIPAL);
+
+      // Open: the flash-borrowed ETH is swapped into WBNB collateral.
+      const minLong = LONG_AMOUNT.mul(98).div(100);
+      const openSwapData = await manipulatedSwap(LONG, LONG_AMOUNT, LEVERAGE_STRATEGIES_MANAGER, WBNB_WHALE);
+      await rpm
+        .connect(alice)
+        .activateAndOpenPosition(vLONG, vSHORT, 0, INITIAL_PRINCIPAL, leverage, SHORT_AMOUNT, minLong, openSwapData);
+
+      const position = await rpm.getPosition(aliceAddress, vLONG, vSHORT);
+      expect(position.isActive).to.equal(true);
+      const positionAccount = position.positionAccount;
+
+      const shortDebtAfterOpen = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
+      const longBalanceAfterOpen = await rpm.callStatic.getLongCollateralBalance(aliceAddress, vLONG, vSHORT);
+      expect(shortDebtAfterOpen).to.be.closeTo(SHORT_AMOUNT, SHORT_AMOUNT.div(1000));
+      expect(longBalanceAfterOpen).to.be.gte(minLong);
+
+      // Full close with profit: 75% of the WBNB repays the ETH debt, the remaining 25% is taken as USDC profit.
+      const longForRepay = longBalanceAfterOpen.mul(75).div(100);
+      const longForProfit = longBalanceAfterOpen.sub(longForRepay);
+      const shortRepayAmount = shortDebtAfterOpen.mul(FULL_CLOSE_BUFFER_BPS).div(1000);
+      const estimatedProfit = longForProfit.mul(500); // ~1 WBNB ≈ 500 USDC
+
+      const repaySwapData = await manipulatedSwap(SHORT, shortRepayAmount, LEVERAGE_STRATEGIES_MANAGER, ETH_WHALE);
+      const profitSwapData = await manipulatedSwap(DSA, estimatedProfit, RELATIVE_POSITION_MANAGER, USDC_WHALE);
+
+      await rpm
+        .connect(alice)
+        .closeWithProfit(
+          vLONG,
+          vSHORT,
+          10000,
+          longForRepay,
+          shortRepayAmount,
+          repaySwapData,
+          longForProfit,
+          estimatedProfit.mul(98).div(100),
+          profitSwapData,
+        );
+
+      // The position is fully unwound: no remaining ETH debt and no remaining WBNB collateral.
+      expect(await shortVToken.callStatic.borrowBalanceCurrent(positionAccount)).to.equal(0);
+      expect(await rpm.callStatic.getLongCollateralBalance(aliceAddress, vLONG, vSHORT)).to.equal(0);
     });
   });
 });

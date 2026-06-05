@@ -48,37 +48,19 @@ const XVS_VTOKEN = "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E"; // vXVS
 const NEW_CLAIM_AS_COLLATERAL_SELECTOR = "0xc2dbfc50"; // claimVenusAsCollateral(address,address[])
 const NEW_SEIZE_SELECTOR = "0xf74c8f31"; // seizeVenus(address[],address,address[])
 
-const E2E_USER = "0x1111111111111111111111111111111111111112";
+const REWARD_FACET_NEW_ABI = [
+  "function seizeVenus(address[],address,address[]) returns (uint256)",
+  "function claimVenusAsCollateral(address,address[])",
+];
+
 const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-const VTOKEN_ABI = [
-  "function mint(uint256) returns (uint256)",
-  "function redeem(uint256) returns (uint256)",
-  "function balanceOf(address) view returns (uint256)",
-];
 const ERC20_ABI = [
   "function approve(address,uint256) returns (bool)",
   "function balanceOf(address) view returns (uint256)",
   "function decimals() view returns (uint8)",
   "function symbol() view returns (string)",
   "function allocateTo(address,uint256)",
-];
-const SEIZE_VENUS_NEW_ABI = ["function seizeVenus(address[],address,address[]) returns (uint256)"];
-const CLAIM_AS_COLLATERAL_NEW_ABI = ["function claimVenusAsCollateral(address,address[])"];
-const MAX_ASSETS_ABI = ["function maxAssets() view returns (uint256)"];
-const READS_ABI = [
-  "function closeFactorMantissa() view returns (uint256)",
-  "function pauseGuardian() view returns (address)",
-  "function vaiController() view returns (address)",
-  "function vaiMintRate() view returns (uint256)",
-  "function getXVSAddress() view returns (address)",
-  "function getXVSVTokenAddress() view returns (address)",
-  "function getAllMarkets() view returns (address[])",
-  "function markets(address) view returns (bool isListed, uint256 collateralFactorMantissa, bool isVenus)",
-  "function supplyCaps(address) view returns (uint256)",
-  "function borrowCaps(address) view returns (uint256)",
-  "function venusSupplySpeeds(address) view returns (uint256)",
-  "function venusBorrowSpeeds(address) view returns (uint256)",
 ];
 
 const NORMAL_TIMELOCK = bsctestnet.NORMAL_TIMELOCK;
@@ -130,9 +112,9 @@ forking(111367637, async () => {
   let leverageProxyAdmin: Contract;
   let leverageManager: Contract;
   let acm: Contract;
-  let reads: Contract;
-  let maxAssetsView: Contract;
   let comptrollerSigner: Signer;
+  let user: Signer;
+  let userAddress: string;
   let leverageOwnerBefore: string;
   let storageBefore: any;
 
@@ -143,13 +125,13 @@ forking(111367637, async () => {
     leverageProxyAdmin = await ethers.getContractAt(PROXY_ADMIN_ABI, LEVERAGE_PROXY_ADMIN);
     leverageManager = await ethers.getContractAt(LEVERAGE_ABI, LEVERAGE_STRATEGIES_MANAGER);
     acm = await ethers.getContractAt(ACM_ABI, ACCESS_CONTROL_MANAGER);
-    reads = await ethers.getContractAt(READS_ABI, UNITROLLER);
-    maxAssetsView = await ethers.getContractAt(MAX_ASSETS_ABI, UNITROLLER);
     comptrollerSigner = await initMainnetUser(UNITROLLER, ethers.utils.parseEther("1"));
+    [user] = await ethers.getSigners();
+    userAddress = await user.getAddress();
 
     leverageOwnerBefore = await leverageManager.owner();
     // Snapshot Core Pool storage pre-VIP so we can assert the diamond recut leaves every slot intact.
-    storageBefore = await readStorageSnapshot(reads);
+    storageBefore = await readStorageSnapshot(comptroller);
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -166,7 +148,7 @@ forking(111367637, async () => {
     });
 
     it("maxAssets() is currently served (the Diamond's inherited public getter still exists)", async () => {
-      expect(await maxAssetsView.maxAssets()).to.be.gte(0);
+      expect(await comptroller.maxAssets()).to.equal(20);
     });
 
     for (const { name, newFacet, selectors } of FACET_GROUPS) {
@@ -237,11 +219,11 @@ forking(111367637, async () => {
     });
 
     it("Core Pool storage is preserved across the diamond recut (slots read identically)", async () => {
-      expect(await readStorageSnapshot(reads)).to.deep.equal(storageBefore);
+      expect(await readStorageSnapshot(comptroller)).to.deep.equal(storageBefore);
     });
 
     it("maxAssets() is dropped by the storage-visibility change (public -> private)", async () => {
-      await expect(maxAssetsView.maxAssets()).to.be.reverted;
+      await expect(comptroller.maxAssets()).to.be.reverted;
     });
 
     it("ComptrollerLens is updated", async () => {
@@ -292,44 +274,49 @@ forking(111367637, async () => {
   describe("Post-VIP e2e", () => {
     it("market: a user can mint and redeem on the upgraded VBep20Delegate", async () => {
       const token = await ethers.getContractAt(ERC20_ABI, USDT);
-      const vToken = await ethers.getContractAt(VTOKEN_ABI, VUSDT);
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
-      const timelock = await initMainnetUser(SEIZE_VENUS_PERMISSION_GRANTEES[0], ethers.utils.parseEther("1"));
+      const vToken = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, VUSDT);
+      const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       await comptroller.connect(timelock)._setMarketSupplyCaps([VUSDT], [ethers.constants.MaxUint256]);
 
       const amount = ethers.utils.parseUnits("1000", await token.decimals());
-      await token.allocateTo(E2E_USER, amount);
+      await token.allocateTo(userAddress, amount);
       await token.connect(user).approve(VUSDT, amount);
-      await expect(vToken.connect(user).mint(amount)).to.not.be.reverted;
-      const vBalance = await vToken.balanceOf(E2E_USER);
-      expect(vBalance).to.be.gt(0);
-      await expect(vToken.connect(user).redeem(vBalance)).to.not.be.reverted;
+      await vToken.connect(user).mint(amount);
+
+      // The full amount was supplied and the minted vTokens are worth ~that amount.
+      expect(await token.balanceOf(userAddress)).to.equal(0);
+      const vBalance = await vToken.balanceOf(userAddress);
+      expect(await vToken.callStatic.balanceOfUnderlying(userAddress)).to.be.closeTo(amount, amount.div(1000));
+
+      await vToken.connect(user).redeem(vBalance);
+      // Fully redeemed back to the underlying.
+      expect(await vToken.balanceOf(userAddress)).to.equal(0);
+      expect(await token.balanceOf(userAddress)).to.be.closeTo(amount, amount.div(1000));
     });
 
     it("comptroller: a user can enter a market on the recut diamond", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
       await comptroller.connect(user).enterMarkets([VUSDT]);
-      expect(await comptroller.checkMembership(E2E_USER, VUSDT)).to.equal(true);
+      expect(await comptroller.checkMembership(userAddress, VUSDT)).to.equal(true);
     });
 
     it("comptroller: the timelock can call the new market-filtered seizeVenus overload", async () => {
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      const diamond = await ethers.getContractAt(SEIZE_VENUS_NEW_ABI, UNITROLLER);
-      await expect(diamond.connect(timelock).seizeVenus([E2E_USER], NORMAL_TIMELOCK, [XVS_VTOKEN])).to.not.be.reverted;
+      const [, freshHolder] = await ethers.getSigners();
+      const rewardFacet = new ethers.Contract(UNITROLLER, REWARD_FACET_NEW_ABI, timelock);
+      await expect(rewardFacet.seizeVenus([await freshHolder.getAddress()], NORMAL_TIMELOCK, [XVS_VTOKEN])).to.not.be
+        .reverted;
     });
 
     it("comptroller: the new market-filtered seizeVenus overload reverts for an unauthorized caller", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
-      const diamond = await ethers.getContractAt(SEIZE_VENUS_NEW_ABI, UNITROLLER);
-      await expect(diamond.connect(user).seizeVenus([E2E_USER], E2E_USER, [XVS_VTOKEN])).to.be.revertedWith(
+      const rewardFacet = new ethers.Contract(UNITROLLER, REWARD_FACET_NEW_ABI, user);
+      await expect(rewardFacet.seizeVenus([userAddress], userAddress, [XVS_VTOKEN])).to.be.revertedWith(
         "access denied",
       );
     });
 
     it("comptroller: a user can call the new market-filtered claimVenusAsCollateral overload", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
-      const diamond = await ethers.getContractAt(CLAIM_AS_COLLATERAL_NEW_ABI, UNITROLLER);
-      await expect(diamond.connect(user).claimVenusAsCollateral(E2E_USER, [VUSDT])).to.not.be.reverted;
+      const rewardFacet = new ethers.Contract(UNITROLLER, REWARD_FACET_NEW_ABI, user);
+      await expect(rewardFacet.claimVenusAsCollateral(userAddress, [VUSDT])).to.not.be.reverted;
     });
 
     it("LSM: the owner is the Normal Timelock and can sweep tokens from the upgraded manager", async () => {
@@ -346,7 +333,6 @@ forking(111367637, async () => {
     });
 
     it("LSM: sweepToken reverts for a non-owner", async () => {
-      const user = await initMainnetUser(E2E_USER, ethers.utils.parseEther("1"));
       await expect(leverageManager.connect(user).sweepToken(USDT)).to.be.revertedWith(
         "Ownable: caller is not the owner",
       );

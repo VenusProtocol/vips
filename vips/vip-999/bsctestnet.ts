@@ -101,6 +101,8 @@ export const vip999 = () => {
         params: [NEW_VTOKEN_DELEGATE, false, "0x"],
       })),
 
+      // Required on testnet because these markets are still on the legacy balanceOf delegate
+      // so internalCash is 0.
       ...Object.values(VTOKENS_TO_UPGRADE).map(vToken => ({
         target: vToken,
         signature: "sweepTokenAndSync(uint256)",

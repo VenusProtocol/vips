@@ -103,12 +103,6 @@ export const vip999 = () => {
         params: [NEW_VTOKEN_DELEGATE, false, "0x"],
       })),
 
-      ...Object.values(VTOKENS_TO_UPGRADE).map(vToken => ({
-        target: vToken,
-        signature: "sweepTokenAndSync(uint256)",
-        params: [0],
-      })),
-
       // ──────────────────────────────────────────────────────────────────────────
       // 4. LeverageStrategiesManager
       // ──────────────────────────────────────────────────────────────────────────
