@@ -1,0 +1,13 @@
+[
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "validateConfigs",
+    "outputs": [
+      { "internalType": "address", "name": "asset", "type": "address" },
+      { "internalType": "uint256", "name": "upperBoundRatio", "type": "uint256" },
+      { "internalType": "uint256", "name": "lowerBoundRatio", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
