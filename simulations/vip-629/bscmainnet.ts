@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip628, {
+import vip629, {
   BORROW_MULTIPLIER,
   NEW_PRIME_SPEED_FOR_U,
   NEW_PRIME_SPEED_FOR_USDT,
@@ -20,7 +20,7 @@ import vip628, {
   VWBNB_CORE,
   WBNB,
   WBNB_MAX_DISTRIBUTION_SPEED,
-} from "../../vips/vip-628/bscmainnet";
+} from "../../vips/vip-629/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -76,7 +76,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-628 Prime Jun-2026 (add WBNB, sideline U)", await vip628(), {
+  testVip("VIP-629 Prime Jun-2026 (add WBNB, sideline U)", await vip629(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MarketAdded"], [1]);
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionInitialized"], [1]);

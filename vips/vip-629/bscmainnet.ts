@@ -69,10 +69,10 @@ export const WBNB_MAX_DISTRIBUTION_SPEED = parseUnits("1", 18);
 export const TEAM_MULTISIG = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
 export const U_TO_SWEEP = parseUnits("12500", 18);
 
-export const vip628 = () => {
+export const vip629 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-628 Adjust Prime Rewards Allocation for Jun-2026 (add WBNB, sideline U)",
+    title: "VIP-629 Adjust Prime Rewards Allocation for Jun-2026 (add WBNB, sideline U)",
     description: `#### Summary
 
 This proposal outlines the allocation of Prime Rewards on BNB Chain for June 2026, based on available funds. The allocation is retroactive, redistributing revenue generated through May 2026.
@@ -165,4 +165,4 @@ The off-chain batch score update is performed after VIP execution and is intenti
   );
 };
 
-export default vip628;
+export default vip629;
