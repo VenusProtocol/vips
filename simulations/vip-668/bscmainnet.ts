@@ -15,7 +15,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 102983073;
+const FORK_BLOCK = 103018310;
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
@@ -26,6 +26,10 @@ const ONE_E18 = BigNumber.from(10).pow(18);
 const ONE_E36 = BigNumber.from(10).pow(36);
 const TRIGGER_DEFAULT_BORROW_ONLY = BigNumber.from("166700000000000000"); // 16.67% — used when CF=0
 const triggerFromCF = (cf: BigNumber): BigNumber => ONE_E36.div(cf).sub(ONE_E18).div(2);
+
+// Stablecoins bypass the CF formula and use a flat, tight trigger (resetThreshold 2% < trigger).
+const STABLECOIN_TRIGGER = BigNumber.from("50000000000000000"); // 5%
+const STABLECOINS = new Set(["DAI", "lisUSD", "sUSDe", "USDe"]);
 
 // Assets already enabled before this VIP: TRX (enabled in VIP-617, the DBO deploy
 // VIP) plus AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI (enabled in VIP-626).
@@ -43,7 +47,7 @@ const ALREADY_ENABLED = [
 ];
 
 // Every asset this VIP newly enables: the 15 flipped via setAssetBoundedPricingEnabled
-// plus the 4 configured-and-enabled in the same setTokenConfigs call.
+// plus the 5 configured-and-enabled in the same setTokenConfigs call.
 const NEWLY_ENABLED = [...ASSETS_TO_ENABLE, ...NEW_ASSET_CONFIGS];
 
 forking(FORK_BLOCK, async () => {
@@ -75,7 +79,7 @@ forking(FORK_BLOCK, async () => {
   // Pre-VIP state
   // ────────────────────────────────────────────────────────────────────
   describe("Pre-VIP state", () => {
-    it("the 4 newly-configured assets have no DBO token config yet", async () => {
+    it("the 5 newly-configured assets have no DBO token config yet", async () => {
       for (const c of NEW_ASSET_CONFIGS) {
         const cfg = await dbo.assetProtectionConfig(c.asset);
         expect(cfg.asset, `${c.name}.asset`).to.equal(ethers.constants.AddressZero);
@@ -105,7 +109,7 @@ forking(FORK_BLOCK, async () => {
   testVip("VIP-668 Enable bounded pricing for the remaining Core Pool assets", await vip668(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // setTokenConfigs emits one BoundedPricingWhitelistUpdated per newly-configured
-      // asset (4), and setAssetBoundedPricingEnabled emits one per enabled asset (15) — 19 total.
+      // asset (5), and setAssetBoundedPricingEnabled emits one per enabled asset (15) — 20 total.
       await expectEvents(
         txResponse,
         [DBO_ABI],
@@ -120,7 +124,7 @@ forking(FORK_BLOCK, async () => {
   // ────────────────────────────────────────────────────────────────────
   describe("Post-VIP state", () => {
     describe("New token configs", () => {
-      it("DAI, FDUSD, FIL, lisUSD are configured with the expected parameters", async () => {
+      it("DAI, FIL, lisUSD, sUSDe, USDe are configured with the expected parameters", async () => {
         for (const c of NEW_ASSET_CONFIGS) {
           const cfg = await dbo.assetProtectionConfig(c.asset);
           expect(cfg.asset.toLowerCase(), `${c.name}.asset`).to.equal(c.asset.toLowerCase());
@@ -132,16 +136,20 @@ forking(FORK_BLOCK, async () => {
         }
       });
 
-      // Borrow-only markets (CF=0) use the 16.67% default since the formula is undefined for LTV=0.
-      it("triggerThreshold per new asset matches ((1/CF)-1)/2 from live Comptroller CF", async () => {
+      // Two threshold rules: stablecoins get a flat 5% trigger; everything else derives from
+      // the on-chain CF via ((1/CF)-1)/2, with borrow-only markets (CF=0) using the 16.67% default.
+      it("triggerThreshold per new asset matches its rule (stablecoins flat 5%, others CF-derived)", async () => {
         for (const c of NEW_ASSET_CONFIGS) {
-          const market = await comptroller.markets(c.vToken);
-          const cf: BigNumber = market.collateralFactorMantissa;
-          const expected = cf.isZero() ? TRIGGER_DEFAULT_BORROW_ONLY : triggerFromCF(cf);
+          let expected: BigNumber;
+          if (STABLECOINS.has(c.name)) {
+            expected = STABLECOIN_TRIGGER;
+          } else {
+            const market = await comptroller.markets(c.vToken);
+            const cf: BigNumber = market.collateralFactorMantissa;
+            expected = cf.isZero() ? TRIGGER_DEFAULT_BORROW_ONLY : triggerFromCF(cf);
+          }
           const cfg = await dbo.assetProtectionConfig(c.asset);
-          expect(cfg.triggerThreshold, `${c.name}.triggerThreshold (vToken=${c.vToken}, CF=${cf.toString()})`).to.equal(
-            expected,
-          );
+          expect(cfg.triggerThreshold, `${c.name}.triggerThreshold (vToken=${c.vToken})`).to.equal(expected);
         }
       });
     });
@@ -153,7 +161,7 @@ forking(FORK_BLOCK, async () => {
         }
       });
 
-      it("getAllBoundedPricingEnabledAssets() returns the 9 prior + 19 newly-enabled (15 flipped + 4 newly-configured) assets", async () => {
+      it("getAllBoundedPricingEnabledAssets() returns the 9 prior + 20 newly-enabled (15 flipped + 5 newly-configured) assets", async () => {
         const enabled: string[] = await dbo.getAllBoundedPricingEnabledAssets();
         expect(enabled.length).to.equal(ALREADY_ENABLED.length + NEWLY_ENABLED.length);
         const set = new Set(enabled.map(a => a.toLowerCase()));
@@ -296,9 +304,12 @@ forking(FORK_BLOCK, async () => {
         expect(await dbo.currentlyUsingProtectedPrice(asset)).to.equal(true);
 
         // Keeper narrows the window around the restored spot, the cooldown elapses, then exits.
+        // The ±0.5% band gives a (max-min)/min spread of ~1.005%, which converges within every
+        // resetThreshold in this VIP (2% stablecoins, 5% FIL). A ±1% band would be a ~2.02%
+        // spread and exceed the 2% stablecoin reset.
         await setSpot(originalSpot);
-        const tightMin = originalSpot.mul(99).div(100);
-        const tightMax = originalSpot.mul(101).div(100);
+        const tightMin = originalSpot.mul(995).div(1000);
+        const tightMax = originalSpot.mul(1005).div(1000);
         await dbo.connect(keeperSigner).updateMinPrice(asset, tightMin);
         await dbo.connect(keeperSigner).updateMaxPrice(asset, tightMax);
 

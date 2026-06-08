@@ -5,18 +5,8 @@
       "asset": "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
       "vToken": "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1",
       "cooldownPeriod": 3600,
-      "triggerThreshold": "166700000000000000",
-      "resetThreshold": "50000000000000000",
-      "isBoundedPricingEnabled": true,
-      "cachingEnabled": false
-    },
-    {
-      "name": "FDUSD",
-      "asset": "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
-      "vToken": "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
-      "cooldownPeriod": 3600,
-      "triggerThreshold": "166666666666666666",
-      "resetThreshold": "50000000000000000",
+      "triggerThreshold": "50000000000000000",
+      "resetThreshold": "20000000000000000",
       "isBoundedPricingEnabled": true,
       "cachingEnabled": false
     },
@@ -35,8 +25,28 @@
       "asset": "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
       "vToken": "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab",
       "cooldownPeriod": 3600,
-      "triggerThreshold": "500000000000000000",
-      "resetThreshold": "50000000000000000",
+      "triggerThreshold": "50000000000000000",
+      "resetThreshold": "20000000000000000",
+      "isBoundedPricingEnabled": true,
+      "cachingEnabled": false
+    },
+    {
+      "name": "sUSDe",
+      "asset": "0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2",
+      "vToken": "0x699658323d58eE25c69F1a29d476946ab011bD18",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "50000000000000000",
+      "resetThreshold": "20000000000000000",
+      "isBoundedPricingEnabled": true,
+      "cachingEnabled": false
+    },
+    {
+      "name": "USDe",
+      "asset": "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34",
+      "vToken": "0x74ca6930108F775CC667894EEa33843e691680d7",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "50000000000000000",
+      "resetThreshold": "20000000000000000",
       "isBoundedPricingEnabled": true,
       "cachingEnabled": false
     }

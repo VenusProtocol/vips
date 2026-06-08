@@ -37,18 +37,23 @@ This is **VIP 3 of 3**, the final step of the DeviationBoundedOracle (DBO) rollo
 
 - **VIP 1 (VIP-617)** deployed the DBO, wired it into the Comptroller, and configured 24 Core Pool assets — enabling bounded pricing for the **first** asset, **TRX** (\`isBoundedPricingEnabled = true\`), while leaving the other 23 configured but disabled.
 - **VIP 2 (VIP-626)** enabled the **second** group of 8 assets: AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI.
-- **This VIP (VIP 3)** enables every remaining Core Pool asset — and additionally configures the 4 markets that were never given a DBO config — completing the rollout.
+- **This VIP (VIP 3)** enables every remaining Core Pool asset — and additionally configures the 5 markets that were never given a DBO config — completing the rollout.
 
 Concretely, this VIP:
 
-1. Add DBO token configs for **DAI, FDUSD, FIL and lisUSD** — the 4 Core Pool markets that were not configured in VIP-617 — enabling them in the same \`setTokenConfigs\` call.
+1. Add DBO token configs for **DAI, FIL, lisUSD, sUSDe and USDe** — 5 Core Pool markets not configured in VIP-617 — enabling them in the same \`setTokenConfigs\` call.
 2. Flipping \`isBoundedPricingEnabled = true\` for the **15 remaining already-configured assets** so that protection becomes active across the Core Pool.
 
-After this VIP executes, the following 19 assets transition to bounded pricing active: asBNB, BNB, BTCB, CAKE, DAI, ETH, FDUSD, FIL, lisUSD, slisBNB, SOL, SolvBTC, vPT-clisBNB-25JUN2026, WBETH, WBNB, XAUM, XRP, xSolvBTC and XVS. Together with the 9 assets enabled earlier (TRX in VIP 1; AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI in VIP 2), this brings the total to **28 Core Pool assets** that now price through the DeviationBoundedOracle's bounded (protected) price rather than the raw ResilientOracle spot.
+After this VIP executes, the following 20 assets transition to bounded pricing active: asBNB, BNB, BTCB, CAKE, DAI, ETH, FIL, lisUSD, slisBNB, SOL, SolvBTC, sUSDe, USDe, vPT-clisBNB-25JUN2026, WBETH, WBNB, XAUM, XRP, xSolvBTC and XVS. Together with the 9 assets enabled earlier (TRX in VIP 1; AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI in VIP 2), this brings the total to **29 Core Pool assets** that now price through the DeviationBoundedOracle's bounded (protected) price rather than the raw ResilientOracle spot.
 
 On enable, each asset's rolling window re-seeds at the current spot price, so there is no stale-window risk. The DBO returns \`(spot, spot)\` until the keeper observes spot deviating beyond the asset's \`triggerThreshold\`, at which point collateral is valued at \`min(spot, windowMin)\` and debt at \`max(spot, windowMax)\`.
 
-Parameters for the newly configured assets follow the same conventions used in VIP-617: \`cooldownPeriod = 1h\`, \`resetThreshold = 5%\`, \`cachingEnabled = false\`, and \`triggerThreshold = ((1 / CF) - 1) / 2\` derived from each market's on-chain collateral factor. Borrow-only markets (\`CF = 0\`, where the formula is undefined) use the fixed \`16.67%\` default. Concretely: FDUSD (CF 75%) → \`16.67%\`; lisUSD (CF 50%) → \`50%\`; DAI and FIL (CF 0, borrow-only) → \`16.67%\` default.
+Parameters for the newly configured assets keep the VIP-617 conventions \`cooldownPeriod = 1h\` and \`cachingEnabled = false\`, with thresholds set per asset:
+
+- **Stablecoins (DAI, lisUSD, sUSDe, USDe)**: a tight \`triggerThreshold = 5%\` with \`resetThreshold = 2%\`. The CF-derived formula used for volatile assets would arm a needlessly wide band on assets expected to hold their peg, so these use a flat low threshold instead.
+- **FIL** (non-stablecoin, borrow-only with \`CF = 0\` where the \`((1 / CF) - 1) / 2\` formula is undefined): the fixed \`triggerThreshold = 16.67%\` default with \`resetThreshold = 5%\`, matching VIP-617.
+
+In every config \`resetThreshold\` is strictly below \`triggerThreshold\`, as the DBO requires.
 
 #### Deployed contracts
 
@@ -61,7 +66,7 @@ Parameters for the newly configured assets follow the same conventions used in V
 
   return makeProposal(
     [
-      // Configure the assets not included in initial VIP-617: DAI, FDUSD, FIL and lisUSD.
+      // Configure the assets not included in initial VIP-617: DAI, FIL, lisUSD, sUSDe and USDe.
       // The config itself enables (isBoundedPricingEnabled = true) bounded pricing.
       {
         target: DEVIATION_BOUNDED_ORACLE,
