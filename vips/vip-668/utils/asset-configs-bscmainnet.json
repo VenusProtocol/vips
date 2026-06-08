@@ -1,0 +1,121 @@
+{
+  "newAssetConfigs": [
+    {
+      "name": "DAI",
+      "asset": "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+      "vToken": "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "166700000000000000",
+      "resetThreshold": "50000000000000000",
+      "isBoundedPricingEnabled": true,
+      "cachingEnabled": false
+    },
+    {
+      "name": "FDUSD",
+      "asset": "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+      "vToken": "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "166666666666666666",
+      "resetThreshold": "50000000000000000",
+      "isBoundedPricingEnabled": true,
+      "cachingEnabled": false
+    },
+    {
+      "name": "FIL",
+      "asset": "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
+      "vToken": "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "166700000000000000",
+      "resetThreshold": "50000000000000000",
+      "isBoundedPricingEnabled": true,
+      "cachingEnabled": false
+    },
+    {
+      "name": "lisUSD",
+      "asset": "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
+      "vToken": "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab",
+      "cooldownPeriod": 3600,
+      "triggerThreshold": "500000000000000000",
+      "resetThreshold": "50000000000000000",
+      "isBoundedPricingEnabled": true,
+      "cachingEnabled": false
+    }
+  ],
+  "assetsToEnable": [
+    {
+      "name": "asBNB",
+      "asset": "0x77734e70b6E88b4d82fE632a168EDf6e700912b6",
+      "vToken": "0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF"
+    },
+    {
+      "name": "BNB",
+      "asset": "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+      "vToken": "0xA07c5b74C9B40447a954e1466938b865b6BBea36"
+    },
+    {
+      "name": "BTCB",
+      "asset": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+      "vToken": "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B"
+    },
+    {
+      "name": "CAKE",
+      "asset": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+      "vToken": "0x86aC3974e2BD0d60825230fa6F355fF11409df5c"
+    },
+    {
+      "name": "ETH",
+      "asset": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+      "vToken": "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8"
+    },
+    {
+      "name": "slisBNB",
+      "asset": "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B",
+      "vToken": "0x89c910Eb8c90df818b4649b508Ba22130Dc73Adc"
+    },
+    {
+      "name": "SOL",
+      "asset": "0x570A5D26f7765Ecb712C0924E4De545B89fD43dF",
+      "vToken": "0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC"
+    },
+    {
+      "name": "SolvBTC",
+      "asset": "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
+      "vToken": "0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea"
+    },
+    {
+      "name": "vPT-clisBNB-25JUN2026",
+      "asset": "0xe052823b4aefc6e230FAf46231A57d0905E30AE0",
+      "vToken": "0x6d3BD68E90B42615cb5abF4B8DE92b154ADc435e"
+    },
+    {
+      "name": "WBETH",
+      "asset": "0xa2E3356610840701BDf5611a53974510Ae27E2e1",
+      "vToken": "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0"
+    },
+    {
+      "name": "WBNB",
+      "asset": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "vToken": "0x6bCa74586218dB34cdB402295796b79663d816e9"
+    },
+    {
+      "name": "XAUM",
+      "asset": "0x23AE4fd8E7844cdBc97775496eBd0E8248656028",
+      "vToken": "0x92e6Ea74a1A3047DabF4186405a21c7D63a0612A"
+    },
+    {
+      "name": "XRP",
+      "asset": "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+      "vToken": "0xB248a295732e0225acd3337607cc01068e3b9c10"
+    },
+    {
+      "name": "xSolvBTC",
+      "asset": "0x1346b618dC92810EC74163e4c27004c921D446a5",
+      "vToken": "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5"
+    },
+    {
+      "name": "XVS",
+      "asset": "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",
+      "vToken": "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D"
+    }
+  ]
+}
