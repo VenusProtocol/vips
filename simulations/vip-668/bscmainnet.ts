@@ -9,7 +9,6 @@ import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } fro
 import { forking, testVip } from "../../src/vip-framework";
 import CHAINLINK_ORACLE_ABI from "../../src/vip-framework/abi/chainlinkOracle.json";
 import vip668, { ASSETS_TO_ENABLE, DEVIATION_BOUNDED_ORACLE, NEW_ASSET_CONFIGS } from "../../vips/vip-668/bscmainnet";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -17,19 +16,12 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 const FORK_BLOCK = 103018310;
 
-const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-
-// Same triggerThreshold convention as VIP-617: each market's threshold comes
-// from its on-chain collateral factor via ((1/CF) - 1)/2. The formula breaks
-// down for borrow-only markets (CF=0), so those fall back to a fixed 16.67%.
 const ONE_E18 = BigNumber.from(10).pow(18);
-const ONE_E36 = BigNumber.from(10).pow(36);
-const TRIGGER_DEFAULT_BORROW_ONLY = BigNumber.from("166700000000000000"); // 16.67% — used when CF=0
-const triggerFromCF = (cf: BigNumber): BigNumber => ONE_E36.div(cf).sub(ONE_E18).div(2);
 
-// Stablecoins bypass the CF formula and use a flat, tight trigger (resetThreshold 2% < trigger).
+// All 5 newly-configured assets are stablecoins, so they bypass the VIP-617 CF-derived
+// formula and use a flat, tight trigger (resetThreshold 2% < trigger).
 const STABLECOIN_TRIGGER = BigNumber.from("50000000000000000"); // 5%
-const STABLECOINS = new Set(["DAI", "lisUSD", "sUSDe", "USDe"]);
+const STABLECOINS = new Set(["DAI", "FDUSD", "lisUSD", "sUSDe", "USDe"]);
 
 // Assets already enabled before this VIP: TRX (enabled in VIP-617, the DBO deploy
 // VIP) plus AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI (enabled in VIP-626).
@@ -55,12 +47,10 @@ forking(FORK_BLOCK, async () => {
 
   let dbo: Contract;
   let resilient: Contract;
-  let comptroller: Contract;
 
   before(async () => {
     dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, provider);
     resilient = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
-    comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, provider);
 
     // Fork-only oracle freshness fix. The governance flow mines days past the
     // real-world feed heartbeats, so the window-seeding getPrice() calls during
@@ -124,7 +114,7 @@ forking(FORK_BLOCK, async () => {
   // ────────────────────────────────────────────────────────────────────
   describe("Post-VIP state", () => {
     describe("New token configs", () => {
-      it("DAI, FIL, lisUSD, sUSDe, USDe are configured with the expected parameters", async () => {
+      it("DAI, FDUSD, lisUSD, sUSDe, USDe are configured with the expected parameters", async () => {
         for (const c of NEW_ASSET_CONFIGS) {
           const cfg = await dbo.assetProtectionConfig(c.asset);
           expect(cfg.asset.toLowerCase(), `${c.name}.asset`).to.equal(c.asset.toLowerCase());
@@ -136,20 +126,12 @@ forking(FORK_BLOCK, async () => {
         }
       });
 
-      // Two threshold rules: stablecoins get a flat 5% trigger; everything else derives from
-      // the on-chain CF via ((1/CF)-1)/2, with borrow-only markets (CF=0) using the 16.67% default.
-      it("triggerThreshold per new asset matches its rule (stablecoins flat 5%, others CF-derived)", async () => {
+      // All 5 newly-configured assets are stablecoins, so each gets the flat 5% trigger.
+      it("triggerThreshold per new asset is the flat 5% stablecoin trigger", async () => {
         for (const c of NEW_ASSET_CONFIGS) {
-          let expected: BigNumber;
-          if (STABLECOINS.has(c.name)) {
-            expected = STABLECOIN_TRIGGER;
-          } else {
-            const market = await comptroller.markets(c.vToken);
-            const cf: BigNumber = market.collateralFactorMantissa;
-            expected = cf.isZero() ? TRIGGER_DEFAULT_BORROW_ONLY : triggerFromCF(cf);
-          }
+          expect(STABLECOINS.has(c.name), `${c.name} expected to be a stablecoin`).to.equal(true);
           const cfg = await dbo.assetProtectionConfig(c.asset);
-          expect(cfg.triggerThreshold, `${c.name}.triggerThreshold (vToken=${c.vToken})`).to.equal(expected);
+          expect(cfg.triggerThreshold, `${c.name}.triggerThreshold (vToken=${c.vToken})`).to.equal(STABLECOIN_TRIGGER);
         }
       });
     });
@@ -202,7 +184,7 @@ forking(FORK_BLOCK, async () => {
   // decimals, so the ResilientOracle price passes straight through to Redstone.
   //
   // The spike is sized off each asset's on-chain triggerThreshold (+50% buffer) so
-  // protection always arms regardless of the per-asset threshold (lisUSD's is 50%).
+  // protection always arms regardless of the per-asset threshold.
   // ────────────────────────────────────────────────────────────────────
 
   // DBO keeper — granted the keeper-action permissions in VIP-617, so it can drive
@@ -304,9 +286,9 @@ forking(FORK_BLOCK, async () => {
         expect(await dbo.currentlyUsingProtectedPrice(asset)).to.equal(true);
 
         // Keeper narrows the window around the restored spot, the cooldown elapses, then exits.
-        // The ±0.5% band gives a (max-min)/min spread of ~1.005%, which converges within every
-        // resetThreshold in this VIP (2% stablecoins, 5% FIL). A ±1% band would be a ~2.02%
-        // spread and exceed the 2% stablecoin reset.
+        // The ±0.5% band gives a (max-min)/min spread of ~1.005%, which converges within the
+        // 2% stablecoin resetThreshold used across this VIP. A ±1% band would be a ~2.02%
+        // spread and exceed that 2% reset.
         await setSpot(originalSpot);
         const tightMin = originalSpot.mul(995).div(1000);
         const tightMax = originalSpot.mul(1005).div(1000);
