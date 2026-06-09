@@ -26,8 +26,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-// Block after the T4B/N4B markets and the Atlas oracle were deployed on testnet.
-const FORK_BLOCK = 112188900;
+const FORK_BLOCK = 112317000;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);

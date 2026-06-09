@@ -56,15 +56,15 @@ export type MarketSpec = {
   };
 };
 
-// Market 1 — T4B
+// Market 1 — TSLAB
 export const MARKET_1: MarketSpec = {
   vToken: {
-    address: "0x4a45FBAf2A736bdF025DEd1D0Af3dF80070EDac0",
-    name: "Venus T4B",
-    symbol: "vT4B",
+    address: "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa",
+    name: "Venus TSLAB",
+    symbol: "vTSLAB",
     underlying: {
-      address: "0xc79Cb7efEBd121DC4B39eA141C214606595D665A", // MockT4B
-      symbol: "T4B",
+      address: "0x10d63B1203E5A0719AbbE927C8BFc87135b2F129", // MockTSLAB
+      symbol: "TSLAB",
       decimals: 18,
     },
     decimals: 8,
@@ -99,15 +99,15 @@ export const MARKET_1: MarketSpec = {
   },
 };
 
-// Market 2 — N4B
+// Market 2 — NVDAB
 export const MARKET_2: MarketSpec = {
   vToken: {
-    address: "0x7397B6bcFA9332Cc8791c886F339B4D114651719",
-    name: "Venus N4B",
-    symbol: "vN4B",
+    address: "0x9e1ECb2671AfabE9eaAA2e74Cb2318a9b6A2Eb5d",
+    name: "Venus NVDAB",
+    symbol: "vNVDAB",
     underlying: {
-      address: "0x16691f500541ca35bd63DD878B6D78728C9518AE", // MockN4B
-      symbol: "N4B",
+      address: "0x8A7d8589A597619A7842d3BC284b9a5a276FaE56", // MockNVDAB
+      symbol: "NVDAB",
       decimals: 18,
     },
     decimals: 8,

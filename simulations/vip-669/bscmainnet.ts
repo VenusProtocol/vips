@@ -25,8 +25,7 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// TODO(pre-deployment): set the fork block to one after the markets are deployed.
-const FORK_BLOCK = 83432607;
+const FORK_BLOCK = 103175700;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);

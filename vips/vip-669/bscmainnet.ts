@@ -55,15 +55,15 @@ export type MarketSpec = {
   };
 };
 
-// Market 1 — T4B
+// Market 1 — TSLAB
 export const MARKET_1: MarketSpec = {
   vToken: {
-    address: "0x1111111111111111111111111111111111111111", // TODO vToken (not deployed on mainnet yet)
-    name: "Venus T4B",
-    symbol: "vT4B",
+    address: "0x97421799419Eb782628e73e7220d8E0A207469a3",
+    name: "Venus TSLAB",
+    symbol: "vTSLAB",
     underlying: {
-      address: "0x1111111111111111111111111111111111111112", // TODO underlying (not deployed on mainnet yet)
-      symbol: "T4B",
+      address: "0x5b1910eaad6450e50f816082aa078c41f10c292f",
+      symbol: "T4B", // TODO: update to "TSLAB" once the underlying symbol is updated on-chain
       decimals: 18,
     },
     decimals: 8,
@@ -71,7 +71,7 @@ export const MARKET_1: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
-  rateModel: "0x1111111111111111111111111111111111111113", // TODO rate model (not deployed on mainnet yet)
+  rateModel: "0xe589E884f69dF3137B43A760C4Ec9E55D944439D",
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -100,15 +100,15 @@ export const MARKET_1: MarketSpec = {
   },
 };
 
-// Market 2 — N4B
+// Market 2 — NVDAB
 export const MARKET_2: MarketSpec = {
   vToken: {
-    address: "0x2222222222222222222222222222222222222221", // TODO vToken (not deployed on mainnet yet)
-    name: "Venus N4B",
-    symbol: "vN4B",
+    address: "0xEb8Ca841cBe1BC4832A10b15c7dAB1081eDaD371",
+    name: "Venus NVDAB",
+    symbol: "vNVDAB",
     underlying: {
-      address: "0x2222222222222222222222222222222222222222", // TODO underlying (not deployed on mainnet yet)
-      symbol: "N4B",
+      address: "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+      symbol: "N4B", // TODO: update to "NVDAB" once the underlying symbol is updated on-chain
       decimals: 18,
     },
     decimals: 8,
@@ -116,7 +116,7 @@ export const MARKET_2: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
-  rateModel: "0x2222222222222222222222222222222222222223", // TODO rate model (not deployed on mainnet yet)
+  rateModel: "0xe589E884f69dF3137B43A760C4Ec9E55D944439D",
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
