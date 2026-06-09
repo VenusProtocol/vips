@@ -27,10 +27,10 @@ export const ASSETS_TO_ENABLE = assetsToEnable as AssetToEnable[];
 
 export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
 
-export const vip668 = () => {
+export const vip630 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-668 [BNB Chain] Enable bounded pricing on the remaining Core Pool assets (VIP 3 of 3)",
+    title: "VIP-630 [BNB Chain] Enable bounded pricing on the remaining Core Pool assets (VIP 3 of 3)",
     description: `#### Summary
 
 This is **VIP 3 of 3**, the final step of the DeviationBoundedOracle (DBO) rollout on BNB Chain. The rollout has been delivered in phases across three VIPs, progressively extending bounded pricing across the Core Pool:
@@ -95,4 +95,4 @@ In every config \`resetThreshold\` is strictly below \`triggerThreshold\`, as th
   );
 };
 
-export default vip668;
+export default vip630;

@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import CHAINLINK_ORACLE_ABI from "../../src/vip-framework/abi/chainlinkOracle.json";
-import vip668, { ASSETS_TO_ENABLE, DEVIATION_BOUNDED_ORACLE, NEW_ASSET_CONFIGS } from "../../vips/vip-668/bscmainnet";
+import vip630, { ASSETS_TO_ENABLE, DEVIATION_BOUNDED_ORACLE, NEW_ASSET_CONFIGS } from "../../vips/vip-630/bscmainnet";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -25,7 +25,7 @@ const STABLECOINS = new Set(["DAI", "FDUSD", "lisUSD", "sUSDe", "USDe"]);
 
 // Assets already enabled before this VIP: TRX (enabled in VIP-617, the DBO deploy
 // VIP) plus AAVE, ADA, BCH, DOGE, LINK, LTC, TWT and UNI (enabled in VIP-626).
-// These must remain enabled and untouched across VIP-668.
+// These must remain enabled and untouched across VIP-630.
 const ALREADY_ENABLED = [
   { name: "AAVE", asset: "0xfb6115445Bff7b52FeB98650C87f44907E58f802" },
   { name: "ADA", asset: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47" },
@@ -96,7 +96,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-668 Enable bounded pricing for the remaining Core Pool assets", await vip668(), {
+  testVip("VIP-630 Enable bounded pricing for the remaining Core Pool assets", await vip630(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // setTokenConfigs emits one BoundedPricingWhitelistUpdated per newly-configured
       // asset (5), and setAssetBoundedPricingEnabled emits one per enabled asset (15) — 20 total.
