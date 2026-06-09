@@ -25,11 +25,11 @@ export const vip670 = () => {
     title: "VIP-670 Treasury Withdrawal for bStock Liquidation and Fixed-Rate Vault Liquidity Seeding",
     description: `#### Summary
 
-If passed, this VIP will withdraw stablecoin liquidity from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) on BNB Chain to a finance-controlled multisig, so the funds can be deployed for (1) a potential bStock liquidation and (2) seeding fixed-rate vault liquidity.
+If passed, this VIP will withdraw stablecoin liquidity from the [Venus Treasury](https://bscscan.com/address/${VTREASURY}) on BNB Chain to a finance-controlled multisig, so the funds can be deployed for (1) a potential bStock liquidation and (2) seeding fixed-rate vault liquidity.
 
 #### Proposed Changes
 
-Withdraw the following amounts from the Treasury to the finance multisig [0xdc6E047f665c3Db94292Bb7fB412B25370db2029](https://bscscan.com/address/0xdc6E047f665c3Db94292Bb7fB412B25370db2029):
+Withdraw the following amounts from the Treasury to the finance multisig [${FINANCE_MULTISIG}](https://bscscan.com/address/${FINANCE_MULTISIG}):
 
 - **480,000 USDT**
 - **720,000 USDC**
