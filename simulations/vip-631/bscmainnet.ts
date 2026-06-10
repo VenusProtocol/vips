@@ -5,14 +5,14 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip670, {
+import vip631, {
   FINANCE_MULTISIG,
   USDC,
   USDC_AMOUNT,
   USDT,
   USDT_AMOUNT,
   VTREASURY,
-} from "../../vips/vip-670/bscmainnet";
+} from "../../vips/vip-631/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
@@ -44,11 +44,15 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-670 Treasury Withdrawal for bStock Liquidation and Fixed-Rate Vault Liquidity Seeding", await vip670(), {
-    callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [2]);
+  testVip(
+    "VIP-631 [BNB Chain] Liquidity Reserve — Institutional Fixed Rate Vault Backstop & Bstock Liquidation Buffer",
+    await vip631(),
+    {
+      callbackAfterExecution: async (txResponse: TransactionResponse) => {
+        await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [2]);
+      },
     },
-  });
+  );
 
   describe("Post-VIP state", () => {
     it("Treasury USDT balance decreased by exactly USDT_AMOUNT", async () => {
