@@ -38,14 +38,8 @@ const COMPTROLLER_ABI = [
   "function checkMembership(address,address) view returns (bool)",
   "function exitMarket(address) returns (uint256)",
 ];
-const VTOKEN_ABI = [
-  "function borrow(uint256) returns (uint256)",
-  "function underlying() view returns (address)",
-];
-const ERC20_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function symbol() view returns (string)",
-];
+const VTOKEN_ABI = ["function borrow(uint256) returns (uint256)", "function underlying() view returns (address)"];
+const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function symbol() view returns (string)"];
 
 const BLOCK_NUMBER = 103745245;
 
