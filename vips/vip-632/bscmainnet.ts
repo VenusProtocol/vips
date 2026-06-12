@@ -13,10 +13,10 @@ export const SXP = "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A";
 // New direct price for SXP: 0.00046 USD, scaled to 1e18 (SXP has 18 decimals).
 export const SXP_DIRECT_PRICE = parseUnits("0.00046", 18); // 460000000000000
 
-const vip631 = () => {
+const vip632 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-631 Set SXP direct price to 0.00046 USD",
+    title: "VIP-632 Set SXP direct price to 0.00046 USD",
     description: `#### Summary
 
 If passed, this VIP will set the direct price of SXP to 0.00046 USD on the Chainlink oracle.
@@ -42,4 +42,4 @@ This VIP calls \`setDirectPrice(${SXP}, ${SXP_DIRECT_PRICE.toString()})\` on the
   );
 };
 
-export default vip631;
+export default vip632;

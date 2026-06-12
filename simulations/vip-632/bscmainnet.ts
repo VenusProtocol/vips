@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES, ORACLE_BNB } from "src/networkAddresses";
 import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip631, { SXP, SXP_DIRECT_PRICE } from "../../vips/vip-631/bscmainnet";
+import vip632, { SXP, SXP_DIRECT_PRICE } from "../../vips/vip-632/bscmainnet";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const CHAINLINK_ORACLE = bscmainnet.CHAINLINK_ORACLE;
@@ -126,7 +126,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-631 Set SXP direct price", await vip631(), {
+  testVip("VIP-632 Set SXP direct price", await vip632(), {
     callbackAfterExecution: async txResponse => {
       await expect(txResponse).to.emit(oracle, "PricePosted").withArgs(SXP, anyValue, SXP_DIRECT_PRICE);
     },
