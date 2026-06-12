@@ -1,0 +1,296 @@
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const CORE_POOL_ID = 0;
+
+export const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
+export const ATLAS_ORACLE = "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0";
+export const ATLAS_MAX_STALE_PERIOD = 86700; // ~24h
+
+export type MarketSpec = {
+  vToken: {
+    address: string;
+    name: string;
+    symbol: string;
+    underlying: { address: string; symbol: string; decimals: number };
+    decimals: number;
+    exchangeRate: BigNumber;
+    comptroller: string;
+    isLegacyPool: boolean;
+  };
+  rateModel: string;
+  interestRateModel: {
+    model: "jump";
+    baseRatePerYear: string;
+    multiplierPerYear: string;
+    jumpMultiplierPerYear: string;
+    kink: string;
+  };
+  oracle: {
+    address: string;
+    feed: string;
+    maxStalePeriod: number;
+    price: BigNumber;
+  };
+  riskParameters: {
+    collateralFactor: BigNumber;
+    liquidationThreshold: BigNumber;
+    liquidationIncentive: BigNumber;
+    reserveFactor: BigNumber;
+    supplyCap: BigNumber;
+    borrowCap: BigNumber;
+  };
+  initialSupply: {
+    amount: BigNumber;
+    vTokenReceiver: string;
+    vTokensToBurn: BigNumber;
+  };
+};
+
+// Market 1 — TSLAB
+export const MARKET_1: MarketSpec = {
+  vToken: {
+    address: "0x97421799419Eb782628e73e7220d8E0A207469a3",
+    name: "Venus TSLAB",
+    symbol: "vTSLAB",
+    underlying: {
+      address: "0x5b1910eaad6450e50f816082aa078c41f10c292f",
+      symbol: "T4B", // TODO: update to "TSLAB" once the underlying symbol is updated on-chain
+      decimals: 18,
+    },
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: bscmainnet.UNITROLLER,
+    isLegacyPool: true,
+  },
+  rateModel: "0xe589E884f69dF3137B43A760C4Ec9E55D944439D",
+  interestRateModel: {
+    model: "jump",
+    baseRatePerYear: "0",
+    multiplierPerYear: "0.0667",
+    jumpMultiplierPerYear: "6.27",
+    kink: "0.75",
+  },
+  oracle: {
+    address: ATLAS_ORACLE,
+    feed: "0x1111111111111111111111111111111111111115", // TODO Atlas feed (configured later)
+    maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
+    price: parseUnits("400", 18), // TODO placeholder, update with the real feed price
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.6", 18),
+    liquidationThreshold: parseUnits("0.7", 18),
+    liquidationIncentive: parseUnits("1.1", 18),
+    reserveFactor: parseUnits("0.1", 18),
+    supplyCap: parseUnits("236", 18),
+    borrowCap: parseUnits("236", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("0.26", 18),
+    vTokenReceiver: bscmainnet.VTREASURY,
+    vTokensToBurn: parseUnits("0.026", 8),
+  },
+};
+
+// Market 2 — NVDAB
+export const MARKET_2: MarketSpec = {
+  vToken: {
+    address: "0xEb8Ca841cBe1BC4832A10b15c7dAB1081eDaD371",
+    name: "Venus NVDAB",
+    symbol: "vNVDAB",
+    underlying: {
+      address: "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+      symbol: "N4B", // TODO: update to "NVDAB" once the underlying symbol is updated on-chain
+      decimals: 18,
+    },
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: bscmainnet.UNITROLLER,
+    isLegacyPool: true,
+  },
+  rateModel: "0xe589E884f69dF3137B43A760C4Ec9E55D944439D",
+  interestRateModel: {
+    model: "jump",
+    baseRatePerYear: "0",
+    multiplierPerYear: "0.0667",
+    jumpMultiplierPerYear: "6.27",
+    kink: "0.75",
+  },
+  oracle: {
+    address: ATLAS_ORACLE,
+    feed: "0x2222222222222222222222222222222222222225", // TODO Atlas feed (configured later)
+    maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
+    price: parseUnits("200", 18), // TODO placeholder, update with the real feed price
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.6", 18),
+    liquidationThreshold: parseUnits("0.7", 18),
+    liquidationIncentive: parseUnits("1.1", 18),
+    reserveFactor: parseUnits("0.1", 18),
+    supplyCap: parseUnits("450", 18),
+    borrowCap: parseUnits("450", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("0.5", 18),
+    vTokenReceiver: bscmainnet.VTREASURY,
+    vTokensToBurn: parseUnits("0.05", 8),
+  },
+};
+
+export const MARKETS: MarketSpec[] = [MARKET_1, MARKET_2];
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
+
+export const vTokensMinted = (m: MarketSpec) => convertAmountToVTokens(m.initialSupply.amount, m.vToken.exchangeRate);
+
+export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initialSupply.vTokensToBurn);
+
+export const vip669 = () => {
+  const meta = {
+    version: "v2",
+    title: "VIP-669 [BNB Chain] List new markets in the Venus Core Pool",
+    description: `#### Summary
+
+If passed, this VIP will list two new markets in the Venus Core Pool on BNB Chain.
+
+The assets, risk parameters and oracle configuration will be detailed ahead of execution.
+
+#### Description
+
+For each new market this VIP will:
+
+- Configure the asset to use the Atlas Oracle in the ResilientOracle
+- Add the market to the Core Pool Comptroller
+- Set the supply cap, borrow cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
+- Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
+- Provide bootstrap liquidity (minting an initial supply and sending the resulting vTokens to the VTreasury)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
+  };
+
+  return makeProposal(
+    MARKETS.flatMap(m => [
+      // Oracle configuration — single source: the Atlas Oracle (feed configured later).
+      {
+        target: m.oracle.address,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[m.vToken.underlying.address, m.oracle.feed, m.oracle.maxStalePeriod]],
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            m.vToken.underlying.address,
+            [m.oracle.address, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+      },
+
+      // Add market
+      {
+        target: m.vToken.comptroller,
+        signature: "_supportMarket(address)",
+        params: [m.vToken.address],
+      },
+      {
+        target: m.vToken.comptroller,
+        signature: "_setMarketSupplyCaps(address[],uint256[])",
+        params: [[m.vToken.address], [m.riskParameters.supplyCap]],
+      },
+      {
+        target: m.vToken.comptroller,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [[m.vToken.address], [m.riskParameters.borrowCap]],
+      },
+      // Enable borrowing for the market.
+      {
+        target: m.vToken.comptroller,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [CORE_POOL_ID, m.vToken.address, true],
+      },
+      {
+        target: m.vToken.address,
+        signature: "setAccessControlManager(address)",
+        params: [bscmainnet.ACCESS_CONTROL_MANAGER],
+      },
+      {
+        target: m.vToken.address,
+        signature: "setProtocolShareReserve(address)",
+        params: [PROTOCOL_SHARE_RESERVE],
+      },
+      {
+        target: m.vToken.address,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: [REDUCE_RESERVES_BLOCK_DELTA],
+      },
+      {
+        target: m.vToken.address,
+        signature: "_setReserveFactor(uint256)",
+        params: [m.riskParameters.reserveFactor],
+      },
+      {
+        target: m.vToken.comptroller,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [m.vToken.address, m.riskParameters.collateralFactor, m.riskParameters.liquidationThreshold],
+      },
+      {
+        target: m.vToken.comptroller,
+        signature: "setLiquidationIncentive(address,uint256)",
+        params: [m.vToken.address, m.riskParameters.liquidationIncentive],
+      },
+
+      // Initial liquidity: pull underlying from the Treasury, mint, burn a slice, and send the remainder to the receiver.
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [m.vToken.underlying.address, m.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: m.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [m.vToken.address, m.initialSupply.amount],
+      },
+      {
+        target: m.vToken.address,
+        signature: "mint(uint256)",
+        params: [m.initialSupply.amount],
+      },
+      {
+        target: m.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [m.vToken.address, 0],
+      },
+      // Burn a slice of vTokens.
+      {
+        target: m.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, m.initialSupply.vTokensToBurn],
+      },
+      // Transfer remaining vTokens to the receiver (VTreasury).
+      {
+        target: m.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
+      },
+    ]),
+    meta,
+    ProposalType.REGULAR,
+  );
+};
+
+export default vip669;
