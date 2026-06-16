@@ -89,7 +89,7 @@ forking(FORK_BLOCK, async () => {
           name: m.vToken.name,
           symbol: m.vToken.symbol,
           decimals: m.vToken.decimals,
-          underlying: m.vToken.underlying.address,
+          underlying: m.vToken.underlying,
           exchangeRate: m.vToken.exchangeRate,
           comptroller: m.vToken.comptroller,
         });

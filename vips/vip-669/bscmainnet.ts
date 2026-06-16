@@ -67,7 +67,7 @@ export const MARKET_1: MarketSpec = {
     symbol: "vTSLAB",
     underlying: {
       address: "0x5b1910eAaD6450E50f816082Aa078C41F10C292f",
-      symbol: "T4B", // TODO: update to "TSLAB" once the underlying symbol is updated on-chain
+      symbol: "TSLAB",
       decimals: 18,
     },
     decimals: 8,
@@ -112,7 +112,7 @@ export const MARKET_2: MarketSpec = {
     symbol: "vNVDAB",
     underlying: {
       address: "0x02Fca66C1D1aFB4E2A7884261eB00F63598a7436",
-      symbol: "N4B", // TODO: update to "NVDAB" once the underlying symbol is updated on-chain
+      symbol: "NVDAB",
       decimals: 18,
     },
     decimals: 8,
