@@ -10,6 +10,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   ATLAS_ORACLE,
   ATLAS_ORACLE_PERMISSIONS,
+  BORROW_ACTION,
   MARKETS,
   PROTOCOL_SHARE_RESERVE,
   REDUCE_RESERVES_BLOCK_DELTA,
@@ -52,7 +53,7 @@ forking(FORK_BLOCK, async () => {
           "MarketListed",
           "NewSupplyCap",
           "NewBorrowCap",
-          "BorrowAllowedUpdated",
+          "ActionPausedMarket",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
           "NewReduceReservesBlockDelta",
@@ -137,9 +138,8 @@ forking(FORK_BLOCK, async () => {
           expect(await vToken.balanceOf(bsctestnet.NORMAL_TIMELOCK)).to.equal(0);
         });
 
-        it("should allow borrowing on the market", async () => {
-          const market = await comptroller.markets(m.vToken.address);
-          expect(market.isBorrowAllowed).to.equal(true);
+        it("should pause borrowing on the market", async () => {
+          expect(await comptroller.actionPaused(m.vToken.address, BORROW_ACTION)).to.equal(true);
         });
       });
     }

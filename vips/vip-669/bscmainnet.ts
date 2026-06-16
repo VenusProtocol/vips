@@ -10,10 +10,14 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const CORE_POOL_ID = 0;
+export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 export const ATLAS_ORACLE = "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0";
-export const ATLAS_MAX_STALE_PERIOD = 86700; // ~24h
+export const ATLAS_MAX_STALE_PERIOD = 3800; // ~1h
+// Used in simulations only: the governance lifecycle mines ~72h of blocks, which would exceed the
+// real stale period and make getUnderlyingPrice revert. See VIP-615 stale-period workaround.
+export const ONE_YEAR = 31536000;
 
 export type MarketSpec = {
   vToken: {
@@ -62,7 +66,7 @@ export const MARKET_1: MarketSpec = {
     name: "Venus TSLAB",
     symbol: "vTSLAB",
     underlying: {
-      address: "0x5b1910eaad6450e50f816082aa078c41f10c292f",
+      address: "0x5b1910eAaD6450E50f816082Aa078C41F10C292f",
       symbol: "T4B", // TODO: update to "TSLAB" once the underlying symbol is updated on-chain
       decimals: 18,
     },
@@ -81,9 +85,9 @@ export const MARKET_1: MarketSpec = {
   },
   oracle: {
     address: ATLAS_ORACLE,
-    feed: "0x1111111111111111111111111111111111111115", // TODO Atlas feed (configured later)
+    feed: "0x63950C265e7CDB4016bA60C288c46291C0148ce2", // Atlas TSLAB/USD feed (id 772)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: parseUnits("400", 18), // TODO placeholder, update with the real feed price
+    price: BigNumber.from("404989994819567769480"), // feed answer @ FORK_BLOCK (~$405.00)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.6", 18),
@@ -107,7 +111,7 @@ export const MARKET_2: MarketSpec = {
     name: "Venus NVDAB",
     symbol: "vNVDAB",
     underlying: {
-      address: "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+      address: "0x02Fca66C1D1aFB4E2A7884261eB00F63598a7436",
       symbol: "N4B", // TODO: update to "NVDAB" once the underlying symbol is updated on-chain
       decimals: 18,
     },
@@ -126,9 +130,9 @@ export const MARKET_2: MarketSpec = {
   },
   oracle: {
     address: ATLAS_ORACLE,
-    feed: "0x2222222222222222222222222222222222222225", // TODO Atlas feed (configured later)
+    feed: "0x8a44cF4E55adD99EB8bAC5D5DB749C63106d54AA", // Atlas NVDAB/USD feed (id 773)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: parseUnits("200", 18), // TODO placeholder, update with the real feed price
+    price: BigNumber.from("211086527189540030430"), // feed answer @ FORK_BLOCK (~$211.09)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.6", 18),
@@ -156,7 +160,7 @@ export const vTokensMinted = (m: MarketSpec) => convertAmountToVTokens(m.initial
 
 export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initialSupply.vTokensToBurn);
 
-export const vip669 = () => {
+export const vip669 = (simulations = false) => {
   const meta = {
     version: "v2",
     title: "VIP-669 [BNB Chain] List new markets in the Venus Core Pool",
@@ -182,11 +186,13 @@ For each new market this VIP will:
 
   return makeProposal(
     MARKETS.flatMap(m => [
-      // Oracle configuration — single source: the Atlas Oracle (feed configured later).
+      // Oracle configuration — single source: the Atlas Oracle.
+      // In simulations use a 1-year stale period so the mined governance lifecycle doesn't make
+      // the feed appear stale.
       {
         target: m.oracle.address,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[m.vToken.underlying.address, m.oracle.feed, m.oracle.maxStalePeriod]],
+        params: [[m.vToken.underlying.address, m.oracle.feed, simulations ? ONE_YEAR : m.oracle.maxStalePeriod]],
       },
       {
         target: RESILIENT_ORACLE,
@@ -217,11 +223,11 @@ For each new market this VIP will:
         signature: "_setMarketBorrowCaps(address[],uint256[])",
         params: [[m.vToken.address], [m.riskParameters.borrowCap]],
       },
-      // Enable borrowing for the market.
+      // Pause borrowing for the market at launch.
       {
         target: m.vToken.comptroller,
-        signature: "setIsBorrowAllowed(uint96,address,bool)",
-        params: [CORE_POOL_ID, m.vToken.address, true],
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[m.vToken.address], [BORROW_ACTION], true],
       },
       {
         target: m.vToken.address,

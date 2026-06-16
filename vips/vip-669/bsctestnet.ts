@@ -12,6 +12,7 @@ export const ATLAS_ORACLE = "0x7F00af2f30a55e79311392C98fBBfA629D19b3A5";
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const CORE_POOL_ID = 0;
+export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 // ACM permissions to grant on the newly deployed Atlas Oracle, to every governance timelock.
 export const ATLAS_ORACLE_PERMISSIONS = ["setDirectPrice(address,uint256)", "setTokenConfig(TokenConfig)"];
@@ -212,11 +213,11 @@ The assets, risk parameters and oracle configuration will be detailed ahead of e
           signature: "_setMarketBorrowCaps(address[],uint256[])",
           params: [[m.vToken.address], [m.riskParameters.borrowCap]],
         },
-        // Enable borrowing for the market
+        // Pause borrowing for the market at launch
         {
           target: m.vToken.comptroller,
-          signature: "setIsBorrowAllowed(uint96,address,bool)",
-          params: [CORE_POOL_ID, m.vToken.address, true],
+          signature: "setActionsPaused(address[],uint8[],bool)",
+          params: [[m.vToken.address], [BORROW_ACTION], true],
         },
         {
           target: m.vToken.address,
