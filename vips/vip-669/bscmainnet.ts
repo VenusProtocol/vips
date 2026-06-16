@@ -18,6 +18,12 @@ export const ATLAS_MAX_STALE_PERIOD = 3800; // ~1h
 // real stale period and make getUnderlyingPrice revert. See VIP-615 stale-period workaround.
 export const ONE_YEAR = 31536000;
 
+// Oracle Dynamic Protection Mode (DeviationBoundedOracle)
+export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
+export const DBO_COOLDOWN_PERIOD = 3600; // 1h rolling window
+export const DBO_TRIGGER_THRESHOLD = parseUnits("0.1667", 18); // 16.67% — arms protection beyond this deviation
+export const DBO_RESET_THRESHOLD = parseUnits("0.05", 18); // 5%
+
 export type MarketSpec = {
   vToken: {
     address: string;
@@ -86,7 +92,7 @@ export const MARKET_1: MarketSpec = {
     address: ATLAS_ORACLE,
     feed: "0x63950C265e7CDB4016bA60C288c46291C0148ce2", // Atlas TSLAB/USD feed (id 772)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("404989994819567769480"), // feed answer @ FORK_BLOCK (~$405.00)
+    price: BigNumber.from("405127531587687588120"), // feed answer @ FORK_BLOCK (~$405.13)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.6", 18),
@@ -131,7 +137,7 @@ export const MARKET_2: MarketSpec = {
     address: ATLAS_ORACLE,
     feed: "0x8a44cF4E55adD99EB8bAC5D5DB749C63106d54AA", // Atlas NVDAB/USD feed (id 773)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("211086527189540030430"), // feed answer @ FORK_BLOCK (~$211.09)
+    price: BigNumber.from("211853899347221359990"), // feed answer @ FORK_BLOCK (~$211.85)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.6", 18),
@@ -180,6 +186,7 @@ For each new market this VIP will:
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
 - Provide bootstrap liquidity (minting an initial supply and sending the resulting vTokens to the VTreasury)
 - Pause borrowing for the market at launch
+- Enable Oracle Dynamic Protection Mode (DeviationBoundedOracle, see VIP-617) for the underlying, with a 16.67% deviation trigger
 
 #### Risk parameters
 
@@ -193,7 +200,8 @@ Both markets share the same interest rate model (base 0%, multiplier 6.67%, jump
 | Reserve factor | 10% | 10% |
 | Supply cap | 236 TSLAB | 450 NVDAB |
 | Borrow cap | 0 (borrowing disabled) | 0 (borrowing disabled) |
-| Bootstrap liquidity | 0.26 TSLAB | 0.5 NVDAB |`,
+| Bootstrap liquidity | 0.26 TSLAB | 0.5 NVDAB |
+| Protection trigger | 16.67% | 16.67% |`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -302,6 +310,22 @@ Both markets share the same interest rate model (base 0%, multiplier 6.67%, jump
         target: m.vToken.address,
         signature: "transfer(address,uint256)",
         params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
+      },
+
+      // Enable Oracle Dynamic Protection Mode (DBO) for the underlying with a 16.67% deviation trigger.
+      {
+        target: DEVIATION_BOUNDED_ORACLE,
+        signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
+        params: [
+          [
+            m.vToken.underlying.address,
+            DBO_COOLDOWN_PERIOD,
+            DBO_TRIGGER_THRESHOLD,
+            DBO_RESET_THRESHOLD,
+            true, // isBoundedPricingEnabled
+            false, // cachingEnabled
+          ],
+        ],
       },
     ]),
     meta,

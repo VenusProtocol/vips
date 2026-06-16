@@ -13,6 +13,12 @@ export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
+// Oracle Dynamic Protection Mode (DeviationBoundedOracle)
+export const DEVIATION_BOUNDED_ORACLE = "0xE0dafC97895B3c98d3B96D3f8739AaC73166beB8";
+export const DBO_COOLDOWN_PERIOD = 3600; // 1h rolling window
+export const DBO_TRIGGER_THRESHOLD = parseUnits("0.1667", 18); // 16.67% — arms protection beyond this deviation
+export const DBO_RESET_THRESHOLD = parseUnits("0.05", 18); // 5%
+
 // ACM permissions to grant on the newly deployed Atlas Oracle, to every governance timelock.
 export const ATLAS_ORACLE_PERMISSIONS = ["setDirectPrice(address,uint256)", "setTokenConfig(TokenConfig)"];
 export const TIMELOCKS = [bsctestnet.NORMAL_TIMELOCK, bsctestnet.FAST_TRACK_TIMELOCK, bsctestnet.CRITICAL_TIMELOCK];
@@ -155,12 +161,10 @@ export const vTokensRemaining = (m: MarketSpec) =>
 export const vip669 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-669 [BNB Chain Testnet] List new markets in the Venus Core Pool",
+    title: "VIP-669 [BNB Chain Testnet] List vTSLAB and vNVDAB markets in the Venus Core Pool",
     description: `#### Summary
 
-If passed, this VIP will list two new markets in the Venus Core Pool on BNB Chain testnet.
-
-The assets, risk parameters and oracle configuration will be detailed ahead of execution.`,
+If passed, this VIP will list two new tokenized-equity markets — Venus TSLAB (vTSLAB) and Venus NVDAB (vNVDAB) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -276,6 +280,22 @@ The assets, risk parameters and oracle configuration will be detailed ahead of e
           target: m.vToken.address,
           signature: "transfer(address,uint256)",
           params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
+        },
+
+        // Enable Oracle Dynamic Protection Mode (DBO) for the underlying with a 16.67% deviation trigger.
+        {
+          target: DEVIATION_BOUNDED_ORACLE,
+          signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
+          params: [
+            [
+              m.vToken.underlying.address,
+              DBO_COOLDOWN_PERIOD,
+              DBO_TRIGGER_THRESHOLD,
+              DBO_RESET_THRESHOLD,
+              true, // isBoundedPricingEnabled
+              false, // cachingEnabled
+            ],
+          ],
         },
       ]),
     ],

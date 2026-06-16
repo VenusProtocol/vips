@@ -1,6 +1,4 @@
-import { setStorageAt } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
@@ -13,6 +11,10 @@ import {
   ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
   BORROW_ACTION,
+  DBO_COOLDOWN_PERIOD,
+  DBO_RESET_THRESHOLD,
+  DBO_TRIGGER_THRESHOLD,
+  DEVIATION_BOUNDED_ORACLE,
   MARKETS,
   ONE_YEAR,
   PROTOCOL_SHARE_RESERVE,
@@ -23,6 +25,7 @@ import {
 } from "../../vips/vip-669/bscmainnet";
 import ATLAS_ORACLE_ABI from "./abi/AtlasOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -30,47 +33,14 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Block after the TSLAB/NVDAB markets and their Atlas feeds were deployed on mainnet.
-const FORK_BLOCK = 104503915;
-
-// The underlying RWA tokens have zero supply on mainnet, so there is no holder to impersonate.
-// Instead we "deal" the bootstrap amount straight into the VTreasury by writing the ERC20
-// balances mapping slot. The slot index is unknown, so we brute-force it: sequential slots
-// (covers OZ v4 layouts) plus the OZ v5 ERC20 namespaced storage base.
-const OZ_V5_ERC20_BASE = BigNumber.from("0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00");
-let cachedBalancesSlot: BigNumber | undefined;
-
-const dealTokens = async (token: string, holder: string, amount: BigNumber) => {
-  const erc20 = new ethers.Contract(token, ERC20_ABI, ethers.provider);
-  const value = ethers.utils.hexZeroPad(amount.toHexString(), 32);
-  const bases: BigNumber[] = [];
-  if (cachedBalancesSlot) bases.push(cachedBalancesSlot);
-  for (let i = 0; i <= 120; i++) bases.push(BigNumber.from(i));
-  bases.push(OZ_V5_ERC20_BASE);
-  for (const base of bases) {
-    const index = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [holder, base]));
-    const prev = await ethers.provider.getStorageAt(token, index);
-    await setStorageAt(token, index, value);
-    if ((await erc20.balanceOf(holder)).eq(amount)) {
-      cachedBalancesSlot = base;
-      return;
-    }
-    await setStorageAt(token, index, prev); // wrong slot — restore and keep searching
-  }
-  throw new Error(`Could not locate the ERC20 balances slot for ${token}`);
-};
+// Block after the TSLAB/NVDAB markets, their Atlas feeds, and the VTreasury bootstrap funding.
+const FORK_BLOCK = 104542000;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const atlasOracle = new ethers.Contract(ATLAS_ORACLE, ATLAS_ORACLE_ABI, ethers.provider);
-
-  before(async () => {
-    // Fund the VTreasury with the bootstrap liquidity the VIP withdraws via withdrawTreasuryBEP20.
-    for (const m of MARKETS) {
-      await dealTokens(m.vToken.underlying.address, bscmainnet.VTREASURY, m.initialSupply.amount);
-    }
-  });
+  const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
 
   describe("Pre-VIP behavior", async () => {
     for (const m of MARKETS) {
@@ -148,6 +118,15 @@ forking(FORK_BLOCK, async () => {
           expect(config.feed).to.equal(m.oracle.feed);
           // Simulations configure a 1-year stale period (see VIP-615 workaround).
           expect(config.maxStalePeriod).to.equal(ONE_YEAR);
+        });
+
+        it("enables Oracle Dynamic Protection Mode with a 16.67% trigger", async () => {
+          const cfg = await dbo.assetProtectionConfig(m.vToken.underlying.address);
+          expect(cfg.isBoundedPricingEnabled).to.equal(true);
+          expect(cfg.triggerThreshold).to.equal(DBO_TRIGGER_THRESHOLD);
+          expect(cfg.resetThreshold).to.equal(DBO_RESET_THRESHOLD);
+          expect(cfg.cooldownPeriod).to.equal(DBO_COOLDOWN_PERIOD);
+          expect(cfg.cachingEnabled).to.equal(false);
         });
 
         it("market has correct owner", async () => {
