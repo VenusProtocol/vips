@@ -92,7 +92,7 @@ export const MARKET_TSLAB: MarketSpec = {
     address: ATLAS_ORACLE,
     feed: "0x63950C265e7CDB4016bA60C288c46291C0148ce2", // Atlas TSLAB/USD feed (id 772)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("405127531587687588120"), // feed answer @ FORK_BLOCK (~$405.13)
+    price: BigNumber.from("405935900574526605890"), // feed answer @ FORK_BLOCK (~$405.94)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.6", 18),
@@ -137,7 +137,7 @@ export const MARKET_NVDAB: MarketSpec = {
     address: ATLAS_ORACLE,
     feed: "0x8a44cF4E55adD99EB8bAC5D5DB749C63106d54AA", // Atlas NVDAB/USD feed (id 773)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("211853899347221359990"), // feed answer @ FORK_BLOCK (~$211.85)
+    price: BigNumber.from("209041550339998554920"), // feed answer @ FORK_BLOCK (~$209.04)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.6", 18),
@@ -182,7 +182,7 @@ export const MARKET_SPCXB: MarketSpec = {
     address: ATLAS_ORACLE,
     feed: "0x0072e55bff6fEC200708cE82612569a1C0EB4B24", // Atlas SPCXB/USD feed
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("212715918086907586340"), // feed answer (~$212.72);
+    price: BigNumber.from("210591042364299936480"), // feed answer @ FORK_BLOCK (~$210.59)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.5", 18),
@@ -199,8 +199,7 @@ export const MARKET_SPCXB: MarketSpec = {
   },
 };
 
-// TODO: add MARKET_SPCXB once the VTreasury holds the initial supply.
-export const MARKETS: MarketSpec[] = [MARKET_TSLAB, MARKET_NVDAB];
+export const MARKETS: MarketSpec[] = [MARKET_TSLAB, MARKET_NVDAB, MARKET_SPCXB];
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -211,10 +210,10 @@ export const vTokensMinted = (m: MarketSpec) => convertAmountToVTokens(m.initial
 
 export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initialSupply.vTokensToBurn);
 
-export const vip669 = (simulations = false) => {
+export const vip633 = (simulations = false) => {
   const meta = {
     version: "v2",
-    title: "VIP-669 [BNB Chain] List vTSLAB and vNVDAB markets in the Venus Core Pool",
+    title: "VIP-633 [BNB Chain] List vTSLAB, vNVDAB and vSPCXB markets in the Venus Core Pool",
     description: `#### Summary
 
 If passed, this VIP will list three new tokenized-equity markets in the Venus Core Pool on BNB Chain, with borrowing paused at launch:
@@ -237,18 +236,37 @@ For each new market this VIP will:
 
 #### Risk parameters
 
-All three markets share the same interest rate model (base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%) and the following parameters:
+All three markets share the same interest rate model (base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%). Per-market parameters:
 
-| Parameter | Venus TSLAB | Venus NVDAB | Venus SpaceX |
-| --- | --- | --- | --- |
-| Collateral factor | 60% | 60% | 50% |
-| Liquidation threshold | 70% | 70% | 65% |
-| Liquidation incentive | 10% | 10% | 10% |
-| Reserve factor | 10% | 10% | 10% |
-| Supply cap | 236 TSLAB | 450 NVDAB | 500 SPCXB |
-| Borrow cap | 0 (borrowing disabled) | 0 (borrowing disabled) | 0 (borrowing disabled) |
-| Bootstrap liquidity | 0.26 TSLAB | 0.5 NVDAB | 0.51 SPCXB |
-| Protection trigger | 16.67% | 16.67% | 16.67% |`,
+**Venus TSLAB (vTSLAB)**
+- Collateral factor: 60%
+- Liquidation threshold: 70%
+- Liquidation incentive: 10%
+- Reserve factor: 10%
+- Supply cap: 236 TSLAB
+- Borrow cap: 0 (borrowing disabled)
+- Bootstrap liquidity: 0.26 TSLAB
+- Protection trigger: 16.67%
+
+**Venus NVDAB (vNVDAB)**
+- Collateral factor: 60%
+- Liquidation threshold: 70%
+- Liquidation incentive: 10%
+- Reserve factor: 10%
+- Supply cap: 450 NVDAB
+- Borrow cap: 0 (borrowing disabled)
+- Bootstrap liquidity: 0.5 NVDAB
+- Protection trigger: 16.67%
+
+**Venus SpaceX (vSPCXB)**
+- Collateral factor: 50%
+- Liquidation threshold: 65%
+- Liquidation incentive: 10%
+- Reserve factor: 10%
+- Supply cap: 500 SPCXB
+- Borrow cap: 0 (borrowing disabled)
+- Bootstrap liquidity: 0.51 SPCXB
+- Protection trigger: 16.67%`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -380,4 +398,4 @@ All three markets share the same interest rate model (base 0%, multiplier 6.67%,
   );
 };
 
-export default vip669;
+export default vip633;
