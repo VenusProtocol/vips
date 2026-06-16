@@ -62,8 +62,8 @@ export type MarketSpec = {
   };
 };
 
-// Market 1 — TSLAB
-export const MARKET_1: MarketSpec = {
+// Market — TSLAB
+export const MARKET_TSLAB: MarketSpec = {
   vToken: {
     address: "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa",
     name: "Venus TSLAB",
@@ -105,8 +105,8 @@ export const MARKET_1: MarketSpec = {
   },
 };
 
-// Market 2 — NVDAB
-export const MARKET_2: MarketSpec = {
+// Market — NVDAB
+export const MARKET_NVDAB: MarketSpec = {
   vToken: {
     address: "0x9e1ECb2671AfabE9eaAA2e74Cb2318a9b6A2Eb5d",
     name: "Venus NVDAB",
@@ -148,7 +148,50 @@ export const MARKET_2: MarketSpec = {
   },
 };
 
-export const MARKETS: MarketSpec[] = [MARKET_1, MARKET_2];
+// Market — SPCXB (Venus SpaceX)
+export const MARKET_SPCXB: MarketSpec = {
+  vToken: {
+    address: "0x05B2EC5B7437FB188175bf440e3EB36af79fe319",
+    name: "Venus SpaceX",
+    symbol: "vSPCXB",
+    underlying: {
+      address: "0x6D9e91cB766259af42619c14c994E694E57e6E85", // MockSPCXB
+      symbol: "SPCXB",
+      decimals: 18,
+    },
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: bsctestnet.UNITROLLER,
+    isLegacyPool: true,
+  },
+  rateModel: "0x1CcDaf39085bae4e27c3Ba100561b1AD1B5A6b80",
+  interestRateModel: {
+    model: "jump",
+    baseRatePerYear: "0",
+    multiplierPerYear: "0.0667",
+    jumpMultiplierPerYear: "6.27",
+    kink: "0.75",
+  },
+  oracle: {
+    address: ATLAS_ORACLE,
+    directPrice: parseUnits("192", 18), // $192 (mocked)
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.5", 18),
+    liquidationThreshold: parseUnits("0.65", 18),
+    liquidationIncentive: parseUnits("1.1", 18),
+    reserveFactor: parseUnits("0.1", 18),
+    supplyCap: parseUnits("500", 18),
+    borrowCap: parseUnits("0", 18), // borrowing disabled at launch
+  },
+  initialSupply: {
+    amount: parseUnits("0.51", 18),
+    vTokenReceiver: bsctestnet.VTREASURY,
+    vTokensToBurn: parseUnits("0.051", 8),
+  },
+};
+
+export const MARKETS: MarketSpec[] = [MARKET_TSLAB, MARKET_NVDAB, MARKET_SPCXB];
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -161,10 +204,10 @@ export const vTokensRemaining = (m: MarketSpec) =>
 export const vip669 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-669 [BNB Chain Testnet] List vTSLAB and vNVDAB markets in the Venus Core Pool",
+    title: "VIP-669 [BNB Chain Testnet] List vTSLAB, vNVDAB and vSPCXB markets in the Venus Core Pool",
     description: `#### Summary
 
-If passed, this VIP will list two new tokenized-equity markets — Venus TSLAB (vTSLAB) and Venus NVDAB (vNVDAB) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch.`,
+If passed, this VIP will list three new tokenized-equity markets — Venus TSLAB (vTSLAB), Venus NVDAB (vNVDAB) and Venus SpaceX (vSPCXB) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

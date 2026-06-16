@@ -64,8 +64,8 @@ export type MarketSpec = {
   };
 };
 
-// Market 1 — TSLAB
-export const MARKET_1: MarketSpec = {
+// Market — TSLAB
+export const MARKET_TSLAB: MarketSpec = {
   vToken: {
     address: "0x97421799419Eb782628e73e7220d8E0A207469a3",
     name: "Venus TSLAB",
@@ -109,8 +109,8 @@ export const MARKET_1: MarketSpec = {
   },
 };
 
-// Market 2 — NVDAB
-export const MARKET_2: MarketSpec = {
+// Market — NVDAB
+export const MARKET_NVDAB: MarketSpec = {
   vToken: {
     address: "0xEb8Ca841cBe1BC4832A10b15c7dAB1081eDaD371",
     name: "Venus NVDAB",
@@ -154,7 +154,54 @@ export const MARKET_2: MarketSpec = {
   },
 };
 
-export const MARKETS: MarketSpec[] = [MARKET_1, MARKET_2];
+// Market — SPCXB (Venus SpaceX)
+export const MARKET_SPCXB: MarketSpec = {
+  vToken: {
+    address: "0xC36dFaCc7a125859C106F29b9F2d874CCF29A55A",
+    name: "Venus SpaceX",
+    symbol: "vSPCXB",
+    underlying: {
+      address: "0xbe9D156892E55e7154BcD3cB0FEA677F9D3103E1",
+      symbol: "SPCXB",
+      decimals: 18,
+    },
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: bscmainnet.UNITROLLER,
+    isLegacyPool: true,
+  },
+  rateModel: "0xe589E884f69dF3137B43A760C4Ec9E55D944439D",
+  interestRateModel: {
+    model: "jump",
+    baseRatePerYear: "0",
+    multiplierPerYear: "0.0667",
+    jumpMultiplierPerYear: "6.27",
+    kink: "0.75",
+  },
+  oracle: {
+    address: ATLAS_ORACLE,
+    feed: ethers.constants.AddressZero, // TODO: set Atlas SPCXB/USD feed
+    maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
+    price: BigNumber.from("0"), // TODO: feed answer @ FORK_BLOCK once the feed is configured
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.5", 18),
+    liquidationThreshold: parseUnits("0.65", 18),
+    liquidationIncentive: parseUnits("1.1", 18),
+    reserveFactor: parseUnits("0.1", 18),
+    supplyCap: parseUnits("500", 18),
+    borrowCap: parseUnits("0", 18), // borrowing disabled at launch
+  },
+  initialSupply: {
+    amount: parseUnits("0.51", 18),
+    vTokenReceiver: bscmainnet.VTREASURY,
+    vTokensToBurn: parseUnits("0.051", 8), // 10% of minted vTokens
+  },
+};
+
+// TODO: add MARKET_SPCXB once its Atlas feed is configured
+// (and the VTreasury holds the 0.51 SPCXB bootstrap amount).
+export const MARKETS: MarketSpec[] = [MARKET_TSLAB, MARKET_NVDAB];
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -168,19 +215,20 @@ export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initia
 export const vip669 = (simulations = false) => {
   const meta = {
     version: "v2",
-    title: "VIP-669 [BNB Chain] List new markets in the Venus Core Pool",
+    title: "VIP-669 [BNB Chain] List vTSLAB and vNVDAB markets in the Venus Core Pool",
     description: `#### Summary
 
-If passed, this VIP will list two new tokenized-equity markets in the Venus Core Pool on BNB Chain, with borrowing paused at launch:
+If passed, this VIP will list three new tokenized-equity markets in the Venus Core Pool on BNB Chain, with borrowing paused at launch:
 
 - **Venus TSLAB (vTSLAB)** — backed by TSLAB (Tesla, Inc.)
 - **Venus NVDAB (vNVDAB)** — backed by NVDAB (NVIDIA Corp)
+- **Venus SpaceX (vSPCXB)** — backed by SPCXB (SpaceX)
 
 #### Description
 
 For each new market this VIP will:
 
-- Configure the underlying to use its Atlas Oracle price feed (TSLAB/USD, NVDAB/USD) in the ResilientOracle
+- Configure the underlying to use its Atlas Oracle price feed (TSLAB/USD, NVDAB/USD, SPCXB/USD) in the ResilientOracle
 - Add the market to the Core Pool Comptroller
 - Set the supply cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
@@ -190,18 +238,18 @@ For each new market this VIP will:
 
 #### Risk parameters
 
-Both markets share the same interest rate model (base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%) and the following parameters:
+All three markets share the same interest rate model (base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%) and the following parameters:
 
-| Parameter | Venus TSLAB | Venus NVDAB |
-| --- | --- | --- |
-| Collateral factor | 60% | 60% |
-| Liquidation threshold | 70% | 70% |
-| Liquidation incentive | 10% | 10% |
-| Reserve factor | 10% | 10% |
-| Supply cap | 236 TSLAB | 450 NVDAB |
-| Borrow cap | 0 (borrowing disabled) | 0 (borrowing disabled) |
-| Bootstrap liquidity | 0.26 TSLAB | 0.5 NVDAB |
-| Protection trigger | 16.67% | 16.67% |`,
+| Parameter | Venus TSLAB | Venus NVDAB | Venus SpaceX |
+| --- | --- | --- | --- |
+| Collateral factor | 60% | 60% | 50% |
+| Liquidation threshold | 70% | 70% | 65% |
+| Liquidation incentive | 10% | 10% | 10% |
+| Reserve factor | 10% | 10% | 10% |
+| Supply cap | 236 TSLAB | 450 NVDAB | 500 SPCXB |
+| Borrow cap | 0 (borrowing disabled) | 0 (borrowing disabled) | 0 (borrowing disabled) |
+| Bootstrap liquidity | 0.26 TSLAB | 0.5 NVDAB | 0.51 SPCXB |
+| Protection trigger | 16.67% | 16.67% | 16.67% |`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

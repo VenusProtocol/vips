@@ -32,7 +32,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 112317000;
+const FORK_BLOCK = 113708000;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
@@ -67,8 +67,8 @@ forking(FORK_BLOCK, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
         ],
-        // 6 permission grants (2 functions x 3 timelocks); the rest are 2 markets each
-        [6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        // 6 permission grants (2 functions x 3 timelocks); the rest are 3 markets each
+        [6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       );
     },
   });
