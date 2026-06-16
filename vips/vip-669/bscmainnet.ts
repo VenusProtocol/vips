@@ -180,9 +180,9 @@ export const MARKET_SPCXB: MarketSpec = {
   },
   oracle: {
     address: ATLAS_ORACLE,
-    feed: ethers.constants.AddressZero, // TODO: set Atlas SPCXB/USD feed
+    feed: "0x0072e55bff6fEC200708cE82612569a1C0EB4B24", // Atlas SPCXB/USD feed
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("0"), // TODO: feed answer @ FORK_BLOCK once the feed is configured
+    price: BigNumber.from("212715918086907586340"), // feed answer (~$212.72);
   },
   riskParameters: {
     collateralFactor: parseUnits("0.5", 18),
@@ -199,8 +199,7 @@ export const MARKET_SPCXB: MarketSpec = {
   },
 };
 
-// TODO: add MARKET_SPCXB once its Atlas feed is configured
-// (and the VTreasury holds the 0.51 SPCXB bootstrap amount).
+// TODO: add MARKET_SPCXB once the VTreasury holds the initial supply.
 export const MARKETS: MarketSpec[] = [MARKET_TSLAB, MARKET_NVDAB];
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
