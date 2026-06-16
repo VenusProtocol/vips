@@ -52,7 +52,6 @@ forking(FORK_BLOCK, async () => {
           "PermissionGranted",
           "MarketListed",
           "NewSupplyCap",
-          "NewBorrowCap",
           "ActionPausedMarket",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
@@ -63,7 +62,7 @@ forking(FORK_BLOCK, async () => {
           "NewLiquidationIncentive",
         ],
         // 6 permission grants (2 functions x 3 timelocks); the rest are 2 markets each
-        [6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
       );
     },
   });

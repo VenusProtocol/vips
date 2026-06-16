@@ -89,7 +89,6 @@ forking(FORK_BLOCK, async () => {
         [
           "MarketListed",
           "NewSupplyCap",
-          "NewBorrowCap",
           "ActionPausedMarket",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
@@ -100,7 +99,7 @@ forking(FORK_BLOCK, async () => {
           "NewLiquidationIncentive",
         ],
         // 2 markets listed in this VIP
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
       );
     },
   });

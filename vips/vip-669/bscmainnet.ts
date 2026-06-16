@@ -9,7 +9,6 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
-export const CORE_POOL_ID = 0;
 export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
@@ -95,7 +94,7 @@ export const MARKET_1: MarketSpec = {
     liquidationIncentive: parseUnits("1.1", 18),
     reserveFactor: parseUnits("0.1", 18),
     supplyCap: parseUnits("236", 18),
-    borrowCap: parseUnits("236", 18),
+    borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
     amount: parseUnits("0.26", 18),
@@ -140,7 +139,7 @@ export const MARKET_2: MarketSpec = {
     liquidationIncentive: parseUnits("1.1", 18),
     reserveFactor: parseUnits("0.1", 18),
     supplyCap: parseUnits("450", 18),
-    borrowCap: parseUnits("450", 18),
+    borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
     amount: parseUnits("0.5", 18),
@@ -166,19 +165,35 @@ export const vip669 = (simulations = false) => {
     title: "VIP-669 [BNB Chain] List new markets in the Venus Core Pool",
     description: `#### Summary
 
-If passed, this VIP will list two new markets in the Venus Core Pool on BNB Chain.
+If passed, this VIP will list two new tokenized-equity markets in the Venus Core Pool on BNB Chain, with borrowing paused at launch:
 
-The assets, risk parameters and oracle configuration will be detailed ahead of execution.
+- **Venus TSLAB (vTSLAB)** — backed by TSLAB (Tesla, Inc.)
+- **Venus NVDAB (vNVDAB)** — backed by NVDAB (NVIDIA Corp)
 
 #### Description
 
 For each new market this VIP will:
 
-- Configure the asset to use the Atlas Oracle in the ResilientOracle
+- Configure the underlying to use its Atlas Oracle price feed (TSLAB/USD, NVDAB/USD) in the ResilientOracle
 - Add the market to the Core Pool Comptroller
-- Set the supply cap, borrow cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
+- Set the supply cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
-- Provide bootstrap liquidity (minting an initial supply and sending the resulting vTokens to the VTreasury)`,
+- Provide bootstrap liquidity (minting an initial supply and sending the resulting vTokens to the VTreasury)
+- Pause borrowing for the market at launch
+
+#### Risk parameters
+
+Both markets share the same interest rate model (base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%) and the following parameters:
+
+| Parameter | Venus TSLAB | Venus NVDAB |
+| --- | --- | --- |
+| Collateral factor | 60% | 60% |
+| Liquidation threshold | 70% | 70% |
+| Liquidation incentive | 10% | 10% |
+| Reserve factor | 10% | 10% |
+| Supply cap | 236 TSLAB | 450 NVDAB |
+| Borrow cap | 0 (borrowing disabled) | 0 (borrowing disabled) |
+| Bootstrap liquidity | 0.26 TSLAB | 0.5 NVDAB |`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -217,11 +232,6 @@ For each new market this VIP will:
         target: m.vToken.comptroller,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
         params: [[m.vToken.address], [m.riskParameters.supplyCap]],
-      },
-      {
-        target: m.vToken.comptroller,
-        signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[m.vToken.address], [m.riskParameters.borrowCap]],
       },
       // Pause borrowing for the market at launch.
       {

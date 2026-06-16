@@ -11,7 +11,6 @@ export const ATLAS_ORACLE = "0x7F00af2f30a55e79311392C98fBBfA629D19b3A5";
 
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
-export const CORE_POOL_ID = 0;
 export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 // ACM permissions to grant on the newly deployed Atlas Oracle, to every governance timelock.
@@ -91,7 +90,7 @@ export const MARKET_1: MarketSpec = {
     liquidationIncentive: parseUnits("1.1", 18),
     reserveFactor: parseUnits("0.1", 18),
     supplyCap: parseUnits("236", 18),
-    borrowCap: parseUnits("236", 18),
+    borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
     amount: parseUnits("0.26", 18),
@@ -134,7 +133,7 @@ export const MARKET_2: MarketSpec = {
     liquidationIncentive: parseUnits("1.1", 18),
     reserveFactor: parseUnits("0.1", 18),
     supplyCap: parseUnits("450", 18),
-    borrowCap: parseUnits("450", 18),
+    borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
     amount: parseUnits("0.5", 18),
@@ -207,11 +206,6 @@ The assets, risk parameters and oracle configuration will be detailed ahead of e
           target: m.vToken.comptroller,
           signature: "_setMarketSupplyCaps(address[],uint256[])",
           params: [[m.vToken.address], [m.riskParameters.supplyCap]],
-        },
-        {
-          target: m.vToken.comptroller,
-          signature: "_setMarketBorrowCaps(address[],uint256[])",
-          params: [[m.vToken.address], [m.riskParameters.borrowCap]],
         },
         // Pause borrowing for the market at launch
         {
