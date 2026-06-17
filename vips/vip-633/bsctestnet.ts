@@ -201,10 +201,10 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 export const vTokensRemaining = (m: MarketSpec) =>
   convertAmountToVTokens(m.initialSupply.amount, m.vToken.exchangeRate).sub(m.initialSupply.vTokensToBurn);
 
-export const vip669 = () => {
+export const vip633 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-669 [BNB Chain Testnet] List vTSLAB, vNVDAB and vSPCXB markets in the Venus Core Pool",
+    title: "VIP-633 [BNB Chain Testnet] List vTSLAB, vNVDAB and vSPCXB markets in the Venus Core Pool",
     description: `#### Summary
 
 If passed, this VIP will list three new tokenized-equity markets — Venus TSLAB (vTSLAB), Venus NVDAB (vNVDAB) and Venus SpaceX (vSPCXB) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch.`,
@@ -347,4 +347,4 @@ If passed, this VIP will list three new tokenized-equity markets — Venus TSLAB
   );
 };
 
-export default vip669;
+export default vip633;

@@ -21,7 +21,7 @@ import {
   TIMELOCKS,
   convertAmountToVTokens,
   vTokensRemaining,
-  vip669,
+  vip633,
 } from "../../vips/vip-633/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -49,7 +49,7 @@ forking(FORK_BLOCK, async () => {
     }
   });
 
-  testVip("VIP-669 Testnet", await vip669(), {
+  testVip("VIP-633 Testnet", await vip633(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
