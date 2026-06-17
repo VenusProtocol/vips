@@ -46,13 +46,16 @@ export interface Mkt {
   vToken: string;
   // true when RF is already 100% on-chain (RF command is a no-op and is skipped).
   rfAlready100?: boolean;
-  // true for markets where the IRM repoint is omitted (PLANET, stkBNB — ~$0 borrows).
+  // true for markets where the IRM repoint is intentionally omitted.
   skipIrm?: boolean;
   // leftover Phase-1 gaps to close → 0.
   supplyCapGap?: boolean;
   borrowCapGap?: boolean;
   // CF gap → 0, preserving the existing liquidation threshold.
   cfGapLiqThreshold?: string;
+  // BNB Core e-mode CF gap → 0 via the diamond setCollateralFactor(uint96,address,uint256,uint256),
+  // preserving the existing liquidation threshold.
+  emodeCfGap?: { poolId: number; liquidationThreshold: string };
 }
 
 export interface PoolDef {
@@ -88,7 +91,7 @@ export const BNB_DEFI: PoolDef = {
     { symbol: "ANKR", vToken: "0x19CE11C8817a1828D1d357DFBF62dCf5b0B2A362" },
     { symbol: "ankrBNB", vToken: "0x53728FD51060a85ac41974C6C3Eb1DaE42776723" },
     { symbol: "BSW", vToken: "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379" },
-    { symbol: "PLANET", vToken: "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be", rfAlready100: true, skipIrm: true },
+    { symbol: "PLANET", vToken: "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be", rfAlready100: true },
     { symbol: "TWT", vToken: "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F" },
     { symbol: "USDD", vToken: "0xA615467caE6B9E0bb98BC04B4411d9296fd1dFa0" },
     { symbol: "USDT", vToken: "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854" },
@@ -117,7 +120,7 @@ export const BNB_LIQUID_STAKED_BNB: PoolDef = {
     { symbol: "BNBx", vToken: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791" },
     { symbol: "PT-clisBNB-24APR2025", vToken: "0xA537ACf381b12Bbb91C58398b66D1D220f1C77c8" },
     { symbol: "slisBNB", vToken: "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A" },
-    { symbol: "stkBNB", vToken: "0xcc5D9e502574cda17215E70bC0B4546663785227", rfAlready100: true, skipIrm: true },
+    { symbol: "stkBNB", vToken: "0xcc5D9e502574cda17215E70bC0B4546663785227", rfAlready100: true },
     { symbol: "WBNB", vToken: "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2" },
   ],
 };
@@ -193,7 +196,13 @@ export const BNB_CORE: PoolDef = {
   irmKey: "bscCore",
   legacy: true,
   markets: [
-    { symbol: "DOT", vToken: "0x1610bc33319e9398de5f57B33a5b184c806aD217", supplyCapGap: true, borrowCapGap: true },
+    {
+      symbol: "DOT",
+      vToken: "0x1610bc33319e9398de5f57B33a5b184c806aD217",
+      supplyCapGap: true,
+      borrowCapGap: true,
+      emodeCfGap: { poolId: 14, liquidationThreshold: parseUnits("0.65", 18).toString() },
+    },
     { symbol: "FIL", vToken: "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343" },
     { symbol: "TUSDOLD", vToken: "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3", rfAlready100: true },
     { symbol: "THE", vToken: "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f" },
@@ -393,6 +402,18 @@ export const generatePoolCommands = (pool: PoolDef): any[] => {
       target: comptroller,
       signature: "setCollateralFactor(address,uint256,uint256)",
       params: [m.vToken, 0, m.cfGapLiqThreshold],
+      ...chain,
+    });
+  }
+
+  // Close BNB Core e-mode CF gaps → 0 (preserving the liquidation threshold).
+  for (const m of markets) {
+    const g = m.emodeCfGap;
+    if (!g) continue;
+    commands.push({
+      target: comptroller,
+      signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+      params: [g.poolId, m.vToken, 0, g.liquidationThreshold],
       ...chain,
     });
   }

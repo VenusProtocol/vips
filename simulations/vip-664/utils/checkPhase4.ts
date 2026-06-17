@@ -17,6 +17,7 @@ const COMPTROLLER_ABI = [
   "function supplyCaps(address) view returns (uint256)",
   "function borrowCaps(address) view returns (uint256)",
   "function markets(address) view returns (bool isListed, uint256 collateralFactorMantissa, uint256 liquidationThresholdMantissa)",
+  "function poolMarkets(uint96, address) view returns (bool isListed, uint256 collateralFactorMantissa, uint256 unused, uint256 liquidationThresholdMantissa, bool isBorrowAllowed)",
 ];
 
 // Asserts the pre-VIP state for the given pools, proving the VIP is not a no-op.
@@ -40,6 +41,7 @@ export const checkPhase4PreVip = (pools: PoolDef[]) => {
         const supplyGap = pool.markets.filter(m => m.supplyCapGap);
         const borrowGap = pool.markets.filter(m => m.borrowCapGap);
         const cfGap = pool.markets.filter(m => m.cfGapLiqThreshold !== undefined);
+        const emodeCfGap = pool.markets.filter(m => m.emodeCfGap !== undefined);
 
         if (rfMarkets.length > 0) {
           it("reserve factor below 100% on markets being raised", async () => {
@@ -85,6 +87,18 @@ export const checkPhase4PreVip = (pools: PoolDef[]) => {
             }
           });
         }
+
+        if (emodeCfGap.length > 0) {
+          it("e-mode collateral-factor gaps still open (> 0, liquidation threshold matches)", async () => {
+            for (const m of emodeCfGap) {
+              const g = m.emodeCfGap;
+              if (!g) continue;
+              const data = await comptroller.poolMarkets(g.poolId, m.vToken);
+              expect(data.collateralFactorMantissa.gt(0), m.symbol).to.be.true;
+              expect(data.liquidationThresholdMantissa.toString(), m.symbol).to.equal(g.liquidationThreshold);
+            }
+          });
+        }
       });
     }
   });
@@ -109,6 +123,7 @@ export const checkPhase4PostVip = (pools: PoolDef[]) => {
         const supplyGap = pool.markets.filter(m => m.supplyCapGap);
         const borrowGap = pool.markets.filter(m => m.borrowCapGap);
         const cfGap = pool.markets.filter(m => m.cfGapLiqThreshold !== undefined);
+        const emodeCfGap = pool.markets.filter(m => m.emodeCfGap !== undefined);
 
         if (rfMarkets.length > 0) {
           it("reserve factor raised to 100%", async () => {
@@ -151,6 +166,18 @@ export const checkPhase4PostVip = (pools: PoolDef[]) => {
               const data = await comptroller.markets(m.vToken);
               expect(data.collateralFactorMantissa.toString(), m.symbol).to.equal("0");
               expect(data.liquidationThresholdMantissa.toString(), m.symbol).to.equal(m.cfGapLiqThreshold);
+            }
+          });
+        }
+
+        if (emodeCfGap.length > 0) {
+          it("e-mode collateral factors closed to 0 (liquidation threshold preserved)", async () => {
+            for (const m of emodeCfGap) {
+              const g = m.emodeCfGap;
+              if (!g) continue;
+              const data = await comptroller.poolMarkets(g.poolId, m.vToken);
+              expect(data.collateralFactorMantissa.toString(), m.symbol).to.equal("0");
+              expect(data.liquidationThresholdMantissa.toString(), m.symbol).to.equal(g.liquidationThreshold);
             }
           });
         }
