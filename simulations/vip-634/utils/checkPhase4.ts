@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { PUSHOUT_IRM, PoolDef, RF_FULL } from "../../../vips/vip-664/phase4Markets";
+import { PUSHOUT_IRM, PoolDef, RF_FULL } from "../../../vips/vip-634/phase4Markets";
 
 // Documented pre-VIP collateral factor on the two BNB Liquid Staked ETH markets (5%).
 const CF_GAP = parseUnits("0.05", 18);

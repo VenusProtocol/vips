@@ -16,7 +16,7 @@ import {
 
 const meta = {
   version: "v2",
-  title: "VIP-664 Market Deprecation Phase 4 (Part 1 of 2)",
+  title: "VIP-634 Market Deprecation Phase 4 (Part 1 of 2)",
   description: `#### Summary
 
 This proposal is the first of two VIPs implementing Phase 4 of the market deprecation outlined in the Venus community forum ([Deprecate Venus Core on opBNB / Optimism / Unichain + Isolated Pools](https://community.venus.io/t/deprecate-venus-core-on-opbnb-optimism-unichain-isolated-pools/5760) and [May 2026 Risk Parameter Update & Asset Off-boarding](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785)).
@@ -25,13 +25,15 @@ The work is split across two VIPs to respect the governor's 100-operation limit 
 
 #### Description
 
-For each deprecated market this VIP:
+These markets already had their collateral factors reduced to zero through prior off-boarding actions, but their reserve factors, interest rate models, and certain residual supply / borrow caps remain misaligned with a wound-down state. For each deprecated market this VIP:
 
 1. Sets the reserve factor to 100% (markets already at 100% are skipped).
 2. Repoints the interest rate model to the chain's push-out deprecation curve (base 300% / slope1 0% / jump 363.64% / kink 0.45 — flat 300% below the kink, ramping to a 500% maximum at full utilization). PLANET and stkBNB are excluded (~$0 borrows, IRM moot).
 3. Closes the leftover Phase-1 gaps by setting outstanding supply / borrow caps to 0.
 
 Liquidation thresholds are unchanged; no action reduces collateral factors of healthy positions in this part.
+
+This parameter update is the first of a two-step wind-down. A follow-up VIP, expected approximately two weeks later, will set the liquidation thresholds and remaining collateral factors of these markets to zero, completing the wind-down.
 
 #### Security and additional considerations
 
@@ -42,7 +44,7 @@ Liquidation thresholds are unchanged; no action reduces collateral factors of he
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
 };
 
-export const vip664 = () =>
+export const vip634 = () =>
   makeProposal(
     [
       // ── BNB Core (legacy) ──
@@ -64,4 +66,4 @@ export const vip664 = () =>
     ProposalType.REGULAR,
   );
 
-export default vip664;
+export default vip634;

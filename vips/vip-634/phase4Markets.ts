@@ -264,8 +264,8 @@ export const UNICHAIN: PoolDef = {
 };
 
 // Ethereum is split across the two VIPs to keep each LayerZero message < 10 KB:
-//   - ETH_CORE  → VIP-664
-//   - ETH_CURVE + ETH_LIQUID_STAKED_ETH → VIP-665
+//   - ETH_CORE  → VIP-634
+//   - ETH_CURVE + ETH_LIQUID_STAKED_ETH → VIP-635
 export const ETH_CORE: PoolDef = {
   label: "Ethereum Core pool",
   comptroller: "0x687a01ecF6d3907658f7A7c714749fAC32336D1B",
