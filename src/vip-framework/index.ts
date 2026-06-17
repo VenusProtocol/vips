@@ -163,6 +163,31 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   return txResponses;
 };
 
+// Logs a single governance transaction's gas in a consistent format:
+//   [gas] <description> <label> gasUsed=<n> (<pct>% of <network> per-tx cap <cap>)
+// Each governance step (propose / queue / execute) runs as one on-chain tx and must
+// fit the chain's per-tx gas cap. When `enforce` is set, also asserts the tx fits the
+// cap — over it the on-chain tx reverts (empty error on propose) and the VIP can't ship.
+const reportTxGas = async (
+  description: string,
+  label: string,
+  gasUsed: BigNumber,
+  options: { enforce?: boolean } = {},
+): Promise<void> => {
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+  const suffix = Number.isFinite(cap)
+    ? ` (${gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+    : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+  console.log(`[gas] ${description} ${label} gasUsed=${gasUsed.toString()}${suffix}`);
+  if (options.enforce && Number.isFinite(cap)) {
+    expect(
+      gasUsed.lte(cap),
+      `${label} gasUsed ${gasUsed.toString()} exceeds the ${FORKED_NETWORK} per-tx gas cap ${cap}; ` +
+        `split or trim the VIP so it fits a single on-chain transaction`,
+    ).to.equal(true);
+  }
+};
+
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
   let impersonatedTimelock: SignerWithAddress;
   let governorProxy: Contract;
@@ -227,7 +252,12 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
           .connect(proposer)
           .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type);
       }
-      await tx.wait();
+      const receipt = await tx.wait();
+      // propose() stores the whole proposal in one tx — the heaviest governance tx and
+      // the binding per-tx-cap constraint. Enforce the cap (over it, on-chain propose
+      // reverts with an empty error and the VIP cannot be created).
+      await reportTxGas(description, "propose()", receipt.gasUsed, { enforce: true });
+
       proposalId = await governorProxy.callStatic.proposalCount();
       expect(proposalIdBefore.add(1)).to.equal(proposalId);
     });
@@ -245,7 +275,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("should be queued successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
-      await tx.wait();
+      const receipt = await tx.wait();
+      await reportTxGas(description, "queue(proposalId)", receipt.gasUsed);
     });
 
     it("should be executed successfully", async () => {
@@ -268,12 +299,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       }
       const tx = await proposer.sendTransaction(populated);
       const receipt = await tx.wait();
-
-      const gasUsed = receipt.gasUsed.toString();
-      const capSuffix = Number.isFinite(cap)
-        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
-        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
-      console.log(`[gas] ${description} execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
+      await reportTxGas(description, "execute(proposalId)", receipt.gasUsed);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
