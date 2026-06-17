@@ -277,10 +277,10 @@ export const ETH_CORE: PoolDef = {
     { symbol: "sFRAX", vToken: "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe" },
     { symbol: "EIGEN", vToken: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e" },
     { symbol: "BAL", vToken: "0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8" },
-    { symbol: "yvUSDC-1", vToken: "0xf87c0a64dc3a8622D6c63265FA29137788163879" },
-    { symbol: "yvUSDT-1", vToken: "0x475d0C68a8CD275c15D1F01F4f291804E445F677" },
-    { symbol: "yvUSDS-1", vToken: "0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764" },
-    { symbol: "yvWETH-1", vToken: "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0" },
+    // { symbol: "yvUSDC-1", vToken: "0xf87c0a64dc3a8622D6c63265FA29137788163879" },
+    // { symbol: "yvUSDT-1", vToken: "0x475d0C68a8CD275c15D1F01F4f291804E445F677" },
+    // { symbol: "yvUSDS-1", vToken: "0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764" },
+    // { symbol: "yvWETH-1", vToken: "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0" },
   ],
 };
 
