@@ -6,7 +6,6 @@ import {
   BNB_CORE,
   BNB_DEFI,
   BNB_GAMEFI,
-  BNB_MEME,
   ETH_CORE,
   OPBNB,
   OPTIMISM,
@@ -21,7 +20,7 @@ const meta = {
 
 This proposal is the first of two VIPs implementing Phase 4 of the market deprecation outlined in the Venus community forum ([Deprecate Venus Core on opBNB / Optimism / Unichain + Isolated Pools](https://community.venus.io/t/deprecate-venus-core-on-opbnb-optimism-unichain-isolated-pools/5760) and [May 2026 Risk Parameter Update & Asset Off-boarding](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785)).
 
-The work is split across two VIPs to respect the governor's 100-operation limit and the LayerZero 10 KB per-message cap. Part 1 covers the BNB Core pool, the BNB BTC / DeFi / GameFi / Meme isolated pools, and the opBNB, Optimism, Unichain and Ethereum Core deployments.
+The work is split across two VIPs to respect the governor's 100-operation limit and the LayerZero 10 KB per-message cap. Part 1 covers the BNB Core pool, the BNB BTC / DeFi / GameFi isolated pools, and the opBNB, Optimism, Unichain and Ethereum Core deployments.
 
 #### Description
 
@@ -54,7 +53,6 @@ export const vip634 = () =>
       ...generatePoolCommands(BNB_BTC),
       ...generatePoolCommands(BNB_DEFI),
       ...generatePoolCommands(BNB_GAMEFI),
-      ...generatePoolCommands(BNB_MEME),
 
       // ── Remote chains ──
       ...generatePoolCommands(OPBNB),

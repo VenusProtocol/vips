@@ -6,6 +6,7 @@ import {
   BASE_CORE,
   BNB_LIQUID_STAKED_BNB,
   BNB_LIQUID_STAKED_ETH,
+  BNB_MEME,
   BNB_STABLECOINS,
   BNB_TRON,
   ETH_CURVE,
@@ -21,7 +22,7 @@ const meta = {
 
 This proposal is the second of two VIPs implementing Phase 4 of the market deprecation outlined in the Venus community forum ([Deprecate Venus Core on opBNB / Optimism / Unichain + Isolated Pools](https://community.venus.io/t/deprecate-venus-core-on-opbnb-optimism-unichain-isolated-pools/5760) and [May 2026 Risk Parameter Update & Asset Off-boarding](https://community.venus.io/t/may-2026-risk-parameter-update-asset-off-boarding/5785)).
 
-The work is split across two VIPs to respect the governor's 100-operation limit and the LayerZero 10 KB per-message cap. Part 2 covers the BNB Liquid Staked BNB / Liquid Staked ETH / Stablecoins / Tron isolated pools, the Ethereum Curve and Ethereum Liquid Staked ETH pools, and the Arbitrum, Base and zkSync Era deployments.
+The work is split across two VIPs to respect the governor's 100-operation limit and the LayerZero 10 KB per-message cap. Part 2 covers the BNB Meme / Liquid Staked BNB / Liquid Staked ETH / Stablecoins / Tron isolated pools, the Ethereum Curve and Ethereum Liquid Staked ETH pools, and the Arbitrum, Base and zkSync Era deployments.
 
 #### Description
 
@@ -46,6 +47,7 @@ export const vip635 = () =>
   makeProposal(
     [
       // ── BNB isolated pools ──
+      ...generatePoolCommands(BNB_MEME),
       ...generatePoolCommands(BNB_LIQUID_STAKED_BNB),
       ...generatePoolCommands(BNB_LIQUID_STAKED_ETH),
       ...generatePoolCommands(BNB_STABLECOINS),
