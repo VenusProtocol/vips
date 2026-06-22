@@ -22,7 +22,11 @@ The TokenRedeemer contract (owned by the NormalTimelock) exposes \`sweepTokens(t
 
 #### Proposed Changes
 
-- Call \`sweepTokens(XVS, VTreasury)\` on the TokenRedeemer, transferring its full XVS balance to the Treasury.
+- Call \`sweepTokens(XVS, VTreasury)\` on the TokenRedeemer (\`0x6E78a0d96257F8F2615d72F3ee48cb6fb2c970bd\`), transferring its full XVS balance to the Treasury.
+
+#### Deployed Contract
+
+- TokenRedeemer (BNB Chain Testnet): [\`0x6E78a0d96257F8F2615d72F3ee48cb6fb2c970bd\`](https://testnet.bscscan.com/address/0x6E78a0d96257F8F2615d72F3ee48cb6fb2c970bd) — owned by the NormalTimelock.
 
 #### Conclusion
 
