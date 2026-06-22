@@ -30,7 +30,7 @@ The TokenRedeemer contract (owned by the NormalTimelock) exposes \`sweepTokens(t
 
 #### Conclusion
 
-This VIP recovers stuck XVS to the Treasury via the governance-owned TokenRedeemer, without affecting any market parameters.`,
+This VIP recovers stuck XVS to the Treasury via the governance-owned TokenRedeemer.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
