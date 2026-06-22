@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer, Wallet } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999 from "../../vips/vip-999/bscmainnet";
@@ -38,7 +38,6 @@ import LEVERAGE_ABI from "./abi/LeverageStrategiesManager.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
 import TRANSPARENT_PROXY_ABI from "./abi/TransparentUpgradeableProxy.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
@@ -111,7 +110,33 @@ const readStorageSnapshot = async (c: Contract) => {
 
 const markets = Object.values(VTOKENS_TO_UPGRADE);
 
-forking(102068510, async () => {
+const pinPriceFeeds = async () => {
+  const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+  const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+  const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+  const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+
+  for (const asset of [USDT, USDC, WBNB, ETH, XVS]) {
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.CHAINLINK_ORACLE,
+      asset,
+      ethers.constants.AddressZero,
+      NORMAL_TIMELOCK,
+    );
+    await setRedstonePrice(
+      bscmainnet.REDSTONE_ORACLE,
+      asset,
+      ethers.constants.AddressZero,
+      NORMAL_TIMELOCK,
+      undefined,
+      {
+        tokenDecimals: 18,
+      },
+    );
+  }
+};
+
+forking(105686375, async () => {
   let comptroller: Contract;
   let liquidator: Contract;
   let liquidatorProxyAdmin: Contract;
@@ -138,6 +163,8 @@ forking(102068510, async () => {
     leverageOwnerBefore = await leverageManager.owner();
     // Snapshot Core Pool storage pre-VIP so we can assert the diamond recut leaves every slot intact.
     storageBefore = await readStorageSnapshot(comptroller);
+
+    await pinPriceFeeds();
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -385,7 +412,7 @@ forking(102068510, async () => {
       const swapHelperIface = new ethers.utils.Interface(SWAP_HELPER_ABI);
       const transferData = new ethers.utils.Interface(ERC20_ABI).encodeFunctionData("transfer", [recipient, amountOut]);
       const calls = [swapHelperIface.encodeFunctionData("genericCall", [tokenOut, transferData])];
-      const deadline = 20 * 365 * 24 * 60 * 60;
+      const deadline = Math.floor(Date.now() / 1000) + 20 * 365 * 24 * 60 * 60;
       const salt = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256"], [++saltCounter]));
       const types = {
         Multicall: [
@@ -411,13 +438,6 @@ forking(102068510, async () => {
       rpm = await ethers.getContractAt(RELATIVE_POSITION_MANAGER_ABI, RELATIVE_POSITION_MANAGER);
       dsa = await ethers.getContractAt(ERC20_ABI, DSA);
       shortVToken = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, vSHORT);
-
-      const oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, await comptroller.oracle());
-      await setMaxStalePeriodForAllAssets(oracle, [
-        await ethers.getContractAt(ERC20_ABI, DSA),
-        await ethers.getContractAt(ERC20_ABI, LONG),
-        await ethers.getContractAt(ERC20_ABI, SHORT),
-      ]);
 
       swapHelper = await ethers.getContractAt(SWAP_HELPER_ABI, await leverageManager.swapHelper());
       const eip712 = await swapHelper.eip712Domain();
