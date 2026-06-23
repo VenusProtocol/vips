@@ -3,28 +3,21 @@ import { makeProposal } from "src/utils";
 
 import {
   ACCESS_CONTROL_MANAGER,
-  FLASHLOAN_FACET_SELECTORS,
+  EXECUTOR,
+  FACETS,
   LEVERAGE_PROXY_ADMIN,
   LEVERAGE_STRATEGIES_MANAGER,
   LIQUIDATOR,
   LIQUIDATOR_PROXY_ADMIN,
-  MARKET_FACET_SELECTORS,
   NEW_COMPTROLLER_LENS,
   NEW_DIAMOND,
-  NEW_FLASHLOAN_FACET,
+  NEW_EXECUTOR_IMPL,
   NEW_LEVERAGE_IMPL,
   NEW_LIQUIDATOR_IMPL,
-  NEW_MARKET_FACET,
-  NEW_POLICY_FACET,
-  NEW_REWARD_FACET,
-  NEW_SETTER_FACET,
   NEW_VTOKEN_DELEGATE,
-  POLICY_FACET_SELECTORS,
-  REWARD_FACET_EXISTING_SELECTORS,
-  REWARD_FACET_NEW_SELECTORS,
+  PROXY_ADMIN,
   SEIZE_VENUS_FILTERED_SIGNATURE,
   SEIZE_VENUS_PERMISSION_GRANTEES,
-  SETTER_FACET_SELECTORS,
   UNITROLLER,
   VTOKENS_TO_UPGRADE,
 } from "./utils/data.bscmainnet";
@@ -43,8 +36,7 @@ If passed, this VIP applies the fixes and recompiled bytecode from the Certik "V
 - **Liquidator** — accrues VAI interest before the force-liquidation gate; honors the per-borrower forced-liquidation flag.
 - **VBep20Delegate** — recompiled, audited delegate; every Core Pool market on the standard delegate is repointed (vBNB and bespoke/legacy markets excluded).
 - **LeverageStrategiesManager** — dust returned via operation deltas; new owner-only sweepToken(address).
-
-The reaudit's changes to ResilientOracle, OneJumpOracle, SnapshotLens and VenusLens were limited to documentation (NatSpec) and do not affect their compiled bytecode or behavior, so these contracts are intentionally not upgraded by this proposal.`,
+- **Executor (E-brake V2)** — implementation-only upgrade: the supply/borrow cap-exceeding emergency halts now fail closed if the cap read reverts (emitting HaltedWithoutCapCheck) instead of falling back to a stale reading.`,
   forDescription: "I agree that Venus Protocol should proceed with this proposal",
   againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -62,12 +54,8 @@ export const vip999 = () => {
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [
           [
-            [NEW_MARKET_FACET, FacetCutAction.Replace, MARKET_FACET_SELECTORS],
-            [NEW_POLICY_FACET, FacetCutAction.Replace, POLICY_FACET_SELECTORS],
-            [NEW_REWARD_FACET, FacetCutAction.Replace, REWARD_FACET_EXISTING_SELECTORS],
-            [NEW_SETTER_FACET, FacetCutAction.Replace, SETTER_FACET_SELECTORS],
-            [NEW_FLASHLOAN_FACET, FacetCutAction.Replace, FLASHLOAN_FACET_SELECTORS],
-            [NEW_REWARD_FACET, FacetCutAction.Add, REWARD_FACET_NEW_SELECTORS],
+            ...FACETS.map(f => [f.newFacet, FacetCutAction.Replace, f.selectors]),
+            ...FACETS.filter(f => f.newSelectors.length > 0).map(f => [f.newFacet, FacetCutAction.Add, f.newSelectors]),
           ],
         ],
       },
@@ -111,6 +99,16 @@ export const vip999 = () => {
         target: LEVERAGE_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [LEVERAGE_STRATEGIES_MANAGER, NEW_LEVERAGE_IMPL],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // 5. Executor (E-brake V2)
+      // ──────────────────────────────────────────────────────────────────────────
+
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [EXECUTOR, NEW_EXECUTOR_IMPL],
       },
     ],
     meta,

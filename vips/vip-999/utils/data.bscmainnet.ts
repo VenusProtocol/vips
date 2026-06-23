@@ -21,138 +21,173 @@ export const SEIZE_VENUS_PERMISSION_GRANTEES = [
 ];
 
 // Newly deployed implementations on BNB Chain mainnet.
-export const NEW_DIAMOND = "0x19db3224da0f019Fc53A52baa533216554721e43"; // Diamond (Unitroller implementation)
-export const NEW_MARKET_FACET = "0x44B13FEDE6b4866C60E1ac78Ac9B065406510433";
-export const NEW_POLICY_FACET = "0x201Aed58C29F09663280c5647d564D7B106E4335";
-export const NEW_REWARD_FACET = "0xB677627eB4B9D8bfB793966e266C899E7FD484C5";
-export const NEW_SETTER_FACET = "0xe0A1EAF1Ad30abBC206c9A3A83F3177e7498b841";
-export const NEW_FLASHLOAN_FACET = "0x65527D9F60E6c6dEE2C5CF361C38499daf0587BA";
-export const NEW_COMPTROLLER_LENS = "0x3C5Fc884BF6d1Ec8957A75EF6436b3B5750A57da";
+export const NEW_DIAMOND = "0xA66B2b5D50ce68A125bBad6B2265b637868c6E66"; // Diamond (Unitroller implementation)
+export const NEW_COMPTROLLER_LENS = "0xd5DEb631cB6c6a667e926a482aadc95a471b120c";
 export const NEW_LIQUIDATOR_IMPL = "0xC8c6f55DEBb47f724761920B79DC3ab5399DBC62";
-export const NEW_VTOKEN_DELEGATE = "0x309bC6e25672fDBCFa09D76bAA68be59f215f98d";
+export const NEW_VTOKEN_DELEGATE = "0xCDfea50f7CECCB24Fe804657DB8E6c93b689941e";
 export const NEW_LEVERAGE_IMPL = "0xB8c418eFf558D7eE517b8f26B5Eb0F4f3c53F5D5";
+export const EXECUTOR = "0xDd541A1b065F9587b01815a390a4d4559D7b630F"; // Executor proxy
+export const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4"; // DefaultProxyAdmin
+export const NEW_EXECUTOR_IMPL = "0x347fBbC71C07496fbBb2fEc5D2a036605F14089D";
 
-// Selectors currently owned by each Core Pool Comptroller facet (diamond loupe). Replaced onto the
-// recompiled facets; the RewardFacet additionally gains the two new overloads.
-export const MARKET_FACET_SELECTORS = [
-  "0xa76b3fda",
-  "0x89c13be0",
-  "0x929fe9a1",
-  "0xd0d13036",
-  "0xd585c3c6",
-  "0xc2998238",
-  "0xf9682732",
-  "0xede4edd0",
-  "0xb0772d0b",
-  "0xabfceffc",
-  "0x23617585",
-  "0xafd3783b",
-  "0x19ef3e8b",
-  "0xd686e9ee",
-  "0x7b86e42c",
-  "0x63e0d634",
-  "0xf02fdf97",
-  "0x007e3dd2",
-  "0x3d98a1e5",
-  "0x0ef332ca",
-  "0xc488847b",
-  "0xa78dc775",
-  "0x8e8f294b",
-  "0x3093c11e",
-  "0xd137f36e",
-  "0xcab4f84c",
-  "0x0686dab6",
-  "0xddbf54fd",
-  "0xd463654c",
-  "0x4d99c776",
-  "0xc5b4db55",
-];
-export const POLICY_FACET_SELECTORS = [
-  "0xead1a8a0",
-  "0xda3d454c",
-  "0x5c778605",
-  "0x5ec88c79",
-  "0x528a174c",
-  "0x4e79238f",
-  "0x5fc7e71e",
-  "0x47ef3b3b",
-  "0x4ef4c3e1",
-  "0x41c728b9",
-  "0xeabe7d91",
-  "0x51dff989",
-  "0x24008a62",
-  "0x1ededc91",
-  "0xd02f7351",
-  "0x6d35bf91",
-  "0xbdcdc258",
-  "0x6a56947e",
-];
-export const REWARD_FACET_EXISTING_SELECTORS = [
-  "0xa7604b41", // _grantXVS(address,uint256)
-  "0x70bf66f0", // claimVenus(address[],address[],bool,bool,bool)
-  "0x86df31ee", // claimVenus(address,address[])
-  "0xadcd5fb9", // claimVenus(address)
-  "0xd09c54ba", // claimVenus(address[],address[],bool,bool)
-  "0x7858524d", // claimVenusAsCollateral(address)
-  "0xededbae6", // getXVSVTokenAddress()
-  "0x655f0725", // seizeVenus(address[],address)
-  "0xe85a2960", // actionPaused(address,uint8)
-  "0xbf32442d", // getXVSAddress()
-];
-export const REWARD_FACET_NEW_SELECTORS = [
-  "0xc2dbfc50", // claimVenusAsCollateral(address,address[])
-  "0xf74c8f31", // seizeVenus(address[],address,address[])
-];
-export const SETTER_FACET_SELECTORS = [
-  "0xf519fc30",
-  "0x2b5d790c",
-  "0x317b0b77",
-  "0x9bf34cbb",
-  "0x522c656b",
-  "0x17db2163",
-  "0xbb857450",
-  "0x607ef6c1",
-  "0x51a485e4",
-  "0x5f5af1aa",
-  "0x55ee1fe1",
-  "0x9460c8b5",
-  "0x2a6a6065",
-  "0xd24febad",
-  "0x9cfdd9e6",
-  "0x2ec04124",
-  "0x4e0853db",
-  "0x6662c7c9",
-  "0x919a3736",
-  "0x4ef233fc",
-  "0x24aaa220",
-  "0x7938146f",
-  "0x12348e96",
-  "0x5cc4fdeb",
-  "0x9159b177",
-  "0xd6ad5c39",
-  "0x8b3113f6",
-  "0xa89766dd",
-  "0x35439240",
-  "0x9bd8f6e8",
-  "0x186db48f",
-  "0xd136af44",
-  "0xfd51a3ad",
-  "0x4964f48c",
-  "0xb88d846b",
-  "0x530e784f",
-  "0xc32094c7",
-  "0x42adb211",
-  "0xfe40768f",
-];
-export const FLASHLOAN_FACET_SELECTORS = ["0x5544ed9c"];
+// Core Pool Comptroller diamond recut, one entry per facet:
+export interface FacetCut {
+  name: string;
+  oldFacet: string;
+  newFacet: string;
+  selectors: string[];
+  newSelectors: string[];
+}
 
-// Every Core Pool market currently on the standard VBep20Delegate (0xb25b...45E1); repointed at NEW_VTOKEN_DELEGATE.
-// Excluded (not on the standard delegate): vBNB.
+export const FACETS: FacetCut[] = [
+  {
+    name: "MarketFacet",
+    oldFacet: "0x7397B6bcFA9332Cc8791c886F339B4D114651719",
+    newFacet: "0x21f8E1471b153f49BE1d645A008E4a57434eEd23",
+    selectors: [
+      "0xa76b3fda",
+      "0x89c13be0",
+      "0x929fe9a1",
+      "0xd0d13036",
+      "0xd585c3c6",
+      "0xc2998238",
+      "0xf9682732",
+      "0xede4edd0",
+      "0xb0772d0b",
+      "0xabfceffc",
+      "0x23617585",
+      "0xafd3783b",
+      "0x19ef3e8b",
+      "0xd686e9ee",
+      "0x7b86e42c",
+      "0x63e0d634",
+      "0xf02fdf97",
+      "0x007e3dd2",
+      "0x3d98a1e5",
+      "0x0ef332ca",
+      "0xc488847b",
+      "0xa78dc775",
+      "0x8e8f294b",
+      "0x3093c11e",
+      "0xd137f36e",
+      "0xcab4f84c",
+      "0x0686dab6",
+      "0xddbf54fd",
+      "0xd463654c",
+      "0x4d99c776",
+      "0xc5b4db55",
+    ],
+    newSelectors: [],
+  },
+  {
+    name: "PolicyFacet",
+    oldFacet: "0x1CcDaf39085bae4e27c3Ba100561b1AD1B5A6b80",
+    newFacet: "0x8930B02c69EDd37464B50991680D306Bb9B8FDBD",
+    selectors: [
+      "0xead1a8a0",
+      "0xda3d454c",
+      "0x5c778605",
+      "0x5ec88c79",
+      "0x528a174c",
+      "0x4e79238f",
+      "0x5fc7e71e",
+      "0x47ef3b3b",
+      "0x4ef4c3e1",
+      "0x41c728b9",
+      "0xeabe7d91",
+      "0x51dff989",
+      "0x24008a62",
+      "0x1ededc91",
+      "0xd02f7351",
+      "0x6d35bf91",
+      "0xbdcdc258",
+      "0x6a56947e",
+    ],
+    newSelectors: [],
+  },
+  {
+    name: "RewardFacet",
+    oldFacet: "0xFaC00Dc856F454BB674c8588d4CC16Edef9dc28b",
+    newFacet: "0x9e0CCD70b5E0030472D5013bbBd37B6E868d416f",
+    selectors: [
+      "0xa7604b41", // _grantXVS(address,uint256)
+      "0x70bf66f0", // claimVenus(address[],address[],bool,bool,bool)
+      "0x86df31ee", // claimVenus(address,address[])
+      "0xadcd5fb9", // claimVenus(address)
+      "0xd09c54ba", // claimVenus(address[],address[],bool,bool)
+      "0x7858524d", // claimVenusAsCollateral(address)
+      "0xededbae6", // getXVSVTokenAddress()
+      "0x655f0725", // seizeVenus(address[],address)
+      "0xe85a2960", // actionPaused(address,uint8)
+      "0xbf32442d", // getXVSAddress()
+    ],
+    newSelectors: [
+      "0xc2dbfc50", // claimVenusAsCollateral(address,address[])
+      "0xf74c8f31", // seizeVenus(address[],address,address[])
+    ],
+  },
+  {
+    name: "SetterFacet",
+    oldFacet: "0x4a45FBAf2A736bdF025DEd1D0Af3dF80070EDac0",
+    newFacet: "0xbc4885e5A27050E321d094503597aC6734AB1871",
+    selectors: [
+      "0xf519fc30",
+      "0x2b5d790c",
+      "0x317b0b77",
+      "0x9bf34cbb",
+      "0x522c656b",
+      "0x17db2163",
+      "0xbb857450",
+      "0x607ef6c1",
+      "0x51a485e4",
+      "0x5f5af1aa",
+      "0x55ee1fe1",
+      "0x9460c8b5",
+      "0x2a6a6065",
+      "0xd24febad",
+      "0x9cfdd9e6",
+      "0x2ec04124",
+      "0x4e0853db",
+      "0x6662c7c9",
+      "0x919a3736",
+      "0x4ef233fc",
+      "0x24aaa220",
+      "0x7938146f",
+      "0x12348e96",
+      "0x5cc4fdeb",
+      "0x9159b177",
+      "0xd6ad5c39",
+      "0x8b3113f6",
+      "0xa89766dd",
+      "0x35439240",
+      "0x9bd8f6e8",
+      "0x186db48f",
+      "0xd136af44",
+      "0xfd51a3ad",
+      "0x4964f48c",
+      "0xb88d846b",
+      "0x530e784f",
+      "0xc32094c7",
+      "0x42adb211",
+      "0xfe40768f",
+    ],
+    newSelectors: [],
+  },
+  {
+    name: "FlashLoanFacet",
+    oldFacet: "0x7F00af2f30a55e79311392C98fBBfA629D19b3A5",
+    newFacet: "0xAC54A4D148690b7FDA22B1D29c4439aCBF668fb2",
+    selectors: ["0x5544ed9c"],
+    newSelectors: [],
+  },
+];
+
+// Core Pool markets repointed at NEW_VTOKEN_DELEGATE (the set specified for this VIP, plus the 3 BStock
+// markets). Excluded: vBNB (native-BNB market — a VBNB contract, not a VBep20 delegator).
 export const VTOKENS_TO_UPGRADE: Record<string, string> = {
   vUSDC: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
   vUSDT: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
   vBUSD: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D",
-  vSXP: "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0",
   vXVS: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
   vBTC: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
   vETH: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
@@ -169,11 +204,11 @@ export const VTOKENS_TO_UPGRADE: Record<string, string> = {
   vMATIC: "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8",
   vCAKE: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c",
   vAAVE: "0x26DA28954763B92139ED49283625ceCAf52C6f94",
-  vTUSDOLD: "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3",
   vTRX: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
   vTRXOLD: "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93",
   vWBETH: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0",
   vTUSD: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E",
+  vTUSDOLD: "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3",
   vUNI: "0x27FF564707786720C71A2e5c1490A63266683612",
   vFDUSD: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
   vTWT: "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc",
@@ -181,7 +216,6 @@ export const VTOKENS_TO_UPGRADE: Record<string, string> = {
   vSolvBTC: "0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea",
   vSOL: "0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC",
   vlisUSD: "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab",
-  "vPT-sUSDE-26JUN2025": "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
   vsUSDe: "0x699658323d58eE25c69F1a29d476946ab011bD18",
   vUSDe: "0x74ca6930108F775CC667894EEa33843e691680d7",
   vUSD1: "0x0C1DA220D301155b87318B90692Da8dc43B67340",
@@ -191,7 +225,6 @@ export const VTOKENS_TO_UPGRADE: Record<string, string> = {
   vslisBNB: "0x89c910Eb8c90df818b4649b508Ba22130Dc73Adc",
   vU: "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E",
   "vPT-clisBNB-25JUN2026": "0x6d3BD68E90B42615cb5abF4B8DE92b154ADc435e",
-  vXAUM: "0x92e6Ea74a1A3047DabF4186405a21c7D63a0612A",
   vTSLAB: "0x97421799419Eb782628e73e7220d8E0A207469a3",
   vNVDAB: "0xEb8Ca841cBe1BC4832A10b15c7dAB1081eDaD371",
   vSPCXB: "0xC36dFaCc7a125859C106F29b9F2d874CCF29A55A",
