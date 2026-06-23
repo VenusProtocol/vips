@@ -31,12 +31,14 @@ const meta: ProposalMeta = {
 
 If passed, this VIP applies the fixes and recompiled bytecode from the Certik "Venus Labs – Core Feature Reaudit" (VPD-1241):
 
-- **Core Pool Comptroller** — the full diamond is recut: the Diamond implementation and all five facets (Market, Policy, Reward, Setter, FlashLoan) are replaced with the recompiled, audited bytecode, preserving the existing function-to-facet mapping. The RewardFacet additionally gains two market-filtered overloads, claimVenusAsCollateral(address,address[]) and seizeVenus(address[],address,address[]), and enforces vXVS-market entry when claiming as collateral with a shortfall. The new seizeVenus overload is ACM-gated under a new signature, so call permission for seizeVenus(address[],address,address[]) is granted to the Normal, Fast-track and Critical timelocks and the critical guardian (mirroring the existing seizeVenus permission).
+- **Core Pool Comptroller** — the full diamond is recut: the Diamond implementation and all five facets (Market, Policy, Reward, Setter, FlashLoan) are replaced with the recompiled, audited bytecode, preserving the existing function-to-facet mapping. The RewardFacet additionally gains two market-filtered overloads, claimVenusAsCollateral(address,address[]) and seizeVenus(address[],address,address[]), and enforces vXVS-market entry when claiming as collateral with a shortfall. The new seizeVenus overload is ACM-gated under a new signature, so call permission for seizeVenus(address[],address,address[]) is granted to the Normal, Fast-track and Critical timelocks and the critical guardian.
 - **ComptrollerLens** — solvency hypothetical now skips entered markets with neither supply nor debt.
 - **Liquidator** — accrues VAI interest before the force-liquidation gate; honors the per-borrower forced-liquidation flag.
-- **VBep20Delegate** — recompiled, audited delegate; every Core Pool market on the standard delegate is repointed (vBNB and bespoke/legacy markets excluded).
+- **VBep20Delegate** — recompiled, audited delegate; the Core Pool markets selected for this VIP are repointed to it. Excluded: the native-BNB vBNB market.
 - **LeverageStrategiesManager** — dust returned via operation deltas; new owner-only sweepToken(address).
-- **Executor (E-brake V2)** — implementation-only upgrade: the supply/borrow cap-exceeding emergency halts now fail closed if the cap read reverts (emitting HaltedWithoutCapCheck) instead of falling back to a stale reading.`,
+- **Executor (E-brake V2)** — implementation-only upgrade: the supply/borrow cap-exceeding emergency halts now fail closed if the cap read reverts (emitting HaltedWithoutCapCheck) instead of falling back to a stale reading.
+
+The CorrelatedTokenOracle fix from the same reaudit is intentionally not included: it only adds an input-validation safeguard to setSnapshot which is a governance-gated function, so the risk is minimal and the change is skipped here; new oracle deployments can adopt the updated contract.`,
   forDescription: "I agree that Venus Protocol should proceed with this proposal",
   againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
