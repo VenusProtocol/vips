@@ -205,7 +205,7 @@ export const VTOKENS_TO_UPGRADE: Record<string, string> = {
   vXAUM: "0xc93CBF6CA7F3124737F2f4daDa8dBBC7be56d125",
 };
 
-// BStock markets 
+// BStock markets
 export const BSTOCK_MARKETS: Record<string, string> = {
   vTSLAB: "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa",
   vNVDAB: "0x9e1ECb2671AfabE9eaAA2e74Cb2318a9b6A2Eb5d",
