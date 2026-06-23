@@ -97,7 +97,7 @@ Interest Rate Model (Jump):
 
 Oracle:
 
-- Chainlink integration via Resilient Oracle (direct price of $2.50 on testnet)`,
+- Chainlink integration via Resilient Oracle`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
