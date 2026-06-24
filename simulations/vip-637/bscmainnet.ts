@@ -33,8 +33,7 @@ const OLD_PROPOSAL_THRESHOLD = parseUnits("300000", 18);
 
 // Liquid XVS holder used to fund a proposer above the new 1,000,000 XVS threshold.
 const XVS_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
-// Fresh accounts with no pre-existing governance state.
-const ATTACKER = "0x0000000000000000000000000000000000000A11";
+const ATTACKER = "0x5859709CeF80B2f0dC86456f9d5E9aaB2483c939";
 const FUNDED_PROPOSER = "0x0000000000000000000000000000000000000B22";
 const STAKE_AMOUNT = parseUnits("1100000", 18); // > 1,000,000 XVS threshold
 
@@ -94,7 +93,12 @@ forking(106052221, async () => {
 
     it("blocks a proposer below the 300,000 XVS threshold", async () => {
       const attacker = await initMainnetUser(ATTACKER, parseUnits("1", 18));
-      expect(await xvsVault.getPriorVotes(ATTACKER, (await ethers.provider.getBlockNumber()) - 1)).to.equal(0);
+      // Activate the attacker's existing on-chain XVS stake as voting power (no extra funding).
+      await xvsVault.connect(attacker).delegate(ATTACKER);
+      await mine();
+      const votes = await xvsVault.getPriorVotes(ATTACKER, (await ethers.provider.getBlockNumber()) - 1);
+      expect(votes).to.be.gt(0);
+      expect(votes).to.be.lt(OLD_PROPOSAL_THRESHOLD);
       await expect(
         bravo.connect(attacker).propose(...dummyProposal(), "below threshold", ProposalType.REGULAR),
       ).to.be.revertedWith("GovernorBravo::propose: proposer votes below proposal threshold");
