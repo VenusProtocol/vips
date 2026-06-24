@@ -16,8 +16,10 @@ import {
   FT_VOTING_PERIOD,
   GOVERNANCE_BRAVO,
   NEW_BRAVO_IMPL,
+  NEW_QUORUM_VOTES,
   NT_VOTING_DELAY,
   NT_VOTING_PERIOD,
+  OLD_QUORUM_VOTES,
   PROPOSAL_THRESHOLD,
   vip637,
 } from "../../vips/vip-637/bscmainnet";
@@ -76,6 +78,10 @@ forking(106052221, async () => {
       expect(await bravo.implementation()).to.not.equal(NEW_BRAVO_IMPL);
     });
 
+    it("has a quorum of 600,000 XVS", async () => {
+      expect(await bravo.quorumVotes()).to.equal(OLD_QUORUM_VOTES);
+    });
+
     it("has a proposal threshold of 300,000 XVS on every route", async () => {
       for (let i = 0; i < ROUTES; i++) {
         const config = await bravo.proposalConfigs(i);
@@ -122,6 +128,10 @@ forking(106052221, async () => {
   describe("Post-VIP behaviour", async () => {
     it("points to the new implementation", async () => {
       expect(await bravo.implementation()).to.equal(NEW_BRAVO_IMPL);
+    });
+
+    it("raises the quorum to 1,500,000 XVS", async () => {
+      expect(await bravo.quorumVotes()).to.equal(NEW_QUORUM_VOTES);
     });
 
     it("raises the proposal threshold to 1,000,000 XVS on every route", async () => {

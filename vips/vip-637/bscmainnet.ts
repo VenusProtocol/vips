@@ -4,12 +4,18 @@ import { makeProposal } from "src/utils";
 
 export const GOVERNANCE_BRAVO = "0x2d56dC077072B53571b8252008C60e945108c75a";
 
-// New GovernorBravoDelegate implementation with MAX_PROPOSAL_THRESHOLD raised to 1,000,000 XVS.
-export const NEW_BRAVO_IMPL = "0x5a00cdB6E41bdc4483bC8aCf7ff0Ebe00ff05052";
+// New GovernorBravoDelegate implementation: MAX_PROPOSAL_THRESHOLD raised to 1,000,000 XVS
+// and quorumVotes raised to 1,500,000 XVS.
+export const NEW_BRAVO_IMPL = "0x9975d7064e40D16E1B76B90e56F606D72B385701";
 
 // New proposal threshold for every route. The current implementation caps this at
 // MAX_PROPOSAL_THRESHOLD (300,000 XVS), so the implementation upgrade must execute first.
 export const PROPOSAL_THRESHOLD = parseUnits("1000000", 18);
+
+// quorumVotes is a constant baked into the implementation. Upgrading the implementation
+// raises it from 600,000 XVS to 1,500,000 XVS; no separate call is required.
+export const OLD_QUORUM_VOTES = parseUnits("600000", 18);
+export const NEW_QUORUM_VOTES = parseUnits("1500000", 18);
 
 // Current on-chain voting params (preserved). Only proposalThreshold changes.
 // struct order: [votingDelay, votingPeriod, proposalThreshold]
@@ -42,14 +48,14 @@ The proposal threshold is the minimum amount of XVS voting power an account must
 
 The current \`GovernorBravoDelegate\` implementation hardcodes \`MAX_PROPOSAL_THRESHOLD = 300,000 XVS\` and \`setProposalConfigs\` reverts for any threshold above that cap. Raising the threshold therefore requires two actions, in order:
 
-1. Upgrade the \`GovernorBravo\` implementation to a new \`GovernorBravoDelegate\` that sets \`MAX_PROPOSAL_THRESHOLD = 1,000,000 XVS\`. Only a constant changes, the storage layout is unchanged.
+1. Upgrade the \`GovernorBravo\` implementation to a new \`GovernorBravoDelegate\` that sets \`MAX_PROPOSAL_THRESHOLD = 1,000,000 XVS\` and \`quorumVotes = 1,500,000 XVS\`. Only constants change, the storage layout is unchanged.
 2. Update the proposal configs for all three routes, raising the proposal threshold to 1,000,000 XVS while keeping the existing voting delays and voting periods.
 
 #### Security and additional considerations
 
-- The implementation change is storage-safe: only the \`MAX_PROPOSAL_THRESHOLD\` constant is modified, no storage variable is added, removed, or reordered.
+- The implementation change is storage-safe: only the \`MAX_PROPOSAL_THRESHOLD\` and \`quorumVotes\` constants are modified, no storage variable is added, removed, or reordered.
 - Voting delays and voting periods are preserved exactly as currently configured on-chain.
-- The quorum (\`quorumVotes\`) is unaffected; it is a separate constant and is not modified by this VIP.
+- The quorum (\`quorumVotes\`) is raised from 600,000 XVS to 1,500,000 XVS as part of the implementation upgrade.
 
 #### References
 
