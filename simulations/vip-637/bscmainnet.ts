@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
@@ -18,8 +18,10 @@ import {
 } from "../../vips/vip-637/bscmainnet";
 import DELEGATE_ABI from "./abi/governorBravodelegate.json";
 
+const ROUTES = 3;
 const OLD_PROPOSAL_THRESHOLD = parseUnits("300000", 18);
 
+// Documented baseline (asserted against chain pre-VIP). Order: [Normal, FastTrack, Critical].
 const EXPECTED_CONFIGS = [
   { votingDelay: NT_VOTING_DELAY, votingPeriod: NT_VOTING_PERIOD },
   { votingDelay: FT_VOTING_DELAY, votingPeriod: FT_VOTING_PERIOD },
@@ -28,9 +30,15 @@ const EXPECTED_CONFIGS = [
 
 forking(106052221, async () => {
   let bravo: Contract;
+  // Actual pre-VIP config read from chain, used to prove the VIP leaves them untouched.
+  const preConfigs: { votingDelay: BigNumber; votingPeriod: BigNumber }[] = [];
 
   before(async () => {
     bravo = await ethers.getContractAt(DELEGATE_ABI, GOVERNANCE_BRAVO);
+    for (let i = 0; i < ROUTES; i++) {
+      const config = await bravo.proposalConfigs(i);
+      preConfigs.push({ votingDelay: config.votingDelay, votingPeriod: config.votingPeriod });
+    }
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -39,9 +47,17 @@ forking(106052221, async () => {
     });
 
     it("has a proposal threshold of 300,000 XVS on every route", async () => {
-      for (let i = 0; i < EXPECTED_CONFIGS.length; i++) {
+      for (let i = 0; i < ROUTES; i++) {
         const config = await bravo.proposalConfigs(i);
         expect(config.proposalThreshold).to.equal(OLD_PROPOSAL_THRESHOLD);
+      }
+    });
+
+    it("matches the documented voting delay and period baseline", async () => {
+      for (let i = 0; i < ROUTES; i++) {
+        const config = await bravo.proposalConfigs(i);
+        expect(config.votingDelay).to.equal(EXPECTED_CONFIGS[i].votingDelay);
+        expect(config.votingPeriod).to.equal(EXPECTED_CONFIGS[i].votingPeriod);
       }
     });
   });
@@ -54,17 +70,17 @@ forking(106052221, async () => {
     });
 
     it("raises the proposal threshold to 1,000,000 XVS on every route", async () => {
-      for (let i = 0; i < EXPECTED_CONFIGS.length; i++) {
+      for (let i = 0; i < ROUTES; i++) {
         const config = await bravo.proposalConfigs(i);
         expect(config.proposalThreshold).to.equal(PROPOSAL_THRESHOLD);
       }
     });
 
-    it("leaves voting delays and voting periods unchanged", async () => {
-      for (let i = 0; i < EXPECTED_CONFIGS.length; i++) {
+    it("leaves voting delays and periods exactly as they were pre-VIP", async () => {
+      for (let i = 0; i < ROUTES; i++) {
         const config = await bravo.proposalConfigs(i);
-        expect(config.votingDelay).to.equal(EXPECTED_CONFIGS[i].votingDelay);
-        expect(config.votingPeriod).to.equal(EXPECTED_CONFIGS[i].votingPeriod);
+        expect(config.votingDelay).to.equal(preConfigs[i].votingDelay);
+        expect(config.votingPeriod).to.equal(preConfigs[i].votingPeriod);
       }
     });
   });
