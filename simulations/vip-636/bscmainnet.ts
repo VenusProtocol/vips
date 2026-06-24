@@ -21,8 +21,8 @@ import {
   NT_VOTING_PERIOD,
   OLD_QUORUM_VOTES,
   PROPOSAL_THRESHOLD,
-  vip637,
-} from "../../vips/vip-637/bscmainnet";
+  vip636,
+} from "../../vips/vip-636/bscmainnet";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import ERC20_ABI from "./abi/erc20.json";
 import DELEGATE_ABI from "./abi/governorBravodelegate.json";
@@ -123,7 +123,7 @@ forking(106069390, async () => {
     });
   });
 
-  testVip("VIP-637 Raise proposal threshold to 1,000,000 XVS", await vip637());
+  testVip("VIP-636 Raise proposal threshold to 1,000,000 XVS", await vip636());
 
   describe("Post-VIP behaviour", async () => {
     it("points to the new implementation", async () => {
