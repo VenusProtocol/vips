@@ -34,6 +34,17 @@ const DEFAULT_SUPPORTER_ADDRESSES = [
   "0xc444949e0054a23c44fc45789738bdf64aed2391",
   "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
 ];
+
+// High delegated-power accounts used as a fallback proposer/supporter only when the
+// default proposer + supporters no longer satisfy the on-chain proposal threshold or
+// quorum at the fork block (e.g. after governance raised the threshold/quorum). For
+// fork blocks where the defaults still suffice, these are never used, so existing
+// simulations are unaffected. Network-specific.
+const FALLBACK_VOTERS: { [network: string]: string[] } = {
+  bscmainnet: ["0x34221485302f6F2029660a000908B5FCABB9BC6e"],
+};
+
+const XVS_VAULT_VOTES_ABI = ["function getPriorVotes(address account, uint256 blockNumber) view returns (uint256)"];
 const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
@@ -163,6 +174,67 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   return txResponses;
 };
 
+// Picks a proposer and supporter set that satisfy the live on-chain proposal threshold
+// and quorum at the current fork block. The default proposer/supporters are returned
+// unchanged whenever they already suffice (true at every historical fork block), so this
+// only takes effect once governance raises the threshold/quorum beyond what the defaults
+// can supply, at which point it falls back to the high-power FALLBACK_VOTERS for the network.
+const resolveGovernanceVoters = async (
+  governorProxy: Contract,
+  proposalType: ProposalType,
+  defaultProposer: string,
+  defaultSupporters: string[],
+): Promise<{ proposerAddress: string; supporterAddresses: string[] }> => {
+  const fallback = { proposerAddress: defaultProposer, supporterAddresses: defaultSupporters };
+  try {
+    const network = FORKED_NETWORK as string;
+    const vaultAddress = NETWORK_ADDRESSES[network as "bscmainnet"]?.XVS_VAULT_PROXY;
+    const fallbackVoters = FALLBACK_VOTERS[network] ?? [];
+    if (!vaultAddress || fallbackVoters.length === 0) return fallback;
+
+    const xvsVault = await ethers.getContractAt(XVS_VAULT_VOTES_ABI, vaultAddress);
+    const priorBlock = (await ethers.provider.getBlockNumber()) - 1;
+    const votesOf = (addr: string): Promise<BigNumber> => xvsVault.getPriorVotes(addr, priorBlock);
+
+    const config = await governorProxy.proposalConfigs(proposalType ?? ProposalType.REGULAR);
+    const threshold: BigNumber = config.proposalThreshold;
+    let quorum: BigNumber = BigNumber.from(0);
+    try {
+      quorum = await governorProxy.quorumVotes();
+    } catch {
+      // Older governor implementations may not expose quorumVotes(); skip the quorum check.
+    }
+
+    const defaultProposerVotes = await votesOf(defaultProposer);
+    let defaultSupporterVotes = BigNumber.from(0);
+    for (const addr of defaultSupporters) defaultSupporterVotes = defaultSupporterVotes.add(await votesOf(addr));
+
+    // Defaults already work for this block (the common case) -> change nothing.
+    if (defaultProposerVotes.gte(threshold) && defaultProposerVotes.add(defaultSupporterVotes).gte(quorum)) {
+      return fallback;
+    }
+
+    // Pick the first account (default first, then fallbacks) that can clear the threshold.
+    const candidates = [defaultProposer, ...fallbackVoters];
+    let proposerAddress = defaultProposer;
+    for (const candidate of candidates) {
+      if ((await votesOf(candidate)).gte(threshold)) {
+        proposerAddress = candidate;
+        break;
+      }
+    }
+
+    // Build a supporter set so proposer + supporters clear quorum.
+    const supporterAddresses = [...defaultSupporters];
+    for (const voter of fallbackVoters) {
+      if (voter !== proposerAddress && !supporterAddresses.includes(voter)) supporterAddresses.push(voter);
+    }
+    return { proposerAddress, supporterAddresses };
+  } catch {
+    return fallback;
+  }
+};
+
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
   let impersonatedTimelock: SignerWithAddress;
   let governorProxy: Contract;
@@ -170,26 +242,39 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   let supporters: SignerWithAddress[];
 
   const governanceFixture = async (): Promise<void> => {
-    const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
-
-    const supporterAddresses =
-      options.supporters ?? (options.supporter ? [options.supporter] : DEFAULT_SUPPORTER_ADDRESSES);
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
       [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
       [ProposalType.CRITICAL]: CRITICAL_TIMELOCK,
     }[proposal.type || ProposalType.REGULAR];
-    proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
-    supporters = await Promise.all(
-      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
-    );
-    impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
     governorProxy = await ethers.getContractAt(
       (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
       GOVERNOR_PROXY,
     );
+
+    // Explicit overrides win; otherwise pick voters that satisfy the live threshold/quorum.
+    const explicitProposer = options.proposer;
+    const explicitSupporters = options.supporters ?? (options.supporter ? [options.supporter] : undefined);
+    const { proposerAddress, supporterAddresses } =
+      explicitProposer || explicitSupporters
+        ? {
+            proposerAddress: explicitProposer ?? DEFAULT_PROPOSER_ADDRESS,
+            supporterAddresses: explicitSupporters ?? DEFAULT_SUPPORTER_ADDRESSES,
+          }
+        : await resolveGovernanceVoters(
+            governorProxy,
+            proposal.type ?? ProposalType.REGULAR,
+            DEFAULT_PROPOSER_ADDRESS,
+            DEFAULT_SUPPORTER_ADDRESSES,
+          );
+
+    proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
+    supporters = await Promise.all(
+      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
+    );
+    impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
   };
 
   describe(`${description} commands`, () => {
