@@ -15,6 +15,8 @@ export const PROPOSAL_THRESHOLD = parseUnits("1000000", 18);
 // quorumVotes is a constant baked into the implementation. Upgrading the implementation
 // raises it from 600,000 XVS to 1,500,000 XVS; no separate call is required.
 export const OLD_QUORUM_VOTES = parseUnits("600000", 18);
+// Quorum set to 1.5x the new 1,000,000 XVS proposal threshold so quorum stays above
+// what a single proposer can supply, preserving meaningful multi-voter consensus.
 export const NEW_QUORUM_VOTES = parseUnits("1500000", 18);
 
 // Current on-chain voting params (preserved). Only proposalThreshold changes.
