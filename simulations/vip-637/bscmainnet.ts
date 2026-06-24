@@ -55,7 +55,7 @@ const dummyProposal = (): [string[], BigNumber[], string[], string[]] => [
   ["0x"],
 ];
 
-forking(106052221, async () => {
+forking(106069390, async () => {
   let bravo: Contract;
   let xvs: Contract;
   let xvsVault: Contract;
@@ -163,7 +163,7 @@ forking(106052221, async () => {
 
     it("allows a proposer at/above the new 1,000,000 XVS threshold", async () => {
       const whale = await initMainnetUser(XVS_WHALE, parseUnits("1", 18));
-      const proposer: SignerWithAddress = await initMainnetUser(FUNDED_PROPOSER, parseUnits("1", 18));
+      const proposer: SignerWithAddress = await initMainnetUser(FUNDED_PROPOSER, parseUnits("2", 18));
 
       await xvs.connect(whale).transfer(FUNDED_PROPOSER, STAKE_AMOUNT);
       await xvs.connect(proposer).approve(XVS_VAULT_PROXY, STAKE_AMOUNT);
