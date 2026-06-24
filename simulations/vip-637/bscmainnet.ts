@@ -21,9 +21,9 @@ import {
   PROPOSAL_THRESHOLD,
   vip637,
 } from "../../vips/vip-637/bscmainnet";
+import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import ERC20_ABI from "./abi/erc20.json";
 import DELEGATE_ABI from "./abi/governorBravodelegate.json";
-import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { XVS, XVS_VAULT_PROXY, DEFAULT_PROPOSER_ADDRESS } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -102,7 +102,10 @@ forking(106052221, async () => {
 
     it("allows a proposer at/above the 300,000 XVS threshold", async () => {
       const proposer = await initMainnetUser(DEFAULT_PROPOSER_ADDRESS, parseUnits("1", 18));
-      const votes = await xvsVault.getPriorVotes(DEFAULT_PROPOSER_ADDRESS, (await ethers.provider.getBlockNumber()) - 1);
+      const votes = await xvsVault.getPriorVotes(
+        DEFAULT_PROPOSER_ADDRESS,
+        (await ethers.provider.getBlockNumber()) - 1,
+      );
       expect(votes).to.be.gte(OLD_PROPOSAL_THRESHOLD);
       // callStatic verifies the threshold gate passes without creating a live proposal.
       await expect(bravo.connect(proposer).callStatic.propose(...dummyProposal(), "ok", ProposalType.REGULAR)).to.not.be
@@ -134,7 +137,10 @@ forking(106052221, async () => {
 
     it("now blocks a proposer that cleared the old 300,000 XVS bar but is below 1,000,000 XVS", async () => {
       const proposer = await initMainnetUser(DEFAULT_PROPOSER_ADDRESS, parseUnits("1", 18));
-      const votes = await xvsVault.getPriorVotes(DEFAULT_PROPOSER_ADDRESS, (await ethers.provider.getBlockNumber()) - 1);
+      const votes = await xvsVault.getPriorVotes(
+        DEFAULT_PROPOSER_ADDRESS,
+        (await ethers.provider.getBlockNumber()) - 1,
+      );
       expect(votes).to.be.gte(OLD_PROPOSAL_THRESHOLD).and.lt(PROPOSAL_THRESHOLD);
       await expect(
         bravo.connect(proposer).propose(...dummyProposal(), "below new threshold", ProposalType.REGULAR),
