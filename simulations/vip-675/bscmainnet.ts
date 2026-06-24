@@ -6,6 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
+  BSCMAINNET_MULTISIG_PAUSER,
   COMPTROLLER,
   KEEPER,
   LEGACY_PRIME,
@@ -150,7 +151,12 @@ forking(BLOCK_NUMBER, async () => {
           .to.emit(primeV2, "MarketAdded")
           .withArgs(market.vToken, market.supplyMultiplier, market.borrowMultiplier);
       }
-      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [41]);
+      // RoleGranted count breakdown:
+      //   PrimeV2:    18 cycle (6×3) + 8 admin + 6 pause/unpause (2×3) + 1 multisig pauser = 33
+      //   Leaderboard: 6 seeding (2×3) + 3 admin                                            = 9
+      //   XVSVault:   1 multisig pauser                                                     = 1
+      //   Total                                                                              = 43
+      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [43]);
     },
   });
 
@@ -225,6 +231,11 @@ forking(BLOCK_NUMBER, async () => {
 
     it("Guardian holds the XVSVault resume() permission", async () => {
       expect(await acm.hasRole(roleFor(XVS_VAULT, "resume()"), bscmainnet.GUARDIAN)).to.equal(true);
+    });
+
+    it("Venus team multisig holds the circuit-breaker pause() permissions", async () => {
+      expect(await acm.hasRole(roleFor(PRIME_V2, "pause()"), BSCMAINNET_MULTISIG_PAUSER)).to.equal(true);
+      expect(await acm.hasRole(roleFor(XVS_VAULT, "pause()"), BSCMAINNET_MULTISIG_PAUSER)).to.equal(true);
     });
 
     for (const market of PRIME_MARKETS) {

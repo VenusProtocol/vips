@@ -11,6 +11,9 @@ const FAST_TRACK_TIMELOCK = bscmainnet.FAST_TRACK_TIMELOCK;
 const CRITICAL_TIMELOCK = bscmainnet.CRITICAL_TIMELOCK;
 const GUARDIAN = bscmainnet.GUARDIAN;
 export const KEEPER = "0xe0237587acA20f9304d30FACC9Afcd5DD9a94899";
+// Venus team multisig used as a circuit-breaker pauser across chains (matches the
+// MULTISIG_PAUSER pattern from vip-616).
+export const BSCMAINNET_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
 
 // Deployed via venus-protocol PR #677. On live networks the deploy script initiates
 // transferOwnership of both contracts to the NormalTimelock (pending acceptance) but
@@ -91,7 +94,12 @@ const PRIME_V2_PERMISSIONS = [
   ...grant(PRIME_V2, "sweepUndistributed(address,address)"),
   ...grant(PRIME_V2, "pause()", ALL_TIMELOCKS),
   ...grant(PRIME_V2, "unpause()", ALL_TIMELOCKS),
+  // Circuit-breaker pause for the Venus team multisig (matches vip-616 cross-chain pattern).
+  ...grant(PRIME_V2, "pause()", [BSCMAINNET_MULTISIG_PAUSER]),
 ];
+
+// Circuit-breaker pause permission on the XVS Vault for the Venus team multisig.
+const XVS_VAULT_MULTISIG_PAUSE_GRANT = grant(XVS_VAULT, "pause()", [BSCMAINNET_MULTISIG_PAUSER]);
 
 // ACM-gated functions on PrimeLeaderboard (see PrimeLeaderboard.sol _checkAccessAllowed).
 // Staker seeding -> KEEPER_ACCOUNTS; admin ops -> NormalTimelock only.
@@ -116,7 +124,7 @@ If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts li
 If passed, this VIP will:
 
 - Accept ownership of PrimeV2 and PrimeLeaderboard (transferred to the Normal Timelock by the deploy script).
-- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, setMintThreshold, recordCycleSnapshot on PrimeV2, and initializeStakers/finalizeInitialization on PrimeLeaderboard) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; pause/unpause on PrimeV2 to all three timelocks. (XVS Vault pause/resume permissions are already held by the Guardian and the Normal Timelock, so they are not re-granted here.)
+- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, setMintThreshold, recordCycleSnapshot on PrimeV2, and initializeStakers/finalizeInitialization on PrimeLeaderboard) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; pause/unpause on PrimeV2 to all three timelocks; and circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (\`${BSCMAINNET_MULTISIG_PAUSER}\`). (XVS Vault resume() is already held by the Guardian and the Normal Timelock, so it is not re-granted here.)
 - Wire the contracts together by setting PrimeLeaderboard on PrimeV2 and PrimeV2 on PrimeLeaderboard.
 - Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
 - Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 0).
@@ -151,10 +159,11 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
       },
 
       // 2. Grant ACM permissions.
-      // (XVS Vault pause() / resume() are not granted here — the Guardian already holds
-      // both perms on mainnet, and the NormalTimelock has them via the ACM admin role.)
+      // (XVS Vault resume() is not granted here — the Guardian already holds it on
+      // mainnet, and the NormalTimelock has it via the ACM admin role.)
       ...PRIME_V2_PERMISSIONS,
       ...PRIME_LEADERBOARD_PERMISSIONS,
+      ...XVS_VAULT_MULTISIG_PAUSE_GRANT,
 
       // 3. Wire PrimeV2 <-> PrimeLeaderboard (ACM-gated; deploy does NOT wire on live networks).
       {
