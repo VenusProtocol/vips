@@ -56,9 +56,11 @@ const KEEPER_CYCLE_SIGS_V2 = [
   "issueBatch(address[])",
   "burn(address)",
   "burnBatch(address[])",
-  "setMintThreshold(uint256,uint256)",
   "recordCycleSnapshot(uint256)",
 ];
+
+// setMintThreshold is governance + Venus Guardian multisig only (NOT the Keeper).
+const MINT_THRESHOLD_SIG = "setMintThreshold(uint256,uint256)";
 
 const KEEPER_CYCLE_SIGS_LEADERBOARD = ["initializeStakers(address[],uint256[],uint64[])", "finalizeInitialization()"];
 
@@ -152,11 +154,12 @@ forking(BLOCK_NUMBER, async () => {
           .withArgs(market.vToken, market.supplyMultiplier, market.borrowMultiplier);
       }
       // RoleGranted count breakdown:
-      //   PrimeV2:    18 cycle (6×3) + 8 admin + 6 pause/unpause (2×3) + 1 multisig pauser = 33
+      //   PrimeV2:    15 cycle (5×3) + 2 setMintThreshold (NT + Guardian) + 8 admin
+      //               + 6 pause/unpause (2×3) + 1 multisig pauser                          = 32
       //   Leaderboard: 6 seeding (2×3) + 3 admin                                            = 9
       //   XVSVault:   1 multisig pauser                                                     = 1
-      //   Total                                                                              = 43
-      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [43]);
+      //   Total                                                                              = 42
+      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [42]);
     },
   });
 
@@ -216,6 +219,15 @@ forking(BLOCK_NUMBER, async () => {
         }
       });
     }
+
+    it("setMintThreshold is held by the NormalTimelock and the Guardian multisig only", async () => {
+      expect(await acm.hasRole(roleFor(PRIME_V2, MINT_THRESHOLD_SIG), bscmainnet.NORMAL_TIMELOCK)).to.equal(true);
+      expect(await acm.hasRole(roleFor(PRIME_V2, MINT_THRESHOLD_SIG), bscmainnet.GUARDIAN)).to.equal(true);
+    });
+
+    it("Keeper does NOT hold setMintThreshold on PrimeV2", async () => {
+      expect(await acm.hasRole(roleFor(PRIME_V2, MINT_THRESHOLD_SIG), KEEPER)).to.equal(false);
+    });
 
     it("Keeper does NOT hold the admin-only permissions on PrimeV2", async () => {
       for (const sig of NT_ONLY_SIGS_V2) {

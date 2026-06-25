@@ -65,6 +65,10 @@ const ALL_TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 // permission for governance-initiated operations.
 const KEEPER_ACCOUNTS = [NORMAL_TIMELOCK, KEEPER, GUARDIAN];
 
+// setMintThreshold opens/closes the permissionless mint window — a sensitive op
+// reserved for governance and the Venus Guardian multisig, NOT the Keeper.
+const MINT_THRESHOLD_ACCOUNTS = [NORMAL_TIMELOCK, GUARDIAN];
+
 // Grant ACM permission for `target.signature` to every account in `accounts`
 // (defaults to NormalTimelock only).
 const grant = (target: string, signature: string, accounts: string[] = [NORMAL_TIMELOCK]) =>
@@ -82,7 +86,7 @@ const PRIME_V2_PERMISSIONS = [
   ...grant(PRIME_V2, "issueBatch(address[])", KEEPER_ACCOUNTS),
   ...grant(PRIME_V2, "burn(address)", KEEPER_ACCOUNTS),
   ...grant(PRIME_V2, "burnBatch(address[])", KEEPER_ACCOUNTS),
-  ...grant(PRIME_V2, "setMintThreshold(uint256,uint256)", KEEPER_ACCOUNTS),
+  ...grant(PRIME_V2, "setMintThreshold(uint256,uint256)", MINT_THRESHOLD_ACCOUNTS),
   ...grant(PRIME_V2, "recordCycleSnapshot(uint256)", KEEPER_ACCOUNTS),
   ...grant(PRIME_V2, "setPrimeLeaderboard(address)"),
   ...grant(PRIME_V2, "addMarket(address,uint256,uint256)"),
@@ -124,7 +128,7 @@ If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts li
 If passed, this VIP will:
 
 - Accept ownership of PrimeV2 and PrimeLeaderboard (transferred to the Normal Timelock by the deploy script).
-- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, setMintThreshold, recordCycleSnapshot on PrimeV2, and initializeStakers/finalizeInitialization on PrimeLeaderboard) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; pause/unpause on PrimeV2 to all three timelocks; and circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (\`${BSCMAINNET_MULTISIG_PAUSER}\`). (XVS Vault resume() is already held by the Guardian and the Normal Timelock, so it is not re-granted here.)
+- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, recordCycleSnapshot on PrimeV2, and initializeStakers/finalizeInitialization on PrimeLeaderboard) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; setMintThreshold on PrimeV2 to the Normal Timelock and the Venus Guardian multisig (\`${GUARDIAN}\`) only (NOT the Keeper); pause/unpause on PrimeV2 to all three timelocks; and circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (\`${BSCMAINNET_MULTISIG_PAUSER}\`). (XVS Vault resume() is already held by the Guardian and the Normal Timelock, so it is not re-granted here.)
 - Wire the contracts together by setting PrimeLeaderboard on PrimeV2 and PrimeV2 on PrimeLeaderboard.
 - Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
 - Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 0).
@@ -133,7 +137,7 @@ If passed, this VIP will:
 - Pause the XVS Vault. The vault stays paused until the existing stakers are seeded into the new PrimeLeaderboard off-chain by the Guardian; the Guardian then calls XVS Vault \`resume()\` to bring it back online.
 - Pause the legacy Prime to decommission it.
 
-The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and the PrimeV2 token limit (500) are set in the contracts' initializers, so they are not re-set here. The permissionless mint window is intentionally left uninitialized (mintThreshold = 0, mintDeadline = 0); governance or the Keeper / Guardian opens it later via setMintThreshold once the protocol is ready.
+The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and the PrimeV2 token limit (500) are set in the contracts' initializers, so they are not re-set here. The permissionless mint window is intentionally left uninitialized (mintThreshold = 0, mintDeadline = 0); governance or the Venus Guardian multisig opens it later via setMintThreshold once the protocol is ready.
 
 #### References
 
