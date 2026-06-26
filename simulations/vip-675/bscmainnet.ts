@@ -190,10 +190,10 @@ forking(BLOCK_NUMBER, async () => {
       // RoleGranted count breakdown:
       //   PrimeV2:    15 cycle (5×3) + 2 setMintThreshold (NT + Guardian) + 8 admin
       //               + 6 pause/unpause (2×3) + 1 multisig pauser                          = 32
-      //   Leaderboard: 6 seeding (2×3) + 3 admin                                            = 9
+      //   Leaderboard: 4 seeding (2×2, Keeper + Guardian) + 3 admin                         = 7
       //   XVSVault:   1 multisig pauser                                                     = 1
-      //   Total                                                                              = 42
-      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [42]);
+      //   Total                                                                              = 40
+      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [40]);
     },
   });
 
@@ -256,13 +256,22 @@ forking(BLOCK_NUMBER, async () => {
           expect(await acm.hasRole(roleFor(PRIME_V2, sig), account)).to.equal(true);
         }
       });
+    }
 
+    // One-time staker seeding is granted to the Keeper and Guardian only — NOT the NormalTimelock.
+    for (const account of [KEEPER, bscmainnet.GUARDIAN]) {
       it(`account ${account} holds the seeding permissions on PrimeLeaderboard`, async () => {
         for (const sig of KEEPER_CYCLE_SIGS_LEADERBOARD) {
           expect(await acm.hasRole(roleFor(PRIME_LEADERBOARD, sig), account)).to.equal(true);
         }
       });
     }
+
+    it("NormalTimelock does NOT hold the one-time seeding permissions on PrimeLeaderboard", async () => {
+      for (const sig of KEEPER_CYCLE_SIGS_LEADERBOARD) {
+        expect(await acm.hasRole(roleFor(PRIME_LEADERBOARD, sig), bscmainnet.NORMAL_TIMELOCK)).to.equal(false);
+      }
+    });
 
     it("setMintThreshold is held by the NormalTimelock and the Guardian multisig only", async () => {
       expect(await acm.hasRole(roleFor(PRIME_V2, MINT_THRESHOLD_SIG), bscmainnet.NORMAL_TIMELOCK)).to.equal(true);
