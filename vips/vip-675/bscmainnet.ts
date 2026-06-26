@@ -20,8 +20,10 @@ export const BSCMAINNET_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e
 // does NOT wire them — the setPrimeV2 / setPrimeLeaderboard wiring is ACM-gated and
 // done here. This VIP accepts ownership, grants ACM permissions, wires PrimeV2 <->
 // PrimeLeaderboard, repoints the PrimeLiquidityProvider / XVS Vault / Core pool
-// Comptroller, configures the Prime markets, pauses the XVS Vault until the new
-// PrimeLeaderboard is seeded off-chain, and pauses the legacy Prime.
+// Comptroller, configures the Prime markets, and pauses the legacy Prime.
+// The XVS Vault is already paused by the preceding critical VIP
+// (vip-675/bscmainnet-critical.ts) and stays paused until the new
+// PrimeLeaderboard is seeded off-chain.
 export const PRIME_V2 = "0x4f5fd115Df31CC48De880a988D74aaD931851628";
 export const PRIME_LEADERBOARD = "0x55e2ccF68B7A276dc28AfA107997b8B1Be932c0b";
 
@@ -33,13 +35,10 @@ export const XVS_VAULT = bscmainnet.XVS_VAULT_PROXY;
 export const XVS = bscmainnet.XVS;
 export const XVS_VAULT_POOL_ID = 0;
 
-// Prime markets on the Core pool (bscmainnet) — mirrors the legacy Prime markets
-// and their supply/borrow multipliers.
-const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
-const VBTC = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
-const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+// Prime markets on the Core pool (bscmainnet). PrimeV2 launches with only the
+// vUSDT and vWBNB markets; the other legacy Prime markets are intentionally not
+// carried over.
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-const VU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E"; // underlying: U (USD1)
 const VWBNB = "0x6bCa74586218dB34cdB402295796b79663d816e9";
 
 interface PrimeMarket {
@@ -49,12 +48,18 @@ interface PrimeMarket {
 }
 
 export const PRIME_MARKETS: PrimeMarket[] = [
-  { vToken: VETH, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: parseUnits("4", 18).toString() },
-  { vToken: VBTC, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: parseUnits("4", 18).toString() },
-  { vToken: VUSDC, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: "0" },
   { vToken: VUSDT, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: "0" },
-  { vToken: VU, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: "0" },
   { vToken: VWBNB, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: "0" },
+];
+
+// PLP reward emissions were zeroed for every Prime underlying by the preceding
+// critical VIP. Restore the prior live distribution speeds for the two
+// underlyings whose markets PrimeV2 carries over (USDT, WBNB).
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+export const PLP_DISTRIBUTION_SPEEDS: { token: string; speed: string }[] = [
+  { token: USDT, speed: "2170138888888888" },
+  { token: WBNB, speed: "3472222222222" },
 ];
 
 const ALL_TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
@@ -121,7 +126,7 @@ const vip675 = () => {
     title: "VIP-675 Deploy and configure PrimeV2 and PrimeLeaderboard",
     description: `#### Summary
 
-If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts live on BNB Chain: it accepts their ownership, grants the required ACM permissions, wires the two contracts together, points the existing PrimeLiquidityProvider at PrimeV2, switches the XVS Vault hook and the Core pool Comptroller from the legacy Prime to the new contracts, adds the Prime markets, pauses the XVS Vault while existing stakers are seeded into PrimeLeaderboard off-chain, and pauses the legacy Prime.
+If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts live on BNB Chain: it accepts their ownership, grants the required ACM permissions, wires the two contracts together, points the existing PrimeLiquidityProvider at PrimeV2, switches the XVS Vault hook and the Core pool Comptroller from the legacy Prime to the new contracts, adds the Prime markets, and pauses the legacy Prime. The XVS Vault was already paused by the preceding critical VIP and stays paused while existing stakers are seeded into PrimeLeaderboard off-chain.
 
 #### Description
 
@@ -133,8 +138,9 @@ If passed, this VIP will:
 - Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
 - Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 0).
 - Update the Core pool Comptroller's prime address from the legacy Prime to PrimeV2, so market hooks call the new contract.
-- Add the Core pool markets to PrimeV2 (vETH, vBTC, vUSDC, vUSDT, vU, vWBNB) with the same supply/borrow multipliers used by the legacy Prime.
-- Pause the XVS Vault. The vault stays paused until the existing stakers are seeded into the new PrimeLeaderboard off-chain by the Guardian; the Guardian then calls XVS Vault \`resume()\` to bring it back online.
+- Add the Core pool markets to PrimeV2 (vUSDT and vWBNB) with a 2x supply multiplier and 0x borrow multiplier.
+- Restore PrimeLiquidityProvider reward emissions (zeroed by the preceding critical VIP) for the two PrimeV2 underlyings — USDT (\`2170138888888888\`) and WBNB (\`3472222222222\`) — back to their prior live distribution speeds. The other legacy Prime underlyings stay at zero.
+- The XVS Vault remains paused (it was paused by the preceding critical VIP). It stays paused until the existing stakers are seeded into the new PrimeLeaderboard off-chain by the Guardian; the Guardian then calls XVS Vault \`resume()\` to bring it back online.
 - Pause the legacy Prime to decommission it.
 
 The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and the PrimeV2 token limit (500) are set in the contracts' initializers, so they are not re-set here. The permissionless mint window is intentionally left uninitialized (mintThreshold = 0, mintDeadline = 0); governance or the Venus Guardian multisig opens it later via setMintThreshold once the protocol is ready.
@@ -142,7 +148,7 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
 #### References
 
 - PrimeV2 / PrimeLeaderboard implementation: https://github.com/VenusProtocol/venus-protocol/pull/676
-- Testnet rollout (VIP-675 + addendun): https://github.com/VenusProtocol/vips/pull/712`,
+- Testnet rollout (VIP-675 + addendum): https://github.com/VenusProtocol/vips/pull/712`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -203,19 +209,20 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
         params: [PRIME_V2],
       },
 
-      // 7. Configure PrimeV2 markets (supply/borrow multipliers mirror the legacy Prime).
+      // 7. Configure PrimeV2 markets (vUSDT, vWBNB).
       ...PRIME_MARKETS.map(market => ({
         target: PRIME_V2,
         signature: "addMarket(address,uint256,uint256)",
         params: [market.vToken, market.supplyMultiplier, market.borrowMultiplier],
       })),
 
-      // 8. Pause the XVS Vault. The Guardian unpauses via resume() after seeding the
-      //    existing stakers into the new PrimeLeaderboard off-chain.
+      // 8. Restore PLP reward emissions (zeroed by the critical VIP) for the two
+      //    PrimeV2 underlyings — USDT and WBNB — back to their prior live speeds.
+      //    NormalTimelock already holds the setTokensDistributionSpeed ACM permission.
       {
-        target: XVS_VAULT,
-        signature: "pause()",
-        params: [],
+        target: PLP,
+        signature: "setTokensDistributionSpeed(address[],uint256[])",
+        params: [PLP_DISTRIBUTION_SPEEDS.map(d => d.token), PLP_DISTRIBUTION_SPEEDS.map(d => d.speed)],
       },
 
       // 9. Decommission the legacy Prime: pause it (halts claim / score updates / issuance).

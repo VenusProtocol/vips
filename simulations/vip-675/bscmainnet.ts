@@ -3,7 +3,7 @@ import { Contract, constants } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import {
   BSCMAINNET_MULTISIG_PAUSER,
@@ -11,12 +11,14 @@ import {
   KEEPER,
   LEGACY_PRIME,
   PLP,
+  PLP_DISTRIBUTION_SPEEDS,
   PRIME_LEADERBOARD,
   PRIME_MARKETS,
   PRIME_V2,
   XVS_VAULT,
   default as vip675,
 } from "../../vips/vip-675/bscmainnet";
+import vip675Critical from "../../vips/vip-675/bscmainnet-critical";
 import ACM_FULL_ABI from "./abi/AccessControlManager.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -44,9 +46,17 @@ const PRIME_LEADERBOARD_ABI = [
   "function primeV2() view returns (address)",
 ];
 
-const PLP_ABI = ["function prime() view returns (address)"];
+const PLP_ABI = [
+  "function prime() view returns (address)",
+  "function tokenDistributionSpeeds(address) view returns (uint256)",
+  "function setTokensDistributionSpeed(address[],uint256[])",
+];
 const LEGACY_PRIME_ABI = ["function paused() view returns (bool)"];
-const VAULT_ABI = ["function primeToken() view returns (address)", "function vaultPaused() view returns (bool)"];
+const VAULT_ABI = [
+  "function primeToken() view returns (address)",
+  "function vaultPaused() view returns (bool)",
+  "function pause()",
+];
 const COMPTROLLER_ABI = ["function prime() view returns (address)"];
 
 const BLOCK_NUMBER = 105868057;
@@ -98,6 +108,12 @@ forking(BLOCK_NUMBER, async () => {
     acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
     xvsVault = new ethers.Contract(XVS_VAULT, VAULT_ABI, ethers.provider);
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+
+    // Run the preceding critical VIP (vip-675/bscmainnet-critical.ts) so this VIP
+    // executes against the real prior state: XVS Vault paused and every Prime
+    // underlying's PLP distribution speed zeroed. Commands run through the
+    // CriticalTimelock, which holds the pause() and setTokensDistributionSpeed perms.
+    await pretendExecutingVip(await vip675Critical(), bscmainnet.CRITICAL_TIMELOCK);
   });
 
   const roleFor = (target: string, signature: string) =>
@@ -134,12 +150,18 @@ forking(BLOCK_NUMBER, async () => {
       expect(await xvsVault.primeToken()).to.equal(LEGACY_PRIME);
     });
 
-    it("XVSVault is not paused", async () => {
-      expect(await xvsVault.vaultPaused()).to.equal(false);
+    it("XVSVault is already paused (by the preceding critical VIP)", async () => {
+      expect(await xvsVault.vaultPaused()).to.equal(true);
     });
 
     it("Comptroller prime still points at legacy Prime", async () => {
       expect(await comptroller.prime()).to.equal(LEGACY_PRIME);
+    });
+
+    it("PLP distribution speeds are zeroed (by the preceding critical VIP)", async () => {
+      for (const { token } of PLP_DISTRIBUTION_SPEEDS) {
+        expect(await plp.tokenDistributionSpeeds(token)).to.equal(0);
+      }
     });
   });
 
@@ -194,12 +216,18 @@ forking(BLOCK_NUMBER, async () => {
       expect(await xvsVault.primeToken()).to.equal(PRIME_LEADERBOARD);
     });
 
-    it("XVSVault is paused (awaiting off-chain staker seeding)", async () => {
+    it("XVSVault stays paused (awaiting off-chain staker seeding)", async () => {
       expect(await xvsVault.vaultPaused()).to.equal(true);
     });
 
     it("Comptroller prime points at PrimeV2", async () => {
       expect(await comptroller.prime()).to.equal(PRIME_V2);
+    });
+
+    it("PLP distribution speeds restored for USDT and WBNB", async () => {
+      for (const { token, speed } of PLP_DISTRIBUTION_SPEEDS) {
+        expect(await plp.tokenDistributionSpeeds(token)).to.equal(speed);
+      }
     });
 
     it("legacy Prime is decommissioned (paused)", async () => {
