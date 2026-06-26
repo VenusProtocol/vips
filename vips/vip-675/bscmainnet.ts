@@ -237,7 +237,9 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
         params: [PLP_DISTRIBUTION_SPEEDS.map(d => d.token), PLP_DISTRIBUTION_SPEEDS.map(d => d.speed)],
       },
 
-      // 9. Decommission the legacy Prime: pause it (halts claim / score updates / issuance).
+      // 9. Decommission the legacy Prime: togglePause() it. This halts only claimInterest
+      //    (boosted-yield claims), not claim()/issue()/burn(); but with all inbound hooks
+      //    repointed in steps 4-7, legacy is inert.
       //    NormalTimelock already holds the togglePause ACM permission, so no grant is needed.
       //    Legacy Prime is currently unpaused, so a single togglePause pauses it.
       //    (setLimit(0,0) is NOT used: it reverts with InvalidLimit because the legacy Prime
