@@ -12,7 +12,10 @@ const PLP_ABI = [
 ];
 const VAULT_ABI = ["function vaultPaused() view returns (bool)", "event VaultPaused(address indexed admin)"];
 const LEGACY_PRIME_ABI = ["function paused() view returns (bool)"];
-const LEGACY_PRIME_CLAIM_ABI = ["function claimInterest(address vToken, address user) returns (uint256)"];
+const LEGACY_PRIME_CLAIM_ABI = [
+  "function claimInterest(address vToken, address user) returns (uint256)",
+  "function isUserPrimeHolder(address user) view returns (bool)",
+];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
 
 const BLOCK_NUMBER = 105868057;
@@ -77,16 +80,31 @@ forking(BLOCK_NUMBER, async () => {
 
     describe("legacy Prime claimInterest is permissionless after the freeze", () => {
       for (const whale of WHALES) {
-        it(`an arbitrary EOA sweeps vUSDT interest on behalf of ${whale}`, async () => {
+        it(`a non-Prime EOA sweeps vUSDT interest on behalf of ${whale}`, async () => {
           const signers = await ethers.getSigners();
           const randomEoa = signers[1];
           const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
           const legacyClaim = new ethers.Contract(LEGACY_PRIME, LEGACY_PRIME_CLAIM_ABI, randomEoa);
 
+          // The caller is an arbitrary EOA, NOT a Prime member; the whale IS one.
+          const callerIsPrime = await legacyClaim.isUserPrimeHolder(randomEoa.address);
+          const whaleIsPrime = await legacyClaim.isUserPrimeHolder(whale);
+          console.log(
+            `    caller ${randomEoa.address} isPrime=${callerIsPrime} | whale ${whale} isPrime=${whaleIsPrime}`,
+          );
+          expect(callerIsPrime).to.equal(false);
+          expect(whaleIsPrime).to.equal(true);
+
           const before = await usdt.balanceOf(whale);
           await legacyClaim.claimInterest(VUSDT, whale);
           const after = await usdt.balanceOf(whale);
+          console.log(
+            `    whale USDT before=${before.toString()} after=${after.toString()} claimed=${after
+              .sub(before)
+              .toString()}`,
+          );
 
+          // Funds land with the whale, not the caller, and the caller never needed Prime status.
           expect(after.gt(before)).to.equal(true);
         });
       }
