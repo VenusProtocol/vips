@@ -15,6 +15,7 @@ import {
   PRIME_LEADERBOARD,
   PRIME_MARKETS,
   PRIME_V2,
+  VAI_CONTROLLER,
   XVS_VAULT,
   default as vip675,
 } from "../../vips/vip-675/bscmainnet";
@@ -58,6 +59,10 @@ const VAULT_ABI = [
   "function pause()",
 ];
 const COMPTROLLER_ABI = ["function prime() view returns (address)"];
+const VAI_CONTROLLER_ABI = [
+  "function prime() view returns (address)",
+  "function mintEnabledOnlyForPrimeHolder() view returns (bool)",
+];
 
 const BLOCK_NUMBER = 105868057;
 
@@ -99,6 +104,7 @@ forking(BLOCK_NUMBER, async () => {
   let acm: Contract;
   let xvsVault: Contract;
   let comptroller: Contract;
+  let vaiController: Contract;
 
   before(async () => {
     primeV2 = new ethers.Contract(PRIME_V2, PRIME_V2_ABI, ethers.provider);
@@ -108,6 +114,7 @@ forking(BLOCK_NUMBER, async () => {
     acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
     xvsVault = new ethers.Contract(XVS_VAULT, VAULT_ABI, ethers.provider);
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+    vaiController = new ethers.Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
 
     // Run the preceding critical VIP (vip-675/bscmainnet-critical.ts) so this VIP
     // executes against the real prior state: XVS Vault paused and every Prime
@@ -156,6 +163,11 @@ forking(BLOCK_NUMBER, async () => {
 
     it("Comptroller prime still points at legacy Prime", async () => {
       expect(await comptroller.prime()).to.equal(LEGACY_PRIME);
+    });
+
+    it("VAIController prime still points at legacy Prime, with the holder mint gate enabled", async () => {
+      expect(await vaiController.prime()).to.equal(LEGACY_PRIME);
+      expect(await vaiController.mintEnabledOnlyForPrimeHolder()).to.equal(true);
     });
 
     it("PLP distribution speeds are zeroed (by the preceding critical VIP)", async () => {
@@ -222,6 +234,10 @@ forking(BLOCK_NUMBER, async () => {
 
     it("Comptroller prime points at PrimeV2", async () => {
       expect(await comptroller.prime()).to.equal(PRIME_V2);
+    });
+
+    it("VAIController prime points at PrimeV2 (gate now tracks PrimeV2 membership)", async () => {
+      expect(await vaiController.prime()).to.equal(PRIME_V2);
     });
 
     it("PLP distribution speeds restored for USDT and WBNB", async () => {

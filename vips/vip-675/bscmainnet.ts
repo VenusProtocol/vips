@@ -20,7 +20,7 @@ export const BSCMAINNET_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e
 // does NOT wire them — the setPrimeV2 / setPrimeLeaderboard wiring is ACM-gated and
 // done here. This VIP accepts ownership, grants ACM permissions, wires PrimeV2 <->
 // PrimeLeaderboard, repoints the PrimeLiquidityProvider / XVS Vault / Core pool
-// Comptroller, configures the Prime markets, and pauses the legacy Prime.
+// Comptroller / VAIController, configures the Prime markets, and pauses the legacy Prime.
 // The XVS Vault is already paused by the preceding critical VIP
 // (vip-675/bscmainnet-critical.ts) and stays paused until the new
 // PrimeLeaderboard is seeded off-chain.
@@ -31,6 +31,7 @@ export const PRIME_LEADERBOARD = "0x55e2ccF68B7A276dc28AfA107997b8B1Be932c0b";
 export const PLP = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2"; // PrimeLiquidityProvider (existing)
 export const LEGACY_PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC"; // current Prime (to be replaced)
 export const COMPTROLLER = bscmainnet.UNITROLLER;
+export const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE"; // VaiUnitroller proxy
 export const XVS_VAULT = bscmainnet.XVS_VAULT_PROXY;
 export const XVS = bscmainnet.XVS;
 export const XVS_VAULT_POOL_ID = 0;
@@ -138,6 +139,7 @@ If passed, this VIP will:
 - Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
 - Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 0).
 - Update the Core pool Comptroller's prime address from the legacy Prime to PrimeV2, so market hooks call the new contract.
+- Update the VAIController's prime address from the legacy Prime to PrimeV2. VAI minting is gated on prime-holder status (\`mintEnabledOnlyForPrimeHolder\` is enabled), so this keeps the gate tracking live PrimeV2 membership once the legacy Prime is decommissioned.
 - Add the Core pool markets to PrimeV2 (vUSDT and vWBNB) with a 2x supply multiplier and 0x borrow multiplier.
 - Restore PrimeLiquidityProvider reward emissions (zeroed by the preceding critical VIP) for the two PrimeV2 underlyings — USDT (\`2170138888888888\`) and WBNB (\`3472222222222\`) — back to their prior live distribution speeds. The other legacy Prime underlyings stay at zero.
 - The XVS Vault remains paused (it was paused by the preceding critical VIP). It stays paused until the existing stakers are seeded into the new PrimeLeaderboard off-chain by the Guardian; the Guardian then calls XVS Vault \`resume()\` to bring it back online.
@@ -205,6 +207,16 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
       // 6. Point the Core pool Comptroller at PrimeV2 (ensureAdmin = NormalTimelock).
       {
         target: COMPTROLLER,
+        signature: "setPrimeToken(address)",
+        params: [PRIME_V2],
+      },
+
+      // 6b. Point the VAIController at PrimeV2 (onlyAdmin = NormalTimelock). VAI minting
+      //     is gated on prime-holder status (mintEnabledOnlyForPrimeHolder = true) and
+      //     reads IPrime(prime).isUserPrimeHolder(minter); repointing keeps that gate
+      //     tracking live PrimeV2 membership instead of the decommissioned legacy Prime.
+      {
+        target: VAI_CONTROLLER,
         signature: "setPrimeToken(address)",
         params: [PRIME_V2],
       },
