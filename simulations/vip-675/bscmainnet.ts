@@ -81,6 +81,25 @@ const VAI_CONTROLLER_ABI = [
   "function getMintableVAI(address) view returns (uint256, uint256)",
 ];
 
+// Core-pool Liquidator contract (resolved at runtime via comptroller.liquidatorContract()).
+const LIQUIDATOR_ABI = [
+  "function liquidateBorrow(address vToken, address borrower, uint256 repayAmount, address vTokenCollateral)",
+];
+// Chainlink sub-oracle backing the ResilientOracle. setDirectPrice lets the timelock pin/crash a
+// price; with the asset's PIVOT role disabled there is no anchor validation, so the value flows
+// through ResilientOracle.getPrice unchanged (used to force a shortfall in the liquidation flow).
+const CHAINLINK_ORACLE_ABI = [
+  "function setDirectPrice(address asset, uint256 price)",
+  "function getPrice(address) view returns (uint256)",
+];
+const RESILIENT_ORACLE_PRICE_ABI = [
+  "function enableOracle(address asset, uint8 role, bool enable)",
+  "function getPrice(address) view returns (uint256)",
+  "function getUnderlyingPrice(address) view returns (uint256)",
+];
+// ResilientOracle OracleRole enum: MAIN=0, PIVOT=1, FALLBACK=2.
+const ORACLE_ROLE_PIVOT = 1;
+
 // A core-pool market intentionally NOT configured on PrimeV2 (only vUSDT + vWBNB are).
 const VETH = mainnetDeployments.addresses.vETH;
 const VUSDT = PRIME_MARKETS[0].vToken;
@@ -598,6 +617,79 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
+    // Cross-asset position: the lifecycle flows above supply and borrow the *same* asset, so a
+    // genuine "supply collateral A, borrow a different asset B" path — exercising the collateral
+    // factor and the cross-market Comptroller -> PrimeV2 hook — stays unproven. Here a non-Prime
+    // user supplies WBNB as collateral and borrows USDT against it, then unwinds. The hook must
+    // no-op on every leg; any revert means the repoint broke cross-collateral borrowing.
+    describe("Cross-asset position: supply WBNB collateral, borrow USDT (non-Prime)", () => {
+      const VWBNB = PRIME_MARKETS[1].vToken;
+      let whale: Signer;
+      let comptroller: Contract;
+      let vwbnb: Contract;
+      let vusdt: Contract;
+      let wbnb: Contract;
+      let usdt: Contract;
+      let supplyAmount: ReturnType<typeof parseUnits>;
+      let borrowAmount: ReturnType<typeof parseUnits>;
+
+      before(async () => {
+        whale = await initMainnetUser(WHALE, parseUnits("10", 18));
+        const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("5", 18));
+        comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_FULL_ABI, whale);
+        vwbnb = new ethers.Contract(VWBNB, VTOKEN_ABI, whale);
+        vusdt = new ethers.Contract(VUSDT, VTOKEN_ABI, whale);
+        wbnb = new ethers.Contract(WBNB, ERC20_ABI, whale);
+        usdt = new ethers.Contract(USDT, ERC20_ABI, whale);
+        supplyAmount = parseUnits("10", await wbnb.decimals());
+        // Borrow a conservative USDT amount that stays well inside WBNB's collateral capacity.
+        borrowAmount = parseUnits("500", await usdt.decimals());
+
+        for (const v of [VWBNB, VUSDT]) {
+          await comptroller.connect(timelock)._setMarketSupplyCaps([v], [constants.MaxUint256]);
+          await comptroller.connect(timelock)._setMarketBorrowCaps([v], [constants.MaxUint256]);
+          await comptroller.connect(timelock)._setActionsPaused([v], FLOW_ACTIONS, false);
+        }
+      });
+
+      it("supplies WBNB and enters it as collateral", async () => {
+        const vBalanceBefore = await vwbnb.balanceOf(WHALE);
+        await wbnb.approve(VWBNB, 0);
+        await wbnb.approve(VWBNB, supplyAmount);
+        await expect(vwbnb.mint(supplyAmount)).to.not.be.reverted;
+        expect(await vwbnb.balanceOf(WHALE)).to.be.gt(vBalanceBefore);
+
+        await comptroller.enterMarkets([VWBNB]);
+        expect(await comptroller.checkMembership(WHALE, VWBNB)).to.equal(true);
+      });
+
+      it("borrows USDT against the WBNB collateral", async () => {
+        const balanceBefore = await usdt.balanceOf(WHALE);
+        await expect(vusdt.borrow(borrowAmount)).to.not.be.reverted;
+        expect(await usdt.balanceOf(WHALE)).to.be.gt(balanceBefore);
+        expect(await vusdt.borrowBalanceStored(WHALE)).to.be.gte(borrowAmount);
+      });
+
+      it("repays the full USDT borrow", async () => {
+        const owed = await vusdt.borrowBalanceStored(WHALE);
+        await usdt.approve(VUSDT, 0);
+        await usdt.approve(VUSDT, owed.mul(2));
+        await expect(vusdt.repayBorrow(constants.MaxUint256)).to.not.be.reverted;
+        expect(await vusdt.borrowBalanceStored(WHALE)).to.equal(0);
+      });
+
+      it("redeems the WBNB collateral and exits the market", async () => {
+        const balanceBefore = await wbnb.balanceOf(WHALE);
+        const vBalance = await vwbnb.balanceOf(WHALE);
+        await expect(vwbnb.redeem(vBalance)).to.not.be.reverted;
+        expect(await wbnb.balanceOf(WHALE)).to.be.gt(balanceBefore);
+        expect(await vwbnb.balanceOf(WHALE)).to.equal(0);
+
+        await expect(comptroller.exitMarket(VWBNB)).to.not.be.reverted;
+        expect(await comptroller.checkMembership(WHALE, VWBNB)).to.equal(false);
+      });
+    });
+
     // The complementary case: once the same user IS a PrimeV2 holder, the Comptroller
     // hook must execute the live score-update path (not the no-op branch) on a
     // configured market, without breaking the supply operation.
@@ -622,6 +714,7 @@ forking(BLOCK_NUMBER, async () => {
         supplyAmount = parseUnits("10000", await usdt.decimals());
 
         await comptroller.connect(timelock)._setMarketSupplyCaps([VUSDT], [constants.MaxUint256]);
+        await comptroller.connect(timelock)._setMarketBorrowCaps([VUSDT], [constants.MaxUint256]);
         await comptroller.connect(timelock)._setActionsPaused([VUSDT], FLOW_ACTIONS, false);
 
         // PrimeV2 scores a member off their live XVS Vault stake (_xvsBalanceOfUser reads
@@ -665,12 +758,44 @@ forking(BLOCK_NUMBER, async () => {
         expect((await primeV2View.markets(VUSDT)).sumOfMembersScore).to.be.gt(before);
       });
 
+      // The score-update hook also fires on borrow/repay/redeem, not just supply. Run the rest of
+      // the money-market lifecycle while the user is an active PrimeV2 holder to prove the live
+      // hook branch survives every operation (the no-op branch is covered by the non-Prime flows).
+      it("a holder can borrow against the supplied collateral (live hook stays wired)", async () => {
+        await comptroller.enterMarkets([VUSDT]);
+        expect(await comptroller.checkMembership(WHALE, VUSDT)).to.equal(true);
+
+        const borrowAmount = parseUnits("1000", await usdt.decimals());
+        const balanceBefore = await usdt.balanceOf(WHALE);
+        await expect(vusdt.borrow(borrowAmount)).to.not.be.reverted;
+        expect(await usdt.balanceOf(WHALE)).to.be.gt(balanceBefore);
+        expect(await primeV2View.isUserPrimeHolder(WHALE)).to.equal(true);
+      });
+
+      it("a holder can repay the full borrow", async () => {
+        const owed = await vusdt.borrowBalanceStored(WHALE);
+        await usdt.approve(VUSDT, 0);
+        await usdt.approve(VUSDT, owed.mul(2));
+        await expect(vusdt.repayBorrow(constants.MaxUint256)).to.not.be.reverted;
+        expect(await vusdt.borrowBalanceStored(WHALE)).to.equal(0);
+      });
+
+      it("a holder can redeem all supplied collateral", async () => {
+        const vBalance = await vusdt.balanceOf(WHALE);
+        await expect(vusdt.redeem(vBalance)).to.not.be.reverted;
+        expect(await vusdt.balanceOf(WHALE)).to.equal(0);
+        expect(await primeV2View.isUserPrimeHolder(WHALE)).to.equal(true);
+      });
+
       after(async () => {
-        // Burn the token and unwind the position so later checks see clean state.
+        // Burn the token and unwind any residual position so later checks see clean state.
         await primeV2Keeper.burn(WHALE);
         const vBalance = await vusdt.balanceOf(WHALE);
         if (vBalance.gt(0)) {
           await vusdt.redeem(vBalance);
+        }
+        if (await comptroller.checkMembership(WHALE, VUSDT)) {
+          await comptroller.exitMarket(VUSDT);
         }
       });
     });
@@ -706,6 +831,111 @@ forking(BLOCK_NUMBER, async () => {
           parseUnits("200", 18),
         );
         expect(seizeForTwo).to.be.gt(seizeForOne);
+      });
+    });
+
+    // End-to-end liquidation: the view-only seize math above never proves the *whole* path —
+    // an underwater account, the core-pool Liquidator contract, and a real collateral seize —
+    // all still works once the Comptroller's Prime hook points at PrimeV2. Drive it for real:
+    // a non-Prime user supplies WBNB and borrows USDT, the WBNB price is crashed through the
+    // (repointed) ResilientOracle, and a liquidator repays USDT to seize the borrower's vWBNB.
+    // Snapshot/revert-isolated because the WBNB price crash must not leak into later tests.
+    describe("End-to-end liquidation seizes collateral through the repointed oracle", () => {
+      const VWBNB = PRIME_MARKETS[1].vToken;
+      // Fresh EOA, distinct from the borrower (WHALE), to act as the liquidator.
+      const LIQUIDATOR_EOA = "0x000000000000000000000000000000000000beef";
+
+      let snapshotId: string;
+      let comptroller: Contract;
+      let liquidator: Contract;
+      let vwbnb: Contract;
+      let vusdt: Contract;
+      let wbnb: Contract;
+      let usdt: Contract;
+      let chainlink: Contract;
+      let resilient: Contract;
+      let borrowerSigner: Signer;
+      let liquidatorSigner: Signer;
+      let originalWbnbSpot: ReturnType<typeof parseUnits>;
+      let supplyAmount: ReturnType<typeof parseUnits>;
+      let borrowAmount: ReturnType<typeof parseUnits>;
+      let repayAmount: ReturnType<typeof parseUnits>;
+
+      before(async () => {
+        snapshotId = await ethers.provider.send("evm_snapshot", []);
+
+        const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("5", 18));
+        borrowerSigner = await initMainnetUser(WHALE, parseUnits("10", 18));
+        liquidatorSigner = await initMainnetUser(LIQUIDATOR_EOA, parseUnits("10", 18));
+
+        comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_FULL_ABI, borrowerSigner);
+        vwbnb = new ethers.Contract(VWBNB, VTOKEN_ABI, borrowerSigner);
+        vusdt = new ethers.Contract(VUSDT, VTOKEN_ABI, borrowerSigner);
+        wbnb = new ethers.Contract(WBNB, ERC20_ABI, borrowerSigner);
+        usdt = new ethers.Contract(USDT, ERC20_ABI, borrowerSigner);
+        chainlink = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+        resilient = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_PRICE_ABI, ethers.provider);
+
+        supplyAmount = parseUnits("10", await wbnb.decimals());
+        borrowAmount = parseUnits("500", await usdt.decimals());
+        repayAmount = parseUnits("50", await usdt.decimals());
+
+        for (const v of [VWBNB, VUSDT]) {
+          await comptroller.connect(timelock)._setMarketSupplyCaps([v], [constants.MaxUint256]);
+          await comptroller.connect(timelock)._setMarketBorrowCaps([v], [constants.MaxUint256]);
+          await comptroller.connect(timelock)._setActionsPaused([v], FLOW_ACTIONS, false);
+        }
+
+        // PIVOT off for WBNB so the crashed Chainlink price flows straight through getPrice with
+        // no anchor validation, then pin Chainlink storage to the live spot (WBNB is 18 decimals,
+        // so setDirectPrice passes through unchanged) before the controlled crash below.
+        await resilient.connect(timelock).enableOracle(WBNB, ORACLE_ROLE_PIVOT, false);
+        originalWbnbSpot = await resilient.getPrice(WBNB);
+        await chainlink.connect(timelock).setDirectPrice(WBNB, originalWbnbSpot);
+
+        // Open the position: supply WBNB collateral, enter it, borrow USDT against it.
+        await wbnb.approve(VWBNB, 0);
+        await wbnb.approve(VWBNB, supplyAmount);
+        await vwbnb.mint(supplyAmount);
+        await comptroller.enterMarkets([VWBNB]);
+        await vusdt.borrow(borrowAmount);
+
+        liquidator = new ethers.Contract(await comptroller.liquidatorContract(), LIQUIDATOR_ABI, liquidatorSigner);
+      });
+
+      after(async () => {
+        await ethers.provider.send("evm_revert", [snapshotId]);
+      });
+
+      it("pre-crash: the borrower's account is healthy", async () => {
+        const [err, liquidity, shortfall] = await comptroller.getAccountLiquidity(WHALE);
+        expect(err).to.equal(0);
+        expect(liquidity).to.be.gt(0);
+        expect(shortfall).to.equal(0);
+      });
+
+      it("price crash forces shortfall and the liquidator seizes vWBNB", async () => {
+        const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("5", 18));
+        // 10 WBNB collateral vastly over-covers 500 USDT debt. Crash to 5% of spot: deep enough to
+        // force shortfall, but shallow enough that seizing for the 50 USDT repay stays within the
+        // 10 WBNB collateral (a deeper crash would trip LIQUIDATE_SEIZE_TOO_MUCH).
+        const crashedSpot = originalWbnbSpot.div(20);
+        await chainlink.connect(timelock).setDirectPrice(WBNB, crashedSpot);
+        expect(await resilient.getPrice(WBNB)).to.equal(crashedSpot);
+
+        const [err, liquidity, shortfall] = await comptroller.getAccountLiquidity(WHALE);
+        expect(err).to.equal(0);
+        expect(liquidity).to.equal(0);
+        expect(shortfall).to.be.gt(0);
+
+        // Fund the liquidator from the borrower's just-borrowed USDT, then liquidate.
+        await usdt.transfer(LIQUIDATOR_EOA, repayAmount);
+        await usdt.connect(liquidatorSigner).approve(liquidator.address, 0);
+        await usdt.connect(liquidatorSigner).approve(liquidator.address, repayAmount);
+
+        const seizedBefore = await vwbnb.balanceOf(LIQUIDATOR_EOA);
+        await expect(liquidator.liquidateBorrow(VUSDT, WHALE, repayAmount, VWBNB)).to.emit(vusdt, "LiquidateBorrow");
+        expect(await vwbnb.balanceOf(LIQUIDATOR_EOA)).to.be.gt(seizedBefore);
       });
     });
 
