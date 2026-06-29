@@ -240,14 +240,17 @@ const reportTxGas = async (
 // gas — immaterial against propose's ~16M and well inside the near-cap warning band. (We avoid
 // approveHash/getTransactionHash because getTransactionHash drifts across mined blocks on a
 // hardhat fork, breaking hash pre-approval.)
-const estimateProposeViaMultisig = async (proposeCalldata: string): Promise<BigNumber> => {
-  const safe = new ethers.Contract(DEFAULT_PROPOSER_ADDRESS, SAFE_ABI, ethers.provider);
+const estimateProposeViaMultisig = async (
+  proposeCalldata: string,
+  proposerAddress: string = DEFAULT_PROPOSER_ADDRESS,
+): Promise<BigNumber> => {
+  const safe = new ethers.Contract(proposerAddress, SAFE_ABI, ethers.provider);
   const owners: string[] = await safe.getOwners();
   const owner = owners[0];
   const zero = ethers.constants.AddressZero;
 
   await ethers.provider.send("hardhat_setStorageAt", [
-    DEFAULT_PROPOSER_ADDRESS,
+    proposerAddress,
     SAFE_THRESHOLD_SLOT,
     ethers.utils.hexZeroPad("0x1", 32),
   ]);
@@ -411,9 +414,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       // (which folds in the 63/64 forwarding reserves + Safe overhead). Must run before the
       // direct propose below, while the proposer still has no live proposal. Falls back to
       // direct-propose consumption when the proposer isn't a Safe (e.g. non-governance forks).
-      if (await isSafe(DEFAULT_PROPOSER_ADDRESS)) {
+      if (await isSafe(proposer.address)) {
         const proposeCalldata = (await governorProxy.populateTransaction.propose(...proposeArgs)).data as string;
-        const requiredLimit = await estimateProposeViaMultisig(proposeCalldata);
+        const requiredLimit = await estimateProposeViaMultisig(proposeCalldata, proposer.address);
         await reportTxGas(description, "propose() via proposer-Safe execTransaction", requiredLimit, {
           enforce: true,
           metric: "requiredGasLimit",
@@ -424,7 +427,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const tx = await governorProxy.connect(proposer).propose(...proposeArgs);
       const receipt = await tx.wait();
       await reportTxGas(description, "propose() direct call", receipt.gasUsed, {
-        enforce: !(await isSafe(DEFAULT_PROPOSER_ADDRESS)),
+        enforce: !(await isSafe(proposer.address)),
       });
 
       proposalId = await governorProxy.callStatic.proposalCount();
