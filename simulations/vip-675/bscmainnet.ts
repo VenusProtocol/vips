@@ -20,7 +20,6 @@ import {
   KEEPER,
   LEGACY_PRIME,
   PLP,
-  PLP_DISTRIBUTION_SPEEDS,
   PRIME_LEADERBOARD,
   PRIME_MARKETS,
   PRIME_V2,
@@ -60,11 +59,7 @@ const PRIME_LEADERBOARD_ABI = [
   "function primeV2() view returns (address)",
 ];
 
-const PLP_ABI = [
-  "function prime() view returns (address)",
-  "function tokenDistributionSpeeds(address) view returns (uint256)",
-  "function setTokensDistributionSpeed(address[],uint256[])",
-];
+const PLP_ABI = ["function prime() view returns (address)"];
 const LEGACY_PRIME_ABI = ["function paused() view returns (bool)"];
 const VAULT_ABI = [
   "function primeToken() view returns (address)",
@@ -263,12 +258,6 @@ forking(BLOCK_NUMBER, async () => {
       expect(await vaiController.prime()).to.equal(LEGACY_PRIME);
       expect(await vaiController.mintEnabledOnlyForPrimeHolder()).to.equal(true);
     });
-
-    it("PLP distribution speeds are zeroed (by the preceding critical VIP)", async () => {
-      for (const { token } of PLP_DISTRIBUTION_SPEEDS) {
-        expect(await plp.tokenDistributionSpeeds(token)).to.equal(0);
-      }
-    });
   });
 
   testVip("VIP-675 PrimeV2 + PrimeLeaderboard setup", await vip675(), {
@@ -293,8 +282,8 @@ forking(BLOCK_NUMBER, async () => {
 
   // Post-VIP: every wiring delta the proposal promises. Ownership accepted by the timelock,
   // all Prime consumers repointed (PLP/Comptroller/VAIController to PrimeV2, XVS Vault hook to
-  // PrimeLeaderboard), PLP speeds restored for the Prime markets, legacy Prime paused, and the
-  // full ACM permission matrix (cycle/seeding/admin/pause) granted to the right principals.
+  // PrimeLeaderboard), legacy Prime paused, and the full ACM permission matrix
+  // (cycle/seeding/admin/pause) granted to the right principals.
   describe("Post-VIP behavior", () => {
     it("PrimeV2 owner is the NormalTimelock", async () => {
       expect(await primeV2.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
@@ -341,12 +330,6 @@ forking(BLOCK_NUMBER, async () => {
 
     it("VAIController prime points at PrimeV2 (gate now tracks PrimeV2 membership)", async () => {
       expect(await vaiController.prime()).to.equal(PRIME_V2);
-    });
-
-    it("PLP distribution speeds restored for USDT and WBNB", async () => {
-      for (const { token, speed } of PLP_DISTRIBUTION_SPEEDS) {
-        expect(await plp.tokenDistributionSpeeds(token)).to.equal(speed);
-      }
     });
 
     it("legacy Prime is decommissioned (paused)", async () => {

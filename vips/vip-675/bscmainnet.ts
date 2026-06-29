@@ -53,16 +53,6 @@ export const PRIME_MARKETS: PrimeMarket[] = [
   { vToken: VWBNB, supplyMultiplier: parseUnits("2", 18).toString(), borrowMultiplier: "0" },
 ];
 
-// PLP reward emissions were zeroed for every Prime underlying by the preceding
-// critical VIP. Restore the prior live distribution speeds for the two
-// underlyings whose markets PrimeV2 carries over (USDT, WBNB).
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-export const PLP_DISTRIBUTION_SPEEDS: { token: string; speed: string }[] = [
-  { token: USDT, speed: "2170138888888888" },
-  { token: WBNB, speed: "3472222222222" },
-];
-
 const ALL_TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
 // pause/unpause on PrimeV2: all three timelocks plus the Guardian, so the Guardian
@@ -153,7 +143,6 @@ If passed, this VIP will:
 - Update the Core pool Comptroller's prime address from the legacy Prime to PrimeV2, so market hooks call the new contract.
 - Update the VAIController's prime address from the legacy Prime to PrimeV2. VAI minting is gated on prime-holder status (\`mintEnabledOnlyForPrimeHolder\` is enabled), so this keeps the gate tracking live PrimeV2 membership once the legacy Prime is decommissioned.
 - Add the Core pool markets to PrimeV2 (vUSDT and vWBNB) with a 2x supply multiplier and 0x borrow multiplier.
-- Restore PrimeLiquidityProvider reward emissions (zeroed by the preceding critical VIP) for the two PrimeV2 underlyings — USDT (\`2170138888888888\`) and WBNB (\`3472222222222\`) — back to their prior live distribution speeds. The other legacy Prime underlyings stay at zero.
 - The XVS Vault remains paused (it was paused by the preceding critical VIP). It stays paused until the existing stakers are seeded into the new PrimeLeaderboard off-chain by the Guardian; the Guardian then calls XVS Vault \`resume()\` to bring it back online.
 - Pause the legacy Prime to decommission it.
 
@@ -240,16 +229,7 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
         params: [market.vToken, market.supplyMultiplier, market.borrowMultiplier],
       })),
 
-      // 8. Restore PLP reward emissions (zeroed by the critical VIP) for the two
-      //    PrimeV2 underlyings — USDT and WBNB — back to their prior live speeds.
-      //    NormalTimelock already holds the setTokensDistributionSpeed ACM permission.
-      {
-        target: PLP,
-        signature: "setTokensDistributionSpeed(address[],uint256[])",
-        params: [PLP_DISTRIBUTION_SPEEDS.map(d => d.token), PLP_DISTRIBUTION_SPEEDS.map(d => d.speed)],
-      },
-
-      // 9. Decommission the legacy Prime: togglePause() it. This halts only claimInterest
+      // 8. Decommission the legacy Prime: togglePause() it. This halts only claimInterest
       //    (boosted-yield claims), not claim()/issue()/burn(); but with all inbound hooks
       //    repointed in steps 4-7, legacy is inert.
       //    NormalTimelock already holds the togglePause ACM permission, so no grant is needed.
