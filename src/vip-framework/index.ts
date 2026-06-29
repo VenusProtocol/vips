@@ -174,6 +174,104 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   return txResponses;
 };
 
+// Minimal Gnosis Safe ABI — the proposer is a Safe and the real propose() ships through
+// its execTransaction(), so we measure the cap against that path (see estimateProposeViaMultisig).
+const SAFE_ABI = [
+  "function getOwners() view returns (address[])",
+  "function getThreshold() view returns (uint256)",
+  "function execTransaction(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,bytes signatures) payable returns (bool)",
+];
+
+// Gnosis Safe storage layout: slot 4 holds `threshold`.
+const SAFE_THRESHOLD_SLOT = "0x4";
+
+// Warn when a tx is this close to the cap: it fits today but mainnet state drift
+// (cold/warm SLOADs, proposalCount, etc.) can tip it over between sim and execution.
+const NEAR_CAP_WARN_BPS = 9700; // 97%
+
+// Logs a single governance transaction's gas in a consistent format:
+//   [gas] <description> <label> <metric>=<n> (<pct>% of <network> per-tx cap <cap>)
+// Each governance step (propose / queue / execute) runs as one on-chain tx and must fit
+// the chain's per-tx gas cap. When `enforce` is set, also asserts the figure fits the cap.
+// NOTE for propose: the binding figure is the REQUIRED GAS LIMIT of the real submission
+// (proposer Safe -> execTransaction -> propose), NOT the gas a direct EOA propose consumes.
+// Because of EIP-150's 63/64 forwarding reserve compounding across the Safe-proxy/singleton
+// and Governor-proxy call layers, the required limit exceeds consumption — a tx can consume
+// under the cap yet be unprovisionable (its required limit is over the cap, so propose OOGs).
+const reportTxGas = async (
+  description: string,
+  label: string,
+  gas: BigNumber,
+  options: { enforce?: boolean; metric?: string } = {},
+): Promise<void> => {
+  const metric = options.metric ?? "gasUsed";
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+  const suffix = Number.isFinite(cap)
+    ? ` (${gas.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+    : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+  console.log(`[gas] ${description} ${label} ${metric}=${gas.toString()}${suffix}`);
+  if (Number.isFinite(cap)) {
+    if (gas.lte(cap) && gas.mul(10000).gte(BigNumber.from(cap).mul(NEAR_CAP_WARN_BPS))) {
+      console.warn(
+        `[gas] WARNING: ${label} is within ${(10000 - NEAR_CAP_WARN_BPS) / 100}% of the per-tx cap ${cap}; ` +
+          `consider splitting before mainnet state drift tips it over`,
+      );
+    }
+    if (options.enforce) {
+      expect(
+        gas.lte(cap),
+        `${label} ${metric} ${gas.toString()} exceeds the ${FORKED_NETWORK} per-tx gas cap ${cap}; ` +
+          `split or trim the VIP so it fits a single on-chain transaction`,
+      ).to.equal(true);
+    }
+  }
+};
+
+// Returns the gas LIMIT the real propose() submission needs. The proposer is a Gnosis Safe,
+// so on-chain the proposal is created by Safe.execTransaction(GOVERNOR_PROXY, propose calldata),
+// not a direct EOA call. estimateGas on that execTransaction folds in everything the cap binds:
+// EIP-150 63/64 reserves across SafeProxy -> SafeSingleton -> GovernorProxy -> impl, the
+// SafeMultiSigTransaction log of the full calldata, signature verification, intrinsic + calldata.
+//
+// To satisfy checkSignatures without private keys, we lower the Safe's threshold to 1 on the
+// fork and use a single "pre-validated" (v=1) signature from an owner acting as msg.sender. We
+// estimate the SAME execTransaction body (same propose calldata, same 63/64 forwarding, same
+// SafeMultiSigTransaction log); only signature verification differs, by at most a few thousand
+// gas — immaterial against propose's ~16M and well inside the near-cap warning band. (We avoid
+// approveHash/getTransactionHash because getTransactionHash drifts across mined blocks on a
+// hardhat fork, breaking hash pre-approval.)
+const estimateProposeViaMultisig = async (proposeCalldata: string): Promise<BigNumber> => {
+  const safe = new ethers.Contract(DEFAULT_PROPOSER_ADDRESS, SAFE_ABI, ethers.provider);
+  const owners: string[] = await safe.getOwners();
+  const owner = owners[0];
+  const zero = ethers.constants.AddressZero;
+
+  await ethers.provider.send("hardhat_setStorageAt", [
+    DEFAULT_PROPOSER_ADDRESS,
+    SAFE_THRESHOLD_SLOT,
+    ethers.utils.hexZeroPad("0x1", 32),
+  ]);
+
+  // v=1 signature: r=owner, s=0, v=1. With msg.sender == owner the Safe accepts it as valid.
+  const signatures = "0x" + owner.toLowerCase().slice(2).padStart(64, "0") + "0".repeat(64) + "01";
+
+  const executor = await initMainnetUser(owner, ethers.utils.parseEther("1"));
+  return safe
+    .connect(executor)
+    .estimateGas.execTransaction(GOVERNOR_PROXY, 0, proposeCalldata, 0, 0, 0, 0, zero, zero, signatures);
+};
+
+// True if `addr` is a Gnosis Safe (used to decide whether to enforce the cap against the
+// real execTransaction path; non-Safe proposers fall back to direct-propose consumption).
+const isSafe = async (addr: string): Promise<boolean> => {
+  try {
+    await new ethers.Contract(addr, SAFE_ABI, ethers.provider).getThreshold();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Picks a proposer and supporter set that satisfy the live on-chain proposal threshold
 // and quorum at the current fork block. The default proposer/supporters are returned
 // unchanged whenever they already suffice (true at every historical fork block), so this
@@ -298,21 +396,37 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("can be proposed", async () => {
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
-      let tx;
 
       // Validates target address
       await validateTargetAddresses(targets, signatures);
 
-      if (proposal.type === undefined || proposal.type === null) {
-        tx = await governorProxy
-          .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta));
-      } else {
-        tx = await governorProxy
-          .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type);
+      const proposeArgs =
+        proposal.type === undefined || proposal.type === null
+          ? [targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta)]
+          : [targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type];
+
+      // propose() stores the whole proposal in one tx — the heaviest governance tx and the
+      // binding per-tx-cap constraint. The real submission is the proposer Safe's
+      // execTransaction -> propose, so enforce the cap against THAT tx's required gas limit
+      // (which folds in the 63/64 forwarding reserves + Safe overhead). Must run before the
+      // direct propose below, while the proposer still has no live proposal. Falls back to
+      // direct-propose consumption when the proposer isn't a Safe (e.g. non-governance forks).
+      if (await isSafe(DEFAULT_PROPOSER_ADDRESS)) {
+        const proposeCalldata = (await governorProxy.populateTransaction.propose(...proposeArgs)).data as string;
+        const requiredLimit = await estimateProposeViaMultisig(proposeCalldata);
+        await reportTxGas(description, "propose() via proposer-Safe execTransaction", requiredLimit, {
+          enforce: true,
+          metric: "requiredGasLimit",
+        });
       }
-      await tx.wait();
+
+      // Create the proposal for the rest of the lifecycle tests.
+      const tx = await governorProxy.connect(proposer).propose(...proposeArgs);
+      const receipt = await tx.wait();
+      await reportTxGas(description, "propose() direct call", receipt.gasUsed, {
+        enforce: !(await isSafe(DEFAULT_PROPOSER_ADDRESS)),
+      });
+
       proposalId = await governorProxy.callStatic.proposalCount();
       expect(proposalIdBefore.add(1)).to.equal(proposalId);
     });
@@ -330,7 +444,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("should be queued successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
-      await tx.wait();
+      const receipt = await tx.wait();
+      await reportTxGas(description, "queue(proposalId)", receipt.gasUsed);
     });
 
     it("should be executed successfully", async () => {
@@ -353,12 +468,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       }
       const tx = await proposer.sendTransaction(populated);
       const receipt = await tx.wait();
-
-      const gasUsed = receipt.gasUsed.toString();
-      const capSuffix = Number.isFinite(cap)
-        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
-        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
-      console.log(`[gas] ${description} execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
+      await reportTxGas(description, "execute(proposalId)", receipt.gasUsed);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
