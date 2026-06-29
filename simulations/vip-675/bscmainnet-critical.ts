@@ -18,7 +18,7 @@ const LEGACY_PRIME_CLAIM_ABI = [
 ];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
 
-const BLOCK_NUMBER = 105868057;
+const BLOCK_NUMBER = 107043197;
 
 // vUSDT market on the Core pool and its underlying. Used to prove the off-chain
 // claimInterest sweep still works after the freeze.

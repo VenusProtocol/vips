@@ -142,7 +142,7 @@ const FLOW_MARKETS: FlowMarket[] = [
   { name: "vWBNB", vToken: PRIME_MARKETS[1].vToken, supply: "10", borrow: "1", isPrimeMarket: true },
 ];
 
-const BLOCK_NUMBER = 105868057;
+const BLOCK_NUMBER = 107043197;
 
 // Core-pool ComptrollerLens live at BLOCK_NUMBER. It predates the upgrade to the address
 // tracked in NETWORK_ADDRESSES.bscmainnet.COMPTROLLER_LENS (checkCorePoolComptroller's

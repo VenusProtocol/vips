@@ -24,7 +24,7 @@ export const BSCMAINNET_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e
 // The XVS Vault is already paused by the preceding critical VIP
 // (vip-675/bscmainnet-critical.ts) and stays paused until the new
 // PrimeLeaderboard is seeded off-chain.
-export const PRIME_V2 = "0x4f5fd115Df31CC48De880a988D74aaD931851628";
+export const PRIME_V2 = "0x059EabA8676b03e4e8f009eFb7F587C28450F50f";
 export const PRIME_LEADERBOARD = "0x55e2ccF68B7A276dc28AfA107997b8B1Be932c0b";
 
 // Existing contracts reused by PrimeV2
