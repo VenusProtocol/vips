@@ -149,6 +149,8 @@ const BLOCK_NUMBER = 105868057;
 // default), so the migration sanity check must assert the lens current at this fork block.
 const CORE_POOL_LENS_AT_FORK = "0x75A71Ad878f6f24616A2AE21d046C0C8E72f67F8";
 
+const ALL_TIMELOCKS = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK];
+
 const KEEPER_CYCLE_SIGS_V2 = [
   "issue(address)",
   "issueBatch(address[])",
@@ -160,13 +162,18 @@ const KEEPER_CYCLE_SIGS_V2 = [
 // setMintThreshold is governance + Venus Guardian multisig only (NOT the Keeper).
 const MINT_THRESHOLD_SIG = "setMintThreshold(uint256,uint256)";
 
+// setLimit (mint cap) is granted to the NormalTimelock + Guardian (NOT the Keeper).
+const SET_LIMIT_SIG = "setLimit(uint256)";
+
+// pause/unpause on PrimeV2 are granted to all three timelocks + the Guardian.
+const PAUSE_SIGS = ["pause()", "unpause()"];
+
 const KEEPER_CYCLE_SIGS_LEADERBOARD = ["initializeStakers(address[],uint256[],uint64[])", "finalizeInitialization()"];
 
 const NT_ONLY_SIGS_V2 = [
   "setPrimeLeaderboard(address)",
   "addMarket(address,uint256,uint256)",
   "removeMarket(address)",
-  "setLimit(uint256)",
   "updateAlpha(uint128,uint128)",
   "updateMultipliers(address,uint256,uint256)",
   "setMaxLoopsLimit(uint256)",
@@ -275,12 +282,12 @@ forking(BLOCK_NUMBER, async () => {
           .withArgs(market.vToken, market.supplyMultiplier, market.borrowMultiplier);
       }
       // RoleGranted count breakdown:
-      //   PrimeV2:    15 cycle (5×3) + 2 setMintThreshold (NT + Guardian) + 8 admin
-      //               + 6 pause/unpause (2×3) + 1 multisig pauser                          = 32
-      //   Leaderboard: 4 seeding (2×2, Keeper + Guardian) + 3 admin                         = 7
-      //   XVSVault:   1 multisig pauser                                                     = 1
-      //   Total                                                                              = 40
-      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [40]);
+      //   PrimeV2:    15 cycle (5×3) + 2 setMintThreshold (NT + Guardian) + 7 admin (NT-only)
+      //               + 2 setLimit (NT + Guardian) + 8 pause/unpause (2×4) + 1 multisig pauser  = 35
+      //   Leaderboard: 4 seeding (2×2, Keeper + Guardian) + 3 admin                              = 7
+      //   XVSVault:   1 multisig pauser                                                          = 1
+      //   Total                                                                                   = 43
+      await expectEvents(txResponse, [ACM_FULL_ABI], ["RoleGranted"], [43]);
     },
   });
 
@@ -380,6 +387,22 @@ forking(BLOCK_NUMBER, async () => {
 
     it("Keeper does NOT hold setMintThreshold on PrimeV2", async () => {
       expect(await acm.hasRole(roleFor(PRIME_V2, MINT_THRESHOLD_SIG), KEEPER)).to.equal(false);
+    });
+
+    it("setLimit is held by the NormalTimelock and the Guardian (NOT the Keeper)", async () => {
+      expect(await acm.hasRole(roleFor(PRIME_V2, SET_LIMIT_SIG), bscmainnet.NORMAL_TIMELOCK)).to.equal(true);
+      expect(await acm.hasRole(roleFor(PRIME_V2, SET_LIMIT_SIG), bscmainnet.GUARDIAN)).to.equal(true);
+      expect(await acm.hasRole(roleFor(PRIME_V2, SET_LIMIT_SIG), KEEPER)).to.equal(false);
+    });
+
+    it("pause/unpause on PrimeV2 are held by all three timelocks and the Guardian", async () => {
+      for (const sig of PAUSE_SIGS) {
+        for (const account of [...ALL_TIMELOCKS, bscmainnet.GUARDIAN]) {
+          expect(await acm.hasRole(roleFor(PRIME_V2, sig), account)).to.equal(true);
+        }
+        // The Keeper is deliberately kept off the pause levers.
+        expect(await acm.hasRole(roleFor(PRIME_V2, sig), KEEPER)).to.equal(false);
+      }
     });
 
     it("Keeper does NOT hold the admin-only permissions on PrimeV2", async () => {

@@ -65,6 +65,13 @@ export const PLP_DISTRIBUTION_SPEEDS: { token: string; speed: string }[] = [
 
 const ALL_TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
+// pause/unpause on PrimeV2: all three timelocks plus the Guardian, so the Guardian
+// can react out-of-band without waiting on a governance proposal.
+const PAUSE_ACCOUNTS = [...ALL_TIMELOCKS, GUARDIAN];
+
+// setLimit (mint cap): the Normal Timelock plus the Guardian as a fallback lever.
+const SET_LIMIT_ACCOUNTS = [NORMAL_TIMELOCK, GUARDIAN];
+
 // The off-chain epoch pipeline runs the cycle operations directly: a dedicated
 // keeper EOA performs the bulk of the calls, the Guardian is granted the same
 // permissions as a fallback / multisig path, and the NormalTimelock keeps the
@@ -91,7 +98,7 @@ const grant = (target: string, signature: string, accounts: string[] = [NORMAL_T
 
 // ACM-gated functions on PrimeV2 (see PrimeV2.sol _checkAccessAllowed).
 // Cycle ops -> KEEPER_ACCOUNTS; admin ops -> NormalTimelock only;
-// pause/unpause -> all three timelocks.
+// setLimit -> NormalTimelock + Guardian; pause/unpause -> all three timelocks + Guardian.
 const PRIME_V2_PERMISSIONS = [
   ...grant(PRIME_V2, "issue(address)", KEEPER_ACCOUNTS),
   ...grant(PRIME_V2, "issueBatch(address[])", KEEPER_ACCOUNTS),
@@ -102,13 +109,13 @@ const PRIME_V2_PERMISSIONS = [
   ...grant(PRIME_V2, "setPrimeLeaderboard(address)"),
   ...grant(PRIME_V2, "addMarket(address,uint256,uint256)"),
   ...grant(PRIME_V2, "removeMarket(address)"),
-  ...grant(PRIME_V2, "setLimit(uint256)"),
+  ...grant(PRIME_V2, "setLimit(uint256)", SET_LIMIT_ACCOUNTS),
   ...grant(PRIME_V2, "updateAlpha(uint128,uint128)"),
   ...grant(PRIME_V2, "updateMultipliers(address,uint256,uint256)"),
   ...grant(PRIME_V2, "setMaxLoopsLimit(uint256)"),
   ...grant(PRIME_V2, "sweepUndistributed(address,address)"),
-  ...grant(PRIME_V2, "pause()", ALL_TIMELOCKS),
-  ...grant(PRIME_V2, "unpause()", ALL_TIMELOCKS),
+  ...grant(PRIME_V2, "pause()", PAUSE_ACCOUNTS),
+  ...grant(PRIME_V2, "unpause()", PAUSE_ACCOUNTS),
   // Circuit-breaker pause for the Venus team multisig (matches vip-616 cross-chain pattern).
   ...grant(PRIME_V2, "pause()", [BSCMAINNET_MULTISIG_PAUSER]),
 ];
@@ -139,7 +146,7 @@ If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts li
 If passed, this VIP will:
 
 - Accept ownership of PrimeV2 and PrimeLeaderboard (transferred to the Normal Timelock by the deploy script).
-- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, recordCycleSnapshot on PrimeV2) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; the one-time PrimeLeaderboard staker seeding ops (initializeStakers/finalizeInitialization) to the Keeper and the Guardian (\`${GUARDIAN}\`) only (NOT the Normal Timelock); setMintThreshold on PrimeV2 to the Normal Timelock and the Venus Guardian multisig only (NOT the Keeper); pause/unpause on PrimeV2 to all three timelocks; and circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (\`${BSCMAINNET_MULTISIG_PAUSER}\`). (XVS Vault resume() is already held by the Guardian and the Normal Timelock, so it is not re-granted here.)
+- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, recordCycleSnapshot on PrimeV2) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; the one-time PrimeLeaderboard staker seeding ops (initializeStakers/finalizeInitialization) to the Keeper and the Guardian (\`${GUARDIAN}\`) only (NOT the Normal Timelock); setMintThreshold on PrimeV2 to the Normal Timelock and the Venus Guardian multisig only (NOT the Keeper); setLimit on PrimeV2 to the Normal Timelock and the Guardian; pause/unpause on PrimeV2 to all three timelocks and the Guardian; and circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (\`${BSCMAINNET_MULTISIG_PAUSER}\`). (XVS Vault resume() is already held by the Guardian and the Normal Timelock, so it is not re-granted here.)
 - Wire the contracts together by setting PrimeLeaderboard on PrimeV2 and PrimeV2 on PrimeLeaderboard.
 - Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
 - Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 0).
