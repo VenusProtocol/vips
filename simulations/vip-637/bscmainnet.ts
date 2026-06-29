@@ -25,9 +25,9 @@ import {
   PRIME_V2,
   VAI_CONTROLLER,
   XVS_VAULT,
-  default as vip675,
-} from "../../vips/vip-675/bscmainnet";
-import vip675Critical from "../../vips/vip-675/bscmainnet-critical";
+  default as vip637,
+} from "../../vips/vip-637/bscmainnet";
+import vip675Critical from "../../vips/vip-637/bscmainnet-critical";
 import ACM_FULL_ABI from "./abi/AccessControlManager.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -201,7 +201,7 @@ forking(BLOCK_NUMBER, async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
     vaiController = new ethers.Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
 
-    // Run the preceding critical VIP (vip-675/bscmainnet-critical.ts) so this VIP
+    // Run the preceding critical VIP (vip-637/bscmainnet-critical.ts) so this VIP
     // executes against the real prior state: XVS Vault paused and every Prime
     // underlying's PLP distribution speed zeroed. Commands run through the
     // CriticalTimelock, which holds the pause() and setTokensDistributionSpeed perms.
@@ -260,7 +260,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-675 PrimeV2 + PrimeLeaderboard setup", await vip675(), {
+  testVip("VIP-637 PrimeV2 + PrimeLeaderboard setup", await vip637(), {
     callbackAfterExecution: async txResponse => {
       await expect(txResponse)
         .to.emit(primeV2, "PrimeLeaderboardSet")

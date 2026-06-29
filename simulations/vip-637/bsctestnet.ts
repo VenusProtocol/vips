@@ -14,7 +14,7 @@ import vip675, {
   PRIME_MARKETS,
   PRIME_V2,
   XVS_VAULT,
-} from "../../vips/vip-675/bsctestnet";
+} from "../../vips/vip-637/bsctestnet";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 const ACM_ABI = [

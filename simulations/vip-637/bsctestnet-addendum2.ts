@@ -5,13 +5,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { PRIME_V2 } from "../../vips/vip-675/bsctestnet";
+import { PRIME_V2 } from "../../vips/vip-637/bsctestnet";
 import vip675Addendum2, {
   NEW_CYCLE_GRANT_ACCOUNTS,
   NEW_CYCLE_SIG,
   NEW_PRIME_V2_IMPL,
   PROXY_ADMIN,
-} from "../../vips/vip-675/bsctestnet-addendum2";
+} from "../../vips/vip-637/bsctestnet-addendum2";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 

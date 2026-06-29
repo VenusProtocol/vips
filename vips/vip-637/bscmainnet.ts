@@ -22,7 +22,7 @@ export const BSCMAINNET_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e
 // PrimeLeaderboard, repoints the PrimeLiquidityProvider / XVS Vault / Core pool
 // Comptroller / VAIController, configures the Prime markets, and pauses the legacy Prime.
 // The XVS Vault is already paused by the preceding critical VIP
-// (vip-675/bscmainnet-critical.ts) and stays paused until the new
+// (vip-637/bscmainnet-critical.ts) and stays paused until the new
 // PrimeLeaderboard is seeded off-chain.
 export const PRIME_V2 = "0x059EabA8676b03e4e8f009eFb7F587C28450F50f";
 export const PRIME_LEADERBOARD = "0x55e2ccF68B7A276dc28AfA107997b8B1Be932c0b";
@@ -123,35 +123,40 @@ const PRIME_LEADERBOARD_PERMISSIONS = [
   ...grant(PRIME_LEADERBOARD, "setMaxLoopsLimit(uint256)"),
 ];
 
-const vip675 = () => {
+const vip637 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-675 Deploy and configure PrimeV2 and PrimeLeaderboard",
+    title: "VIP-637 [BNB Chain] PrimeV2 and PrimeLeaderboard",
     description: `#### Summary
 
-If passed, this VIP will bring the new PrimeV2 and PrimeLeaderboard contracts live on BNB Chain: it accepts their ownership, grants the required ACM permissions, wires the two contracts together, points the existing PrimeLiquidityProvider at PrimeV2, switches the XVS Vault hook and the Core pool Comptroller from the legacy Prime to the new contracts, adds the Prime markets, and pauses the legacy Prime. The XVS Vault was already paused by the preceding critical VIP and stays paused while existing stakers are seeded into PrimeLeaderboard off-chain.
+This proposal begins the execution of the Prime Rewards Redesign on BNB Chain — it brings the new PrimeV2 and PrimeLeaderboard contracts live and decommissions the legacy Prime program. It is the migration half of a two-proposal rollout; a companion critical proposal freezes the system beforehand so the transition from legacy Prime to PrimeV2 is seamless and nothing earned under the existing program is lost.
 
 #### Description
 
-If passed, this VIP will:
+This proposal executes the redesign set out in the [Venus Tokenomics Phase II — Prime Rewards Redesign](https://community.venus.io/t/venus-tokenomics-phase-ii-prime-rewards-redesign/5774) proposal; it does not change that design. PrimeV2 and the legacy Prime share one rewards vault (the PrimeLiquidityProvider), which can serve only one Prime contract at a time. Before this proposal is executed, a companion critical proposal pauses XVS Vault staking and zeroes legacy Prime emissions, and an off-chain reward settlement pays every legacy Prime holder their pending rewards in full — so repointing the vault here strands nothing.
 
-- Accept ownership of PrimeV2 and PrimeLeaderboard (transferred to the Normal Timelock by the deploy script).
-- Grant ACM permissions: configuration functions to the Normal Timelock; cycle / epoch operations (issue/issueBatch/burn/burnBatch, recordCycleSnapshot on PrimeV2) to the Normal Timelock, the Keeper (\`${KEEPER}\`) and the Guardian; the one-time PrimeLeaderboard staker seeding ops (initializeStakers/finalizeInitialization) to the Keeper and the Guardian (\`${GUARDIAN}\`) only (NOT the Normal Timelock); setMintThreshold on PrimeV2 to the Normal Timelock and the Venus Guardian multisig only (NOT the Keeper); setLimit on PrimeV2 to the Normal Timelock and the Guardian; pause/unpause on PrimeV2 to all three timelocks and the Guardian; and circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (\`${BSCMAINNET_MULTISIG_PAUSER}\`). (XVS Vault resume() is already held by the Guardian and the Normal Timelock, so it is not re-granted here.)
-- Wire the contracts together by setting PrimeLeaderboard on PrimeV2 and PrimeV2 on PrimeLeaderboard.
-- Point the existing PrimeLiquidityProvider at PrimeV2 so Prime rewards accrue to the new contract.
-- Switch the XVS Vault prime hook from the legacy Prime to PrimeLeaderboard, so vault deposits/withdrawals update the leaderboard (which in turn calls PrimeV2). Reward token and pool id are unchanged (XVS, pool 0).
-- Update the Core pool Comptroller's prime address from the legacy Prime to PrimeV2, so market hooks call the new contract.
-- Update the VAIController's prime address from the legacy Prime to PrimeV2. VAI minting is gated on prime-holder status (\`mintEnabledOnlyForPrimeHolder\` is enabled), so this keeps the gate tracking live PrimeV2 membership once the legacy Prime is decommissioned.
-- Add the Core pool markets to PrimeV2 (vUSDT and vWBNB) with a 2x supply multiplier and 0x borrow multiplier.
-- The XVS Vault remains paused (it was paused by the preceding critical VIP). It stays paused until the existing stakers are seeded into the new PrimeLeaderboard off-chain by the Guardian; the Guardian then calls XVS Vault \`resume()\` to bring it back online.
-- Pause the legacy Prime to decommission it.
+This proposal then accepts ownership of the new contracts, grants the required ACM permissions, wires PrimeV2 and PrimeLeaderboard together, repoints the rewards vault / XVS Vault / Core pool Comptroller / VAIController from legacy Prime to the new contracts, configures the launch markets (vUSDT and vWBNB), and pauses legacy Prime. Supplying and borrowing on Venus markets are unaffected throughout; only XVS staking is temporarily paused, and is resumed by the Guardian once existing stakers are seeded into the new leaderboard off-chain.
 
-The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and the PrimeV2 token limit (500) are set in the contracts' initializers, so they are not re-set here. The permissionless mint window is intentionally left uninitialized (mintThreshold = 0, mintDeadline = 0); governance or the Venus Guardian multisig opens it later via setMintThreshold once the protocol is ready.
+The contracts are implemented and deployed in venus-protocol PR #676 and PR #677; the governance setup is in vips PR #712.
+
+#### Actions
+
+This proposal performs 54 transactions on BNB Chain, in the following groups. Key addresses: PrimeV2 0x059EabA8676b03e4e8f009eFb7F587C28450F50f, PrimeLeaderboard 0x55e2ccF68B7A276dc28AfA107997b8B1Be932c0b, PrimeLiquidityProvider 0x23c4F844ffDdC6161174eB32c770D4D8C07833F2, legacy Prime 0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC, Core pool Comptroller 0xfD36E2c2a6789Db23113685031d7F16329158384, VAIController 0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE.
+
+- **Accept ownership** — acceptOwnership() on PrimeV2 and PrimeLeaderboard.
+- **Grant ACM permissions** (43 txns) — giveCallPermission on the Access Control Manager: per-cycle ops (issue/issueBatch/burn/burnBatch/recordCycleSnapshot) to Normal Timelock + Keeper (0xe0237587acA20f9304d30FACC9Afcd5DD9a94899) + Guardian; one-time staker seeding (initializeStakers/finalizeInitialization) to Keeper + Guardian only; setMintThreshold/setLimit to Normal Timelock + Guardian only; policy levers (addMarket, removeMarket, updateAlpha, updateMultipliers, setMultiplierTiers, etc.) to Normal Timelock only; pause/unpause to all three timelocks + Guardian; circuit-breaker pause() on both PrimeV2 and the XVS Vault to the Venus team multisig (0xCCa5a587eBDBe80f23c8610F2e53B03158e62948).
+- **Wire PrimeV2 ↔ PrimeLeaderboard** — setPrimeLeaderboard(address) on PrimeV2 and setPrimeV2(address) on PrimeLeaderboard.
+- **Repoint the rewards vault** — setPrimeToken(address) on the PrimeLiquidityProvider, pointing it at PrimeV2.
+- **Switch the XVS Vault hook** — setPrimeToken(address,address,uint256) on the XVS Vault, pointing the prime hook at PrimeLeaderboard (reward token XVS, pool id 0 unchanged).
+- **Repoint the Core pool Comptroller** — setPrimeToken(address) on the Comptroller, pointing market hooks at PrimeV2.
+- **Repoint the VAIController** — setPrimeToken(address) on the VAIController, so the Prime-holder VAI mint gate tracks PrimeV2 membership.
+- **Add Core pool markets** — addMarket(address,uint256,uint256) on PrimeV2 for vUSDT and vWBNB, each with a 2x supply multiplier and 0x borrow multiplier.
+- **Decommission legacy Prime** — togglePause() on the legacy Prime contract to pause it permanently.
 
 #### References
 
 - PrimeV2 / PrimeLeaderboard implementation: https://github.com/VenusProtocol/venus-protocol/pull/676
-- Testnet rollout (VIP-675 + addendum): https://github.com/VenusProtocol/vips/pull/712`,
+- Testnet rollout (VIP-637 + addendum): https://github.com/VenusProtocol/vips/pull/712`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -247,4 +252,4 @@ The leaderboard multiplier tiers (30/60/90 days mapping to 1.3x/1.6x/2.0x) and t
   );
 };
 
-export default vip675;
+export default vip637;

@@ -3,15 +3,15 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 
-import { PRIME_V2 } from "../../vips/vip-675/addendum-testnet-reset";
-import { PLP } from "../../vips/vip-675/bsctestnet";
+import { PRIME_V2 } from "../../vips/vip-637/addendum-testnet-reset";
+import { PLP } from "../../vips/vip-637/bsctestnet";
 import vip675Addendum4, {
   BORROW_MULTIPLIER,
   SUPPLY_MULTIPLIER,
   VWBNB,
   WBNB,
   WBNB_DISTRIBUTION_SPEED,
-} from "../../vips/vip-675/bsctestnet-addendum4";
+} from "../../vips/vip-637/bsctestnet-addendum4";
 
 const PRIME_V2_ABI = [
   "function markets(address) view returns (uint256 supplyMultiplier, uint256 borrowMultiplier, uint256 rewardIndex, uint256 sumOfMembersScore, bool exists)",

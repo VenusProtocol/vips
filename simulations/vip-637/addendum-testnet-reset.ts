@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip675Addendum3, { PRIME_LEADERBOARD, PRIME_V2 } from "../../vips/vip-675/addendum-testnet-reset";
+import vip675Addendum3, { PRIME_LEADERBOARD, PRIME_V2 } from "../../vips/vip-637/addendum-testnet-reset";
 import {
   COMPTROLLER,
   MINT_DEADLINE,
@@ -14,7 +14,7 @@ import {
   PLP,
   PRIME_MARKETS,
   XVS_VAULT,
-} from "../../vips/vip-675/bsctestnet";
+} from "../../vips/vip-637/bsctestnet";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 const ACM_ABI = [

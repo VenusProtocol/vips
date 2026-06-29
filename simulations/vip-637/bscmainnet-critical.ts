@@ -3,8 +3,8 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 
-import { LEGACY_PRIME } from "../../vips/vip-675/bscmainnet";
-import { PLP, PRIME_UNDERLYINGS, XVS_VAULT, default as vip675Critical } from "../../vips/vip-675/bscmainnet-critical";
+import { LEGACY_PRIME } from "../../vips/vip-637/bscmainnet";
+import { PLP, PRIME_UNDERLYINGS, XVS_VAULT, default as vip675Critical } from "../../vips/vip-637/bscmainnet-critical";
 
 const PLP_ABI = [
   "function tokenDistributionSpeeds(address) view returns (uint256)",

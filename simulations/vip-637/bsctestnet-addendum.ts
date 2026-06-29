@@ -4,8 +4,8 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import { PRIME_LEADERBOARD, PRIME_V2 } from "../../vips/vip-675/bsctestnet";
-import vip675Addendum, { TIER_DURATIONS, TIER_MULTIPLIERS } from "../../vips/vip-675/bsctestnet-addendum";
+import { PRIME_LEADERBOARD, PRIME_V2 } from "../../vips/vip-637/bsctestnet";
+import vip675Addendum, { TIER_DURATIONS, TIER_MULTIPLIERS } from "../../vips/vip-637/bsctestnet-addendum";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
