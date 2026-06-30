@@ -42,11 +42,11 @@ export const ADDITIONAL_REVENUE = 1;
 // Critical Timelock already holds every ACM permission used here
 // (XVSVault.pause(), PLP.setTokensDistributionSpeed, and PSR
 // addOrUpdateDistributionConfigs / removeDistributionConfig), so no grants are needed.
-const vip675Critical = () => {
+const vip638Critical = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-675 (Critical) Freeze XVS Vault staking, stop legacy Prime emissions, and re-route XVS buyback to Prime",
+      "VIP-638 (Critical) Freeze XVS Vault staking, stop legacy Prime emissions, and re-route XVS buyback to Prime",
     description: `#### Summary
 
 If passed, this critical VIP prepares the legacy Prime migration by freezing the system so an off-chain script can sweep every legacy Prime user's pending interest via \`claimInterest\` against stable balances. It (1) pauses the XVS Vault to freeze staking for the whole migration window, (2) zeroes the PrimeLiquidityProvider distribution speed for every legacy Prime underlying so no new interest accrues, and (3) re-routes the ProtocolShareReserve XVS buyback share into the USDT and U Prime buybacks.
@@ -59,7 +59,7 @@ If passed, this VIP will:
 - **Stop emissions** — calls \`PrimeLiquidityProvider.setTokensDistributionSpeed\` with a speed of \`0\` for every legacy Prime underlying (ETH, BTCB, USDC, USDT, U, WBNB), so no new Prime interest accrues from this point on.
 - **Re-route the XVS buyback share to Prime** — calls \`ProtocolShareReserve.addOrUpdateDistributionConfigs\` to set the XVS buyback to \`0\` in both distribution schemas and redirect that revenue to Prime: in PROTOCOL_RESERVES (spread income) the USDT and U Prime buybacks move from 10% to 20% each; in ADDITIONAL_REVENUE (liquidation income) the USDT and U Prime buybacks are added at 10% each. Both schemas continue to sum to 100%. The two zeroed XVS buyback entries are then removed via \`removeDistributionConfig\`.
 
-This is the first of two on-chain steps. After this VIP executes, an off-chain script calls \`claimInterest\` on behalf of every legacy Prime user. The subsequent (regular) VIP-675 then brings PrimeV2 / PrimeLeaderboard live; once the new leaderboard stakers are seeded off-chain, the Guardian calls \`XVSVault.resume()\` to bring staking back online.`,
+This is the first of two on-chain steps. After this VIP executes, an off-chain script calls \`claimInterest\` on behalf of every legacy Prime user. The subsequent (regular) PrimeV2 migration VIP then brings PrimeV2 / PrimeLeaderboard live; once the new leaderboard stakers are seeded off-chain, the Guardian calls \`XVSVault.resume()\` to bring staking back online.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -121,4 +121,4 @@ This is the first of two on-chain steps. After this VIP executes, an off-chain s
   );
 };
 
-export default vip675Critical;
+export default vip638Critical;

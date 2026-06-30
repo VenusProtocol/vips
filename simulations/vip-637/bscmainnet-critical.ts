@@ -14,7 +14,7 @@ import {
   U_PRIME_BUYBACK,
   XVS_BUYBACK,
   XVS_VAULT,
-  default as vip675Critical,
+  default as vip638Critical,
 } from "../../vips/vip-637/bscmainnet-critical";
 
 const PLP_ABI = [
@@ -144,7 +144,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-675 (Critical) Freeze XVS Vault and stop legacy Prime emissions", await vip675Critical());
+  testVip("VIP-638 (Critical) Freeze XVS Vault and stop legacy Prime emissions", await vip638Critical());
 
   describe("Post-VIP behavior", () => {
     it("XVS Vault is paused", async () => {
