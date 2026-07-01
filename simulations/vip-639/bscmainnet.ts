@@ -11,8 +11,8 @@ import {
   PRIME_LIQUIDITY_PROVIDER,
   USDT,
   WBNB,
-  vip681,
-} from "../../vips/vip-681/bscmainnet";
+  vip639,
+} from "../../vips/vip-639/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 
 // Fork after the PrimeV2 migration critical VIP, which zeroed every legacy Prime
@@ -31,7 +31,7 @@ forking(107390000, async () => {
     });
   });
 
-  testVip("VIP-681", await vip681(), {
+  testVip("VIP-639", await vip639(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
     },

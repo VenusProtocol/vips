@@ -30,10 +30,10 @@ const speedFromMonthlyUsd = (monthlyUsd: number, priceUsd: number) =>
 export const NEW_PRIME_SPEED_FOR_USDT = speedFromMonthlyUsd(MONTHLY_USD_PER_MARKET, 1);
 export const NEW_PRIME_SPEED_FOR_WBNB = speedFromMonthlyUsd(MONTHLY_USD_PER_MARKET, BNB_PRICE_USD);
 
-export const vip681 = () => {
+export const vip639 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-681 (Critical) [BNB Chain] July 2026 Prime Rewards Allocation",
+    title: "VIP-639 (Critical) [BNB Chain] July 2026 Prime Rewards Allocation",
     description: `This proposal outlines the allocation of Prime Rewards on BNB Chain for July 2026, based on available funds. The allocation is retroactive, redistributing revenue generated through June 2026.
 
 ## Allocation Strategy
@@ -49,7 +49,7 @@ In June 2026, Venus generated **$172.4K** in reserves revenue. Of this amount, *
 
 ## Analysis
 
-All the data presented below can be found in the Venus Prime dashboard.
+All the data presented below can be found in the [Venus Prime dashboard](https://dune.com/xvslove_team/venus-prime).
 
 ### Prime markets — Activity, reserves and rewards
 
@@ -65,7 +65,7 @@ All the data presented below can be found in the Venus Prime dashboard.
 - Prime participation continued to build: Prime suppliers grew from **14 to 47** and Prime-held supply from **~$0.9M to ~$4.1M**, confirming the market is attracting a healthy Prime supplier base.
 - wBNB reserve revenue remains minimal (**~$1.3K in June**), consistent with a market still early in its growth. The ~$16K/mo reward is a deliberate supply incentive, to be tapered as the Prime supplier base deepens.
 
-The Critical Timelock already holds the \`setTokensDistributionSpeed\` ACM permission, so no grants are needed.`,
+The Critical Timelock already holds the setTokensDistributionSpeed ACM permission, so no grants are needed.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -87,4 +87,4 @@ The Critical Timelock already holds the \`setTokensDistributionSpeed\` ACM permi
   );
 };
 
-export default vip681;
+export default vip639;
