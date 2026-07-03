@@ -34,6 +34,17 @@ const DEFAULT_SUPPORTER_ADDRESSES = [
   "0xc444949e0054a23c44fc45789738bdf64aed2391",
   "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
 ];
+
+// High delegated-power accounts used as a fallback proposer/supporter only when the
+// default proposer + supporters no longer satisfy the on-chain proposal threshold or
+// quorum at the fork block (e.g. after governance raised the threshold/quorum). For
+// fork blocks where the defaults still suffice, these are never used, so existing
+// simulations are unaffected. Network-specific.
+const FALLBACK_VOTERS: { [network: string]: string[] } = {
+  bscmainnet: ["0x34221485302f6F2029660a000908B5FCABB9BC6e"],
+};
+
+const XVS_VAULT_VOTES_ABI = ["function getPriorVotes(address account, uint256 blockNumber) view returns (uint256)"];
 const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
@@ -163,6 +174,168 @@ export const pretendExecutingVip = async (proposal: Proposal, sender: string = G
   return txResponses;
 };
 
+// Minimal Gnosis Safe ABI — the proposer is a Safe and the real propose() ships through
+// its execTransaction(), so we measure the cap against that path (see estimateProposeViaMultisig).
+const SAFE_ABI = [
+  "function getOwners() view returns (address[])",
+  "function getThreshold() view returns (uint256)",
+  "function execTransaction(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,bytes signatures) payable returns (bool)",
+];
+
+// Gnosis Safe storage layout: slot 4 holds `threshold`.
+const SAFE_THRESHOLD_SLOT = "0x4";
+
+// Warn when a tx is this close to the cap: it fits today but mainnet state drift
+// (cold/warm SLOADs, proposalCount, etc.) can tip it over between sim and execution.
+const NEAR_CAP_WARN_BPS = 9700; // 97%
+
+// Logs a single governance transaction's gas in a consistent format:
+//   [gas] <description> <label> <metric>=<n> (<pct>% of <network> per-tx cap <cap>)
+// Each governance step (propose / queue / execute) runs as one on-chain tx and must fit
+// the chain's per-tx gas cap. When `enforce` is set, also asserts the figure fits the cap.
+// NOTE for propose: the binding figure is the REQUIRED GAS LIMIT of the real submission
+// (proposer Safe -> execTransaction -> propose), NOT the gas a direct EOA propose consumes.
+// Because of EIP-150's 63/64 forwarding reserve compounding across the Safe-proxy/singleton
+// and Governor-proxy call layers, the required limit exceeds consumption — a tx can consume
+// under the cap yet be unprovisionable (its required limit is over the cap, so propose OOGs).
+const reportTxGas = async (
+  description: string,
+  label: string,
+  gas: BigNumber,
+  options: { enforce?: boolean; metric?: string } = {},
+): Promise<void> => {
+  const metric = options.metric ?? "gasUsed";
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+  const suffix = Number.isFinite(cap)
+    ? ` (${gas.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+    : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
+  console.log(`[gas] ${description} ${label} ${metric}=${gas.toString()}${suffix}`);
+  if (Number.isFinite(cap)) {
+    if (gas.lte(cap) && gas.mul(10000).gte(BigNumber.from(cap).mul(NEAR_CAP_WARN_BPS))) {
+      console.warn(
+        `[gas] WARNING: ${label} is within ${(10000 - NEAR_CAP_WARN_BPS) / 100}% of the per-tx cap ${cap}; ` +
+          `consider splitting before mainnet state drift tips it over`,
+      );
+    }
+    if (options.enforce) {
+      expect(
+        gas.lte(cap),
+        `${label} ${metric} ${gas.toString()} exceeds the ${FORKED_NETWORK} per-tx gas cap ${cap}; ` +
+          `split or trim the VIP so it fits a single on-chain transaction`,
+      ).to.equal(true);
+    }
+  }
+};
+
+// Returns the gas LIMIT the real propose() submission needs. The proposer is a Gnosis Safe,
+// so on-chain the proposal is created by Safe.execTransaction(GOVERNOR_PROXY, propose calldata),
+// not a direct EOA call. estimateGas on that execTransaction folds in everything the cap binds:
+// EIP-150 63/64 reserves across SafeProxy -> SafeSingleton -> GovernorProxy -> impl, the
+// SafeMultiSigTransaction log of the full calldata, signature verification, intrinsic + calldata.
+//
+// To satisfy checkSignatures without private keys, we lower the Safe's threshold to 1 on the
+// fork and use a single "pre-validated" (v=1) signature from an owner acting as msg.sender. We
+// estimate the SAME execTransaction body (same propose calldata, same 63/64 forwarding, same
+// SafeMultiSigTransaction log); only signature verification differs, by at most a few thousand
+// gas — immaterial against propose's ~16M and well inside the near-cap warning band. (We avoid
+// approveHash/getTransactionHash because getTransactionHash drifts across mined blocks on a
+// hardhat fork, breaking hash pre-approval.)
+const estimateProposeViaMultisig = async (
+  proposeCalldata: string,
+  proposerAddress: string = DEFAULT_PROPOSER_ADDRESS,
+): Promise<BigNumber> => {
+  const safe = new ethers.Contract(proposerAddress, SAFE_ABI, ethers.provider);
+  const owners: string[] = await safe.getOwners();
+  const owner = owners[0];
+  const zero = ethers.constants.AddressZero;
+
+  await ethers.provider.send("hardhat_setStorageAt", [
+    proposerAddress,
+    SAFE_THRESHOLD_SLOT,
+    ethers.utils.hexZeroPad("0x1", 32),
+  ]);
+
+  // v=1 signature: r=owner, s=0, v=1. With msg.sender == owner the Safe accepts it as valid.
+  const signatures = "0x" + owner.toLowerCase().slice(2).padStart(64, "0") + "0".repeat(64) + "01";
+
+  const executor = await initMainnetUser(owner, ethers.utils.parseEther("1"));
+  return safe
+    .connect(executor)
+    .estimateGas.execTransaction(GOVERNOR_PROXY, 0, proposeCalldata, 0, 0, 0, 0, zero, zero, signatures);
+};
+
+// True if `addr` is a Gnosis Safe (used to decide whether to enforce the cap against the
+// real execTransaction path; non-Safe proposers fall back to direct-propose consumption).
+const isSafe = async (addr: string): Promise<boolean> => {
+  try {
+    await new ethers.Contract(addr, SAFE_ABI, ethers.provider).getThreshold();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Picks a proposer and supporter set that satisfy the live on-chain proposal threshold
+// and quorum at the current fork block. The default proposer/supporters are returned
+// unchanged whenever they already suffice (true at every historical fork block), so this
+// only takes effect once governance raises the threshold/quorum beyond what the defaults
+// can supply, at which point it falls back to the high-power FALLBACK_VOTERS for the network.
+const resolveGovernanceVoters = async (
+  governorProxy: Contract,
+  proposalType: ProposalType,
+  defaultProposer: string,
+  defaultSupporters: string[],
+): Promise<{ proposerAddress: string; supporterAddresses: string[] }> => {
+  const fallback = { proposerAddress: defaultProposer, supporterAddresses: defaultSupporters };
+  try {
+    const network = FORKED_NETWORK as string;
+    const vaultAddress = NETWORK_ADDRESSES[network as "bscmainnet"]?.XVS_VAULT_PROXY;
+    const fallbackVoters = FALLBACK_VOTERS[network] ?? [];
+    if (!vaultAddress || fallbackVoters.length === 0) return fallback;
+
+    const xvsVault = await ethers.getContractAt(XVS_VAULT_VOTES_ABI, vaultAddress);
+    const priorBlock = (await ethers.provider.getBlockNumber()) - 1;
+    const votesOf = (addr: string): Promise<BigNumber> => xvsVault.getPriorVotes(addr, priorBlock);
+
+    const config = await governorProxy.proposalConfigs(proposalType ?? ProposalType.REGULAR);
+    const threshold: BigNumber = config.proposalThreshold;
+    let quorum: BigNumber = BigNumber.from(0);
+    try {
+      quorum = await governorProxy.quorumVotes();
+    } catch {
+      // Older governor implementations may not expose quorumVotes(); skip the quorum check.
+    }
+
+    const defaultProposerVotes = await votesOf(defaultProposer);
+    let defaultSupporterVotes = BigNumber.from(0);
+    for (const addr of defaultSupporters) defaultSupporterVotes = defaultSupporterVotes.add(await votesOf(addr));
+
+    // Defaults already work for this block (the common case) -> change nothing.
+    if (defaultProposerVotes.gte(threshold) && defaultProposerVotes.add(defaultSupporterVotes).gte(quorum)) {
+      return fallback;
+    }
+
+    // Pick the first account (default first, then fallbacks) that can clear the threshold.
+    const candidates = [defaultProposer, ...fallbackVoters];
+    let proposerAddress = defaultProposer;
+    for (const candidate of candidates) {
+      if ((await votesOf(candidate)).gte(threshold)) {
+        proposerAddress = candidate;
+        break;
+      }
+    }
+
+    // Build a supporter set so proposer + supporters clear quorum.
+    const supporterAddresses = [...defaultSupporters];
+    for (const voter of fallbackVoters) {
+      if (voter !== proposerAddress && !supporterAddresses.includes(voter)) supporterAddresses.push(voter);
+    }
+    return { proposerAddress, supporterAddresses };
+  } catch {
+    return fallback;
+  }
+};
+
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
   let impersonatedTimelock: SignerWithAddress;
   let governorProxy: Contract;
@@ -170,26 +343,39 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   let supporters: SignerWithAddress[];
 
   const governanceFixture = async (): Promise<void> => {
-    const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
-
-    const supporterAddresses =
-      options.supporters ?? (options.supporter ? [options.supporter] : DEFAULT_SUPPORTER_ADDRESSES);
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
       [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
       [ProposalType.CRITICAL]: CRITICAL_TIMELOCK,
     }[proposal.type || ProposalType.REGULAR];
-    proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
-    supporters = await Promise.all(
-      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
-    );
-    impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
     governorProxy = await ethers.getContractAt(
       (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
       GOVERNOR_PROXY,
     );
+
+    // Explicit overrides win; otherwise pick voters that satisfy the live threshold/quorum.
+    const explicitProposer = options.proposer;
+    const explicitSupporters = options.supporters ?? (options.supporter ? [options.supporter] : undefined);
+    const { proposerAddress, supporterAddresses } =
+      explicitProposer || explicitSupporters
+        ? {
+            proposerAddress: explicitProposer ?? DEFAULT_PROPOSER_ADDRESS,
+            supporterAddresses: explicitSupporters ?? DEFAULT_SUPPORTER_ADDRESSES,
+          }
+        : await resolveGovernanceVoters(
+            governorProxy,
+            proposal.type ?? ProposalType.REGULAR,
+            DEFAULT_PROPOSER_ADDRESS,
+            DEFAULT_SUPPORTER_ADDRESSES,
+          );
+
+    proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
+    supporters = await Promise.all(
+      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
+    );
+    impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
   };
 
   describe(`${description} commands`, () => {
@@ -213,21 +399,37 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("can be proposed", async () => {
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
-      let tx;
 
       // Validates target address
       await validateTargetAddresses(targets, signatures);
 
-      if (proposal.type === undefined || proposal.type === null) {
-        tx = await governorProxy
-          .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta));
-      } else {
-        tx = await governorProxy
-          .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type);
+      const proposeArgs =
+        proposal.type === undefined || proposal.type === null
+          ? [targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta)]
+          : [targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type];
+
+      // propose() stores the whole proposal in one tx — the heaviest governance tx and the
+      // binding per-tx-cap constraint. The real submission is the proposer Safe's
+      // execTransaction -> propose, so enforce the cap against THAT tx's required gas limit
+      // (which folds in the 63/64 forwarding reserves + Safe overhead). Must run before the
+      // direct propose below, while the proposer still has no live proposal. Falls back to
+      // direct-propose consumption when the proposer isn't a Safe (e.g. non-governance forks).
+      if (await isSafe(proposer.address)) {
+        const proposeCalldata = (await governorProxy.populateTransaction.propose(...proposeArgs)).data as string;
+        const requiredLimit = await estimateProposeViaMultisig(proposeCalldata, proposer.address);
+        await reportTxGas(description, "propose() via proposer-Safe execTransaction", requiredLimit, {
+          enforce: true,
+          metric: "requiredGasLimit",
+        });
       }
-      await tx.wait();
+
+      // Create the proposal for the rest of the lifecycle tests.
+      const tx = await governorProxy.connect(proposer).propose(...proposeArgs);
+      const receipt = await tx.wait();
+      await reportTxGas(description, "propose() direct call", receipt.gasUsed, {
+        enforce: !(await isSafe(proposer.address)),
+      });
+
       proposalId = await governorProxy.callStatic.proposalCount();
       expect(proposalIdBefore.add(1)).to.equal(proposalId);
     });
@@ -245,7 +447,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     it("should be queued successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
-      await tx.wait();
+      const receipt = await tx.wait();
+      await reportTxGas(description, "queue(proposalId)", receipt.gasUsed);
     });
 
     it("should be executed successfully", async () => {
@@ -268,12 +471,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       }
       const tx = await proposer.sendTransaction(populated);
       const receipt = await tx.wait();
-
-      const gasUsed = receipt.gasUsed.toString();
-      const capSuffix = Number.isFinite(cap)
-        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
-        : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
-      console.log(`[gas] ${description} execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
+      await reportTxGas(description, "execute(proposalId)", receipt.gasUsed);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
