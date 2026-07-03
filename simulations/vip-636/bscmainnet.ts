@@ -7,7 +7,7 @@ import vip636, { BSTOCK_LIQUIDATOR, UNITROLLER } from "../../vips/vip-636/bscmai
 import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-const FORK_BLOCK = 104930000; // ToDo: Block after the bStock backstop liquidator is deployed
+const FORK_BLOCK = 107818021;
 
 const VUSDT_ABI = ["function isFlashLoanEnabled() view returns (bool)"];
 
