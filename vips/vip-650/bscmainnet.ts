@@ -4,10 +4,10 @@ import { makeProposal } from "src/utils";
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const BSTOCK_LIQUIDATOR = "0xF03C90e6BF66b43411189Ad848F17723f8B4A3c1";
 
-export const vip636 = () => {
+export const vip650 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-636 [BNB Chain] Enable flash loans for the bStock backstop liquidator",
+    title: "VIP-650 [BNB Chain] Enable flash loans for the bStock backstop liquidator",
     description: `If passed, this VIP will whitelist the bStock backstop liquidator as a flash loan account on the Core Pool Comptroller on BNB Chain.
 
 **Details**
@@ -37,4 +37,4 @@ This action follows the same pattern as [VIP-576](https://app.venus.io/#/governa
   );
 };
 
-export default vip636;
+export default vip650;
