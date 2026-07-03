@@ -66,16 +66,19 @@ clones remain fully decodable. The controller also gains an \`institutionNameOve
 
   return makeProposal(
     [
+      // 1. Upgrade the InstitutionalVaultController proxy to the new implementation.
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [INSTITUTIONAL_VAULT_CONTROLLER, NEW_CONTROLLER_IMPLEMENTATION],
       },
+      // 2. Point the controller at the new vault implementation used to clone future vaults.
       {
         target: INSTITUTIONAL_VAULT_CONTROLLER,
         signature: "setVaultImplementation(address)",
         params: [NEW_VAULT_IMPLEMENTATION],
       },
+      // 3. Grant ACM permission for the new createVault signature + the two new functions.
       ...NEW_PERMISSIONS.flatMap(fn =>
         CALLERS.map(caller => ({
           target: ACCESS_CONTROL_MANAGER,
@@ -83,6 +86,7 @@ clones remain fully decodable. The controller also gains an \`institutionNameOve
           params: [INSTITUTIONAL_VAULT_CONTROLLER, fn, caller],
         })),
       ),
+      // 4. Revoke the now-dead old createVault permission (superseded by the new signature).
       ...CALLERS.map(caller => ({
         target: ACCESS_CONTROL_MANAGER,
         signature: "revokeCallPermission(address,string,address)",
