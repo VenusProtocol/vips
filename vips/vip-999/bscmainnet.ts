@@ -1,0 +1,121 @@
+import { ProposalMeta, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+import {
+  ACCESS_CONTROL_MANAGER,
+  EXECUTOR,
+  FACETS,
+  LEVERAGE_PROXY_ADMIN,
+  LEVERAGE_STRATEGIES_MANAGER,
+  LIQUIDATOR,
+  LIQUIDATOR_PROXY_ADMIN,
+  NEW_COMPTROLLER_LENS,
+  NEW_DIAMOND,
+  NEW_EXECUTOR_IMPL,
+  NEW_LEVERAGE_IMPL,
+  NEW_LIQUIDATOR_IMPL,
+  NEW_VTOKEN_DELEGATE,
+  PROXY_ADMIN,
+  SEIZE_VENUS_FILTERED_SIGNATURE,
+  SEIZE_VENUS_PERMISSION_GRANTEES,
+  UNITROLLER,
+  VTOKENS_TO_UPGRADE,
+} from "./utils/data.bscmainnet";
+
+const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
+
+const meta: ProposalMeta = {
+  version: "v2",
+  title: "VIP-999 [BNB Chain] Certik VPD-1241 reaudit: upgrade Core Pool, Liquidator and Leverage Manager",
+  description: `#### Summary
+
+If passed, this VIP applies the fixes and recompiled bytecode from the Certik "Venus Labs – Core Feature Reaudit" (VPD-1241):
+
+- **Core Pool Comptroller** — the full diamond is recut: the Diamond implementation and all five facets (Market, Policy, Reward, Setter, FlashLoan) are replaced with the recompiled, audited bytecode, preserving the existing function-to-facet mapping. The RewardFacet additionally gains two market-filtered overloads, claimVenusAsCollateral(address,address[]) and seizeVenus(address[],address,address[]), and enforces vXVS-market entry when claiming as collateral with a shortfall. The new seizeVenus overload is ACM-gated under a new signature, so call permission for seizeVenus(address[],address,address[]) is granted to the Normal, Fast-track and Critical timelocks and the critical guardian.
+- **ComptrollerLens** — solvency hypothetical now skips entered markets with neither supply nor debt.
+- **Liquidator** — accrues VAI interest before the force-liquidation gate; honors the per-borrower forced-liquidation flag.
+- **VBep20Delegate** — recompiled, audited delegate; the Core Pool markets selected for this VIP are repointed to it. Excluded: the native-BNB vBNB market.
+- **LeverageStrategiesManager** — dust returned via operation deltas; new owner-only sweepToken(address).
+- **Executor (E-brake V2)** — implementation-only upgrade: the supply/borrow cap-exceeding emergency halts now fail closed if the cap read reverts (emitting HaltedWithoutCapCheck) instead of falling back to a stale reading.
+
+The CorrelatedTokenOracle fix from the same reaudit is intentionally not included: it only adds an input-validation safeguard to setSnapshot which is a governance-gated function, so the risk is minimal and the change is skipped here; new oracle deployments can adopt the updated contract.`,
+  forDescription: "I agree that Venus Protocol should proceed with this proposal",
+  againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+  abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
+};
+
+export const vip999 = () => {
+  return makeProposal(
+    [
+      // ──────────────────────────────────────────────────────────────────────────
+      // 1. Core Pool Comptroller
+      // ──────────────────────────────────────────────────────────────────────────
+
+      {
+        target: UNITROLLER,
+        signature: "diamondCut((address,uint8,bytes4[])[])",
+        params: [
+          [
+            ...FACETS.map(f => [f.newFacet, FacetCutAction.Replace, f.selectors]),
+            ...FACETS.filter(f => f.newSelectors.length > 0).map(f => [f.newFacet, FacetCutAction.Add, f.newSelectors]),
+          ],
+        ],
+      },
+      { target: UNITROLLER, signature: "_setPendingImplementation(address)", params: [NEW_DIAMOND] },
+      { target: NEW_DIAMOND, signature: "_become(address)", params: [UNITROLLER] },
+
+      { target: UNITROLLER, signature: "_setComptrollerLens(address)", params: [NEW_COMPTROLLER_LENS] },
+
+      // Register call permission for the new market-filtered seizeVenus overload.
+      ...SEIZE_VENUS_PERMISSION_GRANTEES.map(account => ({
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, SEIZE_VENUS_FILTERED_SIGNATURE, account],
+      })),
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // 2. Liquidator
+      // ──────────────────────────────────────────────────────────────────────────
+
+      {
+        target: LIQUIDATOR_PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [LIQUIDATOR, NEW_LIQUIDATOR_IMPL],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // 3. Core Pool markets — VBep20Delegate
+      // ──────────────────────────────────────────────────────────────────────────
+
+      ...Object.values(VTOKENS_TO_UPGRADE).map(vToken => ({
+        target: vToken,
+        signature: "_setImplementation(address,bool,bytes)",
+        params: [NEW_VTOKEN_DELEGATE, false, "0x"],
+      })),
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // 4. LeverageStrategiesManager
+      // ──────────────────────────────────────────────────────────────────────────
+
+      {
+        target: LEVERAGE_PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [LEVERAGE_STRATEGIES_MANAGER, NEW_LEVERAGE_IMPL],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // 5. Executor (E-brake V2)
+      // ──────────────────────────────────────────────────────────────────────────
+
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [EXECUTOR, NEW_EXECUTOR_IMPL],
+      },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
+};
+
+export default vip999;
