@@ -10,15 +10,9 @@ export const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cb
 export const LEVERAGE_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4"; // DefaultProxyAdmin
 export const ACCESS_CONTROL_MANAGER = bscmainnet.ACCESS_CONTROL_MANAGER;
 
-// The new market-filtered seizeVenus overload is ACM-gated under this signature. Granted to the same set as the existing
-// permission plus the critical guardian.
+// The new market-filtered seizeVenus overload is ACM-gated under this signature. Its grantees are the same set
+// as the vault's AUTHORIZED_CALLERS (Normal / Fast-track / Critical timelocks + Critical Guardian).
 export const SEIZE_VENUS_FILTERED_SIGNATURE = "seizeVenus(address[],address,address[])";
-export const SEIZE_VENUS_PERMISSION_GRANTEES = [
-  bscmainnet.NORMAL_TIMELOCK,
-  bscmainnet.FAST_TRACK_TIMELOCK,
-  bscmainnet.CRITICAL_TIMELOCK,
-  bscmainnet.CRITICAL_GUARDIAN,
-];
 
 // Newly deployed implementations on BNB Chain mainnet.
 export const NEW_DIAMOND = "0xA66B2b5D50ce68A125bBad6B2265b637868c6E66"; // Diamond (Unitroller implementation)
@@ -31,6 +25,9 @@ export const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4"; // Defa
 export const NEW_EXECUTOR_IMPL = "0x347fBbC71C07496fbBb2fEc5D2a036605F14089D";
 
 // Core Pool Comptroller diamond recut, one entry per facet:
+// IDiamondCut.FacetCutAction enum.
+export const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
+
 export interface FacetCut {
   name: string;
   oldFacet: string;
@@ -202,6 +199,7 @@ export const VTOKENS_TO_UPGRADE: Record<string, string> = {
   vCAKE: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c",
   vAAVE: "0x26DA28954763B92139ED49283625ceCAf52C6f94",
   vTRX: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
+  vDOT: "0x1610bc33319e9398de5f57B33a5b184c806aD217",
   vWBETH: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0",
   vUNI: "0x27FF564707786720C71A2e5c1490A63266683612",
   vFDUSD: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",

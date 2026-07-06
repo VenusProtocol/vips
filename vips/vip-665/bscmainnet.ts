@@ -7,8 +7,6 @@ import * as reaudit from "./utils/data.bscmainnet";
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, CRITICAL_GUARDIAN, ACCESS_CONTROL_MANAGER } =
   NETWORK_ADDRESSES.bscmainnet;
 
-const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
-
 // ════════════════════════════════════════════════════════════════════════════
 // Block 1 — Institutional Fixed Rate Vault implementation upgrade (VPD-1488)
 // ════════════════════════════════════════════════════════════════════════════
@@ -35,6 +33,44 @@ export const NEW_PERMISSIONS = [CREATE_VAULT_NEW, SET_INSTITUTION_NAME, SET_INST
 // The one existing mainnet vault predates the institutionName field, so this VIP sets its display-name override.
 export const LEGACY_VAULT = "0x7D80A10bEdD13638888e7A946B82878E21fbB820";
 export const LEGACY_VAULT_INSTITUTION_NAME = "Matrixdock";
+
+// The 20 ACM give/revoke calls are pre-seeded off-chain into the AuxiliaryCommandsAggregator
+// (see ./utils/seed-acm-batch.bscmainnet.ts) and run in one batch to stay under the BSC gas cap.
+export const COMMANDS_AGGREGATOR = "0x528A428748dfE73DFcc844176B401475D1831057";
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+export const ACM_BATCH_INDEX = 0;
+
+export interface AcmCommand {
+  target: string;
+  signature: string;
+  params: any[];
+}
+
+// The exact ACM calls the aggregator batch performs. Shared by the seeding script and the simulation so
+// the seeded batch is guaranteed identical to what the VIP relies on.
+export const buildAcmBatch = (): AcmCommand[] => [
+  // vault: grant the new createVault + setInstitutionName + setInstitutionNameOverride permissions
+  ...NEW_PERMISSIONS.flatMap(fn =>
+    AUTHORIZED_CALLERS.map(caller => ({
+      target: ACCESS_CONTROL_MANAGER,
+      signature: "giveCallPermission(address,string,address)",
+      params: [INSTITUTIONAL_VAULT_CONTROLLER, fn, caller],
+    })),
+  ),
+  // vault: revoke the now-dead old createVault permission
+  ...AUTHORIZED_CALLERS.map(caller => ({
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "revokeCallPermission(address,string,address)",
+    params: [INSTITUTIONAL_VAULT_CONTROLLER, CREATE_VAULT_OLD, caller],
+  })),
+  // reaudit: grant the new market-filtered seizeVenus permission. Its grantees are the same set as
+  // AUTHORIZED_CALLERS (Normal / Fast-track / Critical timelocks + Critical Guardian), so reuse that array.
+  ...AUTHORIZED_CALLERS.map(caller => ({
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [reaudit.UNITROLLER, reaudit.SEIZE_VENUS_FILTERED_SIGNATURE, caller],
+  })),
+];
 
 export const vip665 = () => {
   const meta = {
@@ -83,7 +119,9 @@ override can be cleared by passing an empty string.
 - **LeverageStrategiesManager** — dust returned via operation deltas; new owner-only sweepToken(address).
 - **Executor (E-brake V2)** — implementation-only upgrade: the supply/borrow cap-exceeding emergency halts now fail closed if the cap read reverts (emitting HaltedWithoutCapCheck) instead of falling back to a stale reading.
 
-The CorrelatedTokenOracle fix from the same reaudit is intentionally not included: it only adds an input-validation safeguard to setSnapshot which is a governance-gated function, so the risk is minimal and the change is skipped here; new oracle deployments can adopt the updated contract.`,
+The CorrelatedTokenOracle fix from the same reaudit is intentionally not included: it only adds an input-validation safeguard to setSnapshot which is a governance-gated function, so the risk is minimal and the change is skipped here; new oracle deployments can adopt the updated contract.
+
+**Execution note:** The ACM permission changes above are applied in one pre-seeded batch through the \`AuxiliaryCommandsAggregator\` (\`${COMMANDS_AGGREGATOR}\`) to keep the proposal under BNB Chain's per-transaction gas limit: the VIP grants the aggregator the ACM default-admin role, calls \`executeBatch\`, then revokes the role — so it holds the role only transiently.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -92,38 +130,39 @@ The CorrelatedTokenOracle fix from the same reaudit is intentionally not include
   return makeProposal(
     [
       // ══════════════════════════════════════════════════════════════════════
-      // Block 1 — Institutional Fixed Rate Vault implementation upgrade
+      // Block 1 — ACM permissions (batched via AuxiliaryCommandsAggregator)
+      // ══════════════════════════════════════════════════════════════════════
+      // Runs FIRST so permissions are in place before Block 2's setInstitutionNameOverride and the new functions.
+      // Grant the aggregator the ACM admin role, run the pre-seeded batch, then revoke the role (transient).
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, COMMANDS_AGGREGATOR],
+      },
+      { target: COMMANDS_AGGREGATOR, signature: "executeBatch(uint256)", params: [ACM_BATCH_INDEX] },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, COMMANDS_AGGREGATOR],
+      },
+
+      // ══════════════════════════════════════════════════════════════════════
+      // Block 2 — Institutional Fixed Rate Vault implementation upgrade
       // ══════════════════════════════════════════════════════════════════════
 
-      // 1a. Upgrade the InstitutionalVaultController proxy to the new implementation.
+      // 2a. Upgrade the InstitutionalVaultController proxy to the new implementation.
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [INSTITUTIONAL_VAULT_CONTROLLER, NEW_CONTROLLER_IMPLEMENTATION],
       },
-      // 1b. Point the controller at the new vault implementation used to clone future vaults.
+      // 2b. Point the controller at the new vault implementation used to clone future vaults.
       {
         target: INSTITUTIONAL_VAULT_CONTROLLER,
         signature: "setVaultImplementation(address)",
         params: [NEW_VAULT_IMPLEMENTATION],
       },
-      // 1c. Grant ACM permission for the new createVault signature + the two new functions.
-      ...NEW_PERMISSIONS.flatMap(fn =>
-        AUTHORIZED_CALLERS.map(caller => ({
-          target: ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [INSTITUTIONAL_VAULT_CONTROLLER, fn, caller],
-        })),
-      ),
-      // 1d. Revoke the now-dead old createVault permission — REMOVED to keep the merged proposal under the
-      // BSC mainnet single-tx gas cap (16.77M). The old 5-param createVault signature no longer exists on the
-      // new implementation (it is now 6-param), so the stale permission is unusable/dead and safe to leave.
-      // ...AUTHORIZED_CALLERS.map(caller => ({
-      //   target: ACCESS_CONTROL_MANAGER,
-      //   signature: "revokeCallPermission(address,string,address)",
-      //   params: [INSTITUTIONAL_VAULT_CONTROLLER, CREATE_VAULT_OLD, caller],
-      // })),
-      // 1e. Override the legacy vault's display name so getAggregatedVaultStates() doesn't revert post-upgrade.
+      // 2c. Override the legacy vault's display name so getAggregatedVaultStates() doesn't revert post-upgrade.
       {
         target: INSTITUTIONAL_VAULT_CONTROLLER,
         signature: "setInstitutionNameOverride(address,string)",
@@ -131,19 +170,19 @@ The CorrelatedTokenOracle fix from the same reaudit is intentionally not include
       },
 
       // ══════════════════════════════════════════════════════════════════════
-      // Block 2 — Certik VPD-1241 reaudit: Core Pool, Liquidator, Leverage Manager
+      // Block 3 — Certik VPD-1241 reaudit: Core Pool, Liquidator, Leverage Manager
       // ══════════════════════════════════════════════════════════════════════
 
-      // 2a. Core Pool Comptroller — recut the diamond and repoint the ComptrollerLens.
+      // 3a. Core Pool Comptroller — recut the diamond and repoint the ComptrollerLens.
       {
         target: reaudit.UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [
           [
-            ...reaudit.FACETS.map(f => [f.newFacet, FacetCutAction.Replace, f.selectors]),
+            ...reaudit.FACETS.map(f => [f.newFacet, reaudit.FacetCutAction.Replace, f.selectors]),
             ...reaudit.FACETS.filter(f => f.newSelectors.length > 0).map(f => [
               f.newFacet,
-              FacetCutAction.Add,
+              reaudit.FacetCutAction.Add,
               f.newSelectors,
             ]),
           ],
@@ -153,35 +192,28 @@ The CorrelatedTokenOracle fix from the same reaudit is intentionally not include
       { target: reaudit.NEW_DIAMOND, signature: "_become(address)", params: [reaudit.UNITROLLER] },
       { target: reaudit.UNITROLLER, signature: "_setComptrollerLens(address)", params: [reaudit.NEW_COMPTROLLER_LENS] },
 
-      // Register call permission for the new market-filtered seizeVenus overload.
-      ...reaudit.SEIZE_VENUS_PERMISSION_GRANTEES.map(account => ({
-        target: reaudit.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [reaudit.UNITROLLER, reaudit.SEIZE_VENUS_FILTERED_SIGNATURE, account],
-      })),
-
-      // 2b. Liquidator.
+      // 3b. Liquidator.
       {
         target: reaudit.LIQUIDATOR_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [reaudit.LIQUIDATOR, reaudit.NEW_LIQUIDATOR_IMPL],
       },
 
-      // 2c. Core Pool markets — VBep20Delegate.
+      // 3c. Core Pool markets — VBep20Delegate.
       ...Object.values(reaudit.VTOKENS_TO_UPGRADE).map(vToken => ({
         target: vToken,
         signature: "_setImplementation(address,bool,bytes)",
         params: [reaudit.NEW_VTOKEN_DELEGATE, false, "0x"],
       })),
 
-      // 2d. LeverageStrategiesManager.
+      // 3d. LeverageStrategiesManager.
       {
         target: reaudit.LEVERAGE_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [reaudit.LEVERAGE_STRATEGIES_MANAGER, reaudit.NEW_LEVERAGE_IMPL],
       },
 
-      // 2e. Executor (E-brake V2).
+      // 3e. Executor (E-brake V2).
       {
         target: reaudit.PROXY_ADMIN,
         signature: "upgrade(address,address)",

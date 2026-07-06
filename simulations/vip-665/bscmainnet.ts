@@ -3,21 +3,15 @@ import { BigNumber, Contract, Signer, Wallet } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import {
-  expectEvents,
-  initMainnetUser,
-  pinResilientOraclePriceViaRedstone,
-  setMaxStalePeriod,
-  setMaxStalePeriodInBinanceOracle,
-  setMaxStalePeriodInChainlinkOracle,
-  setRedstonePrice,
-} from "src/utils";
+import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import CHAINLINK_ORACLE_ABI from "src/vip-framework/abi/chainlinkOracle.json";
 import VTOKEN_ABI from "src/vip-framework/abi/vToken.json";
 
 import vip665, {
+  ACM_BATCH_INDEX,
   AUTHORIZED_CALLERS,
+  COMMANDS_AGGREGATOR,
   CREATE_VAULT_OLD,
   INSTITUTIONAL_VAULT_CONTROLLER,
   LEGACY_VAULT,
@@ -28,6 +22,7 @@ import vip665, {
   OLD_CONTROLLER_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
   PROXY_ADMIN,
+  buildAcmBatch,
 } from "../../vips/vip-665/bscmainnet";
 import {
   ACCESS_CONTROL_MANAGER,
@@ -45,11 +40,11 @@ import {
   NEW_LIQUIDATOR_IMPL,
   NEW_VTOKEN_DELEGATE,
   SEIZE_VENUS_FILTERED_SIGNATURE,
-  SEIZE_VENUS_PERMISSION_GRANTEES,
   UNITROLLER,
   VTOKENS_TO_UPGRADE,
 } from "../../vips/vip-665/utils/data.bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
+import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import INSTITUTIONAL_LOAN_VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
@@ -64,12 +59,10 @@ import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
-const { NORMAL_TIMELOCK, CRITICAL_GUARDIAN, BINANCE_ORACLE } = bscmainnet;
+const { NORMAL_TIMELOCK, CRITICAL_GUARDIAN } = bscmainnet;
 
-// Fork block from the vault VIP: both the vault and the reaudit implementations are already deployed here and
-// neither upgrade has executed on mainnet. (Later than the reaudit's own deploy block, so its facets/lens/impls
-// are all present too.)
-const FORK_BLOCK = 107803362;
+// Recent block, after the ACM batch was seeded on-chain so the fork includes the real batch.
+const FORK_BLOCK = 108350000;
 
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
@@ -99,32 +92,6 @@ let saltCounter = 0;
 const RELATIVE_POSITION_MANAGER = "0x1525D804DFff218DcC8B9359940F423209356C42";
 
 const markets = Object.values(VTOKENS_TO_UPGRADE);
-
-// ── Vault helper ─────────────────────────────────────────────────────────────
-// testVip advances the fork clock past the USDT/USDC feed stale windows, so createVault's oracle check
-// would revert. Extend the stale period on every enabled leg of each asset so their prices stay valid.
-const bumpStalePeriods = async (resilientOracleAddress: string, admin: string, assets: string[]) => {
-  const RESILIENT_ORACLE_MINI_ABI = [
-    "function getTokenConfig(address) view returns (tuple(address asset, address[3] oracles, bool[3] enableFlagsForOracles))",
-  ];
-  const ERC20_SYMBOL_ABI = ["function symbol() view returns (string)"];
-  const resilientOracle = new ethers.Contract(resilientOracleAddress, RESILIENT_ORACLE_MINI_ABI, ethers.provider);
-  for (const asset of assets) {
-    const cfg = await resilientOracle.getTokenConfig(asset);
-    for (let i = 0; i < 3; i++) {
-      const leg = cfg.oracles[i];
-      if (!cfg.enableFlagsForOracles[i] || leg === ethers.constants.AddressZero) continue;
-      if (leg.toLowerCase() === BINANCE_ORACLE.toLowerCase()) {
-        // Binance oracle keys by symbol.
-        const symbol = await new ethers.Contract(asset, ERC20_SYMBOL_ABI, ethers.provider).symbol();
-        await setMaxStalePeriodInBinanceOracle(leg, symbol);
-      } else {
-        // Chainlink-interface oracles (Chainlink, RedStone, ...) key by asset address.
-        await setMaxStalePeriodInChainlinkOracle(leg, asset, ethers.constants.AddressZero, admin);
-      }
-    }
-  }
-};
 
 // ── Reaudit helpers ──────────────────────────────────────────────────────────
 const normalizeSelectors = (arr: string[]): string[] => [...arr].map(s => s.toLowerCase()).sort();
@@ -178,23 +145,9 @@ const pinPriceFeeds = async () => {
   const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
   const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
-  for (const asset of [USDT, USDC, WBNB, ETH, XVS]) {
-    await setMaxStalePeriodInChainlinkOracle(
-      bscmainnet.CHAINLINK_ORACLE,
-      asset,
-      ethers.constants.AddressZero,
-      NORMAL_TIMELOCK,
-    );
-    await setRedstonePrice(
-      bscmainnet.REDSTONE_ORACLE,
-      asset,
-      ethers.constants.AddressZero,
-      NORMAL_TIMELOCK,
-      undefined,
-      {
-        tokenDecimals: 18,
-      },
-    );
+  for (const asset of [USDT, USDC, WBNB, ETH, XVS, BTCB, VAI, USDC, USDT]) {
+    const resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
+    await pinResilientOraclePriceViaRedstone(resilientOracle, asset);
   }
 };
 
@@ -203,6 +156,7 @@ forking(FORK_BLOCK, async () => {
   let controller: Contract;
   let proxyAdmin: Contract;
   let accessControlManager: Contract;
+  let aggregator: Contract;
   let pre: Record<string, unknown>;
 
   // Reaudit contracts / state
@@ -253,14 +207,13 @@ forking(FORK_BLOCK, async () => {
 
     await pinPriceFeeds();
 
-    // Pin BTC to a single Redstone feed
+    // Snapshot the (now-pinned) BTC spot for the liquidation e2e.
     const resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
-    const btcbToken = await ethers.getContractAt(ERC20_ABI, BTCB);
-    await setMaxStalePeriod(resilientOracle, btcbToken);
-    await pinResilientOraclePriceViaRedstone(resilientOracle, BTCB);
     originalBtcSpot = await resilientOracle.getPrice(BTCB);
 
-    await pinResilientOraclePriceViaRedstone(resilientOracle, VAI);
+    // The ACM permission batch is already seeded on-chain at index ACM_BATCH_INDEX (via
+    // utils/seed-acm-batch.bscmainnet.ts); this fork block includes that tx, so the sim reads the real batch.
+    aggregator = new ethers.Contract(COMMANDS_AGGREGATOR, AGGREGATOR_ABI, ethers.provider);
   });
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -385,11 +338,29 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("no grantee can call the new market-filtered seizeVenus overload yet", async () => {
-      for (const account of SEIZE_VENUS_PERMISSION_GRANTEES) {
+      for (const account of AUTHORIZED_CALLERS) {
         expect(await acm.connect(comptrollerSigner).isAllowedToCall(account, SEIZE_VENUS_FILTERED_SIGNATURE)).to.equal(
           false,
         );
       }
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PRE-VIP — the ACM batch pre-seeded on the aggregator matches the VIP's ACM commands
+  // ══════════════════════════════════════════════════════════════════════════
+  describe("Aggregator: seeded ACM batch matches the VIP's ACM commands", () => {
+    it("batch #ACM_BATCH_INDEX stores exactly the VIP's ACM give/revoke calls (target + calldata)", async () => {
+      const stored = await aggregator.getBatch(ACM_BATCH_INDEX);
+      const expected = buildAcmBatch().map(cmd => ({
+        target: cmd.target,
+        data: new ethers.utils.Interface([`function ${cmd.signature}`]).encodeFunctionData(cmd.signature, cmd.params),
+      }));
+      expect(stored.length).to.equal(expected.length);
+      expected.forEach((cmd, i) => {
+        expect(stored[i].target.toLowerCase()).to.equal(cmd.target.toLowerCase());
+        expect(stored[i].data.toLowerCase()).to.equal(cmd.data.toLowerCase());
+      });
     });
   });
 
@@ -411,14 +382,19 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [4]);
       // One NewImplementation per repointed market plus one for the Diamond implementation swap.
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewImplementation"], [markets.length + 1]);
-      // ACM: vault grants (NEW_PERMISSIONS × AUTHORIZED_CALLERS) + reaudit seizeVenus grants. No RoleRevoked —
-      // the old createVault revoke was dropped to keep the merged proposal under the mainnet gas cap.
+      // ACM (run through the aggregator batch): 16 giveCallPermission + 4 revokeCallPermission from the batch,
+      // plus the transient grantRole/revokeRole of DEFAULT_ADMIN_ROLE on the aggregator itself (+1 each).
       await expectEvents(
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI],
-        ["RoleGranted"],
-        [NEW_PERMISSIONS.length * AUTHORIZED_CALLERS.length + SEIZE_VENUS_PERMISSION_GRANTEES.length],
+        ["RoleGranted", "RoleRevoked"],
+        [
+          NEW_PERMISSIONS.length * AUTHORIZED_CALLERS.length + AUTHORIZED_CALLERS.length + 1,
+          AUTHORIZED_CALLERS.length + 1,
+        ],
       );
+      // The aggregator ran exactly one batch.
+      await expectEvents(txResponse, [AGGREGATOR_ABI], ["BatchExecuted"], [1]);
     },
   });
 
@@ -466,13 +442,13 @@ forking(FORK_BLOCK, async () => {
         }
       });
 
-      it("the old createVault permission is intentionally left in place (revoke dropped for gas; the 5-param signature is dead on the new impl)", async () => {
+      it("the old createVault permission is revoked for every caller", async () => {
         for (const caller of AUTHORIZED_CALLERS) {
           expect(
             await accessControlManager.isAllowedToCall(caller, CREATE_VAULT_OLD, {
               from: INSTITUTIONAL_VAULT_CONTROLLER,
             }),
-          ).to.be.true;
+          ).to.be.false;
         }
       });
     });
@@ -540,10 +516,6 @@ forking(FORK_BLOCK, async () => {
 
       before(async () => {
         guardian = await initMainnetUser(CRITICAL_GUARDIAN, parseEther("1"));
-
-        // Refresh stale periods for the supply + collateral assets so createVault's oracle check passes
-        // despite the time advanced by testVip's voting/timelock.
-        await bumpStalePeriods(await controller.oracle(), NORMAL_TIMELOCK, [USDT, USDC]);
 
         // Predict the clone address (callStatic doesn't advance the nonce), then create it.
         vaultAddress = await controller
@@ -644,7 +616,7 @@ forking(FORK_BLOCK, async () => {
       });
 
       it("every grantee is permitted to call the new market-filtered seizeVenus overload", async () => {
-        for (const account of SEIZE_VENUS_PERMISSION_GRANTEES) {
+        for (const account of AUTHORIZED_CALLERS) {
           expect(
             await acm.connect(comptrollerSigner).isAllowedToCall(account, SEIZE_VENUS_FILTERED_SIGNATURE),
           ).to.equal(true);
