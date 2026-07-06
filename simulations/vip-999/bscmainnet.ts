@@ -13,6 +13,8 @@ import vip999, {
   BTCB_FEED_FALLBACK,
   BTCB_FEED_MAIN,
   BTCB_FEED_PIVOT,
+  BTCB_UPPER_BOUND,
+  BOUND_VALIDATOR,
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
   INSTITUTION_OPERATOR,
@@ -24,11 +26,13 @@ import vip999, {
   vaultConfig,
 } from "../../vips/vip-999/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
-import ERC20_ABI from "./abi/AccessControlledERC20.json";
+import ERC20_ABI from "./abi/VenusERC20.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
+ 
+const BOUND_VALIDATOR_ABI = ["function validateConfigs(address) external view returns (uint256, uint256)"];
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -71,7 +75,6 @@ forking(FORK_BLOCK, async () => {
 
   before(async () => {
     oracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
-    btcbPriceAtFork = await oracle.getPrice(BTCB);
     acm = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
     btcb = await ethers.getContractAt(ERC20_ABI, BTCB);
@@ -80,6 +83,7 @@ forking(FORK_BLOCK, async () => {
     vaultsBefore = await controller.allVaultsLength();
 
     const usdtPriceAtFork = await oracle.getPrice(SUPPLY_ASSET);
+    btcbPriceAtFork = await oracle.getPrice(BTCB);
     await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt]);
     const redstoneOracleForExisting = await ethers.getContractAt(
       ["function setDirectPrice(address asset, uint256 price) external"],
@@ -114,8 +118,10 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Pre-VIP behavior", () => {
-    it("vceBTC is deployed and wired to the real ACM", async () => {
+    it("vceBTC is deployed with correct ACM, name, symbol, and decimals", async () => {
       expect(await vceBTC.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
+      expect(await vceBTC.name()).to.equal("Ceffu Custody BTC for Venus");
+      expect(await vceBTC.symbol()).to.equal("vceBTC");
       expect(await vceBTC.decimals()).to.equal(18);
       expect(await vceBTC.totalSupply()).to.equal(0);
     });
@@ -204,6 +210,36 @@ forking(FORK_BLOCK, async () => {
       expect((await vault.config()).supplyAsset).to.equal(SUPPLY_ASSET);
       expect((await vault.institutionalConfig()).collateralAsset).to.equal(VCEBTC);
       expect((await vault.institutionalConfig()).institutionOperator).to.equal(INSTITUTION_OPERATOR);
+    });
+  });
+
+  describe("Oracle configuration for BTCB and vceBTC", () => {
+    it("BTCB price is available from ResilientOracle", async () => {
+      const btcbPrice = await oracle.getPrice(BTCB);
+      expect(btcbPrice).to.be.gt(0);
+    });
+
+    it("vceBTC price is available from ResilientOracle", async () => {
+      const vceBtcPrice = await oracle.getPrice(VCEBTC);
+      expect(vceBtcPrice).to.be.gt(0);
+    });
+
+    it("vceBTC price matches BTCB price configuration", async () => {
+      const btcbPrice = await oracle.getPrice(BTCB);
+      const vceBtcPrice = await oracle.getPrice(VCEBTC);
+      expect(vceBtcPrice).to.equal(btcbPrice);
+    });
+
+    it("BTCB bounds are configured correctly in BoundValidator", async () => {
+      const boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
+      const btcbBounds = await boundValidator.validateConfigs(BTCB);
+      expect(btcbBounds[1]).to.equal(BTCB_UPPER_BOUND);
+    });
+
+    it("vceBTC bounds are configured correctly in BoundValidator (cloned from BTCB)", async () => {
+      const boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
+      const vceBtcBounds = await boundValidator.validateConfigs(VCEBTC);
+      expect(vceBtcBounds[1]).to.equal(BTCB_UPPER_BOUND);
     });
   });
 
