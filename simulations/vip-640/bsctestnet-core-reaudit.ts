@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999 from "../../vips/vip-665/bsctestnet-core-reaudit";
+import vip999 from "../../vips/vip-640/bsctestnet-core-reaudit";
 import {
   ACCESS_CONTROL_MANAGER,
   FLASHLOAN_FACET_SELECTORS,
@@ -31,7 +31,7 @@ import {
   SETTER_FACET_SELECTORS,
   UNITROLLER,
   VTOKENS_TO_UPGRADE,
-} from "../../vips/vip-665/utils/data.bsctestnet-core-reaudit";
+} from "../../vips/vip-640/utils/data.bsctestnet-core-reaudit";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import LEVERAGE_ABI from "./abi/LeverageStrategiesManager.json";

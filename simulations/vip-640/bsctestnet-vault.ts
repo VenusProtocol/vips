@@ -16,7 +16,7 @@ import vip665, {
   OLD_CONTROLLER_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
   PROXY_ADMIN,
-} from "../../vips/vip-665/bsctestnet-vault";
+} from "../../vips/vip-640/bsctestnet-vault";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import INSTITUTIONAL_LOAN_VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";

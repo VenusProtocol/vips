@@ -14,7 +14,7 @@ import vip665Addendum, {
   NEW_CONTROLLER_IMPLEMENTATION,
   OLD_CONTROLLER_IMPLEMENTATION,
   VAULT_PROXY_ADMIN,
-} from "../../vips/vip-665/bsctestnet-addendum";
+} from "../../vips/vip-640/bsctestnet-addendum";
 import {
   BSTOCK_MARKETS,
   EXECUTOR,
@@ -26,7 +26,7 @@ import {
   NEW_VTOKEN_DELEGATE,
   UNITROLLER,
   VTOKENS_TO_UPGRADE,
-} from "../../vips/vip-665/utils/data.bsctestnet-addendum";
+} from "../../vips/vip-640/utils/data.bsctestnet-addendum";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
