@@ -80,7 +80,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
 
 1. **Oracle** — price vceBTC identically to BTCB by cloning BTCB's full oracle configuration: the main / pivot / fallback sub-oracle feeds, the BoundValidator bounds, and the ResilientOracle token config.
 2. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Guardian, and grant \`createVault(...)\` on the InstitutionalVaultController to the Normal Timelock.
-3. **Initial supply** — mint the initial vceBTC collateral to the institution operator.
+3. **Initial supply** — mint the initial vceBTC collateral to the Venus Treasury.
 4. **Vault creation** — create the Fixed Rate Vault with vceBTC as collateral.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -157,7 +157,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
       {
         target: VCEBTC,
         signature: "mint(address,uint256)",
-        params: [INSTITUTION_OPERATOR, VCEBTC_INITIAL_SUPPLY],
+        params: [bscmainnet.VTREASURY, VCEBTC_INITIAL_SUPPLY],
       },
 
       // ──────────────────────────────────────────────────────────────────────
