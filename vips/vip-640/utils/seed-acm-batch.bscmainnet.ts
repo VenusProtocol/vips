@@ -1,9 +1,9 @@
-// Seeds the VIP-665 ACM permission batch into the AuxiliaryCommandsAggregator on BNB Chain mainnet.
+// Seeds the VIP-640 ACM permission batch into the AuxiliaryCommandsAggregator on BNB Chain mainnet.
 //
 // Run this BEFORE proposing the VIP, from an authorized-batcher wallet (the Normal Timelock, Guardian, or one
 // of the configured common batchers):
 //
-//   npx hardhat run vips/vip-665/utils/seed-acm-batch.bscmainnet.ts --network bscmainnet
+//   npx hardhat run vips/vip-640/utils/seed-acm-batch.bscmainnet.ts --network bscmainnet
 //
 // It appends the 20 give/revoke ACM calls as batch #ACM_BATCH_INDEX. The VIP then runs them in one action via
 // executeBatch(ACM_BATCH_INDEX) after granting the aggregator the ACM DEFAULT_ADMIN_ROLE.
@@ -30,7 +30,7 @@ async function main() {
   if (currentCount !== ACM_BATCH_INDEX) {
     throw new Error(
       `Aggregator batchCount is ${currentCount} but ACM_BATCH_INDEX is ${ACM_BATCH_INDEX}. ` +
-        `Update ACM_BATCH_INDEX in vips/vip-665/bscmainnet.ts (and the simulation) to ${currentCount}, then re-run.`,
+        `Update ACM_BATCH_INDEX in vips/vip-640/bscmainnet.ts (and the simulation) to ${currentCount}, then re-run.`,
     );
   }
 

@@ -8,7 +8,7 @@ import { forking, testVip } from "src/vip-framework";
 import CHAINLINK_ORACLE_ABI from "src/vip-framework/abi/chainlinkOracle.json";
 import VTOKEN_ABI from "src/vip-framework/abi/vToken.json";
 
-import vip665, {
+import vip640, {
   ACM_BATCH_INDEX,
   AUTHORIZED_CALLERS,
   COMMANDS_AGGREGATOR,
@@ -23,7 +23,7 @@ import vip665, {
   OLD_VAULT_IMPLEMENTATION,
   PROXY_ADMIN,
   buildAcmBatch,
-} from "../../vips/vip-665/bscmainnet";
+} from "../../vips/vip-640/bscmainnet";
 import {
   ACCESS_CONTROL_MANAGER,
   EXECUTOR,
@@ -42,7 +42,7 @@ import {
   SEIZE_VENUS_FILTERED_SIGNATURE,
   UNITROLLER,
   VTOKENS_TO_UPGRADE,
-} from "../../vips/vip-665/utils/data.bscmainnet";
+} from "../../vips/vip-640/utils/data.bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -367,7 +367,7 @@ forking(FORK_BLOCK, async () => {
   // ══════════════════════════════════════════════════════════════════════════
   // EXECUTE — merged proposal (vault block + reaudit block)
   // ══════════════════════════════════════════════════════════════════════════
-  testVip("VIP-665 [BNB Chain] Vault upgrade + Certik VPD-1241 reaudit", await vip665(), {
+  testVip("VIP-640 [BNB Chain] Vault upgrade + Certik VPD-1241 reaudit", await vip640(), {
     callbackAfterExecution: async txResponse => {
       // Vault block events
       await expectEvents(

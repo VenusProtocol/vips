@@ -72,56 +72,48 @@ export const buildAcmBatch = (): AcmCommand[] => [
   })),
 ];
 
-export const vip665 = () => {
+export const vip640 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-665 [BNB Chain] Upgrade Institutional Fixed Rate Vault implementations + Certik VPD-1241 reaudit (Core Pool, Liquidator, Leverage Manager)",
+      "VIP-640 [BNB Chain] Upgrade Institutional Fixed Rate Vault implementations + Certik VPD-1241 reaudit (Core Pool, Liquidator, Leverage Manager)",
     description: `#### Summary
 
-If passed, this VIP bundles two independent upgrades on BNB Chain:
+If passed, this VIP bundles two independent BNB Chain implementation upgrades: the Institutional Fixed Rate Vault upgrade (VPD-1488), and the Certik "Core Feature Reaudit" fixes (VPD-1241) covering the Core Pool Comptroller, Liquidator, Leverage Manager, and Executor. No risk parameters are changed.
+
+#### Description
+
+Both are maintenance-grade implementation upgrades — no existing positions are modified, and no user action is required.
 
 **1. Institutional Fixed Rate Vault implementation upgrade (VPD-1488)**
 
-- Upgrade the \`InstitutionalVaultController\` transparent proxy to a new implementation via the \`ProxyAdmin\`.
-- Update the vault implementation used by the controller to clone new vaults via \`setVaultImplementation()\`.
-  Existing vault clones are immutable (EIP-1167 minimal proxies); this only affects vaults created from now on.
-- Re-grant ACM permission for \`createVault\`: the new implementation appends a third \`string\`
-  (\`institutionName\`) to the signature, so the previously granted \`${CREATE_VAULT_OLD}\` no longer matches.
-  The new \`${CREATE_VAULT_NEW}\` is granted to the Normal / Fast-track / Critical timelocks and the
-  Critical Guardian, and the stale old permission is revoked.
-- Grant ACM permission for the two new controller functions \`${SET_INSTITUTION_NAME}\` and
-  \`${SET_INSTITUTION_NAME_OVERRIDE}\` to the same callers.
-- Set a display-name override (\`${LEGACY_VAULT_INSTITUTION_NAME}\`) for the single existing vault
-  (\`${LEGACY_VAULT}\`) via \`setInstitutionNameOverride()\`. That vault was created on the old
-  implementation and predates the on-chain \`institutionName\` field, so without an override
-  \`getAggregatedVaultStates()\` would revert for it after the upgrade.
+The vault controller and its vault clone-source are upgraded so each vault carries a renamable institution name for display. Existing vaults are immutable clones and are not modified; the change applies to vaults created from now on, plus a one-time display-name override (${LEGACY_VAULT_INSTITUTION_NAME}) for the single existing vault.
 
-The new implementations add a renamable \`institutionName\` as a **standalone field on the vault**, leaving the
-\`InstitutionalConfig\` struct — and therefore \`institutionalConfig()\`'s ABI — unchanged, so existing vault
-clones remain fully decodable. The controller also gains an \`institutionNameOverride\` mapping used by
-\`getAggregatedVaultStates()\` to supply a display name for legacy vaults that predate the on-chain field; the
-override can be cleared by passing an empty string.
+- **InstitutionalVaultController** — proxy ${INSTITUTIONAL_VAULT_CONTROLLER}: old implementation ${OLD_CONTROLLER_IMPLEMENTATION}, new implementation ${NEW_CONTROLLER_IMPLEMENTATION}
+- **InstitutionalLoanVault (clone source)** — no proxy (cloned per vault): old implementation ${OLD_VAULT_IMPLEMENTATION}, new implementation ${NEW_VAULT_IMPLEMENTATION}
 
-| Contract | Proxy | Old implementation | New implementation |
-|---|---|---|---|
-| InstitutionalVaultController | ${INSTITUTIONAL_VAULT_CONTROLLER} | ${OLD_CONTROLLER_IMPLEMENTATION} | ${NEW_CONTROLLER_IMPLEMENTATION} |
-| InstitutionalLoanVault (clone source) | n/a (cloned per vault) | ${OLD_VAULT_IMPLEMENTATION} | ${NEW_VAULT_IMPLEMENTATION} |
+**2. Certik "Core Feature Reaudit" fixes (VPD-1241)**
 
-- **ProxyAdmin**: ${PROXY_ADMIN}
+Recompiled, re-audited implementations are deployed across several core contracts, preserving existing behavior:
 
-**2. Certik "Venus Labs – Core Feature Reaudit" fixes (VPD-1241)**
+- **Core Pool Comptroller (Diamond)** — Unitroller ${reaudit.UNITROLLER}: new implementation ${reaudit.NEW_DIAMOND}
+- **ComptrollerLens** — Core Pool Comptroller: new implementation ${reaudit.NEW_COMPTROLLER_LENS}
+- **Liquidator** — ${reaudit.LIQUIDATOR}: new implementation ${reaudit.NEW_LIQUIDATOR_IMPL}
+- **Core Pool markets (VBep20Delegate)** — selected vTokens (excl. native-BNB vBNB): new implementation ${reaudit.NEW_VTOKEN_DELEGATE}
+- **LeverageStrategiesManager** — ${reaudit.LEVERAGE_STRATEGIES_MANAGER}: new implementation ${reaudit.NEW_LEVERAGE_IMPL}
+- **Executor (Emergency Brake V2)** — ${reaudit.EXECUTOR}: new implementation ${reaudit.NEW_EXECUTOR_IMPL}
 
-- **Core Pool Comptroller** — the full diamond is recut: the Diamond implementation and all five facets (Market, Policy, Reward, Setter, FlashLoan) are replaced with the recompiled, audited bytecode, preserving the existing function-to-facet mapping. The RewardFacet additionally gains two market-filtered overloads, claimVenusAsCollateral(address,address[]) and seizeVenus(address[],address,address[]), and enforces vXVS-market entry when claiming as collateral with a shortfall. The new seizeVenus overload is ACM-gated under a new signature, so call permission for seizeVenus(address[],address,address[]) is granted to the Normal, Fast-track and Critical timelocks and the critical guardian.
-- **ComptrollerLens** — solvency hypothetical now skips entered markets with neither supply nor debt.
-- **Liquidator** — accrues VAI interest before the force-liquidation gate; honors the per-borrower forced-liquidation flag.
-- **VBep20Delegate** — recompiled, audited delegate; the Core Pool markets selected for this VIP are repointed to it. Excluded: the native-BNB vBNB market.
-- **LeverageStrategiesManager** — dust returned via operation deltas; new owner-only sweepToken(address).
-- **Executor (E-brake V2)** — implementation-only upgrade: the supply/borrow cap-exceeding emergency halts now fail closed if the cap read reverts (emitting HaltedWithoutCapCheck) instead of falling back to a stale reading.
+One low-risk oracle input-validation fix from the same reaudit is intentionally excluded; new oracle deployments can adopt the updated contract.
 
-The CorrelatedTokenOracle fix from the same reaudit is intentionally not included: it only adds an input-validation safeguard to setSnapshot which is a governance-gated function, so the risk is minimal and the change is skipped here; new oracle deployments can adopt the updated contract.
+#### Actions
 
-**Execution note:** The ACM permission changes above are applied in one pre-seeded batch through the \`AuxiliaryCommandsAggregator\` (\`${COMMANDS_AGGREGATOR}\`) to keep the proposal under BNB Chain's per-transaction gas limit: the VIP grants the aggregator the ACM default-admin role, calls \`executeBatch\`, then revokes the role — so it holds the role only transiently.`,
+On-chain, this VIP upgrades each contract listed above to its new implementation (recutting the Core Pool Comptroller diamond and repointing the selected Core Pool markets), and re-grants the ACM permissions required by the vault and the new reaudit functions. To keep the proposal under BNB Chain's per-transaction gas limit, those ACM changes are pre-seeded into the AuxiliaryCommandsAggregator (${COMMANDS_AGGREGATOR}) and executed in a single batch, with the aggregator holding the ACM admin role only transiently. The complete, exact call list is in [VenusProtocol/vips#729](https://github.com/VenusProtocol/vips/pull/729).
+
+#### Voting options
+
+- **For** — Execute the proposal
+- **Against** — Do not execute the proposal
+- **Abstain** — Indifferent to execution`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -225,4 +217,4 @@ The CorrelatedTokenOracle fix from the same reaudit is intentionally not include
   );
 };
 
-export default vip665;
+export default vip640;
