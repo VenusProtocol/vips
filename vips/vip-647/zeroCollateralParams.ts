@@ -1,3 +1,15 @@
+/**
+ * Phase-4 market deprecation, Step 2 — shared scope + command builders for VIP-645 (Part 1)
+ * and VIP-646 (Part 2), and reused by VIP-647.
+ *
+ * Contains:
+ *   - PART1_POOLS / PART2_POOLS — the in-scope pools, grouped per VIP (mirrors the VIP-634/635 split).
+ *   - LT_ALREADY_ZERO           — vTokens already at liquidation threshold 0, skipped as no-ops.
+ *   - CORE_EMODE                — BNB Core markets that also live in an e-mode pool (extra zeroing).
+ *   - ETH_CORE_STEP2            — Ethereum Core plus the four yv* markets re-added for Step 2.
+ *   - generateStep2Commands / generateCoreEmodeCommands — emit the setCollateralFactor(cf=0, lt=0) calls.
+ *   - marketsToZero             — the per-pool market list the commands and simulation checks share.
+ */
 import { Command } from "src/types";
 
 import {
