@@ -9,12 +9,12 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip999, {
   ATLAS_ORACLE,
+  BOUND_VALIDATOR,
   BTCB,
   BTCB_FEED_FALLBACK,
   BTCB_FEED_MAIN,
   BTCB_FEED_PIVOT,
   BTCB_UPPER_BOUND,
-  BOUND_VALIDATOR,
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
   INSTITUTION_OPERATOR,
@@ -26,12 +26,12 @@ import vip999, {
   vaultConfig,
 } from "../../vips/vip-999/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
-import ERC20_ABI from "./abi/VenusERC20.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
- 
+import ERC20_ABI from "./abi/VenusERC20.json";
+
 const BOUND_VALIDATOR_ABI = ["function validateConfigs(address) external view returns (uint256, uint256)"];
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -169,10 +169,8 @@ forking(FORK_BLOCK, async () => {
   describe("Post-VIP behavior", () => {
     it("vceBTC is priced close to BTCB", async () => {
       const vceBtcPrice = await oracle.getPrice(VCEBTC);
-      const diff = vceBtcPrice.gt(btcbPriceAtFork)
-        ? vceBtcPrice.sub(btcbPriceAtFork)
-        : btcbPriceAtFork.sub(vceBtcPrice);
-      expect(diff.mul(100).lte(btcbPriceAtFork)).to.equal(true); // within 1%
+      const tolerance = btcbPriceAtFork.div(100); // 1% tolerance
+      expect(vceBtcPrice).to.be.closeTo(btcbPriceAtFork, tolerance);
     });
 
     it("the Normal Timelock accepted ownership of vceBTC", async () => {
