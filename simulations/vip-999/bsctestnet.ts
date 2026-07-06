@@ -5,9 +5,8 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { forking, testVip } from "src/vip-framework";
 
-import vip665Addendum from "../../vips/vip-665/bsctestnet-addendum";
 import vip999, {
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
@@ -31,7 +30,7 @@ import ERC20_ABI from "./abi/VenusERC20.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 117554000;
+const FORK_BLOCK = 117573000;
 
 const USDT_FAUCET_ABI = ["function allocateTo(address to, uint256 amount) external"];
 const CHAINLINK_ORACLE_GETPRICE_ABI = ["function getPrice(address) external view returns (uint256)"];
@@ -63,10 +62,6 @@ forking(FORK_BLOCK, async () => {
     timelock = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
     vceBTC = await ethers.getContractAt(ERC20_ABI, VCEBTC);
-
-    // Prerequisite: the VIP-665 addendum re-upgrades the InstitutionalVaultController before this
-    // VIP deploys a new vault on it. Execute it first, as the Normal Timelock.
-    await pretendExecutingVip(await vip665Addendum(), bsctestnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP behavior", () => {
