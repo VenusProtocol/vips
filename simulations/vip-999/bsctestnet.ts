@@ -4,47 +4,37 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser, setMaxStalePeriodForAllAssets, setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import vip665Addendum from "../../vips/vip-665/bsctestnet-addendum";
 import vip999, {
-  BTCB,
-  BTCB_FEED_MAIN,
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
+  INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
   SUPPLY_ASSET,
+  VAULT_SHARE_NAME,
+  VAULT_SHARE_SYMBOL,
   VCEBTC,
+  VCEBTC_DIRECT_PRICE,
   VCEBTC_INITIAL_SUPPLY,
   instConfig,
+  riskConfig,
   vaultConfig,
 } from "../../vips/vip-999/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
 import ERC20_ABI from "./abi/VenusERC20.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 const FORK_BLOCK = 117554000;
-const ONE_YEAR = 31536000;
-
-// A separate, not-yet-executed VIP upgrades the controller/vault implementations to the
-// versions supporting the 6-argument createVault (with institution name). Reproduced here.
-const PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
-const NEW_CONTROLLER_IMPLEMENTATION = "0xC36dFaCc7a125859C106F29b9F2d874CCF29A55A";
-const NEW_VAULT_IMPLEMENTATION = "0x97421799419Eb782628e73e7220d8E0A207469a3";
 
 const USDT_FAUCET_ABI = ["function allocateTo(address to, uint256 amount) external"];
-const LENDER = "0x2222222222222222222222222222222222222222"; // dummy test lender
-
 const CHAINLINK_ORACLE_GETPRICE_ABI = ["function getPrice(address) external view returns (uint256)"];
-
-const STUB_ORACLE_BYTECODE =
-  "0x6080604052348015600e575f80fd5b5061015e8061001c5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c806341976e091461002d575b5f80fd5b610047600480360381019061004291906100cc565b61005d565b604051610054919061010f565b60405180910390f35b5f670de0b6b3a76400009050919050565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61009b82610072565b9050919050565b6100ab81610091565b81146100b5575f80fd5b50565b5f813590506100c6816100a2565b92915050565b5f602082840312156100e1576100e061006e565b5b5f6100ee848285016100b8565b91505092915050565b5f819050919050565b610109816100f7565b82525050565b5f6020820190506101225f830184610100565b9291505056fea26469706673582212209282f7f2d85233912d0088d6dc45ce2459097d2866597e41f0a286059758c12c64736f6c63430008190033";
-const STUB_ORACLE_ABI = ["function getPrice(address) external pure returns (uint256)"];
 
 // IVaultTypes.VaultState
 const VaultState = {
@@ -61,7 +51,6 @@ forking(FORK_BLOCK, async () => {
   let acm: Contract;
   let controller: Contract;
   let vceBTC: Contract;
-  let btcb: Contract;
   let usdt: Contract;
   let timelock: any;
   let vaultsBefore: any;
@@ -70,36 +59,14 @@ forking(FORK_BLOCK, async () => {
     oracle = await ethers.getContractAt(ORACLE_ABI, bsctestnet.RESILIENT_ORACLE);
     acm = await ethers.getContractAt(ACM_ABI, bsctestnet.ACCESS_CONTROL_MANAGER);
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
-    btcb = await ethers.getContractAt(ERC20_ABI, BTCB);
     usdt = await ethers.getContractAt(ERC20_ABI, SUPPLY_ASSET);
     timelock = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
-
-    // Bump the stale period for the pre-existing assets so their prices remain readable on the fork.
-    await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt]);
-
-    // --- Reproduce the separate controller/vault-upgrade VIP's end state ---
-    const proxyAdmin = await ethers.getContractAt(PROXY_ADMIN_ABI, PROXY_ADMIN);
-    const proxyAdminOwner = await initMainnetUser(await proxyAdmin.owner(), parseUnits("1"));
-    await proxyAdmin.connect(proxyAdminOwner).upgrade(FIXED_RATE_VAULT_CONTROLLER, NEW_CONTROLLER_IMPLEMENTATION);
-    await controller.connect(timelock).setVaultImplementation(NEW_VAULT_IMPLEMENTATION);
-    await acm
-      .connect(timelock)
-      .giveCallPermission(
-        FIXED_RATE_VAULT_CONTROLLER,
-        "createVault(VaultConfig,InstitutionalConfig,RiskConfig,string,string,string)",
-        bsctestnet.NORMAL_TIMELOCK,
-      );
-
-    // Point the controller at a stub oracle so createVault can price vceBTC during the
-    // time-advanced execute() (see the STUB_ORACLE_BYTECODE comment). Restored in the callback.
-    const [deployer] = await ethers.getSigners();
-    const stubFactory = new ethers.ContractFactory(STUB_ORACLE_ABI, STUB_ORACLE_BYTECODE, deployer);
-    const stubOracle = await stubFactory.deploy();
-    await stubOracle.deployed();
-    await controller.connect(timelock).setOracle(stubOracle.address);
-
     vceBTC = await ethers.getContractAt(ERC20_ABI, VCEBTC);
+
+    // Prerequisite: the VIP-665 addendum re-upgrades the InstitutionalVaultController before this
+    // VIP deploys a new vault on it. Execute it first, as the Normal Timelock.
+    await pretendExecutingVip(await vip665Addendum(), bsctestnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -131,29 +98,14 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-999 Create Ceffu Custody BTC Fixed Rate Vault (Testnet)", await vip999(), {
-    callbackAfterExecution: async () => {
-      // vceBTC's oracle config (Chainlink main only) is only created by the VIP itself, so its
-      // stale period can only be bumped now — needed so the price survives the ~37-day time
-      // travel in the vault lifecycle test below.
-      await setMaxStalePeriodInChainlinkOracle(
-        CHAINLINK_ORACLE,
-        VCEBTC,
-        BTCB_FEED_MAIN,
-        bsctestnet.NORMAL_TIMELOCK,
-        ONE_YEAR,
-      );
-      // Restore the real ResilientOracle now that vceBTC is priceable with a bumped stale period.
-      await controller.connect(timelock).setOracle(bsctestnet.RESILIENT_ORACLE);
-    },
-  });
+  testVip("VIP-999 Create Ceffu Custody BTC Fixed Rate Vault (Testnet)", await vip999());
 
   describe("Post-VIP behavior", () => {
-    it("vceBTC is priced from the Chainlink feed cloned from BTCB's config", async () => {
+    it("vceBTC is priced at the fixed direct price set on the Chainlink sub-oracle", async () => {
       const chainlink = await ethers.getContractAt(CHAINLINK_ORACLE_GETPRICE_ABI, CHAINLINK_ORACLE);
       const vceBtcPrice = await oracle.getPrice(VCEBTC);
-      expect(vceBtcPrice).to.be.gt(0);
-      // ResilientOracle proxies to the Chainlink main sub-oracle, which reads the cloned feed.
+      expect(vceBtcPrice).to.equal(VCEBTC_DIRECT_PRICE);
+      // ResilientOracle proxies to the Chainlink main sub-oracle, which returns the direct price.
       expect(vceBtcPrice).to.equal(await chainlink.getPrice(VCEBTC));
     });
 
@@ -178,38 +130,64 @@ forking(FORK_BLOCK, async () => {
       );
     });
 
+    it("the Normal Timelock can mint and burn vceBTC", async () => {
+      const recipient = "0x000000000000000000000000000000000000dEaD";
+      const amount = parseUnits("1", 18);
+
+      const supplyBefore = await vceBTC.totalSupply();
+      const balanceBefore = await vceBTC.balanceOf(recipient);
+
+      await vceBTC.connect(timelock).mint(recipient, amount);
+      expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore.add(amount));
+      expect(await vceBTC.totalSupply()).to.equal(supplyBefore.add(amount));
+
+      await vceBTC.connect(timelock).burn(recipient, amount);
+      expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore);
+      expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
+    });
+
     it("initial vceBTC collateral was minted to the Venus Treasury", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
       expect(await vceBTC.balanceOf(bsctestnet.VTREASURY)).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
 
-    it("a Fixed Rate Vault backed by vceBTC was created", async () => {
+    it("a Fixed Rate Vault backed by vceBTC was created with the configured parameters and names", async () => {
       expect(await controller.allVaultsLength()).to.equal(vaultsBefore.add(1));
       const vaultAddress = await controller.allVaults(vaultsBefore);
       expect(await controller.isRegistered(vaultAddress)).to.equal(true);
 
       const vault = await ethers.getContractAt(VAULT_ABI, vaultAddress);
-      expect((await vault.config()).supplyAsset).to.equal(SUPPLY_ASSET);
-      expect((await vault.institutionalConfig()).collateralAsset).to.equal(VCEBTC);
-      expect((await vault.institutionalConfig()).institutionOperator).to.equal(INSTITUTION_OPERATOR);
-    });
-  });
 
-  describe("Oracle configuration for BTCB and vceBTC", () => {
-    it("BTCB price is available from ResilientOracle", async () => {
-      const btcbPrice = await oracle.getPrice(BTCB);
-      expect(btcbPrice).to.be.gt(0);
-    });
+      // VaultConfig
+      const config = await vault.config();
+      expect(config.supplyAsset).to.equal(vaultConfig[0]);
+      expect(config.fixedAPY).to.equal(vaultConfig[1]);
+      expect(config.reserveFactor).to.equal(vaultConfig[2]);
+      expect(config.minBorrowCap).to.equal(vaultConfig[3]);
+      expect(config.maxBorrowCap).to.equal(vaultConfig[4]);
+      expect(config.minSupplierDeposit).to.equal(vaultConfig[5]);
+      expect(config.openDuration).to.equal(vaultConfig[6]);
+      expect(config.lockDuration).to.equal(vaultConfig[7]);
+      expect(config.settlementWindow).to.equal(vaultConfig[8]);
 
-    it("vceBTC price is available from ResilientOracle", async () => {
-      const vceBtcPrice = await oracle.getPrice(VCEBTC);
-      expect(vceBtcPrice).to.be.gt(0);
-    });
+      // InstitutionalConfig (positionTokenId is assigned by the controller)
+      const inst = await vault.institutionalConfig();
+      expect(inst.collateralAsset).to.equal(instConfig[0]);
+      expect(inst.idealCollateralAmount).to.equal(instConfig[1]);
+      expect(inst.marginRate).to.equal(instConfig[2]);
+      expect(inst.institutionOperator).to.equal(instConfig[3]);
+      expect(inst.positionTokenId).to.be.gt(0);
 
-    it("vceBTC price equals the value derived from its cloned Chainlink feed", async () => {
-      const chainlink = await ethers.getContractAt(CHAINLINK_ORACLE_GETPRICE_ABI, CHAINLINK_ORACLE);
-      const vceBtcPrice = await oracle.getPrice(VCEBTC);
-      expect(vceBtcPrice).to.equal(await chainlink.getPrice(VCEBTC));
+      // RiskConfig
+      const risk = await vault.riskConfig();
+      expect(risk.liquidationThreshold).to.equal(riskConfig[0]);
+      expect(risk.liquidationIncentive).to.equal(riskConfig[1]);
+      expect(risk.latePenaltyRate).to.equal(riskConfig[2]);
+
+      // Share token names + institution name
+      expect(await vault.name()).to.equal(VAULT_SHARE_NAME);
+      expect(await vault.symbol()).to.equal(VAULT_SHARE_SYMBOL);
+      expect(await vault.institutionName()).to.equal(INSTITUTION_NAME);
     });
   });
 
@@ -217,6 +195,7 @@ forking(FORK_BLOCK, async () => {
     let vault: Contract;
     let institution: any;
     let lender: any;
+    let LENDER: string;
 
     const idealCollateralAmount = BigNumber.from(instConfig[1]);
     const marginRate = BigNumber.from(instConfig[2]);
@@ -231,14 +210,17 @@ forking(FORK_BLOCK, async () => {
       vault = await ethers.getContractAt(VAULT_ABI, vaultAddress);
 
       institution = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
-      lender = await initMainnetUser(LENDER, parseUnits("1"));
+
+      // Lender is a pre-funded Hardhat signer (account #1), so no impersonation is needed.
+      const [deployer, lenderSigner] = await ethers.getSigners();
+      lender = lenderSigner;
+      LENDER = await lenderSigner.getAddress();
 
       // Fund the institution with vceBTC collateral and both parties with the supply asset (USDT).
       await vceBTC.connect(timelock).mint(INSTITUTION_OPERATOR, idealCollateralAmount);
-      const [deployer] = await ethers.getSigners();
       const usdtFaucet = await ethers.getContractAt(USDT_FAUCET_ABI, SUPPLY_ASSET);
       await usdtFaucet.connect(deployer).allocateTo(LENDER, lenderDepositAmount);
-      await usdtFaucet.connect(deployer).allocateTo(INSTITUTION_OPERATOR, lenderDepositAmount.div(5)); // repay principal + interest
+      await usdtFaucet.connect(deployer).allocateTo(INSTITUTION_OPERATOR, lenderDepositAmount.div(5)); // buffer to cover interest on repay (principal comes from claimed funds)
     });
 
     it("institution deposits margin collateral (WaitingForMargin -> MarginDeposited)", async () => {

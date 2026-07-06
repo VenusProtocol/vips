@@ -568,10 +568,28 @@
         "name": "symbol_",
         "type": "string",
         "internalType": "string"
+      },
+      {
+        "name": "institutionName_",
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "institutionName",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1085,6 +1103,19 @@
   },
   {
     "type": "function",
+    "name": "setInstitutionName",
+    "inputs": [
+      {
+        "name": "newName",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "setLatePenaltyRate",
     "inputs": [
       {
@@ -1418,6 +1449,25 @@
         "type": "uint8",
         "indexed": false,
         "internalType": "uint8"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "InstitutionNameUpdated",
+    "inputs": [
+      {
+        "name": "oldName",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "newName",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
       }
     ],
     "anonymous": false
