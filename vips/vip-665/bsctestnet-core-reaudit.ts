@@ -27,7 +27,7 @@ import {
   SETTER_FACET_SELECTORS,
   UNITROLLER,
   VTOKENS_TO_UPGRADE,
-} from "./utils/data.bsctestnet";
+} from "./utils/data.bsctestnet-core-reaudit";
 
 const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
