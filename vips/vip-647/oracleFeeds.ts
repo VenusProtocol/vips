@@ -79,6 +79,20 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
       feed: "0x37be050e75C7F0a80F0E8abBFC2c4Ff826728cAa",
       maxStalePeriod: 93600,
     },
+    {
+      symbol: "WETH",
+      asset: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      mainAdapter: "0x94c3A2d6B7B2c051aDa041282aec5B0752F8A1F2",
+      feed: "0xc0053f3FBcCD593758258334Dfce24C2A9A673aD",
+      maxStalePeriod: 6000,
+    },
+    {
+      symbol: "WBTC",
+      asset: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      mainAdapter: "0x94c3A2d6B7B2c051aDa041282aec5B0752F8A1F2",
+      feed: "0x91D32e6f01d6473b596f54c6E304e06d774f86b2",
+      maxStalePeriod: 6000,
+    },
   ],
   arbitrumone: [
     {
@@ -93,6 +107,27 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
       asset: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
       mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
       feed: "0xe4c892BE702F8e0771122CCaAA0E50BF9639e2Fd",
+      maxStalePeriod: 93600,
+    },
+    {
+      symbol: "WETH",
+      asset: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
+      feed: "0xe4dF63Bf89fD868A899F2422B030709FD79Be921",
+      maxStalePeriod: 93600,
+    },
+    {
+      symbol: "WBTC",
+      asset: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+      mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
+      feed: "0x06047dD6f43552831BB51319917DC0C99c29A44c",
+      maxStalePeriod: 93600,
+    },
+    {
+      symbol: "ARB",
+      asset: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+      mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
+      feed: "0x54a82Bc6C6540F95C0b84690773635aCC97A92ff",
       maxStalePeriod: 93600,
     },
   ],
