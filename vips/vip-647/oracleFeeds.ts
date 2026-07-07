@@ -6,9 +6,11 @@
  * of that asset's ResilientOracle config — via that adapter's setTokenConfig((asset, feed, maxStalePeriod)).
  * The ResilientOracle slot layout is unchanged; only the MAIN adapter's underlying feed changes.
  *
- * MAIN adapters, current feeds and maxStalePeriods were read on-chain (2026-07-06). maxStalePeriod is preserved
- * per asset (only the feed source changes). On BNB Chain native BNB (vBNB) is priced under the sentinel underlying
- * 0xbBbB...bBbB, which holds its own adapter config separate from WBNB — both are repointed to the new feed.
+ * MAIN adapters and current feeds were read on-chain (2026-07-06). maxStalePeriod is set to each new Chainlink
+ * feed's published heartbeat plus a latency cushion (the on-chain updatedAt interval runs ~30-60s past the nominal
+ * heartbeat): daily feeds → heartbeat + ~1h (86400→90000, 82800→86400), sub-hourly feeds keep their existing
+ * heartbeat×~1.3-2 margin. On BNB Chain native BNB (vBNB) is priced under the sentinel underlying 0xbBbB...bBbB,
+ * which holds its own adapter config separate from WBNB — both are repointed to the new feed.
  */
 
 export interface OracleFeed {
@@ -16,7 +18,7 @@ export interface OracleFeed {
   asset: string;
   mainAdapter: string; // Venus oracle adapter whose feed we repoint (getPrice-capable)
   feed: string; // new raw Chainlink-style feed
-  maxStalePeriod: number; // preserved from the current adapter config
+  maxStalePeriod: number; // new feed's published heartbeat + latency cushion
 }
 
 export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", OracleFeed[]> = {
@@ -79,14 +81,14 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
       asset: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
       mainAdapter: "0x94c3A2d6B7B2c051aDa041282aec5B0752F8A1F2",
       feed: "0x023dfc789db466DD5C900DC04706727a3A9Cf3DE",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 90000,
     },
     {
       symbol: "USDC",
       asset: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       mainAdapter: "0x94c3A2d6B7B2c051aDa041282aec5B0752F8A1F2",
       feed: "0x37be050e75C7F0a80F0E8abBFC2c4Ff826728cAa",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 86400,
     },
     {
       symbol: "WETH",
@@ -109,35 +111,35 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
       asset: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
       mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
       feed: "0x6AA147E11E423F529BEDAed75F3128D5fbE67939",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 90000,
     },
     {
       symbol: "USDC",
       asset: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
       mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
       feed: "0xe4c892BE702F8e0771122CCaAA0E50BF9639e2Fd",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 90000,
     },
     {
       symbol: "WETH",
       asset: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
       mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
       feed: "0xe4dF63Bf89fD868A899F2422B030709FD79Be921",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 90000,
     },
     {
       symbol: "WBTC",
       asset: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
       mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
       feed: "0x06047dD6f43552831BB51319917DC0C99c29A44c",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 90000,
     },
     {
       symbol: "ARB",
       asset: "0x912CE59144191C1204E64559FE8253a0e49E6548",
       mainAdapter: "0x9cd9Fcc7E3dEDA360de7c080590AaD377ac9F113",
       feed: "0x54a82Bc6C6540F95C0b84690773635aCC97A92ff",
-      maxStalePeriod: 93600,
+      maxStalePeriod: 90000,
     },
   ],
 };
