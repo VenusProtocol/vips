@@ -4,7 +4,9 @@
  * The provided addresses are raw Chainlink-style feeds (latestRoundData / decimals / "X / USD"), NOT Venus oracle
  * adapters. So the update repoints the feed INSIDE each asset's MAIN oracle adapter — the contract sitting in slot 0
  * of that asset's ResilientOracle config — via that adapter's setTokenConfig((asset, feed, maxStalePeriod)).
- * The ResilientOracle slot layout is unchanged; only the MAIN adapter's underlying feed changes.
+ * For every asset except THE the ResilientOracle slot layout is unchanged; only the MAIN adapter's underlying feed
+ * changes. THE is the exception: its new feed is a Chainlink feed, so it is written to the ChainlinkOracle adapter
+ * and the ResilientOracle MAIN slot is repointed there (see THE_MAIN_REPOINT below).
  *
  * MAIN adapters and current feeds were read on-chain (2026-07-06). maxStalePeriod is set to each new Chainlink
  * feed's published heartbeat plus a latency cushion (the on-chain updatedAt interval runs ~30-60s past the nominal

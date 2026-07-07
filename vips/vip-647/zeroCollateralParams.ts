@@ -7,6 +7,8 @@
  *   - ETH_CORE_STEP2  — Ethereum Core plus the four yv* markets re-added for Step 2.
  *   - generateStep2Commands / generateCoreEmodeCommands — emit the setCollateralFactor(cf=0, lt=0) calls.
  *   - marketsToZero   — the per-pool market list the commands and simulation checks share.
+ *   - PT_SUSDE / PT_SUSDE_EXTRA_PERMS / generatePtSusdeCommands — the full deprecation (RF/IRM/cap + CF/LT)
+ *     for the PT-sUSDE market that was omitted from the Phase-4 scope.
  */
 import { Command } from "src/types";
 

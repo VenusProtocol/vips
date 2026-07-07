@@ -9,8 +9,9 @@
  * Contents per chain:
  *   - Phase-4 Step 2 deprecation: setCollateralFactor(cf=0, lt=0) on the in-scope markets.
  *   - Oracle feed update: setTokenConfig(asset, feed, maxStalePeriod) on each asset's MAIN oracle adapter.
- *   - BNB Chain only: e-mode threshold zeroing (DOT/FIL/THE) and the PT-sUSDE full deprecation
- *     (RF → 100%, push-out IRM, supply cap → 0, CF/LT → 0), which was missed from the Phase-4 scope.
+ *   - BNB Chain only: e-mode threshold zeroing (DOT/FIL/THE); the PT-sUSDE full deprecation (RF → 100%,
+ *     push-out IRM, supply cap → 0, CF/LT → 0), missed from the Phase-4 scope; and repointing THE's
+ *     ResilientOracle MAIN slot onto the ChainlinkOracle adapter (setOracle).
  */
 import { Command } from "src/types";
 
