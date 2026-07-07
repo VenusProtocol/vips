@@ -9,6 +9,8 @@
  * Contents per chain:
  *   - Phase-4 Step 2 deprecation: setCollateralFactor(cf=0, lt=0) on the in-scope markets.
  *   - Oracle feed update: setTokenConfig(asset, feed, maxStalePeriod) on each asset's MAIN oracle adapter.
+ *   - BNB Chain only: e-mode threshold zeroing (DOT/FIL/THE) and the PT-sUSDE full deprecation
+ *     (RF → 100%, push-out IRM, supply cap → 0, CF/LT → 0), which was missed from the Phase-4 scope.
  */
 import { Command } from "src/types";
 
@@ -29,8 +31,10 @@ import {
 } from "../vip-634/phase4Markets";
 import {
   ORACLE_UPDATE,
+  SET_ORACLE_SIG,
   SET_TOKEN_CONFIG_ACM_SIG,
   SET_TOKEN_CONFIG_SIG,
+  THE_MAIN_REPOINT,
   distinctAdapters,
   tokenConfigParams,
 } from "./oracleFeeds";
@@ -137,12 +141,30 @@ export const buildBatch = (chain: AggregatorChain): SeedCommand[] => {
     params: tokenConfigParams(f),
   }));
 
+  // BNB Chain only: after THE's config is written on the ChainlinkOracle adapter (in oracleCalls above),
+  // move the ResilientOracle MAIN slot for THE onto that adapter so the new Chainlink feed is used.
+  const theRepointPerm: { target: string; signature: string }[] =
+    chain === "bscmainnet" ? [{ target: THE_MAIN_REPOINT.resilientOracle, signature: SET_ORACLE_SIG }] : [];
+  const theRepointCalls: SeedCommand[] =
+    chain === "bscmainnet"
+      ? [
+          {
+            target: THE_MAIN_REPOINT.resilientOracle,
+            signature: SET_ORACLE_SIG,
+            params: [THE_MAIN_REPOINT.asset, THE_MAIN_REPOINT.chainlinkOracle, THE_MAIN_REPOINT.mainRole],
+          },
+        ]
+      : [];
+
   return [
     ...cfPerms.map(p => grant(p.target, p.signature)),
     ...adapters.map(a => grant(a, SET_TOKEN_CONFIG_ACM_SIG)),
+    ...theRepointPerm.map(p => grant(p.target, p.signature)),
     ...setCalls,
     ...oracleCalls,
+    ...theRepointCalls,
     ...cfPerms.map(p => revoke(p.target, p.signature)),
     ...adapters.map(a => revoke(a, SET_TOKEN_CONFIG_ACM_SIG)),
+    ...theRepointPerm.map(p => revoke(p.target, p.signature)),
   ];
 };

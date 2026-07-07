@@ -47,9 +47,12 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
       maxStalePeriod: 1200,
     },
     {
+      // THE's new feed is a Chainlink feed, so it is configured on the ChainlinkOracle adapter (matching the
+      // other BSC assets) rather than the RedStoneOracle adapter it used before. THE_MAIN_REPOINT then moves
+      // the ResilientOracle MAIN slot onto this adapter so the new feed is actually used.
       symbol: "THE",
       asset: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11",
-      mainAdapter: "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a",
+      mainAdapter: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
       feed: "0xD55a9E7e00b6b86ee5C92cA0D9DD218b251E8e4B",
       maxStalePeriod: 1200,
     },
@@ -148,6 +151,19 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
 export const SET_TOKEN_CONFIG_SIG = "setTokenConfig((address,address,uint256))";
 // Signature string the adapter passes to the ACM for the permission check.
 export const SET_TOKEN_CONFIG_ACM_SIG = "setTokenConfig(TokenConfig)";
+
+// THE moves from the RedStoneOracle adapter to the ChainlinkOracle adapter as its ResilientOracle MAIN
+// source (its new feed is a Chainlink feed). After THE's config is written on the ChainlinkOracle adapter
+// (via the ORACLE_UPDATE entry above), this repoints the ResilientOracle MAIN slot onto that adapter.
+// OracleRole.MAIN = 0. The RedStoneOracle adapter's stale THE config is left orphaned (harmless).
+export const THE_MAIN_REPOINT = {
+  resilientOracle: "0x6592b5DE802159F3E74B2486b091D11a8256ab8A",
+  asset: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11",
+  chainlinkOracle: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
+  mainRole: 0,
+};
+// ResilientOracle.setOracle(asset, oracle, role) — the ACM-checked signature.
+export const SET_ORACLE_SIG = "setOracle(address,address,uint8)";
 
 export const tokenConfigParams = (f: OracleFeed) => [[f.asset, f.feed, f.maxStalePeriod]];
 

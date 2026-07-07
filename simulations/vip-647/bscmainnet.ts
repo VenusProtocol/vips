@@ -17,7 +17,7 @@ import {
 } from "../../vips/vip-634/phase4Markets";
 import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-647/aggregatorBatches";
 import vip647 from "../../vips/vip-647/bscmainnet";
-import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
+import { ORACLE_UPDATE, THE_MAIN_REPOINT } from "../../vips/vip-647/oracleFeeds";
 import { CORE_EMODE, PT_SUSDE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
 
@@ -51,6 +51,10 @@ const COMPTROLLER_ABI = [
 const VTOKEN_ABI = [
   "function reserveFactorMantissa() view returns (uint256)",
   "function interestRateModel() view returns (address)",
+];
+const RESILIENT_ORACLE_ABI = [
+  "function getTokenConfig(address) view returns (address asset, address[3] oracles, bool[3] enableFlagsForOracles)",
+  "function getPrice(address) view returns (uint256)",
 ];
 const RF_FULL = ethers.utils.parseUnits("1", 18);
 
@@ -86,6 +90,12 @@ forking(FORK_BLOCK, async () => {
           expect(d.liquidationThresholdMantissa.gt(0), `${pool.label} ${m.symbol}`).to.be.true;
         }
       }
+    });
+
+    it("THE MAIN oracle still points to the RedStoneOracle adapter", async () => {
+      const ro = new Contract(THE_MAIN_REPOINT.resilientOracle, RESILIENT_ORACLE_ABI, ethers.provider);
+      const cfg = await ro.getTokenConfig(THE_MAIN_REPOINT.asset);
+      expect(cfg.oracles[0].toLowerCase(), "THE main pre").to.not.equal(THE_MAIN_REPOINT.chainlinkOracle.toLowerCase());
     });
 
     it("PT-sUSDE is still fully active (CF/LT non-zero, RF 0, non-zero supply cap)", async () => {
@@ -135,6 +145,12 @@ forking(FORK_BLOCK, async () => {
         expect(d.collateralFactorMantissa.toString(), `${e.symbol} pool ${e.poolId} cf`).to.equal("0");
         expect(d.liquidationThresholdMantissa.toString(), `${e.symbol} pool ${e.poolId} lt`).to.equal("0");
       }
+    });
+
+    it("THE MAIN oracle repointed to the ChainlinkOracle adapter", async () => {
+      const ro = new Contract(THE_MAIN_REPOINT.resilientOracle, RESILIENT_ORACLE_ABI, ethers.provider);
+      const cfg = await ro.getTokenConfig(THE_MAIN_REPOINT.asset);
+      expect(cfg.oracles[0].toLowerCase(), "THE main post").to.equal(THE_MAIN_REPOINT.chainlinkOracle.toLowerCase());
     });
 
     it("PT-sUSDE fully deprecated: CF/LT=0, RF=100%, push-out IRM, supply cap=0", async () => {
