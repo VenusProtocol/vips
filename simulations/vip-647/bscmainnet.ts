@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -15,7 +15,7 @@ import {
   BNB_STABLECOINS,
   BNB_TRON,
 } from "../../vips/vip-634/phase4Markets";
-import { AGGREGATOR, SeedCommand, XVS_RESTORE, buildBatch } from "../../vips/vip-647/aggregatorBatches";
+import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-647/aggregatorBatches";
 import vip647 from "../../vips/vip-647/bscmainnet";
 import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
 import { CORE_EMODE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
@@ -61,24 +61,6 @@ forking(FORK_BLOCK, async () => {
     const nextIndex = (await agg.batchCount()).toNumber();
     expect(nextIndex, "batchCount must be 1 so the batch lands at the VIP's index").to.equal(1);
     await agg["addBatch((address,bytes)[])"](buildBatch("bscmainnet").map(encode));
-
-    // Restoring a NON-zero XVS collateral factor requires a valid oracle price. testVip's governance time-travel
-    // makes XVS's feeds stale, so ResilientOracle reverts ("invalid resilient oracle price") and the setter fails.
-    // Fork-only workaround (VIP-647 does not touch XVS's oracle config): keep XVS's Chainlink MAIN feed fresh, and
-    // pin a direct price on the RedStone PIVOT oracle (its underlying feed is dead in the fork), so ResilientOracle's
-    // MAIN-vs-PIVOT bound validation passes post-warp. On mainnet the feeds are fresh at execution.
-    const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-    const XVS_CHAINLINK = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
-    const XVS_REDSTONE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
-    await setMaxStalePeriodInChainlinkOracle(XVS_CHAINLINK, XVS, ethers.constants.AddressZero, NORMAL_TIMELOCK);
-    const ro = new Contract(
-      "0x6592b5DE802159F3E74B2486b091D11a8256ab8A",
-      ["function getPrice(address) view returns (uint256)"],
-      ethers.provider,
-    );
-    const xvsPrice = await ro.getPrice(XVS);
-    const redstone = new Contract(XVS_REDSTONE, ["function setDirectPrice(address,uint256)"], timelock);
-    await redstone.setDirectPrice(XVS, xvsPrice);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -136,13 +118,6 @@ forking(FORK_BLOCK, async () => {
         expect(d.collateralFactorMantissa.toString(), `${e.symbol} pool ${e.poolId} cf`).to.equal("0");
         expect(d.liquidationThresholdMantissa.toString(), `${e.symbol} pool ${e.poolId} lt`).to.equal("0");
       }
-    });
-
-    it("XVS collateral factor restored to 55% (liquidation threshold 60%)", async () => {
-      const comptroller = new Contract(BNB_CORE.comptroller, COMPTROLLER_ABI, ethers.provider);
-      const d = await comptroller.poolMarkets(0, XVS_RESTORE.vToken);
-      expect(d.collateralFactorMantissa.toString(), "XVS cf").to.equal(XVS_RESTORE.collateralFactor.toString());
-      expect(d.liquidationThresholdMantissa.toString(), "XVS lt").to.equal(XVS_RESTORE.liquidationThreshold.toString());
     });
   });
 });

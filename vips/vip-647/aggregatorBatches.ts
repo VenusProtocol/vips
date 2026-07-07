@@ -9,9 +9,7 @@
  * Contents per chain:
  *   - Phase-4 Step 2 deprecation: setCollateralFactor(cf=0, lt=0) on the in-scope markets.
  *   - Oracle feed update: setTokenConfig(asset, feed, maxStalePeriod) on each asset's MAIN oracle adapter.
- *   - BNB Chain only: restore the XVS collateral factor to 55%.
  */
-import { parseUnits } from "ethers/lib/utils";
 import { Command } from "src/types";
 
 import {
@@ -84,17 +82,6 @@ const POOLS: Record<AggregatorChain, PoolDef[]> = {
   arbitrumone: [ARBITRUM_LIQUID_STAKED_ETH],
 };
 
-// Restore the XVS collateral factor in the BNB Core pool to 55% (liquidation threshold stays 60%).
-// The Core diamond uses the pool-aware 4-arg setter (poolId 0 = base pool); the 3-arg overload reverts
-// for the Core pool. This reuses the same ACM grant the Core deprecation calls already need.
-export const XVS_RESTORE = {
-  comptroller: BNB_CORE.comptroller,
-  vToken: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
-  poolId: 0,
-  collateralFactor: parseUnits("0.55", 18),
-  liquidationThreshold: parseUnits("0.6", 18),
-};
-
 // The setCollateralFactor signature the ACM checks for a pool.
 const collateralFactorSig = (pool: PoolDef): string =>
   pool.legacy ? "setCollateralFactor(uint96,address,uint256,uint256)" : "setCollateralFactor(address,uint256,uint256)";
@@ -124,19 +111,14 @@ export const buildBatch = (chain: AggregatorChain): SeedCommand[] => {
   // One grant/revoke per (comptroller, setter).
   const cfPerms = pools.map(p => ({ target: p.comptroller, signature: collateralFactorSig(p) }));
 
-  // BNB Chain only: the e-mode zeroing and the XVS restore both use the BNB Core 4-arg setter. Ensure its
-  // grant is present regardless of whether BNB Core survived the deprecation market filter above.
+  // BNB Chain only: the e-mode zeroing uses the BNB Core 4-arg setter. Ensure its grant is present
+  // regardless of whether BNB Core survived the deprecation market filter above.
   if (chain === "bscmainnet") {
     const coreSig = "setCollateralFactor(uint96,address,uint256,uint256)";
     if (!cfPerms.some(p => p.target === BNB_CORE.comptroller && p.signature === coreSig)) {
       cfPerms.push({ target: BNB_CORE.comptroller, signature: coreSig });
     }
     setCalls.push(...generateCoreEmodeCommands().map(toSeed)); // BNB Core e-mode pools (DOT/FIL/THE)
-    setCalls.push({
-      target: XVS_RESTORE.comptroller,
-      signature: coreSig,
-      params: [XVS_RESTORE.poolId, XVS_RESTORE.vToken, XVS_RESTORE.collateralFactor, XVS_RESTORE.liquidationThreshold],
-    });
   }
 
   // ── Oracle calls: repoint the feed inside each asset's MAIN adapter ──
