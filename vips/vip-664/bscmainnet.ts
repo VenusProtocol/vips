@@ -17,10 +17,14 @@ export const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 // sweeps the treasury's full XVS balance to the XVS Store. ~46,465.73 XVS.
 export const XVS_FUND_AMOUNT = BigNumber.from("46465730038602167664988");
 
-// New XVS Vault reward speed: 1,837.9 XVS/day.
-// BSC ≈ 0.45 s/block → 192,000 blocks/day (repo convention, see VIP-607/618/629/639).
-// 1,837.9 / 192,000 = 0.009572395833333333 XVS per block.
-export const NEW_XVS_VAULT_SPEED = parseUnits("0.009572395833333333", 18);
+// Base Reward allocation granted from the Core Pool Comptroller (Unitroller) to
+// the XVS Store via _grantXVS, mirroring the base-reward grant in VIP-612/VIP-607.
+export const XVS_GRANT_AMOUNT = parseUnits("28091.7", 18); // 28,091.7 XVS
+
+// New XVS Vault reward speed: 535 XVS/day.
+// BSC ≈ 0.45 s/block → 192,000 blocks/day (repo convention, see VIP-607/612/618/629).
+// 535 / 192,000 = 0.002786458333333333 XVS per block.
+export const NEW_XVS_VAULT_SPEED = parseUnits("0.002786458333333333", 18);
 
 // ──────────────────────────────────────────────────────────────────────────
 // Prime budget transfer
@@ -46,8 +50,9 @@ This proposal batches the Q3 XVS Vault rewards adjustment on BNB Chain together 
 **Actions:**
 
 1. **Fund the XVS Vault.** Transfer the entire XVS balance held by the [XVS Vault Treasury](https://bscscan.com/address/0x269ff7818DB317f60E386D2be0B259e1a324a40a) (~46,465.73 XVS) to the [XVS Store](https://bscscan.com/address/0x1e25CF968f12850003Db17E0Dba32108509C4359), replenishing the pool that pays XVS stakers.
-2. **Adjust the XVS Vault reward speed to 1,837.9 XVS/day.** Update the XVS Vault reward speed on BNB Chain to reflect accumulated protocol buybacks.
-3. **Prime budget transfer.** Transfer 17,000 U (United Stables) from the [Prime Liquidity Provider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) to the recipient address [0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de](https://bscscan.com/address/0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de).`,
+2. **Grant the base-reward allocation.** Transfer 28,091.7 XVS from the Core Pool Comptroller to the [XVS Store](https://bscscan.com/address/0x1e25CF968f12850003Db17E0Dba32108509C4359) via \`_grantXVS\`, covering the fixed Base Reward allocation (ref. VIP-607/VIP-612).
+3. **Adjust the XVS Vault reward speed to 535 XVS/day.** Update the XVS Vault reward speed on BNB Chain to reflect accumulated protocol buybacks and base rewards.
+4. **Prime budget transfer.** Transfer 17,000 U (United Stables) from the [Prime Liquidity Provider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) to the recipient address [0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de](https://bscscan.com/address/0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de).`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -62,14 +67,21 @@ This proposal batches the Q3 XVS Vault rewards adjustment on BNB Chain together 
         params: [XVS_FUND_AMOUNT],
       },
 
-      // 2. Set the XVS Vault reward speed to 1,837.9 XVS/day.
+      // 2. Grant the base-reward XVS allocation from the Core Pool Comptroller to the XVS Store.
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "_grantXVS(address,uint256)",
+        params: [XVS_STORE, XVS_GRANT_AMOUNT],
+      },
+
+      // 3. Set the XVS Vault reward speed to 535 XVS/day.
       {
         target: bscmainnet.XVS_VAULT_PROXY,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [bscmainnet.XVS, NEW_XVS_VAULT_SPEED],
       },
 
-      // 3. Transfer 17,000 U from the Prime Liquidity Provider to the recipient.
+      // 4. Transfer 17,000 U from the Prime Liquidity Provider to the recipient.
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "sweepToken(address,address,uint256)",

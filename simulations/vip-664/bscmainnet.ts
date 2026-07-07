@@ -14,6 +14,7 @@ import vip664, {
   U,
   U_TO_SWEEP,
   XVS_FUND_AMOUNT,
+  XVS_GRANT_AMOUNT,
   XVS_STORE,
   XVS_VAULT_TREASURY,
 } from "../../vips/vip-664/bscmainnet";
@@ -35,6 +36,7 @@ forking(106561536, async () => {
 
   let treasuryXvsBefore: BigNumber;
   let storeXvsBefore: BigNumber;
+  let unitrollerXvsBefore: BigNumber;
   let plpUBefore: BigNumber;
   let recipientUBefore: BigNumber;
 
@@ -45,6 +47,7 @@ forking(106561536, async () => {
 
     treasuryXvsBefore = await xvs.balanceOf(XVS_VAULT_TREASURY);
     storeXvsBefore = await xvs.balanceOf(XVS_STORE);
+    unitrollerXvsBefore = await xvs.balanceOf(bscmainnet.UNITROLLER);
     plpUBefore = await u.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     recipientUBefore = await u.balanceOf(RECIPIENT);
   });
@@ -56,6 +59,10 @@ forking(106561536, async () => {
 
     it("current XVS Vault reward speed is the pre-VIP value", async () => {
       expect(await xvsVault.rewardTokenAmountsPerBlockOrSecond(bscmainnet.XVS)).to.equal(OLD_XVS_VAULT_SPEED);
+    });
+
+    it("Comptroller holds at least XVS_GRANT_AMOUNT of XVS", async () => {
+      expect(unitrollerXvsBefore).to.be.gte(XVS_GRANT_AMOUNT);
     });
 
     it("PLP holds at least U_TO_SWEEP of U", async () => {
@@ -72,19 +79,24 @@ forking(106561536, async () => {
   });
 
   describe("Post-VIP state", () => {
-    it("drains the treasury's XVS to the XVS Store", async () => {
+    it("drains the treasury's XVS and grants the base reward into the XVS Store", async () => {
       const treasuryAfter = await xvs.balanceOf(XVS_VAULT_TREASURY);
       const storeAfter = await xvs.balanceOf(XVS_STORE);
+      const unitrollerAfter = await xvs.balanceOf(bscmainnet.UNITROLLER);
+      // Treasury is fully drained by fundXVSVault.
       expect(treasuryAfter).to.equal(treasuryXvsBefore.sub(XVS_FUND_AMOUNT));
       expect(treasuryAfter).to.equal(0);
-      expect(storeAfter).to.equal(storeXvsBefore.add(XVS_FUND_AMOUNT));
+      // Comptroller grants XVS_GRANT_AMOUNT out via _grantXVS.
+      expect(unitrollerXvsBefore.sub(unitrollerAfter)).to.equal(XVS_GRANT_AMOUNT);
+      // Store receives both the treasury fund and the base-reward grant.
+      expect(storeAfter).to.equal(storeXvsBefore.add(XVS_FUND_AMOUNT).add(XVS_GRANT_AMOUNT));
     });
 
-    it("updates the XVS Vault reward speed to 1,837.9 XVS/day", async () => {
+    it("updates the XVS Vault reward speed to 535 XVS/day", async () => {
       const speed = await xvsVault.rewardTokenAmountsPerBlockOrSecond(bscmainnet.XVS);
       expect(speed).to.equal(NEW_XVS_VAULT_SPEED);
-      // 1,837.9 XVS/day (192,000 blocks/day) is a slight reduction from the prior
-      // ~1,846.6 XVS/day, so the new per-block speed sits just below the old one.
+      // 535 XVS/day (192,000 blocks/day) is a reduction from the prior ~1,846.6 XVS/day,
+      // so the new per-block speed sits below the old one.
       expect(speed).to.be.lt(OLD_XVS_VAULT_SPEED);
       expect(speed).to.not.equal(OLD_XVS_VAULT_SPEED);
     });
