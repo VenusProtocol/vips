@@ -7,8 +7,8 @@
  * The ResilientOracle slot layout is unchanged; only the MAIN adapter's underlying feed changes.
  *
  * MAIN adapters, current feeds and maxStalePeriods were read on-chain (2026-07-06). maxStalePeriod is preserved
- * per asset (only the feed source changes). On BNB Chain the vBNB market prices via the WBNB config, so BNB and
- * WBNB share the single WBNB entry.
+ * per asset (only the feed source changes). On BNB Chain native BNB (vBNB) is priced under the sentinel underlying
+ * 0xbBbB...bBbB, which holds its own adapter config separate from WBNB — both are repointed to the new feed.
  */
 
 export interface OracleFeed {
@@ -27,7 +27,16 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
       mainAdapter: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
       feed: "0xA59395678BB6a010a7206f46b6dab8A1e7aC7221",
       maxStalePeriod: 60,
-    }, // BNB & WBNB
+    },
+    {
+      // Native BNB is priced under the sentinel underlying (vBNB market), configured separately from WBNB
+      // in the same MAIN adapter. Both must be repointed to the new feed or vBNB stays on the old one.
+      symbol: "BNB",
+      asset: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+      mainAdapter: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
+      feed: "0xA59395678BB6a010a7206f46b6dab8A1e7aC7221",
+      maxStalePeriod: 60,
+    },
     {
       symbol: "USDC",
       asset: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
