@@ -5,8 +5,9 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser, setMaxStalePeriodForAllAssets, setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import vip640 from "../../vips/vip-640/bscmainnet";
 import vip999, {
   ATLAS_ORACLE,
   BOUND_VALIDATOR,
@@ -28,7 +29,6 @@ import vip999, {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
 import ERC20_ABI from "./abi/VenusERC20.json";
 
@@ -38,12 +38,6 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 const FORK_BLOCK = 108402150;
 const ONE_YEAR = 31536000;
-
-// A separate, not-yet-executed VIP upgrades the controller/vault implementations and
-// grants createVault.
-const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
-const NEW_CONTROLLER_IMPLEMENTATION = "0xBD9df626c642591cef3612586CC5e45E9767360f";
-const NEW_VAULT_IMPLEMENTATION = "0xC25b2B657D24380eDd1a1Cff5296385541e85204";
 
 const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // Binance Hot Wallet
 const LENDER = "0x2222222222222222222222222222222222222222"; // dummy test lender
@@ -92,21 +86,9 @@ forking(FORK_BLOCK, async () => {
     await redstoneOracleForExisting.connect(timelock).setDirectPrice(BTCB, btcbPriceAtFork);
     await redstoneOracleForExisting.connect(timelock).setDirectPrice(SUPPLY_ASSET, usdtPriceAtFork);
 
-    // --- Reproduce the separate controller/vault-upgrade VIP's end state ---
-    const proxyAdmin = await ethers.getContractAt(PROXY_ADMIN_ABI, PROXY_ADMIN);
-    const proxyAdminOwner = await initMainnetUser(await proxyAdmin.owner(), parseUnits("1"));
-    await proxyAdmin.connect(proxyAdminOwner).upgrade(FIXED_RATE_VAULT_CONTROLLER, NEW_CONTROLLER_IMPLEMENTATION);
-    await controller.connect(timelock).setVaultImplementation(NEW_VAULT_IMPLEMENTATION);
-    await acm
-      .connect(timelock)
-      .giveCallPermission(
-        FIXED_RATE_VAULT_CONTROLLER,
-        "createVault(VaultConfig,InstitutionalConfig,RiskConfig,string,string,string)",
-        bscmainnet.NORMAL_TIMELOCK,
-      );
-    await acm
-      .connect(timelock)
-      .giveCallPermission(FIXED_RATE_VAULT_CONTROLLER, "openVault(address)", bscmainnet.NORMAL_TIMELOCK);
+    // Reproduce the prerequisite controller/vault-upgrade VIP (VIP-640), which upgrades the
+    // controller/vault implementations and re-grants the 6-arg createVault permission.
+    await pretendExecutingVip(await vip640(), bscmainnet.NORMAL_TIMELOCK);
 
     const [deployer] = await ethers.getSigners();
     const stubFactory = new ethers.ContractFactory(STUB_ORACLE_ABI, STUB_ORACLE_BYTECODE, deployer);
