@@ -120,16 +120,21 @@ export const buildBatch = (chain: AggregatorChain): SeedCommand[] => {
   // ── Deprecation calls (setCollateralFactor → 0/0) ──
   const pools = POOLS[chain].filter(p => marketsToZero(p).length > 0);
   const setCalls: SeedCommand[] = pools.flatMap(p => generateStep2Commands(p).map(toSeed));
-  if (chain === "bscmainnet") setCalls.push(...generateCoreEmodeCommands().map(toSeed)); // BNB Core e-mode pools
 
-  // One grant/revoke per (comptroller, setter) — the core pool's 4-arg setter also covers its e-mode calls.
+  // One grant/revoke per (comptroller, setter).
   const cfPerms = pools.map(p => ({ target: p.comptroller, signature: collateralFactorSig(p) }));
 
-  // BNB Chain only: restore the XVS collateral factor (Core 4-arg setter, poolId 0 — grant already in cfPerms).
+  // BNB Chain only: the e-mode zeroing and the XVS restore both use the BNB Core 4-arg setter. Ensure its
+  // grant is present regardless of whether BNB Core survived the deprecation market filter above.
   if (chain === "bscmainnet") {
+    const coreSig = "setCollateralFactor(uint96,address,uint256,uint256)";
+    if (!cfPerms.some(p => p.target === BNB_CORE.comptroller && p.signature === coreSig)) {
+      cfPerms.push({ target: BNB_CORE.comptroller, signature: coreSig });
+    }
+    setCalls.push(...generateCoreEmodeCommands().map(toSeed)); // BNB Core e-mode pools (DOT/FIL/THE)
     setCalls.push({
       target: XVS_RESTORE.comptroller,
-      signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+      signature: coreSig,
       params: [XVS_RESTORE.poolId, XVS_RESTORE.vToken, XVS_RESTORE.collateralFactor, XVS_RESTORE.liquidationThreshold],
     });
   }

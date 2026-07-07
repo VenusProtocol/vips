@@ -1,56 +1,16 @@
 /**
- * Phase-4 market deprecation, Step 2 — shared scope + command builders for VIP-645 (Part 1)
- * and VIP-646 (Part 2), and reused by VIP-647.
+ * Phase-4 market deprecation, Step 2 — shared scope + command builders used by VIP-647.
  *
- * Contains:
- *   - PART1_POOLS / PART2_POOLS — the in-scope pools, grouped per VIP (mirrors the VIP-634/635 split).
- *   - LT_ALREADY_ZERO           — vTokens already at liquidation threshold 0, skipped as no-ops.
- *   - CORE_EMODE                — BNB Core markets that also live in an e-mode pool (extra zeroing).
- *   - ETH_CORE_STEP2            — Ethereum Core plus the four yv* markets re-added for Step 2.
+ * Exports:
+ *   - LT_ALREADY_ZERO — vTokens already at liquidation threshold 0, skipped as no-ops.
+ *   - CORE_EMODE      — BNB Core markets that also live in an e-mode pool (extra zeroing).
+ *   - ETH_CORE_STEP2  — Ethereum Core plus the four yv* markets re-added for Step 2.
  *   - generateStep2Commands / generateCoreEmodeCommands — emit the setCollateralFactor(cf=0, lt=0) calls.
- *   - marketsToZero             — the per-pool market list the commands and simulation checks share.
+ *   - marketsToZero   — the per-pool market list the commands and simulation checks share.
  */
 import { Command } from "src/types";
 
-import {
-  ARBITRUM_LIQUID_STAKED_ETH,
-  BASE_CORE,
-  BNB_BTC,
-  BNB_CORE,
-  BNB_DEFI,
-  BNB_GAMEFI,
-  BNB_LIQUID_STAKED_BNB,
-  BNB_LIQUID_STAKED_ETH,
-  BNB_MEME,
-  BNB_STABLECOINS,
-  BNB_TRON,
-  ETH_CORE,
-  ETH_CURVE,
-  ETH_LIQUID_STAKED_ETH,
-  Mkt,
-  OPBNB,
-  OPTIMISM,
-  PoolDef,
-  UNICHAIN,
-  ZKSYNC_CORE,
-} from "../vip-634/phase4Markets";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Phase-4 market deprecation — Step 2 of 2: set the collateral factor AND the
-// liquidation threshold of every in-scope market to zero, fully removing these
-// assets as collateral and completing the wind-down begun in VIP-634 / VIP-635.
-//
-// The collateral factor is already zero on every market (confirmed on-chain), so
-// the operative change is the liquidation threshold. Each market is zeroed with a
-// single setCollateralFactor call that writes both parameters at once:
-//   - isolated pools:            setCollateralFactor(address,uint256,uint256)
-//   - BNB Core (diamond, pools): setCollateralFactor(uint96,address,uint256,uint256)
-//
-// The 87 markets in scope are the same ones covered by Step 1. The four Ethereum
-// Core yv* markets that Step 1 dropped from its command list (to fit the propose
-// transaction under the EIP-7825 gas cap) are folded back in here, since Step 2's
-// single call per market leaves ample room in the Ethereum LayerZero message.
-// ─────────────────────────────────────────────────────────────────────────────
+import { BNB_CORE, ETH_CORE, Mkt, PoolDef } from "../vip-634/phase4Markets";
 
 // The four Ethereum Core yv* markets, re-added for Step 2 (commented out of the
 // Step 1 command list in vip-634/phase4Markets.ts).
@@ -66,40 +26,6 @@ export const ETH_CORE_STEP2: PoolDef = {
   ...ETH_CORE,
   markets: [...ETH_CORE.markets, ...ETH_CORE_YV_MARKETS],
 };
-
-// The work is split across two VIPs, mirroring the Step 1 split (VIP-634 / VIP-635),
-// because a single propose transaction bundling all 87 markets exceeds the BNB Chain
-// per-transaction gas cap (EIP-7825, 16.78M). The division of pools is identical to
-// Step 1, so each part covers the same markets its Step 1 counterpart did.
-//
-// Part 1 (VIP-645): BNB Core + BNB BTC / DeFi / GameFi isolated pools, and the opBNB,
-//   Optimism, Unichain and Ethereum Core deployments.
-// Part 2 (VIP-646): BNB Meme / Liquid Staked BNB / Liquid Staked ETH / Stablecoins /
-//   Tron isolated pools, the Ethereum Curve and Liquid Staked ETH pools, and the
-//   Arbitrum, Base and zkSync Era deployments.
-export const PART1_POOLS: PoolDef[] = [
-  BNB_CORE,
-  BNB_BTC,
-  BNB_DEFI,
-  BNB_GAMEFI,
-  OPBNB,
-  OPTIMISM,
-  UNICHAIN,
-  ETH_CORE_STEP2,
-];
-
-export const PART2_POOLS: PoolDef[] = [
-  BNB_MEME,
-  BNB_LIQUID_STAKED_BNB,
-  BNB_LIQUID_STAKED_ETH,
-  BNB_STABLECOINS,
-  BNB_TRON,
-  ETH_CURVE,
-  ETH_LIQUID_STAKED_ETH,
-  ARBITRUM_LIQUID_STAKED_ETH,
-  BASE_CORE,
-  ZKSYNC_CORE,
-];
 
 // Markets whose liquidation threshold is already 0 on-chain (reads dated 2026-07-06).
 // Zeroing them is a pure no-op, so they are dropped from both the command list and the

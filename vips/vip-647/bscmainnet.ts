@@ -28,10 +28,10 @@ const aggregatorCommands = (chain: "bscmainnet" | "ethereum" | "arbitrumone") =>
 
 const meta = {
   version: "v2",
-  title: "VIP-647 [Multi-Chain] Deprecation Step 2 + Oracle Price Feed Update",
+  title: "VIP-647 [Multi-Chain] Deprecation Step 2 + Oracle Price Feed Update + XVS Collateral Factor Restore",
   description: `#### Summary
 
-This proposal groups two multi-chain actions into a single VIP:
+This proposal groups three multi-chain actions into a single VIP:
 
 1. **Market deprecation — Step 2 (final).** Sets both the collateral factor and the liquidation threshold of every in-scope deprecated / off-boarded market to zero, completing the wind-down begun in VIP-634 / VIP-635. The collateral factor is already zero on every market, so the operative change is the liquidation threshold. Markets already at a zero liquidation threshold are omitted (no-ops).
 2. **Oracle price-feed update.** Repoints the price feed of the listed assets on Ethereum, Arbitrum and BNB Chain by updating the feed inside each asset's MAIN oracle adapter (\`setTokenConfig(asset, feed, maxStalePeriod)\`), preserving the existing staleness window. On BNB Chain, BNB and WBNB share the WBNB configuration.

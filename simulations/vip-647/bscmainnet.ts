@@ -4,12 +4,34 @@ import { ethers } from "hardhat";
 import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { BNB_BTC, BNB_CORE, BNB_DEFI } from "../../vips/vip-634/phase4Markets";
+import {
+  BNB_BTC,
+  BNB_CORE,
+  BNB_DEFI,
+  BNB_GAMEFI,
+  BNB_LIQUID_STAKED_BNB,
+  BNB_LIQUID_STAKED_ETH,
+  BNB_MEME,
+  BNB_STABLECOINS,
+  BNB_TRON,
+} from "../../vips/vip-634/phase4Markets";
 import { AGGREGATOR, SeedCommand, XVS_RESTORE, buildBatch } from "../../vips/vip-647/aggregatorBatches";
 import vip647 from "../../vips/vip-647/bscmainnet";
 import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
 import { CORE_EMODE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
+
+// Every BNB isolated pool in the batch (BNB_BTC's only market is already at LT 0, so it is filtered out).
+const BNB_ISOLATED = [
+  BNB_BTC,
+  BNB_DEFI,
+  BNB_GAMEFI,
+  BNB_LIQUID_STAKED_BNB,
+  BNB_LIQUID_STAKED_ETH,
+  BNB_MEME,
+  BNB_STABLECOINS,
+  BNB_TRON,
+].filter(p => marketsToZero(p).length > 0);
 
 // Recent BSC block where the CommandsAggregator batchCount == 1 (so our seeded batch lands at index 1,
 // matching BATCH_INDEX.bscmainnet in the VIP).
@@ -68,12 +90,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("in-scope BNB markets still carry a non-zero liquidation threshold", async () => {
-      for (const pool of [BNB_BTC, BNB_DEFI]) {
+    it("in-scope BNB isolated markets still carry a non-zero liquidation threshold", async () => {
+      for (const pool of BNB_ISOLATED) {
         const comptroller = new Contract(pool.comptroller, COMPTROLLER_ABI, ethers.provider);
         for (const m of marketsToZero(pool)) {
           const d = await comptroller.markets(m.vToken);
-          expect(d.liquidationThresholdMantissa.gt(0), m.symbol).to.be.true;
+          expect(d.liquidationThresholdMantissa.gt(0), `${pool.label} ${m.symbol}`).to.be.true;
         }
       }
     });
@@ -92,12 +114,12 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("in-scope BNB isolated markets set to CF=0, LT=0", async () => {
-      for (const pool of [BNB_BTC, BNB_DEFI]) {
+      for (const pool of BNB_ISOLATED) {
         const comptroller = new Contract(pool.comptroller, COMPTROLLER_ABI, ethers.provider);
         for (const m of marketsToZero(pool)) {
           const d = await comptroller.markets(m.vToken);
-          expect(d.collateralFactorMantissa.toString(), `${m.symbol} cf`).to.equal("0");
-          expect(d.liquidationThresholdMantissa.toString(), `${m.symbol} lt`).to.equal("0");
+          expect(d.collateralFactorMantissa.toString(), `${pool.label} ${m.symbol} cf`).to.equal("0");
+          expect(d.liquidationThresholdMantissa.toString(), `${pool.label} ${m.symbol} lt`).to.equal("0");
         }
       }
     });
