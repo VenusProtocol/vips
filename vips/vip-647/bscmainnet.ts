@@ -33,7 +33,7 @@ const meta = {
 
 This proposal groups two multi-chain actions into a single VIP:
 
-1. **Market deprecation — Step 2 (final).** Sets both the collateral factor and the liquidation threshold of every in-scope deprecated / off-boarded market to zero, completing the wind-down begun in VIP-634 / VIP-635. The collateral factor is already zero on every market, so the operative change is the liquidation threshold. Markets already at a zero liquidation threshold are omitted (no-ops).
+1. **Market deprecation — Step 2 (final).** Sets both the collateral factor and the liquidation threshold of every in-scope deprecated / off-boarded market to zero, completing the wind-down begun in VIP-634 / VIP-635. The collateral factor is already zero on every market, so the operative change is the liquidation threshold. Markets already at a zero liquidation threshold are omitted (no-ops). The PT-sUSDE-26JUN2025 market on the BNB Chain Core pool, which was not included in the earlier phase, additionally receives the full deprecation treatment in this proposal: reserve factor to 100%, interest rate model repointed to the push-out curve, supply cap to zero, and collateral factor and liquidation threshold to zero. The market stays listed so existing suppliers can still withdraw.
 2. **Oracle price-feed update.** Repoints the price feed of the listed assets on Ethereum, Arbitrum and BNB Chain by updating the feed inside each asset's MAIN oracle adapter (\`setTokenConfig(asset, feed, maxStalePeriod)\`), preserving the existing staleness window. On BNB Chain, BNB and WBNB share the WBNB configuration.
 
 #### Execution model

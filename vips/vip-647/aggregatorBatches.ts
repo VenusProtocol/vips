@@ -36,7 +36,9 @@ import {
 } from "./oracleFeeds";
 import {
   ETH_CORE_STEP2,
+  PT_SUSDE_EXTRA_PERMS,
   generateCoreEmodeCommands,
+  generatePtSusdeCommands,
   generateStep2Commands,
   marketsToZero,
 } from "./zeroCollateralParams";
@@ -119,6 +121,11 @@ export const buildBatch = (chain: AggregatorChain): SeedCommand[] => {
       cfPerms.push({ target: BNB_CORE.comptroller, signature: coreSig });
     }
     setCalls.push(...generateCoreEmodeCommands().map(toSeed)); // BNB Core e-mode pools (DOT/FIL/THE)
+
+    // PT-sUSDE full deprecation (missed from Phase-4 scope): RF/IRM/cap + CF/LT. The 4-arg CF setter is
+    // already granted above; add the vToken RF/IRM and comptroller supply-cap grants.
+    cfPerms.push(...PT_SUSDE_EXTRA_PERMS);
+    setCalls.push(...generatePtSusdeCommands().map(toSeed));
   }
 
   // ── Oracle calls: repoint the feed inside each asset's MAIN adapter ──

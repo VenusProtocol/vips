@@ -10,7 +10,7 @@
  */
 import { Command } from "src/types";
 
-import { BNB_CORE, ETH_CORE, Mkt, PoolDef } from "../vip-634/phase4Markets";
+import { BNB_CORE, ETH_CORE, Mkt, PUSHOUT_IRM, PoolDef, RF_FULL } from "../vip-634/phase4Markets";
 
 // The four Ethereum Core yv* markets, re-added for Step 2 (commented out of the
 // Step 1 command list in vip-634/phase4Markets.ts).
@@ -95,3 +95,37 @@ export const generateCoreEmodeCommands = (): Command[] =>
     signature: "setCollateralFactor(uint96,address,uint256,uint256)",
     params: [m.poolId, m.vToken, 0, 0],
   }));
+
+// PT-sUSDE-26JUN2025 (BNB Core, base pool) was omitted from the Phase-4 scope, so it never received
+// Step 1 (RF → 100%, push-out IRM, supply cap → 0). It gets the full deprecation here — Step 1 plus
+// Step 2 (CF/LT → 0) — while staying listed so the remaining suppliers can still redeem.
+export const PT_SUSDE = {
+  comptroller: BNB_CORE.comptroller,
+  vToken: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
+  poolId: 0,
+  irm: PUSHOUT_IRM.bscCore,
+};
+
+// ACM permissions the PT-sUSDE deprecation needs on top of the batch's existing 4-arg CF grant:
+// the vToken-scoped RF and IRM setters and the comptroller supply-cap setter (legacy signatures).
+export const PT_SUSDE_EXTRA_PERMS: { target: string; signature: string }[] = [
+  { target: PT_SUSDE.vToken, signature: "_setReserveFactor(uint256)" },
+  { target: PT_SUSDE.vToken, signature: "_setInterestRateModel(address)" },
+  { target: PT_SUSDE.comptroller, signature: "_setMarketSupplyCaps(address[],uint256[])" },
+];
+
+// Full deprecation for PT-sUSDE: RF → 100%, push-out IRM, supply cap → 0, CF/LT → 0.
+export const generatePtSusdeCommands = (): Command[] => [
+  { target: PT_SUSDE.vToken, signature: "_setReserveFactor(uint256)", params: [RF_FULL] },
+  { target: PT_SUSDE.vToken, signature: "_setInterestRateModel(address)", params: [PT_SUSDE.irm] },
+  {
+    target: PT_SUSDE.comptroller,
+    signature: "_setMarketSupplyCaps(address[],uint256[])",
+    params: [[PT_SUSDE.vToken], [0]],
+  },
+  {
+    target: PT_SUSDE.comptroller,
+    signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+    params: [PT_SUSDE.poolId, PT_SUSDE.vToken, 0, 0],
+  },
+];

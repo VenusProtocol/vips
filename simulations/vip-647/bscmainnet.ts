@@ -18,7 +18,7 @@ import {
 import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-647/aggregatorBatches";
 import vip647 from "../../vips/vip-647/bscmainnet";
 import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
-import { CORE_EMODE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
+import { CORE_EMODE, PT_SUSDE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
 
 // Every BNB isolated pool in the batch (BNB_BTC's only market is already at LT 0, so it is filtered out).
@@ -46,7 +46,13 @@ const ADAPTER_ABI = [
 const COMPTROLLER_ABI = [
   "function markets(address) view returns (bool, uint256 collateralFactorMantissa, uint256 liquidationThresholdMantissa)",
   "function poolMarkets(uint96, address) view returns (bool, uint256 collateralFactorMantissa, uint256, uint256 liquidationThresholdMantissa, bool)",
+  "function supplyCaps(address) view returns (uint256)",
 ];
+const VTOKEN_ABI = [
+  "function reserveFactorMantissa() view returns (uint256)",
+  "function interestRateModel() view returns (address)",
+];
+const RF_FULL = ethers.utils.parseUnits("1", 18);
 
 const encode = (cmd: SeedCommand) => ({
   target: cmd.target,
@@ -80,6 +86,17 @@ forking(FORK_BLOCK, async () => {
           expect(d.liquidationThresholdMantissa.gt(0), `${pool.label} ${m.symbol}`).to.be.true;
         }
       }
+    });
+
+    it("PT-sUSDE is still fully active (CF/LT non-zero, RF 0, non-zero supply cap)", async () => {
+      const comptroller = new Contract(PT_SUSDE.comptroller, COMPTROLLER_ABI, ethers.provider);
+      const vToken = new Contract(PT_SUSDE.vToken, VTOKEN_ABI, ethers.provider);
+      const d = await comptroller.poolMarkets(PT_SUSDE.poolId, PT_SUSDE.vToken);
+      expect(d.collateralFactorMantissa.gt(0), "PT-sUSDE cf").to.be.true;
+      expect(d.liquidationThresholdMantissa.gt(0), "PT-sUSDE lt").to.be.true;
+      expect((await vToken.reserveFactorMantissa()).toString(), "PT-sUSDE rf").to.equal("0");
+      expect((await comptroller.supplyCaps(PT_SUSDE.vToken)).gt(0), "PT-sUSDE cap").to.be.true;
+      expect((await vToken.interestRateModel()).toLowerCase(), "PT-sUSDE irm").to.not.equal(PT_SUSDE.irm.toLowerCase());
     });
   });
 
@@ -118,6 +135,17 @@ forking(FORK_BLOCK, async () => {
         expect(d.collateralFactorMantissa.toString(), `${e.symbol} pool ${e.poolId} cf`).to.equal("0");
         expect(d.liquidationThresholdMantissa.toString(), `${e.symbol} pool ${e.poolId} lt`).to.equal("0");
       }
+    });
+
+    it("PT-sUSDE fully deprecated: CF/LT=0, RF=100%, push-out IRM, supply cap=0", async () => {
+      const comptroller = new Contract(PT_SUSDE.comptroller, COMPTROLLER_ABI, ethers.provider);
+      const vToken = new Contract(PT_SUSDE.vToken, VTOKEN_ABI, ethers.provider);
+      const d = await comptroller.poolMarkets(PT_SUSDE.poolId, PT_SUSDE.vToken);
+      expect(d.collateralFactorMantissa.toString(), "PT-sUSDE cf").to.equal("0");
+      expect(d.liquidationThresholdMantissa.toString(), "PT-sUSDE lt").to.equal("0");
+      expect((await vToken.reserveFactorMantissa()).toString(), "PT-sUSDE rf").to.equal(RF_FULL.toString());
+      expect((await vToken.interestRateModel()).toLowerCase(), "PT-sUSDE irm").to.equal(PT_SUSDE.irm.toLowerCase());
+      expect((await comptroller.supplyCaps(PT_SUSDE.vToken)).toString(), "PT-sUSDE cap").to.equal("0");
     });
   });
 });
