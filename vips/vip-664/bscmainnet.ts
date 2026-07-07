@@ -18,9 +18,9 @@ export const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 export const XVS_FUND_AMOUNT = BigNumber.from("46465730038602167664988");
 
 // New XVS Vault reward speed: 1,837.9 XVS/day.
-// BSC ≈ 0.75 s/block → 115,200 blocks/day (matches VIP-580's XVS vault speed).
-// 1,837.9 / 115,200 = 0.015953993055555555 XVS per block.
-export const NEW_XVS_VAULT_SPEED = parseUnits("0.015953993055555555", 18);
+// BSC ≈ 0.45 s/block → 192,000 blocks/day (repo convention, see VIP-607/618/629/639).
+// 1,837.9 / 192,000 = 0.009572395833333333 XVS per block.
+export const NEW_XVS_VAULT_SPEED = parseUnits("0.009572395833333333", 18);
 
 // ──────────────────────────────────────────────────────────────────────────
 // Prime budget transfer

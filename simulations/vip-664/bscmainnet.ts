@@ -25,7 +25,7 @@ import ERC20_ABI from "./abi/erc20.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// XVS Vault reward speed prior to this VIP (~1,108 XVS/day at 115,200 blocks/day).
+// XVS Vault reward speed prior to this VIP (~1,846.6 XVS/day at 192,000 blocks/day).
 const OLD_XVS_VAULT_SPEED = BigNumber.from("9620000000000000");
 
 forking(106561536, async () => {
@@ -83,7 +83,10 @@ forking(106561536, async () => {
     it("updates the XVS Vault reward speed to 1,837.9 XVS/day", async () => {
       const speed = await xvsVault.rewardTokenAmountsPerBlockOrSecond(bscmainnet.XVS);
       expect(speed).to.equal(NEW_XVS_VAULT_SPEED);
-      expect(speed).to.be.gt(OLD_XVS_VAULT_SPEED);
+      // 1,837.9 XVS/day (192,000 blocks/day) is a slight reduction from the prior
+      // ~1,846.6 XVS/day, so the new per-block speed sits just below the old one.
+      expect(speed).to.be.lt(OLD_XVS_VAULT_SPEED);
+      expect(speed).to.not.equal(OLD_XVS_VAULT_SPEED);
     });
 
     it("transfers 17,000 U from PLP to the recipient", async () => {
