@@ -20,6 +20,7 @@ import vip647 from "../../vips/vip-647/bscmainnet";
 import { ORACLE_UPDATE, THE_MAIN_REPOINT } from "../../vips/vip-647/oracleFeeds";
 import { CORE_EMODE, PT_SUSDE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
+import { checkVipEffectsPostVip, checkVipEffectsPreVip } from "./utils/checkVipEffects";
 
 // Every BNB isolated pool in the batch (BNB_BTC's only market is already at LT 0, so it is filtered out).
 const BNB_ISOLATED = [
@@ -112,6 +113,8 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  checkVipEffectsPreVip("bscmainnet");
+
   testVip("VIP-647 Deprecation Step 2 + Oracle Feed Update — BNB Chain", await vip647());
 
   describe("Post-VIP behavior", () => {
@@ -168,4 +171,6 @@ forking(FORK_BLOCK, async () => {
       expect((await comptroller.supplyCaps(PT_SUSDE.vToken)).toString(), "PT-sUSDE cap").to.equal("0");
     });
   });
+
+  checkVipEffectsPostVip("bscmainnet", NORMAL_TIMELOCK);
 });

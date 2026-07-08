@@ -10,6 +10,7 @@ import vip647 from "../../vips/vip-647/bscmainnet";
 import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
 import { ETH_CORE_STEP2, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
+import { checkVipEffectsPostVip, checkVipEffectsPreVip } from "./utils/checkVipEffects";
 
 // Recent Ethereum block where the CommandsAggregator batchCount == 0 (batch lands at index 0, matching the VIP).
 const FORK_BLOCK = 25470000;
@@ -57,6 +58,8 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  checkVipEffectsPreVip("ethereum");
+
   testForkedNetworkVipCommands("VIP-647 Ethereum", await vip647());
 
   describe("Post-VIP behavior", () => {
@@ -80,4 +83,6 @@ forking(FORK_BLOCK, async () => {
       }
     });
   });
+
+  checkVipEffectsPostVip("ethereum", ETH_TIMELOCK);
 });

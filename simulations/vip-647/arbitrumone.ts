@@ -10,6 +10,7 @@ import vip647 from "../../vips/vip-647/bscmainnet";
 import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
 import { marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
+import { checkVipEffectsPostVip, checkVipEffectsPreVip } from "./utils/checkVipEffects";
 
 // Recent Arbitrum block where the CommandsAggregator batchCount == 0 (batch lands at index 0, matching the VIP).
 const FORK_BLOCK = 474085204;
@@ -53,6 +54,8 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  checkVipEffectsPreVip("arbitrumone");
+
   testForkedNetworkVipCommands("VIP-647 Arbitrum", await vip647());
 
   describe("Post-VIP behavior", () => {
@@ -74,4 +77,6 @@ forking(FORK_BLOCK, async () => {
       }
     });
   });
+
+  checkVipEffectsPostVip("arbitrumone", ARB_TIMELOCK);
 });
