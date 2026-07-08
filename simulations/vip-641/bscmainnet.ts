@@ -7,7 +7,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip641, {
   NEW_XVS_VAULT_SPEED,
   PRIME_LIQUIDITY_PROVIDER,
   RECIPIENT,
@@ -17,7 +17,7 @@ import vip664, {
   XVS_GRANT_AMOUNT,
   XVS_STORE,
   XVS_VAULT_TREASURY,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-641/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -70,7 +70,7 @@ forking(106561536, async () => {
     });
   });
 
-  testVip("VIP-664 Q3 XVS Vault Rewards Adjustment and Prime Budget Transfer", await vip664(), {
+  testVip("VIP-641 XVS Vault Q3 2026 Rewards", await vip641(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["FundsTransferredToXVSStore"], [1]);
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
