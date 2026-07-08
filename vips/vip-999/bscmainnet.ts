@@ -35,6 +35,9 @@ export const INSTITUTION_OPERATOR = "0x1111111111111111111111111111111111111111"
 // Initial vceBTC collateral supply
 export const VCEBTC_INITIAL_SUPPLY = parseUnits("2000", 18);
 
+// Recipient of the initial vceBTC collateral mint (multisig)
+export const INITIAL_SUPPLY_RECIPIENT = "0x5D1507d5Cfb3d031C3209e9FB8e2644e4094Ea01";
+
 // Fixed Rate Vault configuration. TODO: finalize values.
 // VaultConfig: [supplyAsset, fixedAPY(bps), reserveFactor(1e18), minBorrowCap,
 //               maxBorrowCap, minSupplierDeposit, openDuration, lockDuration, settlementWindow]
@@ -81,7 +84,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
 1. **Oracle** — price vceBTC identically to BTCB by cloning BTCB's full oracle configuration: the main / pivot / fallback sub-oracle feeds, the BoundValidator bounds, and the ResilientOracle token config.
 2. **Ownership** — accept ownership of vceBTC (already transferred to the Normal Timelock by the deployer).
 3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
-4. **Initial supply** — mint the initial vceBTC collateral to the Venus Treasury.
+4. **Initial supply** — mint the initial vceBTC collateral to the Ceffu multisig.
 5. **Vault creation** — create the Fixed Rate Vault with vceBTC as collateral.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -158,7 +161,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
       {
         target: VCEBTC,
         signature: "mint(address,uint256)",
-        params: [bscmainnet.VTREASURY, VCEBTC_INITIAL_SUPPLY],
+        params: [INITIAL_SUPPLY_RECIPIENT, VCEBTC_INITIAL_SUPPLY],
       },
 
       // ──────────────────────────────────────────────────────────────────────

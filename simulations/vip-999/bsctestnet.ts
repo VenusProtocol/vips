@@ -141,9 +141,9 @@ forking(FORK_BLOCK, async () => {
       expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
     });
 
-    it("initial vceBTC collateral was minted to the Venus Treasury", async () => {
+    it("initial vceBTC collateral was minted to the Guardian", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
-      expect(await vceBTC.balanceOf(bsctestnet.VTREASURY)).to.equal(VCEBTC_INITIAL_SUPPLY);
+      expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
 
     it("a Fixed Rate Vault backed by vceBTC was created with the configured parameters and names", async () => {

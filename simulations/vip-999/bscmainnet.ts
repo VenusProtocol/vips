@@ -15,9 +15,11 @@ import vip999, {
   BTCB_FEED_FALLBACK,
   BTCB_FEED_MAIN,
   BTCB_FEED_PIVOT,
+  BTCB_LOWER_BOUND,
   BTCB_UPPER_BOUND,
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
+  INITIAL_SUPPLY_RECIPIENT,
   INSTITUTION_OPERATOR,
   REDSTONE_ORACLE,
   SUPPLY_ASSET,
@@ -27,12 +29,11 @@ import vip999, {
   vaultConfig,
 } from "../../vips/vip-999/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
+import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
 import ERC20_ABI from "./abi/VenusERC20.json";
-
-const BOUND_VALIDATOR_ABI = ["function validateConfigs(address) external view returns (uint256, uint256)"];
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -176,9 +177,9 @@ forking(FORK_BLOCK, async () => {
       ).to.equal(true);
     });
 
-    it("initial vceBTC collateral was minted to the Venus Treasury", async () => {
+    it("initial vceBTC collateral was minted to the Ceffu multisig", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
-      expect(await vceBTC.balanceOf(bscmainnet.VTREASURY)).to.equal(VCEBTC_INITIAL_SUPPLY);
+      expect(await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT)).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
 
     it("a Fixed Rate Vault backed by vceBTC was created", async () => {
@@ -213,13 +214,17 @@ forking(FORK_BLOCK, async () => {
     it("BTCB bounds are configured correctly in BoundValidator", async () => {
       const boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
       const btcbBounds = await boundValidator.validateConfigs(BTCB);
-      expect(btcbBounds[1]).to.equal(BTCB_UPPER_BOUND);
+      expect(btcbBounds.asset).to.equal(BTCB);
+      expect(btcbBounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
+      expect(btcbBounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
     });
 
     it("vceBTC bounds are configured correctly in BoundValidator (cloned from BTCB)", async () => {
       const boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
       const vceBtcBounds = await boundValidator.validateConfigs(VCEBTC);
-      expect(vceBtcBounds[1]).to.equal(BTCB_UPPER_BOUND);
+      expect(vceBtcBounds.asset).to.equal(VCEBTC);
+      expect(vceBtcBounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
+      expect(vceBtcBounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
     });
   });
 
