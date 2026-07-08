@@ -5,10 +5,10 @@ import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { ETH_CURVE, ETH_LIQUID_STAKED_ETH } from "../../vips/vip-634/phase4Markets";
-import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-647/aggregatorBatches";
-import vip647 from "../../vips/vip-647/bscmainnet";
-import { ORACLE_UPDATE } from "../../vips/vip-647/oracleFeeds";
-import { ETH_CORE_STEP2, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
+import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-642/aggregatorBatches";
+import vip642 from "../../vips/vip-642/bscmainnet";
+import { ORACLE_UPDATE } from "../../vips/vip-642/oracleFeeds";
+import { ETH_CORE_STEP2, marketsToZero } from "../../vips/vip-642/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
 import { checkVipEffectsPostVip, checkVipEffectsPreVip } from "./utils/checkVipEffects";
 
@@ -33,7 +33,7 @@ const ETH_POOLS = [ETH_CORE_STEP2, ETH_CURVE, ETH_LIQUID_STAKED_ETH];
 
 forking(FORK_BLOCK, async () => {
   before(async () => {
-    // Seed VIP-647's Ethereum batch in-fork, exactly as an authorized batcher would on mainnet before proposal.
+    // Seed VIP-642's Ethereum batch in-fork, exactly as an authorized batcher would on mainnet before proposal.
     const timelock = await initMainnetUser(ETH_TIMELOCK, ethers.utils.parseEther("2"));
     const agg = new Contract(aggregator, AGGREGATOR_ABI, timelock);
     expect((await agg.batchCount()).toNumber(), "batchCount must be 0").to.equal(0);
@@ -60,7 +60,7 @@ forking(FORK_BLOCK, async () => {
 
   checkVipEffectsPreVip("ethereum");
 
-  testForkedNetworkVipCommands("VIP-647 Ethereum", await vip647());
+  testForkedNetworkVipCommands("VIP-642 Ethereum", await vip642());
 
   describe("Post-VIP behavior", () => {
     it("oracle MAIN adapters repointed to the new feeds (heartbeat-based maxStalePeriod)", async () => {

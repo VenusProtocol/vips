@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { PoolDef } from "../../../vips/vip-634/phase4Markets";
-import { marketsToZero } from "../../../vips/vip-647/zeroCollateralParams";
+import { marketsToZero } from "../../../vips/vip-642/zeroCollateralParams";
 
 // Isolated-pool Comptroller getter (all inline chains are isolated pools).
 const COMPTROLLER_ABI = [

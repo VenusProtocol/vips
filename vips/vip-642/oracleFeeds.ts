@@ -1,5 +1,5 @@
 /**
- * Oracle price-feed update — data for the [Multi-Chain] Oracle Price Feed Update folded into VIP-647.
+ * Oracle price-feed update — data for the [Multi-Chain] Oracle Price Feed Update folded into VIP-642.
  *
  * The provided addresses are raw Chainlink-style feeds (latestRoundData / decimals / "X / USD"), NOT Venus oracle
  * adapters. So the update repoints the feed INSIDE each asset's MAIN oracle adapter — the contract sitting in slot 0

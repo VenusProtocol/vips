@@ -15,10 +15,10 @@ import {
   BNB_STABLECOINS,
   BNB_TRON,
 } from "../../vips/vip-634/phase4Markets";
-import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-647/aggregatorBatches";
-import vip647 from "../../vips/vip-647/bscmainnet";
-import { ORACLE_UPDATE, THE_MAIN_REPOINT } from "../../vips/vip-647/oracleFeeds";
-import { CORE_EMODE, PT_SUSDE, marketsToZero } from "../../vips/vip-647/zeroCollateralParams";
+import { AGGREGATOR, SeedCommand, buildBatch } from "../../vips/vip-642/aggregatorBatches";
+import vip642 from "../../vips/vip-642/bscmainnet";
+import { ORACLE_UPDATE, THE_MAIN_REPOINT } from "../../vips/vip-642/oracleFeeds";
+import { CORE_EMODE, PT_SUSDE, marketsToZero } from "../../vips/vip-642/zeroCollateralParams";
 import AGGREGATOR_ABI from "./abi/CommandsAggregator.json";
 import { checkVipEffectsPostVip, checkVipEffectsPreVip } from "./utils/checkVipEffects";
 
@@ -66,7 +66,7 @@ const encode = (cmd: SeedCommand) => ({
 
 forking(FORK_BLOCK, async () => {
   before(async () => {
-    // Seed VIP-647's BNB Chain batch in-fork, exactly as an authorized batcher would on mainnet before proposal.
+    // Seed VIP-642's BNB Chain batch in-fork, exactly as an authorized batcher would on mainnet before proposal.
     const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
     const agg = new Contract(aggregator, AGGREGATOR_ABI, timelock);
     const nextIndex = (await agg.batchCount()).toNumber();
@@ -115,7 +115,7 @@ forking(FORK_BLOCK, async () => {
 
   checkVipEffectsPreVip("bscmainnet");
 
-  testVip("VIP-647 Deprecation Step 2 + Oracle Feed Update — BNB Chain", await vip647());
+  testVip("VIP-642 Deprecation Step 2 + Oracle Feed Update — BNB Chain", await vip642());
 
   describe("Post-VIP behavior", () => {
     it("oracle MAIN adapters repointed to the new feeds (heartbeat-based maxStalePeriod)", async () => {

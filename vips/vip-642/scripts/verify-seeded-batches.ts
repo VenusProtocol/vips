@@ -1,12 +1,12 @@
 /**
- * Verifies the seeded VIP-647 aggregator batches BEFORE the VIP is proposed.
+ * Verifies the seeded VIP-642 aggregator batches BEFORE the VIP is proposed.
  *
  * For each aggregator chain it checks that (1) the batch exists at the index hard-wired into the
  * VIP (BATCH_INDEX), and (2) the on-chain calls match the CURRENT buildBatch() output byte-for-byte.
  * A batch seeded from an older commit executes silently with the stale contents, so run this once
  * after seeding (batches are append-only — no update/remove — so a verified batch cannot change).
  *
- *   npx hardhat run vips/vip-647/scripts/verify-seeded-batches.ts
+ *   npx hardhat run vips/vip-642/scripts/verify-seeded-batches.ts
  *
  * Requires ARCHIVE_NODE_{bscmainnet,ethereum,arbitrumone} in the environment / .env.
  */
@@ -17,7 +17,7 @@ import { AGGREGATOR, AggregatorChain, buildBatch } from "../aggregatorBatches";
 
 dotenv.config();
 
-// Must mirror BATCH_INDEX in vips/vip-647/bscmainnet.ts.
+// Must mirror BATCH_INDEX in vips/vip-642/bscmainnet.ts.
 const BATCH_INDEX: Record<AggregatorChain, number> = { bscmainnet: 1, ethereum: 0, arbitrumone: 0 };
 
 const ABI = [

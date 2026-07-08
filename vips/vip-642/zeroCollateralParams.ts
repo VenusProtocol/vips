@@ -1,5 +1,5 @@
 /**
- * Phase-4 market deprecation, Step 2 — shared scope + command builders used by VIP-647.
+ * Phase-4 market deprecation, Step 2 — shared scope + command builders used by VIP-642.
  *
  * Exports:
  *   - LT_ALREADY_ZERO — vTokens already at liquidation threshold 0, skipped as no-ops.

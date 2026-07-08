@@ -3,7 +3,7 @@ import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { initMainnetUser } from "src/utils";
 
-import { AGGREGATOR, AggregatorChain, SeedCommand, buildBatch } from "../../../vips/vip-647/aggregatorBatches";
+import { AGGREGATOR, AggregatorChain, SeedCommand, buildBatch } from "../../../vips/vip-642/aggregatorBatches";
 
 /**
  * Command-driven effect checks for the aggregator chains.

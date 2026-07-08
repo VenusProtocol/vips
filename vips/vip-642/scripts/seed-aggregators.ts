@@ -1,10 +1,10 @@
 /**
- * Seeds the VIP-647 batch onto a chain's CommandsAggregator.
+ * Seeds the VIP-642 batch onto a chain's CommandsAggregator.
  *
  * Run once per aggregator chain (bscmainnet, ethereum, arbitrumone), by an authorized batcher, BEFORE the VIP is
- * proposed. The printed index must match BATCH_INDEX[chain] in vips/vip-647/bscmainnet.ts.
+ * proposed. The printed index must match BATCH_INDEX[chain] in vips/vip-642/bscmainnet.ts.
  *
- *   npx hardhat run vips/vip-647/scripts/seed-aggregators.ts --network <chain>
+ *   npx hardhat run vips/vip-642/scripts/seed-aggregators.ts --network <chain>
  *   # for zksync add: --config hardhat.config.zksync.ts   (n/a here — no zksync batch)
  */
 import { ethers, network } from "hardhat";
@@ -23,7 +23,7 @@ const encode = (cmd: SeedCommand): { target: string; data: string } => ({
 
 async function main() {
   const chain = network.name as AggregatorChain;
-  if (!(chain in AGGREGATOR)) throw new Error(`No VIP-647 aggregator batch for network "${chain}"`);
+  if (!(chain in AGGREGATOR)) throw new Error(`No VIP-642 aggregator batch for network "${chain}"`);
 
   const { aggregator } = AGGREGATOR[chain];
   const batch = buildBatch(chain);

@@ -1,5 +1,5 @@
 /**
- * VIP-647 CommandsAggregator batches — one per aggregator chain (BNB Chain, Ethereum, Arbitrum One).
+ * VIP-642 CommandsAggregator batches — one per aggregator chain (BNB Chain, Ethereum, Arbitrum One).
  *
  * Each batch is executed by that chain's CommandsAggregator via executeBatch(index) while the aggregator
  * temporarily holds the ACM DEFAULT_ADMIN_ROLE (granted and revoked around executeBatch by the VIP, VIP-628
