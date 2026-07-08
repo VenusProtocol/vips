@@ -5,8 +5,9 @@
  * adapters. So the update repoints the feed INSIDE each asset's MAIN oracle adapter — the contract sitting in slot 0
  * of that asset's ResilientOracle config — via that adapter's setTokenConfig((asset, feed, maxStalePeriod)).
  * For every asset except THE the ResilientOracle slot layout is unchanged; only the MAIN adapter's underlying feed
- * changes. THE is the exception: its new feed is a Chainlink feed, so it is written to the ChainlinkOracle adapter
- * and the ResilientOracle MAIN slot is repointed there (see THE_MAIN_REPOINT below).
+ * changes. THE is the exception: its new feed is a Chainlink feed, so it is written to the ChainlinkOracle adapter,
+ * the ResilientOracle MAIN slot is repointed there, and the old RedStone config becomes THE's FALLBACK
+ * (see THE_MAIN_REPOINT below).
  *
  * MAIN adapters and current feeds were read on-chain (2026-07-06). maxStalePeriod is set to each new Chainlink
  * feed's published heartbeat plus a latency cushion (the on-chain updatedAt interval runs ~30-60s past the nominal
@@ -51,7 +52,7 @@ export const ORACLE_UPDATE: Record<"bscmainnet" | "ethereum" | "arbitrumone", Or
     {
       // THE's new feed is a Chainlink feed, so it is configured on the ChainlinkOracle adapter (matching the
       // other BSC assets) rather than the RedStoneOracle adapter it used before. THE_MAIN_REPOINT then moves
-      // the ResilientOracle MAIN slot onto this adapter so the new feed is actually used.
+      // the ResilientOracle MAIN slot onto this adapter and wires the old RedStone config as FALLBACK.
       symbol: "THE",
       asset: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11",
       mainAdapter: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
@@ -157,15 +158,20 @@ export const SET_TOKEN_CONFIG_ACM_SIG = "setTokenConfig(TokenConfig)";
 // THE moves from the RedStoneOracle adapter to the ChainlinkOracle adapter as its ResilientOracle MAIN
 // source (its new feed is a Chainlink feed). After THE's config is written on the ChainlinkOracle adapter
 // (via the ORACLE_UPDATE entry above), this repoints the ResilientOracle MAIN slot onto that adapter.
-// OracleRole.MAIN = 0. The RedStoneOracle adapter's stale THE config is left orphaned (harmless).
+// The RedStoneOracle adapter keeps its working THE config (RedStone feed, 1200s stale period), so instead
+// of orphaning it, it becomes THE's FALLBACK: if the new Chainlink feed fails, the ResilientOracle falls
+// back to the RedStone price (validated against the pivot). OracleRole: MAIN = 0, FALLBACK = 2.
 export const THE_MAIN_REPOINT = {
   resilientOracle: "0x6592b5DE802159F3E74B2486b091D11a8256ab8A",
   asset: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11",
   chainlinkOracle: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
   mainRole: 0,
+  redStoneOracle: "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a",
+  fallbackRole: 2,
 };
-// ResilientOracle.setOracle(asset, oracle, role) — the ACM-checked signature.
+// ResilientOracle.setOracle(asset, oracle, role) / enableOracle(asset, role, enable) — ACM-checked signatures.
 export const SET_ORACLE_SIG = "setOracle(address,address,uint8)";
+export const ENABLE_ORACLE_SIG = "enableOracle(address,uint8,bool)";
 
 export const tokenConfigParams = (f: OracleFeed) => [[f.asset, f.feed, f.maxStalePeriod]];
 

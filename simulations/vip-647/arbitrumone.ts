@@ -56,7 +56,7 @@ forking(FORK_BLOCK, async () => {
   testForkedNetworkVipCommands("VIP-647 Arbitrum", await vip647());
 
   describe("Post-VIP behavior", () => {
-    it("oracle MAIN adapters repointed to the new feeds (maxStalePeriod preserved)", async () => {
+    it("oracle MAIN adapters repointed to the new feeds (heartbeat-based maxStalePeriod)", async () => {
       for (const f of ORACLE_UPDATE.arbitrumone) {
         const adapter = new Contract(f.mainAdapter, ADAPTER_ABI, ethers.provider);
         const cfg = await adapter.tokenConfigs(f.asset);

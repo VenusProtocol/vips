@@ -11,7 +11,8 @@
  *   - Oracle feed update: setTokenConfig(asset, feed, maxStalePeriod) on each asset's MAIN oracle adapter.
  *   - BNB Chain only: e-mode threshold zeroing (DOT/FIL/THE); the PT-sUSDE full deprecation (RF → 100%,
  *     push-out IRM, supply cap → 0, CF/LT → 0), missed from the Phase-4 scope; and repointing THE's
- *     ResilientOracle MAIN slot onto the ChainlinkOracle adapter (setOracle).
+ *     ResilientOracle MAIN slot onto the ChainlinkOracle adapter (setOracle) with the old RedStone
+ *     config wired as the enabled FALLBACK (setOracle + enableOracle).
  */
 import { Command } from "src/types";
 
@@ -31,6 +32,7 @@ import {
   PoolDef,
 } from "../vip-634/phase4Markets";
 import {
+  ENABLE_ORACLE_SIG,
   ORACLE_UPDATE,
   SET_ORACLE_SIG,
   SET_TOKEN_CONFIG_ACM_SIG,
@@ -143,9 +145,15 @@ export const buildBatch = (chain: AggregatorChain): SeedCommand[] => {
   }));
 
   // BNB Chain only: after THE's config is written on the ChainlinkOracle adapter (in oracleCalls above),
-  // move the ResilientOracle MAIN slot for THE onto that adapter so the new Chainlink feed is used.
+  // move the ResilientOracle MAIN slot for THE onto that adapter so the new Chainlink feed is used, and
+  // wire the RedStoneOracle adapter (which keeps THE's old working config) as the enabled FALLBACK.
   const theRepointPerm: { target: string; signature: string }[] =
-    chain === "bscmainnet" ? [{ target: THE_MAIN_REPOINT.resilientOracle, signature: SET_ORACLE_SIG }] : [];
+    chain === "bscmainnet"
+      ? [
+          { target: THE_MAIN_REPOINT.resilientOracle, signature: SET_ORACLE_SIG },
+          { target: THE_MAIN_REPOINT.resilientOracle, signature: ENABLE_ORACLE_SIG },
+        ]
+      : [];
   const theRepointCalls: SeedCommand[] =
     chain === "bscmainnet"
       ? [
@@ -153,6 +161,16 @@ export const buildBatch = (chain: AggregatorChain): SeedCommand[] => {
             target: THE_MAIN_REPOINT.resilientOracle,
             signature: SET_ORACLE_SIG,
             params: [THE_MAIN_REPOINT.asset, THE_MAIN_REPOINT.chainlinkOracle, THE_MAIN_REPOINT.mainRole],
+          },
+          {
+            target: THE_MAIN_REPOINT.resilientOracle,
+            signature: SET_ORACLE_SIG,
+            params: [THE_MAIN_REPOINT.asset, THE_MAIN_REPOINT.redStoneOracle, THE_MAIN_REPOINT.fallbackRole],
+          },
+          {
+            target: THE_MAIN_REPOINT.resilientOracle,
+            signature: ENABLE_ORACLE_SIG,
+            params: [THE_MAIN_REPOINT.asset, THE_MAIN_REPOINT.fallbackRole, true],
           },
         ]
       : [];

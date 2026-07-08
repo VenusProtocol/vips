@@ -92,10 +92,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("THE MAIN oracle still points to the RedStoneOracle adapter", async () => {
+    it("THE MAIN oracle still points to the RedStoneOracle adapter, no fallback configured", async () => {
       const ro = new Contract(THE_MAIN_REPOINT.resilientOracle, RESILIENT_ORACLE_ABI, ethers.provider);
       const cfg = await ro.getTokenConfig(THE_MAIN_REPOINT.asset);
       expect(cfg.oracles[0].toLowerCase(), "THE main pre").to.not.equal(THE_MAIN_REPOINT.chainlinkOracle.toLowerCase());
+      expect(cfg.oracles[2], "THE fallback pre").to.equal(ethers.constants.AddressZero);
+      expect(cfg.enableFlagsForOracles[2], "THE fallback flag pre").to.be.false;
     });
 
     it("PT-sUSDE is still fully active (CF/LT non-zero, RF 0, non-zero supply cap)", async () => {
@@ -113,7 +115,7 @@ forking(FORK_BLOCK, async () => {
   testVip("VIP-647 Deprecation Step 2 + Oracle Feed Update — BNB Chain", await vip647());
 
   describe("Post-VIP behavior", () => {
-    it("oracle MAIN adapters repointed to the new feeds (maxStalePeriod preserved)", async () => {
+    it("oracle MAIN adapters repointed to the new feeds (heartbeat-based maxStalePeriod)", async () => {
       for (const f of ORACLE_UPDATE.bscmainnet) {
         const adapter = new Contract(f.mainAdapter, ADAPTER_ABI, ethers.provider);
         const cfg = await adapter.tokenConfigs(f.asset);
@@ -147,10 +149,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("THE MAIN oracle repointed to the ChainlinkOracle adapter", async () => {
+    it("THE MAIN oracle repointed to the ChainlinkOracle adapter, RedStone enabled as FALLBACK", async () => {
       const ro = new Contract(THE_MAIN_REPOINT.resilientOracle, RESILIENT_ORACLE_ABI, ethers.provider);
       const cfg = await ro.getTokenConfig(THE_MAIN_REPOINT.asset);
       expect(cfg.oracles[0].toLowerCase(), "THE main post").to.equal(THE_MAIN_REPOINT.chainlinkOracle.toLowerCase());
+      expect(cfg.oracles[2].toLowerCase(), "THE fallback post").to.equal(THE_MAIN_REPOINT.redStoneOracle.toLowerCase());
+      expect(cfg.enableFlagsForOracles[2], "THE fallback flag post").to.be.true;
     });
 
     it("PT-sUSDE fully deprecated: CF/LT=0, RF=100%, push-out IRM, supply cap=0", async () => {
