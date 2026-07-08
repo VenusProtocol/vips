@@ -20,12 +20,16 @@ import vip999, {
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
   INITIAL_SUPPLY_RECIPIENT,
+  INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
   REDSTONE_ORACLE,
   SUPPLY_ASSET,
+  VAULT_SHARE_NAME,
+  VAULT_SHARE_SYMBOL,
   VCEBTC,
   VCEBTC_INITIAL_SUPPLY,
   instConfig,
+  riskConfig,
   vaultConfig,
 } from "../../vips/vip-999/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
@@ -177,20 +181,64 @@ forking(FORK_BLOCK, async () => {
       ).to.equal(true);
     });
 
+    it("the Normal Timelock can mint and burn vceBTC", async () => {
+      const recipient = "0x000000000000000000000000000000000000dEaD";
+      const amount = parseUnits("1", 18);
+
+      const supplyBefore = await vceBTC.totalSupply();
+      const balanceBefore = await vceBTC.balanceOf(recipient);
+
+      await vceBTC.connect(timelock).mint(recipient, amount);
+      expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore.add(amount));
+      expect(await vceBTC.totalSupply()).to.equal(supplyBefore.add(amount));
+
+      await vceBTC.connect(timelock).burn(recipient, amount);
+      expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore);
+      expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
+    });
+
     it("initial vceBTC collateral was minted to the Ceffu multisig", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
       expect(await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT)).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
 
-    it("a Fixed Rate Vault backed by vceBTC was created", async () => {
+    it("a Fixed Rate Vault backed by vceBTC was created with the configured parameters and names", async () => {
       expect(await controller.allVaultsLength()).to.equal(vaultsBefore.add(1));
       const vaultAddress = await controller.allVaults(vaultsBefore);
       expect(await controller.isRegistered(vaultAddress)).to.equal(true);
 
       const vault = await ethers.getContractAt(VAULT_ABI, vaultAddress);
-      expect((await vault.config()).supplyAsset).to.equal(SUPPLY_ASSET);
-      expect((await vault.institutionalConfig()).collateralAsset).to.equal(VCEBTC);
-      expect((await vault.institutionalConfig()).institutionOperator).to.equal(INSTITUTION_OPERATOR);
+
+      // VaultConfig
+      const config = await vault.config();
+      expect(config.supplyAsset).to.equal(vaultConfig[0]);
+      expect(config.fixedAPY).to.equal(vaultConfig[1]);
+      expect(config.reserveFactor).to.equal(vaultConfig[2]);
+      expect(config.minBorrowCap).to.equal(vaultConfig[3]);
+      expect(config.maxBorrowCap).to.equal(vaultConfig[4]);
+      expect(config.minSupplierDeposit).to.equal(vaultConfig[5]);
+      expect(config.openDuration).to.equal(vaultConfig[6]);
+      expect(config.lockDuration).to.equal(vaultConfig[7]);
+      expect(config.settlementWindow).to.equal(vaultConfig[8]);
+
+      // InstitutionalConfig (positionTokenId is assigned by the controller)
+      const inst = await vault.institutionalConfig();
+      expect(inst.collateralAsset).to.equal(instConfig[0]);
+      expect(inst.idealCollateralAmount).to.equal(instConfig[1]);
+      expect(inst.marginRate).to.equal(instConfig[2]);
+      expect(inst.institutionOperator).to.equal(instConfig[3]);
+      expect(inst.positionTokenId).to.be.gt(0);
+
+      // RiskConfig
+      const risk = await vault.riskConfig();
+      expect(risk.liquidationThreshold).to.equal(riskConfig[0]);
+      expect(risk.liquidationIncentive).to.equal(riskConfig[1]);
+      expect(risk.latePenaltyRate).to.equal(riskConfig[2]);
+
+      // Share token names + institution name
+      expect(await vault.name()).to.equal(VAULT_SHARE_NAME);
+      expect(await vault.symbol()).to.equal(VAULT_SHARE_SYMBOL);
+      expect(await vault.institutionName()).to.equal(INSTITUTION_NAME);
     });
   });
 
