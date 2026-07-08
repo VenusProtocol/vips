@@ -40,3 +40,5 @@ scripts/data/safePauseTxMetadata*.json
 
 .cache
 .vscode/settings.json
+safe-propose.json
+safe-vote.json
