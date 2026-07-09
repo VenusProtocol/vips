@@ -4,7 +4,7 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser, setMaxStalePeriodForAllAssets, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import vip640 from "../../vips/vip-640/bscmainnet";
@@ -12,10 +12,8 @@ import vip999, {
   ATLAS_ORACLE,
   BOUND_VALIDATOR,
   BTCB,
-  BTCB_FEED_FALLBACK,
-  BTCB_FEED_MAIN,
-  BTCB_FEED_PIVOT,
   BTCB_LOWER_BOUND,
+  BTCB_ORACLE_CONFIGS,
   BTCB_UPPER_BOUND,
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
@@ -34,6 +32,7 @@ import vip999, {
 } from "../../vips/vip-999/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
+import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -42,14 +41,30 @@ import ERC20_ABI from "./abi/VenusERC20.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 const FORK_BLOCK = 108402150;
-const ONE_YEAR = 31536000;
 
 const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // Binance Hot Wallet
 const LENDER = "0x2222222222222222222222222222222222222222"; // dummy test lender
 
+// Minimal price-oracle stub that always returns 1e18 — swapped in so getPrice-probing calls
+// succeed against feeds that are stale on the fork or not configured yet.
+// Source (compiled with solc 0.8.25, optimizer off):
+//   contract StubOracle {
+//       function getPrice(address) external pure returns (uint256) { return 1e18; }
+//   }
 const STUB_ORACLE_BYTECODE =
   "0x6080604052348015600e575f80fd5b5061015e8061001c5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c806341976e091461002d575b5f80fd5b610047600480360381019061004291906100cc565b61005d565b604051610054919061010f565b60405180910390f35b5f670de0b6b3a76400009050919050565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61009b82610072565b9050919050565b6100ab81610091565b81146100b5575f80fd5b50565b5f813590506100c6816100a2565b92915050565b5f602082840312156100e1576100e061006e565b5b5f6100ee848285016100b8565b91505092915050565b5f819050919050565b610109816100f7565b82525050565b5f6020820190506101225f830184610100565b9291505056fea26469706673582212209282f7f2d85233912d0088d6dc45ce2459097d2866597e41f0a286059758c12c64736f6c63430008190033";
-const STUB_ORACLE_ABI = ["function getPrice(address) external pure returns (uint256)"];
+
+const deployStubOracle = async (): Promise<Contract> => {
+  const [deployer] = await ethers.getSigners();
+  const factory = new ethers.ContractFactory(
+    ["function getPrice(address) external pure returns (uint256)"],
+    STUB_ORACLE_BYTECODE,
+    deployer,
+  );
+  const stubOracle = await factory.deploy();
+  await stubOracle.deployed();
+  return stubOracle;
+};
 
 // IVaultTypes.VaultState
 const VaultState = {
@@ -71,6 +86,8 @@ forking(FORK_BLOCK, async () => {
   let timelock: any;
   let vaultsBefore: any;
   let btcbPriceAtFork: any;
+  let originalControllerOracle: string;
+  const vceBtcConfigsAfterVip: Record<string, any> = {};
 
   before(async () => {
     oracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
@@ -81,25 +98,12 @@ forking(FORK_BLOCK, async () => {
     timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
 
-    const usdtPriceAtFork = await oracle.getPrice(SUPPLY_ASSET);
+    // Capture the BTCB price while the fork-block feed data is still fresh
     btcbPriceAtFork = await oracle.getPrice(BTCB);
-    await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt]);
-    const redstoneOracleForExisting = await ethers.getContractAt(
-      ["function setDirectPrice(address asset, uint256 price) external"],
-      REDSTONE_ORACLE,
-    );
-    await redstoneOracleForExisting.connect(timelock).setDirectPrice(BTCB, btcbPriceAtFork);
-    await redstoneOracleForExisting.connect(timelock).setDirectPrice(SUPPLY_ASSET, usdtPriceAtFork);
 
     // Reproduce the prerequisite controller/vault-upgrade VIP (VIP-640), which upgrades the
     // controller/vault implementations and re-grants the 6-arg createVault permission.
     await pretendExecutingVip(await vip640(), bscmainnet.NORMAL_TIMELOCK);
-
-    const [deployer] = await ethers.getSigners();
-    const stubFactory = new ethers.ContractFactory(STUB_ORACLE_ABI, STUB_ORACLE_BYTECODE, deployer);
-    const stubOracle = await stubFactory.deploy();
-    await stubOracle.deployed();
-    await controller.connect(timelock).setOracle(stubOracle.address);
 
     vceBTC = await ethers.getContractAt(ERC20_ABI, VCEBTC);
   });
@@ -130,26 +134,48 @@ forking(FORK_BLOCK, async () => {
       expect(
         await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.CRITICAL_GUARDIAN, "mint(address,uint256)"),
       ).to.equal(false);
+      expect(
+        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, "burn(address,uint256)"),
+      ).to.equal(false);
+      expect(
+        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.CRITICAL_GUARDIAN, "burn(address,uint256)"),
+      ).to.equal(false);
+    });
+
+    it("BTCB's live sub-oracle configs match the feeds and stale periods the VIP clones", async () => {
+      for (const { name, address, feed, maxStalePeriod } of BTCB_ORACLE_CONFIGS) {
+        const subOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, address);
+        const config = await subOracle.tokenConfigs(BTCB);
+        expect(config.feed, name).to.equal(feed);
+        expect(config.maxStalePeriod, name).to.equal(maxStalePeriod);
+      }
+    });
+
+    // createVault probes getPrice() for both vault assets, but on the fork the feeds are stale by
+    // execution time (testVip advances days) and vceBTC's config doesn't exist until the VIP runs.
+    // Swap the controller's oracle for an always-1e18 stub; callbackAfterExecution restores it.
+    it("[Test-Only] swaps the controller's oracle for a stub so createVault's price probe passes during execution", async () => {
+      originalControllerOracle = await controller.oracle();
+      expect(originalControllerOracle).to.equal(bscmainnet.RESILIENT_ORACLE);
+      const stubOracle = await deployStubOracle();
+      await controller.connect(timelock).setOracle(stubOracle.address);
+      expect(await controller.oracle()).to.equal(stubOracle.address);
     });
   });
 
   testVip("VIP-999 Create Ceffu Custody BTC Fixed Rate Vault", await vip999(), {
     callbackAfterExecution: async () => {
-      // vceBTC's oracle config is only created by the VIP itself, so its stale period
-      // can only be bumped now.
-      for (const [oracleAddress, feed] of [
-        [CHAINLINK_ORACLE, BTCB_FEED_MAIN],
-        [REDSTONE_ORACLE, BTCB_FEED_PIVOT],
-        [ATLAS_ORACLE, BTCB_FEED_FALLBACK],
-      ]) {
-        await setMaxStalePeriodInChainlinkOracle(oracleAddress, VCEBTC, feed, bscmainnet.NORMAL_TIMELOCK, ONE_YEAR);
+      // createVault executed against the stub oracle set in the last pre-VIP step; restore the
+      // original oracle so everything below runs against production wiring.
+      await controller.connect(timelock).setOracle(originalControllerOracle);
+      // Snapshot the VIP-set vceBTC sub-oracle configs before the stale-period bump rewrites them.
+      for (const { name, address } of BTCB_ORACLE_CONFIGS) {
+        const subOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, address);
+        vceBtcConfigsAfterVip[name] = await subOracle.tokenConfigs(VCEBTC);
       }
-      const redstoneOracle = await ethers.getContractAt(
-        ["function setDirectPrice(address asset, uint256 price) external"],
-        REDSTONE_ORACLE,
-      );
-      await redstoneOracle.connect(timelock).setDirectPrice(VCEBTC, btcbPriceAtFork);
-      await controller.connect(timelock).setOracle(bscmainnet.RESILIENT_ORACLE);
+      // Fork feed data is frozen at the fork block while testVip advanced simulated time past the
+      // real stale periods: bump them for every priced asset (vceBTC's config only exists now).
+      await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt, vceBTC]);
     },
   });
 
@@ -257,6 +283,29 @@ forking(FORK_BLOCK, async () => {
       const btcbPrice = await oracle.getPrice(BTCB);
       const vceBtcPrice = await oracle.getPrice(VCEBTC);
       expect(vceBtcPrice).to.equal(btcbPrice);
+    });
+
+    // Together with the pre-VIP check that BTCB's live configs match BTCB_ORACLE_CONFIGS, this proves
+    // vceBTC's configs are exact clones of BTCB's.
+    for (const { name, feed, maxStalePeriod } of BTCB_ORACLE_CONFIGS) {
+      it(`vceBTC ${name} config clones BTCB's feed and stale period`, async () => {
+        const vceBtcConfig = vceBtcConfigsAfterVip[name];
+        expect(vceBtcConfig, `${name} snapshot missing — callbackAfterExecution did not run`).to.not.be.undefined;
+        expect(vceBtcConfig.asset).to.equal(VCEBTC);
+        expect(vceBtcConfig.feed).to.equal(feed);
+        expect(vceBtcConfig.maxStalePeriod).to.equal(maxStalePeriod);
+      });
+    }
+
+    it("vceBTC ResilientOracle config mirrors BTCB's (same sub-oracles, all enabled)", async () => {
+      const btcbConfig = await oracle.getTokenConfig(BTCB);
+      const vceBtcConfig = await oracle.getTokenConfig(VCEBTC);
+      expect(vceBtcConfig.asset).to.equal(VCEBTC);
+      expect(vceBtcConfig.oracles).to.deep.equal([CHAINLINK_ORACLE, REDSTONE_ORACLE, ATLAS_ORACLE]);
+      expect(vceBtcConfig.oracles).to.deep.equal(btcbConfig.oracles);
+      expect(vceBtcConfig.enableFlagsForOracles).to.deep.equal(btcbConfig.enableFlagsForOracles);
+      expect(vceBtcConfig.cachingEnabled).to.equal(btcbConfig.cachingEnabled);
+      expect(vceBtcConfig.cachingEnabled).to.equal(false);
     });
 
     it("BTCB bounds are configured correctly in BoundValidator", async () => {

@@ -6,6 +6,11 @@ import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
+// TODO before proposing:
+// 1. Redeploy vceBTC from fixed-rate-vaults CustodyReceiptToken (current deployment is the older
+//    VenusERC20 bytecode without pause/unpause), transfer ownership to the Normal Timelock,
+//    update VCEBTC, add pause()/unpause() ACM grants, and update the simulations.
+
 export const VCEBTC = "0x3C5Fc884BF6d1Ec8957A75EF6436b3B5750A57da";
 export const FIXED_RATE_VAULT_CONTROLLER = "0xf77dED2A00F94e33C392126238360D4642c16Ba2";
 export const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
