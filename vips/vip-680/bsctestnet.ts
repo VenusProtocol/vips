@@ -91,8 +91,14 @@ export const HUB_OPERATOR_SIGS = [
   "lowerMaxWithdrawalSize(uint256)",
 ];
 
-// CoreSource_USDT — Governance role set (all gated YieldGroup functions).
-export const CORE_SOURCE_GOVERNANCE_SIGS = [
+// Yield-source Governance role strings. All three sources share the YieldGroupBase gated surface;
+// each subclass only adds a few functions (copied verbatim from YieldGroupBase.sol / YieldGroup.sol /
+// YieldGroupFRV.sol):
+//   - Core & Flux use `YieldGroup`    → base + raiseResourceCap / lowerResourceCap / setBlocksPerYear
+//   - FRV         uses `YieldGroupFRV` → base + forceRemoveResource (no cap setters, no setBlocksPerYear)
+
+// Shared by all three sources (the 8 gated functions on YieldGroupBase).
+export const YIELD_GROUP_BASE_GOVERNANCE_SIGS = [
   "addResource(address,address)",
   "removeResource(address)",
   "updateResourceAdapter(address,address)",
@@ -100,11 +106,20 @@ export const CORE_SOURCE_GOVERNANCE_SIGS = [
   "setInnerWithdrawQueue(address[])",
   "pauseResource(address)",
   "unpauseResource(address)",
+  "sweep(address,address)",
+];
+
+// CoreSource_USDT (and the Flux source) — YieldGroup: base + per-resource caps + blocksPerYear.
+export const CORE_SOURCE_GOVERNANCE_SIGS = [
+  ...YIELD_GROUP_BASE_GOVERNANCE_SIGS,
   "raiseResourceCap(address,uint256)",
   "lowerResourceCap(address,uint256)",
   "setBlocksPerYear(uint256)",
-  "sweep(address,address)",
 ];
+
+// FRV_SOURCE_USDT — YieldGroupFRV: base + forceRemoveResource. It has NO raise/lowerResourceCap and
+// NO setBlocksPerYear (those are Core/Flux-only), so it must not reuse CORE_SOURCE_GOVERNANCE_SIGS.
+export const FRV_SOURCE_GOVERNANCE_SIGS = [...YIELD_GROUP_BASE_GOVERNANCE_SIGS, "forceRemoveResource(address)"];
 
 // CoreSource_USDT — Operator role set (tighten-only).
 export const CORE_SOURCE_OPERATOR_SIGS = [
@@ -133,9 +148,12 @@ Post-deploy governance wiring for the newly deployed **Liquidity Hub (USDT)** on
 The Hub and its yield-source proxies were deployed without any ACM permissions, registry, or queue
 configuration (the deploy scripts only deploy and initialise; all ACM-gated wiring is governance's
 job). This VIP provisions the core access-control roles and wires the **Core** yield source
-end-to-end so the USDT Hub becomes usable, routing deposits and withdrawals through Venus Core. A
-companion addendum proposal grants the same Governance role set to the Fast-Track and Critical
-timelocks.
+end-to-end so the USDT Hub becomes usable, routing deposits and withdrawals through Venus Core.
+
+Two companion proposals complete the testnet setup: an **addendum** grants the same Governance role
+set to the Fast-Track and Critical timelocks, and a **Guardian-permissions** proposal tops the
+Guardian up to the full Governance role set across the whole Hub stack (Hub + Core + FRV + Flux) so
+backend can add and reconfigure resources via multisig without a VIP per change.
 
 #### Access-control model
 
@@ -157,10 +175,12 @@ The Hub uses an asymmetric permission model: **Governance** can both loosen and 
 
 #### Notes
 
-- **FRV and Flux sources are deferred.** Both proxies are deployed but have no concrete resource on
-  testnet: no FRV vault instance exists for USDT (only the vault implementation and controller are
-  deployed), and the Flux adapter is not deployed (no Fluid LendingResolver on testnet). Their
-  permissions and registration will be handled by a dedicated follow-up VIP once each resource exists.
+- **FRV and Flux sources are deferred in this proposal.** Both proxies are deployed but have no
+  concrete resource on testnet yet: no FRV vault instance exists for USDT (only the vault
+  implementation and controller are deployed), and the Flux adapter is not deployed (no Fluid
+  LendingResolver on testnet). Once each resource exists, the Guardian multisig registers it directly
+  using the permissions from the companion Guardian-permissions proposal — no further VIP needed on
+  testnet.
 - Testnet-only. The Hub is not yet deployed on any mainnet.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",

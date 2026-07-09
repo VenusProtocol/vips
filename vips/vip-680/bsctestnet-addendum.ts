@@ -40,8 +40,9 @@ Critical timelocks.
 
 #### Notes
 
-- Governance-only: this proposal grants no Operator (\`reallocate\` / tighten-only) roles — those are
-  held by the Guardian per the main VIP-680 proposal.
+- This proposal grants timelock roles only. The Guardian's permissions are set separately: the
+  Operator (tighten-only) set by the main VIP-680 proposal, and the full Governance set by the
+  companion Guardian-permissions proposal (testnet-only).
 - Testnet-only. The Hub is not yet deployed on any mainnet.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
