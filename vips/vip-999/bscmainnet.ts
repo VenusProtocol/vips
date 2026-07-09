@@ -58,7 +58,7 @@ export const vaultConfig = [
 export const instConfig = [
   VCEBTC, // collateral = vceBTC
   parseUnits("21.92", 18), // idealCollateralAmount = 21.92 BTCB
-  parseUnits("0.05", 18), // marginRate = 5% (must be > 0; createVault reverts InvalidConfig if 0)
+  parseUnits("0.005", 18), // marginRate = 0.5% (must be > 0; createVault reverts InvalidConfig if 0)
   INSTITUTION_OPERATOR,
   0, // positionTokenId assigned by the controller
 ];
