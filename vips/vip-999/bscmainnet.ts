@@ -44,8 +44,8 @@ export const INITIAL_SUPPLY_RECIPIENT = "0x5D1507d5Cfb3d031C3209e9FB8e2644e4094E
 export const vaultConfig = [
   SUPPLY_ASSET,
   600, // fixedAPY = 6%
-  parseUnits("0.1", 18), // reserveFactor = 10%
-  parseUnits("900000", 18), // minBorrowCap = 900K
+  parseUnits("0.3", 18), // reserveFactor = 30%
+  parseUnits("10", 18), // minBorrowCap = 10 USDT (must be > 0; createVault reverts if 0)
   parseUnits("1000000", 18), // maxBorrowCap = 1M
   0, // minSupplierDeposit
   7 * 24 * 60 * 60, // openDuration = 7 days
@@ -66,9 +66,8 @@ export const instConfig = [
 // RiskConfig: [liquidationThreshold(1e18), liquidationIncentive(1e18), latePenaltyRate(1e18)]
 export const riskConfig = [parseUnits("0.9", 18), parseUnits("1.1", 18), parseUnits("1.1", 18)];
 
-// TODO: finalize values
-export const VAULT_SHARE_NAME = "Venus Ceffu Fixed Rate Vault";
-export const VAULT_SHARE_SYMBOL = "vceFRV";
+export const VAULT_SHARE_NAME = "FRV Solv BTCB 24JUL2026 30";
+export const VAULT_SHARE_SYMBOL = "FRV-sv-24JUL2026-30";
 export const INSTITUTION_NAME = "Ceffu";
 
 export const vip999 = () => {
