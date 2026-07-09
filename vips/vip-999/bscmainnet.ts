@@ -26,45 +26,45 @@ export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const BTCB_UPPER_BOUND = parseUnits("1.01", 18);
 export const BTCB_LOWER_BOUND = parseUnits("0.99", 18);
 
-// TODO: supply asset
+// USDT
 export const SUPPLY_ASSET = "0x55d398326f99059fF775485246999027B3197955";
 
 // TODO: replace with the real Ceffu operator address before proposal
 export const INSTITUTION_OPERATOR = "0x1111111111111111111111111111111111111111";
 
 // Initial vceBTC collateral supply
-export const VCEBTC_INITIAL_SUPPLY = parseUnits("2000", 18);
+export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.92", 18);
 
 // Recipient of the initial vceBTC collateral mint (multisig)
 export const INITIAL_SUPPLY_RECIPIENT = "0x5D1507d5Cfb3d031C3209e9FB8e2644e4094Ea01";
 
-// Fixed Rate Vault configuration. TODO: finalize values.
+// Fixed Rate Vault configuration.
 // VaultConfig: [supplyAsset, fixedAPY(bps), reserveFactor(1e18), minBorrowCap,
 //               maxBorrowCap, minSupplierDeposit, openDuration, lockDuration, settlementWindow]
 export const vaultConfig = [
   SUPPLY_ASSET,
-  800, // fixedAPY = 8%
+  600, // fixedAPY = 6%
   parseUnits("0.1", 18), // reserveFactor = 10%
-  parseUnits("1000000", 18), // minBorrowCap = 1M
-  parseUnits("50000000", 18), // maxBorrowCap = 50M loan market size
+  parseUnits("900000", 18), // minBorrowCap = 900K
+  parseUnits("1000000", 18), // maxBorrowCap = 1M
   0, // minSupplierDeposit
   7 * 24 * 60 * 60, // openDuration = 7 days
-  30 * 24 * 60 * 60, // lockDuration = 30 days
-  30 * 24 * 60 * 60, // settlementWindow = 30 days
+  30 * 24 * 60 * 60, // lockDuration = 1 month
+  3 * 24 * 60 * 60, // settlementWindow = 3 days
 ];
 
 // InstitutionalConfig: [collateralAsset, idealCollateralAmount, marginRate(1e18),
 //                       institutionOperator, positionTokenId]
 export const instConfig = [
   VCEBTC, // collateral = vceBTC
-  parseUnits("2000", 18), // idealCollateralAmount (sized off-chain from 50% CF + 20% buffer)
-  parseUnits("0.1", 18), // marginRate = 10%
+  parseUnits("21.92", 18), // idealCollateralAmount = 21.92 BTCB
+  parseUnits("0.05", 18), // marginRate = 5% (must be > 0; createVault reverts InvalidConfig if 0)
   INSTITUTION_OPERATOR,
   0, // positionTokenId assigned by the controller
 ];
 
 // RiskConfig: [liquidationThreshold(1e18), liquidationIncentive(1e18), latePenaltyRate(1e18)]
-export const riskConfig = [parseUnits("0.85", 18), parseUnits("1.1", 18), parseUnits("1.1", 18)];
+export const riskConfig = [parseUnits("0.9", 18), parseUnits("1.1", 18), parseUnits("1.1", 18)];
 
 // TODO: finalize values
 export const VAULT_SHARE_NAME = "Venus Ceffu Fixed Rate Vault";

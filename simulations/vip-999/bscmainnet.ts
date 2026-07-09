@@ -284,10 +284,11 @@ forking(FORK_BLOCK, async () => {
     const idealCollateralAmount = BigNumber.from(instConfig[1]);
     const marginRate = BigNumber.from(instConfig[2]);
     const minBorrowCap = BigNumber.from(vaultConfig[3]);
+    const maxBorrowCap = BigNumber.from(vaultConfig[4]);
     const openDuration = Number(vaultConfig[6]);
     const lockDuration = Number(vaultConfig[7]);
     const marginAmount = idealCollateralAmount.mul(marginRate).div(parseUnits("1", 18));
-    const lenderDepositAmount = minBorrowCap.mul(2);
+    const lenderDepositAmount = minBorrowCap.add(maxBorrowCap).div(2);
 
     before(async () => {
       const vaultAddress = await controller.allVaults(vaultsBefore);

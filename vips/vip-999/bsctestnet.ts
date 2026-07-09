@@ -21,35 +21,35 @@ export const SUPPLY_ASSET = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 export const INSTITUTION_OPERATOR = "0x4cD6300F5cb8D6BbA5E646131c3522664C10dF11";
 
 // Initial vceBTC collateral supply
-export const VCEBTC_INITIAL_SUPPLY = parseUnits("2000", 18);
+export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.92", 18);
 
 // VaultConfig: [supplyAsset, fixedAPY(bps), reserveFactor(1e18), minBorrowCap,
 //   maxBorrowCap, minSupplierDeposit, openDuration, lockDuration, settlementWindow]
 // Caps / minSupplierDeposit are in the supply asset (USDT, 6 decimals).
 export const vaultConfig = [
   SUPPLY_ASSET,
-  800, // fixedAPY = 8%
+  600, // fixedAPY = 6%
   parseUnits("0.1", 18), // reserveFactor = 10%
-  parseUnits("1000000", 6), // minBorrowCap = 1M USDT
-  parseUnits("50000000", 6), // maxBorrowCap = 50M USDT loan market size
+  parseUnits("900000", 6), // minBorrowCap = 900K USDT
+  parseUnits("1000000", 6), // maxBorrowCap = 1M USDT
   0, // minSupplierDeposit
   7 * 24 * 60 * 60, // openDuration = 7 days
-  30 * 24 * 60 * 60, // lockDuration = 30 days
-  10 * 24 * 60 * 60, // settlementWindow = 10 days
+  30 * 24 * 60 * 60, // lockDuration = 1 month
+  3 * 24 * 60 * 60, // settlementWindow = 3 days
 ];
 
 // InstitutionalConfig: [collateralAsset, idealCollateralAmount, marginRate(1e18),
 //                       institutionOperator, positionTokenId]
 export const instConfig = [
   VCEBTC, // collateral = vceBTC (18 decimals)
-  parseUnits("2000", 18), // idealCollateralAmount
-  parseUnits("0.1", 18), // marginRate = 10%
+  parseUnits("21.92", 18), // idealCollateralAmount = 21.92 BTCB
+  parseUnits("0.05", 18), // marginRate = 5% (must be > 0; createVault reverts InvalidConfig if 0)
   INSTITUTION_OPERATOR,
   0, // positionTokenId assigned by the controller
 ];
 
 // RiskConfig: [liquidationThreshold(1e18), liquidationIncentive(1e18), latePenaltyRate(1e18)]
-export const riskConfig = [parseUnits("0.85", 18), parseUnits("1.1", 18), parseUnits("1.1", 18)];
+export const riskConfig = [parseUnits("0.9", 18), parseUnits("1.1", 18), parseUnits("1.1", 18)];
 
 export const VAULT_SHARE_NAME = "Venus Ceffu Fixed Rate Vault";
 export const VAULT_SHARE_SYMBOL = "vceFRV";
