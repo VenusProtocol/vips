@@ -3,7 +3,7 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999, {
@@ -50,7 +50,11 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-999 Upgrade Institutional Fixed Rate Vault implementation", await vip999());
+  testVip("VIP-999 Upgrade Institutional Fixed Rate Vault implementation", await vip999(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultImplementationUpdated"], [1]);
+    },
+  });
 
   describe("Post-VIP behavior", () => {
     it("controller now clones the new vault implementation", async () => {
