@@ -117,13 +117,14 @@ forking(FORK_BLOCK, async () => {
     let lenderB: any;
     let lenderC: any;
     let lenderD: any;
+    let otherReceiver: any;
 
     before(async () => {
       btcb = await ethers.getContractAt(ERC20_ABI, BTCB);
       usdt = await ethers.getContractAt(ERC20_ABI, USDT);
 
       // Institution + lenders are Hardhat signers (pre-funded with gas).
-      [, institution, lenderA, lenderB, lenderC, lenderD] = await ethers.getSigners();
+      [, institution, lenderA, lenderB, lenderC, lenderD, otherReceiver] = await ethers.getSigners();
       institutionAddress = await institution.getAddress();
 
       // Create a fresh vault; it is cloned from the just-installed consent-enabled implementation.
@@ -178,23 +179,27 @@ forking(FORK_BLOCK, async () => {
       expect(await vault.balanceOf(receiver)).to.equal(shares);
     });
 
-    it("depositWithConsent records the consent hash and mints shares", async () => {
-      const receiver = await lenderC.getAddress();
+    it("depositWithConsent records the consent hash with supplier as sender, not receiver", async () => {
+      const supplier = await lenderC.getAddress();
+      const receiver = await otherReceiver.getAddress();
+      const before = await vault.balanceOf(receiver);
       await usdt.connect(lenderC).approve(vault.address, lenderFunding);
       await expect(vault.connect(lenderC).depositWithConsent(depositAmount, receiver, consentHash))
         .to.emit(vault, "ConsentRecorded")
-        .withArgs(receiver, receiver, consentHash);
-      expect(await vault.balanceOf(receiver)).to.be.gt(0);
+        .withArgs(supplier, receiver, consentHash);
+      expect(await vault.balanceOf(receiver)).to.be.gt(before);
     });
 
-    it("mintWithConsent records the consent hash and pulls assets", async () => {
-      const receiver = await lenderD.getAddress();
+    it("mintWithConsent records the consent hash with supplier as sender, not receiver", async () => {
+      const supplier = await lenderD.getAddress();
+      const receiver = await otherReceiver.getAddress();
       const shares = await vault.previewDeposit(depositAmount);
+      const before = await vault.balanceOf(receiver);
       await usdt.connect(lenderD).approve(vault.address, lenderFunding);
       await expect(vault.connect(lenderD).mintWithConsent(shares, receiver, consentHash))
         .to.emit(vault, "ConsentRecorded")
-        .withArgs(receiver, receiver, consentHash);
-      expect(await vault.balanceOf(receiver)).to.equal(shares);
+        .withArgs(supplier, receiver, consentHash);
+      expect(await vault.balanceOf(receiver)).to.equal(before.add(shares));
     });
 
     it("depositWithConsent / mintWithConsent accept a zero consent hash without emitting", async () => {
