@@ -4,8 +4,8 @@ import { makeProposal } from "src/utils";
 export const FIXED_RATE_VAULT_CONTROLLER = "0xf77dED2A00F94e33C392126238360D4642c16Ba2";
 export const OLD_VAULT_IMPLEMENTATION = "0x97421799419Eb782628e73e7220d8E0A207469a3";
 
-// Adds depositWithConsent / mintWithConsent (deployed at testnet block 118271685).
-export const NEW_VAULT_IMPLEMENTATION = "0x44B13FEDE6b4866C60E1ac78Ac9B065406510433";
+// Adds depositWithConsent / mintWithConsent.
+export const NEW_VAULT_IMPLEMENTATION = "0xB677627eB4B9D8bfB793966e266C899E7FD484C5";
 
 export const vip999 = () => {
   const meta = {

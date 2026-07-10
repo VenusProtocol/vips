@@ -2074,11 +2074,6 @@
   },
   {
     "type": "error",
-    "name": "InvalidConsentHash",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "InvalidOraclePrice",
     "inputs": []
   },

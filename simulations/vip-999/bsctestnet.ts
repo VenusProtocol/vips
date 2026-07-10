@@ -18,7 +18,7 @@ import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 118272500;
+const FORK_BLOCK = 118291763;
 
 forking(FORK_BLOCK, async () => {
   let controller: Contract;
@@ -182,15 +182,24 @@ forking(FORK_BLOCK, async () => {
       expect(await vault.balanceOf(receiver)).to.equal(shares);
     });
 
-    it("depositWithConsent / mintWithConsent revert on a zero consent hash", async () => {
+    it("depositWithConsent / mintWithConsent accept a zero consent hash without emitting", async () => {
       const zero = ethers.constants.HashZero;
       const receiver = await lenderA.getAddress();
+      const smallDeposit = parseUnits("10000", 6);
+
+      // A zero hash skips consent recording: no event, no revert, deposit/mint still happens.
+      const beforeDeposit = await vault.balanceOf(receiver);
+      await expect(vault.connect(lenderA).depositWithConsent(smallDeposit, receiver, zero)).to.not.emit(
+        vault,
+        "ConsentRecorded",
+      );
+      const afterDeposit = await vault.balanceOf(receiver);
+      expect(afterDeposit).to.be.gt(beforeDeposit);
+
       await expect(
-        vault.connect(lenderA).depositWithConsent(depositAmount, receiver, zero),
-      ).to.be.revertedWithCustomError(vault, "InvalidConsentHash");
-      await expect(
-        vault.connect(lenderA).mintWithConsent(await vault.previewDeposit(depositAmount), receiver, zero),
-      ).to.be.revertedWithCustomError(vault, "InvalidConsentHash");
+        vault.connect(lenderA).mintWithConsent(await vault.previewDeposit(smallDeposit), receiver, zero),
+      ).to.not.emit(vault, "ConsentRecorded");
+      expect(await vault.balanceOf(receiver)).to.be.gt(afterDeposit);
     });
 
     it("normal flow completes: lock -> claim -> repay -> matured -> redeem -> withdraw collateral", async () => {
