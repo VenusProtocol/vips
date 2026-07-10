@@ -3,22 +3,26 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
+import { initMainnetUser, pinResilientOraclePriceViaRedstone } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999, {
   FIXED_RATE_VAULT_CONTROLLER,
   NEW_VAULT_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
-} from "../../vips/vip-999/bsctestnet";
+} from "../../vips/vip-999/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import FAUCET_TOKEN_ABI from "./abi/FaucetToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
+import ORACLE_ABI from "./abi/ResilientOracle.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 118291763;
+const FORK_BLOCK = 109158500;
+
+const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
 forking(FORK_BLOCK, async () => {
   let controller: Contract;
@@ -27,8 +31,12 @@ forking(FORK_BLOCK, async () => {
 
   before(async () => {
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
-    timelock = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, parseUnits("40"));
+    timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
+
+    const resilientOracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
+    await pinResilientOraclePriceViaRedstone(resilientOracle, BTCB);
+    await pinResilientOraclePriceViaRedstone(resilientOracle, USDT);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -59,10 +67,6 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("New vault: deposit/mint with consent + normal flow", () => {
-    const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
-    const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-    const BTCB_WHALE = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-
     // IVaultTypes.VaultState
     const VaultState = {
       WaitingForMargin: 0,
@@ -83,8 +87,8 @@ forking(FORK_BLOCK, async () => {
       USDT, // supplyAsset
       600, // fixedAPY = 6%
       parseUnits("0.3", 18), // reserveFactor = 30%
-      parseUnits("10", 6), // minBorrowCap = 10 USDT
-      parseUnits("1000000", 6), // maxBorrowCap = 1M USDT
+      parseUnits("10", 18), // minBorrowCap = 10 USDT
+      parseUnits("1000000", 18), // maxBorrowCap = 1M USDT
       0, // minSupplierDeposit
       openDuration,
       lockDuration,
@@ -96,8 +100,8 @@ forking(FORK_BLOCK, async () => {
     const INSTITUTION_NAME = "ConsentTest";
 
     // 4 lenders * 100k deposit = 400k < 1M cap.
-    const depositAmount = parseUnits("100000", 6);
-    const lenderFunding = parseUnits("200000", 6);
+    const depositAmount = parseUnits("100000", 18);
+    const lenderFunding = parseUnits("200000", 18);
     const consentHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("Venus FRV disclaimer v1"));
 
     let vault: Contract;
@@ -105,7 +109,6 @@ forking(FORK_BLOCK, async () => {
     let usdt: Contract;
     let institution: any;
     let institutionAddress: string;
-    let deployer: any;
     let lenderA: any;
     let lenderB: any;
     let lenderC: any;
@@ -113,10 +116,10 @@ forking(FORK_BLOCK, async () => {
 
     before(async () => {
       btcb = await ethers.getContractAt(ERC20_ABI, BTCB);
-      usdt = await ethers.getContractAt(FAUCET_TOKEN_ABI, USDT);
+      usdt = await ethers.getContractAt(ERC20_ABI, USDT);
 
       // Institution + lenders are Hardhat signers (pre-funded with gas).
-      [deployer, institution, lenderA, lenderB, lenderC, lenderD] = await ethers.getSigners();
+      [, institution, lenderA, lenderB, lenderC, lenderD] = await ethers.getSigners();
       institutionAddress = await institution.getAddress();
 
       // Create a fresh vault; it is cloned from the just-installed consent-enabled implementation.
@@ -127,14 +130,13 @@ forking(FORK_BLOCK, async () => {
       const vaultAddress = await controller.allVaults(vaultsBefore);
       vault = await ethers.getContractAt(VAULT_ABI, vaultAddress);
 
-      // Fund the institution with BTCB collateral and the lenders + institution with USDT.
-      const whale = await initMainnetUser(BTCB_WHALE, parseUnits("40"));
+      // Fund the institution with BTCB collateral and the lenders + institution with USDT (from the whale).
+      const whale = await initMainnetUser(WHALE, parseUnits("40"));
       await btcb.connect(whale).transfer(institutionAddress, idealCollateralAmount);
-
       for (const lender of [lenderA, lenderB, lenderC, lenderD]) {
-        await usdt.connect(deployer).allocateTo(await lender.getAddress(), lenderFunding);
+        await usdt.connect(whale).transfer(await lender.getAddress(), lenderFunding);
       }
-      await usdt.connect(deployer).allocateTo(institutionAddress, parseUnits("50000", 6));
+      await usdt.connect(whale).transfer(institutionAddress, parseUnits("50000", 18));
     });
 
     it("a new vault backed by the new implementation was registered", async () => {
@@ -194,7 +196,7 @@ forking(FORK_BLOCK, async () => {
     it("depositWithConsent / mintWithConsent accept a zero consent hash without emitting", async () => {
       const zero = ethers.constants.HashZero;
       const receiver = await lenderA.getAddress();
-      const smallDeposit = parseUnits("10000", 6);
+      const smallDeposit = parseUnits("10000", 18);
 
       // A zero hash skips consent recording: no event, no revert, deposit/mint still happens.
       const beforeDeposit = await vault.balanceOf(receiver);

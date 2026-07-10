@@ -1,16 +1,16 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const FIXED_RATE_VAULT_CONTROLLER = "0xf77dED2A00F94e33C392126238360D4642c16Ba2";
-export const OLD_VAULT_IMPLEMENTATION = "0x97421799419Eb782628e73e7220d8E0A207469a3";
+export const FIXED_RATE_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
+export const OLD_VAULT_IMPLEMENTATION = "0xC25b2B657D24380eDd1a1Cff5296385541e85204";
 
 // Adds depositWithConsent / mintWithConsent.
-export const NEW_VAULT_IMPLEMENTATION = "0xB677627eB4B9D8bfB793966e266C899E7FD484C5";
+export const NEW_VAULT_IMPLEMENTATION = "0xe87A1eFCED88bBddf8CCF78EfB3bCF62cFdd5bdC";
 
 export const vip999 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain Testnet] Upgrade Institutional Fixed Rate Vault implementation (consent recording)",
+    title: "VIP-999 [BNB Chain] Upgrade Institutional Fixed Rate Vault implementation (consent recording)",
     description: `#### Summary
 
 If passed, this VIP points the Institutional Fixed Rate Vault controller at a new vault clone-source implementation that adds on-chain disclaimer-consent recording to the supplier deposit/mint flow.
