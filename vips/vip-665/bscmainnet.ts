@@ -1,7 +1,7 @@
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { LZ_CHAIN_ID, RemoteChain } from "./data/remote";
+import { LZ_CHAIN_ID, RemoteChain } from "./data/actionPlan";
 import {
   AGGREGATOR,
   Chain,
@@ -10,8 +10,23 @@ import {
   REVOKE_INDEX,
   acmOf,
   grantPermissions,
+  legacyWildcardCommands,
   revokePermissions,
 } from "./utils/commands";
+
+// Expected RoleGranted / RoleRevoked counts per chain, asserted by the simulations after execution.
+// granted = aggregator grants + wrapper grantRole(DEFAULT_ADMIN). revoked = aggregator revokes + wrapper
+// revokeRole(DEFAULT_ADMIN) + redundant cleanup + (BNB only) the 3 direct legacy-wildcard revokeRole calls.
+export const EXPECTED_ROLE_EVENTS: Record<"bscmainnet" | RemoteChain, { granted: number; revoked: number }> = {
+  bscmainnet: { granted: 6, revoked: 82 },
+  ethereum: { granted: 2, revoked: 62 },
+  arbitrumone: { granted: 2, revoked: 34 },
+  basemainnet: { granted: 2, revoked: 29 },
+  zksyncmainnet: { granted: 2, revoked: 23 },
+  opmainnet: { granted: 2, revoked: 19 },
+  unichainmainnet: { granted: 2, revoked: 19 },
+  opbnbmainnet: { granted: 2, revoked: 13 },
+};
 
 // The commands the VIP emits per chain: grant the aggregator DEFAULT_ADMIN_ROLE, execute the grant and/or
 // revoke batch, revoke the role. Local on BNB; wrapped with dstChainId (LayerZero) on remotes.
@@ -77,6 +92,7 @@ export const vip665 = () =>
   makeProposal(
     [
       ...aggregatorCommands("bscmainnet"),
+      ...legacyWildcardCommands(),
       ...aggregatorCommands("ethereum"),
       ...aggregatorCommands("arbitrumone"),
       ...aggregatorCommands("basemainnet"),

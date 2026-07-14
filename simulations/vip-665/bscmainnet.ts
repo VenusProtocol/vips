@@ -6,11 +6,17 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip665 from "../../vips/vip-665/bscmainnet";
-import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, BNB_ROWS, ZERO } from "../../vips/vip-665/data/bnb";
-import { EXPECTED_ROLE_EVENTS } from "../../vips/vip-665/data/remote";
-import { STALE_ROWS } from "../../vips/vip-665/data/staleness";
-import { AGGREGATOR, grantPermissions, revokePermissions } from "../../vips/vip-665/utils/commands";
+import vip665, { EXPECTED_ROLE_EVENTS } from "../../vips/vip-665/bscmainnet";
+import { BNB_ROWS } from "../../vips/vip-665/data/actionPlan";
+import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, ZERO } from "../../vips/vip-665/data/addresses";
+import { REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-665/data/cleanup";
+import {
+  AGGREGATOR,
+  BNB_LEGACY_WILDCARD_REVOKES,
+  grantPermissions,
+  legacyWildcardRole,
+  revokePermissions,
+} from "../../vips/vip-665/utils/commands";
 import { seedAggregator } from "../../vips/vip-665/utils/seed";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
@@ -33,6 +39,8 @@ const REVOKE = BNB_ROWS.filter(row => row.action === "revoke");
 const SWAP = BNB_ROWS.filter(row => row.action === "swap");
 const GRANT = BNB_ROWS.filter(row => row.action === "grant");
 const STALE = BNB_ROWS.filter(row => row.action === "stale");
+// Redundant (wildcard-shadowed) target-specific grants revoked as behavior-preserving cleanup.
+const REDUNDANT = REDUNDANT_REVOKES.bscmainnet;
 
 forking(FORK_BLOCK, async () => {
   const acm = () => new Contract(BNB_ACM, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
@@ -59,6 +67,26 @@ forking(FORK_BLOCK, async () => {
       expect(GRANT.length, "grant rows").to.equal(1);
       expect(STALE.length, "stale (BNB) rows").to.equal(1);
       expect(STALE_ROWS.length, "stale (dangling cleanup) rows").to.equal(8);
+      expect(BNB_LEGACY_WILDCARD_REVOKES.length, "legacy wildcard revokes").to.equal(3);
+      expect(REDUNDANT.length, "redundant revokes").to.equal(25);
+    });
+
+    it("legacy wildcard: each grantee currently holds the 32-byte wildcard role", async () => {
+      for (const r of BNB_LEGACY_WILDCARD_REVOKES) {
+        expect(
+          await acm().hasRole(legacyWildcardRole(r.signature), r.account),
+          `pre legacy wildcard ${r.signature} ${r.account}`,
+        ).to.be.true;
+      }
+    });
+
+    it("redundant: each target-specific grant is currently held by its account", async () => {
+      for (const r of REDUNDANT) {
+        expect(
+          await acm().hasRole(role(r.contract, r.signature), r.account),
+          `pre redundant ${r.note} (${r.signature})`,
+        ).to.be.true;
+      }
     });
 
     it("no-change: Critical holds each one and Guardian flags match the plan", async () => {
@@ -146,34 +174,36 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("VIP-665 post-execution permissions (bscmainnet)", () => {
-    it("no-change: holders are untouched (Critical and every Guardian flag unchanged)", async () => {
+    // No-change = the capability is untouched. Every holder the plan lists can still call the function — either
+    // through its own grant, or (for grants the redundant cleanup drops) through the surviving wildcard.
+    it("no-change: Critical and every listed Guardian can still call the function", async () => {
       for (const row of NO_CHANGE) {
-        expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.equal(row.critical);
-        expect(await holds(BNB_GUARDIANS.guardian1, row), `post g1 ${row.signature}@${row.target}`).to.equal(
-          row.guardian1,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian2, row), `post g2 ${row.signature}@${row.target}`).to.equal(
-          row.guardian2,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian3, row), `post g3 ${row.signature}@${row.target}`).to.equal(
-          row.guardian3,
-        );
+        if (row.critical)
+          expect(
+            await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
+            `no-change critical ${row.signature}@${row.target}`,
+          ).to.be.true;
+        if (row.guardian1)
+          expect(
+            await acm().isAllowedToCall(BNB_GUARDIANS.guardian1, row.signature, { from: row.target }),
+            `no-change g1 ${row.signature}@${row.target}`,
+          ).to.be.true;
+        if (row.guardian2)
+          expect(
+            await acm().isAllowedToCall(BNB_GUARDIANS.guardian2, row.signature, { from: row.target }),
+            `no-change g2 ${row.signature}@${row.target}`,
+          ).to.be.true;
+        if (row.guardian3)
+          expect(
+            await acm().isAllowedToCall(BNB_GUARDIANS.guardian3, row.signature, { from: row.target }),
+            `no-change g3 ${row.signature}@${row.target}`,
+          ).to.be.true;
       }
     });
 
-    it("revoke: Critical lost each one; Guardian flags unchanged", async () => {
-      for (const row of REVOKE) {
+    it("revoke: the CriticalTimelock lost each target-specific grant", async () => {
+      for (const row of REVOKE)
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
-        expect(await holds(BNB_GUARDIANS.guardian1, row), `post g1 ${row.signature}@${row.target}`).to.equal(
-          row.guardian1,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian2, row), `post g2 ${row.signature}@${row.target}`).to.equal(
-          row.guardian2,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian3, row), `post g3 ${row.signature}@${row.target}`).to.equal(
-          row.guardian3,
-        );
-      }
     });
 
     it("swap: Critical lost each one and the target Guardian gained it", async () => {
@@ -209,6 +239,36 @@ forking(FORK_BLOCK, async () => {
       for (const staleRow of STALE_ROWS)
         for (const who of staleRow.revokeFrom)
           expect(await holds(who, staleRow), `post stale ${staleRow.signature}@${staleRow.target} ${who}`).to.be.false;
+    });
+
+    it("legacy wildcard: each grantee lost the 32-byte wildcard role", async () => {
+      for (const r of BNB_LEGACY_WILDCARD_REVOKES) {
+        expect(
+          await acm().hasRole(legacyWildcardRole(r.signature), r.account),
+          `post legacy wildcard ${r.signature} ${r.account}`,
+        ).to.be.false;
+      }
+    });
+
+    it("redundant: each target-specific grant was revoked", async () => {
+      for (const r of REDUNDANT) {
+        expect(
+          await acm().hasRole(role(r.contract, r.signature), r.account),
+          `post redundant ${r.note} (${r.signature})`,
+        ).to.be.false;
+      }
+    });
+
+    it("redundant behavioral: each account can still call its function via the surviving wildcard", async () => {
+      for (const r of REDUNDANT) {
+        // setCollateralFactor from Critical is the single case whose wildcard is also revoked, so its power is
+        // fully removed (asserted in the revoke test). Every other redundant revoke is behavior-preserving.
+        if (r.signature === "setCollateralFactor(address,uint256,uint256)" && r.account === BNB_CRITICAL) continue;
+        expect(
+          await acm().isAllowedToCall(r.account, r.signature, { from: r.contract }),
+          `still callable ${r.note} (${r.signature})`,
+        ).to.be.true;
+      }
     });
   });
 

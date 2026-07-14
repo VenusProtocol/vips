@@ -1,9 +1,23 @@
+import { ethers } from "ethers";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { Command } from "src/types";
 
-import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, BNB_ROWS } from "../data/bnb";
-import { REMOTE_ACM, REMOTE_CHAINS, RemoteChain, remoteRowsFor } from "../data/remote";
-import { STALE_ROWS } from "../data/staleness";
-import { syncCashGrants, syncCashRevokes } from "../data/syncCash";
+import {
+  BNB_ACTION_LEGACY_WILDCARD_REVOKES,
+  BNB_ROWS,
+  REMOTE_CHAINS,
+  RemoteChain,
+  remoteRowsFor,
+} from "../data/actionPlan";
+import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, REMOTE_ACM } from "../data/addresses";
+import {
+  CLEANUP_LEGACY_WILDCARD_REVOKES,
+  REDUNDANT_REVOKES,
+  RedundantChain,
+  STALE_ROWS,
+  syncCashGrants,
+  syncCashRevokes,
+} from "../data/cleanup";
 
 export type Chain = "bscmainnet" | RemoteChain;
 export const CHAINS: Chain[] = ["bscmainnet", ...REMOTE_CHAINS];
@@ -56,8 +70,8 @@ export interface Permission {
 }
 
 // Permissions the aggregator grants on a chain. On BNB: swap → move a function to a Guardian, grant → add a
-// Guardian alongside Critical. On remotes: the single wildcard syncCash() grant to NormalTimelock (the
-// syncCash hygiene cleanup); remotes have no Guardian swaps/grants.
+// Guardian alongside Critical. On remotes: the single wildcard syncCash() grant to NormalTimelock; remotes
+// have no Guardian swaps/grants.
 export const grantPermissions = (chain: Chain): Permission[] => {
   if (chain !== "bscmainnet") return syncCashGrants(chain);
   return BNB_ROWS.filter(r => r.action === "swap" || r.action === "grant").map(r => ({
@@ -67,25 +81,66 @@ export const grantPermissions = (chain: Chain): Permission[] => {
   }));
 };
 
-// Permissions the aggregator revokes on a chain: revoke/swap/stale rows from Critical on BNB (plus the
-// staleness / legacy cleanup); on remotes every remote row from that chain's Critical, plus the per-market
-// syncCash() grants from NormalTimelock (replaced by the wildcard grant above).
-export const revokePermissions = (chain: Chain): Permission[] => {
-  if (chain === "bscmainnet") {
-    const revokes: Permission[] = BNB_ROWS.filter(
-      r => r.action === "revoke" || r.action === "swap" || r.action === "stale",
-    ).map(r => ({ contractAddress: r.target, functionSig: r.signature, account: BNB_CRITICAL }));
-    // Staleness / legacy cleanup: revoke each dangling grant from every current holder.
-    for (const s of STALE_ROWS)
-      for (const who of s.revokeFrom)
-        revokes.push({ contractAddress: s.target, functionSig: s.signature, account: who });
-    return revokes;
-  }
-  const critical = criticalOf(chain);
-  const criticalRevokes = remoteRowsFor(chain).map(r => ({
-    contractAddress: r.target,
+// Key identifying a unique ACM revoke (contract + function + grantee), used to de-duplicate the redundant
+// cleanup against the base plan (e.g. Unitroller setCollateralFactor from Critical is in both).
+const revokeKey = (p: Permission) => `${p.contractAddress.toLowerCase()}|${p.functionSig}|${p.account.toLowerCase()}`;
+
+// Redundant target-specific grants to revoke on a chain — shadowed by an identical wildcard grant held by the
+// same account, so revoking them is behavior-preserving.
+const redundantRevokes = (chain: Chain): Permission[] =>
+  REDUNDANT_REVOKES[chain as RedundantChain].map(r => ({
+    contractAddress: r.contract,
     functionSig: r.signature,
-    account: critical,
+    account: r.account,
   }));
-  return [...criticalRevokes, ...syncCashRevokes(chain)];
+
+// Permissions the aggregator revokes on a chain: revoke/swap/stale rows from Critical on BNB (plus the
+// dangling-grant cleanup); on remotes every remote row from that chain's Critical, plus the per-market
+// syncCash() grants from NormalTimelock (replaced by the wildcard grant). Finally the redundant
+// (wildcard-shadowed) target-specific grants, de-duplicated against everything above.
+export const revokePermissions = (chain: Chain): Permission[] => {
+  let base: Permission[];
+  if (chain === "bscmainnet") {
+    base = BNB_ROWS.filter(r => r.action === "revoke" || r.action === "swap" || r.action === "stale").map(r => ({
+      contractAddress: r.target,
+      functionSig: r.signature,
+      account: BNB_CRITICAL,
+    }));
+    for (const s of STALE_ROWS)
+      for (const who of s.revokeFrom) base.push({ contractAddress: s.target, functionSig: s.signature, account: who });
+  } else {
+    const critical = criticalOf(chain);
+    const criticalRevokes = remoteRowsFor(chain).map(r => ({
+      contractAddress: r.target,
+      functionSig: r.signature,
+      account: critical,
+    }));
+    base = [...criticalRevokes, ...syncCashRevokes(chain)];
+  }
+  const seen = new Set(base.map(revokeKey));
+  const redundant = redundantRevokes(chain).filter(p => !seen.has(revokeKey(p)));
+  return [...base, ...redundant];
 };
+
+// BNB legacy-ACM wildcard quirk. The AccessControlManager on bscmainnet derives a wildcard ("any contract")
+// role from the 32-byte DEFAULT_ADMIN_ROLE constant, not the 20-byte address(0). revokeCallPermission hashes
+// the 20-byte zero, so it targets a different role and can never clear a wildcard grant — and the
+// ACMCommandsAggregator only calls give/revokeCallPermission. These grants are cleared with a direct
+// ACM.revokeRole(legacyRole, account), which the NormalTimelock (proposal executor and ACM DEFAULT_ADMIN) can call.
+export const legacyWildcardRole = (signature: string): string =>
+  ethers.utils.solidityKeccak256(["bytes32", "string"], [ethers.constants.HashZero, signature]);
+
+// Wildcard grants on the bscmainnet legacy ACM the plan revokes but the aggregator cannot reach: the
+// setCollateralFactor revoke from Critical (action plan) and the retired risk steward cap powers (cleanup).
+export const BNB_LEGACY_WILDCARD_REVOKES: { signature: string; account: string }[] = [
+  ...BNB_ACTION_LEGACY_WILDCARD_REVOKES,
+  ...CLEANUP_LEGACY_WILDCARD_REVOKES,
+];
+
+// Direct ACM.revokeRole calls for the legacy wildcard grants, executed by the NormalTimelock.
+export const legacyWildcardCommands = (): Command[] =>
+  BNB_LEGACY_WILDCARD_REVOKES.map(r => ({
+    target: BNB_ACM,
+    signature: "revokeRole(bytes32,address)",
+    params: [legacyWildcardRole(r.signature), r.account],
+  }));

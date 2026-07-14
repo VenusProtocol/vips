@@ -1,71 +1,20 @@
+// VIP-665 — reduce CriticalTimelock privileges across BNB Chain and the 7 remote mainnets.
+// BNB rows carry the current holder flags and the final action; remote rows are all Critical revokes.
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId } from "src/types";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
-export const ZERO = "0x0000000000000000000000000000000000000000";
+import {
+  BNB_CRITICAL,
+  BNB_CONTRACTS as CONTRACTS,
+  OMNICHAIN_EXECUTOR_OWNER,
+  SENTINEL_ORACLE,
+  XVS_BRIDGE_ADMIN,
+  ZERO,
+} from "./addresses";
 
-export const BNB_ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
-export const BNB_CRITICAL = bscmainnet.CRITICAL_TIMELOCK;
-// Guardian 1 = CRITICAL_GUARDIAN (swap/grant target), 2 = GUARDIAN (pause), 3 = oracles.
-export const BNB_GUARDIANS = {
-  guardian1: bscmainnet.CRITICAL_GUARDIAN,
-  guardian2: bscmainnet.GUARDIAN,
-  guardian3: "0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF",
-};
-
-// Contract addresses the action plan is scoped to (verified on-chain).
-const CONTRACTS = {
-  Liquidator: "0x0870793286aaDA55D39CE7f82fb2766e8004cF43",
-  PegStability_USDT: "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36",
-  Prime: "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC",
-  PrimeLiquidityProvider: "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2",
-  PrimeV2: "0x059EabA8676b03e4e8f009eFb7F587C28450F50f",
-  Unitroller: "0xfD36E2c2a6789Db23113685031d7F16329158384",
-  VaiUnitroller: "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE",
-  VAIVaultProxy: "0x0667Eed0a0aAb930af74a3dfeDD263A73994f216",
-  VBNBAdmin: "0x9A7890534d9d91d473F28cB97962d176e2B65f1d",
-  VRTVaultProxy: "0x98bF4786D72AAEF6c714425126Dd92f149e3F334",
-  XVSVaultProxy: "0x051100480289e704d20e9DB4804837068f3f9204",
-  BinanceOracle: "0x594810b741d136f1960141C0d8Fb4a91bE78A820",
-  ChainlinkOracle: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
-  DeviationBoundedOracle: "0xc79Cb7efEBd121DC4B39eA141C214606595D665A",
-  PythOracle: "0xb893E38162f55fb80B18Aa44da76FaDf8E9B2262",
-  RedStoneOracle: "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a",
-  ResilientOracle: "0x6592b5DE802159F3E74B2486b091D11a8256ab8A",
-  USDTChainlinkOracle: "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8",
-  BTCBPrimeConverter: "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53",
-  ConverterNetwork: "0xF7Caad5CeB0209165f2dFE71c92aDe14d0F15995",
-  ETHPrimeConverter: "0xca430B8A97Ea918fF634162acb0b731445B8195E",
-  ProtocolShareReserve: "0xCa01D5A9A248a830E9D93231e791B1afFed7c446",
-  RiskFundConverter: "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0",
-  RiskFundV2: "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42",
-  USDCPrimeConverter: "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b",
-  USDTPrimeConverter: "0xD9f101AA67F3D72662609a2703387242452078C3",
-  WBNBBurnConverter: "0x9eF79830e626C8ccA7e46DCEd1F90e51E7cFCeBE",
-  XVSVaultConverter: "0xd5b9AE835F4C59272032B3B954417179573331E0",
-  XVSVaultTreasury: "0x269ff7818DB317f60E386D2be0B259e1a324a40a",
-  Comptroller_DeFi: "0x3344417c9360b963ca93A4e8305361AEde340Ab9",
-  Comptroller_GameFi: "0x1b43ea8622e76627B81665B1eCeBB4867566B963",
-  Comptroller_LiquidStakedBNB: "0xd933909A4a2b7A4638903028f44D1d38ce27c352",
-  Comptroller_Stablecoins: "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571",
-  Comptroller_Tron: "0x23b4404E4E5eC5FF5a6FFb70B7d14E3FabF237B0",
-  Shortfall: "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209",
-  DeviationSentinel: "0x6599C15cc8407046CD91E5c0F8B7f765fF914870",
-  EBrake: "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec",
-  Executor: "0xDd541A1b065F9587b01815a390a4d4559D7b630F",
-  PancakeSwapOracle: "0x44B72078240A3509979faF450085Fa818401D32E",
-  PendlePTVaultAdapter: "0x60Db419d8ea13C5827072Cf693D13cA1Ec6E0B4a",
-  RelativePositionManager: "0x1525D804DFff218DcC8B9359940F423209356C42",
-  SentinelOracle: "0x58eae0Cf4215590E19860b66b146C5d539cb6f14",
-  UniswapOracle: "0x8FD05458faf220B2324c4BFbb29DBC4B3CF6f23f",
-  AuxiliaryCommandsAggregator: "0x528A428748dfE73DFcc844176B401475D1831057",
-  OmnichainProposalSender: "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6",
-  RiskOracle: "0x0E3E51958b0Daa8C57c949675975CBEDd7b5a1a1",
-  RiskStewardReceiver: "0x47856bFa74B71d24a5545c7506862B8FddE52baB",
-  XVSBridgeAdmin: "0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21",
-  InstitutionalVaultControllerProxy: "0x6D9e91cB766259af42619c14c994E694E57e6E85",
-  LiquidationAdapterProxy: "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd",
-};
-
+// ===================================================================================================
+// BNB Chain
+// ===================================================================================================
 export type Action = "none" | "revoke" | "swap" | "grant" | "stale";
 // signature = ACM-registered function signature; target = contract it is scoped to;
 // critical/guardian1/guardian2/guardian3 = current holders; action = final action;
@@ -2097,3 +2046,150 @@ export const BNB_ROWS: {
     action: "none",
   },
 ];
+
+// setCollateralFactor on the isolated-pools wildcard target is revoked from the CriticalTimelock via a
+// direct ACM.revokeRole on the legacy BNB ACM (the aggregator cannot clear wildcard grants there — see
+// legacyWildcardRole in utils/commands.ts).
+export const BNB_ACTION_LEGACY_WILDCARD_REVOKES: { signature: string; account: string }[] = [
+  { signature: "setCollateralFactor(address,uint256,uint256)", account: BNB_CRITICAL },
+];
+
+// ===================================================================================================
+// Remote chains
+// ===================================================================================================
+export type RemoteChain =
+  | "ethereum"
+  | "arbitrumone"
+  | "basemainnet"
+  | "zksyncmainnet"
+  | "opmainnet"
+  | "unichainmainnet"
+  | "opbnbmainnet";
+
+export const REMOTE_CHAINS: RemoteChain[] = [
+  "ethereum",
+  "arbitrumone",
+  "basemainnet",
+  "zksyncmainnet",
+  "opmainnet",
+  "unichainmainnet",
+  "opbnbmainnet",
+];
+
+export const LZ_CHAIN_ID: Record<RemoteChain, LzChainId> = {
+  ethereum: LzChainId.ethereum,
+  arbitrumone: LzChainId.arbitrumone,
+  basemainnet: LzChainId.basemainnet,
+  zksyncmainnet: LzChainId.zksyncmainnet,
+  opmainnet: LzChainId.opmainnet,
+  unichainmainnet: LzChainId.unichainmainnet,
+  opbnbmainnet: LzChainId.opbnbmainnet,
+};
+
+const addressesOf = (chain: RemoteChain) => NETWORK_ADDRESSES[chain] as Record<string, string>;
+
+// Resolve a contract key to its address on a chain. On Arbitrum/OP the "CHAINLINK_ORACLE" key is the
+// SequencerChainlinkOracle adapter.
+export const remoteAddr = (chain: RemoteChain, c: string): string => {
+  switch (c) {
+    case "WILDCARD":
+      return ZERO;
+    case "ResilientOracle":
+      return addressesOf(chain).RESILIENT_ORACLE;
+    case "ChainlinkOracle":
+      return addressesOf(chain).CHAINLINK_ORACLE;
+    case "RedStoneOracle":
+      return addressesOf(chain).REDSTONE_ORACLE;
+    case "SequencerChainlinkOracle":
+      return addressesOf(chain).CHAINLINK_ORACLE;
+    case "SentinelOracle":
+      return SENTINEL_ORACLE[chain]!;
+    case "XVSBridgeAdmin":
+      return XVS_BRIDGE_ADMIN[chain];
+    case "OmnichainExecutorOwner":
+      return OMNICHAIN_EXECUTOR_OWNER[chain];
+    default:
+      throw new Error(`unknown remote contract key ${c}`);
+  }
+};
+
+const ALL_REMOTES = REMOTE_CHAINS;
+
+// Every row is a revoke from Critical. contract = contract key (resolved per-chain); chains = where it
+// applies; guardian = Guardian currently holds it (must still hold post-VIP).
+export const REMOTE_ROWS: { signature: string; contract: string; chains: RemoteChain[]; guardian: boolean }[] = [
+  // ── Common to all 7 remotes ──
+  { signature: "setTokenConfig(TokenConfig)", contract: "ResilientOracle", chains: ALL_REMOTES, guardian: true },
+  {
+    signature: "setCollateralFactor(address,uint256,uint256)",
+    contract: "WILDCARD",
+    chains: ALL_REMOTES,
+    guardian: true,
+  },
+  { signature: "addTimelocks(address[])", contract: "OmnichainExecutorOwner", chains: ALL_REMOTES, guardian: true },
+  {
+    signature: "setMaxDailyReceiveLimit(uint256)",
+    contract: "OmnichainExecutorOwner",
+    chains: ALL_REMOTES,
+    guardian: true,
+  },
+  { signature: "setWhitelist(address,bool)", contract: "XVSBridgeAdmin", chains: ALL_REMOTES, guardian: false },
+
+  // ── Chain-specific ──
+  {
+    signature: "setDirectPrice(address,uint256)",
+    contract: "ChainlinkOracle",
+    chains: ["ethereum", "basemainnet", "zksyncmainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setTokenConfig(TokenConfig)",
+    contract: "ChainlinkOracle",
+    chains: ["ethereum", "basemainnet", "zksyncmainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setDirectPrice(address,uint256)",
+    contract: "RedStoneOracle",
+    chains: ["ethereum", "arbitrumone", "basemainnet", "zksyncmainnet", "opmainnet", "unichainmainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setTokenConfig(TokenConfig)",
+    contract: "RedStoneOracle",
+    chains: ["ethereum", "arbitrumone", "basemainnet", "zksyncmainnet", "opmainnet", "unichainmainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setDirectPrice(address,uint256)",
+    contract: "SequencerChainlinkOracle",
+    chains: ["arbitrumone", "opmainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setTokenConfig(TokenConfig)",
+    contract: "SequencerChainlinkOracle",
+    chains: ["arbitrumone", "opmainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setDirectPrice(address,uint256)",
+    contract: "SentinelOracle",
+    chains: ["ethereum", "arbitrumone", "basemainnet"],
+    guardian: true,
+  },
+  {
+    signature: "setTokenOracleConfig(address,address)",
+    contract: "SentinelOracle",
+    chains: ["ethereum", "arbitrumone", "basemainnet"],
+    guardian: true,
+  },
+];
+
+// Rows applicable to one chain, with resolved target address.
+export const remoteRowsFor = (chain: RemoteChain) =>
+  REMOTE_ROWS.filter(r => r.chains.includes(chain)).map(r => ({
+    signature: r.signature,
+    target: remoteAddr(chain, r.contract),
+    guardian: r.guardian,
+  }));
