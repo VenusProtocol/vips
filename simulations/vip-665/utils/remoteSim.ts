@@ -47,7 +47,10 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
       it("redundant: each target-specific grant is currently held by its account", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
         for (const r of redundant)
-          expect(await acm.hasRole(role(r.contract, r.signature), r.account), `pre redundant ${r.note}`).to.be.true;
+          expect(
+            await acm.hasRole(role(r.contract, r.signature), r.account),
+            `pre redundant ${r.signature}@${r.contract} ${r.account}`,
+          ).to.be.true;
       });
 
       it("revoke: Critical currently holds every permission to be revoked", async () => {
@@ -111,7 +114,10 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
       it("redundant: each target-specific grant was revoked", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
         for (const r of redundant)
-          expect(await acm.hasRole(role(r.contract, r.signature), r.account), `post redundant ${r.note}`).to.be.false;
+          expect(
+            await acm.hasRole(role(r.contract, r.signature), r.account),
+            `post redundant ${r.signature}@${r.contract} ${r.account}`,
+          ).to.be.false;
       });
 
       it("redundant behavioral: each account can still call the function via the surviving wildcard", async () => {
@@ -119,7 +125,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
         for (const r of redundant)
           expect(
             await acm.isAllowedToCall(r.account, r.signature, { from: r.contract }),
-            `post callable ${r.note} (${r.signature})`,
+            `post callable ${r.signature}@${r.contract} ${r.account}`,
           ).to.be.true;
       });
 

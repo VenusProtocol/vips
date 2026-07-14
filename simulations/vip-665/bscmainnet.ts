@@ -84,7 +84,7 @@ forking(FORK_BLOCK, async () => {
       for (const r of REDUNDANT) {
         expect(
           await acm().hasRole(role(r.contract, r.signature), r.account),
-          `pre redundant ${r.note} (${r.signature})`,
+          `pre redundant ${r.signature}@${r.contract} ${r.account}`,
         ).to.be.true;
       }
     });
@@ -206,6 +206,14 @@ forking(FORK_BLOCK, async () => {
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
     });
 
+    it("behavioral: the CriticalTimelock can no longer call any revoked or stale function", async () => {
+      for (const row of [...REVOKE, ...STALE])
+        expect(
+          await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
+          `crit still allowed ${row.signature}@${row.target}`,
+        ).to.be.false;
+    });
+
     it("swap: Critical lost each one and the target Guardian gained it", async () => {
       for (const row of SWAP) {
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
@@ -254,7 +262,7 @@ forking(FORK_BLOCK, async () => {
       for (const r of REDUNDANT) {
         expect(
           await acm().hasRole(role(r.contract, r.signature), r.account),
-          `post redundant ${r.note} (${r.signature})`,
+          `post redundant ${r.signature}@${r.contract} ${r.account}`,
         ).to.be.false;
       }
     });
@@ -266,7 +274,7 @@ forking(FORK_BLOCK, async () => {
         if (r.signature === "setCollateralFactor(address,uint256,uint256)" && r.account === BNB_CRITICAL) continue;
         expect(
           await acm().isAllowedToCall(r.account, r.signature, { from: r.contract }),
-          `still callable ${r.note} (${r.signature})`,
+          `still callable ${r.signature}@${r.contract} ${r.account}`,
         ).to.be.true;
       }
     });

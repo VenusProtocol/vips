@@ -97,12 +97,11 @@ export type RedundantChain =
 // Timelocks / guardians per chain, keyed by networkAddresses (cast for uniform string access).
 const na = NETWORK_ADDRESSES as unknown as Record<RedundantChain, Record<string, string>>;
 
-// A single target-specific grant to revoke. note = "<ContractName> — <PrincipalName>" for review readability.
+// A single target-specific grant to revoke.
 export interface RedundantRevoke {
   contract: string;
   signature: string;
   account: string;
-  note: string;
 }
 
 // The 75 redundant target-specific grants, per chain.
@@ -112,151 +111,126 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.bscmainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.bscmainnet.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.bscmainnet.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.PrimeLeaderboard,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "PrimeLeaderboard — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.PrimeV2,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "PrimeV2 — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "setCollateralFactor(address,uint256,uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "Unitroller — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "setCollateralFactor(address,uint256,uint256)",
       account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-      note: "Unitroller — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "setCollateralFactor(address,uint256,uint256)",
       account: na.bscmainnet.CRITICAL_TIMELOCK,
-      note: "Unitroller — CriticalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "setCollateralFactor(address,uint256,uint256)",
       account: na.bscmainnet.CRITICAL_GUARDIAN,
-      note: "Unitroller — Guardian 1",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "unlistMarket(address)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "Unitroller — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "unlistMarket(address)",
       account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-      note: "Unitroller — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "unlistMarket(address)",
       account: na.bscmainnet.CRITICAL_TIMELOCK,
-      note: "Unitroller — CriticalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.Unitroller,
       signature: "unlistMarket(address)",
       account: na.bscmainnet.GUARDIAN,
-      note: "Unitroller — Guardian 2",
     },
     {
       contract: CONTRACTS.bscmainnet.VBNBAdmin,
       signature: "setInterestRateModel(address)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "VBNBAdmin — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.VBNBAdmin,
       signature: "setInterestRateModel(address)",
       account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-      note: "VBNBAdmin — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.VBNBAdmin,
       signature: "setInterestRateModel(address)",
       account: na.bscmainnet.CRITICAL_TIMELOCK,
-      note: "VBNBAdmin — CriticalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.vUNI,
       signature: "_setReserveFactor(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "vUNI — NormalTimelock",
     },
     {
       contract: CONTRACTS.bscmainnet.vUNI,
       signature: "setReduceReservesBlockDelta(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
-      note: "vUNI — NormalTimelock",
     },
   ],
   ethereum: [
@@ -264,73 +238,61 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.ethereum.GUARDIAN,
-      note: "EBrake — Guardian",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.ethereum.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.ethereum.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.ethereum.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.ethereum.GUARDIAN,
-      note: "EBrake — Guardian",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.ethereum.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.ethereum.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.ethereum.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.ethereum.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.ethereum.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.ethereum.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.ethereum.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.ethereum.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.ethereum.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
   arbitrumone: [
@@ -338,73 +300,61 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.arbitrumone.GUARDIAN,
-      note: "EBrake — Guardian",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.arbitrumone.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.arbitrumone.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.arbitrumone.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.arbitrumone.GUARDIAN,
-      note: "EBrake — Guardian",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.arbitrumone.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.arbitrumone.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.arbitrumone.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.arbitrumone.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.arbitrumone.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.arbitrumone.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.arbitrumone.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.arbitrumone.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
   basemainnet: [
@@ -412,73 +362,61 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.basemainnet.GUARDIAN,
-      note: "EBrake — Guardian",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.basemainnet.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.basemainnet.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketBorrowCaps(address[],uint256[])",
       account: na.basemainnet.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.basemainnet.GUARDIAN,
-      note: "EBrake — Guardian",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.basemainnet.NORMAL_TIMELOCK,
-      note: "EBrake — NormalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.basemainnet.FAST_TRACK_TIMELOCK,
-      note: "EBrake — FastTrackTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.EBrake,
       signature: "setMarketSupplyCaps(address[],uint256[])",
       account: na.basemainnet.CRITICAL_TIMELOCK,
-      note: "EBrake — CriticalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.basemainnet.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.basemainnet.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.basemainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.basemainnet.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.basemainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
   opmainnet: [
@@ -486,25 +424,21 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.opmainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.opmainnet.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.opmainnet.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.opmainnet.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.opmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.opmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.opmainnet.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.opmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
   unichainmainnet: [
@@ -512,25 +446,21 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.unichainmainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.unichainmainnet.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.unichainmainnet.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.unichainmainnet.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.unichainmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.unichainmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.unichainmainnet.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.unichainmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
   zksyncmainnet: [
@@ -538,25 +468,21 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.zksyncmainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.zksyncmainnet.NORMAL_TIMELOCK,
-      note: "Prime — NormalTimelock",
     },
     {
       contract: CONTRACTS.zksyncmainnet.PrimeLiquidityProvider,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.zksyncmainnet.NORMAL_TIMELOCK,
-      note: "PrimeLiquidityProvider — NormalTimelock",
     },
     {
       contract: CONTRACTS.zksyncmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.zksyncmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.zksyncmainnet.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.zksyncmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
   opbnbmainnet: [
@@ -564,13 +490,11 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       contract: CONTRACTS.opbnbmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.opbnbmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
     {
       contract: CONTRACTS.opbnbmainnet.VenusERC4626Factory,
       signature: "setRewardRecipient(address)",
       account: na.opbnbmainnet.NORMAL_TIMELOCK,
-      note: "VenusERC4626Factory — NormalTimelock",
     },
   ],
 };
