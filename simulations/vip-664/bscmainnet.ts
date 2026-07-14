@@ -11,6 +11,10 @@ import {
   ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
   BORROW_ACTION,
+  DBO_COOLDOWN_PERIOD,
+  DBO_RESET_THRESHOLD,
+  DBO_TRIGGER_THRESHOLD,
+  DEVIATION_BOUNDED_ORACLE,
   MARKETS,
   ONE_YEAR,
   PROTOCOL_SHARE_RESERVE,
@@ -21,6 +25,7 @@ import {
 } from "../../vips/vip-664/bscmainnet";
 import ATLAS_ORACLE_ABI from "./abi/AtlasOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -39,6 +44,7 @@ forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const atlasOracle = new ethers.Contract(ATLAS_ORACLE, ATLAS_ORACLE_ABI, ethers.provider);
+  const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
 
   before(async () => {
     // Seed the VTreasury with the bootstrap SKHYB so `withdrawTreasuryBEP20` in the VIP succeeds.
@@ -125,6 +131,15 @@ forking(FORK_BLOCK, async () => {
           expect(config.feed).to.equal(m.oracle.feed);
           // Simulations configure a 1-year stale period (see VIP-615 workaround).
           expect(config.maxStalePeriod).to.equal(ONE_YEAR);
+        });
+
+        it("enables Oracle Dynamic Protection Mode with a 16.67% trigger", async () => {
+          const cfg = await dbo.assetProtectionConfig(m.vToken.underlying.address);
+          expect(cfg.isBoundedPricingEnabled).to.equal(true);
+          expect(cfg.triggerThreshold).to.equal(DBO_TRIGGER_THRESHOLD);
+          expect(cfg.resetThreshold).to.equal(DBO_RESET_THRESHOLD);
+          expect(cfg.cooldownPeriod).to.equal(DBO_COOLDOWN_PERIOD);
+          expect(cfg.cachingEnabled).to.equal(false);
         });
 
         it("market has correct owner", async () => {

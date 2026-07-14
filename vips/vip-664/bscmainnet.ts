@@ -13,6 +13,12 @@ export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 export const ATLAS_ORACLE = "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0";
+
+// Oracle Dynamic Protection Mode (DeviationBoundedOracle)
+export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
+export const DBO_COOLDOWN_PERIOD = 3600; // 1h rolling window
+export const DBO_TRIGGER_THRESHOLD = parseUnits("0.1667", 18); // 16.67% — arms protection beyond this deviation
+export const DBO_RESET_THRESHOLD = parseUnits("0.05", 18); // 5%
 export const ATLAS_MAX_STALE_PERIOD = 3800; // ~1h — matches the other Atlas-backed bstock markets (VIP-633)
 // Used in simulations only: the governance lifecycle mines ~72h of blocks, which would exceed the
 // real stale period and make getUnderlyingPrice revert. See VIP-615 stale-period workaround.
@@ -132,6 +138,7 @@ This VIP will:
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
 - Provide bootstrap liquidity (minting an initial supply and sending the resulting vTokens to the VTreasury)
 - Pause borrowing for the market at launch
+- Enable Oracle Dynamic Protection Mode (DeviationBoundedOracle, see VIP-617) for the underlying, with a 16.67% deviation trigger
 
 #### Risk parameters
 
@@ -251,6 +258,22 @@ This VIP will:
         target: m.vToken.address,
         signature: "transfer(address,uint256)",
         params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
+      },
+
+      // Enable Oracle Dynamic Protection Mode (DBO) for the underlying with a 16.67% deviation trigger.
+      {
+        target: DEVIATION_BOUNDED_ORACLE,
+        signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
+        params: [
+          [
+            m.vToken.underlying.address,
+            DBO_COOLDOWN_PERIOD,
+            DBO_TRIGGER_THRESHOLD,
+            DBO_RESET_THRESHOLD,
+            true, // isBoundedPricingEnabled
+            false, // cachingEnabled
+          ],
+        ],
       },
     ]),
     meta,

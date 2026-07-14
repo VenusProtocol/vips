@@ -26,6 +26,8 @@ Both simulations passed. Test files:
 | Atlas feed (SKHYB/USD)           | bscmainnet | `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` |
 | Protocol Share Reserve           | bsctestnet | `0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3` |
 | Protocol Share Reserve           | bscmainnet | `0xCa01D5A9A248a830E9D93231e791B1afFed7c446` |
+| DeviationBoundedOracle (DBO)     | bsctestnet | `0xE0dafC97895B3c98d3B96D3f8739AaC73166beB8` |
+| DeviationBoundedOracle (DBO)     | bscmainnet | `0xc79Cb7efEBd121DC4B39eA141C214606595D665A` |
 
 ---
 
@@ -44,6 +46,9 @@ Both simulations passed. Test files:
 | IRM jump multiplier         | 627%                      |
 | IRM kink                    | 75%                       |
 | Bootstrap liquidity         | 0.51 SK4B                 |
+| DBO trigger threshold       | 16.67% (`0.1667e18`)      |
+| DBO reset threshold         | 5% (`0.05e18`)            |
+| DBO cooldown period         | 3600 s (1 h)              |
 | vTokens burned (10%)        | 0.051 vSKHYB → address(0) |
 | vTokens to VTreasury        | remainder after burn      |
 | `reduceReservesBlockDelta`  | 28 800 blocks             |
@@ -102,6 +107,14 @@ Both simulations passed. Test files:
 - `supplyCap` = `1250e18`
 - `borrowCap` = `0`
 
+**Oracle Dynamic Protection Mode (DBO)**
+
+- `dbo.assetProtectionConfig(SK4B).isBoundedPricingEnabled` = `true`
+- `dbo.assetProtectionConfig(SK4B).triggerThreshold` = `0.1667e18` (16.67%)
+- `dbo.assetProtectionConfig(SK4B).resetThreshold` = `0.05e18` (5%)
+- `dbo.assetProtectionConfig(SK4B).cooldownPeriod` = `3600`
+- `dbo.assetProtectionConfig(SK4B).cachingEnabled` = `false`
+
 **Market configuration**
 
 - `admin` = Normal Timelock
@@ -152,6 +165,14 @@ Same 10 events as testnet (each with count = 1).
 **Interest rate model** — same parameters, contract at `0xe589E884f69dF3137B43A760C4Ec9E55D944439D`.
 
 **Risk parameters** — identical to testnet (CF 50%, LT 65%, LI 10%, RF 10%, cap 1250, borrow cap 0).
+
+**Oracle Dynamic Protection Mode (DBO)**
+
+- `dbo.assetProtectionConfig(SK4B).isBoundedPricingEnabled` = `true`
+- `dbo.assetProtectionConfig(SK4B).triggerThreshold` = `0.1667e18` (16.67%)
+- `dbo.assetProtectionConfig(SK4B).resetThreshold` = `0.05e18` (5%)
+- `dbo.assetProtectionConfig(SK4B).cooldownPeriod` = `3600`
+- `dbo.assetProtectionConfig(SK4B).cachingEnabled` = `false`
 
 **Market configuration**
 

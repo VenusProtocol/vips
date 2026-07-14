@@ -13,6 +13,12 @@ export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
+// Oracle Dynamic Protection Mode (DeviationBoundedOracle)
+export const DEVIATION_BOUNDED_ORACLE = "0xE0dafC97895B3c98d3B96D3f8739AaC73166beB8";
+export const DBO_COOLDOWN_PERIOD = 3600; // 1h rolling window
+export const DBO_TRIGGER_THRESHOLD = parseUnits("0.1667", 18); // 16.67% — arms protection beyond this deviation
+export const DBO_RESET_THRESHOLD = parseUnits("0.05", 18); // 5%
+
 export type MarketSpec = {
   vToken: {
     address: string;
@@ -218,6 +224,22 @@ If passed, this VIP will list a new tokenized-equity market — Venus SK Hynix (
         target: m.vToken.address,
         signature: "transfer(address,uint256)",
         params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
+      },
+
+      // Enable Oracle Dynamic Protection Mode (DBO) for the underlying with a 16.67% deviation trigger.
+      {
+        target: DEVIATION_BOUNDED_ORACLE,
+        signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
+        params: [
+          [
+            m.vToken.underlying.address,
+            DBO_COOLDOWN_PERIOD,
+            DBO_TRIGGER_THRESHOLD,
+            DBO_RESET_THRESHOLD,
+            true, // isBoundedPricingEnabled
+            false, // cachingEnabled
+          ],
+        ],
       },
     ]),
     meta,

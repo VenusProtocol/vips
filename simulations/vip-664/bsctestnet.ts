@@ -9,6 +9,10 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import {
   BORROW_ACTION,
+  DBO_COOLDOWN_PERIOD,
+  DBO_RESET_THRESHOLD,
+  DBO_TRIGGER_THRESHOLD,
+  DEVIATION_BOUNDED_ORACLE,
   MARKETS,
   PROTOCOL_SHARE_RESERVE,
   REDUCE_RESERVES_BLOCK_DELTA,
@@ -17,6 +21,7 @@ import {
   vip664,
 } from "../../vips/vip-664/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -29,6 +34,7 @@ const FORK_BLOCK = 119048000;
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+  const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
 
   describe("Pre-VIP behavior", async () => {
     for (const m of MARKETS) {
@@ -93,6 +99,15 @@ forking(FORK_BLOCK, async () => {
         it("returns the configured price from the oracle", async () => {
           const price = await resilientOracle.getUnderlyingPrice(m.vToken.address);
           expect(price).to.equal(m.oracle.directPrice);
+        });
+
+        it("enables Oracle Dynamic Protection Mode with a 16.67% trigger", async () => {
+          const cfg = await dbo.assetProtectionConfig(m.vToken.underlying.address);
+          expect(cfg.isBoundedPricingEnabled).to.equal(true);
+          expect(cfg.triggerThreshold).to.equal(DBO_TRIGGER_THRESHOLD);
+          expect(cfg.resetThreshold).to.equal(DBO_RESET_THRESHOLD);
+          expect(cfg.cooldownPeriod).to.equal(DBO_COOLDOWN_PERIOD);
+          expect(cfg.cachingEnabled).to.equal(false);
         });
 
         it("market has correct owner", async () => {
