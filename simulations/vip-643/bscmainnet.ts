@@ -22,8 +22,8 @@ import {
   REDUCE_RESERVES_BLOCK_DELTA,
   convertAmountToVTokens,
   vTokensRemaining,
-  vip664,
-} from "../../vips/vip-664/bscmainnet";
+  vip643,
+} from "../../vips/vip-643/bscmainnet";
 import ATLAS_ORACLE_ABI from "./abi/AtlasOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
@@ -69,7 +69,7 @@ forking(FORK_BLOCK, async () => {
     }
   });
 
-  testVip("VIP-664", await vip664(true), {
+  testVip("VIP-643", await vip643(true), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

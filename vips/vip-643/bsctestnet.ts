@@ -111,10 +111,10 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 export const vTokensRemaining = (m: MarketSpec) =>
   convertAmountToVTokens(m.initialSupply.amount, m.vToken.exchangeRate).sub(m.initialSupply.vTokensToBurn);
 
-export const vip664 = () => {
+export const vip643 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain Testnet] List Venus SK Hynix (vSKHYB) in the Venus Core Pool",
+    title: "VIP-643 [BNB Chain Testnet] List Venus SK Hynix (vSKHYB) in the Venus Core Pool",
     description: `#### Summary
 
 If passed, this VIP will list a new tokenized-equity market — Venus SK Hynix (vSKHYB), backed by SKHYB (SK Hynix) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch.`,
@@ -247,4 +247,4 @@ If passed, this VIP will list a new tokenized-equity market — Venus SK Hynix (
   );
 };
 
-export default vip664;
+export default vip643;

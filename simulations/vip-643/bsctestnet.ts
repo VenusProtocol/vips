@@ -18,8 +18,8 @@ import {
   REDUCE_RESERVES_BLOCK_DELTA,
   convertAmountToVTokens,
   vTokensRemaining,
-  vip664,
-} from "../../vips/vip-664/bsctestnet";
+  vip643,
+} from "../../vips/vip-643/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -45,7 +45,7 @@ forking(FORK_BLOCK, async () => {
     }
   });
 
-  testVip("VIP-664 Testnet", await vip664(), {
+  testVip("VIP-643 Testnet", await vip643(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

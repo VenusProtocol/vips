@@ -1,13 +1,13 @@
-# VIP-664 Simulation Report — List Venus SK Hynix (vSKHYB) in the Venus Core Pool
+# VIP-643 Simulation Report — List Venus SK Hynix (vSKHYB) in the Venus Core Pool
 
 ## Overview
 
-This report summarises the fork simulations run for VIP-664 on both BNB Chain testnet and BNB Chain mainnet. The VIP adds a new tokenized-equity market, **Venus SK Hynix (vSKHYB)**, backed by the BStock **SK4B** token (SK Hynix equity), to the Venus Core Pool. Borrowing is paused at launch.
+This report summarises the fork simulations run for VIP-643 on both BNB Chain testnet and BNB Chain mainnet. The VIP adds a new tokenized-equity market, **Venus SK Hynix (vSKHYB)**, backed by the BStock **SKHYB** token (SK Hynix equity), to the Venus Core Pool. Borrowing is paused at launch.
 
 Both simulations passed. Test files:
 
-- `simulations/vip-664/bsctestnet.ts` — BNB Chain testnet
-- `simulations/vip-664/bscmainnet.ts` — BNB Chain mainnet
+- `simulations/vip-643/bsctestnet.ts` — BNB Chain testnet
+- `simulations/vip-643/bscmainnet.ts` — BNB Chain mainnet
 
 ---
 
@@ -16,7 +16,7 @@ Both simulations passed. Test files:
 | Item                             | Network    | Address                                      |
 | -------------------------------- | ---------- | -------------------------------------------- |
 | MockSKHYB (underlying — testnet) | bsctestnet | `0xb52DE23C6D4be6Bb3E87fF64527E856Ab346FDf2` |
-| SK4B (underlying — mainnet)      | bscmainnet | `0xCA750eF65f295BBECd685Abf54e82CAf297BDB61` |
+| SKHYB (underlying — mainnet)     | bscmainnet | `0xCA750eF65f295BBECd685Abf54e82CAf297BDB61` |
 | vSKHYB                           | bsctestnet | `0x101843eAbA6b98fbF4bba078b86EFdE62DF0fc16` |
 | vSKHYB                           | bscmainnet | `0x3E281461efb3D53EC20DB207674373Ed8Ef3BbA9` |
 | JumpRateModel                    | bsctestnet | `0x1CcDaf39085bae4e27c3Ba100561b1AD1B5A6b80` |
@@ -45,7 +45,7 @@ Both simulations passed. Test files:
 | IRM multiplier              | 6.67%                     |
 | IRM jump multiplier         | 627%                      |
 | IRM kink                    | 75%                       |
-| Bootstrap liquidity         | 0.65 SK4B                 |
+| Bootstrap liquidity         | 0.65 SKHYB                |
 | DBO trigger threshold       | 16.67% (`0.1667e18`)      |
 | DBO reset threshold         | 5% (`0.05e18`)            |
 | DBO cooldown period         | 3600 s (1 h)              |
@@ -109,11 +109,11 @@ Both simulations passed. Test files:
 
 **Oracle Dynamic Protection Mode (DBO)**
 
-- `dbo.assetProtectionConfig(SK4B).isBoundedPricingEnabled` = `true`
-- `dbo.assetProtectionConfig(SK4B).triggerThreshold` = `0.1667e18` (16.67%)
-- `dbo.assetProtectionConfig(SK4B).resetThreshold` = `0.05e18` (5%)
-- `dbo.assetProtectionConfig(SK4B).cooldownPeriod` = `3600`
-- `dbo.assetProtectionConfig(SK4B).cachingEnabled` = `false`
+- `dbo.assetProtectionConfig(SKHYB).isBoundedPricingEnabled` = `true`
+- `dbo.assetProtectionConfig(SKHYB).triggerThreshold` = `0.1667e18` (16.67%)
+- `dbo.assetProtectionConfig(SKHYB).resetThreshold` = `0.05e18` (5%)
+- `dbo.assetProtectionConfig(SKHYB).cooldownPeriod` = `3600`
+- `dbo.assetProtectionConfig(SKHYB).cachingEnabled` = `false`
 
 **Market configuration**
 
@@ -157,11 +157,11 @@ Same 10 events as testnet (each with count = 1).
 **Oracle**
 
 - `resilientOracle.getUnderlyingPrice(vSKHYB)` = `162656059522857396940` (~$162.66 from the Atlas feed at the fork block).
-- `resilientOracle.getTokenConfig(SK4B).oracles[0]` = Atlas Oracle (`0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0`), flag = `true`.
-- `atlasOracle.tokenConfigs(SK4B).feed` = `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` (Atlas SKHYB/USD SingleFeed, id 871).
-- `atlasOracle.tokenConfigs(SK4B).maxStalePeriod` = `ONE_YEAR` (simulation value, then rolled back to `3800` — see below).
+- `resilientOracle.getTokenConfig(SKHYB).oracles[0]` = Atlas Oracle (`0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0`), flag = `true`.
+- `atlasOracle.tokenConfigs(SKHYB).feed` = `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` (Atlas SKHYB/USD SingleFeed, id 871).
+- `atlasOracle.tokenConfigs(SKHYB).maxStalePeriod` = `ONE_YEAR` (simulation value, then rolled back to `3800` — see below).
 
-**vToken properties** — same as testnet (name, symbol, decimals, exchangeRate, comptroller), underlying = SK4B.
+**vToken properties** — same as testnet (name, symbol, decimals, exchangeRate, comptroller), underlying = SKHYB.
 
 **Interest rate model** — same parameters, contract at `0xe589E884f69dF3137B43A760C4Ec9E55D944439D`.
 
@@ -169,11 +169,11 @@ Same 10 events as testnet (each with count = 1).
 
 **Oracle Dynamic Protection Mode (DBO)**
 
-- `dbo.assetProtectionConfig(SK4B).isBoundedPricingEnabled` = `true`
-- `dbo.assetProtectionConfig(SK4B).triggerThreshold` = `0.1667e18` (16.67%)
-- `dbo.assetProtectionConfig(SK4B).resetThreshold` = `0.05e18` (5%)
-- `dbo.assetProtectionConfig(SK4B).cooldownPeriod` = `3600`
-- `dbo.assetProtectionConfig(SK4B).cachingEnabled` = `false`
+- `dbo.assetProtectionConfig(SKHYB).isBoundedPricingEnabled` = `true`
+- `dbo.assetProtectionConfig(SKHYB).triggerThreshold` = `0.1667e18` (16.67%)
+- `dbo.assetProtectionConfig(SKHYB).resetThreshold` = `0.05e18` (5%)
+- `dbo.assetProtectionConfig(SKHYB).cooldownPeriod` = `3600`
+- `dbo.assetProtectionConfig(SKHYB).cachingEnabled` = `false`
 
 **Market configuration**
 
@@ -194,8 +194,8 @@ Same 10 events as testnet (each with count = 1).
 
 **Atlas stale-period rollback** (post-assertion)
 
-- Normal Timelock calls `atlasOracle.setTokenConfig([SK4B, feed, 3800])`.
-- `atlasOracle.tokenConfigs(SK4B).maxStalePeriod` = `3800` — confirms the production stale period is correctly set and that the Normal Timelock has the required permission.
+- Normal Timelock calls `atlasOracle.setTokenConfig([SKHYB, feed, 3800])`.
+- `atlasOracle.tokenConfigs(SKHYB).maxStalePeriod` = `3800` — confirms the production stale period is correctly set and that the Normal Timelock has the required permission.
 
 ---
 
