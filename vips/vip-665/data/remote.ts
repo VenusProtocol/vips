@@ -182,3 +182,14 @@ export const remoteRowsFor = (chain: RemoteChain) =>
     target: remoteAddr(chain, r.contract),
     guardian: r.guardian,
   }));
+
+export const EXPECTED_ROLE_EVENTS: Record<"bscmainnet" | RemoteChain, { granted: number; revoked: number }> = {
+  bscmainnet: { granted: 6, revoked: 55 },
+  ethereum: { granted: 2, revoked: 50 },
+  arbitrumone: { granted: 2, revoked: 22 },
+  basemainnet: { granted: 2, revoked: 17 },
+  zksyncmainnet: { granted: 2, revoked: 19 },
+  opmainnet: { granted: 2, revoked: 15 },
+  unichainmainnet: { granted: 2, revoked: 15 },
+  opbnbmainnet: { granted: 2, revoked: 11 },
+};

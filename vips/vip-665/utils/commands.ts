@@ -89,10 +89,3 @@ export const revokePermissions = (chain: Chain): Permission[] => {
   }));
   return [...criticalRevokes, ...syncCashRevokes(chain)];
 };
-
-// Grant / revoke counts in a chain's batches — drives expectEvents on the ACM's role events. Each
-// giveCallPermission grants one role and each revokeCallPermission revokes one.
-export const roleChangeCounts = (chain: Chain): { granted: number; revoked: number } => ({
-  granted: grantPermissions(chain).length,
-  revoked: revokePermissions(chain).length,
-});

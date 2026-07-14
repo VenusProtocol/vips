@@ -8,15 +8,9 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip665 from "../../../vips/vip-665/bscmainnet";
 import { ZERO } from "../../../vips/vip-665/data/bnb";
-import { REMOTE_ACM, remoteRowsFor } from "../../../vips/vip-665/data/remote";
+import { EXPECTED_ROLE_EVENTS, REMOTE_ACM, remoteRowsFor } from "../../../vips/vip-665/data/remote";
 import { SYNC_CASH_MARKETS, SYNC_CASH_SIG } from "../../../vips/vip-665/data/syncCash";
-import {
-  AGGREGATOR,
-  Chain,
-  grantPermissions,
-  revokePermissions,
-  roleChangeCounts,
-} from "../../../vips/vip-665/utils/commands";
+import { AGGREGATOR, Chain, grantPermissions, revokePermissions } from "../../../vips/vip-665/utils/commands";
 import { seedAggregator } from "../../../vips/vip-665/utils/seed";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 
@@ -26,8 +20,8 @@ const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["addres
 
 // RoleGranted / RoleRevoked are emitted by every ACM version. On remotes the grants are the wrapper
 // grantRole(DEFAULT_ADMIN_ROLE) plus the single wildcard syncCash() grant; RoleRevoked = the Critical
-// revokes + the per-market syncCash() revokes + the wrapper revokeRole. Event counts derive from
-// roleChangeCounts, so they track the batch contents automatically.
+// revokes + the per-market syncCash() revokes + the wrapper revokeRole. Expected counts come from the
+// hardcoded EXPECTED_ROLE_EVENTS oracle in data/remote.ts.
 
 // Shared body for the 7 remote-chain simulations. Run each with its matching --fork.
 export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
@@ -51,37 +45,39 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
 
       it("revoke: Critical currently holds every permission to be revoked", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const r of rows)
-          expect(await acm.hasRole(role(r.target, r.signature), critical), `pre critical ${r.signature}@${r.target}`).to
-            .be.true;
+        for (const row of rows)
+          expect(
+            await acm.hasRole(role(row.target, row.signature), critical),
+            `pre critical ${row.signature}@${row.target}`,
+          ).to.be.true;
       });
 
       it("no-change: the Guardian flag matches the plan for every row", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const r of rows)
+        for (const row of rows)
           expect(
-            await acm.hasRole(role(r.target, r.signature), guardian),
-            `pre guardian ${r.signature}@${r.target}`,
-          ).to.equal(r.guardian);
+            await acm.hasRole(role(row.target, row.signature), guardian),
+            `pre guardian ${row.signature}@${row.target}`,
+          ).to.equal(row.guardian);
       });
 
       it("syncCash: NormalTimelock holds every per-market grant and no wildcard grant yet", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
         expect(syncCashMarkets.length, `syncCash markets for ${chain}`).to.be.greaterThan(0);
         expect(await acm.hasRole(role(ZERO, SYNC_CASH_SIG), normal), "pre wildcard syncCash").to.be.false;
-        for (const m of syncCashMarkets)
-          expect(await acm.hasRole(role(m, SYNC_CASH_SIG), normal), `pre normal syncCash@${m}`).to.be.true;
+        for (const market of syncCashMarkets)
+          expect(await acm.hasRole(role(market, SYNC_CASH_SIG), normal), `pre normal syncCash@${market}`).to.be.true;
       });
     });
 
-    const counts = roleChangeCounts(chain);
+    const events = EXPECTED_ROLE_EVENTS[chain];
     testForkedNetworkVipCommands(`VIP-665 ${chain}`, await vip665(), {
       callbackAfterExecution: async (txResponse: TransactionResponse) => {
         await expectEvents(
           txResponse,
           [ACCESS_CONTROL_MANAGER_ABI],
           ["RoleGranted", "RoleRevoked"],
-          [counts.granted + 1, counts.revoked + 1],
+          [events.granted, events.revoked],
         );
       },
     });
@@ -89,40 +85,46 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
     describe(`VIP-665 post-execution permissions (${chain})`, () => {
       it("revoke: Critical lost every revoked permission", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const r of rows)
-          expect(await acm.hasRole(role(r.target, r.signature), critical), `post critical ${r.signature}@${r.target}`)
-            .to.be.false;
+        for (const row of rows)
+          expect(
+            await acm.hasRole(role(row.target, row.signature), critical),
+            `post critical ${row.signature}@${row.target}`,
+          ).to.be.false;
       });
 
       it("no-change: the Guardian flag is unchanged for every row", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const r of rows)
+        for (const row of rows)
           expect(
-            await acm.hasRole(role(r.target, r.signature), guardian),
-            `post guardian ${r.signature}@${r.target}`,
-          ).to.equal(r.guardian);
+            await acm.hasRole(role(row.target, row.signature), guardian),
+            `post guardian ${row.signature}@${row.target}`,
+          ).to.equal(row.guardian);
       });
 
       it("behavioral: Critical is no longer allowed to call any revoked function", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const r of rows)
-          if (r.target !== ZERO)
-            expect(await acm.isAllowedToCall(critical, r.signature, { from: r.target }), `crit !allowed ${r.signature}`)
-              .to.be.false;
+        for (const row of rows)
+          if (row.target !== ZERO)
+            expect(
+              await acm.isAllowedToCall(critical, row.signature, { from: row.target }),
+              `crit !allowed ${row.signature}`,
+            ).to.be.false;
       });
 
       it("syncCash: NormalTimelock gained the wildcard grant and lost every per-market grant", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
         expect(await acm.hasRole(role(ZERO, SYNC_CASH_SIG), normal), "post wildcard syncCash").to.be.true;
-        for (const m of syncCashMarkets)
-          expect(await acm.hasRole(role(m, SYNC_CASH_SIG), normal), `post normal syncCash@${m}`).to.be.false;
+        for (const market of syncCashMarkets)
+          expect(await acm.hasRole(role(market, SYNC_CASH_SIG), normal), `post normal syncCash@${market}`).to.be.false;
       });
 
       it("syncCash behavioral: NormalTimelock is still allowed to call syncCash on every market via wildcard", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const m of syncCashMarkets)
-          expect(await acm.isAllowedToCall(normal, SYNC_CASH_SIG, { from: m }), `normal allowed syncCash@${m}`).to.be
-            .true;
+        for (const market of syncCashMarkets)
+          expect(
+            await acm.isAllowedToCall(normal, SYNC_CASH_SIG, { from: market }),
+            `normal allowed syncCash@${market}`,
+          ).to.be.true;
       });
     });
   });

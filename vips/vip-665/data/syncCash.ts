@@ -6,8 +6,6 @@ import { RemoteChain } from "./remote";
 export const ZERO = "0x0000000000000000000000000000000000000000";
 export const SYNC_CASH_SIG = "syncCash()";
 
-const normalOf = (chain: RemoteChain): string => (NETWORK_ADDRESSES[chain] as Record<string, string>).NORMAL_TIMELOCK;
-
 // Markets whose syncCash() role is currently granted to the NormalTimelock, per chain (verified on-chain).
 export const SYNC_CASH_MARKETS: Record<RemoteChain, string[]> = {
   ethereum: [
@@ -106,10 +104,17 @@ export const SYNC_CASH_MARKETS: Record<RemoteChain, string[]> = {
 };
 
 // The single wildcard grant: syncCash() on address(0) → NormalTimelock.
-export const syncCashGrants = (chain: RemoteChain): Permission[] => [
-  { contractAddress: ZERO, functionSig: SYNC_CASH_SIG, account: normalOf(chain) },
-];
+export const syncCashGrants = (chain: RemoteChain): Permission[] => {
+  const normalTimelock = (NETWORK_ADDRESSES[chain] as Record<string, string>).NORMAL_TIMELOCK;
+  return [{ contractAddress: ZERO, functionSig: SYNC_CASH_SIG, account: normalTimelock }];
+};
 
 // The per-market revokes: syncCash() → NormalTimelock, one per market.
-export const syncCashRevokes = (chain: RemoteChain): Permission[] =>
-  SYNC_CASH_MARKETS[chain].map(m => ({ contractAddress: m, functionSig: SYNC_CASH_SIG, account: normalOf(chain) }));
+export const syncCashRevokes = (chain: RemoteChain): Permission[] => {
+  const normalTimelock = (NETWORK_ADDRESSES[chain] as Record<string, string>).NORMAL_TIMELOCK;
+  return SYNC_CASH_MARKETS[chain].map(market => ({
+    contractAddress: market,
+    functionSig: SYNC_CASH_SIG,
+    account: normalTimelock,
+  }));
+};
