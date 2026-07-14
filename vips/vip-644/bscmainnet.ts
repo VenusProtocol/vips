@@ -24,11 +24,11 @@ export const OLD_VAULT_IMPLEMENTATION = "0xC25b2B657D24380eDd1a1Cff5296385541e85
 // Adds depositWithConsent / mintWithConsent.
 export const NEW_VAULT_IMPLEMENTATION = "0xe87A1eFCED88bBddf8CCF78EfB3bCF62cFdd5bdC";
 
-export const vip999 = () => {
+export const vip644 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-999 [BNB Chain] Fix DAI market (disable DeviationSentinel monitoring, resume borrowing) and upgrade Institutional Fixed Rate Vault implementation",
+      "VIP-644 [BNB Chain] Fix DAI market (disable DeviationSentinel monitoring, resume borrowing) and upgrade Institutional Fixed Rate Vault implementation",
     description: `#### Summary
 
 If passed, this VIP will (1) stop the DeviationSentinel from monitoring DAI, resume borrowing on the vDAI market and clear the related Emergency Brake snapshots, and (2) point the Institutional Fixed Rate Vault controller at a new vault clone-source implementation that adds on-chain disclaimer-consent recording to the supplier deposit/mint flow.
@@ -138,4 +138,4 @@ No new AccessControlManager permissions are required — the Normal Timelock alr
   );
 };
 
-export default vip999;
+export default vip644;

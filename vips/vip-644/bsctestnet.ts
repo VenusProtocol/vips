@@ -7,10 +7,10 @@ export const OLD_VAULT_IMPLEMENTATION = "0x97421799419Eb782628e73e7220d8E0A20746
 // Adds depositWithConsent / mintWithConsent.
 export const NEW_VAULT_IMPLEMENTATION = "0xB677627eB4B9D8bfB793966e266C899E7FD484C5";
 
-export const vip999 = () => {
+export const vip644 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain Testnet] Upgrade Institutional Fixed Rate Vault implementation (consent recording)",
+    title: "VIP-644 [BNB Chain Testnet] Upgrade Institutional Fixed Rate Vault implementation (consent recording)",
     description: `#### Summary
 
 If passed, this VIP points the Institutional Fixed Rate Vault controller at a new vault clone-source implementation that adds on-chain disclaimer-consent recording to the supplier deposit/mint flow.
@@ -51,4 +51,4 @@ The consent hash is optional: passing \`bytes32(0)\` skips the event and deposit
   );
 };
 
-export default vip999;
+export default vip644;

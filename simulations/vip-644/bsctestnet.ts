@@ -6,11 +6,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip644, {
   FIXED_RATE_VAULT_CONTROLLER,
   NEW_VAULT_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
-} from "../../vips/vip-999/bsctestnet";
+} from "../../vips/vip-644/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import FAUCET_TOKEN_ABI from "./abi/FaucetToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
@@ -50,7 +50,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-999 Upgrade Institutional Fixed Rate Vault implementation", await vip999(), {
+  testVip("VIP-644 Upgrade Institutional Fixed Rate Vault implementation", await vip644(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultImplementationUpdated"], [1]);
     },

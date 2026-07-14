@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip644, {
   BORROW,
   DAI,
   DEVIATION_SENTINEL,
@@ -15,7 +15,7 @@ import vip999, {
   NEW_VAULT_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
   vDAI,
-} from "../../vips/vip-999/bscmainnet";
+} from "../../vips/vip-644/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
@@ -133,7 +133,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-999 Fix DAI market + upgrade Institutional Fixed Rate Vault implementation", await vip999(), {
+  testVip("VIP-644 Fix DAI market + upgrade Institutional Fixed Rate Vault implementation", await vip644(), {
     callbackAfterExecution: async txResponse => {
       // Monitoring toggled off for DAI on the DeviationSentinel.
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenMonitoringStatusChanged"], [1]);
