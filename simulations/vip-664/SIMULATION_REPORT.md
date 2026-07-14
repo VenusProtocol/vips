@@ -45,11 +45,11 @@ Both simulations passed. Test files:
 | IRM multiplier              | 6.67%                     |
 | IRM jump multiplier         | 627%                      |
 | IRM kink                    | 75%                       |
-| Bootstrap liquidity         | 0.51 SK4B                 |
+| Bootstrap liquidity         | 0.65 SK4B                 |
 | DBO trigger threshold       | 16.67% (`0.1667e18`)      |
 | DBO reset threshold         | 5% (`0.05e18`)            |
 | DBO cooldown period         | 3600 s (1 h)              |
-| vTokens burned (10%)        | 0.051 vSKHYB → address(0) |
+| vTokens burned (10%)        | 0.065 vSKHYB → address(0) |
 | vTokens to VTreasury        | remainder after burn      |
 | `reduceReservesBlockDelta`  | 28 800 blocks             |
 
@@ -125,9 +125,9 @@ Both simulations passed. Test files:
 
 **Bootstrap liquidity**
 
-- `vSKHYB.totalSupply` = `convertAmountToVTokens(0.51e18, 1e28)` (i.e. `0.051e8` = 5 100 000 cSKHYB units)
-- `underlying.balanceOf(vSKHYB)` = `0.51e18`
-- `vSKHYB.balanceOf(address(0))` = `0.051e8` (10% burned)
+- `vSKHYB.totalSupply` = `convertAmountToVTokens(0.65e18, 1e28)` (i.e. `0.065e8` = 6 500 000 cSKHYB units)
+- `underlying.balanceOf(vSKHYB)` = `0.65e18`
+- `vSKHYB.balanceOf(address(0))` = `0.065e8` (10% burned)
 - `vSKHYB.balanceOf(VTreasury)` = remaining 90%
 - `vSKHYB.balanceOf(NORMAL_TIMELOCK)` = `0` (no dust left)
 
@@ -141,7 +141,7 @@ Both simulations passed. Test files:
 
 ### Bootstrap setup (simulation only)
 
-The VTreasury does not hold SK4B on-chain yet (it is an operational precondition at on-chain execution time). The simulation deals `0.51 SK4B` to the VTreasury by impersonating the holder `0x8894e0a0c962cb723c1976a4421c95949be2d4e3`, making `withdrawTreasuryBEP20` succeed without any dependency on a live treasury balance.
+The VTreasury does not hold SK4B on-chain yet (it is an operational precondition at on-chain execution time). The simulation deals `0.65 SK4B` to the VTreasury by impersonating the holder `0x8894e0a0c962cb723c1976a4421c95949be2d4e3`, making `withdrawTreasuryBEP20` succeed without any dependency on a live treasury balance.
 
 ### Pre-VIP checks
 
@@ -184,9 +184,9 @@ Same 10 events as testnet (each with count = 1).
 
 **Bootstrap liquidity**
 
-- `vSKHYB.totalSupply` = `convertAmountToVTokens(0.51e18, 1e28)`
-- `underlying.balanceOf(vSKHYB)` = `0.51e18`
-- `vSKHYB.balanceOf(address(0))` = `0.051e8` (10% burned)
+- `vSKHYB.totalSupply` = `convertAmountToVTokens(0.65e18, 1e28)`
+- `underlying.balanceOf(vSKHYB)` = `0.65e18`
+- `vSKHYB.balanceOf(address(0))` = `0.065e8` (10% burned)
 - `vSKHYB.balanceOf(VTreasury)` = remaining 90%
 - `vSKHYB.balanceOf(NORMAL_TIMELOCK)` = `0`
 
@@ -199,4 +199,4 @@ Same 10 events as testnet (each with count = 1).
 
 ## Operational note — VTreasury pre-funding
 
-The VIP bootstraps liquidity via `withdrawTreasuryBEP20(SK4B, 0.51e18, NORMAL_TIMELOCK)`. The VTreasury must hold at least `0.51 SK4B` **at the moment the VIP executes on-chain**. This is an operational precondition, not a code blocker — the BStock team should transfer `0.51 SK4B` to the VTreasury before the proposal is queued for execution.
+The VIP bootstraps liquidity via `withdrawTreasuryBEP20(SK4B, 0.65e18, NORMAL_TIMELOCK)`. The VTreasury must hold at least `0.65 SK4B` **at the moment the VIP executes on-chain**. This is an operational precondition, not a code blocker — the BStock team should transfer `0.65 SK4B` to the VTreasury before the proposal is queued for execution.

@@ -103,9 +103,9 @@ export const MARKET_SKHYB: MarketSpec = {
     borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
-    amount: parseUnits("0.51", 18),
+    amount: parseUnits("0.65", 18),
     vTokenReceiver: bscmainnet.VTREASURY,
-    vTokensToBurn: parseUnits("0.051", 8), // 10% of minted vTokens
+    vTokensToBurn: parseUnits("0.065", 8), // 10% of minted vTokens
   },
 };
 
@@ -149,7 +149,7 @@ This VIP will:
 - Supply cap: 1250 SKHYB
 - Borrow cap: 0 (borrowing disabled)
 - Interest rate model: base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%
-- Bootstrap liquidity: 0.51 SKHYB`,
+- Bootstrap liquidity: 0.65 SKHYB`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

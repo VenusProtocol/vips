@@ -95,9 +95,9 @@ export const MARKET_SKHYB: MarketSpec = {
     borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
-    amount: parseUnits("0.51", 18),
+    amount: parseUnits("0.65", 18),
     vTokenReceiver: bsctestnet.VTREASURY,
-    vTokensToBurn: parseUnits("0.051", 8), // 10% of minted vTokens
+    vTokensToBurn: parseUnits("0.065", 8), // 10% of minted vTokens
   },
 };
 
