@@ -80,6 +80,8 @@ export const BNB_ROWS: {
   action: Action;
   grantTo?: "guardian1" | "guardian2" | "guardian3";
 }[] = [
+  // ==================== venus-protocol ====================
+  // ---- Liquidator ----
   {
     signature: "addToAllowlist(address,address)",
     target: CONTRACTS.Liquidator,
@@ -143,6 +145,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- PegStability_USDT ----
   {
     signature: "setVAIMintCap(uint256)",
     target: CONTRACTS.PegStability_USDT,
@@ -188,6 +191,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Prime ----
   {
     signature: "addMarket(address,address,uint256,uint256)",
     target: CONTRACTS.Prime,
@@ -278,6 +282,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- PrimeLiquidityProvider ----
   {
     signature: "setMaxLoopsLimit(uint256)",
     target: CONTRACTS.PrimeLiquidityProvider,
@@ -323,6 +328,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- PrimeV2 ----
   {
     signature: "pause()",
     target: CONTRACTS.PrimeV2,
@@ -341,6 +347,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Unitroller (core pool Comptroller) ----
   {
     signature: "addPoolMarkets(uint96[],address[])",
     target: CONTRACTS.Unitroller,
@@ -523,6 +530,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- VaiUnitroller ----
   {
     signature: "setBaseRate(uint256)",
     target: CONTRACTS.VaiUnitroller,
@@ -559,6 +567,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- VAIVaultProxy ----
   {
     signature: "pause()",
     target: CONTRACTS.VAIVaultProxy,
@@ -577,6 +586,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- VBNBAdmin ----
   {
     signature: "setInterestRateModel(address)",
     target: CONTRACTS.VBNBAdmin,
@@ -586,6 +596,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- VRTVaultProxy ----
   {
     signature: "pause()",
     target: CONTRACTS.VRTVaultProxy,
@@ -604,6 +615,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- XVSVaultProxy ----
   {
     signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
     target: CONTRACTS.XVSVaultProxy,
@@ -631,6 +643,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "revoke",
   },
+  // ==================== oracle ====================
+  // ---- BinanceOracle ----
   {
     signature: "setMaxStalePeriod(string,uint256)",
     target: CONTRACTS.BinanceOracle,
@@ -649,6 +663,7 @@ export const BNB_ROWS: {
     guardian3: true,
     action: "none",
   },
+  // ---- ChainlinkOracle ----
   {
     signature: "setDirectPrice(address,uint256)",
     target: CONTRACTS.ChainlinkOracle,
@@ -676,6 +691,7 @@ export const BNB_ROWS: {
     guardian3: true,
     action: "revoke",
   },
+  // ---- DeviationBoundedOracle ----
   {
     signature: "setThresholds(address,uint256,uint256)",
     target: CONTRACTS.DeviationBoundedOracle,
@@ -767,6 +783,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- PythOracle ----
   {
     signature: "setTokenConfig(TokenConfig)",
     target: CONTRACTS.PythOracle,
@@ -776,6 +793,7 @@ export const BNB_ROWS: {
     guardian3: true,
     action: "revoke",
   },
+  // ---- RedStoneOracle ----
   {
     signature: "setDirectPrice(address,uint256)",
     target: CONTRACTS.RedStoneOracle,
@@ -794,6 +812,7 @@ export const BNB_ROWS: {
     guardian3: true,
     action: "revoke",
   },
+  // ---- ResilientOracle ----
   {
     signature: "setTokenConfig(TokenConfig)",
     target: CONTRACTS.ResilientOracle,
@@ -821,6 +840,7 @@ export const BNB_ROWS: {
     guardian3: true,
     action: "none",
   },
+  // ---- USDTChainlinkOracle ----
   {
     signature: "setDirectPrice(address,uint256)",
     target: CONTRACTS.USDTChainlinkOracle,
@@ -839,6 +859,8 @@ export const BNB_ROWS: {
     guardian3: true,
     action: "revoke",
   },
+  // ==================== protocol-reserve ====================
+  // ---- BTCBPrimeConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.BTCBPrimeConverter,
@@ -875,6 +897,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- ConverterNetwork ----
   {
     signature: "addTokenConverter(address)",
     target: CONTRACTS.ConverterNetwork,
@@ -893,6 +916,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- ETHPrimeConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.ETHPrimeConverter,
@@ -929,6 +953,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- ProtocolShareReserve ----
   {
     signature: "addOrUpdateDistributionConfigs(DistributionConfig[])",
     target: CONTRACTS.ProtocolShareReserve,
@@ -947,6 +972,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- RiskFundConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.RiskFundConverter,
@@ -992,6 +1018,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- RiskFundV2 ----
   {
     signature: "setMinAmountToConvert(uint256)",
     target: CONTRACTS.RiskFundV2,
@@ -1001,6 +1028,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- USDCPrimeConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.USDCPrimeConverter,
@@ -1037,6 +1065,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- USDTPrimeConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.USDTPrimeConverter,
@@ -1073,6 +1102,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- WBNBBurnConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.WBNBBurnConverter,
@@ -1109,6 +1139,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- XVSVaultConverter ----
   {
     signature: "setConversionConfig(address,address,ConversionConfig)",
     target: CONTRACTS.XVSVaultConverter,
@@ -1145,6 +1176,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- XVSVaultTreasury ----
   {
     signature: "fundXVSVault(uint256)",
     target: CONTRACTS.XVSVaultTreasury,
@@ -1154,6 +1186,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ==================== isolated-pools ====================
+  // ---- Comptroller_DeFi ----
   {
     signature: "setForcedLiquidation(address,bool)",
     target: CONTRACTS.Comptroller_DeFi,
@@ -1163,6 +1197,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Comptroller_GameFi ----
   {
     signature: "setForcedLiquidation(address,bool)",
     target: CONTRACTS.Comptroller_GameFi,
@@ -1172,6 +1207,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Comptroller_LiquidStakedBNB ----
   {
     signature: "setForcedLiquidation(address,bool)",
     target: CONTRACTS.Comptroller_LiquidStakedBNB,
@@ -1181,6 +1217,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Comptroller_Stablecoins ----
   {
     signature: "setForcedLiquidation(address,bool)",
     target: CONTRACTS.Comptroller_Stablecoins,
@@ -1190,6 +1227,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Comptroller_Tron ----
   {
     signature: "setForcedLiquidation(address,bool)",
     target: CONTRACTS.Comptroller_Tron,
@@ -1199,6 +1237,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Shortfall ----
   {
     signature: "updateIncentiveBps(uint256)",
     target: CONTRACTS.Shortfall,
@@ -1253,6 +1292,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ==================== venus-periphery ====================
+  // ---- DeviationSentinel ----
   {
     signature: "setTokenConfig(address,(uint8,bool))",
     target: CONTRACTS.DeviationSentinel,
@@ -1289,6 +1330,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- EBrake ----
   {
     signature: "decreaseCF(address,uint256)",
     target: CONTRACTS.EBrake,
@@ -1424,6 +1466,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- Executor ----
   {
     signature: "setMarketConfig(address,(uint256,uint256,bool))",
     target: CONTRACTS.Executor,
@@ -1433,6 +1476,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- PancakeSwapOracle ----
   {
     signature: "setPoolConfig(address,address)",
     target: CONTRACTS.PancakeSwapOracle,
@@ -1442,6 +1486,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- PendlePTVaultAdapter ----
   {
     signature: "pause()",
     target: CONTRACTS.PendlePTVaultAdapter,
@@ -1460,6 +1505,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- RelativePositionManager ----
   {
     signature: "executePositionAccountCall(address,address[],bytes[])",
     target: CONTRACTS.RelativePositionManager,
@@ -1532,6 +1578,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- SentinelOracle ----
   {
     signature: "setDirectPrice(address,uint256)",
     target: CONTRACTS.SentinelOracle,
@@ -1550,6 +1597,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "revoke",
   },
+  // ---- UniswapOracle ----
   {
     signature: "setPoolConfig(address,address)",
     target: CONTRACTS.UniswapOracle,
@@ -1559,6 +1607,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ==================== governance-contracts ====================
+  // ---- AuxiliaryCommandsAggregator ----
   {
     signature: "addAuthorizedBatchers(address[])",
     target: CONTRACTS.AuxiliaryCommandsAggregator,
@@ -1586,6 +1636,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- OmnichainProposalSender ----
   {
     signature: "execute(uint16,bytes,bytes,address)",
     target: CONTRACTS.OmnichainProposalSender,
@@ -1658,6 +1709,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- RiskOracle ----
   {
     signature: "removeAuthorizedSender(address)",
     target: CONTRACTS.RiskOracle,
@@ -1676,6 +1728,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- RiskStewardReceiver ----
   {
     signature: "setWhitelistedExecutor(address,bool)",
     target: CONTRACTS.RiskStewardReceiver,
@@ -1703,6 +1756,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ==================== token-bridge ====================
+  // ---- XVSBridgeAdmin ----
   {
     signature: "setConfig(uint16,uint16,uint256,bytes)",
     target: CONTRACTS.XVSBridgeAdmin,
@@ -1848,6 +1903,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "revoke",
   },
+  // ==================== fixed-rate-vaults ====================
+  // ---- InstitutionalVaultControllerProxy ----
   {
     signature: "createVault(VaultConfig,InstitutionalConfig,RiskConfig,string,string,string)",
     target: CONTRACTS.InstitutionalVaultControllerProxy,
@@ -1993,6 +2050,7 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // ---- LiquidationAdapterProxy ----
   {
     signature: "setCloseFactor(uint256)",
     target: CONTRACTS.LiquidationAdapterProxy,
