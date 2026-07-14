@@ -14,8 +14,8 @@ import {
   AGGREGATOR,
   BNB_LEGACY_WILDCARD_REVOKES,
   buildGrantPermissions,
-  legacyWildcardRole,
   buildRevokePermissions,
+  legacyWildcardRole,
 } from "../../vips/vip-665/utils/commands";
 import { seedAggregator } from "../../vips/vip-665/utils/seed";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
@@ -87,21 +87,6 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("no-change: Critical holds each one and Guardian flags match the plan", async () => {
-      for (const row of NO_CHANGE) {
-        expect(await holds(BNB_CRITICAL, row), `pre critical ${row.signature}@${row.target}`).to.equal(row.critical);
-        expect(await holds(BNB_GUARDIANS.guardian1, row), `pre g1 ${row.signature}@${row.target}`).to.equal(
-          row.guardian1,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian2, row), `pre g2 ${row.signature}@${row.target}`).to.equal(
-          row.guardian2,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian3, row), `pre g3 ${row.signature}@${row.target}`).to.equal(
-          row.guardian3,
-        );
-      }
-    });
-
     it("revoke: Critical currently holds every permission to be revoked", async () => {
       for (const row of REVOKE) {
         expect(await holds(BNB_CRITICAL, row), `pre critical ${row.signature}@${row.target}`).to.be.true;
@@ -157,33 +142,6 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("VIP-665 post-execution permissions (bscmainnet)", () => {
-    // No-change = the capability is untouched. Every holder the plan lists can still call the function — either
-    // through its own grant, or (for grants the redundant cleanup drops) through the surviving wildcard.
-    it("no-change: Critical and every listed Guardian can still call the function", async () => {
-      for (const row of NO_CHANGE) {
-        if (row.critical)
-          expect(
-            await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
-            `no-change critical ${row.signature}@${row.target}`,
-          ).to.be.true;
-        if (row.guardian1)
-          expect(
-            await acm().isAllowedToCall(BNB_GUARDIANS.guardian1, row.signature, { from: row.target }),
-            `no-change g1 ${row.signature}@${row.target}`,
-          ).to.be.true;
-        if (row.guardian2)
-          expect(
-            await acm().isAllowedToCall(BNB_GUARDIANS.guardian2, row.signature, { from: row.target }),
-            `no-change g2 ${row.signature}@${row.target}`,
-          ).to.be.true;
-        if (row.guardian3)
-          expect(
-            await acm().isAllowedToCall(BNB_GUARDIANS.guardian3, row.signature, { from: row.target }),
-            `no-change g3 ${row.signature}@${row.target}`,
-          ).to.be.true;
-      }
-    });
-
     it("revoke: the CriticalTimelock lost each target-specific grant", async () => {
       for (const row of REVOKE)
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
@@ -270,6 +228,36 @@ forking(FORK_BLOCK, async () => {
 
       await expect(asGuardian._setForcedLiquidation(vUSDT, true)).to.not.be.reverted;
       await expect(asCritical._setForcedLiquidation(vUSDT, true)).to.be.reverted;
+    });
+  });
+
+  // "No change" rows carry no action and were validated at extraction (see data/noChangeRows.ts). This block
+  // re-confirms post-execution that Critical and every listed Guardian still retain each capability — directly
+  // or via a surviving wildcard — so the VIP touched nothing it shouldn't have.
+  describe("VIP-665 no-change permissions retained (bscmainnet)", () => {
+    it("Critical and every listed Guardian can still call each untouched function", async () => {
+      for (const row of NO_CHANGE) {
+        if (row.critical)
+          expect(
+            await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
+            `no-change critical ${row.signature}@${row.target}`,
+          ).to.be.true;
+        if (row.guardian1)
+          expect(
+            await acm().isAllowedToCall(BNB_GUARDIANS.guardian1, row.signature, { from: row.target }),
+            `no-change g1 ${row.signature}@${row.target}`,
+          ).to.be.true;
+        if (row.guardian2)
+          expect(
+            await acm().isAllowedToCall(BNB_GUARDIANS.guardian2, row.signature, { from: row.target }),
+            `no-change g2 ${row.signature}@${row.target}`,
+          ).to.be.true;
+        if (row.guardian3)
+          expect(
+            await acm().isAllowedToCall(BNB_GUARDIANS.guardian3, row.signature, { from: row.target }),
+            `no-change g3 ${row.signature}@${row.target}`,
+          ).to.be.true;
+      }
     });
   });
 });
