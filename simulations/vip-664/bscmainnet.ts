@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
@@ -32,13 +33,9 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Block after vSKHYB was deployed and the Atlas SKHYB/USD feed is live.
-const FORK_BLOCK = 109906000;
-
-// Holder impersonated to seed the VTreasury with the bootstrap SKHYB. The VTreasury is not yet
-// funded on-chain (an operational precondition at proposal-execution time), so the simulation
-// deals the bootstrap amount to it to stay self-contained.
-const SKHYB_HOLDER = "0x8894e0a0c962cb723c1976a4421c95949be2d4e3";
+// Latest block at the time of authoring — after vSKHYB was deployed, the Atlas SKHYB/USD feed is
+// live, and the VTreasury has been funded with 0.66 SKHYB (bootstrap draws 0.65 from it).
+const FORK_BLOCK = 109922737;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
@@ -46,12 +43,14 @@ forking(FORK_BLOCK, async () => {
   const atlasOracle = new ethers.Contract(ATLAS_ORACLE, ATLAS_ORACLE_ABI, ethers.provider);
   const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
 
+  // Snapshot of the VTreasury's real underlying balance before the VIP executes, so we can assert
+  // the bootstrap withdraws exactly the initial supply from the live on-chain balance (no seeding).
+  const treasuryBalanceBefore: Record<string, BigNumber> = {};
+
   before(async () => {
-    // Seed the VTreasury with the bootstrap SKHYB so `withdrawTreasuryBEP20` in the VIP succeeds.
-    const holder = await initMainnetUser(SKHYB_HOLDER, ethers.utils.parseEther("1"));
     for (const m of MARKETS) {
-      const underlying = new ethers.Contract(m.vToken.underlying.address, ERC20_ABI, holder);
-      await underlying.transfer(bscmainnet.VTREASURY, m.initialSupply.amount);
+      const underlying = new ethers.Contract(m.vToken.underlying.address, ERC20_ABI, ethers.provider);
+      treasuryBalanceBefore[m.vToken.address] = await underlying.balanceOf(bscmainnet.VTREASURY);
     }
   });
 
@@ -60,6 +59,12 @@ forking(FORK_BLOCK, async () => {
       it(`check ${m.vToken.symbol} market not listed`, async () => {
         const market = await comptroller.markets(m.vToken.address);
         expect(market.isListed).to.equal(false);
+      });
+
+      it(`VTreasury holds enough ${m.vToken.underlying.symbol} for the bootstrap`, async () => {
+        const underlying = new ethers.Contract(m.vToken.underlying.address, ERC20_ABI, ethers.provider);
+        const balance = await underlying.balanceOf(bscmainnet.VTREASURY);
+        expect(balance).to.be.gte(m.initialSupply.amount);
       });
     }
   });
@@ -165,6 +170,11 @@ forking(FORK_BLOCK, async () => {
 
         it("market has balance of underlying", async () => {
           expect(await underlying.balanceOf(m.vToken.address)).to.equal(m.initialSupply.amount);
+        });
+
+        it("bootstrap drew the initial supply from the VTreasury's real balance", async () => {
+          const balanceAfter = await underlying.balanceOf(bscmainnet.VTREASURY);
+          expect(treasuryBalanceBefore[m.vToken.address].sub(balanceAfter)).to.equal(m.initialSupply.amount);
         });
 
         it("should not leave any vTokens in the timelock", async () => {

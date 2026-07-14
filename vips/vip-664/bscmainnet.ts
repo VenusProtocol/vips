@@ -92,7 +92,7 @@ export const MARKET_SKHYB: MarketSpec = {
     address: ATLAS_ORACLE,
     feed: "0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B", // Atlas SKHYB/USD SingleFeed (id 871)
     maxStalePeriod: ATLAS_MAX_STALE_PERIOD,
-    price: BigNumber.from("162147041208637701100"), // feed answer @ FORK_BLOCK (~$162.15)
+    price: BigNumber.from("162656059522857396940"), // feed answer @ FORK_BLOCK (~$162.66)
   },
   riskParameters: {
     collateralFactor: parseUnits("0.5", 18),

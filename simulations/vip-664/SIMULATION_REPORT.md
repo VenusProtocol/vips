@@ -135,17 +135,18 @@ Both simulations passed. Test files:
 
 ## BNB Chain Mainnet Simulation
 
-**Fork block:** `109906000` (after vSKHYB was deployed and the Atlas SKHYB/USD feed was live)
+**Fork block:** `109922737` (latest block at authoring — vSKHYB deployed, Atlas SKHYB/USD feed live, and the VTreasury funded with `0.66 SKHYB`)
 
 **Oracle stale-period workaround:** The governance lifecycle mines ~72 h of blocks. To prevent `getUnderlyingPrice` from reverting due to a stale feed, the VIP sets `maxStalePeriod = ONE_YEAR (31 536 000 s)` in simulations and `3800 s` in production. After all price assertions, the simulation rolls the period back to `3800 s` (using impersonated Normal Timelock) to confirm the production value is also settable. This pattern mirrors VIP-633 and VIP-615.
 
-### Bootstrap setup (simulation only)
+### Bootstrap setup — real on-chain treasury balance (no impersonation)
 
-The VTreasury does not hold SK4B on-chain yet (it is an operational precondition at on-chain execution time). The simulation deals `0.65 SK4B` to the VTreasury by impersonating the holder `0x8894e0a0c962cb723c1976a4421c95949be2d4e3`, making `withdrawTreasuryBEP20` succeed without any dependency on a live treasury balance.
+The VTreasury is now funded on-chain: it holds `0.66 SKHYB` (transferred at block `109922154`, tx `0x707e7b1b9a541e59ad8a1e18aa2ddd69058bf9fa5af396f2619a3587095d69a8`). The prior simulation-only impersonation/seed of the treasury has been **removed** — the VIP's `withdrawTreasuryBEP20` now draws the `0.65 SKHYB` bootstrap directly from the real balance, exactly as it will on-chain.
 
 ### Pre-VIP checks
 
 - `comptroller.markets(vSKHYB).isListed` is `false`.
+- `SKHYB.balanceOf(VTreasury)` ≥ `0.65e18` (real on-chain balance covers the bootstrap).
 
 ### VIP execution — events asserted
 
@@ -155,7 +156,7 @@ Same 10 events as testnet (each with count = 1).
 
 **Oracle**
 
-- `resilientOracle.getUnderlyingPrice(vSKHYB)` = `162147041208637701100` (~$162.15 from the Atlas feed at the fork block).
+- `resilientOracle.getUnderlyingPrice(vSKHYB)` = `162656059522857396940` (~$162.66 from the Atlas feed at the fork block).
 - `resilientOracle.getTokenConfig(SK4B).oracles[0]` = Atlas Oracle (`0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0`), flag = `true`.
 - `atlasOracle.tokenConfigs(SK4B).feed` = `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` (Atlas SKHYB/USD SingleFeed, id 871).
 - `atlasOracle.tokenConfigs(SK4B).maxStalePeriod` = `ONE_YEAR` (simulation value, then rolled back to `3800` — see below).
@@ -186,6 +187,7 @@ Same 10 events as testnet (each with count = 1).
 
 - `vSKHYB.totalSupply` = `convertAmountToVTokens(0.65e18, 1e28)`
 - `underlying.balanceOf(vSKHYB)` = `0.65e18`
+- `VTreasury` SKHYB balance decreased by exactly `0.65e18` (bootstrap drawn from the real treasury balance)
 - `vSKHYB.balanceOf(address(0))` = `0.065e8` (10% burned)
 - `vSKHYB.balanceOf(VTreasury)` = remaining 90%
 - `vSKHYB.balanceOf(NORMAL_TIMELOCK)` = `0`
@@ -199,4 +201,4 @@ Same 10 events as testnet (each with count = 1).
 
 ## Operational note — VTreasury pre-funding
 
-The VIP bootstraps liquidity via `withdrawTreasuryBEP20(SK4B, 0.65e18, NORMAL_TIMELOCK)`. The VTreasury must hold at least `0.65 SK4B` **at the moment the VIP executes on-chain**. This is an operational precondition, not a code blocker — the BStock team should transfer `0.65 SK4B` to the VTreasury before the proposal is queued for execution.
+The VIP bootstraps liquidity via `withdrawTreasuryBEP20(SKHYB, 0.65e18, NORMAL_TIMELOCK)`. The VTreasury must hold at least `0.65 SKHYB` at the moment the VIP executes on-chain. **This is now satisfied on-chain:** the VTreasury holds `0.66 SKHYB` (funded at block `109922154`), so the bootstrap draws directly from the real balance with no simulation-only seeding. The balance should be preserved until the proposal is queued and executed.
