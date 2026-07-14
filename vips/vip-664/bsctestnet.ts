@@ -85,7 +85,7 @@ export const MARKET_SKHYB: MarketSpec = {
     liquidationThreshold: parseUnits("0.65", 18),
     liquidationIncentive: parseUnits("1.1", 18),
     reserveFactor: parseUnits("0.1", 18),
-    supplyCap: parseUnits("140", 18),
+    supplyCap: parseUnits("1250", 18),
     borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {

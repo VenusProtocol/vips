@@ -93,7 +93,7 @@ export const MARKET_SKHYB: MarketSpec = {
     liquidationThreshold: parseUnits("0.65", 18),
     liquidationIncentive: parseUnits("1.1", 18),
     reserveFactor: parseUnits("0.1", 18),
-    supplyCap: parseUnits("140", 18),
+    supplyCap: parseUnits("1250", 18),
     borrowCap: parseUnits("0", 18), // borrowing disabled at launch
   },
   initialSupply: {
@@ -139,7 +139,7 @@ This VIP will:
 - Liquidation threshold: 65%
 - Liquidation incentive: 10%
 - Reserve factor: 10%
-- Supply cap: 140 SKHYB
+- Supply cap: 1250 SKHYB
 - Borrow cap: 0 (borrowing disabled)
 - Interest rate model: base 0%, multiplier 6.67%, jump multiplier 627%, kink 75%
 - Bootstrap liquidity: 0.51 SKHYB`,

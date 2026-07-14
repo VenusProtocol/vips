@@ -13,40 +13,40 @@ Both simulations passed. Test files:
 
 ## Addresses verified
 
-| Item | Network | Address |
-|---|---|---|
+| Item                             | Network    | Address                                      |
+| -------------------------------- | ---------- | -------------------------------------------- |
 | MockSKHYB (underlying — testnet) | bsctestnet | `0xb52DE23C6D4be6Bb3E87fF64527E856Ab346FDf2` |
-| SK4B (underlying — mainnet) | bscmainnet | `0xCA750eF65f295BBECd685Abf54e82CAf297BDB61` |
-| vSKHYB | bsctestnet | `0x101843eAbA6b98fbF4bba078b86EFdE62DF0fc16` |
-| vSKHYB | bscmainnet | `0x3E281461efb3D53EC20DB207674373Ed8Ef3BbA9` |
-| JumpRateModel | bsctestnet | `0x1CcDaf39085bae4e27c3Ba100561b1AD1B5A6b80` |
-| JumpRateModel | bscmainnet | `0xe589E884f69dF3137B43A760C4Ec9E55D944439D` |
-| Atlas Oracle | bsctestnet | `0x7F00af2f30a55e79311392C98fBBfA629D19b3A5` |
-| Atlas Oracle | bscmainnet | `0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0` |
-| Atlas feed (SKHYB/USD) | bscmainnet | `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` |
-| Protocol Share Reserve | bsctestnet | `0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3` |
-| Protocol Share Reserve | bscmainnet | `0xCa01D5A9A248a830E9D93231e791B1afFed7c446` |
+| SK4B (underlying — mainnet)      | bscmainnet | `0xCA750eF65f295BBECd685Abf54e82CAf297BDB61` |
+| vSKHYB                           | bsctestnet | `0x101843eAbA6b98fbF4bba078b86EFdE62DF0fc16` |
+| vSKHYB                           | bscmainnet | `0x3E281461efb3D53EC20DB207674373Ed8Ef3BbA9` |
+| JumpRateModel                    | bsctestnet | `0x1CcDaf39085bae4e27c3Ba100561b1AD1B5A6b80` |
+| JumpRateModel                    | bscmainnet | `0xe589E884f69dF3137B43A760C4Ec9E55D944439D` |
+| Atlas Oracle                     | bsctestnet | `0x7F00af2f30a55e79311392C98fBBfA629D19b3A5` |
+| Atlas Oracle                     | bscmainnet | `0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0` |
+| Atlas feed (SKHYB/USD)           | bscmainnet | `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` |
+| Protocol Share Reserve           | bsctestnet | `0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3` |
+| Protocol Share Reserve           | bscmainnet | `0xCa01D5A9A248a830E9D93231e791B1afFed7c446` |
 
 ---
 
 ## Risk parameters verified
 
-| Parameter | Value |
-|---|---|
-| Collateral Factor (Max LTV) | 50% |
-| Liquidation Threshold | 65% |
-| Liquidation Incentive | 10% bonus (`1.1e18`) |
-| Reserve Factor | 10% |
-| Supply Cap | 140 SKHYB |
-| Borrow Cap | 0 (borrowing disabled) |
-| IRM base rate | 0% |
-| IRM multiplier | 6.67% |
-| IRM jump multiplier | 627% |
-| IRM kink | 75% |
-| Bootstrap liquidity | 0.51 SK4B |
-| vTokens burned (10%) | 0.051 vSKHYB → address(0) |
-| vTokens to VTreasury | remainder after burn |
-| `reduceReservesBlockDelta` | 28 800 blocks |
+| Parameter                   | Value                     |
+| --------------------------- | ------------------------- |
+| Collateral Factor (Max LTV) | 50%                       |
+| Liquidation Threshold       | 65%                       |
+| Liquidation Incentive       | 10% bonus (`1.1e18`)      |
+| Reserve Factor              | 10%                       |
+| Supply Cap                  | 1250 SKHYB                |
+| Borrow Cap                  | 0 (borrowing disabled)    |
+| IRM base rate               | 0%                        |
+| IRM multiplier              | 6.67%                     |
+| IRM jump multiplier         | 627%                      |
+| IRM kink                    | 75%                       |
+| Bootstrap liquidity         | 0.51 SK4B                 |
+| vTokens burned (10%)        | 0.051 vSKHYB → address(0) |
+| vTokens to VTreasury        | remainder after burn      |
+| `reduceReservesBlockDelta`  | 28 800 blocks             |
 
 ---
 
@@ -60,25 +60,27 @@ Both simulations passed. Test files:
 
 ### VIP execution — events asserted
 
-| Event | Count |
-|---|---|
-| `MarketListed` | 1 |
-| `NewSupplyCap` | 1 |
-| `ActionPausedMarket` | 1 |
-| `NewAccessControlManager` | 1 |
-| `NewProtocolShareReserve` | 1 |
-| `NewReduceReservesBlockDelta` | 1 |
-| `NewReserveFactor` | 1 |
-| `NewCollateralFactor` | 1 |
-| `NewLiquidationThreshold` | 1 |
-| `NewLiquidationIncentive` | 1 |
+| Event                         | Count |
+| ----------------------------- | ----- |
+| `MarketListed`                | 1     |
+| `NewSupplyCap`                | 1     |
+| `ActionPausedMarket`          | 1     |
+| `NewAccessControlManager`     | 1     |
+| `NewProtocolShareReserve`     | 1     |
+| `NewReduceReservesBlockDelta` | 1     |
+| `NewReserveFactor`            | 1     |
+| `NewCollateralFactor`         | 1     |
+| `NewLiquidationThreshold`     | 1     |
+| `NewLiquidationIncentive`     | 1     |
 
 ### Post-VIP checks
 
 **Oracle**
+
 - `resilientOracle.getUnderlyingPrice(vSKHYB)` returns `parseUnits("130", 18)` (mocked direct price).
 
 **vToken properties** (`checkVToken`)
+
 - `name` = `"Venus SK Hynix"`
 - `symbol` = `"vSKHYB"`
 - `decimals` = `8`
@@ -87,18 +89,21 @@ Both simulations passed. Test files:
 - `comptroller` = Core Pool Unitroller
 
 **Interest rate model** (`checkInterestRate`)
+
 - Contract at `0x1CcDaf39085bae4e27c3Ba100561b1AD1B5A6b80`
 - base = `0`, multiplier = `0.0667`, jump = `6.27`, kink = `0.75`
 
 **Risk parameters** (`checkRiskParameters`)
+
 - `collateralFactor` = `0.5e18`
 - `liquidationThreshold` = `0.65e18`
 - `liquidationIncentive` = `1.1e18`
 - `reserveFactor` = `0.1e18`
-- `supplyCap` = `140e18`
+- `supplyCap` = `1250e18`
 - `borrowCap` = `0`
 
 **Market configuration**
+
 - `admin` = Normal Timelock
 - `accessControlManager` = Core ACM
 - `protocolShareReserve` = `0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3`
@@ -106,6 +111,7 @@ Both simulations passed. Test files:
 - `actionPaused(vSKHYB, BORROW)` = `true`
 
 **Bootstrap liquidity**
+
 - `vSKHYB.totalSupply` = `convertAmountToVTokens(0.51e18, 1e28)` (i.e. `0.051e8` = 5 100 000 cSKHYB units)
 - `underlying.balanceOf(vSKHYB)` = `0.51e18`
 - `vSKHYB.balanceOf(address(0))` = `0.051e8` (10% burned)
@@ -135,6 +141,7 @@ Same 10 events as testnet (each with count = 1).
 ### Post-VIP checks
 
 **Oracle**
+
 - `resilientOracle.getUnderlyingPrice(vSKHYB)` = `162147041208637701100` (~$162.15 from the Atlas feed at the fork block).
 - `resilientOracle.getTokenConfig(SK4B).oracles[0]` = Atlas Oracle (`0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0`), flag = `true`.
 - `atlasOracle.tokenConfigs(SK4B).feed` = `0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B` (Atlas SKHYB/USD SingleFeed, id 871).
@@ -144,9 +151,10 @@ Same 10 events as testnet (each with count = 1).
 
 **Interest rate model** — same parameters, contract at `0xe589E884f69dF3137B43A760C4Ec9E55D944439D`.
 
-**Risk parameters** — identical to testnet (CF 50%, LT 65%, LI 10%, RF 10%, cap 140, borrow cap 0).
+**Risk parameters** — identical to testnet (CF 50%, LT 65%, LI 10%, RF 10%, cap 1250, borrow cap 0).
 
 **Market configuration**
+
 - `admin` = Normal Timelock
 - `accessControlManager` = Core ACM
 - `protocolShareReserve` = `0xCa01D5A9A248a830E9D93231e791B1afFed7c446`
@@ -154,6 +162,7 @@ Same 10 events as testnet (each with count = 1).
 - `actionPaused(vSKHYB, BORROW)` = `true`
 
 **Bootstrap liquidity**
+
 - `vSKHYB.totalSupply` = `convertAmountToVTokens(0.51e18, 1e28)`
 - `underlying.balanceOf(vSKHYB)` = `0.51e18`
 - `vSKHYB.balanceOf(address(0))` = `0.051e8` (10% burned)
@@ -161,6 +170,7 @@ Same 10 events as testnet (each with count = 1).
 - `vSKHYB.balanceOf(NORMAL_TIMELOCK)` = `0`
 
 **Atlas stale-period rollback** (post-assertion)
+
 - Normal Timelock calls `atlasOracle.setTokenConfig([SK4B, feed, 3800])`.
 - `atlasOracle.tokenConfigs(SK4B).maxStalePeriod` = `3800` — confirms the production stale period is correctly set and that the Normal Timelock has the required permission.
 
