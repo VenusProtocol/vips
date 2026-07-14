@@ -18,7 +18,7 @@ import {
 // granted = aggregator grants + wrapper grantRole(DEFAULT_ADMIN). revoked = aggregator revokes + wrapper
 // revokeRole(DEFAULT_ADMIN) + redundant cleanup + (BNB only) the 3 direct legacy-wildcard revokeRole calls.
 export const EXPECTED_ROLE_EVENTS: Record<"bscmainnet" | RemoteChain, { granted: number; revoked: number }> = {
-  bscmainnet: { granted: 6, revoked: 82 },
+  bscmainnet: { granted: 6, revoked: 81 },
   ethereum: { granted: 2, revoked: 62 },
   arbitrumone: { granted: 2, revoked: 34 },
   basemainnet: { granted: 2, revoked: 29 },

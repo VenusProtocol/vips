@@ -94,14 +94,14 @@ const redundantRevokes = (chain: Chain): Permission[] =>
     account: r.account,
   }));
 
-// Permissions the aggregator revokes on a chain: revoke/swap/stale rows from Critical on BNB (plus the
+// Permissions the aggregator revokes on a chain: revoke/swap rows from Critical on BNB (plus the
 // dangling-grant cleanup); on remotes every remote row from that chain's Critical, plus the per-market
 // syncCash() grants from NormalTimelock (replaced by the wildcard grant). Finally the redundant
 // (wildcard-shadowed) target-specific grants, de-duplicated against everything above.
 export const revokePermissions = (chain: Chain): Permission[] => {
   let base: Permission[];
   if (chain === "bscmainnet") {
-    base = BNB_ROWS.filter(r => r.action === "revoke" || r.action === "swap" || r.action === "stale").map(r => ({
+    base = BNB_ROWS.filter(r => r.action === "revoke" || r.action === "swap").map(r => ({
       contractAddress: r.target,
       functionSig: r.signature,
       account: BNB_CRITICAL,

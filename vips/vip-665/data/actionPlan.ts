@@ -15,7 +15,7 @@ import {
 // ===================================================================================================
 // BNB Chain
 // ===================================================================================================
-export type Action = "none" | "revoke" | "swap" | "grant" | "stale";
+export type Action = "none" | "revoke" | "swap" | "grant";
 // signature = ACM-registered function signature; target = contract it is scoped to;
 // critical/guardian1/guardian2/guardian3 = current holders; action = final action;
 // grantTo = destination guardian for swap/grant actions.
@@ -1024,6 +1024,8 @@ export const BNB_ROWS: {
     guardian3: false,
     action: "none",
   },
+  // setMinAmountToConvert is not revoked here: the grant looks dangling but the contract/function is live,
+  // so Critical keeps it (No change). The stale grant, if any, is handled explicitly in a separate cleanup.
   {
     signature: "setMinAmountToConvert(uint256)",
     target: CONTRACTS.USDTPrimeConverter,
@@ -1031,7 +1033,7 @@ export const BNB_ROWS: {
     guardian1: false,
     guardian2: false,
     guardian3: false,
-    action: "stale",
+    action: "none",
   },
   {
     signature: "pauseConversion()",

@@ -31,14 +31,13 @@ const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
 const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["address", "string"], [at, fn]);
 
-// One row bucket per action so every category (no-change / revoke / swap / grant / stale) is asserted
+// One row bucket per action so every category (no-change / revoke / swap / grant) is asserted
 // explicitly. Each bucket is guarded to be non-empty so a data regression that empties a category fails
 // loudly instead of passing vacuously.
 const NO_CHANGE = BNB_ROWS.filter(row => row.action === "none");
 const REVOKE = BNB_ROWS.filter(row => row.action === "revoke");
 const SWAP = BNB_ROWS.filter(row => row.action === "swap");
 const GRANT = BNB_ROWS.filter(row => row.action === "grant");
-const STALE = BNB_ROWS.filter(row => row.action === "stale");
 // Redundant (wildcard-shadowed) target-specific grants revoked as behavior-preserving cleanup.
 const REDUNDANT = REDUNDANT_REVOKES.bscmainnet;
 
@@ -61,11 +60,10 @@ forking(FORK_BLOCK, async () => {
 
   describe("VIP-665 pre-execution permissions (bscmainnet)", () => {
     it("the action plan covers every category with the expected row counts", () => {
-      expect(NO_CHANGE.length, "no-change rows").to.equal(185);
+      expect(NO_CHANGE.length, "no-change rows").to.equal(186);
       expect(REVOKE.length, "revoke rows").to.equal(26);
       expect(SWAP.length, "swap rows").to.equal(4);
       expect(GRANT.length, "grant rows").to.equal(1);
-      expect(STALE.length, "stale (BNB) rows").to.equal(1);
       expect(STALE_ROWS.length, "stale (dangling cleanup) rows").to.equal(8);
       expect(BNB_LEGACY_WILDCARD_REVOKES.length, "legacy wildcard revokes").to.equal(3);
       expect(REDUNDANT.length, "redundant revokes").to.equal(25);
@@ -130,21 +128,6 @@ forking(FORK_BLOCK, async () => {
       for (const row of GRANT) {
         expect(await holds(BNB_CRITICAL, row), `pre critical ${row.signature}@${row.target}`).to.be.true;
         expect(await holds(guardianAddr(row), row), `pre guardian ${row.signature}@${row.target}`).to.be.false;
-      }
-    });
-
-    it("stale (BNB rows): Critical currently holds each dangling permission", async () => {
-      for (const row of STALE) {
-        expect(await holds(BNB_CRITICAL, row), `pre critical ${row.signature}@${row.target}`).to.be.true;
-        expect(await holds(BNB_GUARDIANS.guardian1, row), `pre g1 ${row.signature}@${row.target}`).to.equal(
-          row.guardian1,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian2, row), `pre g2 ${row.signature}@${row.target}`).to.equal(
-          row.guardian2,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian3, row), `pre g3 ${row.signature}@${row.target}`).to.equal(
-          row.guardian3,
-        );
       }
     });
 
@@ -225,21 +208,6 @@ forking(FORK_BLOCK, async () => {
       for (const row of GRANT) {
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.true;
         expect(await holds(guardianAddr(row), row), `post guardian ${row.signature}@${row.target}`).to.be.true;
-      }
-    });
-
-    it("stale (BNB rows): Critical lost each dangling permission; Guardian flags unchanged", async () => {
-      for (const row of STALE) {
-        expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
-        expect(await holds(BNB_GUARDIANS.guardian1, row), `post g1 ${row.signature}@${row.target}`).to.equal(
-          row.guardian1,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian2, row), `post g2 ${row.signature}@${row.target}`).to.equal(
-          row.guardian2,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian3, row), `post g3 ${row.signature}@${row.target}`).to.equal(
-          row.guardian3,
-        );
       }
     });
 
