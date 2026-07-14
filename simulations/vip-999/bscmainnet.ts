@@ -7,37 +7,85 @@ import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } fro
 import { forking, testVip } from "src/vip-framework";
 
 import vip999, {
+  BORROW,
+  DAI,
+  DEVIATION_SENTINEL,
+  EBRAKE,
   FIXED_RATE_VAULT_CONTROLLER,
   NEW_VAULT_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
+  vDAI,
 } from "../../vips/vip-999/bscmainnet";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
+import EBRAKE_ABI from "./abi/EBrake.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 109158500;
+// Block shortly before the proposal — vDAI borrowing is paused, the sentinel still monitors DAI,
+// the EBrake snapshots for vDAI are empty (the weekend incident only paused borrowing), and the
+// FRV controller still clones the old (pre-consent) vault implementation.
+const FORK_BLOCK = 109660000;
 
 const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
+// A trusted keeper on the DeviationSentinel (verified on-chain) — used to call handleDeviation.
+const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+// Collateral market used to prove borrowing DAI works again (vUSDT has a non-zero collateral factor).
+const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+// Core Pool id for the CF snapshot read on EBrake.
+const CORE_POOL_ID = 0;
+
 forking(FORK_BLOCK, async () => {
+  const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
+  const deviationSentinel = new ethers.Contract(DEVIATION_SENTINEL, DEVIATION_SENTINEL_ABI, ethers.provider);
+  const ebrake = new ethers.Contract(EBRAKE, EBRAKE_ABI, ethers.provider);
+
   let controller: Contract;
+  let resilientOracle: Contract;
   let timelock: any;
   let vaultsBefore: BigNumber;
+
+  // DAI and USDT prices captured at the fork block (before the governance lifecycle warps time and
+  // makes the RedStone pivot feed stale) so the behavioral DAI borrow can pin them via the Chainlink feed.
+  let daiPrice: BigNumber;
+  let usdtPrice: BigNumber;
 
   before(async () => {
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
     timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
 
-    const resilientOracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
+    resilientOracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
+    daiPrice = await resilientOracle.getPrice(DAI);
+    usdtPrice = await resilientOracle.getPrice(USDT);
+
     await pinResilientOraclePriceViaRedstone(resilientOracle, BTCB);
     await pinResilientOraclePriceViaRedstone(resilientOracle, USDT);
   });
+
+  // Repoint an asset to the Chainlink feed as the sole ResilientOracle source and pin an exact price.
+  const pinPriceViaChainlink = async (asset: string, price: BigNumber) => {
+    await resilientOracle.connect(timelock).setTokenConfig({
+      asset,
+      oracles: [bscmainnet.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+      enableFlagsForOracles: [true, false, false],
+      cachingEnabled: false,
+    });
+    const chainlinkOracle = new ethers.Contract(
+      bscmainnet.CHAINLINK_ORACLE,
+      ["function setDirectPrice(address,uint256)"],
+      timelock,
+    );
+    await chainlinkOracle.setDirectPrice(asset, price);
+  };
 
   describe("Pre-VIP behavior", () => {
     it("controller still clones the old vault implementation", async () => {
@@ -56,10 +104,49 @@ forking(FORK_BLOCK, async () => {
         expect(newCode, "new impl should expose the consent entrypoints").to.include(selector);
       }
     });
+
+    it("borrowing is paused on the vDAI market", async () => {
+      expect(await comptroller.actionPaused(vDAI, BORROW)).to.equal(true);
+    });
+
+    it("vDAI collateral factor is 0", async () => {
+      const market = await comptroller.markets(vDAI);
+      expect(market.collateralFactorMantissa).to.equal(0);
+    });
+
+    it("DeviationSentinel monitors DAI (enabled, deviation 10%)", async () => {
+      const config = await deviationSentinel.tokenConfigs(DAI);
+      expect(config.enabled).to.equal(true);
+      expect(config.deviation).to.equal(10);
+    });
+
+    it("EBrake holds no collateral-factor snapshot for vDAI", async () => {
+      const [cf, lt] = await ebrake.getMarketCFSnapshot(vDAI, CORE_POOL_ID);
+      expect(cf).to.equal(0);
+      expect(lt).to.equal(0);
+    });
+
+    it("EBrake holds no cap snapshots for vDAI", async () => {
+      const state = await ebrake.marketStates(vDAI);
+      expect(state.borrowCapSnapshotted).to.equal(false);
+      expect(state.supplyCapSnapshotted).to.equal(false);
+    });
   });
 
-  testVip("VIP-999 Upgrade Institutional Fixed Rate Vault implementation", await vip999(), {
+  testVip("VIP-999 Fix DAI market + upgrade Institutional Fixed Rate Vault implementation", await vip999(), {
     callbackAfterExecution: async txResponse => {
+      // Monitoring toggled off for DAI on the DeviationSentinel.
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenMonitoringStatusChanged"], [1]);
+      // Borrow action unpaused on the Core Pool Comptroller for vDAI.
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [1]);
+      // Three EBrake snapshots reset for vDAI.
+      await expectEvents(
+        txResponse,
+        [EBRAKE_ABI],
+        ["CFSnapshotReset", "BorrowCapSnapshotReset", "SupplyCapSnapshotReset"],
+        [1, 1, 1],
+      );
+      // FRV clone source upgraded on the controller.
       await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultImplementationUpdated"], [1]);
     },
   });
@@ -67,6 +154,30 @@ forking(FORK_BLOCK, async () => {
   describe("Post-VIP behavior", () => {
     it("controller now clones the new vault implementation", async () => {
       expect(await controller.vaultImplementation()).to.equal(NEW_VAULT_IMPLEMENTATION);
+    });
+
+    it("borrowing is resumed on the vDAI market", async () => {
+      expect(await comptroller.actionPaused(vDAI, BORROW)).to.equal(false);
+    });
+
+    it("vDAI collateral factor is unchanged (0)", async () => {
+      const market = await comptroller.markets(vDAI);
+      expect(market.collateralFactorMantissa).to.equal(0);
+    });
+
+    it("DeviationSentinel no longer monitors DAI (deviation config preserved)", async () => {
+      const config = await deviationSentinel.tokenConfigs(DAI);
+      expect(config.enabled).to.equal(false);
+      expect(config.deviation).to.equal(10);
+    });
+
+    it("EBrake snapshots for vDAI remain empty", async () => {
+      const [cf, lt] = await ebrake.getMarketCFSnapshot(vDAI, CORE_POOL_ID);
+      expect(cf).to.equal(0);
+      expect(lt).to.equal(0);
+      const state = await ebrake.marketStates(vDAI);
+      expect(state.borrowCapSnapshotted).to.equal(false);
+      expect(state.supplyCapSnapshotted).to.equal(false);
     });
   });
 
@@ -265,6 +376,46 @@ forking(FORK_BLOCK, async () => {
       await vault.connect(institution).withdrawCollateral(collateral);
       expect(await btcb.balanceOf(institutionAddress)).to.equal(instBtcbBefore.add(collateral));
       expect(await btcb.balanceOf(vault.address)).to.equal(0);
+    });
+  });
+
+  describe("Post-VIP behavioral proof: DAI market", () => {
+    it("a user with collateral can borrow DAI, and the sentinel can no longer act on vDAI", async () => {
+      const dai = new ethers.Contract(DAI, ERC20_ABI, ethers.provider);
+      const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+      const vUsdt = new ethers.Contract(vUSDT, VTOKEN_ABI, ethers.provider);
+      const vDai = new ethers.Contract(vDAI, VTOKEN_ABI, ethers.provider);
+
+      // The mined governance lifecycle and the FRV vault lifecycle advance time, staling DAI/USDT's
+      // RedStone pivot feed (its internal guard cannot be widened). Repoint both to the Chainlink feed
+      // as the single source and pin the price captured at the fork block, so the borrow path prices
+      // don't revert.
+      await pinPriceViaChainlink(DAI, daiPrice);
+      await pinPriceViaChainlink(USDT, usdtPrice);
+
+      const user = await initMainnetUser("0x000000000000000000000000000000000000dEaD", parseUnits("10"));
+      const whale = await initMainnetUser(WHALE, parseUnits("10"));
+
+      // Fund the user with USDT collateral and supply it.
+      const collateral = parseUnits("1000", 18);
+      await usdt.connect(whale).transfer(user.address, collateral);
+      await usdt.connect(user).approve(vUSDT, collateral);
+      await vUsdt.connect(user).mint(collateral);
+      await comptroller.connect(user).enterMarkets([vUSDT]);
+
+      // Borrow a small amount of DAI — previously reverted on the borrow-paused guard.
+      const borrowAmount = parseUnits("100", 18);
+      const daiBefore = await dai.balanceOf(user.address);
+      await expect(vDai.connect(user).borrow(borrowAmount)).to.not.be.reverted;
+      expect(await dai.balanceOf(user.address)).to.equal(daiBefore.add(borrowAmount));
+      expect(await vDai.callStatic.borrowBalanceCurrent(user.address)).to.be.gte(borrowAmount);
+
+      // With monitoring disabled, a trusted keeper can no longer act on the vDAI market.
+      const keeper = await initMainnetUser(GUARDIAN, parseUnits("10"));
+      await expect(deviationSentinel.connect(keeper).handleDeviation(vDAI)).to.be.revertedWithCustomError(
+        deviationSentinel,
+        "TokenMonitoringDisabled",
+      );
     });
   });
 });
