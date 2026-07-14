@@ -10,7 +10,7 @@ import vip665, { EXPECTED_ROLE_EVENTS } from "../../../vips/vip-665/bscmainnet";
 import { remoteRowsFor } from "../../../vips/vip-665/data/actionPlan";
 import { REMOTE_ACM, SYNC_CASH_MARKETS, ZERO } from "../../../vips/vip-665/data/addresses";
 import { REDUNDANT_REVOKES, SYNC_CASH_SIG } from "../../../vips/vip-665/data/cleanup";
-import { AGGREGATOR, Chain, grantPermissions, revokePermissions } from "../../../vips/vip-665/utils/commands";
+import { AGGREGATOR, Chain, buildGrantPermissions, buildRevokePermissions } from "../../../vips/vip-665/utils/commands";
 import { seedAggregator } from "../../../vips/vip-665/utils/seed";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 
@@ -33,7 +33,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
   forking(forkBlock, async () => {
     before(async () => {
       const signer = await initMainnetUser(NETWORK_ADDRESSES[chain].NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-      await seedAggregator(signer, AGGREGATOR[chain], grantPermissions(chain), revokePermissions(chain));
+      await seedAggregator(signer, AGGREGATOR[chain], buildGrantPermissions(chain), buildRevokePermissions(chain));
     });
 
     const rows = remoteRowsFor(chain);

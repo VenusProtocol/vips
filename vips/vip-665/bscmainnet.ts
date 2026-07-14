@@ -9,9 +9,9 @@ import {
   GRANT_INDEX,
   REVOKE_INDEX,
   acmOf,
-  grantPermissions,
+  buildGrantPermissions,
   legacyWildcardCommands,
-  revokePermissions,
+  buildRevokePermissions,
 } from "./utils/commands";
 
 // Expected RoleGranted / RoleRevoked counts per chain, asserted by the simulations after execution.
@@ -37,14 +37,14 @@ const aggregatorCommands = (chain: Chain): Command[] => {
   const commands: Command[] = [
     { target: acm, signature: "grantRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, agg], ...route },
   ];
-  if (grantPermissions(chain).length > 0)
+  if (buildGrantPermissions(chain).length > 0)
     commands.push({
       target: agg,
       signature: "executeGrantPermissions(uint256)",
       params: [GRANT_INDEX[chain]],
       ...route,
     });
-  if (revokePermissions(chain).length > 0)
+  if (buildRevokePermissions(chain).length > 0)
     commands.push({
       target: agg,
       signature: "executeRevokePermissions(uint256)",

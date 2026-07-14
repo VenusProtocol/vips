@@ -72,7 +72,7 @@ export interface Permission {
 // Permissions the aggregator grants on a chain. On BNB: swap → move a function to a Guardian, grant → add a
 // Guardian alongside Critical. On remotes: the single wildcard syncCash() grant to NormalTimelock; remotes
 // have no Guardian swaps/grants.
-export const grantPermissions = (chain: Chain): Permission[] => {
+export const buildGrantPermissions = (chain: Chain): Permission[] => {
   if (chain !== "bscmainnet") return syncCashGrants(chain);
   return BNB_ROWS.filter(r => r.action === "swap" || r.action === "grant").map(r => ({
     contractAddress: r.target,
@@ -98,7 +98,7 @@ const redundantRevokes = (chain: Chain): Permission[] =>
 // dangling-grant cleanup); on remotes every remote row from that chain's Critical, plus the per-market
 // syncCash() grants from NormalTimelock (replaced by the wildcard grant). Finally the redundant
 // (wildcard-shadowed) target-specific grants, de-duplicated against everything above.
-export const revokePermissions = (chain: Chain): Permission[] => {
+export const buildRevokePermissions = (chain: Chain): Permission[] => {
   let base: Permission[];
   if (chain === "bscmainnet") {
     base = BNB_ROWS.filter(r => r.action === "revoke" || r.action === "swap").map(r => ({

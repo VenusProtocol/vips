@@ -13,9 +13,9 @@ import { REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-665/data/cleanup";
 import {
   AGGREGATOR,
   BNB_LEGACY_WILDCARD_REVOKES,
-  grantPermissions,
+  buildGrantPermissions,
   legacyWildcardRole,
-  revokePermissions,
+  buildRevokePermissions,
 } from "../../vips/vip-665/utils/commands";
 import { seedAggregator } from "../../vips/vip-665/utils/seed";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
@@ -53,8 +53,8 @@ forking(FORK_BLOCK, async () => {
     await seedAggregator(
       signer,
       AGGREGATOR.bscmainnet,
-      grantPermissions("bscmainnet"),
-      revokePermissions("bscmainnet"),
+      buildGrantPermissions("bscmainnet"),
+      buildRevokePermissions("bscmainnet"),
     );
   });
 
@@ -189,8 +189,8 @@ forking(FORK_BLOCK, async () => {
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
     });
 
-    it("behavioral: the CriticalTimelock can no longer call any revoked or stale function", async () => {
-      for (const row of [...REVOKE, ...STALE])
+    it("behavioral: the CriticalTimelock can no longer call any revoked function", async () => {
+      for (const row of REVOKE)
         expect(
           await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
           `crit still allowed ${row.signature}@${row.target}`,

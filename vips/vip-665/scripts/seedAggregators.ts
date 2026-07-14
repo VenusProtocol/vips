@@ -10,7 +10,7 @@
  */
 import { ethers, network } from "hardhat";
 
-import { AGGREGATOR, Chain, grantPermissions, revokePermissions } from "../utils/commands";
+import { AGGREGATOR, Chain, buildGrantPermissions, buildRevokePermissions } from "../utils/commands";
 import { seedAggregator } from "../utils/seed";
 
 async function main() {
@@ -18,8 +18,8 @@ async function main() {
   if (!(chain in AGGREGATOR)) throw new Error(`VIP-665 has no aggregator for network "${chain}"`);
 
   const [signer] = await ethers.getSigners();
-  const grants = grantPermissions(chain);
-  const revokes = revokePermissions(chain);
+  const grants = buildGrantPermissions(chain);
+  const revokes = buildRevokePermissions(chain);
 
   console.log(`Chain ${chain} — aggregator ${AGGREGATOR[chain]}`);
   console.log(`  seeding ${grants.length} grant(s) and ${revokes.length} revoke(s) from ${await signer.getAddress()}`);
