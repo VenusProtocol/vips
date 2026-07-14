@@ -3,14 +3,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, BNB_ROWS } from "../data/bnb";
 import { REMOTE_ACM, REMOTE_CHAINS, RemoteChain, remoteRowsFor } from "../data/remote";
 import { STALE_ROWS } from "../data/staleness";
+import { syncCashGrants, syncCashRevokes } from "../data/syncCash";
 
 export type Chain = "bscmainnet" | RemoteChain;
 export const CHAINS: Chain[] = ["bscmainnet", ...REMOTE_CHAINS];
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-// ACMCommandsAggregator per chain (deployed on every mainnet; addresses from the governance-contracts
-// deployments). Each instance is bound at construction to its own chain's ACM.
+// ACMCommandsAggregator per chain
 export const AGGREGATOR: Record<Chain, string> = {
   bscmainnet: "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64",
   ethereum: "0xb78772bed6995551b64e54Cdb8e09800d86C73ee",
@@ -22,9 +22,6 @@ export const AGGREGATOR: Record<Chain, string> = {
   opbnbmainnet: "0x6dB5e303289fea2E83F7d442470210045592AD93",
 };
 
-// Index each chain's aggregator stores this VIP's grant / revoke batch at (= the corresponding batch array
-// length at seed time). Re-confirm and re-seed with scripts/seedAggregators.ts immediately before
-// proposing. GRANT_INDEX is only meaningful on BNB Chain (remotes have no grants).
 export const GRANT_INDEX: Record<Chain, number> = {
   bscmainnet: 4,
   ethereum: 3,
@@ -58,10 +55,11 @@ export interface Permission {
   account: string;
 }
 
-// Permissions the aggregator grants on a chain. Only BNB Chain has grants (swap → move a function to a
-// Guardian, grant → add a Guardian alongside Critical); remotes have none.
+// Permissions the aggregator grants on a chain. On BNB: swap → move a function to a Guardian, grant → add a
+// Guardian alongside Critical. On remotes: the single wildcard syncCash() grant to NormalTimelock (the
+// syncCash hygiene cleanup); remotes have no Guardian swaps/grants.
 export const grantPermissions = (chain: Chain): Permission[] => {
-  if (chain !== "bscmainnet") return [];
+  if (chain !== "bscmainnet") return syncCashGrants(chain);
   return BNB_ROWS.filter(r => r.action === "swap" || r.action === "grant").map(r => ({
     contractAddress: r.target,
     functionSig: r.signature,
@@ -70,7 +68,8 @@ export const grantPermissions = (chain: Chain): Permission[] => {
 };
 
 // Permissions the aggregator revokes on a chain: revoke/swap/stale rows from Critical on BNB (plus the
-// staleness / legacy cleanup), or every remote row from that chain's Critical.
+// staleness / legacy cleanup); on remotes every remote row from that chain's Critical, plus the per-market
+// syncCash() grants from NormalTimelock (replaced by the wildcard grant above).
 export const revokePermissions = (chain: Chain): Permission[] => {
   if (chain === "bscmainnet") {
     const revokes: Permission[] = BNB_ROWS.filter(
@@ -83,7 +82,12 @@ export const revokePermissions = (chain: Chain): Permission[] => {
     return revokes;
   }
   const critical = criticalOf(chain);
-  return remoteRowsFor(chain).map(r => ({ contractAddress: r.target, functionSig: r.signature, account: critical }));
+  const criticalRevokes = remoteRowsFor(chain).map(r => ({
+    contractAddress: r.target,
+    functionSig: r.signature,
+    account: critical,
+  }));
+  return [...criticalRevokes, ...syncCashRevokes(chain)];
 };
 
 // Grant / revoke counts in a chain's batches — drives expectEvents on the ACM's role events. Each

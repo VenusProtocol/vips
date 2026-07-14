@@ -45,13 +45,13 @@ const meta = {
   title: "VIP-665 [Multi-Chain] Reduce CriticalTimelock privileges",
   description: `#### Summary
 
-This proposal hardens governance by removing high-severity powers from the CriticalTimelock on every mainnet, and — for a small set of BNB Chain functions where a Guardian multisig does not already hold them — moving them to the Guardian. It also cleans up dangling permissions left on removed setters and retired contracts.
+This proposal hardens governance by removing high-severity powers from the CriticalTimelock on every mainnet, and — for a small set of BNB Chain functions where a Guardian multisig does not already hold them — moving them to the Guardian. It also cleans up dangling permissions left on removed setters and retired contracts, and normalizes the \`syncCash()\` permission on every remote chain to the wildcard convention used by all other vToken setters.
 
 #### Description
 
 A proposal routed through the Critical route executes in roughly 7 hours on BNB Chain and 8 hours on remote chains once voting, queue and timelock delays are counted. To shrink that fast-path attack surface, this VIP takes the high-severity powers off the CriticalTimelock across BNB Chain, Ethereum, Arbitrum One, Base, zkSync Era, OP Mainnet, Unichain and opBNB. The full per-contract, per-chain list of permissions changed is in the accompanying community post and the pull request.
 
-Actions per chain: revoke the listed permissions from the CriticalTimelock; on BNB Chain, grant a few functions to Guardian 1 (swap) and grant one to Guardian 1 while keeping Critical (add); and revoke dangling grants on removed setters and retired contracts from every current holder.
+Actions per chain: revoke the listed permissions from the CriticalTimelock; on BNB Chain, grant a few functions to Guardian 1 (swap) and grant one to Guardian 1 while keeping Critical (add), and revoke dangling grants on removed setters and retired contracts from every current holder; on each remote chain, grant \`syncCash()\` on the wildcard target (address(0)) to the NormalTimelock and revoke the per-market \`syncCash()\` grants it currently holds.
 
 #### Execution model
 
@@ -61,7 +61,7 @@ To keep the whole change in one proposal within the BNB Chain per-transaction ga
 
 - **Scoped privilege**: the aggregator's DEFAULT_ADMIN_ROLE grant is scoped to this proposal — granted, used once, and revoked in the same transaction sequence, per chain.
 - **VIP execution simulation**: validated in a fork environment that every listed permission moved as intended (revoke / swap / grant), that "No change" permissions are untouched, and that the expected ACM events fire.
-- **Cross-chain payload size**: each LayerZero message carries only 3 commands, well under the Relayer cap.
+- **Cross-chain payload size**: each LayerZero message carries only 4 commands (grant the aggregator the ACM role, execute the grant batch, execute the revoke batch, revoke the role), well under the Relayer cap.
 
 #### Voting options
 

@@ -9,6 +9,7 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import vip665 from "../../../vips/vip-665/bscmainnet";
 import { ZERO } from "../../../vips/vip-665/data/bnb";
 import { REMOTE_ACM, remoteRowsFor } from "../../../vips/vip-665/data/remote";
+import { SYNC_CASH_MARKETS, SYNC_CASH_SIG } from "../../../vips/vip-665/data/syncCash";
 import {
   AGGREGATOR,
   Chain,
@@ -23,14 +24,17 @@ type RemoteChain = Exclude<Chain, "bscmainnet">;
 
 const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["address", "string"], [at, fn]);
 
-// RoleGranted / RoleRevoked are emitted by every ACM version. Remotes have no grants, so the only
-// RoleGranted is the wrapper grantRole(DEFAULT_ADMIN_ROLE) and RoleRevoked = revokes + the wrapper
-// revokeRole.
+// RoleGranted / RoleRevoked are emitted by every ACM version. On remotes the grants are the wrapper
+// grantRole(DEFAULT_ADMIN_ROLE) plus the single wildcard syncCash() grant; RoleRevoked = the Critical
+// revokes + the per-market syncCash() revokes + the wrapper revokeRole. Event counts derive from
+// roleChangeCounts, so they track the batch contents automatically.
 
 // Shared body for the 7 remote-chain simulations. Run each with its matching --fork.
 export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
   const critical = NETWORK_ADDRESSES[chain].CRITICAL_TIMELOCK;
   const guardian = NETWORK_ADDRESSES[chain].GUARDIAN;
+  const normal = NETWORK_ADDRESSES[chain].NORMAL_TIMELOCK;
+  const syncCashMarkets = SYNC_CASH_MARKETS[chain];
 
   forking(forkBlock, async () => {
     before(async () => {
@@ -59,6 +63,14 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
             await acm.hasRole(role(r.target, r.signature), guardian),
             `pre guardian ${r.signature}@${r.target}`,
           ).to.equal(r.guardian);
+      });
+
+      it("syncCash: NormalTimelock holds every per-market grant and no wildcard grant yet", async () => {
+        const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+        expect(syncCashMarkets.length, `syncCash markets for ${chain}`).to.be.greaterThan(0);
+        expect(await acm.hasRole(role(ZERO, SYNC_CASH_SIG), normal), "pre wildcard syncCash").to.be.false;
+        for (const m of syncCashMarkets)
+          expect(await acm.hasRole(role(m, SYNC_CASH_SIG), normal), `pre normal syncCash@${m}`).to.be.true;
       });
     });
 
@@ -97,6 +109,20 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
           if (r.target !== ZERO)
             expect(await acm.isAllowedToCall(critical, r.signature, { from: r.target }), `crit !allowed ${r.signature}`)
               .to.be.false;
+      });
+
+      it("syncCash: NormalTimelock gained the wildcard grant and lost every per-market grant", async () => {
+        const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+        expect(await acm.hasRole(role(ZERO, SYNC_CASH_SIG), normal), "post wildcard syncCash").to.be.true;
+        for (const m of syncCashMarkets)
+          expect(await acm.hasRole(role(m, SYNC_CASH_SIG), normal), `post normal syncCash@${m}`).to.be.false;
+      });
+
+      it("syncCash behavioral: NormalTimelock is still allowed to call syncCash on every market via wildcard", async () => {
+        const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+        for (const m of syncCashMarkets)
+          expect(await acm.isAllowedToCall(normal, SYNC_CASH_SIG, { from: m }), `normal allowed syncCash@${m}`).to.be
+            .true;
       });
     });
   });

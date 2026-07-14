@@ -37,9 +37,6 @@ export const STALE_ROWS: { target: string; signature: string; revokeFrom: string
   { target: RETIRED_RISK_CONFIG, signature: "toggleConfigActive(string)", revokeFrom: [NORMAL, FASTTRACK, CRITICAL] },
   // Retired risk steward — dangling target grant.
   { target: RETIRED_RISK_STEWARD, signature: "setMaxDeltaBps(uint256)", revokeFrom: [NORMAL, FASTTRACK, CRITICAL] },
-  // NOTE: this retired steward was also a candidate GRANTEE of the wildcard setMarketBorrowCaps/
-  // setMarketSupplyCaps powers, but it holds neither on-chain, so those two revokes would be no-ops
-  // and are omitted.
   // Retired oracle — dangling target grant.
   {
     target: RETIRED_TWAP_ORACLE,
