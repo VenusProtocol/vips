@@ -44,64 +44,29 @@ export const VUSDC_WITHDRAW_AMOUNT = parseUnits("3960000", 8);
 export const vip644 = () => {
   const meta = {
     version: "v2",
-    title:
-      "VIP-644 [BNB Chain] Fix DAI market (disable DeviationSentinel monitoring, resume borrowing), upgrade Institutional Fixed Rate Vault implementation and pay Allez Labs Q3 2026 fees",
+    title: "VIP-644 [BNB Chain] Fix DAI Market, Upgrade Institutional Fixed Rate Vault, and Pay Allez Labs Q3",
     description: `#### Summary
 
-If passed, this VIP will (1) stop the DeviationSentinel from monitoring DAI, resume borrowing on the vDAI market and clear the related Emergency Brake snapshots, (2) point the Institutional Fixed Rate Vault controller at a new vault clone-source implementation that adds on-chain disclaimer-consent recording to the supplier deposit/mint flow, and (3) transfer 105,000 USDC from the Venus Treasury to Allez Labs for Q3 2026 risk management services, sourced by redeeming treasury vUSDC.
+This VIP (1) stops DeviationSentinel monitoring of DAI, resumes vDAI borrowing and clears the related Emergency Brake snapshots, (2) upgrades the Institutional Fixed Rate Vault to an implementation that adds optional on-chain disclaimer-consent recording to the deposit/mint flow, and (3) transfers 105,000 USDC from the Venus Treasury to Allez Labs for Q3 2026 risk-management services, sourced by redeeming Treasury-held vUSDC.
 
-#### Part 1 — Fix the DAI market
+#### Description
 
-DAI has thin, volatile DEX liquidity on BNB Chain. Because the DEX price of DAI is chronically noisy relative to the ResilientOracle price, the DeviationSentinel has repeatedly tripped false positives on the DAI market — most recently over the weekend, pausing borrowing on the vDAI market. As reliably configuring a deviation threshold for such a shallow pool is not practical, the risk team has decided to stop monitoring DAI with the DeviationSentinel.
+**Part 1 — DAI market.** DAI's thin, volatile DEX liquidity makes its price noisy against the ResilientOracle, repeatedly tripping DeviationSentinel false positives on vDAI (most recently last weekend). Monitoring is disabled and borrowing resumed; no collateral factor or cap is restored because EBrake never reduced any (vDAI's collateral factor was already 0).
 
-**1. Disable DeviationSentinel monitoring for DAI**
+**Part 2 — Fixed Rate Vault.** A new implementation adds depositWithConsent / mintWithConsent — ERC-4626 wrappers that emit ConsentRecorded (a zero hash skips it). Plain deposit/mint and existing vaults are unaffected; only vaults created after execution use it.
 
-- **Contract**: DeviationSentinel (${DEVIATION_SENTINEL})
-- **Function**: setTokenMonitoringEnabled(address,bool)
-- **Parameters**: token = DAI (${DAI}), enabled = false
-- **Effect**: handleDeviation can no longer act on the vDAI market (it reverts TokenMonitoringDisabled). The stored deviation threshold for DAI is left unchanged. This is ordered first so the market cannot be re-tripped around execution.
+**Part 3 — Allez Labs Q3 payment.** Allez Labs provides risk-management services to Venus, billed quarterly in advance. This pays the Q3 2026 fee of 105,000 USDC ($35,000/month × 3, covering 26 July 2026 – 25 October 2026) — the same amount as the Q2 payment ([VIP-612](https://app.venus.io/#/governance/proposal/612?chainId=56)), paid in USDC. Because the Treasury's liquid USDC does not cover the amount, the USDC is sourced by redeeming Treasury-held vUSDC through the Token Redeemer, the same flow as [VIP-594](https://app.venus.io/#/governance/proposal/594?chainId=56): the redemption pays Allez Labs exactly 105,000 USDC and returns the unused vUSDC remainder to the Treasury. The vUSDC exchange rate only increases over time via interest accrual, so the withdrawn 3,960,000 vUSDC always covers the payment at execution time.
 
-**2. Resume borrowing on vDAI**
+#### Actions
 
-- **Contract**: Core Pool Comptroller (${bscmainnet.UNITROLLER})
-- **Function**: setActionsPaused(address[],uint8[],bool)
-- **Parameters**: markets = [vDAI], actions = [BORROW (2)], paused = false
-- **Effect**: Users can borrow DAI again. The collateral factor of vDAI is **not** changed by this VIP: its pre-incident collateral factor was already 0 (which is why the EBrake collateral-factor snapshot for vDAI is empty — the sentinel only paused borrowing, it never lowered a non-zero collateral factor), so there is no collateral factor to restore. Likewise the borrow and supply caps were never reduced by EBrake (both cap snapshots are empty and the live caps are intact), so there are no caps to restore.
+This VIP performs 8 actions on BNB Chain:
 
-**3. Reset the DAI snapshots on EBrake**
-
-- **Contract**: EBrake (${EBRAKE})
-- **Functions**: resetCFSnapshot(address), resetBorrowCapSnapshot(address), resetSupplyCapSnapshot(address)
-- **Parameters**: market = vDAI
-- **Effect**: Clears any stored collateral-factor / borrow-cap / supply-cap snapshot for the vDAI market so EBrake tracks no residual state for DAI after monitoring is disabled.
-
-#### Part 2 — Upgrade the Institutional Fixed Rate Vault implementation (consent recording)
-
-The \`InstitutionalLoanVault\` implementation used by the controller (${FIXED_RATE_VAULT_CONTROLLER}) to clone new vaults is upgraded from ${OLD_VAULT_IMPLEMENTATION} to ${NEW_VAULT_IMPLEMENTATION}. The new implementation adds two supplier entrypoints:
-
-- \`depositWithConsent(uint256 assets, address receiver, bytes32 consentHash)\` — a thin wrapper over ERC-4626 \`deposit\` that emits \`ConsentRecorded(supplier, receiver, consentHash)\`.
-- \`mintWithConsent(uint256 shares, address receiver, bytes32 consentHash)\` — a thin wrapper over ERC-4626 \`mint\` that emits the same event.
-
-The consent hash is optional: passing \`bytes32(0)\` skips the event and deposits/mints as usual. The plain \`deposit\`/\`mint\` entrypoints are unchanged. Existing vaults are immutable clones and are not modified; the change applies to vaults created from now on.
-
-- **Action**: point the controller at the new vault implementation via \`setVaultImplementation(${NEW_VAULT_IMPLEMENTATION})\`.
-
-#### Part 3 — Allez Labs Q3 2026 Risk Services Payment
-
-Allez Labs provides risk management services to Venus Protocol. Per the contract terms, fees are paid quarterly in advance. This is the payment covering Q3 2026 (26 July 2026 – 25 October 2026), following the Q2 2026 payment executed in [VIP-612](https://app.venus.io/#/governance/proposal/612?chainId=56).
-
-**Transfer Details**
-
-- Amount: 105,000 USDC (at $35,000/month × 3 months)
-- Source: Venus Treasury (${bscmainnet.VTREASURY}), by redeeming treasury-held vUSDC
-- Destination: Allez Labs (${ALLEZ_LABS})
-
-**Technical implementation.** The treasury's liquid USDC balance does not cover the payment, so this VIP uses the Token Redeemer (${TOKEN_REDEEMER}) to convert treasury vUSDC into USDC — the same flow as [VIP-594](https://app.venus.io/#/governance/proposal/594?chainId=56):
-
-1. Withdraw 3,960,000 vUSDC (~105K USDC worth) from the Venus Treasury to the Token Redeemer.
-2. Call \`redeemUnderlyingAndTransfer\`: redeems exactly 105,000 USDC and sends it to Allez Labs; the unused vUSDC remainder is returned to the Venus Treasury.
-
-The vUSDC exchange rate (~0.02655 USDC per vUSDC at authoring) only increases over time via interest accrual, so 3,960,000 vUSDC always covers 105,000 USDC at execution time, and the amount received by Allez Labs is exact and deterministic.
+1. **Disable DeviationSentinel monitoring for DAI** — setTokenMonitoringEnabled(DAI, false) on DeviationSentinel (${DEVIATION_SENTINEL}), ordered first so vDAI cannot be re-tripped around execution.
+2. **Resume borrowing on vDAI** — setActionsPaused([vDAI], [BORROW], false) on the Core Pool Comptroller (${bscmainnet.UNITROLLER}).
+3. **Clear the vDAI Emergency Brake snapshots** — resetCFSnapshot, resetBorrowCapSnapshot and resetSupplyCapSnapshot(vDAI) on EBrake (${EBRAKE}).
+4. **Upgrade the Fixed Rate Vault implementation** — setVaultImplementation(${NEW_VAULT_IMPLEMENTATION}) on the controller (${FIXED_RATE_VAULT_CONTROLLER}), replacing ${OLD_VAULT_IMPLEMENTATION}; only vaults cloned after execution use it.
+5. **Withdraw vUSDC for the Allez Labs payment** — withdrawTreasuryBEP20(vUSDC, 3,960,000, TOKEN_REDEEMER) on the Venus Treasury (${bscmainnet.VTREASURY}), moving 3,960,000 vUSDC (${vUSDC}) to the Token Redeemer (${TOKEN_REDEEMER}).
+6. **Pay Allez Labs for Q3 2026** — redeemUnderlyingAndTransfer on the Token Redeemer, redeeming exactly 105,000 USDC (${USDC}) to Allez Labs (${ALLEZ_LABS}) and returning the unused vUSDC remainder to the Venus Treasury.
 
 No new AccessControlManager permissions are required — the Normal Timelock already holds all of the roles used by this proposal.
 
