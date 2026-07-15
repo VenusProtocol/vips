@@ -7,12 +7,11 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip665, { EXPECTED_ROLE_EVENTS } from "../../vips/vip-665/bscmainnet";
-import { BNB_ACTIONS } from "../../vips/vip-665/data/criticalChanges";
 import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, ZERO } from "../../vips/vip-665/data/addresses";
-import { REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-665/data/cleanup";
+import { CLEANUP_LEGACY_WILDCARD_REVOKES, REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-665/data/cleanup";
+import { BNB_ACTIONS, BNB_ACTION_LEGACY_WILDCARD_REVOKES } from "../../vips/vip-665/data/criticalChanges";
 import {
   AGGREGATOR,
-  BNB_LEGACY_WILDCARD_REVOKES,
   buildGrantPermissions,
   buildRevokePermissions,
   legacyWildcardRole,
@@ -31,12 +30,12 @@ const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
 const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["address", "string"], [at, fn]);
 
-// One bucket per action so each category is asserted explicitly and guarded non-empty (a data regression
-// that empties a category fails loudly instead of passing vacuously).
+// Critical maintenance rows, bucketed per action so each category is asserted explicitly and guarded
+// non-empty (a data regression that empties a category fails loudly instead of passing vacuously).
 const REVOKE = BNB_ACTIONS.filter(row => row.action === "revoke");
 const SWAP = BNB_ACTIONS.filter(row => row.action === "swap");
 const GRANT = BNB_ACTIONS.filter(row => row.action === "grant");
-// Redundant (wildcard-shadowed) target-specific grants revoked as behavior-preserving cleanup.
+// Cleanup: redundant (wildcard-shadowed) target-specific grants revoked as behavior-preserving cleanup.
 const REDUNDANT = REDUNDANT_REVOKES.bscmainnet;
 
 forking(FORK_BLOCK, async () => {
@@ -56,32 +55,15 @@ forking(FORK_BLOCK, async () => {
     );
   });
 
-  describe("VIP-665 pre-execution permissions (bscmainnet)", () => {
-    it("the action plan covers every category with the expected row counts", () => {
+  // ==================================================================================================
+  // Critical maintenance — reduce CriticalTimelock privileges (revoke / swap / grant + legacy wildcard).
+  // ==================================================================================================
+  describe("VIP-665 Critical maintenance — pre-execution (bscmainnet)", () => {
+    it("covers the expected revoke / swap / grant counts", () => {
       expect(REVOKE.length, "revoke rows").to.equal(26);
       expect(SWAP.length, "swap rows").to.equal(4);
       expect(GRANT.length, "grant rows").to.equal(1);
-      expect(STALE_ROWS.length, "stale (dangling cleanup) rows").to.equal(8);
-      expect(BNB_LEGACY_WILDCARD_REVOKES.length, "legacy wildcard revokes").to.equal(3);
-      expect(REDUNDANT.length, "redundant revokes").to.equal(15);
-    });
-
-    it("legacy wildcard: each grantee currently holds the 32-byte wildcard role", async () => {
-      for (const r of BNB_LEGACY_WILDCARD_REVOKES) {
-        expect(
-          await acm().hasRole(legacyWildcardRole(r.signature), r.account),
-          `pre legacy wildcard ${r.signature} ${r.account}`,
-        ).to.be.true;
-      }
-    });
-
-    it("redundant: each target-specific grant is currently held by its account", async () => {
-      for (const r of REDUNDANT) {
-        expect(
-          await acm().hasRole(role(r.contract, r.signature), r.account),
-          `pre redundant ${r.signature}@${r.contract} ${r.account}`,
-        ).to.be.true;
-      }
+      expect(BNB_ACTION_LEGACY_WILDCARD_REVOKES.length, "critical legacy wildcard revokes").to.equal(1);
     });
 
     it("revoke: Critical currently holds every permission to be revoked", async () => {
@@ -103,10 +85,53 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("stale (dangling cleanup): every listed grantee currently holds the dangling permission", async () => {
-      for (const staleRow of STALE_ROWS)
-        for (const who of staleRow.revokeFrom)
-          expect(await holds(who, staleRow), `pre stale ${staleRow.signature}@${staleRow.target} ${who}`).to.be.true;
+    it("legacy wildcard: Critical currently holds the 32-byte wildcard role", async () => {
+      for (const r of BNB_ACTION_LEGACY_WILDCARD_REVOKES)
+        expect(
+          await acm().hasRole(legacyWildcardRole(r.signature), r.account),
+          `pre legacy wildcard ${r.signature} ${r.account}`,
+        ).to.be.true;
+    });
+  });
+
+  // ==================================================================================================
+  // Cleanup — ACM maintenance: stale/dangling grants, redundant wildcard-shadowed grants, and the retired
+  // risk-steward legacy-wildcard cap powers. (BNB has no syncCash normalization — that is remotes only.)
+  // ==================================================================================================
+  describe("VIP-665 Cleanup — pre-execution (bscmainnet)", () => {
+    describe("stale (dangling grants)", () => {
+      it("covers the expected count", () => expect(STALE_ROWS.length, "stale rows").to.equal(8));
+
+      it("every listed grantee currently holds the dangling permission", async () => {
+        for (const staleRow of STALE_ROWS)
+          for (const who of staleRow.revokeFrom)
+            expect(await holds(who, staleRow), `pre stale ${staleRow.signature}@${staleRow.target} ${who}`).to.be.true;
+      });
+    });
+
+    describe("redundant (wildcard-shadowed grants)", () => {
+      it("covers the expected count", () => expect(REDUNDANT.length, "redundant rows").to.equal(15));
+
+      it("each target-specific grant is currently held by its account", async () => {
+        for (const r of REDUNDANT)
+          expect(
+            await acm().hasRole(role(r.contract, r.signature), r.account),
+            `pre redundant ${r.signature}@${r.contract} ${r.account}`,
+          ).to.be.true;
+      });
+    });
+
+    describe("legacy wildcard (retired risk-steward caps)", () => {
+      it("covers the expected count", () =>
+        expect(CLEANUP_LEGACY_WILDCARD_REVOKES.length, "cleanup legacy wildcard revokes").to.equal(2));
+
+      it("each grantee currently holds the 32-byte wildcard role", async () => {
+        for (const r of CLEANUP_LEGACY_WILDCARD_REVOKES)
+          expect(
+            await acm().hasRole(legacyWildcardRole(r.signature), r.account),
+            `pre legacy wildcard ${r.signature} ${r.account}`,
+          ).to.be.true;
+      });
     });
   });
 
@@ -128,13 +153,16 @@ forking(FORK_BLOCK, async () => {
     },
   });
 
-  describe("VIP-665 post-execution permissions (bscmainnet)", () => {
+  // ==================================================================================================
+  // Critical maintenance — post-execution.
+  // ==================================================================================================
+  describe("VIP-665 Critical maintenance — post-execution (bscmainnet)", () => {
     it("revoke: the CriticalTimelock lost each target-specific grant", async () => {
       for (const row of REVOKE)
         expect(await holds(BNB_CRITICAL, row), `post critical ${row.signature}@${row.target}`).to.be.false;
     });
 
-    it("behavioral: the CriticalTimelock can no longer call any revoked function", async () => {
+    it("revoke behavioral: the CriticalTimelock can no longer call any revoked function", async () => {
       for (const row of REVOKE)
         expect(
           await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
@@ -156,45 +184,15 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("stale (dangling cleanup): every listed grantee lost the dangling permission", async () => {
-      for (const staleRow of STALE_ROWS)
-        for (const who of staleRow.revokeFrom)
-          expect(await holds(who, staleRow), `post stale ${staleRow.signature}@${staleRow.target} ${who}`).to.be.false;
-    });
-
-    it("legacy wildcard: each grantee lost the 32-byte wildcard role", async () => {
-      for (const r of BNB_LEGACY_WILDCARD_REVOKES) {
+    it("legacy wildcard: Critical lost the 32-byte wildcard role", async () => {
+      for (const r of BNB_ACTION_LEGACY_WILDCARD_REVOKES)
         expect(
           await acm().hasRole(legacyWildcardRole(r.signature), r.account),
           `post legacy wildcard ${r.signature} ${r.account}`,
         ).to.be.false;
-      }
     });
 
-    it("redundant: each target-specific grant was revoked", async () => {
-      for (const r of REDUNDANT) {
-        expect(
-          await acm().hasRole(role(r.contract, r.signature), r.account),
-          `post redundant ${r.signature}@${r.contract} ${r.account}`,
-        ).to.be.false;
-      }
-    });
-
-    it("redundant behavioral: each account can still call its function via the surviving wildcard", async () => {
-      for (const r of REDUNDANT) {
-        // setCollateralFactor from Critical is the single case whose wildcard is also revoked, so its power is
-        // fully removed (asserted in the revoke test). Every other redundant revoke is behavior-preserving.
-        if (r.signature === "setCollateralFactor(address,uint256,uint256)" && r.account === BNB_CRITICAL) continue;
-        expect(
-          await acm().isAllowedToCall(r.account, r.signature, { from: r.contract }),
-          `still callable ${r.signature}@${r.contract} ${r.account}`,
-        ).to.be.true;
-      }
-    });
-  });
-
-  describe("Post-VIP behavioral: swapped permissions follow the ACM authorization checks", () => {
-    it("every swapped function is allowed for the target Guardian and denied for Critical", async () => {
+    it("swap behavioral: every swapped function is allowed for the target Guardian and denied for Critical", async () => {
       for (const row of SWAP.filter(swapRow => swapRow.target !== ZERO)) {
         expect(
           await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
@@ -215,6 +213,52 @@ forking(FORK_BLOCK, async () => {
 
       await expect(asGuardian._setForcedLiquidation(vUSDT, true)).to.not.be.reverted;
       await expect(asCritical._setForcedLiquidation(vUSDT, true)).to.be.reverted;
+    });
+  });
+
+  // ==================================================================================================
+  // Cleanup — post-execution.
+  // ==================================================================================================
+  describe("VIP-665 Cleanup — post-execution (bscmainnet)", () => {
+    describe("stale (dangling grants)", () => {
+      it("every listed grantee lost the dangling permission", async () => {
+        for (const staleRow of STALE_ROWS)
+          for (const who of staleRow.revokeFrom)
+            expect(await holds(who, staleRow), `post stale ${staleRow.signature}@${staleRow.target} ${who}`).to.be
+              .false;
+      });
+    });
+
+    describe("redundant (wildcard-shadowed grants)", () => {
+      it("each target-specific grant was revoked", async () => {
+        for (const r of REDUNDANT)
+          expect(
+            await acm().hasRole(role(r.contract, r.signature), r.account),
+            `post redundant ${r.signature}@${r.contract} ${r.account}`,
+          ).to.be.false;
+      });
+
+      it("behavioral: each account can still call its function via the surviving wildcard", async () => {
+        for (const r of REDUNDANT) {
+          // setCollateralFactor from Critical is the single case whose wildcard is also revoked, so its power
+          // is fully removed (asserted in the critical revoke test). Every other redundant revoke preserves it.
+          if (r.signature === "setCollateralFactor(address,uint256,uint256)" && r.account === BNB_CRITICAL) continue;
+          expect(
+            await acm().isAllowedToCall(r.account, r.signature, { from: r.contract }),
+            `still callable ${r.signature}@${r.contract} ${r.account}`,
+          ).to.be.true;
+        }
+      });
+    });
+
+    describe("legacy wildcard (retired risk-steward caps)", () => {
+      it("each grantee lost the 32-byte wildcard role", async () => {
+        for (const r of CLEANUP_LEGACY_WILDCARD_REVOKES)
+          expect(
+            await acm().hasRole(legacyWildcardRole(r.signature), r.account),
+            `post legacy wildcard ${r.signature} ${r.account}`,
+          ).to.be.false;
+      });
     });
   });
 });
