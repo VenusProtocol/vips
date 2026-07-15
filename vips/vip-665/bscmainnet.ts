@@ -58,17 +58,17 @@ const meta = {
   title: "VIP-665 [Multi-Chain] Remove all CriticalTimelock privileges",
   description: `#### Summary
 
-This proposal hardens governance by removing every permission the CriticalTimelock holds on all eight mainnets, leaving it with zero privileges. No permission is moved to a Guardian. It also cleans up dangling permissions left on removed setters and retired contracts, and normalizes the \`syncCash()\` permission on every remote chain to the wildcard convention used by all other vToken setters.
+This proposal hardens governance by removing every permission the CriticalTimelock holds on all eight mainnets, leaving it with zero privileges. No permission is moved to a Guardian. It also cleans up dangling permissions left on removed setters and retired contracts, removes redundant per-contract grants that are already covered by an identical wildcard grant, and normalizes the \`syncCash()\` permission on every remote chain to the wildcard convention used by all other vToken setters.
 
 #### Description
 
 A proposal routed through the Critical route executes in roughly 7 hours on BNB Chain and 8 hours on remote chains once voting, queue and timelock delays are counted. To eliminate that fast-path attack surface entirely, this VIP revokes every permission the CriticalTimelock currently holds across BNB Chain, Ethereum, Arbitrum One, Base, zkSync Era, OP Mainnet, Unichain and opBNB — including emergency pause powers. The full per-contract, per-chain list of permissions revoked is in the accompanying community post and the pull request.
 
-Actions per chain: revoke every CriticalTimelock permission (no Guardian is granted anything). On BNB Chain, additionally revoke dangling grants on removed setters and retired contracts from every current holder (including the deprecated BUSDLiquidator and the retired SetCheckpoint deploy contracts). On each remote chain, grant \`syncCash()\` on the wildcard target (address(0)) to the NormalTimelock and revoke the per-market \`syncCash()\` grants it currently holds.
+Actions per chain: revoke every CriticalTimelock permission (no Guardian is granted anything), and revoke redundant per-contract grants that are already shadowed by an identical wildcard grant (behavior-preserving). On BNB Chain, additionally revoke dangling grants on removed setters and retired contracts from every current holder (including the deprecated BUSDLiquidator and the retired SetCheckpoint deploy contracts). On each remote chain, grant \`syncCash()\` on the wildcard target (address(0)) to the NormalTimelock and revoke the per-market \`syncCash()\` grants it currently holds.
 
 #### Execution model
 
-To keep the whole change in one proposal within the BNB Chain per-transaction gas limit, every chain is executed through its pre-seeded ACMCommandsAggregator. For each chain the proposal grants the aggregator the ACM DEFAULT_ADMIN_ROLE, calls executeGrantPermissions and/or executeRevokePermissions by batch index, and revokes the role — all in the same proposal. Each batch contains only the giveCallPermission / revokeCallPermission calls for that chain. The CriticalTimelock's wildcard grants on the legacy BNB ACM are cleared with direct ACM.revokeRole calls, which the aggregator cannot reach.
+To keep the whole change in one proposal within the BNB Chain per-transaction gas limit, every chain is executed through its pre-seeded ACMCommandsAggregator. For each chain the proposal grants the aggregator the ACM DEFAULT_ADMIN_ROLE, calls executeGrantPermissions and/or executeRevokePermissions by batch index, and revokes the role — all in the same proposal. Each batch contains only the giveCallPermission / revokeCallPermission calls for that chain. The CriticalTimelock's wildcard grants on the legacy BNB ACM — together with the retired contracts' wildcard grants (the RetiredRiskSteward cap setters and the SetCheckpoint interest-rate-model deploy contracts) — are cleared with direct ACM.revokeRole calls, which the aggregator cannot reach.
 
 #### Security and additional considerations
 
