@@ -3,12 +3,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { Command } from "src/types";
 
 import {
+  BNB_ACTIONS,
   BNB_ACTION_LEGACY_WILDCARD_REVOKES,
-  BNB_ROWS,
   REMOTE_CHAINS,
   RemoteChain,
   remoteRowsFor,
-} from "../data/actionPlan";
+} from "../data/criticalChanges";
 import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, REMOTE_ACM } from "../data/addresses";
 import {
   CLEANUP_LEGACY_WILDCARD_REVOKES,
@@ -74,7 +74,7 @@ export interface Permission {
 // have no Guardian swaps/grants.
 export const buildGrantPermissions = (chain: Chain): Permission[] => {
   if (chain !== "bscmainnet") return syncCashGrants(chain);
-  return BNB_ROWS.filter(r => r.action === "swap" || r.action === "grant").map(r => ({
+  return BNB_ACTIONS.filter(r => r.action === "swap" || r.action === "grant").map(r => ({
     contractAddress: r.target,
     functionSig: r.signature,
     account: BNB_GUARDIANS[r.grantTo ?? "guardian1"],
@@ -101,7 +101,7 @@ const redundantRevokes = (chain: Chain): Permission[] =>
 export const buildRevokePermissions = (chain: Chain): Permission[] => {
   let base: Permission[];
   if (chain === "bscmainnet") {
-    base = BNB_ROWS.filter(r => r.action === "revoke" || r.action === "swap").map(r => ({
+    base = BNB_ACTIONS.filter(r => r.action === "revoke" || r.action === "swap").map(r => ({
       contractAddress: r.target,
       functionSig: r.signature,
       account: BNB_CRITICAL,

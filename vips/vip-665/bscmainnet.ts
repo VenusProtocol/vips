@@ -1,7 +1,7 @@
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { LZ_CHAIN_ID, RemoteChain } from "./data/actionPlan";
+import { LZ_CHAIN_ID, RemoteChain } from "./data/criticalChanges";
 import {
   AGGREGATOR,
   Chain,
@@ -10,22 +10,22 @@ import {
   REVOKE_INDEX,
   acmOf,
   buildGrantPermissions,
-  legacyWildcardCommands,
   buildRevokePermissions,
+  legacyWildcardCommands,
 } from "./utils/commands";
 
 // Expected RoleGranted / RoleRevoked counts per chain, asserted by the simulations after execution.
 // granted = aggregator grants + wrapper grantRole(DEFAULT_ADMIN). revoked = aggregator revokes + wrapper
 // revokeRole(DEFAULT_ADMIN) + redundant cleanup + (BNB only) the 3 direct legacy-wildcard revokeRole calls.
 export const EXPECTED_ROLE_EVENTS: Record<"bscmainnet" | RemoteChain, { granted: number; revoked: number }> = {
-  bscmainnet: { granted: 6, revoked: 81 },
-  ethereum: { granted: 2, revoked: 62 },
-  arbitrumone: { granted: 2, revoked: 34 },
-  basemainnet: { granted: 2, revoked: 29 },
-  zksyncmainnet: { granted: 2, revoked: 23 },
-  opmainnet: { granted: 2, revoked: 19 },
-  unichainmainnet: { granted: 2, revoked: 19 },
-  opbnbmainnet: { granted: 2, revoked: 13 },
+  bscmainnet: { granted: 6, revoked: 71 },
+  ethereum: { granted: 2, revoked: 53 },
+  arbitrumone: { granted: 2, revoked: 25 },
+  basemainnet: { granted: 2, revoked: 20 },
+  zksyncmainnet: { granted: 2, revoked: 22 },
+  opmainnet: { granted: 2, revoked: 18 },
+  unichainmainnet: { granted: 2, revoked: 18 },
+  opbnbmainnet: { granted: 2, revoked: 12 },
 };
 
 // The commands the VIP emits per chain: grant the aggregator DEFAULT_ADMIN_ROLE, execute the grant and/or

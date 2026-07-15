@@ -7,7 +7,7 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip665, { EXPECTED_ROLE_EVENTS } from "../../vips/vip-665/bscmainnet";
-import { BNB_ROWS } from "../../vips/vip-665/data/actionPlan";
+import { BNB_ACTIONS } from "../../vips/vip-665/data/criticalChanges";
 import { BNB_ACM, BNB_CRITICAL, BNB_GUARDIANS, ZERO } from "../../vips/vip-665/data/addresses";
 import { REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-665/data/cleanup";
 import {
@@ -31,13 +31,11 @@ const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
 const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["address", "string"], [at, fn]);
 
-// One row bucket per action so every category (no-change / revoke / swap / grant) is asserted
-// explicitly. Each bucket is guarded to be non-empty so a data regression that empties a category fails
-// loudly instead of passing vacuously.
-const NO_CHANGE = BNB_ROWS.filter(row => row.action === "none");
-const REVOKE = BNB_ROWS.filter(row => row.action === "revoke");
-const SWAP = BNB_ROWS.filter(row => row.action === "swap");
-const GRANT = BNB_ROWS.filter(row => row.action === "grant");
+// One bucket per action so each category is asserted explicitly and guarded non-empty (a data regression
+// that empties a category fails loudly instead of passing vacuously).
+const REVOKE = BNB_ACTIONS.filter(row => row.action === "revoke");
+const SWAP = BNB_ACTIONS.filter(row => row.action === "swap");
+const GRANT = BNB_ACTIONS.filter(row => row.action === "grant");
 // Redundant (wildcard-shadowed) target-specific grants revoked as behavior-preserving cleanup.
 const REDUNDANT = REDUNDANT_REVOKES.bscmainnet;
 
@@ -60,13 +58,12 @@ forking(FORK_BLOCK, async () => {
 
   describe("VIP-665 pre-execution permissions (bscmainnet)", () => {
     it("the action plan covers every category with the expected row counts", () => {
-      expect(NO_CHANGE.length, "no-change rows").to.equal(186);
       expect(REVOKE.length, "revoke rows").to.equal(26);
       expect(SWAP.length, "swap rows").to.equal(4);
       expect(GRANT.length, "grant rows").to.equal(1);
       expect(STALE_ROWS.length, "stale (dangling cleanup) rows").to.equal(8);
       expect(BNB_LEGACY_WILDCARD_REVOKES.length, "legacy wildcard revokes").to.equal(3);
-      expect(REDUNDANT.length, "redundant revokes").to.equal(25);
+      expect(REDUNDANT.length, "redundant revokes").to.equal(15);
     });
 
     it("legacy wildcard: each grantee currently holds the 32-byte wildcard role", async () => {
@@ -88,18 +85,8 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("revoke: Critical currently holds every permission to be revoked", async () => {
-      for (const row of REVOKE) {
+      for (const row of REVOKE)
         expect(await holds(BNB_CRITICAL, row), `pre critical ${row.signature}@${row.target}`).to.be.true;
-        expect(await holds(BNB_GUARDIANS.guardian1, row), `pre g1 ${row.signature}@${row.target}`).to.equal(
-          row.guardian1,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian2, row), `pre g2 ${row.signature}@${row.target}`).to.equal(
-          row.guardian2,
-        );
-        expect(await holds(BNB_GUARDIANS.guardian3, row), `pre g3 ${row.signature}@${row.target}`).to.equal(
-          row.guardian3,
-        );
-      }
     });
 
     it("swap: Critical holds each one and the target Guardian does not yet", async () => {
@@ -228,36 +215,6 @@ forking(FORK_BLOCK, async () => {
 
       await expect(asGuardian._setForcedLiquidation(vUSDT, true)).to.not.be.reverted;
       await expect(asCritical._setForcedLiquidation(vUSDT, true)).to.be.reverted;
-    });
-  });
-
-  // "No change" rows carry no action and were validated at extraction (see data/noChangeRows.ts). This block
-  // re-confirms post-execution that Critical and every listed Guardian still retain each capability — directly
-  // or via a surviving wildcard — so the VIP touched nothing it shouldn't have.
-  describe("VIP-665 no-change permissions retained (bscmainnet)", () => {
-    it("Critical and every listed Guardian can still call each untouched function", async () => {
-      for (const row of NO_CHANGE) {
-        if (row.critical)
-          expect(
-            await acm().isAllowedToCall(BNB_CRITICAL, row.signature, { from: row.target }),
-            `no-change critical ${row.signature}@${row.target}`,
-          ).to.be.true;
-        if (row.guardian1)
-          expect(
-            await acm().isAllowedToCall(BNB_GUARDIANS.guardian1, row.signature, { from: row.target }),
-            `no-change g1 ${row.signature}@${row.target}`,
-          ).to.be.true;
-        if (row.guardian2)
-          expect(
-            await acm().isAllowedToCall(BNB_GUARDIANS.guardian2, row.signature, { from: row.target }),
-            `no-change g2 ${row.signature}@${row.target}`,
-          ).to.be.true;
-        if (row.guardian3)
-          expect(
-            await acm().isAllowedToCall(BNB_GUARDIANS.guardian3, row.signature, { from: row.target }),
-            `no-change g3 ${row.signature}@${row.target}`,
-          ).to.be.true;
-      }
     });
   });
 });

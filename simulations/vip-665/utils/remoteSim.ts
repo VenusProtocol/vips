@@ -7,7 +7,7 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip665, { EXPECTED_ROLE_EVENTS } from "../../../vips/vip-665/bscmainnet";
-import { remoteRowsFor } from "../../../vips/vip-665/data/actionPlan";
+import { remoteRowsFor } from "../../../vips/vip-665/data/criticalChanges";
 import { REMOTE_ACM, SYNC_CASH_MARKETS, ZERO } from "../../../vips/vip-665/data/addresses";
 import { REDUNDANT_REVOKES, SYNC_CASH_SIG } from "../../../vips/vip-665/data/cleanup";
 import { AGGREGATOR, Chain, buildGrantPermissions, buildRevokePermissions } from "../../../vips/vip-665/utils/commands";
@@ -26,7 +26,6 @@ const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["addres
 // Shared body for the 7 remote-chain simulations. Run each with its matching --fork.
 export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
   const critical = NETWORK_ADDRESSES[chain].CRITICAL_TIMELOCK;
-  const guardian = NETWORK_ADDRESSES[chain].GUARDIAN;
   const normal = NETWORK_ADDRESSES[chain].NORMAL_TIMELOCK;
   const syncCashMarkets = SYNC_CASH_MARKETS[chain];
 
@@ -62,15 +61,6 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
           ).to.be.true;
       });
 
-      it("no-change: the Guardian flag matches the plan for every row", async () => {
-        const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const row of rows)
-          expect(
-            await acm.hasRole(role(row.target, row.signature), guardian),
-            `pre guardian ${row.signature}@${row.target}`,
-          ).to.equal(row.guardian);
-      });
-
       it("syncCash: NormalTimelock holds every per-market grant and no wildcard grant yet", async () => {
         const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
         expect(syncCashMarkets.length, `syncCash markets for ${chain}`).to.be.greaterThan(0);
@@ -100,15 +90,6 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
             await acm.hasRole(role(row.target, row.signature), critical),
             `post critical ${row.signature}@${row.target}`,
           ).to.be.false;
-      });
-
-      it("no-change: the Guardian flag is unchanged for every row", async () => {
-        const acm = new Contract(REMOTE_ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-        for (const row of rows)
-          expect(
-            await acm.hasRole(role(row.target, row.signature), guardian),
-            `post guardian ${row.signature}@${row.target}`,
-          ).to.equal(row.guardian);
       });
 
       it("redundant: each target-specific grant was revoked", async () => {

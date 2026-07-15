@@ -5,7 +5,7 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import type { Permission } from "../utils/commands";
-import { RemoteChain } from "./actionPlan";
+import { RemoteChain } from "./criticalChanges";
 import { BNB_GUARDIANS, REDUNDANT_CONTRACTS as CONTRACTS, RETIRED, SYNC_CASH_MARKETS, ZERO } from "./addresses";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -108,36 +108,6 @@ export interface RedundantRevoke {
 export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
   bscmainnet: [
     {
-      contract: CONTRACTS.bscmainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.bscmainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.bscmainnet.CRITICAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.bscmainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.bscmainnet.CRITICAL_TIMELOCK,
-    },
-    {
       contract: CONTRACTS.bscmainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
@@ -198,28 +168,8 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       account: na.bscmainnet.GUARDIAN,
     },
     {
-      contract: CONTRACTS.bscmainnet.VBNBAdmin,
-      signature: "setInterestRateModel(address)",
-      account: na.bscmainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.VBNBAdmin,
-      signature: "setInterestRateModel(address)",
-      account: na.bscmainnet.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.VBNBAdmin,
-      signature: "setInterestRateModel(address)",
-      account: na.bscmainnet.CRITICAL_TIMELOCK,
-    },
-    {
       contract: CONTRACTS.bscmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
-      account: na.bscmainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.bscmainnet.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
       account: na.bscmainnet.NORMAL_TIMELOCK,
     },
     {
@@ -235,46 +185,6 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
   ],
   ethereum: [
     {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.ethereum.GUARDIAN,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.ethereum.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.ethereum.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.ethereum.CRITICAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.ethereum.GUARDIAN,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.ethereum.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.ethereum.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.ethereum.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.ethereum.CRITICAL_TIMELOCK,
-    },
-    {
       contract: CONTRACTS.ethereum.Prime,
       signature: "setMaxLoopsLimit(uint256)",
       account: na.ethereum.NORMAL_TIMELOCK,
@@ -289,53 +199,8 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       signature: "setMaxLoopsLimit(uint256)",
       account: na.ethereum.NORMAL_TIMELOCK,
     },
-    {
-      contract: CONTRACTS.ethereum.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
-      account: na.ethereum.NORMAL_TIMELOCK,
-    },
   ],
   arbitrumone: [
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.arbitrumone.GUARDIAN,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.arbitrumone.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.arbitrumone.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.arbitrumone.CRITICAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.arbitrumone.GUARDIAN,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.arbitrumone.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.arbitrumone.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.arbitrumone.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.arbitrumone.CRITICAL_TIMELOCK,
-    },
     {
       contract: CONTRACTS.arbitrumone.Prime,
       signature: "setMaxLoopsLimit(uint256)",
@@ -351,53 +216,8 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       signature: "setMaxLoopsLimit(uint256)",
       account: na.arbitrumone.NORMAL_TIMELOCK,
     },
-    {
-      contract: CONTRACTS.arbitrumone.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
-      account: na.arbitrumone.NORMAL_TIMELOCK,
-    },
   ],
   basemainnet: [
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.basemainnet.GUARDIAN,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.basemainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.basemainnet.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketBorrowCaps(address[],uint256[])",
-      account: na.basemainnet.CRITICAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.basemainnet.GUARDIAN,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.basemainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.basemainnet.FAST_TRACK_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.basemainnet.EBrake,
-      signature: "setMarketSupplyCaps(address[],uint256[])",
-      account: na.basemainnet.CRITICAL_TIMELOCK,
-    },
     {
       contract: CONTRACTS.basemainnet.Prime,
       signature: "setMaxLoopsLimit(uint256)",
@@ -411,11 +231,6 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
     {
       contract: CONTRACTS.basemainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
-      account: na.basemainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.basemainnet.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
       account: na.basemainnet.NORMAL_TIMELOCK,
     },
   ],
@@ -435,11 +250,6 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       signature: "setMaxLoopsLimit(uint256)",
       account: na.opmainnet.NORMAL_TIMELOCK,
     },
-    {
-      contract: CONTRACTS.opmainnet.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
-      account: na.opmainnet.NORMAL_TIMELOCK,
-    },
   ],
   unichainmainnet: [
     {
@@ -455,11 +265,6 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
     {
       contract: CONTRACTS.unichainmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
-      account: na.unichainmainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.unichainmainnet.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
       account: na.unichainmainnet.NORMAL_TIMELOCK,
     },
   ],
@@ -479,21 +284,11 @@ export const REDUNDANT_REVOKES: Record<RedundantChain, RedundantRevoke[]> = {
       signature: "setMaxLoopsLimit(uint256)",
       account: na.zksyncmainnet.NORMAL_TIMELOCK,
     },
-    {
-      contract: CONTRACTS.zksyncmainnet.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
-      account: na.zksyncmainnet.NORMAL_TIMELOCK,
-    },
   ],
   opbnbmainnet: [
     {
       contract: CONTRACTS.opbnbmainnet.VenusERC4626Factory,
       signature: "setMaxLoopsLimit(uint256)",
-      account: na.opbnbmainnet.NORMAL_TIMELOCK,
-    },
-    {
-      contract: CONTRACTS.opbnbmainnet.VenusERC4626Factory,
-      signature: "setRewardRecipient(address)",
       account: na.opbnbmainnet.NORMAL_TIMELOCK,
     },
   ],
