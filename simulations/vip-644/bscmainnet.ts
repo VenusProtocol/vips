@@ -7,6 +7,8 @@ import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } fro
 import { forking, testVip } from "src/vip-framework";
 
 import vip644, {
+  ALLEZ_LABS,
+  ALLEZ_LABS_USDC_AMOUNT,
   BORROW,
   DAI,
   DEVIATION_SENTINEL,
@@ -14,7 +16,11 @@ import vip644, {
   FIXED_RATE_VAULT_CONTROLLER,
   NEW_VAULT_IMPLEMENTATION,
   OLD_VAULT_IMPLEMENTATION,
+  TOKEN_REDEEMER,
+  USDC,
+  VUSDC_WITHDRAW_AMOUNT,
   vDAI,
+  vUSDC,
 } from "../../vips/vip-644/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
@@ -53,6 +59,12 @@ forking(FORK_BLOCK, async () => {
   let timelock: any;
   let vaultsBefore: BigNumber;
 
+  let usdc: Contract;
+  let vUsdc: Contract;
+  let allezUsdcBefore: BigNumber;
+  let treasuryUsdcBefore: BigNumber;
+  let treasuryVUsdcBefore: BigNumber;
+
   // DAI and USDT prices captured at the fork block (before the governance lifecycle warps time and
   // makes the RedStone pivot feed stale) so the behavioral DAI borrow can pin them via the Chainlink feed.
   let daiPrice: BigNumber;
@@ -66,6 +78,12 @@ forking(FORK_BLOCK, async () => {
     resilientOracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
     daiPrice = await resilientOracle.getPrice(DAI);
     usdtPrice = await resilientOracle.getPrice(USDT);
+
+    usdc = await ethers.getContractAt(ERC20_ABI, USDC);
+    vUsdc = await ethers.getContractAt(ERC20_ABI, vUSDC);
+    allezUsdcBefore = await usdc.balanceOf(ALLEZ_LABS);
+    treasuryUsdcBefore = await usdc.balanceOf(bscmainnet.VTREASURY);
+    treasuryVUsdcBefore = await vUsdc.balanceOf(bscmainnet.VTREASURY);
 
     await pinResilientOraclePriceViaRedstone(resilientOracle, BTCB);
     await pinResilientOraclePriceViaRedstone(resilientOracle, USDT);
@@ -178,6 +196,30 @@ forking(FORK_BLOCK, async () => {
       const state = await ebrake.marketStates(vDAI);
       expect(state.borrowCapSnapshotted).to.equal(false);
       expect(state.supplyCapSnapshotted).to.equal(false);
+    });
+  });
+
+  describe("Post-VIP behavior: Allez Labs Q3 2026 payment", () => {
+    it("Allez Labs received exactly 105,000 USDC", async () => {
+      expect(await usdc.balanceOf(ALLEZ_LABS)).to.equal(allezUsdcBefore.add(ALLEZ_LABS_USDC_AMOUNT));
+    });
+
+    it("treasury liquid USDC is untouched", async () => {
+      expect(await usdc.balanceOf(bscmainnet.VTREASURY)).to.equal(treasuryUsdcBefore);
+    });
+
+    it("treasury vUSDC decreased by at most the withdrawn amount (remainder returned)", async () => {
+      const treasuryVUsdcAfter = await vUsdc.balanceOf(bscmainnet.VTREASURY);
+      const consumed = treasuryVUsdcBefore.sub(treasuryVUsdcAfter);
+      // The redeemer consumes only what 105,000 USDC requires at the execution-time
+      // exchange rate and returns the rest; the 3.96M withdrawal carries ~0.13% headroom.
+      expect(consumed).to.be.lte(VUSDC_WITHDRAW_AMOUNT);
+      expect(consumed).to.be.gte(VUSDC_WITHDRAW_AMOUNT.mul(99).div(100));
+    });
+
+    it("the Token Redeemer retains no vUSDC or USDC", async () => {
+      expect(await vUsdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
+      expect(await usdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
     });
   });
 

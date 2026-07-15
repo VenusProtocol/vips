@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -24,14 +25,30 @@ export const OLD_VAULT_IMPLEMENTATION = "0xC25b2B657D24380eDd1a1Cff5296385541e85
 // Adds depositWithConsent / mintWithConsent.
 export const NEW_VAULT_IMPLEMENTATION = "0xe87A1eFCED88bBddf8CCF78EfB3bCF62cFdd5bdC";
 
+// ── Allez Labs Q3 2026 payment (risk management services) ─────────────────
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8"; // vUSDC Core Pool
+export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
+export const ALLEZ_LABS = "0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e";
+
+export const ALLEZ_LABS_USDC_AMOUNT = parseUnits("105000", 18);
+
+// The treasury's liquid USDC (~86K) does not cover the payment, so the USDC is sourced
+// by redeeming treasury vUSDC via the TokenRedeemer (same flow as VIP-594). ~3.96M vUSDC
+// is withdrawn against a need of ~3,954,894 vUSDC at the authoring exchange rate
+// (~0.02655 USDC per vUSDC); the rate only increases through interest accrual, so this
+// amount always covers 105,000 USDC at execution time and the unused vUSDC remainder is
+// returned to the treasury by the redeemer.
+export const VUSDC_WITHDRAW_AMOUNT = parseUnits("3960000", 8);
+
 export const vip644 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-644 [BNB Chain] Fix DAI market (disable DeviationSentinel monitoring, resume borrowing) and upgrade Institutional Fixed Rate Vault implementation",
+      "VIP-644 [BNB Chain] Fix DAI market (disable DeviationSentinel monitoring, resume borrowing), upgrade Institutional Fixed Rate Vault implementation and pay Allez Labs Q3 2026 fees",
     description: `#### Summary
 
-If passed, this VIP will (1) stop the DeviationSentinel from monitoring DAI, resume borrowing on the vDAI market and clear the related Emergency Brake snapshots, and (2) point the Institutional Fixed Rate Vault controller at a new vault clone-source implementation that adds on-chain disclaimer-consent recording to the supplier deposit/mint flow.
+If passed, this VIP will (1) stop the DeviationSentinel from monitoring DAI, resume borrowing on the vDAI market and clear the related Emergency Brake snapshots, (2) point the Institutional Fixed Rate Vault controller at a new vault clone-source implementation that adds on-chain disclaimer-consent recording to the supplier deposit/mint flow, and (3) transfer 105,000 USDC from the Venus Treasury to Allez Labs for Q3 2026 risk management services, sourced by redeeming treasury vUSDC.
 
 #### Part 1 — Fix the DAI market
 
@@ -68,6 +85,23 @@ The \`InstitutionalLoanVault\` implementation used by the controller (${FIXED_RA
 The consent hash is optional: passing \`bytes32(0)\` skips the event and deposits/mints as usual. The plain \`deposit\`/\`mint\` entrypoints are unchanged. Existing vaults are immutable clones and are not modified; the change applies to vaults created from now on.
 
 - **Action**: point the controller at the new vault implementation via \`setVaultImplementation(${NEW_VAULT_IMPLEMENTATION})\`.
+
+#### Part 3 — Allez Labs Q3 2026 Risk Services Payment
+
+Allez Labs provides risk management services to Venus Protocol. Per the contract terms, fees are paid quarterly in advance. This is the payment covering Q3 2026 (26 July 2026 – 25 October 2026), following the Q2 2026 payment executed in [VIP-612](https://app.venus.io/#/governance/proposal/612?chainId=56).
+
+**Transfer Details**
+
+- Amount: 105,000 USDC (at $35,000/month × 3 months)
+- Source: Venus Treasury (${bscmainnet.VTREASURY}), by redeeming treasury-held vUSDC
+- Destination: Allez Labs (${ALLEZ_LABS})
+
+**Technical implementation.** The treasury's liquid USDC balance does not cover the payment, so this VIP uses the Token Redeemer (${TOKEN_REDEEMER}) to convert treasury vUSDC into USDC — the same flow as [VIP-594](https://app.venus.io/#/governance/proposal/594?chainId=56):
+
+1. Withdraw 3,960,000 vUSDC (~105K USDC worth) from the Venus Treasury to the Token Redeemer.
+2. Call \`redeemUnderlyingAndTransfer\`: redeems exactly 105,000 USDC and sends it to Allez Labs; the unused vUSDC remainder is returned to the Venus Treasury.
+
+The vUSDC exchange rate (~0.02655 USDC per vUSDC at authoring) only increases over time via interest accrual, so 3,960,000 vUSDC always covers 105,000 USDC at execution time, and the amount received by Allez Labs is exact and deterministic.
 
 No new AccessControlManager permissions are required — the Normal Timelock already holds all of the roles used by this proposal.
 
@@ -131,6 +165,22 @@ No new AccessControlManager permissions are required — the Normal Timelock alr
         target: FIXED_RATE_VAULT_CONTROLLER,
         signature: "setVaultImplementation(address)",
         params: [NEW_VAULT_IMPLEMENTATION],
+      },
+
+      // ────────────────────────────────────────────────────────────────────────
+      // Part 3 — Allez Labs Q3 2026 payment: withdraw vUSDC from the treasury to
+      //   the Token Redeemer, redeem exactly 105,000 USDC to Allez Labs, and
+      //   return the unused vUSDC remainder to the treasury (VIP-594 flow).
+      // ────────────────────────────────────────────────────────────────────────
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [vUSDC, VUSDC_WITHDRAW_AMOUNT, TOKEN_REDEEMER],
+      },
+      {
+        target: TOKEN_REDEEMER,
+        signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
+        params: [vUSDC, ALLEZ_LABS, ALLEZ_LABS_USDC_AMOUNT, bscmainnet.VTREASURY],
       },
     ],
     meta,
