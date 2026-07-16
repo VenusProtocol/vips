@@ -1,201 +1,116 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip680, {
-  ADAPTER_CORE_V1,
-  CORE_ABSOLUTE_CAP,
-  CORE_SOURCE_GOVERNANCE_SIGS,
-  CORE_SOURCE_OPERATOR_SIGS,
+import {
+  ACM,
   CORE_SOURCE_USDT,
-  HUB_GOVERNANCE_SIGS,
-  HUB_OPERATOR_SIGS,
+  CRITICAL_TIMELOCK,
+  FAST_TRACK_TIMELOCK,
+  FLUX_SOURCE_USDT,
+  FRV_SOURCE_USDT,
+  GUARDIAN,
+  HUB_REGISTRY,
   HUB_USDT,
-  PERCENTAGE_CAP_DISABLED,
-  VUSDT_CORE,
-} from "../../vips/vip-680/bsctestnet";
+  NORMAL_TIMELOCK,
+} from "../../vips/vip-680/addresses";
+import vip680 from "../../vips/vip-680/bsctestnet";
+import {
+  CORE_FLUX_GOVERNANCE,
+  FRV_GOVERNANCE,
+  HUB_GOVERNANCE,
+  HUB_REGISTRY_GOVERNANCE,
+  REALLOCATE,
+} from "../../vips/vip-680/permissions";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
-import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
+import HUB_REGISTRY_ABI from "./abi/HubRegistry.json";
 
-const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, ACCESS_CONTROL_MANAGER } =
-  NETWORK_ADDRESSES.bsctestnet;
+// bsctestnet block after the Liquidity Hub (USDT) redeployment and the FRV vault creation.
+const BLOCK_NUMBER = 119474506;
 
-// The Fast-Track / Critical timelocks receive their governance grants in the addendum proposal, so
-// they must stay ungranted here — this proves the split boundary.
-const FAST_LANE_TIMELOCKS = [FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
-
-// bsctestnet block after the Liquidity Hub (USDT) deployment (deploy block ~117918419).
-const BLOCK_NUMBER = 117930000;
-
-// The exact ACM role id `giveCallPermission(contract, sig, account)` grants:
-// keccak256(abi.encodePacked(contract, functionSig)). Asserting `hasRole` on this specific role is
-// immune to the `isAllowedToCall` wildcard fallback (a role granted against address(0)), so pre-VIP
-// "not granted" checks cannot be masked by an unrelated wildcard permission.
+// The exact ACM role id giveCallPermission(contract, sig, account) grants:
+// keccak256(abi.encodePacked(contract, functionSig)). Asserting hasRole on this specific role is immune
+// to the isAllowedToCall wildcard fallback, so pre-VIP "not granted" checks cannot be masked.
 const roleId = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
 
-const addr = (a: string) => ethers.utils.getAddress(a);
-
-// Governance-only signatures = governance set minus the shared (also-Operator) tighten actions.
-const HUB_GOVERNANCE_ONLY_SIGS = HUB_GOVERNANCE_SIGS.filter(s => !HUB_OPERATOR_SIGS.includes(s));
-const CORE_SOURCE_GOVERNANCE_ONLY_SIGS = CORE_SOURCE_GOVERNANCE_SIGS.filter(
-  s => !CORE_SOURCE_OPERATOR_SIGS.includes(s),
-);
-
-const REALLOCATE_SIG = "reallocate((address,address,uint256)[],(address,address,uint256)[])";
+// Every (contract, sig) pair this proposal grants to the Normal Timelock: 18 Hub + 11 Core + 9 FRV +
+// 11 Flux + 2 Registry = 51.
+const GOV_GRANTS: [string, string][] = [
+  ...HUB_GOVERNANCE.map((s): [string, string] => [HUB_USDT, s]),
+  ...CORE_FLUX_GOVERNANCE.map((s): [string, string] => [CORE_SOURCE_USDT, s]),
+  ...FRV_GOVERNANCE.map((s): [string, string] => [FRV_SOURCE_USDT, s]),
+  ...CORE_FLUX_GOVERNANCE.map((s): [string, string] => [FLUX_SOURCE_USDT, s]),
+  ...HUB_REGISTRY_GOVERNANCE.map((s): [string, string] => [HUB_REGISTRY, s]),
+];
 
 forking(BLOCK_NUMBER, async () => {
   let acm: Contract;
   let hub: Contract;
-  let coreSource: Contract;
+  let registry: Contract;
 
   before(async () => {
-    acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACCESS_CONTROL_MANAGER);
+    acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
     hub = await ethers.getContractAt(HUB_ABI, HUB_USDT);
-    coreSource = await ethers.getContractAt(YIELD_GROUP_ABI, CORE_SOURCE_USDT);
+    registry = await ethers.getContractAt(HUB_REGISTRY_ABI, HUB_REGISTRY);
   });
 
   describe("Pre-VIP state", () => {
-    it("Hub has no registered yield groups and empty outer queues", async () => {
-      expect(await hub.registeredYieldGroups()).to.deep.equal([]);
-      expect(await hub.outerDepositQueue()).to.deep.equal([]);
-      expect(await hub.outerWithdrawQueue()).to.deep.equal([]);
+    it("GOV_GRANTS is the expected 51 (contract, sig) pairs", () => {
+      expect(GOV_GRANTS.length).to.equal(51);
     });
 
-    it("Core source has no registered resources and empty inner queues", async () => {
-      expect(await coreSource.resources()).to.deep.equal([]);
-      expect(await coreSource.innerDepositQueue()).to.deep.equal([]);
-      expect(await coreSource.innerWithdrawQueue()).to.deep.equal([]);
+    it("Hub and HubRegistry are pending-owned by the Normal Timelock (not yet accepted)", async () => {
+      expect(await hub.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await registry.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await hub.owner()).to.not.equal(NORMAL_TIMELOCK);
+      expect(await registry.owner()).to.not.equal(NORMAL_TIMELOCK);
     });
 
-    it("Hub advertises zero deposit capacity (no routes wired)", async () => {
-      expect(await hub.maxDeposit(NORMAL_TIMELOCK)).to.equal(0);
-    });
-
-    it("Normal timelock holds no governance role on Hub or Core source", async () => {
-      for (const sig of HUB_GOVERNANCE_SIGS) {
-        expect(await acm.hasRole(roleId(HUB_USDT, sig), NORMAL_TIMELOCK)).to.equal(false, `pre Hub gov ${sig}`);
-      }
-      for (const sig of CORE_SOURCE_GOVERNANCE_SIGS) {
-        expect(await acm.hasRole(roleId(CORE_SOURCE_USDT, sig), NORMAL_TIMELOCK)).to.equal(
-          false,
-          `pre Core gov ${sig}`,
-        );
-      }
-    });
-
-    it("Guardian holds no operator role on Hub or Core source", async () => {
-      for (const sig of HUB_OPERATOR_SIGS) {
-        expect(await acm.hasRole(roleId(HUB_USDT, sig), GUARDIAN)).to.equal(false, `pre Hub op ${sig}`);
-      }
-      for (const sig of CORE_SOURCE_OPERATOR_SIGS) {
-        expect(await acm.hasRole(roleId(CORE_SOURCE_USDT, sig), GUARDIAN)).to.equal(false, `pre Core op ${sig}`);
+    it("Normal Timelock holds none of the governance roles this proposal grants", async () => {
+      for (const [c, s] of GOV_GRANTS) {
+        expect(await acm.hasRole(roleId(c, s), NORMAL_TIMELOCK)).to.equal(false, `pre ${c} ${s}`);
       }
     });
   });
 
-  testVip("VIP-680 [BNB Testnet] Configure Liquidity Hub (USDT)", await vip680(), {
+  testVip("VIP-680 [BNB Testnet] Liquidity Hub (USDT) Normal Timelock permissions", await vip680(), {
     callbackAfterExecution: async txResponse => {
-      // Normal-timelock governance: 18 Hub + 11 Core = 29. Guardian operator: 7 Hub + 4 Core = 11. Total 40.
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [40]);
-      await expectEvents(
-        txResponse,
-        [HUB_ABI],
-        ["YieldGroupAdded", "OuterDepositQueueSet", "OuterWithdrawQueueSet"],
-        [1, 1, 1],
-      );
-      await expectEvents(
-        txResponse,
-        [YIELD_GROUP_ABI],
-        ["ResourceAdded", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
-        [1, 1, 1],
-      );
+      // 51 governance grants + 2 acceptOwnership (Hub + registry each emit OwnershipTransferred).
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [51]);
+      await expectEvents(txResponse, [HUB_ABI], ["OwnershipTransferred"], [2]);
     },
   });
 
-  describe("Post-VIP wiring", () => {
-    it("Core source registered on the Hub with the expected caps", async () => {
-      expect((await hub.registeredYieldGroups()).map(addr)).to.deep.equal([addr(CORE_SOURCE_USDT)]);
-      const cfg = await hub.yieldGroupConfig(CORE_SOURCE_USDT);
-      expect(cfg.registered).to.equal(true);
-      expect(cfg.paused).to.equal(false);
-      expect(cfg.absoluteCap.toString()).to.equal(CORE_ABSOLUTE_CAP);
-      expect(cfg.percentageCapBps).to.equal(PERCENTAGE_CAP_DISABLED);
+  describe("Post-VIP state", () => {
+    it("Hub and HubRegistry are now owned by the Normal Timelock", async () => {
+      expect(await hub.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await registry.owner()).to.equal(NORMAL_TIMELOCK);
     });
 
-    it("Hub outer queues route to the Core source", async () => {
-      expect((await hub.outerDepositQueue()).map(addr)).to.deep.equal([addr(CORE_SOURCE_USDT)]);
-      expect((await hub.outerWithdrawQueue()).map(addr)).to.deep.equal([addr(CORE_SOURCE_USDT)]);
-    });
-
-    it("vUSDT registered on the Core source behind AdapterCoreV1", async () => {
-      expect((await coreSource.resources()).map(addr)).to.deep.equal([addr(VUSDT_CORE)]);
-      const [registered, paused, adapter] = await coreSource.resourceConfig(VUSDT_CORE);
-      expect(registered).to.equal(true);
-      expect(paused).to.equal(false);
-      expect(addr(adapter)).to.equal(addr(ADAPTER_CORE_V1));
-    });
-
-    it("Core source inner queues route to vUSDT", async () => {
-      expect((await coreSource.innerDepositQueue()).map(addr)).to.deep.equal([addr(VUSDT_CORE)]);
-      expect((await coreSource.innerWithdrawQueue()).map(addr)).to.deep.equal([addr(VUSDT_CORE)]);
-    });
-
-    it("Hub now advertises deposit capacity through Core → vUSDT", async () => {
-      // Non-zero maxDeposit exercises the whole wired route: Hub outer queue → Core source inner
-      // queue → AdapterCoreV1.maxDeposit(vUSDT) (mint unpaused, supply-cap headroom).
-      expect(await hub.maxDeposit(NORMAL_TIMELOCK)).to.be.gt(0);
-    });
-  });
-
-  describe("Post-VIP permissions", () => {
-    it("Normal timelock holds the full governance role set on Hub and Core source", async () => {
-      for (const sig of HUB_GOVERNANCE_SIGS) {
-        expect(await acm.hasRole(roleId(HUB_USDT, sig), NORMAL_TIMELOCK)).to.equal(true, `post Hub gov ${sig}`);
-      }
-      for (const sig of CORE_SOURCE_GOVERNANCE_SIGS) {
-        expect(await acm.hasRole(roleId(CORE_SOURCE_USDT, sig), NORMAL_TIMELOCK)).to.equal(
-          true,
-          `post Core gov ${sig}`,
-        );
+    it("Normal Timelock holds the full governance set across the stack", async () => {
+      for (const [c, s] of GOV_GRANTS) {
+        expect(await acm.hasRole(roleId(c, s), NORMAL_TIMELOCK)).to.equal(true, `post ${c} ${s}`);
       }
     });
 
-    it("Guardian holds the full operator role set on Hub and Core source", async () => {
-      for (const sig of HUB_OPERATOR_SIGS) {
-        expect(await acm.hasRole(roleId(HUB_USDT, sig), GUARDIAN)).to.equal(true, `post Hub op ${sig}`);
-      }
-      for (const sig of CORE_SOURCE_OPERATOR_SIGS) {
-        expect(await acm.hasRole(roleId(CORE_SOURCE_USDT, sig), GUARDIAN)).to.equal(true, `post Core op ${sig}`);
-      }
+    it("Normal Timelock does NOT hold the operator-only reallocate role", async () => {
+      expect(await acm.hasRole(roleId(HUB_USDT, REALLOCATE), NORMAL_TIMELOCK)).to.equal(false);
     });
 
-    it("Guardian holds NO governance-only role (asymmetric: Operator can only tighten)", async () => {
-      for (const sig of HUB_GOVERNANCE_ONLY_SIGS) {
-        expect(await acm.hasRole(roleId(HUB_USDT, sig), GUARDIAN)).to.equal(false, `Guardian must NOT have Hub ${sig}`);
-      }
-      for (const sig of CORE_SOURCE_GOVERNANCE_ONLY_SIGS) {
-        expect(await acm.hasRole(roleId(CORE_SOURCE_USDT, sig), GUARDIAN)).to.equal(
-          false,
-          `Guardian must NOT have Core ${sig}`,
-        );
-      }
-    });
-
-    it("Normal timelock does NOT hold the operator-only reallocate role", async () => {
-      expect(await acm.hasRole(roleId(HUB_USDT, REALLOCATE_SIG), NORMAL_TIMELOCK)).to.equal(false);
-    });
-
-    it("Fast-Track and Critical timelocks are not yet granted (deferred to the addendum)", async () => {
-      for (const timelock of FAST_LANE_TIMELOCKS) {
-        for (const sig of HUB_GOVERNANCE_SIGS) {
-          expect(await acm.hasRole(roleId(HUB_USDT, sig), timelock)).to.equal(false, `${sig} @ ${timelock}`);
+    it("Fast-Track, Critical and Guardian hold no governance role yet", async () => {
+      for (const account of [FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN]) {
+        for (const [c, s] of GOV_GRANTS) {
+          expect(await acm.hasRole(roleId(c, s), account)).to.equal(false, `${account} ${c} ${s}`);
         }
       }
+    });
+
+    it("Hub still has no registered yield groups (wiring deferred to the wiring proposal)", async () => {
+      expect(await hub.registeredYieldGroups()).to.deep.equal([]);
     });
   });
 });

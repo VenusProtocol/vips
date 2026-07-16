@@ -1,186 +1,74 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { NORMAL_TIMELOCK, GUARDIAN, ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES.bsctestnet;
-
-// AccessControlManager that the Liquidity Hub contracts were initialised with. Verified on-chain to
-// equal Hub_USDT.accessControlManager() and CoreSource_USDT.accessControlManager(), and to match the
-// governance-contracts testnet ACM (NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER =
-// 0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA). Grants must target THIS ACM — it is the one the Hub
-// and sources check against in _checkAccessAllowed.
-export const ACM = ACCESS_CONTROL_MANAGER;
-
-// ---------------------------------------------------------------------------------------------------
-// Liquidity Hub (USDT) — hardcoded from venus-liquidity-hub/deployments/bsctestnet/*.json.
-// The Hub is not published as an @venusprotocol/*-deployments npm package, so addresses are inlined
-// here rather than imported. Cross-checked against the deployment registry and on-chain state.
-// ---------------------------------------------------------------------------------------------------
-
-// Per-asset ERC-4626 Hub (USDT)
-export const HUB_USDT = "0x8C8894217b9552736CF86784B087b5114b7CfF76";
-
-// Core yield source (a YieldGroup proxy over Venus Core lending) — the one source wired by this VIP.
-export const CORE_SOURCE_USDT = "0x5A53efCa9ac93c6456d60E3c33839e3F06BA9356";
-
-// Deferred yield sources — deployed but intentionally NOT wired by this VIP (no concrete resource on
-// testnet). See the file-level note below; a follow-up VIP wires each when its resource exists.
-export const FRV_SOURCE_USDT = "0x503BF2929232a0Cf7C1D296a8C59D63C6224777D";
-export const FLUX_SOURCE_USDT = "0x8Aac02EB8054F4CBAdE1396651b94F8F7D87fafc";
-
-// Core resource + adapter: Venus Core-pool vUSDT and the shared stateless AdapterCoreV1.
-// vUSDT is @venusprotocol/venus-protocol bsctestnet `vUSDT`; verified on-chain that
-// vUSDT.underlying() == Hub_USDT.asset() (USDT) and its Comptroller.treasuryPercent() == 0
-// (required for AdapterCoreV1.validateRegistration to pass).
-export const VUSDT_CORE = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
-export const ADAPTER_CORE_V1 = "0x480B8A3BBb6B16920c3B60cDcD64Ad059EfDb352";
+import {
+  CORE_SOURCE_USDT,
+  FLUX_SOURCE_USDT,
+  FRV_SOURCE_USDT,
+  HUB_REGISTRY,
+  HUB_USDT,
+  NORMAL_TIMELOCK,
+} from "./addresses";
+import {
+  CORE_FLUX_GOVERNANCE,
+  FRV_GOVERNANCE,
+  HUB_GOVERNANCE,
+  HUB_REGISTRY_GOVERNANCE,
+  giveCallPermission,
+} from "./permissions";
 
 // ---------------------------------------------------------------------------------------------------
-// Caps for addYieldGroup(source, absoluteCap, percentageCapBps).
-// ---------------------------------------------------------------------------------------------------
-
-// Effectively-unbounded absolute cap. The Hub rejects type(uint256).max as InvalidCap, so
-// type(uint128).max is the canonical "no ceiling" sentinel used throughout the Hub test-suite.
-export const CORE_ABSOLUTE_CAP = "340282366920938463463374607431768211455"; // type(uint128).max
-// 10_000 bps disables the percentage-of-TVL cap dimension, leaving only the absolute cap binding.
-export const PERCENTAGE_CAP_DISABLED = 10_000;
-
-// ---------------------------------------------------------------------------------------------------
-// ACM role strings — copied verbatim from the literals passed to _checkAccessAllowed(...) in the
-// target contracts (Hub.sol / YieldGroupBase.sol / YieldGroup.sol). Split by access class per the
-// Hub's asymmetric permission model (README "Permissions"): Governance can loosen AND tighten; the
-// Operator can only tighten (lower caps, pause, reorder queues) plus reallocate.
+// VIP-680 (main) — BNB Chain Testnet.
 //
-// This VIP (VIP-680) provisions the Governance role set for the NORMAL timelock (the executor, which
-// then performs the wiring) and the Operator role set for the Guardian. The Fast-Track and Critical
-// timelocks receive the same Governance role set in the addendum proposal (bsctestnet-addendum.ts) —
-// split out because all three timelocks' governance grants plus the wiring exceed the single-proposal
-// block-gas budget on BSC.
+// First of five proposals that onboard the freshly redeployed Liquidity Hub (USDT) stack. This one
+// gives the Normal Timelock full control of the stack: it grants the Governance role set on the Hub,
+// the three yield sources (Core / FRV / Flux) and the HubRegistry, and it accepts the Hub's and the
+// registry's pending Ownable2Step ownership (both were transferred to the Normal Timelock at deploy).
+//
+// Ownership is accepted here, early, on purpose: it retires the deployer's owner key immediately, so
+// the deployer can no longer repoint `setAccessControlManager` in the deploy -> onboarding window. It
+// has no effect on indexers, whose only ordering requirement (HubAdded before every YieldGroupAdded)
+// lives entirely in the wiring proposal.
+//
+// Companion proposals: a wiring proposal registers the Hub and wires the three sources end-to-end (it
+// needs the roles granted here, so it executes after this one); two addendum proposals grant the same
+// Governance set to the Fast-Track and Critical timelocks; and a testnet-only proposal tops the
+// Guardian up to full permissions.
 // ---------------------------------------------------------------------------------------------------
-
-// Hub_USDT — Governance role set (every gated Hub function except `reallocate`, which is Operator-only).
-export const HUB_GOVERNANCE_SIGS = [
-  "addYieldGroup(address,uint256,uint16)",
-  "removeYieldGroup(address)",
-  "raiseYieldGroupCap(address,uint256,uint16)",
-  "lowerYieldGroupCap(address,uint256,uint16)",
-  "setOuterDepositQueue(address[])",
-  "setOuterWithdrawQueue(address[])",
-  "emergencyReallocate((address,address,uint256)[],(address,address,uint256)[])",
-  "pauseHub()",
-  "unpauseHub()",
-  "pauseYieldGroup(address)",
-  "unpauseYieldGroup(address)",
-  "raiseMaxWithdrawalSize(uint256)",
-  "lowerMaxWithdrawalSize(uint256)",
-  "setManagementFeeBps(uint16)",
-  "setPerformanceFeeBps(uint16)",
-  "setRedeemFeeBps(uint16)",
-  "setFeeRecipient(address)",
-  "sweep(address,address)",
-];
-
-// Hub_USDT — Operator role set (tighten-only + reallocate + emergency pause).
-export const HUB_OPERATOR_SIGS = [
-  "lowerYieldGroupCap(address,uint256,uint16)",
-  "setOuterDepositQueue(address[])",
-  "setOuterWithdrawQueue(address[])",
-  "reallocate((address,address,uint256)[],(address,address,uint256)[])",
-  "pauseHub()",
-  "pauseYieldGroup(address)",
-  "lowerMaxWithdrawalSize(uint256)",
-];
-
-// Yield-source Governance role strings. All three sources share the YieldGroupBase gated surface;
-// each subclass only adds a few functions (copied verbatim from YieldGroupBase.sol / YieldGroup.sol /
-// YieldGroupFRV.sol):
-//   - Core & Flux use `YieldGroup`    → base + raiseResourceCap / lowerResourceCap / setBlocksPerYear
-//   - FRV         uses `YieldGroupFRV` → base + forceRemoveResource (no cap setters, no setBlocksPerYear)
-
-// Shared by all three sources (the 8 gated functions on YieldGroupBase).
-export const YIELD_GROUP_BASE_GOVERNANCE_SIGS = [
-  "addResource(address,address)",
-  "removeResource(address)",
-  "updateResourceAdapter(address,address)",
-  "setInnerDepositQueue(address[])",
-  "setInnerWithdrawQueue(address[])",
-  "pauseResource(address)",
-  "unpauseResource(address)",
-  "sweep(address,address)",
-];
-
-// CoreSource_USDT (and the Flux source) — YieldGroup: base + per-resource caps + blocksPerYear.
-export const CORE_SOURCE_GOVERNANCE_SIGS = [
-  ...YIELD_GROUP_BASE_GOVERNANCE_SIGS,
-  "raiseResourceCap(address,uint256)",
-  "lowerResourceCap(address,uint256)",
-  "setBlocksPerYear(uint256)",
-];
-
-// FRV_SOURCE_USDT — YieldGroupFRV: base + forceRemoveResource. It has NO raise/lowerResourceCap and
-// NO setBlocksPerYear (those are Core/Flux-only), so it must not reuse CORE_SOURCE_GOVERNANCE_SIGS.
-export const FRV_SOURCE_GOVERNANCE_SIGS = [...YIELD_GROUP_BASE_GOVERNANCE_SIGS, "forceRemoveResource(address)"];
-
-// CoreSource_USDT — Operator role set (tighten-only).
-export const CORE_SOURCE_OPERATOR_SIGS = [
-  "setInnerDepositQueue(address[])",
-  "setInnerWithdrawQueue(address[])",
-  "pauseResource(address)",
-  "lowerResourceCap(address,uint256)",
-];
-
-// Operator holder: the testnet Guardian multisig (the Venus Core multisig plays the Operator role).
-const OPERATOR = GUARDIAN;
-
-export const giveCallPermission = (contract: string, sig: string, account: string) => ({
-  target: ACM,
-  signature: "giveCallPermission(address,string,address)",
-  params: [contract, sig, account],
-});
 
 export const vip680 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-680 [BNB Chain Testnet] Configure Liquidity Hub (USDT) — permissions and Core yield source",
+    title: "VIP-680 [BNB Chain Testnet] Liquidity Hub (USDT) — Normal Timelock permissions and ownership",
     description: `#### Summary
 
-Post-deploy governance wiring for the newly deployed **Liquidity Hub (USDT)** on BNB Chain Testnet.
-The Hub and its yield-source proxies were deployed without any ACM permissions, registry, or queue
-configuration (the deploy scripts only deploy and initialise; all ACM-gated wiring is governance's
-job). This VIP provisions the core access-control roles and wires the **Core** yield source
-end-to-end so the USDT Hub becomes usable, routing deposits and withdrawals through Venus Core.
-
-Two companion proposals complete the testnet setup: an **addendum** grants the same Governance role
-set to the Fast-Track and Critical timelocks, and a **Guardian-permissions** proposal tops the
-Guardian up to the full Governance role set across the whole Hub stack (Hub + Core + FRV + Flux) so
-backend can add and reconfigure resources via multisig without a VIP per change.
+First of five proposals onboarding the newly redeployed **Liquidity Hub (USDT)** on BNB Chain Testnet.
+The Hub, its three yield sources (Core, FRV, Flux) and the HubRegistry were deployed with no ACM
+permissions and their ownership left pending to governance. This proposal gives the **Normal Timelock**
+full control: the Governance role set across the whole stack, plus acceptance of the Hub's and
+registry's pending ownership.
 
 #### Access-control model
 
 The Hub uses an asymmetric permission model: **Governance** can both loosen and tighten, while the
-**Operator** can only tighten (lower caps, pause, reorder queues) plus rebalance via \`reallocate\`.
+**Operator** can only tighten (lower caps, pause, reorder queues) plus \`reallocate\`. This proposal
+provisions the Governance set for the Normal Timelock, which then performs the wiring in the companion
+wiring proposal.
 
-1. Grant the **Governance** role set on **Hub_USDT** and the **Core source** to the Normal Timelock
-   (registry, caps, queues, pause/unpause, fees, sweep, adapter updates, \`emergencyReallocate\`).
-2. Grant the **Operator** role set on **Hub_USDT** and the **Core source** to the Guardian multisig
-   (\`lowerYieldGroupCap\`, \`lowerMaxWithdrawalSize\`, \`lowerResourceCap\`, \`setOuter*/setInner*Queue\`,
-   \`pauseHub\`, \`pauseYieldGroup\`, \`pauseResource\`, \`reallocate\`).
+#### Actions
 
-#### Wiring
-
-3. Register **vUSDT** (Venus Core pool) on the Core source behind the shared **AdapterCoreV1**, and
-   point the source's inner deposit/withdraw queues at it.
-4. Register the Core source on **Hub_USDT** with an effectively-unbounded cap, and point the Hub's
-   outer deposit/withdraw queues at it.
+1. Grant the **Governance** role set to the Normal Timelock on **Hub_USDT** (registry, caps, queues,
+   pause/unpause, fees, sweep, adapter updates, \`emergencyReallocate\`), the **Core**, **FRV** and
+   **Flux** yield sources, and the **HubRegistry** (\`addHub\` / \`removeHub\`).
+2. Accept the pending ownership of the **HubRegistry** and **Hub_USDT** (both transferred to the Normal
+   Timelock at deploy), so the deployer no longer holds the owner key that gates
+   \`setAccessControlManager\`.
 
 #### Notes
 
-- **FRV and Flux sources are deferred in this proposal.** Both proxies are deployed but have no
-  concrete resource on testnet yet: no FRV vault instance exists for USDT (only the vault
-  implementation and controller are deployed), and the Flux adapter is not deployed (no Fluid
-  LendingResolver on testnet). Once each resource exists, the Guardian multisig registers it directly
-  using the permissions from the companion Guardian-permissions proposal — no further VIP needed on
-  testnet.
+- The Normal Timelock intentionally does **not** receive the operator-only \`reallocate\` role.
+- No routing is wired here; the companion wiring proposal registers the Hub and the Core/FRV/Flux
+  resources once this proposal has executed.
 - Testnet-only. The Hub is not yet deployed on any mainnet.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -189,33 +77,16 @@ The Hub uses an asymmetric permission model: **Governance** can both loosen and 
 
   return makeProposal(
     [
-      // 1. Governance role set (loosen + tighten) → the Normal Timelock (this proposal's executor).
-      ...HUB_GOVERNANCE_SIGS.map(sig => giveCallPermission(HUB_USDT, sig, NORMAL_TIMELOCK)),
-      ...CORE_SOURCE_GOVERNANCE_SIGS.map(sig => giveCallPermission(CORE_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      // 1. Governance role set -> Normal Timelock, across the whole stack.
+      ...HUB_GOVERNANCE.map(sig => giveCallPermission(HUB_USDT, sig, NORMAL_TIMELOCK)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(CORE_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      ...FRV_GOVERNANCE.map(sig => giveCallPermission(FRV_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(FLUX_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(HUB_REGISTRY, sig, NORMAL_TIMELOCK)),
 
-      // 2. Operator role set (tighten-only + reallocate + emergency pause) → the Guardian multisig.
-      ...HUB_OPERATOR_SIGS.map(sig => giveCallPermission(HUB_USDT, sig, OPERATOR)),
-      ...CORE_SOURCE_OPERATOR_SIGS.map(sig => giveCallPermission(CORE_SOURCE_USDT, sig, OPERATOR)),
-
-      // 3. Register vUSDT on the Core source behind AdapterCoreV1, then set its inner queues.
-      //    addResource must precede the inner-queue setters (they reject unregistered resources).
-      {
-        target: CORE_SOURCE_USDT,
-        signature: "addResource(address,address)",
-        params: [VUSDT_CORE, ADAPTER_CORE_V1],
-      },
-      { target: CORE_SOURCE_USDT, signature: "setInnerDepositQueue(address[])", params: [[VUSDT_CORE]] },
-      { target: CORE_SOURCE_USDT, signature: "setInnerWithdrawQueue(address[])", params: [[VUSDT_CORE]] },
-
-      // 4. Register the Core source on the Hub, then point the outer queues at it.
-      //    addYieldGroup must precede the outer-queue setters (they reject unregistered sources).
-      {
-        target: HUB_USDT,
-        signature: "addYieldGroup(address,uint256,uint16)",
-        params: [CORE_SOURCE_USDT, CORE_ABSOLUTE_CAP, PERCENTAGE_CAP_DISABLED],
-      },
-      { target: HUB_USDT, signature: "setOuterDepositQueue(address[])", params: [[CORE_SOURCE_USDT]] },
-      { target: HUB_USDT, signature: "setOuterWithdrawQueue(address[])", params: [[CORE_SOURCE_USDT]] },
+      // 2. Accept pending ownership (Ownable2Step) — registry first, then the Hub.
+      { target: HUB_REGISTRY, signature: "acceptOwnership()", params: [] },
+      { target: HUB_USDT, signature: "acceptOwnership()", params: [] },
     ],
     meta,
     ProposalType.REGULAR,
