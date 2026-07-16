@@ -21,6 +21,7 @@ import { seedAggregator } from "../../vips/vip-665/utils/seed";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import { SCANNED_CRITICAL } from "./data/scannedCritical";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 // Recent BSC block where the ACMCommandsAggregator batch lengths match GRANT_INDEX / REVOKE_INDEX.
@@ -32,6 +33,12 @@ const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["address", "string"], [at, fn]);
 
 const REDUNDANT = REDUNDANT_REVOKES.bscmainnet;
+const SCANNED = SCANNED_CRITICAL.bscmainnet;
+const ZERO = "0x0000000000000000000000000000000000000000";
+// On the BNB v1 ACM, wildcard roles hash a 32-byte zero prefix (legacyWildcardRole);
+// the scanned data marks wildcards with a zero-address target.
+const scannedRole = (r: { target: string; signature: string }) =>
+  r.target === ZERO ? legacyWildcardRole(r.signature) : role(r.target, r.signature);
 
 forking(FORK_BLOCK, async () => {
   const acm = () => new Contract(ACM.bscmainnet, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
@@ -64,6 +71,25 @@ forking(FORK_BLOCK, async () => {
     it("Critical holds every wildcard grant the VIP revokes", async () => {
       for (const sig of BNB_CRITICAL_WILDCARD_SIGS)
         expect(await acm().hasRole(legacyWildcardRole(sig), BNB_CRITICAL), `before wildcard: ${sig}`).to.be.true;
+    });
+
+    it("the VIP revoke set equals the independently scanned Critical permission set", () => {
+      const key = (r: { target: string; signature: string }) => `${r.target.toLowerCase()}|${r.signature}`;
+      const vipKeys = new Set([
+        ...CRITICAL_REVOKES.bscmainnet.map(key),
+        ...BNB_CRITICAL_WILDCARD_SIGS.map(sig => `${ZERO}|${sig}`),
+      ]);
+      const scannedKeys = new Set(SCANNED.map(key));
+      const missing = SCANNED.filter(r => !vipKeys.has(key(r))); // Critical would KEEP these
+      const extra = [...vipKeys].filter(k => !scannedKeys.has(k)); // no-op revokes, break event counts
+      expect(missing.map(key), "scanned Critical permissions missing from the VIP").to.be.empty;
+      expect(extra, "VIP revokes not present in the scanned Critical set").to.be.empty;
+    });
+
+    it("Critical holds every independently scanned permission at the fork block", async () => {
+      for (const row of SCANNED)
+        expect(await acm().hasRole(scannedRole(row), BNB_CRITICAL), `scan before: ${row.signature}@${row.target}`).to.be
+          .true;
     });
   });
 
@@ -152,6 +178,12 @@ forking(FORK_BLOCK, async () => {
       const criticalSigner = await initMainnetUser(bscmainnet.CRITICAL_TIMELOCK, ethers.utils.parseEther("1"));
       const asCritical = new Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, criticalSigner);
       await expect(asCritical._setForcedLiquidation(vUSDT, true)).to.be.reverted;
+    });
+
+    it("Critical holds none of the independently scanned permissions", async () => {
+      for (const row of SCANNED)
+        expect(await acm().hasRole(scannedRole(row), BNB_CRITICAL), `scan after: ${row.signature}@${row.target}`).to.be
+          .false;
     });
 
     it("the aggregator no longer holds the ACM DEFAULT_ADMIN_ROLE", async () => {

@@ -19,6 +19,7 @@ import {
 } from "../../../vips/vip-665/utils/commands";
 import { seedAggregator } from "../../../vips/vip-665/utils/seed";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
+import { SCANNED_CRITICAL } from "../data/scannedCritical";
 
 type RemoteChain = Exclude<Chain, "bscmainnet">;
 
@@ -39,10 +40,29 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
     const acm = () => new Contract(ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
     const rows = CRITICAL_REVOKES[chain];
     const redundant = REDUNDANT_REVOKES[chain];
+    const scanned = SCANNED_CRITICAL[chain];
 
     describe(`VIP-665 Critical permissions — before execution (${chain})`, () => {
       it("the VIP revokes at least one grant on this chain", () => {
         expect(rows.length, `revokes for ${chain}`).to.be.greaterThan(0);
+      });
+
+      it("the VIP revoke set equals the independently scanned Critical permission set", () => {
+        const key = (r: { target: string; signature: string }) => `${r.target.toLowerCase()}|${r.signature}`;
+        const vipKeys = new Set(rows.map(key));
+        const scannedKeys = new Set(scanned.map(key));
+        const missing = scanned.filter(r => !vipKeys.has(key(r))); // Critical would KEEP these
+        const extra = rows.filter(r => !scannedKeys.has(key(r))); // no-op revokes, break event counts
+        expect(missing.map(key), "scanned Critical permissions missing from the VIP").to.be.empty;
+        expect(extra.map(key), "VIP revokes not present in the scanned Critical set").to.be.empty;
+      });
+
+      it("Critical holds every independently scanned permission at the fork block", async () => {
+        for (const row of scanned)
+          expect(
+            await acm().hasRole(role(row.target, row.signature), critical),
+            `scan before: ${row.signature}@${row.target}`,
+          ).to.be.true;
       });
 
       it("Critical holds every grant the VIP revokes", async () => {
@@ -103,6 +123,14 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
               await acm().isAllowedToCall(critical, row.signature, { from: row.target }),
               `still allowed: ${row.signature}`,
             ).to.be.false;
+      });
+
+      it("Critical holds none of the independently scanned permissions", async () => {
+        for (const row of scanned)
+          expect(
+            await acm().hasRole(role(row.target, row.signature), critical),
+            `scan after: ${row.signature}@${row.target}`,
+          ).to.be.false;
       });
 
       it("the aggregator no longer holds the ACM DEFAULT_ADMIN_ROLE", async () => {
