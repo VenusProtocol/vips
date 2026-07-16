@@ -20,7 +20,7 @@
  *   unichainmainnet: 8095093..53436354 (63 permissions)
  *   opbnbmainnet: 10895878..164271776 (49 permissions)
  */
-import { Chain, ZERO } from "../../../vips/vip-665/data/addresses";
+import { Chain, ZERO } from "../../../vips/vip-645/data/addresses";
 
 export interface ScannedCriticalRow {
   target: string; // zero address = wildcard (any contract)

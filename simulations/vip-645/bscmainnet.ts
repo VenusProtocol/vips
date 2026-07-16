@@ -6,10 +6,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip665, { EXPECTED_ROLE_EVENTS } from "../../vips/vip-665/bscmainnet";
-import { ACM, BNB_CRITICAL } from "../../vips/vip-665/data/addresses";
-import { CLEANUP_LEGACY_WILDCARD_REVOKES, REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-665/data/cleanup";
-import { BNB_CRITICAL_WILDCARD_SIGS, CRITICAL_REVOKES } from "../../vips/vip-665/data/criticalRevokes";
+import vip645, { EXPECTED_ROLE_EVENTS } from "../../vips/vip-645/bscmainnet";
+import { ACM, BNB_CRITICAL } from "../../vips/vip-645/data/addresses";
+import { CLEANUP_LEGACY_WILDCARD_REVOKES, REDUNDANT_REVOKES, STALE_ROWS } from "../../vips/vip-645/data/cleanup";
+import { BNB_CRITICAL_WILDCARD_SIGS, CRITICAL_REVOKES } from "../../vips/vip-645/data/criticalRevokes";
 import {
   AGGREGATOR,
   DEFAULT_ADMIN_ROLE,
@@ -18,7 +18,7 @@ import {
   bscRevokeBatches,
   buildGrantPermissions,
   legacyWildcardRole,
-} from "../../vips/vip-665/utils/commands";
+} from "../../vips/vip-645/utils/commands";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -69,7 +69,7 @@ const assertSeededBatch = async (
 forking(FORK_BLOCK, async () => {
   const acm = () => new Contract(ACM.bscmainnet, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
 
-  describe("VIP-665 Aggregator seeding — before execution (bscmainnet)", () => {
+  describe("VIP-645 Aggregator seeding — before execution (bscmainnet)", () => {
     it("the batches the VIP executes match the intended permissions exactly", async () => {
       const aggregator = new Contract(AGGREGATOR.bscmainnet, ACM_COMMANDS_AGGREGATOR_ABI, ethers.provider);
       // BNB seeds only revoke batches; the grant batch is empty so the VIP skips executeGrantPermissions.
@@ -82,7 +82,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("VIP-665 Critical permissions — before execution (bscmainnet)", () => {
+  describe("VIP-645 Critical permissions — before execution (bscmainnet)", () => {
     it("revokes the expected number of grants and grants nothing", () => {
       expect(CRITICAL_REVOKES.bscmainnet.length, "per-contract grants").to.equal(223);
       expect(BNB_CRITICAL_WILDCARD_SIGS.length, "wildcard grants").to.equal(17);
@@ -122,7 +122,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("VIP-665 Cleanup — before execution (bscmainnet)", () => {
+  describe("VIP-645 Cleanup — before execution (bscmainnet)", () => {
     describe("stale grants", () => {
       it("lists the expected number of stale grants", () => expect(STALE_ROWS.length).to.equal(9));
 
@@ -163,7 +163,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   const events = EXPECTED_ROLE_EVENTS.bscmainnet;
-  testVip("VIP-665 Remove all CriticalTimelock privileges — BNB Chain", await vip665(), {
+  testVip("VIP-645 Remove all CriticalTimelock privileges — BNB Chain", await vip645(), {
     proposer: PROPOSER,
     supporter: SUPPORTER,
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
@@ -183,7 +183,7 @@ forking(FORK_BLOCK, async () => {
     },
   });
 
-  describe("VIP-665 Critical permissions — after execution (bscmainnet)", () => {
+  describe("VIP-645 Critical permissions — after execution (bscmainnet)", () => {
     it("Critical lost every per-contract grant", async () => {
       for (const row of CRITICAL_REVOKES.bscmainnet)
         expect(
@@ -222,7 +222,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("VIP-665 Cleanup — after execution (bscmainnet)", () => {
+  describe("VIP-645 Cleanup — after execution (bscmainnet)", () => {
     describe("stale grants", () => {
       it("every grantee lost its stale grant", async () => {
         for (const staleRow of STALE_ROWS)

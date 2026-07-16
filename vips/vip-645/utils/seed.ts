@@ -1,6 +1,6 @@
 import { Contract, Signer } from "ethers";
 
-import ACM_COMMANDS_AGGREGATOR_ABI from "../../../simulations/vip-665/abi/ACMCommandsAggregator.json";
+import ACM_COMMANDS_AGGREGATOR_ABI from "../../../simulations/vip-645/abi/ACMCommandsAggregator.json";
 import { Permission } from "./commands";
 
 export const seedAggregator = async (

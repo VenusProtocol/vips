@@ -6,10 +6,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip665, { EXPECTED_ROLE_EVENTS } from "../../../vips/vip-665/bscmainnet";
-import { ACM, SYNC_CASH_MARKETS, ZERO } from "../../../vips/vip-665/data/addresses";
-import { REDUNDANT_REVOKES, SYNC_CASH_SIG } from "../../../vips/vip-665/data/cleanup";
-import { CRITICAL_REVOKES } from "../../../vips/vip-665/data/criticalRevokes";
+import vip645, { EXPECTED_ROLE_EVENTS } from "../../../vips/vip-645/bscmainnet";
+import { ACM, SYNC_CASH_MARKETS, ZERO } from "../../../vips/vip-645/data/addresses";
+import { REDUNDANT_REVOKES, SYNC_CASH_SIG } from "../../../vips/vip-645/data/cleanup";
+import { CRITICAL_REVOKES } from "../../../vips/vip-645/data/criticalRevokes";
 import {
   AGGREGATOR,
   Chain,
@@ -19,7 +19,7 @@ import {
   REVOKE_INDICES,
   buildGrantPermissions,
   buildRevokePermissions,
-} from "../../../vips/vip-665/utils/commands";
+} from "../../../vips/vip-645/utils/commands";
 import ACM_COMMANDS_AGGREGATOR_ABI from "../abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 import { SCANNED_CRITICAL } from "../data/scannedCritical";
@@ -61,7 +61,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
     const redundant = REDUNDANT_REVOKES[chain];
     const scanned = SCANNED_CRITICAL[chain];
 
-    describe(`VIP-665 Aggregator seeding — before execution (${chain})`, () => {
+    describe(`VIP-645 Aggregator seeding — before execution (${chain})`, () => {
       it("both batches the VIP executes match the intended permissions exactly", async () => {
         const aggregator = new Contract(AGGREGATOR[chain], ACM_COMMANDS_AGGREGATOR_ABI, ethers.provider);
         await assertSeededBatch(aggregator, "grant", GRANT_INDEX[chain], buildGrantPermissions(chain));
@@ -69,7 +69,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
       });
     });
 
-    describe(`VIP-665 Critical permissions — before execution (${chain})`, () => {
+    describe(`VIP-645 Critical permissions — before execution (${chain})`, () => {
       it("the VIP revokes at least one grant on this chain", () => {
         expect(rows.length, `revokes for ${chain}`).to.be.greaterThan(0);
       });
@@ -101,7 +101,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
       });
     });
 
-    describe(`VIP-665 Cleanup — before execution (${chain})`, () => {
+    describe(`VIP-645 Cleanup — before execution (${chain})`, () => {
       describe("syncCash normalization", () => {
         it("NormalTimelock holds the per-market grants but not the wildcard yet", async () => {
           expect(syncCashMarkets.length, `syncCash markets for ${chain}`).to.be.greaterThan(0);
@@ -123,7 +123,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
     });
 
     const events = EXPECTED_ROLE_EVENTS[chain];
-    testForkedNetworkVipCommands(`VIP-665 ${chain}`, await vip665(), {
+    testForkedNetworkVipCommands(`VIP-645 ${chain}`, await vip645(), {
       callbackAfterExecution: async (txResponse: TransactionResponse) => {
         await expectEvents(
           txResponse,
@@ -134,7 +134,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
       },
     });
 
-    describe(`VIP-665 Critical permissions — after execution (${chain})`, () => {
+    describe(`VIP-645 Critical permissions — after execution (${chain})`, () => {
       it("Critical lost every grant", async () => {
         for (const row of rows)
           expect(
@@ -165,7 +165,7 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
       });
     });
 
-    describe(`VIP-665 Cleanup — after execution (${chain})`, () => {
+    describe(`VIP-645 Cleanup — after execution (${chain})`, () => {
       describe("syncCash normalization", () => {
         it("NormalTimelock gained the wildcard grant and lost the per-market grants", async () => {
           expect(await acm().hasRole(role(ZERO, SYNC_CASH_SIG), normal), "after wildcard syncCash").to.be.true;

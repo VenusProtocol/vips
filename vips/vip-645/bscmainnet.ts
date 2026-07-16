@@ -54,20 +54,36 @@ const aggregatorCommands = (chain: Chain): Command[] => {
 
 const meta = {
   version: "v2",
-  title: "VIP-665 [Multi-Chain] Remove all CriticalTimelock privileges",
+  title: "VIP-645 [Multi-Chain] Remove all CriticalTimelock Privileges",
   description: `#### Summary
 
-This proposal hardens governance by removing every permission the CriticalTimelock holds on all eight mainnets, leaving it with zero privileges. No permission is moved to a Guardian. It also cleans up dangling permissions left on removed setters and retired contracts, removes redundant per-contract grants that are already covered by an identical wildcard grant, and normalizes the \`syncCash()\` permission on every remote chain to the wildcard convention used by all other vToken setters.
+This proposal revokes every permission the CriticalTimelock holds across all eight Venus mainnets — including its emergency pause powers — leaving it with zero privileges and no permission moved to a Guardian, and additionally cleans up dangling, redundant and non-standard permission grants on the AccessControlManager (ACM). Refer to the community post for the full background and rationale.
 
-#### Description
+#### Actions
 
-A proposal routed through the Critical route executes in roughly 7 hours on BNB Chain and 8 hours on remote chains once voting, queue and timelock delays are counted. To eliminate that fast-path attack surface entirely, this VIP revokes every permission the CriticalTimelock currently holds across BNB Chain, Ethereum, Arbitrum One, Base, zkSync Era, OP Mainnet, Unichain and opBNB — including emergency pause powers. The full per-contract, per-chain list of permissions revoked is in the accompanying community post and the pull request.
+On each of the eight chains the proposal executes the following sequence through that chain's ACMCommandsAggregator:
 
-Actions per chain: revoke every CriticalTimelock permission (no Guardian is granted anything), and revoke redundant per-contract grants that are already shadowed by an identical wildcard grant (behavior-preserving). On BNB Chain, additionally revoke dangling grants on removed setters and retired contracts from every current holder (including the deprecated BUSDLiquidator and the retired SetCheckpoint deploy contracts). On each remote chain, grant \`syncCash()\` on the wildcard target (address(0)) to the NormalTimelock and revoke the per-market \`syncCash()\` grants it currently holds.
+1. **Grant aggregator admin** — Calls grantRole(DEFAULT_ADMIN_ROLE, aggregator) on the chain's AccessControlManager.
+2. **Execute grant batch** — Calls executeGrantPermissions(index) on the aggregator (remote chains only; applies the wildcard syncCash() grant to the NormalTimelock).
+3. **Execute revoke batch** — Calls executeRevokePermissions(index) on the aggregator, revoking all CriticalTimelock permissions plus the redundant and stale grants for that chain.
+4. **Revoke aggregator admin** — Calls revokeRole(DEFAULT_ADMIN_ROLE, aggregator) on the AccessControlManager.
 
-#### Execution model
+ACMCommandsAggregator addresses:
 
-To keep the whole change in one proposal within the BNB Chain per-transaction gas limit, every chain is executed through its pre-seeded ACMCommandsAggregator. For each chain the proposal grants the aggregator the ACM DEFAULT_ADMIN_ROLE, calls executeGrantPermissions and/or executeRevokePermissions by batch index, and revokes the role — all in the same proposal. Each batch contains only the giveCallPermission / revokeCallPermission calls for that chain. The CriticalTimelock's wildcard grants on the legacy BNB ACM — together with the retired contracts' wildcard grants (the RetiredRiskSteward cap setters and the SetCheckpoint interest-rate-model deploy contracts) — are cleared with direct ACM.revokeRole calls, which the aggregator cannot reach.
+- BNB Chain — 0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64
+- Ethereum — 0xb78772bed6995551b64e54Cdb8e09800d86C73ee
+- Arbitrum One — 0x74AFeA28456a683b8fF907699Ff77138edef00f3
+- Base — 0xB2770DBD5146f7ee0766Dc9E3931433bb697Aa06
+- zkSync Era — 0x88B1452e512c8fcf83889DdCfe54dF37D561Db82
+- OP Mainnet — 0xbbEBaF646e7a3E4064a899e68565B1b439eFdf70
+- Unichain — 0x904D11b00bdB2740d16176cc00DE139d0d626115
+- opBNB — 0x6dB5e303289fea2E83F7d442470210045592AD93
+
+On BNB Chain, the proposal additionally issues direct ACM.revokeRole calls on the AccessControlManager (0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555) to clear the CriticalTimelock's legacy 32-byte wildcard grants and the retired contracts' wildcard grants, which the aggregator cannot reach.
+
+Expected ACM event counts per chain (RoleGranted / RoleRevoked): BNB Chain 1 / 279, Ethereum 2 / 136, Arbitrum One 2 / 122, Base 2 / 95, zkSync Era 2 / 81, OP Mainnet 2 / 74, Unichain 2 / 74, opBNB 2 / 56.
+
+The complete per-contract, per-chain list of every permission granted and revoked is in the GitHub pull request: [https://github.com/VenusProtocol/vips/pull/740](https://github.com/VenusProtocol/vips/pull/740)
 
 #### Security and additional considerations
 
@@ -85,7 +101,7 @@ To keep the whole change in one proposal within the BNB Chain per-transaction ga
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
 };
 
-export const vip665 = () =>
+export const vip645 = () =>
   makeProposal(
     [
       ...aggregatorCommands("bscmainnet"),
@@ -102,4 +118,4 @@ export const vip665 = () =>
     ProposalType.REGULAR,
   );
 
-export default vip665;
+export default vip645;
