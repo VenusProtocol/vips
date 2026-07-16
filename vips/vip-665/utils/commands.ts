@@ -38,15 +38,19 @@ export const GRANT_INDEX: Record<Chain, number> = {
   unichainmainnet: 4,
   opbnbmainnet: 2,
 };
-export const REVOKE_INDEX: Record<Chain, number> = {
-  bscmainnet: 0,
-  ethereum: 2,
-  arbitrumone: 2,
-  basemainnet: 1,
-  zksyncmainnet: 1,
-  opmainnet: 1,
-  unichainmainnet: 2,
-  opbnbmainnet: 2,
+// The aggregator batch index/indices each chain's revokes are seeded at. The VIP calls
+// executeRevokePermissions once per index. Every chain has a single index except BNB Chain, whose 254
+// revokes exceed the Osaka per-tx gas cap (16,777,216) as one batch (~92k gas/revoke) and so are seeded
+// and executed as two halves — see bscRevokeBatches().
+export const REVOKE_INDICES: Record<Chain, number[]> = {
+  bscmainnet: [0, 1],
+  ethereum: [2],
+  arbitrumone: [2],
+  basemainnet: [1],
+  zksyncmainnet: [1],
+  opmainnet: [1],
+  unichainmainnet: [2],
+  opbnbmainnet: [2],
 };
 
 export const acmOf = (chain: Chain): string => ACM[chain];
@@ -100,6 +104,12 @@ export const buildRevokePermissions = (chain: Chain): Permission[] => {
     seen.add(key);
     return true;
   });
+};
+
+export const bscRevokeBatches = (): Permission[][] => {
+  const all = buildRevokePermissions("bscmainnet");
+  const mid = Math.ceil(all.length / 2);
+  return [all.slice(0, mid), all.slice(mid)];
 };
 
 // BNB legacy-ACM wildcard quirk: the bscmainnet ACM keys its "any contract" wildcard role off the 32-byte

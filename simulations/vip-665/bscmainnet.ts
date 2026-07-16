@@ -13,19 +13,24 @@ import { BNB_CRITICAL_WILDCARD_SIGS, CRITICAL_REVOKES } from "../../vips/vip-665
 import {
   AGGREGATOR,
   DEFAULT_ADMIN_ROLE,
+  Permission,
+  REVOKE_INDICES,
+  bscRevokeBatches,
   buildGrantPermissions,
-  buildRevokePermissions,
   legacyWildcardRole,
 } from "../../vips/vip-665/utils/commands";
-import { seedAggregator } from "../../vips/vip-665/utils/seed";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import { SCANNED_CRITICAL } from "./data/scannedCritical";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
-// Recent BSC block where the ACMCommandsAggregator batch lengths match GRANT_INDEX / REVOKE_INDEX.
-const FORK_BLOCK = 109924798;
+// Post-seed BSC block: the ACMCommandsAggregator is already seeded on-chain (127+127 revokes at indices
+// [0,1])
+const FORK_BLOCK = 110304228;
+// PROPOSER: a Gnosis Safe holding >1M votes with no live proposal at FORK_BLOCK, so propose() succeeds.
+const PROPOSER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
+const SUPPORTER = "0x34221485302f6F2029660a000908B5FCABB9BC6e";
 
 // A long-listed core-pool market, used to check the CriticalTimelock lost its forced-liquidation power.
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
@@ -40,17 +45,41 @@ const ZERO = "0x0000000000000000000000000000000000000000";
 const scannedRole = (r: { target: string; signature: string }) =>
   r.target === ZERO ? legacyWildcardRole(r.signature) : role(r.target, r.signature);
 
+const assertSeededBatch = async (
+  aggregator: Contract,
+  kind: "grant" | "revoke",
+  index: number,
+  expected: Permission[],
+) => {
+  const read = (i: number) =>
+    kind === "grant" ? aggregator.grantPermissions(index, i) : aggregator.revokePermissions(index, i);
+  for (let i = 0; i < expected.length; i++) {
+    const got = await read(i);
+    const at = `${kind}[${index}][${i}]`;
+    expect(got.contractAddress.toLowerCase(), `${at} contractAddress`).to.equal(
+      expected[i].contractAddress.toLowerCase(),
+    );
+    expect(got.functionSig, `${at} functionSig`).to.equal(expected[i].functionSig);
+    expect(got.account.toLowerCase(), `${at} account`).to.equal(expected[i].account.toLowerCase());
+  }
+  // Reading one past the end reverts (out-of-bounds public-array access) → confirms no trailing entries.
+  await expect(read(expected.length), `${kind} batch ${index} has unexpected trailing entries`).to.be.reverted;
+};
+
 forking(FORK_BLOCK, async () => {
   const acm = () => new Contract(ACM.bscmainnet, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
 
-  before(async () => {
-    const signer = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-    await seedAggregator(
-      signer,
-      AGGREGATOR.bscmainnet,
-      buildGrantPermissions("bscmainnet"),
-      buildRevokePermissions("bscmainnet"),
-    );
+  describe("VIP-665 Aggregator seeding — before execution (bscmainnet)", () => {
+    it("the batches the VIP executes match the intended permissions exactly", async () => {
+      const aggregator = new Contract(AGGREGATOR.bscmainnet, ACM_COMMANDS_AGGREGATOR_ABI, ethers.provider);
+      // BNB seeds only revoke batches; the grant batch is empty so the VIP skips executeGrantPermissions.
+      expect(buildGrantPermissions("bscmainnet").length, "no grant batch on BNB").to.equal(0);
+      // BNB's revokes are split into two batches (Osaka per-tx gas cap); assert each lands at its index.
+      const batches = bscRevokeBatches();
+      const indices = REVOKE_INDICES.bscmainnet;
+      expect(batches.length, "two revoke batches on BNB").to.equal(indices.length);
+      for (let b = 0; b < batches.length; b++) await assertSeededBatch(aggregator, "revoke", indices[b], batches[b]);
+    });
   });
 
   describe("VIP-665 Critical permissions — before execution (bscmainnet)", () => {
@@ -135,6 +164,8 @@ forking(FORK_BLOCK, async () => {
 
   const events = EXPECTED_ROLE_EVENTS.bscmainnet;
   testVip("VIP-665 Remove all CriticalTimelock privileges — BNB Chain", await vip665(), {
+    proposer: PROPOSER,
+    supporter: SUPPORTER,
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -142,12 +173,12 @@ forking(FORK_BLOCK, async () => {
         ["RoleGranted", "RoleRevoked"],
         [events.granted, events.revoked],
       );
-      // BNB grants nothing, so only the revoke batch executes.
+      // BNB grants nothing and its revokes are split into two batches, so two RevokePermissionsExecuted fire.
       await expectEvents(
         txResponse,
         [ACM_COMMANDS_AGGREGATOR_ABI],
         ["GrantPermissionsExecuted", "RevokePermissionsExecuted"],
-        [0, 1],
+        [0, 2],
       );
     },
   });

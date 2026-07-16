@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip665, { EXPECTED_ROLE_EVENTS } from "../../../vips/vip-665/bscmainnet";
@@ -14,16 +14,40 @@ import {
   AGGREGATOR,
   Chain,
   DEFAULT_ADMIN_ROLE,
+  GRANT_INDEX,
+  Permission,
+  REVOKE_INDICES,
   buildGrantPermissions,
   buildRevokePermissions,
 } from "../../../vips/vip-665/utils/commands";
-import { seedAggregator } from "../../../vips/vip-665/utils/seed";
+import ACM_COMMANDS_AGGREGATOR_ABI from "../abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 import { SCANNED_CRITICAL } from "../data/scannedCritical";
 
 type RemoteChain = Exclude<Chain, "bscmainnet">;
 
 const role = (at: string, fn: string) => ethers.utils.solidityKeccak256(["address", "string"], [at, fn]);
+
+const assertSeededBatch = async (
+  aggregator: Contract,
+  kind: "grant" | "revoke",
+  index: number,
+  expected: Permission[],
+) => {
+  const read = (i: number) =>
+    kind === "grant" ? aggregator.grantPermissions(index, i) : aggregator.revokePermissions(index, i);
+  for (let i = 0; i < expected.length; i++) {
+    const got = await read(i);
+    const at = `${kind}[${index}][${i}]`;
+    expect(got.contractAddress.toLowerCase(), `${at} contractAddress`).to.equal(
+      expected[i].contractAddress.toLowerCase(),
+    );
+    expect(got.functionSig, `${at} functionSig`).to.equal(expected[i].functionSig);
+    expect(got.account.toLowerCase(), `${at} account`).to.equal(expected[i].account.toLowerCase());
+  }
+  // Reading one past the end reverts (out-of-bounds public-array access) → confirms no trailing entries.
+  await expect(read(expected.length), `${kind} batch ${index} has unexpected trailing entries`).to.be.reverted;
+};
 
 // Shared body for the 7 remote-chain simulations.
 export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
@@ -32,15 +56,18 @@ export const runRemoteSim = (chain: RemoteChain, forkBlock: number) => {
   const syncCashMarkets = SYNC_CASH_MARKETS[chain];
 
   forking(forkBlock, async () => {
-    before(async () => {
-      const signer = await initMainnetUser(NETWORK_ADDRESSES[chain].NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-      await seedAggregator(signer, AGGREGATOR[chain], buildGrantPermissions(chain), buildRevokePermissions(chain));
-    });
-
     const acm = () => new Contract(ACM[chain], ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
     const rows = CRITICAL_REVOKES[chain];
     const redundant = REDUNDANT_REVOKES[chain];
     const scanned = SCANNED_CRITICAL[chain];
+
+    describe(`VIP-665 Aggregator seeding — before execution (${chain})`, () => {
+      it("both batches the VIP executes match the intended permissions exactly", async () => {
+        const aggregator = new Contract(AGGREGATOR[chain], ACM_COMMANDS_AGGREGATOR_ABI, ethers.provider);
+        await assertSeededBatch(aggregator, "grant", GRANT_INDEX[chain], buildGrantPermissions(chain));
+        await assertSeededBatch(aggregator, "revoke", REVOKE_INDICES[chain][0], buildRevokePermissions(chain));
+      });
+    });
 
     describe(`VIP-665 Critical permissions — before execution (${chain})`, () => {
       it("the VIP revokes at least one grant on this chain", () => {

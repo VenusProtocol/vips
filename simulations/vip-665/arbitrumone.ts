@@ -1,4 +1,5 @@
 import { runRemoteSim } from "./utils/remoteSim";
 
-// Recent arbitrumone block where the CriticalTimelock still holds the permissions this VIP revokes.
-runRemoteSim("arbitrumone", 483738162);
+// Recent arbitrumone block, after the ACMCommandsAggregator was seeded on-chain, where the CriticalTimelock
+// still holds the permissions this VIP revokes.
+runRemoteSim("arbitrumone", 484414000);

@@ -7,10 +7,9 @@ import {
   Chain,
   DEFAULT_ADMIN_ROLE,
   GRANT_INDEX,
-  REVOKE_INDEX,
+  REVOKE_INDICES,
   acmOf,
   buildGrantPermissions,
-  buildRevokePermissions,
   legacyWildcardCommands,
 } from "./utils/commands";
 
@@ -42,11 +41,11 @@ const aggregatorCommands = (chain: Chain): Command[] => {
       params: [GRANT_INDEX[chain]],
       ...route,
     });
-  if (buildRevokePermissions(chain).length > 0)
+  for (const revokeIndex of REVOKE_INDICES[chain])
     commands.push({
       target: agg,
       signature: "executeRevokePermissions(uint256)",
-      params: [REVOKE_INDEX[chain]],
+      params: [revokeIndex],
       ...route,
     });
   commands.push({ target: acm, signature: "revokeRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, agg], ...route });
