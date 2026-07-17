@@ -39,6 +39,25 @@
   },
   {
     "type": "function",
+    "name": "assetForHub",
+    "inputs": [
+      {
+        "name": "hub",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getHubs",
     "inputs": [],
     "outputs": [

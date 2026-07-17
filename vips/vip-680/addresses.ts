@@ -33,6 +33,10 @@ export const OPERATOR = GUARDIAN; // 0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706
 // Hub stack — CALLED by the VIP (source: venus-liquidity-hub/deployments/bsctestnet/*.json).
 // ---------------------------------------------------------------------------------------------------
 export const HUB_REGISTRY = "0x5346f648029d1D1d1034e09e8AD7a115f5D7A159"; // acceptOwnership + addHub target
+// New HubRegistry implementation exposing the `assetForHub(hub)` reverse getter. The proxy above still
+// runs the impl it was deployed with (no assetForHub); this VIP upgrades it via the ProxyAdmin below.
+// Source: venus-liquidity-hub/deployments/bsctestnet/HubRegistryImpl.json (deployed at block 119,670,331).
+export const HUB_REGISTRY_IMPL = "0x4D2C18fB4520c2e4f7C754979e9a4F3BbC1BCe92";
 export const HUB_USDT = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61"; // acceptOwnership + roles + wiring target
 export const CORE_SOURCE_USDT = "0x11e39DC7b8b16BBDA8D9C2903dF741Ae9341Ec88";
 export const FRV_SOURCE_USDT = "0xA0Fb0fFeBdcB7F45A3Ec841cCE7F78B7CeBD0f82";
@@ -63,6 +67,7 @@ export const HUB_BEACON = "0x7cbaC6991aC33DaFDD347e84CFbE2F372b936d92";
 export const CORE_BEACON = "0xbBEe25aE7d2Db035Afc327fb0096fC88FDfF3170";
 export const FRV_BEACON = "0x6196Ec22133610132563B03b6Fad5aa766A9C037";
 export const FLUX_BEACON = "0x6b9CA74F82848668EA04D56E0A8396A816ba5330";
+// CALLED by this VIP: Normal-Timelock-owned ProxyAdmin that upgrades the HubRegistry proxy to HUB_REGISTRY_IMPL.
 export const HUB_REGISTRY_PROXY_ADMIN = "0x9f8413eEE33D434F6D4f40C83181f32A831c9ef7";
 export const MIGRATOR = "0x343D518d8C89f9B5D770000F1ed80f45bF1419f5"; // immutable, permissionless — no wiring
 
