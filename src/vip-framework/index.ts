@@ -26,8 +26,9 @@ import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
-// XVS Vault stakes erode over time, so a single default supporter no longer reliably
-// clears quorum (600,000 XVS) when combined with the proposer at recent fork blocks.
+// XVS Vault stakes erode over time and governance has raised the bar (1,000,000 XVS proposal
+// threshold, 1,500,000 XVS quorum as of block ~111,098,000), so a single default supporter no
+// longer reliably clears quorum when combined with the proposer at recent fork blocks.
 // Two supporters give the framework headroom across blocks. Override per-test by passing
 // `supporter` (single, legacy) or `supporters` (array) to `testVip`.
 const DEFAULT_SUPPORTER_ADDRESSES = [
@@ -325,9 +326,12 @@ const resolveGovernanceVoters = async (
       }
     }
 
-    // Build a supporter set so proposer + supporters clear quorum.
+    // Build a supporter set so proposer + supporters clear quorum. The default proposer keeps its
+    // voting power when a fallback outbids it for the proposer slot, so fold it back in as a
+    // supporter — otherwise its stake is silently dropped and the remaining voters can fall short
+    // of quorum even though enough power exists.
     const supporterAddresses = [...defaultSupporters];
-    for (const voter of fallbackVoters) {
+    for (const voter of [defaultProposer, ...fallbackVoters]) {
       if (voter !== proposerAddress && !supporterAddresses.includes(voter)) supporterAddresses.push(voter);
     }
     return { proposerAddress, supporterAddresses };
