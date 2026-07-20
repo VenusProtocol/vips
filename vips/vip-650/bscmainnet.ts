@@ -2,7 +2,7 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const BSTOCK_LIQUIDATOR = "0xF03C90e6BF66b43411189Ad848F17723f8B4A3c1";
+export const BSTOCK_LIQUIDATOR = "0x5974Badab6911a78Ba15229045514C2C1bD42343";
 
 export const vip650 = () => {
   const meta = {
