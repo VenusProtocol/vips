@@ -21,7 +21,7 @@ import ERC20_ABI from "./abi/erc20.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 111000000;
+const FORK_BLOCK = 111068000;
 
 const MAX_BPS = BigNumber.from(10_000);
 
@@ -51,22 +51,9 @@ forking(FORK_BLOCK, async () => {
       tokenContracts.push(new ethers.Contract(token, ERC20_ABI, ethers.provider));
     }
 
-    // The TreasuryTokenBuybackDistributor is not yet deployed on bscmainnet. Deploy it on the
-    // fork with the six bscmainnet buyback addresses as constructor args, then inject its runtime
-    // code (immutables baked in) at the address the VIP references, so the proof is exact.
-    const [deployer] = await ethers.getSigners();
-    const factory = new ethers.ContractFactory(DISTRIBUTOR_ARTIFACT.abi, DISTRIBUTOR_ARTIFACT.bytecode, deployer);
-    const deployed = await factory.deploy(
-      BTCB_BUYBACK,
-      ETH_BUYBACK,
-      XVS_BUYBACK,
-      USDT_BUYBACK,
-      USDC_BUYBACK,
-      U_BUYBACK,
-    );
-    await deployed.deployed();
-    const runtimeCode = await ethers.provider.getCode(deployed.address);
-    await ethers.provider.send("hardhat_setCode", [TREASURY_TOKEN_BUYBACK_DISTRIBUTOR, runtimeCode]);
+    // The TreasuryTokenBuybackDistributor is deployed on bscmainnet at the address the VIP
+    // references (0xfE7579C90423eEA3D0D4e29fbED6b8766e225f53, block 111066694 < FORK_BLOCK), so the
+    // simulation runs against the real deployed contract — no fork deploy / code injection needed.
     distributor = new ethers.Contract(TREASURY_TOKEN_BUYBACK_DISTRIBUTOR, DISTRIBUTOR_ARTIFACT.abi, ethers.provider);
 
     // Snapshot balances before the VIP.

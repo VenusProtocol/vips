@@ -14,14 +14,13 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // USDT 15% / USDC 15% / U 30%, U absorbing rounding dust). Because the split is computed
 // from `balanceOf(this)` at execution time, NO per-token amount is hardcoded in this VIP.
 //
-// NOTE: the contract is currently deployed on bsctestnet at
-// 0xfd45810d4c669e59510A096fc4cFA2233e5e20FD. It must be deployed to bscmainnet with the
-// six bscmainnet buyback addresses below as constructor args, and the placeholder constant
-// below replaced with the resulting mainnet address, before this VIP is proposed. The
-// simulation deploys the contract on the mainnet fork and injects its runtime code at this
-// address, so the fork proof is exact.
+// Deployed on bscmainnet at the address below (protocol-reserve deployment artifact
+// `deployments/bscmainnet/TreasuryTokenBuybackDistributor.json`, tx
+// 0x8f1aedf5962d342dee507319264064908add8995ddd10865c3240159745dacbb, block 111066694),
+// constructed with the six bscmainnet buyback addresses below. Verified on-chain: MAX_BPS,
+// the six *_BUYBACK immutables, and the weight bps (1500/1500/1000/1500/1500/3000) all match.
 // ─────────────────────────────────────────────────────────────────────────────
-export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0x1234567890123456789012345678901234567890"; // TODO: bscmainnet deploy address
+export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0xfE7579C90423eEA3D0D4e29fbED6b8766e225f53";
 
 // Treasury `TokenBuyback` contracts (Token Converter Phase-2). Each has DESTINATION == VTreasury
 // and BASE_ASSET == the corresponding pre-aligned asset (verified on-chain).
