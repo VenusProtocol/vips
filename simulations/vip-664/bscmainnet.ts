@@ -52,6 +52,7 @@ forking(FORK_BLOCK, async () => {
   const treasuryBefore: BigNumber[] = [];
   const buybackBefore: BigNumber[][] = [];
   const stableBuybackBefore: BigNumber[] = [];
+  let treasuryStableBefore: BigNumber;
 
   before(async () => {
     vTreasury = new ethers.Contract(bscmainnet.VTREASURY, VTREASURY_ABI, ethers.provider);
@@ -90,6 +91,7 @@ forking(FORK_BLOCK, async () => {
       VAI,
       VAI_PSM,
       STABLE_TOKEN,
+      bscmainnet.VTREASURY,
     );
     await deployed.deployed();
     const runtimeCode = await ethers.provider.getCode(deployed.address);
@@ -129,8 +131,10 @@ forking(FORK_BLOCK, async () => {
       }
       buybackBefore.push(perBuyback);
     }
-    // USDT (the VAI→USDT proceeds destination) is not one of the withdrawn tokens, so snapshot the
-    // buyback USDT balances separately to measure the deltas contributed by this VIP.
+    // USDT is not one of the withdrawn tokens. The VAI→USDT proceeds go back to VTreasury, so
+    // snapshot the treasury's USDT balance to measure the redemption delta; also snapshot each
+    // buyback's USDT so we can prove no USDT leaked to them.
+    treasuryStableBefore = await stableContract.balanceOf(bscmainnet.VTREASURY);
     for (const b of BUYBACKS) {
       stableBuybackBefore.push(await stableContract.balanceOf(b.address));
     }
@@ -245,32 +249,27 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("VAI should be redeemed for USDT at the PSM, and the USDT split across the six buybacks by weight", async () => {
+    it("VAI should be redeemed for USDT at the PSM, and the USDT returned to VTreasury (not the buybacks)", async () => {
       const vaiBefore = treasuryBefore[vaiIndex];
       expect(vaiBefore, "VAI treasury balance snapshot").to.be.gt(0);
 
-      // The USDT the buybacks received is entirely the VAI→USDT redemption proceeds (USDT is not a
-      // withdrawn token, and the distributor ends at zero USDT).
-      const usdtDeltas: BigNumber[] = [];
-      for (let b = 0; b < BUYBACKS.length; b++) {
-        usdtDeltas.push((await stableContract.balanceOf(BUYBACKS[b].address)).sub(stableBuybackBefore[b]));
-      }
-      const usdtDistributed = usdtDeltas.reduce((acc, d) => acc.add(d), BigNumber.from(0));
+      // The redeemed USDT went straight back to VTreasury. USDT is not a withdrawn token and the
+      // distributor ends at zero USDT, so the treasury's USDT delta is exactly the redemption
+      // proceeds.
+      const usdtToTreasury = (await stableContract.balanceOf(bscmainnet.VTREASURY)).sub(treasuryStableBefore);
 
       // The bulk of the VAI was redeemed at (near) peg minus the 0.10% PSM fee: proceeds should be
       // just under the VAI balance, and certainly not materially less (which would indicate the
       // conversion silently fell back to a thin-liquidity DEX path instead of the PSM).
-      expect(usdtDistributed, "USDT proceeds > 99.5% of VAI").to.be.gt(vaiBefore.mul(995).div(1_000));
-      expect(usdtDistributed, "USDT proceeds <= VAI redeemed").to.be.lte(vaiBefore);
+      expect(usdtToTreasury, "USDT proceeds > 99.5% of VAI").to.be.gt(vaiBefore.mul(995).div(1_000));
+      expect(usdtToTreasury, "USDT proceeds <= VAI redeemed").to.be.lte(vaiBefore);
 
-      // Same weighted split as every other token: five floor legs, remainder to U.
-      let weighted = BigNumber.from(0);
-      for (let b = 0; b < 5; b++) {
-        const expectedLeg = usdtDistributed.mul(BUYBACKS[b].weight).div(MAX_BPS);
-        expect(usdtDeltas[b], `${BUYBACKS[b].name} buyback USDT`).to.equal(expectedLeg);
-        weighted = weighted.add(expectedLeg);
+      // USDT is a base asset and is intentionally excluded from `distribute`, so no USDT should have
+      // reached any of the six buybacks.
+      for (let b = 0; b < BUYBACKS.length; b++) {
+        const usdtDelta = (await stableContract.balanceOf(BUYBACKS[b].address)).sub(stableBuybackBefore[b]);
+        expect(usdtDelta, `${BUYBACKS[b].name} buyback USDT delta`).to.equal(0);
       }
-      expect(usdtDeltas[5], "U buyback USDT").to.equal(usdtDistributed.sub(weighted));
 
       // The only VAI left anywhere after the VIP is the PSM's outgoing fee, which the PSM routes to
       // its `venusTreasury` (== VTreasury). It must be a small, positive amount bounded by the live
