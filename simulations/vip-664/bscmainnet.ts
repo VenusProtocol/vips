@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import RESILIENT_ORACLE_ABI from "../../src/vip-framework/abi/resilientOracle.json";
@@ -25,7 +25,7 @@ import ERC20_ABI from "./abi/erc20.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 111068000;
+const FORK_BLOCK = 111101000;
 
 const MAX_BPS = BigNumber.from(10_000);
 
@@ -61,41 +61,9 @@ forking(FORK_BLOCK, async () => {
     }
     stableContract = new ethers.Contract(STABLE_TOKEN, ERC20_ABI, ethers.provider);
 
-    // The real (re)deployed distributor will be a fresh address holding nothing. Our placeholder
-    // address happens to hold stray dust on mainnet (e.g. ~6.4k USDT), which would otherwise leak
-    // into the distribution. Sweep any stray balance of the tokens we touch so the fork starts from
-    // a clean, fresh-deploy state before we inject the contract code.
-    const placeholderSigner = await initMainnetUser(TREASURY_TOKEN_BUYBACK_DISTRIBUTOR, ethers.utils.parseEther("10"));
-    const DEAD = "0x000000000000000000000000000000000000dEaD";
-    for (const token of [...TOKENS, STABLE_TOKEN]) {
-      const erc20 = new ethers.Contract(token, ERC20_ABI, placeholderSigner);
-      const stray = await erc20.balanceOf(TREASURY_TOKEN_BUYBACK_DISTRIBUTOR);
-      if (stray.gt(0)) {
-        await erc20.transfer(DEAD, stray);
-      }
-    }
-
-    // The updated TreasuryTokenBuybackDistributor (VAI-PSM aware) is not yet (re)deployed on
-    // bscmainnet. Deploy it on the fork with the six bscmainnet buyback addresses plus the
-    // VAI / VAI-PSM / USDT wiring as constructor args, then inject its runtime code (immutables
-    // baked in) at the placeholder address the VIP references, so the proof is exact.
-    const [deployer] = await ethers.getSigners();
-    const factory = new ethers.ContractFactory(DISTRIBUTOR_ARTIFACT.abi, DISTRIBUTOR_ARTIFACT.bytecode, deployer);
-    const deployed = await factory.deploy(
-      BTCB_BUYBACK,
-      ETH_BUYBACK,
-      XVS_BUYBACK,
-      USDT_BUYBACK,
-      USDC_BUYBACK,
-      U_BUYBACK,
-      VAI,
-      VAI_PSM,
-      STABLE_TOKEN,
-      bscmainnet.VTREASURY,
-    );
-    await deployed.deployed();
-    const runtimeCode = await ethers.provider.getCode(deployed.address);
-    await ethers.provider.send("hardhat_setCode", [TREASURY_TOKEN_BUYBACK_DISTRIBUTOR, runtimeCode]);
+    // The updated, VAI-PSM aware TreasuryTokenBuybackDistributor is deployed on bscmainnet at the
+    // address the VIP references, so the fork simulation runs against the real deployed contract (no
+    // fork-side deploy or code injection). Its ten constructor immutables are re-asserted below.
     distributor = new ethers.Contract(TREASURY_TOKEN_BUYBACK_DISTRIBUTOR, DISTRIBUTOR_ARTIFACT.abi, ethers.provider);
 
     // The VAI PSM prices USDT through the ResilientOracle inside `swapVAIForStable`. Executing the

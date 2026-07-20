@@ -20,14 +20,12 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // USDT is already a base asset and needs no buyback conversion, so it is NOT in the `distribute`
 // list below.
 //
-// PENDING REDEPLOY: the contract's constructor changed (it now also takes VAI / VAI PSM / USDT),
-// so the previously-deployed bscmainnet distributor (0xfE7579C90423eEA3D0D4e29fbED6b8766e225f53)
-// is stale and must be redeployed. The address below is a placeholder that will be replaced with
-// the redeployed contract before the VIP is proposed. The fork simulation deploys the updated
-// contract on the fork and injects its runtime code (immutables baked in) at this address, so the
-// proof is exact; the six *_BUYBACK immutables and weights are re-asserted there.
+// Deployed on bscmainnet at the address below (VAI-PSM aware build). Its ten constructor immutables
+// — the six *_BUYBACK addresses, VAI, the VAI PSM, USDT and VTreasury — were verified on-chain to
+// match the constants in this file, and the fork simulation re-asserts them against the live
+// deployed contract before running the proposal.
 // ─────────────────────────────────────────────────────────────────────────────
-export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0x1234567890123456789012345678901234567890";
+export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0xc594053D4b2FaA311b55dDbFAb2338f7c90D6632";
 
 // VAI, its Peg Stability Module (PegStability_USDT) and the PSM stable token (USDT). Verified
 // on-chain (bscmainnet): the PSM's `VAI()` == VAI, `STABLE_TOKEN_ADDRESS()` == USDT, `venusTreasury()`
