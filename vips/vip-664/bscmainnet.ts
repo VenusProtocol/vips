@@ -14,13 +14,27 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // USDT 15% / USDC 15% / U 30%, U absorbing rounding dust). Because the split is computed
 // from `balanceOf(this)` at execution time, NO per-token amount is hardcoded in this VIP.
 //
-// Deployed on bscmainnet at the address below (protocol-reserve deployment artifact
-// `deployments/bscmainnet/TreasuryTokenBuybackDistributor.json`, tx
-// 0x8f1aedf5962d342dee507319264064908add8995ddd10865c3240159745dacbb, block 111066694),
-// constructed with the six bscmainnet buyback addresses below. Verified on-chain: MAX_BPS,
-// the six *_BUYBACK immutables, and the weight bps (1500/1500/1000/1500/1500/3000) all match.
+// VAI is handled specially: `convertVaiViaPsm()` first redeems the distributor's VAI for USDT
+// at the VAI Peg Stability Module (peg price, 0.10% fee, no slippage) instead of DEX-swapping
+// it out of the thin VAI market via the buybacks; the resulting USDT is then split across the
+// same six buybacks by the same weights (USDT is appended to the `distribute` list below).
+//
+// PENDING REDEPLOY: the contract's constructor changed (it now also takes VAI / VAI PSM / USDT),
+// so the previously-deployed bscmainnet distributor (0xfE7579C90423eEA3D0D4e29fbED6b8766e225f53)
+// is stale and must be redeployed. The address below is a placeholder that will be replaced with
+// the redeployed contract before the VIP is proposed. The fork simulation deploys the updated
+// contract on the fork and injects its runtime code (immutables baked in) at this address, so the
+// proof is exact; the six *_BUYBACK immutables and weights are re-asserted there.
 // ─────────────────────────────────────────────────────────────────────────────
-export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0xfE7579C90423eEA3D0D4e29fbED6b8766e225f53";
+export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0x1234567890123456789012345678901234567890";
+
+// VAI, its Peg Stability Module (PegStability_USDT) and the PSM stable token (USDT). Verified
+// on-chain (bscmainnet): the PSM's `VAI()` == VAI, `STABLE_TOKEN_ADDRESS()` == USDT, it is not
+// paused, feeOut == 10 bps, and it holds enough USDT reserves / minted headroom to redeem the
+// treasury's VAI. `convertVaiViaPsm` reads the live fee and oracle price, so nothing is hardcoded.
+export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
+export const VAI_PSM = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
+export const STABLE_TOKEN = "0x55d398326f99059fF775485246999027B3197955"; // USDT
 
 // Treasury `TokenBuyback` contracts (Token Converter Phase-2). Each has DESTINATION == VTreasury
 // and BASE_ASSET == the corresponding pre-aligned asset (verified on-chain).
@@ -83,12 +97,13 @@ The distribution weights are **BTCB 15% · ETH 15% · XVS 10% · USDT 15% · USD
 
 Per the requester's requirement, **no withdrawal amount is hardcoded**. Instead a dedicated one-shot helper, \`TreasuryTokenBuybackDistributor\`, reads its own live balance of each token at execution time and computes each split, so the ratios stay correct even if balances change between authoring and execution.
 
-The proposal executes as the Normal Timelock (owner of \`VTreasury\`) in two stages:
+The proposal executes as the Normal Timelock (owner of \`VTreasury\`) in three stages:
 
 1. **Withdraw** the full live balance of each of the 33 tokens from \`VTreasury\` into the distributor with \`withdrawTreasuryBEP20(token, type(uint256).max, distributor)\`. \`VTreasury\` caps the amount to the actual balance, so \`type(uint256).max\` is a "whatever the balance is" sentinel rather than a hardcoded number.
-2. **Distribute** by calling \`distribute(tokens)\` on the helper, which splits each token's balance across the six buyback contracts by the fixed weights above. The helper holds no privilege over the treasury and can only forward tokens explicitly transferred to it to the fixed, verified buyback destinations.
+2. **Convert VAI via the PSM.** \`convertVaiViaPsm()\` redeems the distributor's VAI for USDT at the VAI Peg Stability Module at the pegged rate (minus the PSM's 0.10% fee, zero slippage) instead of DEX-swapping VAI out of its thin market. The PSM's 0.10% outgoing fee (≈0.10% of the treasury's VAI) is paid in VAI and routed by the PSM back to its \`venusTreasury\`, which is \`VTreasury\` — i.e. that small fee stays with the protocol as PSM revenue. This stage is best-effort: if the PSM is paused or short of liquidity, the VAI simply falls through to plain distribution in stage 3. The redeemed size is derived from the live VAI balance, the live PSM fee, and the live oracle price — nothing is hardcoded.
+3. **Distribute** by calling \`distribute(tokens)\` on the helper, which splits each token's balance across the six buyback contracts by the fixed weights above. USDT is appended to the list so the VAI→USDT proceeds from stage 2 keep the same per-buyback allocation, reaching the base assets through USDT's deep liquidity (the USDT-buyback leg needs no swap). The helper holds no privilege over the treasury and can only forward tokens explicitly transferred to it to the fixed, verified buyback destinations.
 
-Every buyback destination has been verified on-chain to have \`DESTINATION() == VTreasury\` and the expected \`BASE_ASSET()\`.
+Every buyback destination has been verified on-chain to have \`DESTINATION() == VTreasury\` and the expected \`BASE_ASSET()\`. The VAI PSM has been verified on-chain to reference this VAI and USDT, to be active, and to hold sufficient USDT reserves to redeem the treasury's VAI.
 
 #### Voting options
 
@@ -113,12 +128,25 @@ Every buyback destination has been verified on-chain to have \`DESTINATION() == 
       })),
 
       // ════════════════════════════════════════════════════════════════════════
-      // Stage 2: Split every token's balance across the six buybacks by weight.
+      // Stage 2: Redeem the withdrawn VAI for USDT at the VAI Peg Stability Module
+      // (peg price, 0.10% fee, no slippage) so VAI reaches the base assets through USDT's
+      // deep liquidity. Best-effort: if the PSM is unavailable the VAI simply falls through
+      // to plain distribution in stage 3. The received USDT stays on the distributor.
+      // ════════════════════════════════════════════════════════════════════════
+      {
+        target: TREASURY_TOKEN_BUYBACK_DISTRIBUTOR,
+        signature: "convertVaiViaPsm()",
+        params: [],
+      },
+
+      // ════════════════════════════════════════════════════════════════════════
+      // Stage 3: Split every token's balance across the six buybacks by weight. USDT is
+      // appended so the VAI→USDT proceeds from stage 2 are split by the same weights.
       // ════════════════════════════════════════════════════════════════════════
       {
         target: TREASURY_TOKEN_BUYBACK_DISTRIBUTOR,
         signature: "distribute(address[])",
-        params: [TOKENS],
+        params: [[...TOKENS, STABLE_TOKEN]],
       },
     ],
     meta,
