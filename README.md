@@ -6,7 +6,8 @@
 
 - Solc - v0.8.13 (https://github.com/ethereum/solidity/releases/tag/v0.8.13)
 
-- anvil-zksync - v0.3.0 (https://github.com/matter-labs/anvil-zksync)
+- anvil-zksync - v0.6.11 or newer (https://github.com/matter-labs/anvil-zksync) — zksync Era mainnet
+  blocks use protocol version 29, which older releases (≤0.6.10) refuse to fork
 
 ### Installing
 
@@ -31,7 +32,7 @@ ZKSync simulations require a local `anvil-zksync` node to be installed. Skip if 
 Set the `chainId` in [hardhat.config.zksync.ts:175](hardhat.config.zksync.ts#L175) to match the target network (`300` for zksyncsepolia, `324` for zksyncmainnet), then run the node and simulation in separate terminals:
 
 ```bash
-# Start local forked node
+# Start local forked node (use the fork block noted in the simulation file)
 yarn local-anvil-node:zksyncsepolia --fork-block-number <block-number>
 yarn local-anvil-node:zksyncmainnet --fork-block-number <block-number>
 
@@ -39,6 +40,13 @@ yarn local-anvil-node:zksyncmainnet --fork-block-number <block-number>
 npx hardhat test simulations/<vip-path>/zksyncsepolia.ts --network zksynctestnode --fork zksyncsepolia --config hardhat.config.zksync.ts
 npx hardhat test simulations/<vip-path>/zksyncmainnet.ts --network zksynctestnode --fork zksyncmainnet --config hardhat.config.zksync.ts
 ```
+
+Notes:
+
+- The local node is **stateful**: restart a fresh fork before every simulation run — state left by a
+  previous run (e.g. aggregator batches, queued proposals) contaminates the next one.
+- The `zksynctestnode` network signs with `DEPLOYER_PRIVATE_KEY` if set, and otherwise falls back to the
+  public hardhat test key (safe here: the node is local and the framework funds the signer itself).
 
 ### Run Simulations for Multisig
 
