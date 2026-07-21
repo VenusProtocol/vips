@@ -6,7 +6,7 @@ import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import RESILIENT_ORACLE_ABI from "../../src/vip-framework/abi/resilientOracle.json";
-import vip664, {
+import vip646, {
   BTCB_BUYBACK,
   ETH_BUYBACK,
   STABLE_TOKEN,
@@ -18,7 +18,7 @@ import vip664, {
   VAI,
   VAI_PSM,
   XVS_BUYBACK,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-646/bscmainnet";
 import DISTRIBUTOR_ARTIFACT from "./abi/TreasuryTokenBuybackDistributorArtifact.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -147,7 +147,7 @@ forking(FORK_BLOCK, async () => {
   // proposal threshold is 0x3422… (~1.13M votes), but on its own it falls short of the 1.5M XVS
   // quorum, so add supporters (0x5176… ~0.47M plus the two default supporters) to clear quorum with
   // headroom.
-  testVip("VIP-664 Venus Treasury Cleanup", await vip664(), {
+  testVip("VIP-646 Venus Treasury Cleanup", await vip646(), {
     proposer: "0x34221485302f6F2029660a000908B5FCABB9BC6e",
     supporters: [
       "0x5176671de05380379399b669ed276feec99d59cb",

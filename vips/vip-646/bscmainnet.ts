@@ -83,27 +83,74 @@ export const TOKENS = [
   "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34", // USDe
 ];
 
-export const vip664 = () => {
+export const vip646 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain] Venus Treasury Cleanup — route legacy tokens to buyback contracts",
+    title: "VIP-646 [BNB Chain] Venus Treasury Cleanup — Token Transfers to Buyback Contracts",
     description: `#### Summary
 
-This VIP cleans up the Venus Treasury on BNB Chain by moving 33 miscellaneous / legacy tokens into the six Treasury \`TokenBuyback\` contracts introduced by the Token Converter Phase-2 migration, so the finance-team cron can later swap them at market rate into the pre-aligned base assets.
+As a follow-up action from the previously introduced [token converter design](https://community.venus.io/t/token-converter-phase-2-tokenbuyback-migration/5778), this VIP cleans up the Venus Treasury on BNB Chain by transferring 33 miscellaneous / legacy tokens into the six Treasury TokenBuyback contracts, where they will be bought back into the pre-aligned base assets by percentage.
 
-The distribution weights are **BTCB 15% · ETH 15% · XVS 10% · USDT 15% · USDC 15% · U 30%** (the U buyback also receives any integer-division dust).
+Snapshot 2026-07-15: 33 tokens, total ~$983,651.71.
 
-#### Description
+#### Buyback weights
 
-Per the requester's requirement, **no withdrawal amount is hardcoded**. Instead a dedicated one-shot helper, \`TreasuryTokenBuybackDistributor\`, reads its own live balance of each token at execution time and computes each split, so the ratios stay correct even if balances change between authoring and execution.
+- BTCB buyback: 15%
+- ETH buyback: 15%
+- XVS buyback: 10%
+- USDT buyback: 15%
+- USDC buyback: 15%
+- U buyback: 30%
 
-The proposal executes as the Normal Timelock (owner of \`VTreasury\`) in three stages:
+Each token's live balance is split across the six buyback contracts by these fixed weights (the U buyback also receives any integer-division rounding dust).
 
-1. **Withdraw** the full live balance of each of the 33 tokens from \`VTreasury\` into the distributor with \`withdrawTreasuryBEP20(token, type(uint256).max, distributor)\`. \`VTreasury\` caps the amount to the actual balance, so \`type(uint256).max\` is a "whatever the balance is" sentinel rather than a hardcoded number.
-2. **Convert VAI via the PSM.** \`convertVaiViaPsm()\` redeems the distributor's VAI for USDT at the VAI Peg Stability Module at the pegged rate (minus the PSM's 0.10% fee, zero slippage) instead of DEX-swapping VAI out of its thin market, and sends the resulting USDT straight back to \`VTreasury\`. USDT is already a base asset, so it needs no buyback conversion — the redemption simply turns the treasury's illiquid VAI into treasury-held USDT at the peg. The PSM's 0.10% outgoing fee (≈0.10% of the treasury's VAI) is paid in VAI and routed by the PSM back to its \`venusTreasury\`, which is \`VTreasury\` — i.e. that small fee also stays with the protocol as PSM revenue. This stage is best-effort: if the PSM is paused or short of liquidity, the VAI simply falls through to plain distribution in stage 3. The redeemed size is derived from the live VAI balance, the live PSM fee, and the live oracle price — nothing is hardcoded.
-3. **Distribute** by calling \`distribute(tokens)\` on the helper, which splits each token's balance across the six buyback contracts by the fixed weights above. USDT is intentionally NOT in the list: the VAI→USDT proceeds from stage 2 already went back to \`VTreasury\`, and any VAI that failed to redeem in stage 2 (PSM unavailable) falls through here and is distributed as a plain ERC20. The helper holds no privilege over the treasury and can only forward tokens explicitly transferred to it to the fixed, verified buyback destinations.
+#### Tokens
 
-Every buyback destination has been verified on-chain to have \`DESTINATION() == VTreasury\` and the expected \`BASE_ASSET()\`. The VAI PSM has been verified on-chain to reference this VAI and USDT, to be active, and to hold sufficient USDT reserves to redeem the treasury's VAI.
+- NFT: 0x20eE7B720f4E4c4FFcB00C4065cdae55271aECCa
+- BabyDoge: 0xc748673057861a797275CD8A068AbB95A902e8de
+- RACA: 0x12BB890508c125661E03b09EC06E404bc9289040
+- WIN: 0xaeF0d72a118ce24feE3cD1d43d383897D05B4e99
+- VAI: 0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7
+- FDUSD: 0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409
+- TUSD: 0x14016E85a25aeb13065688cAFB43044C2ef86784
+- DOGE: 0xbA2aE424d960c26247Dd6c32edC70B295c744C43
+- FLOKI: 0xfb5B838b6cfEEdC2873aB27866079AC55363D37E
+- LTC: 0x4338665CBB7B2485A8855A139b75D5e34AB0DB94
+- TRX: 0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B
+- USDF: 0x5A110fC00474038f6c02E89C707D638602EA44B5
+- LINK: 0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD
+- TRX (legacy): 0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3
+- DOT: 0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402
+- USD1: 0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d
+- TWT: 0x4B0F1812e5Df2A09796481Ff14017e6005508003
+- TUSD (legacy): 0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9
+- BERA: 0xC45873F0042902Aa4116a3264df0163dd1888c67
+- FIL: 0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153
+- BUSD: 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56
+- MATIC: 0xCC42724C6683B7E57334c4E856f4c9965ED682bD
+- BCH: 0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf
+- lisUSD: 0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5
+- TIA: 0xD369F1Af3f6D194800ebB76Ed70a23055927fB49
+- NTRN: 0xAb980940732b4f5f3c04A3A0fF9800cF6DD72FeC
+- USDD: 0xd17479997F34dd9156Deef8F95A52D81D265be9c
+- BTT: 0x352Cb5E19b12FC216548a2677bD0fce83BaE434B
+- Cake: 0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82
+- DAI: 0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3
+- SXP: 0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A
+- THE: 0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11
+- USDe: 0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34
+
+#### Execution
+
+**No withdrawal amount is hardcoded.** A dedicated one-shot helper, TreasuryTokenBuybackDistributor (0xc594053D4b2FaA311b55dDbFAb2338f7c90D6632), reads its own live balance of each token at execution time and computes each split, so the ratios stay correct even if balances change between authoring and execution.
+
+The proposal executes as the Normal Timelock (owner of VTreasury) in three stages:
+
+- **Withdraw** the full live balance of each of the 33 tokens from VTreasury into the distributor with withdrawTreasuryBEP20(token, type(uint256).max, distributor). VTreasury caps the amount to the actual balance, so type(uint256).max is a "whatever the balance is" sentinel rather than a hardcoded number.
+- **Convert VAI via the PSM.** convertVaiViaPsm() redeems the distributor's VAI for USDT at the VAI Peg Stability Module at the pegged rate (minus the PSM's 0.10% fee, zero slippage) instead of DEX-swapping VAI out of its thin market, and sends the resulting USDT straight back to VTreasury — USDT is already a base asset and needs no buyback conversion. The 0.10% fee is paid in VAI and routed by the PSM back to its venusTreasury, which is VTreasury, so it also stays with the protocol as PSM revenue. This stage is best-effort: if the PSM is paused or short of liquidity, the VAI simply falls through to plain distribution in the next stage.
+- **Distribute** by calling distribute(tokens) on the helper, which splits each token's balance across the six buyback contracts by the fixed weights above. USDT is intentionally NOT in the list: the VAI-to-USDT proceeds from the previous stage already went back to VTreasury; only VAI that failed to redeem (PSM unavailable) falls through here as a plain ERC20. The helper holds no privilege over the treasury and can only forward tokens explicitly transferred to it to the fixed, verified buyback destinations.
+
+Every buyback destination has been verified on-chain to have DESTINATION() == VTreasury and the expected BASE_ASSET(). The VAI PSM has been verified on-chain to reference this VAI and USDT, to be active, and to hold sufficient USDT reserves to redeem the treasury's VAI.
 
 #### Voting options
 
@@ -155,4 +202,4 @@ Every buyback destination has been verified on-chain to have \`DESTINATION() == 
   );
 };
 
-export default vip664;
+export default vip646;
