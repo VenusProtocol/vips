@@ -50,6 +50,7 @@ export const NETWORK_ADDRESSES = {
     BINANCE_ORACLE: oracleBscmainnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBscmainnetContracts.addresses.ResilientOracle,
     REDSTONE_ORACLE: oracleBscmainnetContracts.addresses.RedStoneOracle,
+    ATLAS_ORACLE: "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0",
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
@@ -76,6 +77,7 @@ export const NETWORK_ADDRESSES = {
     BINANCE_ORACLE: oracleBsctestnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBsctestnetContracts.addresses.ResilientOracle,
     REDSTONE_ORACLE: oracleBsctestnetContracts.addresses.RedStoneOracle,
+    ATLAS_ORACLE: "0x7F00af2f30a55e79311392C98fBBfA629D19b3A5",
   },
   ethereum: {
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",

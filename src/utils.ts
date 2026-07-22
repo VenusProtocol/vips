@@ -478,6 +478,8 @@ export const setMaxStalePeriod = async (
     binance: tryGetForkedNetworkAddress("BINANCE_ORACLE"),
     chainlink: tryGetForkedNetworkAddress("CHAINLINK_ORACLE"),
     redstone: tryGetForkedNetworkAddress("REDSTONE_ORACLE"),
+    // same interface as the Chainlink oracle, different address
+    atlas: tryGetForkedNetworkAddress("ATLAS_ORACLE"),
   };
 
   const adminKey = NORMAL_TIMELOCK_NETWORKS.includes(FORKED_NETWORK ?? "") ? "NORMAL_TIMELOCK" : "GUARDIAN";
@@ -495,7 +497,7 @@ export const setMaxStalePeriod = async (
       const symbol =
         underlyingAsset.address.toLowerCase() === ORACLE_BNB.toLowerCase() ? "BNB" : await underlyingAsset.symbol();
       await setMaxStalePeriodInBinanceOracle(oracle, symbol, maxStalePeriodInSeconds);
-    } else if (oracle === knownOracles.chainlink || oracle === knownOracles.redstone) {
+    } else if (oracle === knownOracles.chainlink || oracle === knownOracles.redstone || oracle === knownOracles.atlas) {
       await setMaxStalePeriodInChainlinkOracle(
         oracle,
         underlyingAsset.address,
