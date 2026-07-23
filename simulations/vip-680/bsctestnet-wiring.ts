@@ -21,7 +21,7 @@ import {
   PERCENTAGE_CAP_DISABLED,
   USDT,
   VUSDT_CORE,
-} from "../../vips/vip-680/addresses";
+} from "../../vips/vip-680/addresses/bsctestnet";
 import vip680 from "../../vips/vip-680/bsctestnet";
 import vip680Wiring from "../../vips/vip-680/bsctestnet-wiring";
 import HUB_ABI from "./abi/Hub.json";

@@ -12,7 +12,7 @@ import {
   FRV_SOURCE_USDT,
   HUB_REGISTRY,
   HUB_USDT,
-} from "../../vips/vip-680/addresses";
+} from "../../vips/vip-680/addresses/bsctestnet";
 import vip680Critical from "../../vips/vip-680/bsctestnet-critical";
 import {
   CORE_FLUX_GOVERNANCE,

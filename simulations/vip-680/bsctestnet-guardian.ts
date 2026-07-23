@@ -12,7 +12,7 @@ import {
   GUARDIAN,
   HUB_REGISTRY,
   HUB_USDT,
-} from "../../vips/vip-680/addresses";
+} from "../../vips/vip-680/addresses/bsctestnet";
 import vip680Guardian from "../../vips/vip-680/bsctestnet-guardian";
 import {
   CORE_FLUX_GOVERNANCE,

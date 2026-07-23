@@ -1,5 +1,3 @@
-import { ACM } from "./addresses";
-
 // ===================================================================================================
 // VIP-680 — Liquidity Hub (USDT) ACM role-string sets.
 //
@@ -109,11 +107,12 @@ export const FRV_OPERATOR = [
 export const HUB_REGISTRY_GOVERNANCE = ["addHub(address)", "removeHub(address)"];
 
 // ---------------------------------------------------------------------------------------------------
-// Command builder: ACM.giveCallPermission(contract, roleString, account). ACM is the single ACM the
-// Hub stack checks against (see addresses.ts).
+// Command builder: ACM.giveCallPermission(contract, roleString, account). `acm` is passed in by the
+// caller so this module stays network-agnostic — each network's VIP supplies its own ACM from its
+// address book (see addresses/<network>.ts).
 // ---------------------------------------------------------------------------------------------------
-export const giveCallPermission = (contract: string, sig: string, account: string) => ({
-  target: ACM,
+export const giveCallPermission = (acm: string, contract: string, sig: string, account: string) => ({
+  target: acm,
   signature: "giveCallPermission(address,string,address)",
   params: [contract, sig, account],
 });

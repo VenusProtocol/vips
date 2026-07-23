@@ -1,7 +1,15 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { CORE_SOURCE_USDT, FLUX_SOURCE_USDT, FRV_SOURCE_USDT, GUARDIAN, HUB_REGISTRY, HUB_USDT } from "./addresses";
+import {
+  ACM,
+  CORE_SOURCE_USDT,
+  FLUX_SOURCE_USDT,
+  FRV_SOURCE_USDT,
+  GUARDIAN,
+  HUB_REGISTRY,
+  HUB_USDT,
+} from "./addresses/bsctestnet";
 import {
   CORE_FLUX_GOVERNANCE,
   FRV_GOVERNANCE,
@@ -67,15 +75,15 @@ Grant to the **Guardian** multisig:
   return makeProposal(
     [
       // 1. Hub_USDT — every gated function (Governance ∪ reallocate) -> Guardian.
-      ...HUB_FULL.map(sig => giveCallPermission(HUB_USDT, sig, GUARDIAN)),
+      ...HUB_FULL.map(sig => giveCallPermission(ACM, HUB_USDT, sig, GUARDIAN)),
 
       // 2. Core / FRV / Flux sources — full Governance set -> Guardian.
-      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(CORE_SOURCE_USDT, sig, GUARDIAN)),
-      ...FRV_GOVERNANCE.map(sig => giveCallPermission(FRV_SOURCE_USDT, sig, GUARDIAN)),
-      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(FLUX_SOURCE_USDT, sig, GUARDIAN)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(ACM, CORE_SOURCE_USDT, sig, GUARDIAN)),
+      ...FRV_GOVERNANCE.map(sig => giveCallPermission(ACM, FRV_SOURCE_USDT, sig, GUARDIAN)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(ACM, FLUX_SOURCE_USDT, sig, GUARDIAN)),
 
       // 3. HubRegistry — addHub / removeHub -> Guardian.
-      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(HUB_REGISTRY, sig, GUARDIAN)),
+      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(ACM, HUB_REGISTRY, sig, GUARDIAN)),
     ],
     meta,
     ProposalType.REGULAR,

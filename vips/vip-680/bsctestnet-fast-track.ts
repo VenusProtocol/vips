@@ -2,13 +2,14 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import {
+  ACM,
   CORE_SOURCE_USDT,
   FAST_TRACK_TIMELOCK,
   FLUX_SOURCE_USDT,
   FRV_SOURCE_USDT,
   HUB_REGISTRY,
   HUB_USDT,
-} from "./addresses";
+} from "./addresses/bsctestnet";
 import {
   CORE_FLUX_GOVERNANCE,
   FRV_GOVERNANCE,
@@ -60,11 +61,11 @@ Grant the full Governance role set (registry, caps, queues, pause/unpause, fees,
 
   return makeProposal(
     [
-      ...HUB_GOVERNANCE.map(sig => giveCallPermission(HUB_USDT, sig, FAST_TRACK_TIMELOCK)),
-      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(CORE_SOURCE_USDT, sig, FAST_TRACK_TIMELOCK)),
-      ...FRV_GOVERNANCE.map(sig => giveCallPermission(FRV_SOURCE_USDT, sig, FAST_TRACK_TIMELOCK)),
-      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(FLUX_SOURCE_USDT, sig, FAST_TRACK_TIMELOCK)),
-      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(HUB_REGISTRY, sig, FAST_TRACK_TIMELOCK)),
+      ...HUB_GOVERNANCE.map(sig => giveCallPermission(ACM, HUB_USDT, sig, FAST_TRACK_TIMELOCK)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(ACM, CORE_SOURCE_USDT, sig, FAST_TRACK_TIMELOCK)),
+      ...FRV_GOVERNANCE.map(sig => giveCallPermission(ACM, FRV_SOURCE_USDT, sig, FAST_TRACK_TIMELOCK)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(ACM, FLUX_SOURCE_USDT, sig, FAST_TRACK_TIMELOCK)),
+      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(ACM, HUB_REGISTRY, sig, FAST_TRACK_TIMELOCK)),
     ],
     meta,
     ProposalType.REGULAR,

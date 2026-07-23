@@ -1,7 +1,7 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { HUB_REGISTRY, HUB_REGISTRY_IMPL, HUB_REGISTRY_PROXY_ADMIN } from "./addresses";
+import { HUB_REGISTRY, HUB_REGISTRY_IMPL, HUB_REGISTRY_PROXY_ADMIN } from "./addresses/bsctestnet";
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-680 [BNB Chain Testnet] — HubRegistry implementation upgrade (adds `assetForHub`).

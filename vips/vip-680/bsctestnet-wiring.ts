@@ -15,7 +15,7 @@ import {
   HUB_USDT,
   PERCENTAGE_CAP_DISABLED,
   VUSDT_CORE,
-} from "./addresses";
+} from "./addresses/bsctestnet";
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-680 (wiring) — BNB Chain Testnet.

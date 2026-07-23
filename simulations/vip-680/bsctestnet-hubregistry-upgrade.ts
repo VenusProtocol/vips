@@ -4,8 +4,8 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { HUB_REGISTRY, HUB_REGISTRY_IMPL, HUB_REGISTRY_PROXY_ADMIN } from "../../vips/vip-680/addresses";
-import vip680HubRegistryUpgrade from "../../vips/vip-680/bsctestnetHubregistryUpgrade";
+import { HUB_REGISTRY, HUB_REGISTRY_IMPL, HUB_REGISTRY_PROXY_ADMIN } from "../../vips/vip-680/addresses/bsctestnet";
+import vip680HubRegistryUpgrade from "../../vips/vip-680/bsctestnet-hubregistry-upgrade";
 import HUB_REGISTRY_ABI from "./abi/HubRegistry.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 

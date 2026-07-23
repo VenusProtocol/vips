@@ -15,7 +15,7 @@ import {
   HUB_REGISTRY,
   HUB_USDT,
   NORMAL_TIMELOCK,
-} from "../../vips/vip-680/addresses";
+} from "../../vips/vip-680/addresses/bsctestnet";
 import vip680 from "../../vips/vip-680/bsctestnet";
 import {
   CORE_FLUX_GOVERNANCE,

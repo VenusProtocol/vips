@@ -2,13 +2,14 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import {
+  ACM,
   CORE_SOURCE_USDT,
   FLUX_SOURCE_USDT,
   FRV_SOURCE_USDT,
   HUB_REGISTRY,
   HUB_USDT,
   NORMAL_TIMELOCK,
-} from "./addresses";
+} from "./addresses/bsctestnet";
 import {
   CORE_FLUX_GOVERNANCE,
   FRV_GOVERNANCE,
@@ -78,11 +79,11 @@ wiring proposal.
   return makeProposal(
     [
       // 1. Governance role set -> Normal Timelock, across the whole stack.
-      ...HUB_GOVERNANCE.map(sig => giveCallPermission(HUB_USDT, sig, NORMAL_TIMELOCK)),
-      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(CORE_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
-      ...FRV_GOVERNANCE.map(sig => giveCallPermission(FRV_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
-      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(FLUX_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
-      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(HUB_REGISTRY, sig, NORMAL_TIMELOCK)),
+      ...HUB_GOVERNANCE.map(sig => giveCallPermission(ACM, HUB_USDT, sig, NORMAL_TIMELOCK)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(ACM, CORE_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      ...FRV_GOVERNANCE.map(sig => giveCallPermission(ACM, FRV_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      ...CORE_FLUX_GOVERNANCE.map(sig => giveCallPermission(ACM, FLUX_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
+      ...HUB_REGISTRY_GOVERNANCE.map(sig => giveCallPermission(ACM, HUB_REGISTRY, sig, NORMAL_TIMELOCK)),
 
       // 2. Accept pending ownership (Ownable2Step) — registry first, then the Hub.
       { target: HUB_REGISTRY, signature: "acceptOwnership()", params: [] },
