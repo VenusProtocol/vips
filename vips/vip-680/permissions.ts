@@ -102,6 +102,56 @@ export const FRV_OPERATOR = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
+// Fast-Track sets (mainnet). A middle tier between Governance and Operator: every risk/ops lever, in
+// BOTH directions (raise and lower, pause and unpause), but nothing that changes the shape of the
+// stack. Withheld from the fast lane and reserved to the Normal Timelock: add/remove YieldGroup,
+// add/remove/forceRemove Resource, updateResourceAdapter, the four fee setters, sweep,
+// setBlocksPerYear, and the registry entirely.
+//
+// `updateResourceAdapter` repoints a resource's delegatecall target and is the highest-risk function
+// in the stack — it stays governance-only. This mirrors the mainnet convention in VIP-627, which kept
+// setOracle / setComptroller / setLiquidationAdapter off the fast lane while granting it the risk
+// parameters, and VIP-258, which gave the fast lanes both the pause AND the resume side of each
+// reversible lever.
+// ---------------------------------------------------------------------------------------------------
+
+// `emergencyReallocate` is the only fund-mover here. It is included because it is the sole route that
+// still works while the Hub is paused (the Operator's `reallocate` reverts once paused), so without it
+// recovering a paused Hub needs a full 48h Normal proposal. It is net-zero and confined to registered
+// routes, so it cannot move value out of the Hub.
+export const HUB_FAST_TRACK = [
+  "raiseYieldGroupCap(address,uint256,uint16)",
+  "lowerYieldGroupCap(address,uint256,uint16)",
+  "raiseMaxWithdrawalSize(uint256)",
+  "lowerMaxWithdrawalSize(uint256)",
+  "setOuterDepositQueue(address[])",
+  "setOuterWithdrawQueue(address[])",
+  "pauseHub()",
+  "unpauseHub()",
+  "pauseYieldGroup(address)",
+  "unpauseYieldGroup(address)",
+  "emergencyReallocate((address,address,uint256)[],(address,address,uint256)[])",
+];
+
+// Core & Flux: the per-resource cap in both directions, inner queues, and resource pause/unpause.
+export const CORE_FLUX_FAST_TRACK = [
+  "raiseResourceCap(address,uint256)",
+  "lowerResourceCap(address,uint256)",
+  "setInnerDepositQueue(address[])",
+  "setInnerWithdrawQueue(address[])",
+  "pauseResource(address)",
+  "unpauseResource(address)",
+];
+
+// FRV has no per-resource cap, so its fast-track set is the queue + pause subset only.
+export const FRV_FAST_TRACK = [
+  "setInnerDepositQueue(address[])",
+  "setInnerWithdrawQueue(address[])",
+  "pauseResource(address)",
+  "unpauseResource(address)",
+];
+
+// ---------------------------------------------------------------------------------------------------
 // HubRegistry — the only two gated functions.
 // ---------------------------------------------------------------------------------------------------
 export const HUB_REGISTRY_GOVERNANCE = ["addHub(address)", "removeHub(address)"];
@@ -117,7 +167,10 @@ export const giveCallPermission = (acm: string, contract: string, sig: string, a
   params: [contract, sig, account],
 });
 
-// NOTE for a future mainnet VIP: the mainnet Guardian must receive ONLY the Operator sets
-// (HUB_OPERATOR on the Hub, CORE_FLUX_OPERATOR on Core/Flux, FRV_OPERATOR on FRV — no registry, no
-// Governance). HUB_FULL / the full-Governance Guardian grant in bsctestnet-guardian.ts is a
-// testnet-only deviation and must not be mirrored to mainnet.
+// NOTE on the testnet/mainnet split. bsctestnet-guardian.ts grants the Guardian HUB_FULL plus the
+// full Governance set on every source — a testnet-only deviation, made to speed up iteration, that is
+// deliberately NOT mirrored to mainnet. bscmainnet.ts applies the asymmetric model instead: the
+// Normal Timelock holds the Governance sets, the Fast-Track timelock holds the *_FAST_TRACK sets, and
+// the Operator holds only HUB_OPERATOR / CORE_FLUX_OPERATOR / FRV_OPERATOR (no registry, no
+// Governance). Likewise the *_FAST_TRACK sets above are mainnet-only — on testnet the fast lanes hold
+// the full Governance set for parity with the Normal Timelock.
