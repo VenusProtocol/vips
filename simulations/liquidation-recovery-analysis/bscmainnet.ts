@@ -3,12 +3,11 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { initMainnetUser } from "src/utils";
 import { forking } from "src/vip-framework";
 
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
-import CHAINLINK_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import LIQUIDATOR_ABI from "./abi/liquidatorAbi.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -35,10 +34,7 @@ const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
-// Oracle plumbing for BTCB inside the ResilientOracle (main / pivot / fallback).
-const CHAINLINK_ORACLE = "0x1b2103441a0a108dad8848d8f5d790e4d402921f"; // main oracle for BTCB
-
-// Owner of the oracle contracts / ACM-authorised caller for setDirectPrice.
+// Normal Timelock — authorised (via VIP-172) to toggle forced liquidations on the Core pool.
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 // Binance hot wallet — holds plenty of both BTCB and USDT on this block.
@@ -50,19 +46,22 @@ const LIQUIDATOR_EOA = "0x000000000000000000000000000000000000abC1";
 
 // --- Analysis knobs (documented in README.md) -------------------------------
 const SUPPLY_BTCB = parseUnits("2", 18); // collateral the borrower supplies
-const BORROW_FRACTION_BPS = 9000; // borrow 90% of the CF-adjusted limit (leaves a buffer)
-const PRICE_DROP_BPS = 1800; // crash BTCB 18% to push the account into shortfall
-const MAX_LIQUIDATIONS = 12; // safety bound on the recovery loop
+const BORROW_FRACTION_BPS = 9000; // borrow 90% of the CF-adjusted limit (position stays healthy)
+const MAX_LIQUIDATIONS = 4; // safety bound on the recovery loop (forced liq clears in 1 step)
 
 const MANTISSA_ONE = parseUnits("1", 18);
 const usd = (v: BigNumber): number => Number(formatUnits(v, 18));
 
+// This is a standalone risk-analysis fork simulation, NOT a VIP. It reproduces the
+// forced-liquidation recovery mechanism used by VIP-172 / 186 / 191: a healthy but
+// stuck (over-collateralised) position is unwound by governance-enabled forced
+// liquidation — WITHOUT ever creating a shortfall / manipulating the oracle — and the
+// liquidation-incentive leakage is measured and reconciled against the on-chain formula.
 forking(FORK_BLOCK, async () => {
   const provider = ethers.provider;
 
   let comptroller: Contract;
   let resilientOracle: Contract;
-  let chainlinkOracle: Contract;
   let liquidator: Contract;
   let vBtc: Contract;
   let vUsdt: Contract;
@@ -79,16 +78,15 @@ forking(FORK_BLOCK, async () => {
   let liquidationIncentive: BigNumber;
   let treasuryPercent: BigNumber;
   let usdtPrice: BigNumber;
-  let btcbPriceBefore: BigNumber;
-  let btcbPriceAfter: BigNumber;
+  let btcbPrice: BigNumber; // the REAL, unmodified BTCB price — used to value everything
 
   // Recovery / leakage accumulators.
   let totalRepaid = BigNumber.from(0); // USDT base units repaid across all liquidations
   let seizeTreasuryVTokens = BigNumber.from(0); // vBTC that went to the treasury
   let seizeLiquidatorVTokens = BigNumber.from(0); // vBTC that went to the liquidator
-  let shortfallBefore = BigNumber.from(0);
-  let shortfallAfter = BigNumber.from(0);
-  let remainingDebt = BigNumber.from(0); // outstanding USDT debt after recovery (still collateralised)
+  let debtBefore = BigNumber.from(0); // USDT debt before the forced liquidation
+  let remainingDebt = BigNumber.from(0); // outstanding USDT debt after recovery
+  let borrowerResidualVBtc = BigNumber.from(0); // collateral left with the borrower after recovery
 
   let psrBtcbBefore: BigNumber;
   let liquidatorVBtcBefore: BigNumber;
@@ -99,7 +97,6 @@ forking(FORK_BLOCK, async () => {
   before(async () => {
     comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, provider);
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
-    chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ABI, provider);
     liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
     vBtc = new ethers.Contract(VBTC, VBEP20_ABI, provider);
     vUsdt = new ethers.Contract(VUSDT, VBEP20_ABI, provider);
@@ -116,6 +113,7 @@ forking(FORK_BLOCK, async () => {
     liquidationIncentive = await comptroller.getLiquidationIncentive(VBTC);
     treasuryPercent = await liquidator.treasuryPercentMantissa();
     usdtPrice = await resilientOracle.getUnderlyingPrice(VUSDT);
+    btcbPrice = await resilientOracle.getUnderlyingPrice(VBTC);
   });
 
   describe("Live protocol parameters", () => {
@@ -135,7 +133,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Step 1 — build a healthy vBTC-collateralised position", () => {
-    it("borrower supplies BTCB, enters the market and borrows USDT (starts healthy)", async () => {
+    it("borrower supplies BTCB, enters the market and borrows USDT (stays healthy)", async () => {
       // Source BTCB to the borrower and mint vBTC.
       await btcb.connect(whale).transfer(BORROWER, SUPPLY_BTCB);
       await btcb.connect(borrower).approve(VBTC, SUPPLY_BTCB);
@@ -154,49 +152,44 @@ forking(FORK_BLOCK, async () => {
       expect(await vUsdt.connect(borrower).callStatic.borrow(borrowUsdt)).to.equal(0);
       await vUsdt.connect(borrower).borrow(borrowUsdt);
 
-      // Still healthy right after the borrow (buffer intact).
+      // The position is healthy — this is the whole point: it is NOT in shortfall, it is
+      // simply stuck (mirrors the AutoFarm case where funds sit in Venus but can't be moved).
       [, liquidity, shortfall] = await comptroller.getAccountLiquidity(BORROWER);
       expect(shortfall).to.equal(0);
       expect(liquidity).to.be.gt(0);
 
-      btcbPriceBefore = await resilientOracle.getUnderlyingPrice(VBTC);
+      debtBefore = await vUsdt.callStatic.borrowBalanceCurrent(BORROWER);
       console.log(
-        `\n[setup] supplied ${formatUnits(SUPPLY_BTCB, 18)} BTCB @ $${usd(btcbPriceBefore).toLocaleString()}, ` +
-          `borrowed ${formatUnits(borrowUsdt, 18)} USDT`,
+        `\n[setup] supplied ${formatUnits(SUPPLY_BTCB, 18)} BTCB @ $${usd(btcbPrice).toLocaleString()}, ` +
+          `borrowed ${formatUnits(borrowUsdt, 18)} USDT — position healthy (shortfall $0)`,
       );
     });
   });
 
-  describe("Step 2 — force the account into shortfall (oracle crash)", () => {
-    it("crashing BTCB ~18% pushes the account underwater", async () => {
-      // Avoid staleness reverts on the core Chainlink feed.
-      await setMaxStaleCoreAssets(CHAINLINK_ORACLE, NORMAL_TIMELOCK);
+  describe("Step 2 — enable forced liquidation via governance (no shortfall, no oracle change)", () => {
+    it("timelock enables forced liquidation on the borrowed market while the account stays healthy", async () => {
+      expect(await comptroller.isForcedLiquidationEnabled(VUSDT)).to.equal(false);
 
-      // Isolate BTCB pricing to the main (Chainlink) oracle only: disable the pivot
-      // bound-validation and the fallback so setDirectPrice flows straight through the
-      // ResilientOracle (otherwise an 18% deviation would be rejected vs the pivot and the
-      // real fallback price would be returned instead). OracleRole: MAIN=0, PIVOT=1, FALLBACK=2.
-      await resilientOracle.connect(timelock).enableOracle(BTCB, 1, false); // disable PIVOT
-      await resilientOracle.connect(timelock).enableOracle(BTCB, 2, false); // disable FALLBACK
+      // Governance path used by VIP-172/186/191: enable forced liquidation on the borrowed
+      // market. This lets a healthy (over-collateralised) position be liquidated and bypasses
+      // the close factor — WITHOUT any oracle manipulation or shortfall.
+      await comptroller.connect(timelock)._setForcedLiquidation(VUSDT, true);
+      expect(await comptroller.isForcedLiquidationEnabled(VUSDT)).to.equal(true);
 
-      btcbPriceAfter = btcbPriceBefore.mul(10000 - PRICE_DROP_BPS).div(10000);
-      await chainlinkOracle.connect(timelock).setDirectPrice(BTCB, btcbPriceAfter);
-
-      // The resilient oracle now reports the crashed price.
-      expect(await resilientOracle.getUnderlyingPrice(VBTC)).to.equal(btcbPriceAfter);
-
-      const [, , shortfall] = await comptroller.getAccountLiquidity(BORROWER);
-      shortfallBefore = shortfall;
-      expect(shortfall).to.be.gt(0);
+      // The account is STILL healthy — nothing about its risk changed; it just became
+      // eligible for a governance-authorised forced liquidation.
+      const [, liquidity, shortfall] = await comptroller.getAccountLiquidity(BORROWER);
+      expect(shortfall).to.equal(0);
+      expect(liquidity).to.be.gt(0);
       console.log(
-        `[crash]  BTCB $${usd(btcbPriceBefore).toLocaleString()} -> $${usd(btcbPriceAfter).toLocaleString()} ` +
-          `(-${PRICE_DROP_BPS / 100}%), shortfall = $${usd(shortfall).toLocaleString()}`,
+        `[enable] forced liquidation ON for vUSDT; borrower still healthy ` +
+          `(liquidity $${usd(liquidity).toLocaleString()}, shortfall $0)`,
       );
     });
   });
 
   describe("Step 3 — execute the forced liquidation(s): the recovery path", () => {
-    it("liquidates in closeFactor-bounded steps until the account is healthy again", async () => {
+    it("unwinds the full USDT debt in forced-liquidation steps (close factor bypassed)", async () => {
       // Fund the liquidator EOA with USDT and approve the enforced Liquidator.
       const fundUsdt = parseUnits("5000000", 18);
       await usdt.connect(whale).transfer(LIQUIDATOR_EOA, fundUsdt);
@@ -210,17 +203,26 @@ forking(FORK_BLOCK, async () => {
       borrowerVBtcBefore = await vBtc.balanceOf(BORROWER);
 
       let iterations = 0;
+      let firstRepay = BigNumber.from(0);
+      let closeFactorCapForFirst = BigNumber.from(0);
       for (let i = 0; i < MAX_LIQUIDATIONS; i++) {
-        const [, , shortfall] = await comptroller.getAccountLiquidity(BORROWER);
-        if (shortfall.isZero()) break;
-
         const borrowBalance = await vUsdt.callStatic.borrowBalanceCurrent(BORROWER);
         if (borrowBalance.isZero()) break;
 
-        // Repay up to closeFactor of the outstanding debt.
-        const repay = borrowBalance.mul(closeFactor).div(MANTISSA_ONE);
         const borrowerVBtc = await vBtc.balanceOf(BORROWER);
         if (borrowerVBtc.isZero()) break; // collateral exhausted -> bad debt
+
+        // Forced liquidation ignores the close factor, so repay 100% of the outstanding debt
+        // in one shot (bounded only by the collateral the borrower still holds). The first
+        // iteration clears the entire debt; any later iteration only sweeps sub-cent interest
+        // that accrued between the borrow-balance read and the liquidation tx.
+        const repay = borrowBalance;
+        if (i === 0) {
+          firstRepay = repay;
+          // Under normal (non-forced) rules the Comptroller would cap repay at
+          // closeFactor × borrowBalance (50%); the first liquidation repays far more.
+          closeFactorCapForFirst = borrowBalance.mul(closeFactor).div(MANTISSA_ONE);
+        }
 
         const tx = await liquidator.connect(liquidatorSigner).liquidateBorrow(VUSDT, BORROWER, repay, VBTC);
         const receipt = await tx.wait();
@@ -241,15 +243,25 @@ forking(FORK_BLOCK, async () => {
         iterations++;
       }
 
-      const [, , shortfall] = await comptroller.getAccountLiquidity(BORROWER);
-      shortfallAfter = shortfall;
       remainingDebt = await vUsdt.callStatic.borrowBalanceCurrent(BORROWER);
+      borrowerResidualVBtc = await vBtc.balanceOf(BORROWER);
+      const [, , shortfall] = await comptroller.getAccountLiquidity(BORROWER);
 
-      console.log(`[recover] ${iterations} liquidation(s), final shortfall = $${usd(shortfallAfter).toLocaleString()}`);
+      console.log(
+        `[recover] first forced liquidation repaid ${formatUnits(firstRepay, 18)} USDT in ONE tx ` +
+          `(close factor would cap at ${formatUnits(closeFactorCapForFirst, 18)}); ` +
+          `${iterations} tx total incl. interest-dust sweep; remaining debt ` +
+          `$${usd(remainingDebt.mul(usdtPrice).div(MANTISSA_ONE)).toFixed(2)}`,
+      );
 
-      // Recovery proof: the underwater position was brought back to health.
+      // Recovery proof: a healthy-but-stuck position was fully unwound.
       expect(iterations).to.be.gt(0);
-      expect(shortfallAfter).to.equal(0);
+      // The first liquidation repaid the full debt — far more than the 50% close factor would
+      // normally allow — proving forced liquidation bypasses the close factor.
+      expect(firstRepay).to.be.gt(closeFactorCapForFirst);
+      expect(remainingDebt).to.equal(0); // debt fully repaid
+      expect(borrowerResidualVBtc).to.be.gt(0); // residual collateral stays with the borrower
+      expect(shortfall).to.equal(0); // never entered shortfall
     });
   });
 
@@ -268,7 +280,7 @@ forking(FORK_BLOCK, async () => {
 
       // Convert vBTC -> BTCB (underlying = vTokens * exchangeRate / 1e18).
       const vTokensToBtcb = (v: BigNumber) => v.mul(exchangeRate).div(MANTISSA_ONE);
-      const btcbToUsd = (b: BigNumber) => b.mul(btcbPriceAfter).div(MANTISSA_ONE); // valued at the liquidation (crashed) price
+      const btcbToUsd = (b: BigNumber) => b.mul(btcbPrice).div(MANTISSA_ONE); // real, unmodified price
 
       const closeTo = (measured: BigNumber, expected: BigNumber, toleranceBps: number) => {
         const diff = measured.sub(expected).abs();
@@ -314,26 +326,34 @@ forking(FORK_BLOCK, async () => {
       closeTo(treasuryUsd, debtClearedUsd.mul(500).div(10000), 100); // ±1%
       closeTo(leakageUsd, debtClearedUsd.mul(500).div(10000), 100);
 
+      const debtBeforeUsd = debtBefore.mul(usdtPrice).div(MANTISSA_ONE);
+      const residualBtcb = vTokensToBtcb(borrowerResidualVBtc);
       const pct = (v: BigNumber) => `${((usd(v) / usd(debtClearedUsd)) * 100).toFixed(2)}%`;
-      console.log("\n=========================== LIQUIDATION-INCENTIVE LEAKAGE ===========================");
+      console.log("\n=========================== FORCED-LIQUIDATION RECOVERY & LEAKAGE ===========================");
       console.log(` Fork block ............... bscmainnet #${FORK_BLOCK}`);
-      console.log(` Recovery ................. shortfall $${usd(shortfallBefore).toLocaleString()} -> $0 (healthy)`);
-      // Bad debt only exists if collateral is exhausted while a shortfall remains; here shortfall == 0.
-      const remainingDebtUsd = remainingDebt.mul(usdtPrice).div(MANTISSA_ONE);
-      const badDebtUsd = shortfallAfter.isZero() ? BigNumber.from(0) : remainingDebtUsd;
-      console.log(` Remaining debt (healthy)   $${usd(remainingDebtUsd).toLocaleString()}  (fully collateralised)`);
-      console.log(` Residual bad debt ........ $${usd(badDebtUsd).toFixed(2)}`);
-      console.log("-------------------------------------------------------------------------------------");
+      console.log(` Mechanism ................ governance forced liquidation (VIP-172/186/191), no shortfall`);
+      console.log(` Debt before recovery ..... $${usd(debtBeforeUsd).toLocaleString()}  (position healthy throughout)`);
+      console.log(
+        ` Remaining debt ........... $${usd(remainingDebt.mul(usdtPrice).div(MANTISSA_ONE)).toFixed(
+          2,
+        )}  (fully unwound)`,
+      );
+      console.log(
+        ` Residual collateral ...... ${Number(formatUnits(residualBtcb, 18)).toFixed(6)} BTCB` +
+          ` = $${usd(btcbToUsd(residualBtcb)).toLocaleString()}  (returned to borrower)`,
+      );
+      console.log(` Residual bad debt ........ $0.00`);
+      console.log("---------------------------------------------------------------------------------------------");
       console.log(` Debt cleared ............. $${usd(debtClearedUsd).toLocaleString()}`);
       console.log(
         ` Collateral seized ........ ${Number(formatUnits(seizedBtcb, 18)).toFixed(6)} BTCB` +
           ` = $${usd(seizedUsd).toLocaleString()}  (${pct(seizedUsd)} of debt)`,
       );
       console.log(` Liquidation penalty (10%)  $${usd(penaltyUsd).toLocaleString()}  (${pct(penaltyUsd)} of debt)`);
-      console.log("-------------------------------------------------------------------------------------");
+      console.log("---------------------------------------------------------------------------------------------");
       console.log(` Treasury recapture ....... $${usd(treasuryUsd).toLocaleString()}  (${pct(treasuryUsd)} of debt)`);
       console.log(` External leakage ......... $${usd(leakageUsd).toLocaleString()}  (${pct(leakageUsd)} of debt)`);
-      console.log("=====================================================================================\n");
+      console.log("=============================================================================================\n");
     });
   });
 });

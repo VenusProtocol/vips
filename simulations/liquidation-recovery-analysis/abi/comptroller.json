@@ -1,5 +1,22 @@
 [
   {
+    "inputs": [
+      { "internalType": "address", "name": "vToken", "type": "address" },
+      { "internalType": "bool", "name": "enable", "type": "bool" }
+    ],
+    "name": "_setForcedLiquidation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "vToken", "type": "address" }],
+    "name": "isForcedLiquidationEnabled",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
