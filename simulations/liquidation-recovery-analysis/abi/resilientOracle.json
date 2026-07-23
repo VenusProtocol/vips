@@ -1,0 +1,168 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "enum ResilientOracle.OracleRole",
+        "name": "role",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "enable",
+        "type": "bool"
+      }
+    ],
+    "name": "enableOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "enum ResilientOracle.OracleRole",
+        "name": "role",
+        "type": "uint8"
+      }
+    ],
+    "name": "getOracle",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "oracle",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "enabled",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
+    "name": "getUnderlyingPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getTokenConfig",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "address[3]",
+            "name": "oracles",
+            "type": "address[3]"
+          },
+          {
+            "internalType": "bool[3]",
+            "name": "enableFlagsForOracles",
+            "type": "bool[3]"
+          },
+          {
+            "internalType": "bool",
+            "name": "cachingEnabled",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct ResilientOracle.TokenConfig",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "address[3]",
+            "name": "oracles",
+            "type": "address[3]"
+          },
+          {
+            "internalType": "bool[3]",
+            "name": "enableFlagsForOracles",
+            "type": "bool[3]"
+          },
+          {
+            "internalType": "bool",
+            "name": "cachingEnabled",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct ResilientOracle.TokenConfig",
+        "name": "tokenConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "setTokenConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
