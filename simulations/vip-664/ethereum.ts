@@ -17,8 +17,14 @@ import vip664, {
 const FORK_BLOCK = 25590000;
 // Core pool id used for the EBrake CF-snapshot reads (single-pool IL comptroller).
 const CORE_POOL_ID = 0;
+// Comptroller Action enum (isolated-pools ComptrollerInterface): BORROW is index 2.
+const ACTION_BORROW = 2;
 
-const COMPTROLLER_ABI = ["function supplyCaps(address) view returns (uint256)"];
+const COMPTROLLER_ABI = [
+  "function supplyCaps(address) view returns (uint256)",
+  "function markets(address) view returns (bool isListed, uint256 collateralFactorMantissa, uint256 liquidationThresholdMantissa)",
+  "function actionPaused(address market, uint8 action) view returns (bool)",
+];
 const EBRAKE_ABI = ["function getMarketCFSnapshot(address,uint96) view returns (uint256 cf, uint256 lt)"];
 const DEVIATION_SENTINEL_ABI = ["function tokenConfigs(address) view returns (uint8 deviation, bool enabled)"];
 
@@ -42,6 +48,18 @@ forking(FORK_BLOCK, async () => {
       const config = await deviationSentinel.tokenConfigs(eBTC);
       expect(config.enabled).to.equal(true);
     });
+
+    // The delisting's collateral-factor and borrow-pause actions were already applied via the
+    // Emergency Brake (EBrake.decreaseCF + pauseBorrow), so they are not repeated in this VIP.
+    // Assert the eBTC market is already in that delisted state before the VIP runs.
+    it("eBTC collateral factor is already 0 (set via the Emergency Brake)", async () => {
+      const { collateralFactorMantissa } = await comptroller.markets(veBTC);
+      expect(collateralFactorMantissa).to.equal(0);
+    });
+
+    it("borrowing on eBTC is already paused (set via the Emergency Brake)", async () => {
+      expect(await comptroller.actionPaused(veBTC, ACTION_BORROW)).to.equal(true);
+    });
   });
 
   testForkedNetworkVipCommands("VIP-664 Ethereum eBTC delisting", await vip664());
@@ -62,6 +80,17 @@ forking(FORK_BLOCK, async () => {
       const config = await deviationSentinel.tokenConfigs(eBTC);
       expect(config.enabled).to.equal(false);
       expect(config.deviation).to.equal(configBefore);
+    });
+
+    // resetCFSnapshot only clears the EBrake's stored snapshot; it does NOT restore the collateral
+    // factor, and the VIP never touches the borrow pause. Confirm the delisted state still holds.
+    it("eBTC collateral factor remains 0 after the VIP", async () => {
+      const { collateralFactorMantissa } = await comptroller.markets(veBTC);
+      expect(collateralFactorMantissa).to.equal(0);
+    });
+
+    it("borrowing on eBTC remains paused after the VIP", async () => {
+      expect(await comptroller.actionPaused(veBTC, ACTION_BORROW)).to.equal(true);
     });
   });
 });

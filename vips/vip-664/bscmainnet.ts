@@ -54,6 +54,10 @@ export const eBTC = "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642";
 export const ETH_EBRAKE = "0xCD09042c5DFFed762998Df9a058ec5944e39949B";
 export const ETH_DEVIATION_SENTINEL = "0x7D0EFA41eBF1aF242A37174E1E047bD6ea1b1B9c";
 
+// Held in a named constant because it is referenced twice (the ACM grant in command 2 and the
+// setPoolConfig call in command 6) and both must use the byte-identical string, or the grant would
+// not authorize the call. Expanded, the call is:
+//   setPoolConfig(asset, pool, coinIndex, refCoinIndex, referenceToken, assetDecimals)
 export const SET_POOL_CONFIG_SIGNATURE = "setPoolConfig(address,address,uint8,uint8,address,uint8)";
 
 const giveCallPermission = (contract: string, sig: string, account: string) => ({
@@ -145,6 +149,7 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
       // 6. Re-route the Deviation Sentinel to the ListaDAO pool via the new PCSStableOracle.
       {
         target: pcsStableOracle,
+        // setPoolConfig(address,address,uint8,uint8,address,uint8) — same signature granted in command 2.
         signature: SET_POOL_CONFIG_SIGNATURE,
         params: [lisUSD, LISTA_LISUSD_USDT_POOL, LISUSD_COIN_INDEX, USDT_REF_COIN_INDEX, USDT, LISUSD_DECIMALS],
       },
