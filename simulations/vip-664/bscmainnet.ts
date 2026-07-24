@@ -32,10 +32,11 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Recent block, after the PCSStableOracle was deployed on BNB Chain (block 111796601) — lisUSD CF
-// is 0, its supply cap is 5M, the EBrake CF snapshot holds the pre-incident [0.5, 0.55] pair, and
+// Block after the deployer called transferOwnership(NormalTimelock) on PCSStableOracle — the Normal
+// Timelock is already the pending owner at this height so the VIP's acceptOwnership() works without
+// any setup in the test. lisUSD CF is still 0, supply cap 5M, EBrake CF snapshot [0.5, 0.55], and
 // the Deviation Sentinel still routes lisUSD to the PancakeSwap V3 oracle.
-const FORK_BLOCK = 111798000;
+const FORK_BLOCK = 111812608;
 
 // Deviation Sentinel oracle lisUSD is currently routed to (VIP-613) — the PancakeSwap V3 adapter.
 const BSC_PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
@@ -54,18 +55,11 @@ forking(FORK_BLOCK, async () => {
   const sentinelOracle = new ethers.Contract(BSC_SENTINEL_ORACLE, SENTINEL_ORACLE_ABI, ethers.provider);
   const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
 
-  // ── Use the PCSStableOracle adapter deployed on BNB Chain ──
-  // The adapter is already deployed at PCS_STABLE_ORACLE (block 111796601). Its ownership handoff to
-  // the Normal Timelock is a two-step transfer performed by the deployer before the VIP is proposed
-  // on-chain; at this fork block that handoff has not happened yet (owner = deployer, no pending
-  // owner). Replicate that prerequisite here by impersonating the current owner and transferring
-  // ownership to the Normal Timelock (leaving it as pendingOwner) so the VIP's acceptOwnership() in
-  // command 1 succeeds — the faithful pre-proposal state. This runs unconditionally: if the on-chain
-  // prerequisites ever change, transferOwnership reverts and the test fails loudly rather than
-  // silently skipping the setup.
+  // ── PCSStableOracle adapter deployed on BNB Chain ──
+  // The deployer called transferOwnership(NormalTimelock) on-chain as a pre-proposal step, so at
+  // this fork block the NormalTimelock is already the pending owner. The VIP's acceptOwnership()
+  // (command 1) finalises the transfer — no setup needed in the test.
   const pcsStableOracle = new ethers.Contract(PCS_STABLE_ORACLE, PCS_STABLE_ORACLE_ARTIFACT.abi, ethers.provider);
-  const currentOwner = await initMainnetUser(await pcsStableOracle.owner(), parseUnits("1"));
-  await pcsStableOracle.connect(currentOwner).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
 
   // ── Pin oracle prices for lisUSD + USDT so the governance-lifecycle time warp doesn't stale them. ──
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
