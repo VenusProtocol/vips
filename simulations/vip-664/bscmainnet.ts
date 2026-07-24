@@ -15,6 +15,7 @@ import vip664, {
   LISUSD_COLLATERAL_FACTOR,
   LISUSD_LIQUIDATION_THRESHOLD,
   LISUSD_NEW_SUPPLY_CAP,
+  PCS_STABLE_ORACLE,
   SET_POOL_CONFIG_SIGNATURE,
   USDT,
   lisUSD,
@@ -27,15 +28,14 @@ import ERC20_ABI from "./abi/ERC20.json";
 import PCS_STABLE_ORACLE_ARTIFACT from "./abi/PCSStableOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
-import PROXY_ARTIFACT from "./abi/TransparentUpgradeableProxy.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Block shortly before the proposal — lisUSD CF is 0, its supply cap is 5M, the EBrake CF snapshot
-// holds the pre-incident [0.5, 0.55] pair, and the Deviation Sentinel still routes lisUSD to the
-// PancakeSwap V3 oracle.
-const FORK_BLOCK = 111500000;
+// Recent block, after the PCSStableOracle was deployed on BNB Chain (block 111796601) — lisUSD CF
+// is 0, its supply cap is 5M, the EBrake CF snapshot holds the pre-incident [0.5, 0.55] pair, and
+// the Deviation Sentinel still routes lisUSD to the PancakeSwap V3 oracle.
+const FORK_BLOCK = 111798000;
 
 // Deviation Sentinel oracle lisUSD is currently routed to (VIP-613) — the PancakeSwap V3 adapter.
 const BSC_PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
@@ -54,30 +54,18 @@ forking(FORK_BLOCK, async () => {
   const sentinelOracle = new ethers.Contract(BSC_SENTINEL_ORACLE, SENTINEL_ORACLE_ABI, ethers.provider);
   const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
 
-  // ── Deploy the PCSStableOracle adapter in-fork (mirrors the real deploy → VIP handoff) ──
-  // Done inline (the fork block is already pinned by forking()) so its address is available to
-  // vip664() at test-registration time. Real mainnet deployment and pinning the address into the
-  // VIP are a later phase; here we deploy a proxy, initialize it with the ACM, and transfer
-  // ownership to the Normal Timelock (leaving it as pendingOwner) so acceptOwnership() succeeds.
-  const signers = await ethers.getSigners();
-  const deployer = signers[0];
-  const proxyAdmin = signers[1];
-
-  const implFactory = new ethers.ContractFactory(
-    PCS_STABLE_ORACLE_ARTIFACT.abi,
-    PCS_STABLE_ORACLE_ARTIFACT.bytecode,
-    deployer,
-  );
-  const impl = await implFactory.deploy(bscmainnet.RESILIENT_ORACLE);
-  const initData = new ethers.utils.Interface(PCS_STABLE_ORACLE_ARTIFACT.abi).encodeFunctionData("initialize", [
-    bscmainnet.ACCESS_CONTROL_MANAGER,
-  ]);
-  const proxyFactory = new ethers.ContractFactory(PROXY_ARTIFACT.abi, PROXY_ARTIFACT.bytecode, deployer);
-  const proxy = await proxyFactory.deploy(impl.address, proxyAdmin.address, initData);
-  const pcsStableOracle = new ethers.Contract(proxy.address, PCS_STABLE_ORACLE_ARTIFACT.abi, ethers.provider);
-
-  // Two-step ownership transfer to the Normal Timelock (VIP accepts it).
-  await pcsStableOracle.connect(deployer).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
+  // ── Use the PCSStableOracle adapter deployed on BNB Chain ──
+  // The adapter is already deployed at PCS_STABLE_ORACLE (block 111796601). Its ownership handoff to
+  // the Normal Timelock is a two-step transfer performed by the deployer before the VIP is proposed
+  // on-chain; at this fork block that handoff has not happened yet (owner = deployer, no pending
+  // owner). Replicate it here by impersonating the current owner and transferring ownership to the
+  // Normal Timelock (leaving it as pendingOwner) so the VIP's acceptOwnership() in command 1
+  // succeeds — the faithful pre-proposal state.
+  const pcsStableOracle = new ethers.Contract(PCS_STABLE_ORACLE, PCS_STABLE_ORACLE_ARTIFACT.abi, ethers.provider);
+  if ((await pcsStableOracle.pendingOwner()) !== bscmainnet.NORMAL_TIMELOCK) {
+    const currentOwner = await initMainnetUser(await pcsStableOracle.owner(), parseUnits("1"));
+    await pcsStableOracle.connect(currentOwner).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
+  }
 
   // ── Pin oracle prices for lisUSD + USDT so the governance-lifecycle time warp doesn't stale them. ──
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -112,9 +100,14 @@ forking(FORK_BLOCK, async () => {
       expect(await sentinelOracle.tokenConfigs(lisUSD)).to.equal(BSC_PANCAKESWAP_ORACLE);
     });
 
-    it("PCSStableOracle is owned by deployer with the Normal Timelock pending", async () => {
-      expect(await pcsStableOracle.owner()).to.equal(await deployer.getAddress());
+    it("PCSStableOracle is not yet owned by the Normal Timelock but has it pending", async () => {
+      expect(await pcsStableOracle.owner()).to.not.equal(bscmainnet.NORMAL_TIMELOCK);
       expect(await pcsStableOracle.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
+
+    it("PCSStableOracle is not yet configured for lisUSD", async () => {
+      const cfg = await pcsStableOracle.poolConfigs(lisUSD);
+      expect(cfg.pool).to.equal(ethers.constants.AddressZero);
     });
 
     it("no account may call setPoolConfig on the new PCSStableOracle yet", async () => {
@@ -131,7 +124,7 @@ forking(FORK_BLOCK, async () => {
   // proposal threshold is 0x3422… (~1.13M votes), but on its own it falls short of the 1.5M XVS
   // quorum, so add supporters (0x5176… ~0.47M plus the two default supporters) to clear quorum with
   // headroom.
-  testVip("VIP-664 eBTC Delisting & lisUSD Resumption", await vip664(pcsStableOracle.address), {
+  testVip("VIP-664 eBTC Delisting & lisUSD Resumption", await vip664(), {
     proposer: "0x34221485302f6F2029660a000908B5FCABB9BC6e",
     supporters: [
       "0x5176671de05380379399b669ed276feec99d59cb",

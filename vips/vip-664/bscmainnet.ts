@@ -27,12 +27,10 @@ export const BSC_GUARDIAN = bscmainnet.GUARDIAN;
 // timelocks are intentionally omitted (added back only if a future VIP specifically needs them).
 export const BSC_GOVERNANCE_TIMELOCKS = [bscmainnet.NORMAL_TIMELOCK];
 
-// New PancakeSwap StableSwap / ListaDAO oracle adapter (venus-periphery).
-// PLACEHOLDER — the real mainnet address is pinned in a later deployment phase.
-// The simulation deploys the adapter in-fork and passes that address to vip664(),
-// so the sim never relies on this default. Do NOT propose this VIP on-chain until
-// this constant is replaced with the deployed mainnet PCSStableOracle address.
-export const PCS_STABLE_ORACLE = "0x0000000000000000000000000000000000000000";
+// New PancakeSwap StableSwap / ListaDAO oracle adapter (venus-periphery), deployed on BNB Chain.
+// Its ownership is transferred to the Normal Timelock (two-step) as part of the deployment step
+// preceding execution; this VIP accepts that ownership in command 1.
+export const PCS_STABLE_ORACLE = "0x8440889CaEC04FeFEB52c3c5cd729548864E7886";
 
 // lisUSD risk parameters (restored)
 export const LISUSD_COLLATERAL_FACTOR = parseUnits("0.5", 18); // 50%
