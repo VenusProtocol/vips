@@ -58,14 +58,14 @@ forking(FORK_BLOCK, async () => {
   // The adapter is already deployed at PCS_STABLE_ORACLE (block 111796601). Its ownership handoff to
   // the Normal Timelock is a two-step transfer performed by the deployer before the VIP is proposed
   // on-chain; at this fork block that handoff has not happened yet (owner = deployer, no pending
-  // owner). Replicate it here by impersonating the current owner and transferring ownership to the
-  // Normal Timelock (leaving it as pendingOwner) so the VIP's acceptOwnership() in command 1
-  // succeeds — the faithful pre-proposal state.
+  // owner). Replicate that prerequisite here by impersonating the current owner and transferring
+  // ownership to the Normal Timelock (leaving it as pendingOwner) so the VIP's acceptOwnership() in
+  // command 1 succeeds — the faithful pre-proposal state. This runs unconditionally: if the on-chain
+  // prerequisites ever change, transferOwnership reverts and the test fails loudly rather than
+  // silently skipping the setup.
   const pcsStableOracle = new ethers.Contract(PCS_STABLE_ORACLE, PCS_STABLE_ORACLE_ARTIFACT.abi, ethers.provider);
-  if ((await pcsStableOracle.pendingOwner()) !== bscmainnet.NORMAL_TIMELOCK) {
-    const currentOwner = await initMainnetUser(await pcsStableOracle.owner(), parseUnits("1"));
-    await pcsStableOracle.connect(currentOwner).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
-  }
+  const currentOwner = await initMainnetUser(await pcsStableOracle.owner(), parseUnits("1"));
+  await pcsStableOracle.connect(currentOwner).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
 
   // ── Pin oracle prices for lisUSD + USDT so the governance-lifecycle time warp doesn't stale them. ──
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
