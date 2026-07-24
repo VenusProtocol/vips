@@ -2,21 +2,18 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip664, {
   ETH_CORE_COMPTROLLER,
   ETH_DEVIATION_SENTINEL,
   ETH_EBRAKE,
+  ETH_NORMAL_TIMELOCK,
   ETH_VTREASURY,
-  PCS_STABLE_ORACLE,
+  EXPECTED_EBTC_UNDERLYING,
   eBTC,
   veBTC,
 } from "../../vips/vip-664/bscmainnet";
-import TOKEN_REDEEMER_ARTIFACT from "./abi/TokenRedeemer.json";
-
-const { ethereum } = NETWORK_ADDRESSES;
 
 // Recent Ethereum block — the eBTC market, EBrake and DeviationSentinel (VIP-616) all predate it,
 // and the Deviation Sentinel has already snapshotted eBTC's CF ([0.68, 0.72]) by this height.
@@ -41,22 +38,6 @@ forking(FORK_BLOCK, async () => {
   const deviationSentinel = new Contract(ETH_DEVIATION_SENTINEL, DEVIATION_SENTINEL_ABI, ethers.provider);
   const vebtc = new Contract(veBTC, ERC20_ABI, ethers.provider);
   const ebtc = new Contract(eBTC, ERC20_ABI, ethers.provider);
-
-  // ── Deploy a TokenRedeemer in-fork (mirrors the real deploy → VIP handoff) ──
-  // TokenRedeemer is not yet deployed on Ethereum; the real deployment (ownership → Normal Timelock)
-  // and pinning the address into the VIP are a later phase. Here we deploy it with the Normal
-  // Timelock as owner (its constructor sets the owner directly — no acceptOwnership needed) and pass
-  // the address to vip664(), so the redeem command executes against a real redeemer. The vBNB
-  // parameter is irrelevant on Ethereum (only used to detect the native-wrapper vToken), so it is
-  // left as the zero address.
-  const [deployer] = await ethers.getSigners();
-  const redeemerFactory = new ethers.ContractFactory(
-    TOKEN_REDEEMER_ARTIFACT.abi,
-    TOKEN_REDEEMER_ARTIFACT.bytecode,
-    deployer,
-  );
-  const tokenRedeemer = await redeemerFactory.deploy(ethereum.NORMAL_TIMELOCK, ethers.constants.AddressZero);
-  await tokenRedeemer.deployed();
 
   let treasuryVeBTCBefore: BigNumber;
   let treasuryEBTCBefore: BigNumber;
@@ -95,15 +76,13 @@ forking(FORK_BLOCK, async () => {
       expect(treasuryVeBTCBefore).to.be.gt(0);
     });
 
-    it("the in-fork TokenRedeemer is owned by the Normal Timelock", async () => {
-      expect(await tokenRedeemer.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+    it("the Normal Timelock holds no veBTC or eBTC before the VIP", async () => {
+      expect(await vebtc.balanceOf(ETH_NORMAL_TIMELOCK)).to.equal(0);
+      expect(await ebtc.balanceOf(ETH_NORMAL_TIMELOCK)).to.equal(0);
     });
   });
 
-  testForkedNetworkVipCommands(
-    "VIP-664 Ethereum eBTC delisting",
-    await vip664(PCS_STABLE_ORACLE, tokenRedeemer.address),
-  );
+  testForkedNetworkVipCommands("VIP-664 Ethereum eBTC delisting", await vip664());
 
   describe("Post-VIP state", () => {
     it("eBTC supply cap is 0", async () => {
@@ -135,19 +114,17 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("the Treasury's veBTC is redeemed and the eBTC returned to the Treasury", async () => {
-      // The whole veBTC position was withdrawn to the redeemer and redeemed, so the Treasury holds
-      // no veBTC and its eBTC balance grew by the redeemed underlying.
+      // The whole veBTC position was withdrawn to the Normal Timelock, redeemed, and the eBTC
+      // transferred back, so the Treasury holds no veBTC and its eBTC balance grew by the redeemed
+      // underlying (1:1 at the fixed 1e18 exchange rate — no dust).
       expect(await vebtc.balanceOf(ETH_VTREASURY)).to.equal(0);
       const treasuryEBTCAfter = await ebtc.balanceOf(ETH_VTREASURY);
-      expect(treasuryEBTCAfter).to.be.gt(treasuryEBTCBefore);
-      // veBTC redeems ~1:1 into eBTC (exchange rate ~1e18, 8-decimal token), so the eBTC gained is
-      // of the same order as the redeemed veBTC balance.
-      expect(treasuryEBTCAfter.sub(treasuryEBTCBefore)).to.be.gt(0);
+      expect(treasuryEBTCAfter.sub(treasuryEBTCBefore)).to.equal(EXPECTED_EBTC_UNDERLYING);
     });
 
-    it("the TokenRedeemer keeps no leftover veBTC or eBTC", async () => {
-      expect(await vebtc.balanceOf(tokenRedeemer.address)).to.equal(0);
-      expect(await ebtc.balanceOf(tokenRedeemer.address)).to.equal(0);
+    it("the Normal Timelock keeps no leftover veBTC or eBTC", async () => {
+      expect(await vebtc.balanceOf(ETH_NORMAL_TIMELOCK)).to.equal(0);
+      expect(await ebtc.balanceOf(ETH_NORMAL_TIMELOCK)).to.equal(0);
     });
   });
 });

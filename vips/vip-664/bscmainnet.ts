@@ -1,4 +1,3 @@
-import { constants } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
@@ -52,13 +51,16 @@ export const ETH_EBRAKE = "0xCD09042c5DFFed762998Df9a058ec5944e39949B";
 export const ETH_DEVIATION_SENTINEL = "0x7D0EFA41eBF1aF242A37174E1E047bD6ea1b1B9c";
 // Venus Treasury (VTreasuryV8) on Ethereum — holds the eBTC seed-liquidity position (~0.1447 veBTC).
 export const ETH_VTREASURY = ethereum.VTREASURY;
+// Ethereum Normal Timelock — executes the destination-chain commands, so it is the account that
+// temporarily holds and redeems the treasury's veBTC in the direct redemption flow (see command 10).
+export const ETH_NORMAL_TIMELOCK = ethereum.NORMAL_TIMELOCK;
 
-// TokenRedeemer is not yet deployed on Ethereum. PLACEHOLDER — the real address is pinned in the
-// later deployment phase (same handling as PCS_STABLE_ORACLE). The ethereum simulation deploys a
-// TokenRedeemer in-fork (owned by the Normal Timelock) and passes that address to vip664(), so the
-// sim never relies on this default. Do NOT propose this VIP on-chain until this constant is
-// replaced with the deployed mainnet TokenRedeemer address.
-export const ETH_TOKEN_REDEEMER = "0x0000000000000000000000000000000000000000";
+// Treasury's full veBTC balance and the eBTC it redeems into. veBTC and eBTC are both 8-decimal
+// tokens and the market has 0 borrows, so its exchange rate is fixed at 1e18 (no interest accrues):
+// redeeming the whole veBTC balance yields exactly the same amount of eBTC, leaving no dust. Verified
+// on-chain: treasury veBTC balance = 0.14471345, exchangeRateStored = 1e18, totalBorrows = 0.
+export const TREASURY_VEBTC_AMOUNT = parseUnits("0.14471345", 8);
+export const EXPECTED_EBTC_UNDERLYING = parseUnits("0.14471345", 8);
 
 // Held in a named constant because it is referenced twice (the ACM grant in command 2 and the
 // setPoolConfig call in command 6) and both must use the byte-identical string, or the grant would
@@ -72,7 +74,7 @@ const giveCallPermission = (contract: string, sig: string, account: string) => (
   params: [contract, sig, account],
 });
 
-export const vip664 = (pcsStableOracle: string = PCS_STABLE_ORACLE, ethTokenRedeemer: string = ETH_TOKEN_REDEEMER) => {
+export const vip664 = (pcsStableOracle: string = PCS_STABLE_ORACLE) => {
   const meta = {
     version: "v2",
     title: "VIP-664 [BNB Chain & Ethereum] eBTC Delisting & lisUSD Resumption",
@@ -94,15 +96,16 @@ This VIP (1) resumes **lisUSD** as collateral on BNB Chain with a tightened supp
 7. **Set the eBTC supply cap to 0** — \`setMarketSupplyCaps([veBTC], [0])\` on the Ethereum Core Comptroller.
 8. **Reset the Emergency Brake CF snapshot** for veBTC — \`resetCFSnapshot(veBTC)\`.
 9. **Disable the Deviation Sentinel for eBTC** — \`setTokenMonitoringEnabled(eBTC, false)\`.
-10. **Redeem the treasury-held veBTC back to eBTC** — \`VTreasuryV8.withdrawTreasuryToken(veBTC, all, TokenRedeemer)\` moves the Treasury's full veBTC balance (~0.1447 veBTC) to the Token Redeemer, then \`TokenRedeemer.redeemAndTransfer(veBTC, VTreasuryV8)\` redeems it to eBTC and returns the eBTC to the Treasury (same redemption helper flow as VIP-644). The eBTC market has 0 borrows and full cash, so the position redeems in full.
+10. **Redeem the treasury-held veBTC back to eBTC** (direct redemption through the Normal Timelock, same flow as VIP-526): \`VTreasuryV8.withdrawTreasuryToken(veBTC, 0.14471345, NormalTimelock)\` moves the Treasury's full veBTC balance to the Ethereum Normal Timelock, \`veBTC.redeem(0.14471345)\` redeems it to eBTC held by the Timelock, and \`eBTC.transfer(VTreasuryV8, 0.14471345)\` returns the redeemed eBTC to the Treasury. The eBTC market has 0 borrows and full cash with a fixed 1e18 exchange rate, so the position redeems 1:1 with no dust left in the Timelock.
 
-The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setTokenMonitoringEnabled\` permissions (granted in VIP-616), so no additional ACM grants are required. Accrued reserves on the eBTC market are currently 0, so no \`reduceReserves\` step is needed. The Token Redeemer used in action 10 is deployed to Ethereum and its ownership transferred to the Normal Timelock as part of the deployment step preceding execution.
+The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setTokenMonitoringEnabled\` permissions (granted in VIP-616), so no additional ACM grants are required. Accrued reserves on the eBTC market are currently 0, so no \`reduceReserves\` step is needed. This redemption path does not rely on the Token Redeemer (which is not deployed on Ethereum); the standard redemption flow works because the market has no borrows and therefore no accruing interest.
 
 #### References
 
 - [Community Post](https://community.venus.io/) — eBTC Delisting and lisUSD Resumption
 - [ListaDAO lisUSD/USDT pool](https://lista.org/liquidity/pool/bsc/0x8df7891fb2cb3e98c7ab3cfb4d9a59fbcc63c956)
 - Deviation Sentinel governance pattern: VIP-590, VIP-610, VIP-613, VIP-616
+- Treasury redemption pattern (withdraw → redeem → transfer back): VIP-526
 
 #### Voting options
 
@@ -194,20 +197,28 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
         dstChainId: LzChainId.ethereum,
       },
 
-      // 10. Redeem the treasury-held veBTC back to eBTC (VIP-644 redemption-helper flow):
-      //   a) move the treasury's full veBTC balance to the Token Redeemer. MaxUint256 withdraws the
-      //      entire balance — VTreasuryV8.withdrawTreasuryToken caps the amount at the balance.
+      // 10. Redeem the treasury-held veBTC back to eBTC directly through the Normal Timelock (VIP-526 flow):
+      //   a) move the treasury's full veBTC balance to the Ethereum Normal Timelock (the executor of
+      //      these cross-chain commands, so it becomes the holder that can redeem).
       {
         target: ETH_VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [veBTC, constants.MaxUint256, ethTokenRedeemer],
+        params: [veBTC, TREASURY_VEBTC_AMOUNT, ETH_NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
-      //   b) redeem the whole veBTC balance held by the redeemer and send the eBTC to the treasury.
+      //   b) the Timelock redeems the veBTC, receiving the underlying eBTC (0 borrows → 1e18 exchange
+      //      rate → redeems 1:1, no dust).
       {
-        target: ethTokenRedeemer,
-        signature: "redeemAndTransfer(address,address)",
-        params: [veBTC, ETH_VTREASURY],
+        target: veBTC,
+        signature: "redeem(uint256)",
+        params: [TREASURY_VEBTC_AMOUNT],
+        dstChainId: LzChainId.ethereum,
+      },
+      //   c) transfer the redeemed eBTC from the Timelock back to the Treasury.
+      {
+        target: eBTC,
+        signature: "transfer(address,uint256)",
+        params: [ETH_VTREASURY, EXPECTED_EBTC_UNDERLYING],
         dstChainId: LzChainId.ethereum,
       },
     ],
