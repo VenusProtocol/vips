@@ -182,6 +182,18 @@ forking(FORK_BLOCK, async () => {
       expect(diff).to.be.lte(resilientPrice.mul(2).div(100));
     });
 
+    it("SentinelOracle end-to-end: getPrice(lisUSD) returns the underlying PCSStableOracle feed price", async () => {
+      // The full re-routed chain must be live: SentinelOracle.getPrice(lisUSD) → tokenConfigs
+      // routing → PCSStableOracle.getPrice → ListaDAO pool get_dy × ResilientOracle USDT price.
+      const sentinelPrice = await sentinelOracle.getPrice(lisUSD);
+      const feedPrice = await pcsStableOracle.getPrice(lisUSD);
+      expect(sentinelPrice).to.be.gt(0);
+      expect(sentinelPrice).to.equal(feedPrice);
+      // No direct-price override is set for lisUSD, so the equality above really exercised the
+      // adapter path rather than a stored constant.
+      expect(await sentinelOracle.directPrices(lisUSD)).to.equal(0);
+    });
+
     it("Guardian and governance timelocks may now call setPoolConfig on the PCSStableOracle", async () => {
       const impersonatedOracle = await initMainnetUser(pcsStableOracle.address, parseUnits("1"));
       for (const account of PERMISSION_ACCOUNTS) {
