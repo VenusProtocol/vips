@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip664, {
+import vip647, {
   ETH_CORE_COMPTROLLER,
   ETH_DEVIATION_SENTINEL,
   ETH_EBRAKE,
@@ -13,7 +13,7 @@ import vip664, {
   EXPECTED_EBTC_UNDERLYING,
   eBTC,
   veBTC,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-647/bscmainnet";
 
 // Recent Ethereum block — the eBTC market, EBrake and DeviationSentinel (VIP-616) all predate it,
 // and the Deviation Sentinel has already snapshotted eBTC's CF ([0.68, 0.72]) by this height.
@@ -82,7 +82,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-664 Ethereum eBTC delisting", await vip664());
+  testForkedNetworkVipCommands("VIP-647 Ethereum eBTC delisting", await vip647());
 
   describe("Post-VIP state", () => {
     it("eBTC supply cap is 0", async () => {

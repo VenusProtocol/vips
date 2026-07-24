@@ -5,12 +5,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, pinResilientOraclePriceViaRedstone } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip647, {
   BSC_COMPTROLLER,
   BSC_EBRAKE,
   BSC_GOVERNANCE_TIMELOCKS,
   BSC_GUARDIAN,
   BSC_SENTINEL_ORACLE,
+  BSTOCK_LIQUIDATOR,
   LISTA_LISUSD_USDT_POOL,
   LISUSD_COLLATERAL_FACTOR,
   LISUSD_LIQUIDATION_THRESHOLD,
@@ -20,11 +21,12 @@ import vip664, {
   USDT,
   lisUSD,
   vlisUSD,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-647/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 import PCS_STABLE_ORACLE_ARTIFACT from "./abi/PCSStableOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
@@ -42,8 +44,10 @@ const FORK_BLOCK = 111812608;
 const BSC_PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
 // Core pool id used for EBrake CF-snapshot reads.
 const CORE_POOL_ID = 0;
-// vUSDT market — borrow target for the behavioral proof (borrow not paused, verified on-chain).
+// vUSDT market — borrow target for the behavioral proof (borrow not paused, verified on-chain),
+// and flash-loan-enabled market used to sanity-check the bStock whitelist precondition.
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+const VUSDT_FLASHLOAN_ABI = ["function isFlashLoanEnabled() view returns (bool)"];
 // The ListaDAO pool holds ~9.5M lisUSD; impersonated as the lisUSD source for the behavioral proof.
 const LISUSD_WHALE = LISTA_LISUSD_USDT_POOL;
 
@@ -112,13 +116,23 @@ forking(FORK_BLOCK, async () => {
         );
       }
     });
+
+    it("BStockLiquidator is not yet whitelisted for flash loans", async () => {
+      const flashLoanFacet = new ethers.Contract(BSC_COMPTROLLER, FLASHLOAN_FACET_ABI, ethers.provider);
+      expect(await flashLoanFacet.authorizedFlashLoan(BSTOCK_LIQUIDATOR)).to.equal(false);
+    });
+
+    it("vUSDT flash loans are already enabled (set by a prior VIP)", async () => {
+      const vUsdtFlash = new ethers.Contract(vUSDT, VUSDT_FLASHLOAN_ABI, ethers.provider);
+      expect(await vUsdtFlash.isFlashLoanEnabled()).to.equal(true);
+    });
   });
 
   // Name the governance voters explicitly. At this fork block the sole delegate above the 1M XVS
   // proposal threshold is 0x3422… (~1.13M votes), but on its own it falls short of the 1.5M XVS
   // quorum, so add supporters (0x5176… ~0.47M plus the two default supporters) to clear quorum with
   // headroom.
-  testVip("VIP-664 eBTC Delisting & lisUSD Resumption", await vip664(), {
+  testVip("VIP-647 eBTC Delisting, lisUSD Resumption & bStock Liquidator Flash Loans", await vip647(), {
     proposer: "0x34221485302f6F2029660a000908B5FCABB9BC6e",
     supporters: [
       "0x5176671de05380379399b669ed276feec99d59cb",
@@ -130,6 +144,8 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "NewSupplyCap"], [1, 1]);
       // EBrake CF snapshot reset for vlisUSD.
       await expectEvents(txResponse, [EBRAKE_ABI], ["CFSnapshotReset"], [1]);
+      // bStock backstop liquidator whitelisted for flash loans.
+      await expectEvents(txResponse, [FLASHLOAN_FACET_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
       // PCSStableOracle: ownership accepted + pool configured.
       await expectEvents(
         txResponse,
@@ -201,6 +217,11 @@ forking(FORK_BLOCK, async () => {
           true,
         );
       }
+    });
+
+    it("BStockLiquidator is whitelisted for flash loans", async () => {
+      const flashLoanFacet = new ethers.Contract(BSC_COMPTROLLER, FLASHLOAN_FACET_ABI, ethers.provider);
+      expect(await flashLoanFacet.authorizedFlashLoan(BSTOCK_LIQUIDATOR)).to.equal(true);
     });
   });
 

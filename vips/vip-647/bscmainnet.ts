@@ -41,6 +41,11 @@ export const LISUSD_COIN_INDEX = 0;
 export const USDT_REF_COIN_INDEX = 1;
 export const LISUSD_DECIMALS = 18;
 
+// bStock backstop liquidator (BStockLiquidator proxy), whitelisted for Core-pool flash
+// loans so it can atomically repay an undercollateralized bStock borrow, seize and redeem
+// the collateral, and sell it for the debt asset in a single transaction (VIP-576 pattern).
+export const BSTOCK_LIQUIDATOR = "0x5974Badab6911a78Ba15229045514C2C1bD42343";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Ethereum — eBTC delisting (Core pool, cross-chain)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -52,7 +57,7 @@ export const ETH_DEVIATION_SENTINEL = "0x7D0EFA41eBF1aF242A37174E1E047bD6ea1b1B9
 // Venus Treasury (VTreasuryV8) on Ethereum — holds the eBTC seed-liquidity position (~0.1447 veBTC).
 export const ETH_VTREASURY = ethereum.VTREASURY;
 // Ethereum Normal Timelock — executes the destination-chain commands, so it is the account that
-// temporarily holds and redeems the treasury's veBTC in the direct redemption flow (see command 10).
+// temporarily holds and redeems the treasury's veBTC in the direct redemption flow (see command 11).
 export const ETH_NORMAL_TIMELOCK = ethereum.NORMAL_TIMELOCK;
 
 // Treasury's full veBTC balance and the eBTC it redeems into. veBTC and eBTC are both 8-decimal
@@ -74,38 +79,42 @@ const giveCallPermission = (contract: string, sig: string, account: string) => (
   params: [contract, sig, account],
 });
 
-export const vip664 = (pcsStableOracle: string = PCS_STABLE_ORACLE) => {
+export const vip647 = (pcsStableOracle: string = PCS_STABLE_ORACLE) => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain & Ethereum] eBTC Delisting & lisUSD Resumption",
+    title: "VIP-647 [BNB Chain & Ethereum] eBTC Delisting, lisUSD Resumption & bStock Liquidator Flash Loans",
     description: `#### Summary
 
-This VIP (1) resumes **lisUSD** as collateral on BNB Chain with a tightened supply cap and re-routes its Deviation Sentinel price source to the ListaDAO lisUSD/USDT pool via a new PancakeSwap StableSwap oracle adapter, and (2) delists **eBTC** on Ethereum Core by zeroing its supply cap and disabling its Deviation Sentinel monitoring.
+This VIP (1) resumes **lisUSD** as collateral on BNB Chain with a tightened supply cap and re-routes its Deviation Sentinel price source to the ListaDAO lisUSD/USDT pool via a new PancakeSwap StableSwap oracle adapter, (2) delists **eBTC** on Ethereum Core by zeroing its supply cap and disabling its Deviation Sentinel monitoring, and (3) whitelists the **bStock backstop liquidator** for flash loans on the BNB Chain Core Pool Comptroller.
 
 #### BNB Chain — lisUSD (Core pool)
 
-1. **Accept ownership of the new PCSStableOracle** — \`acceptOwnership()\`. The adapter is deployed with a two-step ownership transfer to the Normal Timelock, which this VIP accepts (same pattern as the DEX oracles in VIP-590 / VIP-616).
-2. **Grant \`setPoolConfig\` permission** on PCSStableOracle to the Guardian and the Normal Timelock, so the pool can be configured.
-3. **Restore the collateral factor to 50%** — \`setCollateralFactor(vlisUSD, 0.5e18, 0.55e18)\`. The liquidation threshold stays 0.55 (matches the pre-incident value stored in the Emergency Brake CF snapshot).
-4. **Reduce the supply cap 5,000,000 → 2,100,000 lisUSD** — \`setMarketSupplyCaps([vlisUSD], [2,100,000])\` (2× the 3-month average supply).
-5. **Reset the Emergency Brake CF snapshot** for vlisUSD — \`resetCFSnapshot(vlisUSD)\`.
-6. **Re-route the Deviation Sentinel** from the old lisUSD PancakeSwap V3 pool to the ListaDAO lisUSD/USDT pool: \`PCSStableOracle.setPoolConfig(lisUSD, ListaDAOPool, 0, 1, USDT, 18)\` then \`SentinelOracle.setTokenOracleConfig(lisUSD, PCSStableOracle)\`. The ListaDAO pool exposes the PancakeSwap StableSwap interface, which the existing CurveOracle (int128 indices) cannot read, hence the new adapter.
+1. **Accept ownership of the new PCSStableOracle** — acceptOwnership(). The adapter is deployed with a two-step ownership transfer to the Normal Timelock, which this VIP accepts (same pattern as the DEX oracles in VIP-590 / VIP-616).
+2. **Grant setPoolConfig permission** on PCSStableOracle to the Guardian and the Normal Timelock, so the pool can be configured.
+3. **Restore the collateral factor to 50%** — setCollateralFactor(vlisUSD, 0.5e18, 0.55e18). The liquidation threshold stays 0.55 (matches the pre-incident value stored in the Emergency Brake CF snapshot).
+4. **Reduce the supply cap 5,000,000 → 2,100,000 lisUSD** — setMarketSupplyCaps([vlisUSD], [2,100,000]) (2× the 3-month average supply).
+5. **Reset the Emergency Brake CF snapshot** for vlisUSD — resetCFSnapshot(vlisUSD).
+6. **Re-route the Deviation Sentinel** from the old lisUSD PancakeSwap V3 pool to the ListaDAO lisUSD/USDT pool: PCSStableOracle.setPoolConfig(lisUSD, ListaDAOPool, 0, 1, USDT, 18) then SentinelOracle.setTokenOracleConfig(lisUSD, PCSStableOracle). The ListaDAO pool exposes the PancakeSwap StableSwap interface, which the existing CurveOracle (int128 indices) cannot read, hence the new adapter.
+
+#### BNB Chain — bStock backstop liquidator (Core pool)
+
+7. **Whitelist the bStock backstop liquidator as a flash loan account** — setWhiteListFlashLoanAccount(BStockLiquidator, true). The Core Pool flash loan feature is already live (enabled by [VIP-567](https://app.venus.io/#/governance/proposal/567?chainId=56) and activated for all markets), and the Comptroller only allows whitelisted accounts to initiate flash loans. This authorizes the bStock backstop liquidator to atomically repay an undercollateralized bStock borrow, seize and redeem the collateral, and sell it for the debt asset within a single transaction, without locking protocol capital — the same pattern as [VIP-576](https://app.venus.io/#/governance/proposal/576?chainId=56), which whitelisted the Leveraged Positions manager.
 
 #### Ethereum — eBTC (Core pool, cross-chain)
 
-7. **Set the eBTC supply cap to 0** — \`setMarketSupplyCaps([veBTC], [0])\` on the Ethereum Core Comptroller.
-8. **Reset the Emergency Brake CF snapshot** for veBTC — \`resetCFSnapshot(veBTC)\`.
-9. **Disable the Deviation Sentinel for eBTC** — \`setTokenMonitoringEnabled(eBTC, false)\`.
-10. **Redeem the treasury-held veBTC back to eBTC** (direct redemption through the Normal Timelock, same flow as VIP-526): \`VTreasuryV8.withdrawTreasuryToken(veBTC, 0.14471345, NormalTimelock)\` moves the Treasury's full veBTC balance to the Ethereum Normal Timelock, \`veBTC.redeem(0.14471345)\` redeems it to eBTC held by the Timelock, and \`eBTC.transfer(VTreasuryV8, 0.14471345)\` returns the redeemed eBTC to the Treasury. The eBTC market has 0 borrows and full cash with a fixed 1e18 exchange rate, so the position redeems 1:1 with no dust left in the Timelock.
+8. **Set the eBTC supply cap to 0** — setMarketSupplyCaps([veBTC], [0]) on the Ethereum Core Comptroller.
+9. **Reset the Emergency Brake CF snapshot** for veBTC — resetCFSnapshot(veBTC).
+10. **Disable the Deviation Sentinel for eBTC** — setTokenMonitoringEnabled(eBTC, false).
+11. **Redeem the treasury-held veBTC back to eBTC** (direct redemption through the Normal Timelock, same flow as VIP-526): VTreasuryV8.withdrawTreasuryToken(veBTC, 0.14471345, NormalTimelock) moves the Treasury's full veBTC balance to the Ethereum Normal Timelock, veBTC.redeem(0.14471345) redeems it to eBTC held by the Timelock, and eBTC.transfer(VTreasuryV8, 0.14471345) returns the redeemed eBTC to the Treasury. The eBTC market has 0 borrows and full cash with a fixed 1e18 exchange rate, so the position redeems 1:1 with no dust left in the Timelock.
 
-The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setTokenMonitoringEnabled\` permissions (granted in VIP-616), so no additional ACM grants are required. Accrued reserves on the eBTC market are currently 0, so no \`reduceReserves\` step is needed. This redemption path does not rely on the Token Redeemer (which is not deployed on Ethereum); the standard redemption flow works because the market has no borrows and therefore no accruing interest.
+The Ethereum Normal Timelock already holds the resetCFSnapshot and setTokenMonitoringEnabled permissions (granted in VIP-616), so no additional ACM grants are required. Accrued reserves on the eBTC market are currently 0, so no reduceReserves step is needed. This redemption path does not rely on the Token Redeemer (which is not deployed on Ethereum); the standard redemption flow works because the market has no borrows and therefore no accruing interest.
 
 #### References
 
-- [Community Post](https://community.venus.io/) — eBTC Delisting and lisUSD Resumption
 - [ListaDAO lisUSD/USDT pool](https://lista.org/liquidity/pool/bsc/0x8df7891fb2cb3e98c7ab3cfb4d9a59fbcc63c956)
 - Deviation Sentinel governance pattern: VIP-590, VIP-610, VIP-613, VIP-616
 - Treasury redemption pattern (withdraw → redeem → transfer back): VIP-526
+- Flash loan whitelisting pattern: [VIP-567](https://app.venus.io/#/governance/proposal/567?chainId=56), [VIP-576](https://app.venus.io/#/governance/proposal/576?chainId=56)
 
 #### Voting options
 
@@ -170,10 +179,21 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
       },
 
       // ──────────────────────────────────────────────────────────────────────
+      // BNB Chain — bStock backstop liquidator flash-loan whitelist
+      // ──────────────────────────────────────────────────────────────────────
+
+      // 7. Whitelist the bStock backstop liquidator as a flash loan account (VIP-576 pattern).
+      {
+        target: BSC_COMPTROLLER,
+        signature: "setWhiteListFlashLoanAccount(address,bool)",
+        params: [BSTOCK_LIQUIDATOR, true],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────
       // Ethereum — eBTC delisting (cross-chain)
       // ──────────────────────────────────────────────────────────────────────
 
-      // 7. Set the eBTC supply cap to 0.
+      // 8. Set the eBTC supply cap to 0.
       {
         target: ETH_CORE_COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
@@ -181,7 +201,7 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
         dstChainId: LzChainId.ethereum,
       },
 
-      // 8. Reset the Emergency Brake CF snapshot for veBTC.
+      // 9. Reset the Emergency Brake CF snapshot for veBTC.
       {
         target: ETH_EBRAKE,
         signature: "resetCFSnapshot(address)",
@@ -189,7 +209,7 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
         dstChainId: LzChainId.ethereum,
       },
 
-      // 9. Disable the Deviation Sentinel for eBTC.
+      // 10. Disable the Deviation Sentinel for eBTC.
       {
         target: ETH_DEVIATION_SENTINEL,
         signature: "setTokenMonitoringEnabled(address,bool)",
@@ -197,7 +217,7 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
         dstChainId: LzChainId.ethereum,
       },
 
-      // 10. Redeem the treasury-held veBTC back to eBTC directly through the Normal Timelock (VIP-526 flow):
+      // 11. Redeem the treasury-held veBTC back to eBTC directly through the Normal Timelock (VIP-526 flow):
       //   a) move the treasury's full veBTC balance to the Ethereum Normal Timelock (the executor of
       //      these cross-chain commands, so it becomes the holder that can redeem).
       {
@@ -227,4 +247,4 @@ The Ethereum Normal Timelock already holds the \`resetCFSnapshot\` and \`setToke
   );
 };
 
-export default vip664;
+export default vip647;
