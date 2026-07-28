@@ -123,7 +123,7 @@ forking(BLOCK_NUMBER, async () => {
         expect(config.enableFlagsForOracles).to.deep.equal([true, true, false]);
       });
 
-      it(`${symbol}: BoundValidator anchor band set to ±1%`, async () => {
+      it(`${symbol}: BoundValidator anchor band set to ±2%`, async () => {
         const c = await boundValidator.validateConfigs(asset);
         expect(c.upperBoundRatio).to.equal(UPPER_BOUND);
         expect(c.lowerBoundRatio).to.equal(LOWER_BOUND);

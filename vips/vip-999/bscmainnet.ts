@@ -13,9 +13,9 @@ export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const ATLAS_ORACLE = "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0";
 export const MAX_STALE_PERIOD = 3800;
 
-// ±1% anchor band (feed deviation threshold is 1%)
-export const UPPER_BOUND = parseUnits("1.01", 18);
-export const LOWER_BOUND = parseUnits("0.99", 18);
+// ±2% anchor band
+export const UPPER_BOUND = parseUnits("1.02", 18);
+export const LOWER_BOUND = parseUnits("0.98", 18);
 
 export interface AproAsset {
   symbol: string;
@@ -84,9 +84,21 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
 4. **Insert APRO as PIVOT** in the ResilientOracle for the four assets: oracles become
    [Atlas (MAIN), APRO (PIVOT), 0 (no FALLBACK)] with enable flags [true, true, false]. Atlas is
    unchanged as MAIN.
-5. **Set the BoundValidator anchor band** for the four assets to ±1% (upper 1.01, lower 0.99) — the
-   tighter of the two bands in use on BNB Chain — so the MAIN (Atlas) price is validated against the
-   PIVOT (APRO) price.
+5. **Set the BoundValidator anchor band** for the four assets to ±2% (upper 1.02, lower 0.98) so the
+   MAIN (Atlas) price is validated against the PIVOT (APRO) price. The band has to absorb the gap
+   between two independent feeds — each feed's own deviation threshold plus the skew between their
+   ~1h heartbeats — rather than a single feed's threshold. Over a 14-day sample of both feeds the
+   observed Atlas-vs-APRO spread peaks near 1.6%, so ±2% keeps normal operation inside the band
+   while still rejecting a genuine divergence.
+
+#### Execution precondition
+
+APRO must whitelist the APRO oracle (\`0x04480f1Ba2252CDF89deB022B58d0a03d1B4cF91\`) as an authorised
+contract reader on the access controller of all four price feeds **before this VIP executes**. The
+feeds are \`AccessControlledOffchainAggregator\`s that reject contract callers unless whitelisted; with
+a PIVOT enabled and no FALLBACK, an unreadable pivot makes \`ResilientOracle.getPrice\` revert for
+these assets, which would block supply and redeem on the four markets. This must be re-checked after
+the timelock delay and immediately before execution.
 
 #### Voting options
 
