@@ -2,9 +2,10 @@ import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 // ===================================================================================================
-// VIP-680 [BNB Chain Mainnet] — Liquidity Hub address book. Launch set: THREE Hubs, one per asset
-// (USDT, USDC, U). One Hub proxy + three source proxies (Core / Flux / FRV) per asset; the registry,
-// the three adapters, the four beacons and the Migrator are shared once per chain.
+// VIP-680 [BNB Chain Mainnet] — Liquidity Hub address book, shared by BOTH onboarding proposals in
+// this directory (bscmainnet-part-1.ts = USDT + USDC, bscmainnet-part-2.ts = U). Launch set: THREE
+// Hubs, one per asset. One Hub proxy + three source proxies (Core / Flux / FRV) per asset; the
+// registry, the three adapters, the four beacons and the Migrator are shared once per chain.
 //
 // STATUS: the Hub stack is DEPLOYED on BNB Chain mainnet. Every address below is filled from
 // venus-liquidity-hub/deployments/bscmainnet/<Name>.json and verified on-chain (see below).
@@ -21,11 +22,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 //     LendingResolver 0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569.
 //   - Of the four governance accounts, only NORMAL_TIMELOCK holds DEFAULT_ADMIN_ROLE on the ACM, so
 //     this proposal must be REGULAR.
-//   - AuxiliaryCommandsAggregator batchCount() == 2 (== ACM_BATCH_INDEX_BASE), owner() ==
+//   - AuxiliaryCommandsAggregator batchCount() == 2 (== ACM_BATCH_INDEX_BASE_PART_1), owner() ==
 //     NORMAL_TIMELOCK; NORMAL and FAST_TRACK hold executeBatch(uint256).
 // ===================================================================================================
 
-const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } =
+const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, VTREASURY } =
   NETWORK_ADDRESSES.bscmainnet;
 
 export const ACM = ACCESS_CONTROL_MANAGER; // 0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555
@@ -39,30 +40,42 @@ export { CRITICAL_TIMELOCK };
 export const OPERATOR: string = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 
 // ---------------------------------------------------------------------------------------------------
-// ACM batching — AuxiliaryCommandsAggregator.
+// Bootstrap deposit. Each Hub is seeded from the Treasury in the same proposal, so governance is the
+// first depositor and totalSupply is never 0. Shares go to the burn address rather than the Treasury:
+// a redeemable seed could be withdrawn later, returning supply to 0 and re-opening `_deposit`'s
+// refill-from-empty branch. Defence in depth only — the deployed decimalsOffset of 6 is what actually
+// makes a first-deposit inflation attack non-griefing.
 //
-// All 233 ACM grants (77 per asset x3 + 2 registry) far exceed both GovernorBravo's
-// proposalMaxOperations of 100 and the 16,777,216 per-tx gas cap. They are pre-seeded as THREE batches
-// (one per asset; the registry's two grants ride in the USDT batch) and replayed by three executeBatch
-// commands, holding the aggregator's DEFAULT_ADMIN_ROLE only transiently. One batch per asset keeps
-// each executeBatch (~79 grants) comfortably under the per-tx gas cap.
+// The receiver cannot be address(0): ERC4626 `_deposit` ends in `_mint`, which rejects it.
 //
-// Every call in every batch targets the ACM itself — giveCallPermission(contract, sig, account) — so
-// the aggregator never touches a Hub or the registry directly and needs no permission on them.
+// withdrawTreasuryBEP20 is onlyOwner (not ACM-gated) and the Treasury owner is the Normal Timelock,
+// so no grant is needed. It SILENTLY CLAMPS to the treasury balance instead of reverting when short,
+// which is why the simulation asserts that balance up front.
+// ---------------------------------------------------------------------------------------------------
+export { VTREASURY };
+export const BOOTSTRAP_RECEIVER = "0x000000000000000000000000000000000000dEaD";
+export const BOOTSTRAP_SEED = parseUnits("10", 18).toString(); // 10 tokens per asset (all 18-dec)
+
+// ---------------------------------------------------------------------------------------------------
+// ACM batching — AuxiliaryCommandsAggregator, brought into service by VIP-628.
 //
-// Source: governance-contracts/contracts/Utils/AuxiliaryCommandsAggregator.sol (develop).
-// Address: deployments/bscmainnet/AuxiliaryCommandsAggregator.json, brought into service by VIP-628.
+// All 234 grants (77 per asset x3, plus 2 registry grants in part 1 and the redundant `addHub`
+// re-grant in part 2) exceed both GovernorBravo's proposalMaxOperations of 100 and the per-tx gas cap.
+// They are pre-seeded one batch per asset and replayed by executeBatch, with the aggregator holding
+// DEFAULT_ADMIN_ROLE only for the duration of the proposal.
 // ---------------------------------------------------------------------------------------------------
 export const AUX_COMMANDS_AGGREGATOR = "0x528A428748dfE73DFcc844176B401475D1831057";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-// The first of three consecutive batch slots this VIP occupies: USDT = base, USDC = base+1, U = base+2.
+// Part 1 takes two consecutive slots (USDT = base, USDC = base+1), part 2 one. Each part pins its own
+// base rather than deriving part 2's from part 1's: batches are append-only and the parts are seeded
+// at different times, so anything another VIP appends in between shifts part 2 alone.
 //
-// TODO(ops): re-verify immediately before seeding. Batches are append-only, so any batch seeded by
-// another VIP in the meantime shifts this. The seed script asserts batchCount() == base and uses the
-// indexed addBatch(calls, expectedIndex) overload (reverts InvalidBatchIndex), so a stale value trips
-// loudly rather than landing grants in the wrong slot — bump this and re-run if it does.
-export const ACM_BATCH_INDEX_BASE = 2;
+// TODO(ops): re-verify both immediately before their runs of provisionAcmBatches.ts. That script
+// asserts batchCount() == the selected part's base and uses the indexed addBatch overload, so a stale
+// value reverts rather than landing grants in the wrong slot.
+export const ACM_BATCH_INDEX_BASE_PART_1 = 2;
+export const ACM_BATCH_INDEX_BASE_PART_2 = 4;
 
 // ---------------------------------------------------------------------------------------------------
 // Shared Hub infrastructure — one deployment per chain.
@@ -72,20 +85,22 @@ export const ADAPTER_CORE_V1 = "0x4E514a0C7aB9d140eE204dfA0017574270D92944"; // 
 export const ADAPTER_FRV = "0x1FA0365bDd603452CE96BE3c0e12Db5515a35902"; // AdapterFRV.json — shared (unused until a vault exists)
 export const ADAPTER_FLUX = "0xA81bDf813A428053E764C34Bc679b3E4d0807be3"; // AdapterFlux.json — shared by every Flux source
 
-// Reference only (not called by the VIP). Recorded so the simulation can assert owners.
+// Not called by the VIP. Recorded so the simulation can assert who may replace the implementation
+// behind every proxy in the launch set.
 export const HUB_BEACON = "0x0f20e1004962e2DF16c16FC15460Dc6480626321";
 export const CORE_BEACON = "0x195a0F1BCF73C3Beb609a1271E8E08b8E4c098C6";
 export const FRV_BEACON = "0x8A5EceDD726246682402430b9B24c19bF61B7f1d";
 export const FLUX_BEACON = "0x9bb6a3Ac5955fA8dc236560CA9D51483d1d79f15";
 export const HUB_REGISTRY_PROXY_ADMIN = "0x3E2fbA605c1d9D470FB2691c4AA59Eb0570caB3E";
-export const MIGRATOR = "0xfe6b8BEf1215C19Cd247FbF495ef560932F1Eb9B"; // immutable, permissionless — no wiring
+
+// Deliberately not asserted anywhere: the Migrator is non-upgradeable with no owner and no ACM, so
+// there is nothing to wire and nothing to check.
+export const MIGRATOR = "0xfe6b8BEf1215C19Cd247FbF495ef560932F1Eb9B";
 
 // ---------------------------------------------------------------------------------------------------
-// Per-asset Hub stacks, all deployed and verified on-chain (2026-07-29). `asset` / `vToken` / `fToken`
-// are the live underlying + resources; `hub` / `core` / `flux` / `frv` are the BeaconProxy instances
-// from deploy script 06 (deployments/bscmainnet/{Hub,CoreSource,FluxSource,FRVSource}_<KEY>.json).
-// Every vToken.underlying() and fToken.asset() equals `asset`; every source is bound to its `hub` and
-// `asset` and to the canonical ACM (checked on-chain, see header).
+// Per-asset Hub stacks. `asset` / `vToken` / `fToken` are the live underlying and resources; the rest
+// are BeaconProxy instances from deployments/bscmainnet/{Hub,CoreSource,FluxSource,FRVSource}_<KEY>.
+// Bindings verified on-chain — see the header.
 // ---------------------------------------------------------------------------------------------------
 export interface HubStack {
   key: string;
@@ -98,7 +113,8 @@ export interface HubStack {
   frv: string;
 }
 
-export const STACKS: HubStack[] = [
+// Part 1 takes USDT and USDC, part 2 takes U. See commands.ts for why the launch set is split.
+export const STACKS_PART_1: HubStack[] = [
   {
     key: "USDT",
     asset: "0x55d398326f99059fF775485246999027B3197955",
@@ -119,6 +135,9 @@ export const STACKS: HubStack[] = [
     flux: "0xA65bB4b20542268B64CF08871a98D75342AFE927",
     frv: "0x438388847eE16850Ab4f5b82dc7954c0d043B716",
   },
+];
+
+export const STACKS_PART_2: HubStack[] = [
   {
     key: "U",
     asset: "0xcE24439F2D9C6a2289F741120FE202248B666666",
@@ -131,18 +150,20 @@ export const STACKS: HubStack[] = [
   },
 ];
 
+// Neither proposal iterates this; the simulations use it to assert the end state after both parts.
+export const STACKS: HubStack[] = [...STACKS_PART_1, ...STACKS_PART_2];
+
 // ---------------------------------------------------------------------------------------------------
-// Cap constants for Hub.addYieldGroup(source, absoluteCap, percentageCapBps). Identical for all three
-// assets (all 18-dec), per the shipment plan's routing & caps worksheet.
-//   - Core: absolute 2B, percentage 100% (the 10_000 sentinel disables the percentage dimension, so the
-//     absolute cap alone binds and the first deposit lands in Core from block one).
-//   - Flux: absolute 7M, percentage 20% of live TVL. At TVL 0 the effective cap is 0, so Flux fills only
-//     via Operator `reallocate` once Core holds funds — the intended "deposits to Core, rebalance to
-//     Flux" policy (Hub._effectiveCap, Open item 3).
-//   - FRV: absolute 5M, percentage 30%. Stored config only — FRV is registered but has no resource and
-//     is out of both outer queues, so nothing routes to it until a later VIP wires a vault.
+// Caps for Hub.addYieldGroup(source, absoluteCap, percentageCapBps), from the shipment plan's routing
+// worksheet. Identical for all three assets, which are all 18-decimal. `_effectiveCap` takes the lower
+// of the two dimensions, so:
+//   - Core binds on its absolute cap alone and takes deposits from block one.
+//   - Flux is held to 20% of TVL, well under its absolute cap at launch, so it fills via Operator
+//     `reallocate` rather than from the deposit queue.
+//   - FRV is stored config only until a later VIP wires a vault. See stackCommands() in commands.ts
+//     for why it is still listed last in the withdraw queue.
 // ---------------------------------------------------------------------------------------------------
-// 10_000 bps == BPS_DENOMINATOR: percentage cap disabled, absolute cap only.
+// The 10_000 sentinel equals BPS_DENOMINATOR, which disables the percentage dimension entirely.
 export const PERCENTAGE_CAP_DISABLED = 10_000;
 
 export const CORE_ABSOLUTE_CAP = parseUnits("2000000000", 18).toString(); // 2,000,000,000 tokens

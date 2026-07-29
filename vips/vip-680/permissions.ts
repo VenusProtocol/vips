@@ -1,31 +1,33 @@
 // ===================================================================================================
-// VIP-680 — Liquidity Hub (USDT) ACM role-string sets.
+// VIP-680 — Liquidity Hub ACM role-string sets, shared by the mainnet and testnet proposals.
 //
-// Every string is the literal function signature passed to `_checkAccessAllowed(...)` in the deployed
-// contracts (the ACM role is `keccak256(targetContract, roleString)`), copied verbatim from
-// venus-liquidity-hub/contracts. Roles by holder (mainnet policy, per the shipment plan's permission
-// tables): Governance holds everything; the Operator is the routine keeper (raise/lower caps, pause,
-// reorder queues, plus the operator-exclusive `reallocate`); the Guardian is the instant emergency
-// multisig (pause + `emergencyReallocate` + FRV `forceRemoveResource`). Only Governance may unpause,
-// change fees, add/remove, or repoint an adapter.
+// Every string is the literal signature passed to `_checkAccessAllowed(...)` in the deployed
+// contracts, copied verbatim — the ACM role is `keccak256(targetContract, roleString)`, so a string
+// that merely looks right grants a role nothing checks.
 //
 // Source of truth per contract:
-//   Hub/Hub.sol                     -> HUB_*        (19 gated fns: 18 governance + operator-only reallocate)
-//   YieldGroup/base/YieldGroupBase  -> YIELD_GROUP_BASE (8 shared gated fns)
-//   YieldGroup/YieldGroup.sol       -> CORE_FLUX_*  (base + resource caps + setBlocksPerYear)
-//   YieldGroup/YieldGroupFRV.sol    -> FRV_*        (base + forceRemoveResource; NO caps, NO blocksPerYear)
-//   registry/HubRegistry.sol        -> HUB_REGISTRY (addHub / removeHub)
+//   Hub/Hub.sol                     -> HUB_*             (19 gated fns: 18 governance + reallocate)
+//   YieldGroup/base/YieldGroupBase  -> YIELD_GROUP_BASE  (8 shared gated fns)
+//   YieldGroup/YieldGroup.sol       -> CORE_FLUX_*       (base + resource caps + setBlocksPerYear)
+//   YieldGroup/YieldGroupFRV.sol    -> FRV_*             (base + forceRemoveResource; no caps)
+//   registry/HubRegistry.sol        -> HUB_REGISTRY_*    (addHub / removeHub)
+//
+// The holder split departs from the shipment plan's tables in two places, both resolved against the
+// contracts:
+//   - the Guardian also holds `pauseHub()`, per Hub.sol's "(Operator, Guardian, or VIP)" and the
+//     protocol README; only the plan's table leaves that cell blank.
+//   - Governance is NOT granted `reallocate`, which the plan's table marks yes. Its own prose says
+//     otherwise, and Governance holds `emergencyReallocate`, which also works while paused.
 // ===================================================================================================
 
-// Operator-only on the Hub: net-zero rebalance, callable only while unpaused. NOT in the Governance
-// set (governance holds the pause-bypassing `emergencyReallocate` instead).
+// Operator-only: net-zero rebalance, callable only while unpaused.
 export const REALLOCATE = "reallocate((address,address,uint256)[],(address,address,uint256)[])";
 
 // ---------------------------------------------------------------------------------------------------
-// Hub_USDT.
+// Hub. Identical for every asset stack — the ACM binds a role per contract address.
 // ---------------------------------------------------------------------------------------------------
 
-// Governance role set: every gated Hub function EXCEPT `reallocate` (operator-only).
+// Every gated Hub function except `reallocate`.
 export const HUB_GOVERNANCE = [
   "addYieldGroup(address,uint256,uint16)",
   "removeYieldGroup(address)",
@@ -47,10 +49,8 @@ export const HUB_GOVERNANCE = [
   "sweep(address,address)",
 ];
 
-// Operator role set (the routine keeper): raise AND lower the yield-group cap, lower the per-tx cap,
-// reorder the outer queues, pause the Hub or a yield group, plus the operator-exclusive `reallocate`.
-// `raiseYieldGroupCap` is included so the keeper can open headroom before a `reallocate` push without a
-// governance round. It gets no unpause, no raise-per-tx, no fees, no add/remove, and no `sweep`.
+// The routine keeper. `raiseYieldGroupCap` is included so it can open headroom before a `reallocate`
+// without a governance round; it gets no unpause, no fees, no add/remove and no `sweep`.
 export const HUB_OPERATOR = [
   "raiseYieldGroupCap(address,uint256,uint16)",
   "lowerYieldGroupCap(address,uint256,uint16)",
@@ -62,16 +62,14 @@ export const HUB_OPERATOR = [
   "lowerMaxWithdrawalSize(uint256)",
 ];
 
-// Full control on the Hub = Governance ∪ {reallocate}, deduped (reallocate is the only operator sig
-// not already in HUB_GOVERNANCE). Used only by the testnet Guardian proposal.
+// Governance plus `reallocate`, the only operator signature not already in HUB_GOVERNANCE.
+// Testnet Guardian proposal only.
 export const HUB_FULL = [...HUB_GOVERNANCE, REALLOCATE];
 
 // ---------------------------------------------------------------------------------------------------
-// Yield sources (Core / FRV / Flux). All three share the YieldGroupBase surface; each subclass adds
-// a few functions.
+// Yield sources. All three share the YieldGroupBase surface; each subclass adds to it.
 // ---------------------------------------------------------------------------------------------------
 
-// Shared by all three sources.
 export const YIELD_GROUP_BASE = [
   "addResource(address,address)",
   "removeResource(address)",
@@ -83,7 +81,7 @@ export const YIELD_GROUP_BASE = [
   "sweep(address,address)",
 ];
 
-// Core & Flux use `YieldGroup`: base + per-resource caps + blocksPerYear.
+// Core and Flux are `YieldGroup`.
 export const CORE_FLUX_GOVERNANCE = [
   ...YIELD_GROUP_BASE,
   "raiseResourceCap(address,uint256)",
@@ -91,12 +89,10 @@ export const CORE_FLUX_GOVERNANCE = [
   "setBlocksPerYear(uint256)",
 ];
 
-// FRV uses `YieldGroupFRV`: base + forceRemoveResource. It has NO cap setters and NO setBlocksPerYear,
-// so it must not reuse CORE_FLUX_GOVERNANCE.
+// FRV is `YieldGroupFRV`: no cap setters, no setBlocksPerYear, so it must not reuse the set above.
 export const FRV_GOVERNANCE = [...YIELD_GROUP_BASE, "forceRemoveResource(address)"];
 
-// Operator sets on the sources. Core/Flux: raise and lower the per-resource cap, reorder inner queues,
-// pause a resource. FRV has no per-resource cap, so its operator set is the queue + pause subset only.
+// FRV has no per-resource cap, so its operator set is the queue + pause subset.
 export const CORE_FLUX_OPERATOR = [
   "raiseResourceCap(address,uint256)",
   "lowerResourceCap(address,uint256)",
@@ -111,14 +107,10 @@ export const FRV_OPERATOR = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// Guardian sets (mainnet). The Venus Guardian multisig acts instantly, with no timelock delay, so it
-// holds only the pure-containment levers: pause at every level (Hub, yield group, resource),
-// `emergencyReallocate` (route funds out of danger — the sole fund-mover that still works while the Hub
-// is paused), and `forceRemoveResource` on FRV (evict a bricked vault). It deliberately holds NO
-// unpause (loosening is governance-only, so the Guardian can contain but can never undo a
-// governance-ordered pause), NO cap changes (raising caps is the Operator's headroom lever, not an
-// emergency one), no queues, no fees, no adapter repointing, and nothing on the registry. Every string
-// below is a strict subset of the matching Governance set above.
+// Guardian sets (mainnet). The Guardian multisig acts with no timelock delay, so it holds containment
+// only: pause at every level, `emergencyReallocate` (the sole fund-mover that works while paused), and
+// `forceRemoveResource` to evict a bricked FRV vault. No unpause, so it can contain but never undo a
+// governance-ordered pause. Every string here is a strict subset of the Governance set above.
 // ---------------------------------------------------------------------------------------------------
 export const HUB_GUARDIAN = [
   "pauseHub()",
@@ -126,32 +118,25 @@ export const HUB_GUARDIAN = [
   "emergencyReallocate((address,address,uint256)[],(address,address,uint256)[])",
 ];
 
-// Core & Flux: pause a resource.
 export const CORE_FLUX_GUARDIAN = ["pauseResource(address)"];
 
-// FRV: pause a resource plus the emergency eviction lever for a bricked vault.
 export const FRV_GUARDIAN = ["pauseResource(address)", "forceRemoveResource(address)"];
 
 // ---------------------------------------------------------------------------------------------------
 // HubRegistry — the only two gated functions.
 // ---------------------------------------------------------------------------------------------------
-export const HUB_REGISTRY_GOVERNANCE = ["addHub(address)", "removeHub(address)"];
+// Broken out because part 2 re-grants exactly this role and nothing else on the registry.
+export const ADD_HUB = "addHub(address)";
 
-// ---------------------------------------------------------------------------------------------------
-// Command builder: ACM.giveCallPermission(contract, roleString, account). `acm` is passed in by the
-// caller so this module stays network-agnostic — each network's VIP supplies its own ACM from its
-// address book (see addresses/<network>.ts).
-// ---------------------------------------------------------------------------------------------------
+export const HUB_REGISTRY_GOVERNANCE = [ADD_HUB, "removeHub(address)"];
+
+// `acm` is a parameter so this module stays network-agnostic; each network's VIP supplies its own.
 export const giveCallPermission = (acm: string, contract: string, sig: string, account: string) => ({
   target: acm,
   signature: "giveCallPermission(address,string,address)",
   params: [contract, sig, account],
 });
 
-// NOTE on the testnet/mainnet split. bsctestnet-guardian.ts grants the Guardian HUB_FULL plus the
-// full Governance set on every source — a testnet-only convenience for fast iteration, deliberately
-// NOT mirrored to mainnet. bscmainnet.ts applies the asymmetric model from the README instead: the
-// Normal Timelock holds the Governance sets and the registry; the Guardian holds only the emergency
-// *_GUARDIAN subsets above; the Operator holds only HUB_OPERATOR / CORE_FLUX_OPERATOR / FRV_OPERATOR
-// plus `reallocate` (no registry, no Governance). The Critical and Fast-Track Timelocks receive
-// nothing on the Hub stack.
+// bsctestnet-guardian.ts grants the Guardian HUB_FULL plus the full Governance set on every source.
+// That is a testnet convenience for fast iteration and is deliberately not mirrored to mainnet, which
+// uses the *_GUARDIAN subsets above.
