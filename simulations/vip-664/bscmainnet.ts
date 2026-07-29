@@ -7,10 +7,15 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip664, {
+  BNBX_REDEEM_AMOUNT,
+  BNB_RETURN_AMOUNT,
+  BNBx,
   BUYBACKS,
   DEV_RECIPIENT,
   FULL_REDEEM_MARKETS,
   GUARDIAN,
+  PARTIAL_REDEEM_MARKETS,
+  STAKE_MANAGER_V2,
   THIRD_PARTY_TOKENS,
   TOKEN_REDEEMER,
   VETH_REDEEM_AMOUNT,
@@ -20,6 +25,7 @@ import vip664, {
 import VTREASURY_ABI from "./abi/VTreasury.json";
 import ERC20_ABI from "./abi/erc20.json";
 import OWNABLE2STEP_ABI from "./abi/ownable2Step.json";
+import STAKE_MANAGER_ABI from "./abi/stakeManagerV2.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -27,11 +33,15 @@ const { NORMAL_TIMELOCK } = bscmainnet;
 
 const FORK_BLOCK = 112790000;
 
-// Every redeemed market (12 fully + vETH partially).
-const ALL_MARKETS = [...FULL_REDEEM_MARKETS, vETH_LiquidStakedETH];
+// The two cash-safe partial redemptions (vUSDT Tron, vETH).
+const PARTIAL_VTOKENS = PARTIAL_REDEEM_MARKETS.map(m => m.vToken);
 
-// One WithdrawTreasuryBEP20 per redeemed market (13) plus one per third-party token (8).
-const EXPECTED_WITHDRAWALS = ALL_MARKETS.length + THIRD_PARTY_TOKENS.length;
+// Every redeemed market (11 fully + 2 partially).
+const ALL_MARKETS = [...FULL_REDEEM_MARKETS, ...PARTIAL_VTOKENS];
+
+// One WithdrawTreasuryBEP20 per redeemed market (13), one per third-party token (7), and one moving
+// BNBx to the Timelock for the native redemption (1).
+const EXPECTED_WITHDRAWALS = ALL_MARKETS.length + THIRD_PARTY_TOKENS.length + 1;
 
 forking(FORK_BLOCK, async () => {
   const buybackContracts: Contract[] = [];
@@ -50,6 +60,12 @@ forking(FORK_BLOCK, async () => {
   const treasuryThirdPartyBefore: BigNumber[] = [];
   const devThirdPartyBefore: BigNumber[] = [];
   let treasuryEthBefore: BigNumber;
+
+  // BNBx native-exit state.
+  let bnbxContract: Contract;
+  let treasuryBnbxBefore: BigNumber;
+  let timelockBnbxBefore: BigNumber;
+  let treasuryBnbBefore: BigNumber;
 
   // vETH's underlying (ETH), resolved in before().
   let treasuryEthKey: string;
@@ -87,6 +103,11 @@ forking(FORK_BLOCK, async () => {
       treasuryThirdPartyBefore.push(await c.balanceOf(VTREASURY));
       devThirdPartyBefore.push(await c.balanceOf(DEV_RECIPIENT));
     }
+
+    bnbxContract = new ethers.Contract(BNBx, ERC20_ABI, ethers.provider);
+    treasuryBnbxBefore = await bnbxContract.balanceOf(VTREASURY);
+    timelockBnbxBefore = await bnbxContract.balanceOf(NORMAL_TIMELOCK);
+    treasuryBnbBefore = await ethers.provider.getBalance(VTREASURY);
   });
 
   describe("Pre-VIP state", () => {
@@ -109,10 +130,21 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("vETH market cash covers the redeem amount", async () => {
-      // 1.99 ETH must be redeemable from the market at execution time.
-      const cash = await new ethers.Contract(vETH_LiquidStakedETH, VTOKEN_ABI, ethers.provider).getCash();
-      expect(cash, "vETH market cash").to.be.gte(VETH_REDEEM_AMOUNT);
+    it("each partial market's cash covers its cash-safe redeem amount", async () => {
+      for (const { vToken, amount } of PARTIAL_REDEEM_MARKETS) {
+        const cash = await new ethers.Contract(vToken, VTOKEN_ABI, ethers.provider).getCash();
+        expect(cash, `partial market ${vToken} cash`).to.be.gte(amount);
+      }
+    });
+
+    it("VTreasury holds BNBx, the Timelock holds none, and Stader's instant redemption pays the expected BNB", async () => {
+      expect(treasuryBnbxBefore, "treasury BNBx").to.be.gt(0);
+      expect(treasuryBnbxBefore, "treasury BNBx == BNBX_REDEEM_AMOUNT").to.equal(BNBX_REDEEM_AMOUNT);
+      expect(timelockBnbxBefore, "timelock BNBx").to.equal(0);
+      // redeemBnbxForBnb pays convertBnbXToBnb of the balance; the forwarded amount must not exceed it.
+      const stakeManager = new ethers.Contract(STAKE_MANAGER_V2, STAKE_MANAGER_ABI, ethers.provider);
+      const expectedBnb = await stakeManager.convertBnbXToBnb(BNBX_REDEEM_AMOUNT);
+      expect(expectedBnb, "convertBnbXToBnb >= forwarded BNB").to.be.gte(BNB_RETURN_AMOUNT);
     });
   });
 
@@ -126,8 +158,10 @@ forking(FORK_BLOCK, async () => {
     callbackAfterExecution: async txResponse => {
       // Part 1: six two-step ownership transfers started.
       await expectEvents(txResponse, [OWNABLE2STEP_ABI], ["OwnershipTransferStarted"], [BUYBACKS.length]);
-      // Part 2 + Part 3: one treasury withdrawal per redeemed market and per third-party token.
+      // Part 2 + Part 3: one treasury withdrawal per redeemed market, per third-party token, and for BNBx.
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [EXPECTED_WITHDRAWALS]);
+      // Part 3: the single BNBx native redemption.
+      await expectEvents(txResponse, [STAKE_MANAGER_ABI], ["RedeemedBnbxForBnb"], [1]);
     },
   });
 
@@ -149,13 +183,15 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("vETH: partially redeemed, leftover vETH returned to treasury, redeemer left empty", async () => {
-      const c = new ethers.Contract(vETH_LiquidStakedETH, VTOKEN_ABI, ethers.provider);
-      const treasuryAfter = await c.balanceOf(VTREASURY);
-      const idx = ALL_MARKETS.indexOf(vETH_LiquidStakedETH);
-      expect(treasuryAfter, "treasury vETH decreased").to.be.lt(treasuryVTokenBefore[idx]);
-      expect(treasuryAfter, "treasury vETH remainder > 0").to.be.gt(0);
-      expect(await c.balanceOf(TOKEN_REDEEMER), "redeemer vETH").to.equal(0);
+    it("partial markets: partially redeemed, leftover vToken returned to treasury, redeemer left empty", async () => {
+      for (const vToken of PARTIAL_VTOKENS) {
+        const c = new ethers.Contract(vToken, VTOKEN_ABI, ethers.provider);
+        const treasuryAfter = await c.balanceOf(VTREASURY);
+        const idx = ALL_MARKETS.indexOf(vToken);
+        expect(treasuryAfter, `treasury ${vToken} decreased`).to.be.lt(treasuryVTokenBefore[idx]);
+        expect(treasuryAfter, `treasury ${vToken} remainder > 0`).to.be.gt(0);
+        expect(await c.balanceOf(TOKEN_REDEEMER), `redeemer ${vToken}`).to.equal(0);
+      }
     });
 
     it("every redeemed underlying increased in the treasury; no underlying stranded on the redeemer", async () => {
@@ -188,6 +224,15 @@ forking(FORK_BLOCK, async () => {
           devThirdPartyBefore[i].add(treasuryThirdPartyBefore[i]),
         );
       }
+    });
+
+    it("BNBx: fully redeemed (none left on treasury or Timelock) and BNB returned to VTreasury", async () => {
+      // BNBx is burned by the redemption, so neither the treasury nor the Timelock holds any afterwards.
+      expect(await bnbxContract.balanceOf(VTREASURY), "treasury BNBx").to.equal(0);
+      expect(await bnbxContract.balanceOf(NORMAL_TIMELOCK), "timelock BNBx").to.equal(timelockBnbxBefore);
+      // VTreasury's native BNB balance increased by exactly the forwarded amount.
+      const treasuryBnbAfter = await ethers.provider.getBalance(VTREASURY);
+      expect(treasuryBnbAfter.sub(treasuryBnbBefore), "VTreasury BNB delta").to.equal(BNB_RETURN_AMOUNT);
     });
   });
 });

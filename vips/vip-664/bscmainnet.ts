@@ -14,6 +14,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // balance is" sentinel: VTreasury caps the amount to its actual balance (VTreasury.sol).
 export const VTREASURY = bscmainnet.VTREASURY;
 export const GUARDIAN = bscmainnet.GUARDIAN; // 0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B
+export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK; // 0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396
 
 // TokenRedeemer (VIP-594) — owned by the Normal Timelock. redeemAndTransfer redeems the redeemer's
 // full vToken balance to `destination`; redeemUnderlyingAndTransfer redeems an exact underlying
@@ -46,10 +47,11 @@ export const BUYBACKS = [BTCB_BUYBACK, ETH_BUYBACK, XVS_BUYBACK, USDT_BUYBACK, U
 // are all 0. Each position is withdrawn (as the vToken) to the TokenRedeemer and redeemed to the
 // underlying, which is sent straight back to VTreasury.
 //
-// Twelve markets are fully redeemed with redeemAndTransfer (market cash >= the treasury position for
-// all of them, verified on-chain). vETH (Liquid Staked ETH) is the exception: its market cash sits
-// close to the position, so it is redeemed for a fixed, cash-safe underlying amount with
-// redeemUnderlyingAndTransfer, leaving a small vETH remainder in VTreasury.
+// Eleven markets are fully redeemed with redeemAndTransfer (market cash comfortably exceeds the
+// treasury position, verified on-chain). Two markets — vUSDT (Tron) and vETH (Liquid Staked ETH) —
+// have market cash that sits close to the treasury position, so each is redeemed for a fixed,
+// cash-safe underlying amount with redeemUnderlyingAndTransfer, leaving a small vToken remainder in
+// VTreasury (still recoverable later).
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Isolated pools (8)
@@ -69,12 +71,11 @@ export const vTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E"; // new-TUSD m
 export const vDOT = "0x1610bc33319e9398de5f57B33a5b184c806aD217";
 export const vMATIC = "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8";
 
-// Markets fully redeemed (position <= market cash on-chain).
+// Markets fully redeemed (position comfortably <= market cash on-chain).
 export const FULL_REDEEM_MARKETS = [
   vWBNB_LiquidStakedBNB,
   vUSDT_GameFi,
   vUSDT_DeFi,
-  vUSDT_Tron,
   vUSDT_Stablecoins,
   vBTCB_BTC,
   vUSDT_Meme,
@@ -85,26 +86,30 @@ export const FULL_REDEEM_MARKETS = [
   vMATIC,
 ];
 
-// vETH partial redemption amount. Treasury position ≈ 2.008392 ETH; market cash ≈ 2.0279 ETH.
-// 1.99 ETH stays comfortably below both, so the redemption cannot revert on insufficient cash even
-// if cash drifts slightly before execution. The un-redeemed remainder (≈0.018 ETH) is returned to
-// VTreasury as vETH.
+// Cash-safe partial redemptions. For these two markets the market's available cash sits close to the
+// treasury position, so instead of a full redeemAndTransfer we redeem a fixed underlying amount with
+// redeemUnderlyingAndTransfer. The amount stays below the market cash so the redemption cannot revert
+// on insufficient cash even if cash drifts slightly before execution; the small un-redeemed remainder
+// is returned to VTreasury as the vToken.
+//
+// - vUSDT (Tron): treasury position ≈ 10,355.92 USDT; market cash ≈ 10,404.31 USDT (only ~0.47% above
+//   the position — the thinnest of the deprecated markets). 10,300 USDT stays safely below cash.
+// - vETH (Liquid Staked ETH): treasury position ≈ 2.008392 ETH; market cash ≈ 2.0279 ETH. 1.99 ETH
+//   stays comfortably below both.
+export const VUSDT_TRON_REDEEM_AMOUNT = parseUnits("10300", 18);
 export const VETH_REDEEM_AMOUNT = parseUnits("1.99", 18);
+
+export const PARTIAL_REDEEM_MARKETS = [
+  { vToken: vUSDT_Tron, amount: VUSDT_TRON_REDEEM_AMOUNT },
+  { vToken: vETH_LiquidStakedETH, amount: VETH_REDEEM_AMOUNT },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Part 3 — Third-party staking receipt tokens.
-// None of these has a clean synchronous on-chain exit, so each is transferred whole to the dev
-// recipient for off-chain unstaking (7–15 day cooldowns or off-chain-only redemption).
+// Rule: exit natively where an immediate on-chain exit exists; otherwise transfer the receipt token
+// to the dev recipient for off-chain unstaking (7–15 day cooldowns or off-chain-only redemption).
 //
-// BNBx is included here rather than exited natively: Stader's StakeManagerV2
-// (0x3b961e83400D51e6E1AF5c450d3C7d7b80588d28) is currently paused() == true and charges
-// feeBps == 1000 (10%), so redeemBnbxForBnb is neither executable nor "instant / zero-fee" as the
-// requirements assumed. Routing BNBx to the dev recipient keeps it consistent with the other
-// positions and avoids the 10% haircut.
-//
-// wBETH is intentionally NOT touched — it is the treasury's only retained yield-bearing position.
-// ─────────────────────────────────────────────────────────────────────────────
-export const BNBx = "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275";
+// These seven have no synchronous on-chain exit, so each is transferred whole to the dev recipient:
 export const SolvBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
 export const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
 export const ankrBNB = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
@@ -113,7 +118,28 @@ export const BETH = "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B";
 export const slisBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
 export const stkBNB = "0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16";
 
-export const THIRD_PARTY_TOKENS = [BNBx, SolvBTC, xSolvBTC, ankrBNB, asBNB, BETH, slisBNB, stkBNB];
+export const THIRD_PARTY_TOKENS = [SolvBTC, xSolvBTC, ankrBNB, asBNB, BETH, slisBNB, stkBNB];
+
+// BNBx (Stader) — exited natively. Stader's StakeManagerV2 offers an instant, zero-fee redemption
+// via redeemBnbxForBnb: the caller's BNBx is burned and BNB is paid to msg.sender in the same call.
+// Stader V2 is in sunset mode — paused() == true and feeBps == 1000 gate the *asynchronous*
+// requestWithdraw path only; they do NOT gate redeemBnbxForBnb (verified: a redeemBnbxForBnb of the
+// full treasury balance executes with paused() == true and returns the full convertBnbXToBnb value
+// with no fee). So BNBx is withdrawn to the Normal Timelock, redeemed for BNB (paid to the Timelock),
+// and the BNB is forwarded to VTreasury.
+//
+// wBETH is intentionally NOT touched — it is the treasury's only retained yield-bearing position.
+export const BNBx = "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275";
+export const STAKE_MANAGER_V2 = "0x3b961e83400D51e6E1AF5c450d3C7d7b80588d28";
+
+// Treasury BNBx balance to redeem (static holding; verified on-chain). MaxUint256 is withdrawn to the
+// Timelock and this exact amount is burned by redeemBnbxForBnb.
+export const BNBX_REDEEM_AMOUNT = "31139027608566113112"; // 31.139027608566113112 BNBx
+
+// BNB forwarded from the Timelock to VTreasury after the redemption. Equals convertBnbXToBnb of the
+// balance above at authoring time. The Stader rate is frozen (sunset), so the redemption pays exactly
+// this; any trivial remainder from a late rate tick stays in the Timelock (Venus-controlled).
+export const BNB_RETURN_AMOUNT = "34562765676008670355"; // 34.562765676008670355 BNB
 
 export const vip664 = () => {
   const meta = {
@@ -143,15 +169,19 @@ Each of these markets has collateral factor, supply cap and borrow cap all set t
 Isolated pools (8): vWBNB (Liquid Staked BNB), vUSDT (GameFi), vUSDT (DeFi), vUSDT (Tron), vUSDT (Stablecoins), vBTCB (BTC), vUSDT (Meme), vETH (Liquid Staked ETH).
 Core pool (5): vTRXOLD, vBUSD, vTUSD (new-TUSD market), vDOT, vMATIC.
 
-- **vETH (Liquid Staked ETH)** is redeemed for a fixed, cash-safe underlying amount (1.99 ETH) rather than in full, because the market's available cash sits close to the treasury position. The small un-redeemed remainder (≈0.018 ETH) is returned to VTreasury as vETH.
-- The three thin USDT pools (**Tron**, **Stablecoins**, **Meme**) are fully redeemable but the treasury is effectively their entire supply, so redeeming leaves those pools near-empty.
+- **vUSDT (Tron)** and **vETH (Liquid Staked ETH)** are each redeemed for a fixed, cash-safe underlying amount (10,300 USDT and 1.99 ETH respectively) rather than in full, because their market cash sits close to the treasury position (vUSDT Tron is the thinnest, cash only ≈0.47% above the position). The small un-redeemed remainder is returned to VTreasury as the vToken and stays recoverable.
+- The three thin USDT pools (**Tron**, **Stablecoins**, **Meme**) are drained near-empty, because the treasury is effectively their entire supply.
 - Out of scope: vUST / vLUNA (already unlisted — handled with the write-off proposal) and vTUSDOLD (illiquid; redeemed in a later batch after the positions are manually worked out).
 
-#### Part 3 — Third-party staking positions → dev recipient
+#### Part 3 — Third-party staking positions
 
-None of these receipt tokens has a clean synchronous on-chain exit (7–15 day cooldowns or off-chain-only redemption), so each is transferred whole to the precedented Venus dev recipient (${DEV_RECIPIENT}) for off-chain unstaking: SolvBTC, xSolvBTC, ankrBNB, asBNB, BETH, slisBNB, stkBNB, and BNBx.
+Rule: exit natively where an immediate on-chain exit exists; otherwise transfer the receipt token to the precedented Venus dev recipient (${DEV_RECIPIENT}) for off-chain unstaking.
 
-BNBx is routed to the dev recipient rather than exited natively through Stader: its StakeManagerV2 is currently paused and charges a 10% redemption fee, so an on-chain \`redeemBnbxForBnb\` is neither executable nor free (contrary to the "instant / zero-fee" assumption). wBETH is intentionally retained — it is the treasury's only yield-bearing position.
+Seven receipt tokens have no synchronous on-chain exit (7–15 day cooldowns or off-chain-only redemption) and are transferred whole to the dev recipient: SolvBTC, xSolvBTC, ankrBNB, asBNB, BETH, slisBNB, stkBNB.
+
+**BNBx (Stader)** is exited natively: it is withdrawn to the Normal Timelock, redeemed for BNB via \`StakeManagerV2.redeemBnbxForBnb\` (instant, zero-fee), and the BNB is forwarded to VTreasury. Stader V2 is in sunset mode, where \`paused()\` and \`feeBps\` gate only the asynchronous \`requestWithdraw\` path — not the instant \`redeemBnbxForBnb\`, which pays the full BNB value with no fee.
+
+wBETH is intentionally retained — it is the treasury's only yield-bearing position.
 
 #### Note on the vUST interest-rate change
 
@@ -197,28 +227,52 @@ Repointing vUST to a 0% interest-rate model is **not** part of this VIP. vUST's 
         },
       ]),
 
-      // vETH (Liquid Staked ETH): withdraw the whole position to the redeemer, then redeem a fixed
-      // cash-safe underlying amount to VTreasury; the leftover vETH is returned to VTreasury.
-      {
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [vETH_LiquidStakedETH, constants.MaxUint256, TOKEN_REDEEMER],
-      },
-      {
-        target: TOKEN_REDEEMER,
-        signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
-        params: [vETH_LiquidStakedETH, VTREASURY, VETH_REDEEM_AMOUNT, VTREASURY],
-      },
+      // Cash-safe partial redemptions (vUSDT Tron, vETH): withdraw the whole position to the redeemer,
+      // then redeem a fixed cash-safe underlying amount to VTreasury; the leftover vToken is returned
+      // to VTreasury.
+      ...PARTIAL_REDEEM_MARKETS.flatMap(({ vToken, amount }) => [
+        {
+          target: VTREASURY,
+          signature: "withdrawTreasuryBEP20(address,uint256,address)",
+          params: [vToken, constants.MaxUint256, TOKEN_REDEEMER],
+        },
+        {
+          target: TOKEN_REDEEMER,
+          signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
+          params: [vToken, VTREASURY, amount, VTREASURY],
+        },
+      ]),
 
       // ════════════════════════════════════════════════════════════════════════
-      // Part 3 — Transfer third-party staking receipt tokens to the dev recipient for off-chain
-      // unstaking. type(uint256).max withdraws the whole balance of each.
+      // Part 3 — Recover third-party staking positions.
+      // Seven receipt tokens have no synchronous on-chain exit and are transferred whole to the dev
+      // recipient for off-chain unstaking. type(uint256).max withdraws the whole balance of each.
       // ════════════════════════════════════════════════════════════════════════
       ...THIRD_PARTY_TOKENS.map(token => ({
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [token, constants.MaxUint256, DEV_RECIPIENT],
       })),
+
+      // BNBx (Stader) native exit: withdraw BNBx to the Normal Timelock, redeem it for BNB via
+      // StakeManagerV2.redeemBnbxForBnb (instant, zero-fee; BNB is paid to the Timelock), then forward
+      // the BNB to VTreasury.
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [BNBx, constants.MaxUint256, NORMAL_TIMELOCK],
+      },
+      {
+        target: STAKE_MANAGER_V2,
+        signature: "redeemBnbxForBnb(uint256)",
+        params: [BNBX_REDEEM_AMOUNT],
+      },
+      {
+        target: VTREASURY,
+        signature: "",
+        params: [],
+        value: BNB_RETURN_AMOUNT,
+      },
     ],
     meta,
     ProposalType.REGULAR,
