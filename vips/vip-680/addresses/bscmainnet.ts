@@ -1,64 +1,55 @@
+import { parseUnits } from "ethers/lib/utils";
+
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 // ===================================================================================================
-// VIP-680 [BNB Chain Mainnet] — Liquidity Hub (USDT) address book.
+// VIP-680 [BNB Chain Mainnet] — Liquidity Hub address book. Launch set: THREE Hubs, one per asset
+// (USDT, USDC, U). One Hub proxy + three source proxies (Core / Flux / FRV) per asset; the registry,
+// the three adapters, the four beacons and the Migrator are shared once per chain.
 //
-// STATUS: the Hub stack is NOT deployed on BNB Chain mainnet yet. venus-liquidity-hub/deployments/
-// holds only bsctestnet/, and deploy/config/bscmainnet.json still ships 0x0 for acm / governance /
-// fluxLendingResolver / feeRecipient. Every address in the "Hub stack" sections below is therefore a
-// TODO placeholder that must be filled from venus-liquidity-hub/deployments/bscmainnet/<Name>.json
-// once the deploy lands. Everything outside those sections is live and was verified on-chain.
+// STATUS: the Hub stack is DEPLOYED on BNB Chain mainnet. Every address below is filled from
+// venus-liquidity-hub/deployments/bscmainnet/<Name>.json and verified on-chain (see below).
 //
-// The fork simulation cannot pass while the placeholders are zero: testVip's "can be proposed" step
-// runs validateTargetAddresses(), which requires bytecode at every target. That is expected, not a
-// defect — see simulations/vip-680/bscmainnet.ts.
-//
-// Verified live on bscmainnet (2026-07-23):
-//   - USDT.decimals() == 18  (NOTE: testnet USDT is 6-decimal; do not carry testnet amounts over)
-//   - vUSDT.underlying()  == USDT
-//   - fUSDT.asset()       == USDT, decimals 18, totalAssets ~2.98e24
-//   - Comptroller.treasuryPercent() == 0 -> AdapterCoreV1.validateRegistration accepts vUSDT
-//     (a non-zero per-redeem treasury fee would block Core registration)
-//   - Of the four governance accounts, only NORMAL_TIMELOCK holds DEFAULT_ADMIN_ROLE on the ACM,
-//     so this proposal must be REGULAR
-//   - AuxiliaryCommandsAggregator: batchCount() == 2, owner() == NORMAL_TIMELOCK, and both
-//     NORMAL_TIMELOCK and FAST_TRACK_TIMELOCK hold executeBatch(uint256). CRITICAL_TIMELOCK's grants
-//     on it were revoked by VIP-645, which does not affect this proposal.
+// Verified live on bscmainnet (2026-07-29, block ~112.78M):
+//   - USDT / USDC / U all decimals() == 18, so caps below are in 18-dec asset units uniformly.
+//   - Every Core vToken.underlying() and Flux fToken.asset() equals its asset (all six).
+//   - Per stack (all 36 bindings): hub.asset() == asset, hub.pendingOwner() == NORMAL_TIMELOCK,
+//     hub.accessControlManager() == ACM; and every Core/Flux/FRV source hub()/asset()/
+//     accessControlManager() correct. The sources have NO setter for _accessControlManager/_hub, so
+//     this binding is unrepairable and the check is load-bearing.
+//   - HubRegistry pendingOwner() == NORMAL_TIMELOCK and accessControlManager() == ACM; all four
+//     beacons and the registry ProxyAdmin owner() == NORMAL_TIMELOCK; AdapterFlux resolver == Fluid
+//     LendingResolver 0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569.
+//   - Of the four governance accounts, only NORMAL_TIMELOCK holds DEFAULT_ADMIN_ROLE on the ACM, so
+//     this proposal must be REGULAR.
+//   - AuxiliaryCommandsAggregator batchCount() == 2 (== ACM_BATCH_INDEX_BASE), owner() ==
+//     NORMAL_TIMELOCK; NORMAL and FAST_TRACK hold executeBatch(uint256).
 // ===================================================================================================
 
 const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } =
   NETWORK_ADDRESSES.bscmainnet;
 
-// ---------------------------------------------------------------------------------------------------
-// Governance / access control (source: @venusprotocol/governance-contracts, via NETWORK_ADDRESSES).
-// ---------------------------------------------------------------------------------------------------
 export const ACM = ACCESS_CONTROL_MANAGER; // 0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555
 export { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK };
-// Granted nothing by this proposal. Exported so the simulation can assert they stay empty-handed.
-export { CRITICAL_TIMELOCK, GUARDIAN };
+export { GUARDIAN }; // 0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B
+// Granted nothing by this proposal. Exported so the simulation can assert it stays empty-handed.
+export { CRITICAL_TIMELOCK };
 
-// TODO(ops): the Operator account is not decided yet. It plays the tighten-only role (lower caps,
-// pause, reorder queues) plus the operator-exclusive `reallocate`. Candidates are the Guardian
-// multisig (NETWORK_ADDRESSES.bscmainnet.GUARDIAN, 0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B) or a
-// dedicated operator account. Fill before running utils/seedAcmBatch.ts.
-export const OPERATOR = "0x0000000000000000000000000000000000000000";
+// The Operator (routine keeper): raise/lower caps, reorder queues, pause, plus the operator-exclusive
+// `reallocate`. Distinct from the Guardian.
+export const OPERATOR: string = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 
 // ---------------------------------------------------------------------------------------------------
 // ACM batching — AuxiliaryCommandsAggregator.
 //
-// The 96 ACM grants do not fit inline: 96 + 14 wiring commands = 110, above GovernorBravo's
-// proposalMaxOperations of 100 (a hard revert in propose()), and far above the 16,777,216 per-tx gas
-// cap. Pre-seeding them as one aggregator batch collapses them to three proposal commands.
+// All 233 ACM grants (77 per asset x3 + 2 registry) far exceed both GovernorBravo's
+// proposalMaxOperations of 100 and the 16,777,216 per-tx gas cap. They are pre-seeded as THREE batches
+// (one per asset; the registry's two grants ride in the USDT batch) and replayed by three executeBatch
+// commands, holding the aggregator's DEFAULT_ADMIN_ROLE only transiently. One batch per asset keeps
+// each executeBatch (~79 grants) comfortably under the per-tx gas cap.
 //
-// Every call in the batch targets the ACM itself — `giveCallPermission(contract, sig, account)` — so
-// the aggregator never touches the Hub or the registry directly and needs no Hub permission. It only
-// needs DEFAULT_ADMIN_ROLE on the ACM, which the VIP lends it for exactly one command and takes back
-// in the same atomic transaction.
-//
-// The wiring commands stay inline on purpose. Their targets ARE the Hub and the registry, so batching
-// them would require granting a shared, upgradeable contract standing Hub governance; and
-// `acceptOwnership()` could not be batched at all, since Ownable2Step checks msg.sender against
-// pendingOwner (the Timelock), which the aggregator is not.
+// Every call in every batch targets the ACM itself — giveCallPermission(contract, sig, account) — so
+// the aggregator never touches a Hub or the registry directly and needs no permission on them.
 //
 // Source: governance-contracts/contracts/Utils/AuxiliaryCommandsAggregator.sol (develop).
 // Address: deployments/bscmainnet/AuxiliaryCommandsAggregator.json, brought into service by VIP-628.
@@ -66,80 +57,98 @@ export const OPERATOR = "0x0000000000000000000000000000000000000000";
 export const AUX_COMMANDS_AGGREGATOR = "0x528A428748dfE73DFcc844176B401475D1831057";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-// The batch slot this VIP's grants occupy. Shared by the proposal, the seed script and the
-// simulation so all three agree on one value.
+// The first of three consecutive batch slots this VIP occupies: USDT = base, USDC = base+1, U = base+2.
 //
-// TODO(ops): re-verify immediately before seeding. `batchCount()` read 2 on 2026-07-23, and batches
-// are append-only, so any batch seeded by another VIP in the meantime shifts this. The seed script
-// asserts `batchCount() == ACM_BATCH_INDEX` and uses the indexed `addBatch(calls, expectedIndex)`
-// overload, which reverts `InvalidBatchIndex` rather than silently landing in the wrong slot — bump
-// this constant and re-run if it trips.
-export const ACM_BATCH_INDEX = 2;
+// TODO(ops): re-verify immediately before seeding. Batches are append-only, so any batch seeded by
+// another VIP in the meantime shifts this. The seed script asserts batchCount() == base and uses the
+// indexed addBatch(calls, expectedIndex) overload (reverts InvalidBatchIndex), so a stale value trips
+// loudly rather than landing grants in the wrong slot — bump this and re-run if it does.
+export const ACM_BATCH_INDEX_BASE = 2;
 
 // ---------------------------------------------------------------------------------------------------
-// Hub stack — CALLED by the VIP.
-// TODO(deploy): fill every address below from venus-liquidity-hub/deployments/bscmainnet/<Name>.json.
+// Shared Hub infrastructure — one deployment per chain.
 // ---------------------------------------------------------------------------------------------------
-export const HUB_REGISTRY = "0x0000000000000000000000000000000000000000"; // HubRegistry.json
-export const HUB_USDT = "0x0000000000000000000000000000000000000000"; // Hub_USDT.json
-export const CORE_SOURCE_USDT = "0x0000000000000000000000000000000000000000"; // CoreSource_USDT.json
-export const FRV_SOURCE_USDT = "0x0000000000000000000000000000000000000000"; // FRVSource_USDT.json
-export const FLUX_SOURCE_USDT = "0x0000000000000000000000000000000000000000"; // FluxSource_USDT.json
-export const ADAPTER_CORE_V1 = "0x0000000000000000000000000000000000000000"; // AdapterCoreV1.json
-export const ADAPTER_FRV = "0x0000000000000000000000000000000000000000"; // AdapterFRV.json
-export const ADAPTER_FLUX = "0x0000000000000000000000000000000000000000"; // AdapterFlux.json
+export const HUB_REGISTRY: string = "0x4196932b0c76A114178236C00A5e140f27866790"; // HubRegistry.json — CALLED (acceptOwnership, addHub)
+export const ADAPTER_CORE_V1 = "0x4E514a0C7aB9d140eE204dfA0017574270D92944"; // AdapterCoreV1.json — shared by every Core source
+export const ADAPTER_FRV = "0x1FA0365bDd603452CE96BE3c0e12Db5515a35902"; // AdapterFRV.json — shared (unused until a vault exists)
+export const ADAPTER_FLUX = "0xA81bDf813A428053E764C34Bc679b3E4d0807be3"; // AdapterFlux.json — shared by every Flux source
 
-// Ownable2Step contracts whose ownership is transferred to governance at deploy and must be accepted
-// by the VIP. Until acceptOwnership() runs, the deployer EOA is still the LIVE owner and can repoint
-// setAccessControlManager (onlyOwner), so accepting early retires that key.
-export const OWNERSHIP_ACCEPT_TARGETS = [HUB_REGISTRY, HUB_USDT];
+// Reference only (not called by the VIP). Recorded so the simulation can assert owners.
+export const HUB_BEACON = "0x0f20e1004962e2DF16c16FC15460Dc6480626321";
+export const CORE_BEACON = "0x195a0F1BCF73C3Beb609a1271E8E08b8E4c098C6";
+export const FRV_BEACON = "0x8A5EceDD726246682402430b9B24c19bF61B7f1d";
+export const FLUX_BEACON = "0x9bb6a3Ac5955fA8dc236560CA9D51483d1d79f15";
+export const HUB_REGISTRY_PROXY_ADMIN = "0x3E2fbA605c1d9D470FB2691c4AA59Eb0570caB3E";
+export const MIGRATOR = "0xfe6b8BEf1215C19Cd247FbF495ef560932F1Eb9B"; // immutable, permissionless — no wiring
 
 // ---------------------------------------------------------------------------------------------------
-// Resources registered inside each source — CALLED by the VIP (addResource + inner queues).
-// Live mainnet markets, verified on-chain. Cross-checked against
-// venus-liquidity-hub/tests/foundry/fork/base/ForkAddresses.sol:74-97, which the repo's own mainnet
-// fork suite binds against.
+// Per-asset Hub stacks, all deployed and verified on-chain (2026-07-29). `asset` / `vToken` / `fToken`
+// are the live underlying + resources; `hub` / `core` / `flux` / `frv` are the BeaconProxy instances
+// from deploy script 06 (deployments/bscmainnet/{Hub,CoreSource,FluxSource,FRVSource}_<KEY>.json).
+// Every vToken.underlying() and fToken.asset() equals `asset`; every source is bound to its `hub` and
+// `asset` and to the canonical ACM (checked on-chain, see header).
 // ---------------------------------------------------------------------------------------------------
-export const VUSDT_CORE = "0xfD5840Cd36d94D7229439859C0112a4185BC0255"; // @venusprotocol/venus-protocol core vUSDT
-export const FUSDT_FLUX = "0xA5b8FCa32E5252B0B58EAbf1A8c79d958F8EE6A2"; // Fluid fUSDT fToken (ERC-4626)
+export interface HubStack {
+  key: string;
+  asset: string;
+  vToken: string; // Core resource (Venus vToken)
+  fToken: string; // Flux resource (Fluid fToken)
+  hub: string;
+  core: string;
+  flux: string;
+  frv: string;
+}
 
-// Underlying asset shared by the Hub and every resource above. 18 decimals on mainnet.
-export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const STACKS: HubStack[] = [
+  {
+    key: "USDT",
+    asset: "0x55d398326f99059fF775485246999027B3197955",
+    vToken: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
+    fToken: "0xA5b8FCa32E5252B0B58EAbf1A8c79d958F8EE6A2",
+    hub: "0x18AfDACF30F8671021dec4b78297E39d2FE87226",
+    core: "0xC9E6ceD9589363f8dC5695Be2C79AB4dDaECC94B",
+    flux: "0xe3df38E12E37ED80E1b3ccf2bdf84F9e1527ce14",
+    frv: "0x621eF38cE0C4e7060fF0bF3D609E3D46EC144bE7",
+  },
+  {
+    key: "USDC",
+    asset: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    vToken: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
+    fToken: "0xfE60462E93cee34319F48Cfc6AcFbc13c2882Df9",
+    hub: "0x9D2D9592cF8DFbf59107fAab703d08494BE14617",
+    core: "0x299D9Be7CEfff91c68F13F267d525CFC18e965ef",
+    flux: "0xA65bB4b20542268B64CF08871a98D75342AFE927",
+    frv: "0x438388847eE16850Ab4f5b82dc7954c0d043B716",
+  },
+  {
+    key: "U",
+    asset: "0xcE24439F2D9C6a2289F741120FE202248B666666",
+    vToken: "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E",
+    fToken: "0x007df53Cda786450Cf8145a73B2748B241a0069c",
+    hub: "0x0e5AA174d4F31b757a237eb1999DE151596788B0",
+    core: "0x8A680F77A5367FA7cD33a02f51896Cb1d55159c3",
+    flux: "0xe31B8851c3fa9B3dD39a04a2ed9493869A410616",
+    frv: "0x30908eddB9E94add7AC9944a0adda66d80B89143",
+  },
+];
 
-// NOTE: there is no FRV vault instance for USDT on mainnet — only the controller
-// (0x6D9e91cB766259af42619c14c994E694E57e6E85), the loan-vault implementation and the position token.
-// ForkAddresses.sol:88 confirms mainnet vault instances are created on-fork. The FRV YieldGroup is
-// therefore registered by this VIP but left with no resource and kept out of both outer queues; a
-// follow-up VIP wires it once a vault exists.
-
 // ---------------------------------------------------------------------------------------------------
-// Hub stack — REFERENCE ONLY (not called by the VIP; single-step Ownable, owned by governance at
-// deploy, so no acceptOwnership). Recorded so the simulation can assert their owners.
-// TODO(deploy): fill from venus-liquidity-hub/deployments/bscmainnet/<Name>.json.
+// Cap constants for Hub.addYieldGroup(source, absoluteCap, percentageCapBps). Identical for all three
+// assets (all 18-dec), per the shipment plan's routing & caps worksheet.
+//   - Core: absolute 2B, percentage 100% (the 10_000 sentinel disables the percentage dimension, so the
+//     absolute cap alone binds and the first deposit lands in Core from block one).
+//   - Flux: absolute 7M, percentage 20% of live TVL. At TVL 0 the effective cap is 0, so Flux fills only
+//     via Operator `reallocate` once Core holds funds — the intended "deposits to Core, rebalance to
+//     Flux" policy (Hub._effectiveCap, Open item 3).
+//   - FRV: absolute 5M, percentage 30%. Stored config only — FRV is registered but has no resource and
+//     is out of both outer queues, so nothing routes to it until a later VIP wires a vault.
 // ---------------------------------------------------------------------------------------------------
-export const HUB_BEACON = "0x0000000000000000000000000000000000000000";
-export const CORE_BEACON = "0x0000000000000000000000000000000000000000";
-export const FRV_BEACON = "0x0000000000000000000000000000000000000000";
-export const FLUX_BEACON = "0x0000000000000000000000000000000000000000";
-export const HUB_REGISTRY_PROXY_ADMIN = "0x0000000000000000000000000000000000000000";
-export const MIGRATOR = "0x0000000000000000000000000000000000000000"; // immutable, permissionless — no wiring
-
-// ---------------------------------------------------------------------------------------------------
-// Cap constants for Hub.addYieldGroup(source, absoluteCap, percentageCapBps).
-// ---------------------------------------------------------------------------------------------------
-// The Hub rejects type(uint256).max as InvalidCap; type(uint128).max is the canonical "no ceiling".
-export const ABSOLUTE_CAP_UNBOUNDED = "340282366920938463463374607431768211455"; // type(uint128).max
-// 10_000 bps disables the percentage-of-TVL cap dimension, leaving only the absolute cap binding. It
-// is also required for a fresh Hub: at TVL 0 any pct < 100% collapses the effective cap to zero and
-// the first deposit could not land.
+// 10_000 bps == BPS_DENOMINATOR: percentage cap disabled, absolute cap only.
 export const PERCENTAGE_CAP_DISABLED = 10_000;
 
-// TODO(risk): mainnet launch caps are not decided. The values below mirror the testnet policy
-// (uncapped) so the proposal is complete and reviewable; replace them with the risk team's numbers
-// before proposing. Amounts are in USDT units — 18 decimals on mainnet, NOT the 6 used on testnet.
-export const CORE_ABSOLUTE_CAP = ABSOLUTE_CAP_UNBOUNDED;
-export const CORE_PERCENTAGE_CAP_BPS = PERCENTAGE_CAP_DISABLED;
-export const FLUX_ABSOLUTE_CAP = ABSOLUTE_CAP_UNBOUNDED;
-export const FLUX_PERCENTAGE_CAP_BPS = PERCENTAGE_CAP_DISABLED;
-export const FRV_ABSOLUTE_CAP = ABSOLUTE_CAP_UNBOUNDED;
-export const FRV_PERCENTAGE_CAP_BPS = PERCENTAGE_CAP_DISABLED;
+export const CORE_ABSOLUTE_CAP = parseUnits("2000000000", 18).toString(); // 2,000,000,000 tokens
+export const CORE_PERCENTAGE_CAP_BPS = PERCENTAGE_CAP_DISABLED; // 100% -> absolute only
+export const FLUX_ABSOLUTE_CAP = parseUnits("7000000", 18).toString(); // 7,000,000 tokens
+export const FLUX_PERCENTAGE_CAP_BPS = 2_000; // 20% of TVL
+export const FRV_ABSOLUTE_CAP = parseUnits("5000000", 18).toString(); // 5,000,000 tokens
+export const FRV_PERCENTAGE_CAP_BPS = 3_000; // 30% of TVL

@@ -3,8 +3,11 @@
 //
 // Every string is the literal function signature passed to `_checkAccessAllowed(...)` in the deployed
 // contracts (the ACM role is `keccak256(targetContract, roleString)`), copied verbatim from
-// venus-liquidity-hub/contracts. The asymmetric model (README "Permissions"): Governance may loosen
-// AND tighten; the Operator may only tighten (lower caps, pause, reorder queues) plus `reallocate`.
+// venus-liquidity-hub/contracts. Roles by holder (mainnet policy, per the shipment plan's permission
+// tables): Governance holds everything; the Operator is the routine keeper (raise/lower caps, pause,
+// reorder queues, plus the operator-exclusive `reallocate`); the Guardian is the instant emergency
+// multisig (pause + `emergencyReallocate` + FRV `forceRemoveResource`). Only Governance may unpause,
+// change fees, add/remove, or repoint an adapter.
 //
 // Source of truth per contract:
 //   Hub/Hub.sol                     -> HUB_*        (19 gated fns: 18 governance + operator-only reallocate)
@@ -44,8 +47,12 @@ export const HUB_GOVERNANCE = [
   "sweep(address,address)",
 ];
 
-// Operator role set: tighten-only + `reallocate` + emergency pause.
+// Operator role set (the routine keeper): raise AND lower the yield-group cap, lower the per-tx cap,
+// reorder the outer queues, pause the Hub or a yield group, plus the operator-exclusive `reallocate`.
+// `raiseYieldGroupCap` is included so the keeper can open headroom before a `reallocate` push without a
+// governance round. It gets no unpause, no raise-per-tx, no fees, no add/remove, and no `sweep`.
 export const HUB_OPERATOR = [
+  "raiseYieldGroupCap(address,uint256,uint16)",
   "lowerYieldGroupCap(address,uint256,uint16)",
   "setOuterDepositQueue(address[])",
   "setOuterWithdrawQueue(address[])",
@@ -88,12 +95,14 @@ export const CORE_FLUX_GOVERNANCE = [
 // so it must not reuse CORE_FLUX_GOVERNANCE.
 export const FRV_GOVERNANCE = [...YIELD_GROUP_BASE, "forceRemoveResource(address)"];
 
-// Operator (tighten-only) sets. Core/Flux can lower per-resource caps; FRV has no cap to lower.
+// Operator sets on the sources. Core/Flux: raise and lower the per-resource cap, reorder inner queues,
+// pause a resource. FRV has no per-resource cap, so its operator set is the queue + pause subset only.
 export const CORE_FLUX_OPERATOR = [
+  "raiseResourceCap(address,uint256)",
+  "lowerResourceCap(address,uint256)",
   "setInnerDepositQueue(address[])",
   "setInnerWithdrawQueue(address[])",
   "pauseResource(address)",
-  "lowerResourceCap(address,uint256)",
 ];
 export const FRV_OPERATOR = [
   "setInnerDepositQueue(address[])",
@@ -102,54 +111,26 @@ export const FRV_OPERATOR = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// Fast-Track sets (mainnet). A middle tier between Governance and Operator: every risk/ops lever, in
-// BOTH directions (raise and lower, pause and unpause), but nothing that changes the shape of the
-// stack. Withheld from the fast lane and reserved to the Normal Timelock: add/remove YieldGroup,
-// add/remove/forceRemove Resource, updateResourceAdapter, the four fee setters, sweep,
-// setBlocksPerYear, and the registry entirely.
-//
-// `updateResourceAdapter` repoints a resource's delegatecall target and is the highest-risk function
-// in the stack — it stays governance-only. This mirrors the mainnet convention in VIP-627, which kept
-// setOracle / setComptroller / setLiquidationAdapter off the fast lane while granting it the risk
-// parameters, and VIP-258, which gave the fast lanes both the pause AND the resume side of each
-// reversible lever.
+// Guardian sets (mainnet). The Venus Guardian multisig acts instantly, with no timelock delay, so it
+// holds only the pure-containment levers: pause at every level (Hub, yield group, resource),
+// `emergencyReallocate` (route funds out of danger — the sole fund-mover that still works while the Hub
+// is paused), and `forceRemoveResource` on FRV (evict a bricked vault). It deliberately holds NO
+// unpause (loosening is governance-only, so the Guardian can contain but can never undo a
+// governance-ordered pause), NO cap changes (raising caps is the Operator's headroom lever, not an
+// emergency one), no queues, no fees, no adapter repointing, and nothing on the registry. Every string
+// below is a strict subset of the matching Governance set above.
 // ---------------------------------------------------------------------------------------------------
-
-// `emergencyReallocate` is the only fund-mover here. It is included because it is the sole route that
-// still works while the Hub is paused (the Operator's `reallocate` reverts once paused), so without it
-// recovering a paused Hub needs a full 48h Normal proposal. It is net-zero and confined to registered
-// routes, so it cannot move value out of the Hub.
-export const HUB_FAST_TRACK = [
-  "raiseYieldGroupCap(address,uint256,uint16)",
-  "lowerYieldGroupCap(address,uint256,uint16)",
-  "raiseMaxWithdrawalSize(uint256)",
-  "lowerMaxWithdrawalSize(uint256)",
-  "setOuterDepositQueue(address[])",
-  "setOuterWithdrawQueue(address[])",
+export const HUB_GUARDIAN = [
   "pauseHub()",
-  "unpauseHub()",
   "pauseYieldGroup(address)",
-  "unpauseYieldGroup(address)",
   "emergencyReallocate((address,address,uint256)[],(address,address,uint256)[])",
 ];
 
-// Core & Flux: the per-resource cap in both directions, inner queues, and resource pause/unpause.
-export const CORE_FLUX_FAST_TRACK = [
-  "raiseResourceCap(address,uint256)",
-  "lowerResourceCap(address,uint256)",
-  "setInnerDepositQueue(address[])",
-  "setInnerWithdrawQueue(address[])",
-  "pauseResource(address)",
-  "unpauseResource(address)",
-];
+// Core & Flux: pause a resource.
+export const CORE_FLUX_GUARDIAN = ["pauseResource(address)"];
 
-// FRV has no per-resource cap, so its fast-track set is the queue + pause subset only.
-export const FRV_FAST_TRACK = [
-  "setInnerDepositQueue(address[])",
-  "setInnerWithdrawQueue(address[])",
-  "pauseResource(address)",
-  "unpauseResource(address)",
-];
+// FRV: pause a resource plus the emergency eviction lever for a bricked vault.
+export const FRV_GUARDIAN = ["pauseResource(address)", "forceRemoveResource(address)"];
 
 // ---------------------------------------------------------------------------------------------------
 // HubRegistry — the only two gated functions.
@@ -168,9 +149,9 @@ export const giveCallPermission = (acm: string, contract: string, sig: string, a
 });
 
 // NOTE on the testnet/mainnet split. bsctestnet-guardian.ts grants the Guardian HUB_FULL plus the
-// full Governance set on every source — a testnet-only deviation, made to speed up iteration, that is
-// deliberately NOT mirrored to mainnet. bscmainnet.ts applies the asymmetric model instead: the
-// Normal Timelock holds the Governance sets, the Fast-Track timelock holds the *_FAST_TRACK sets, and
-// the Operator holds only HUB_OPERATOR / CORE_FLUX_OPERATOR / FRV_OPERATOR (no registry, no
-// Governance). Likewise the *_FAST_TRACK sets above are mainnet-only — on testnet the fast lanes hold
-// the full Governance set for parity with the Normal Timelock.
+// full Governance set on every source — a testnet-only convenience for fast iteration, deliberately
+// NOT mirrored to mainnet. bscmainnet.ts applies the asymmetric model from the README instead: the
+// Normal Timelock holds the Governance sets and the registry; the Guardian holds only the emergency
+// *_GUARDIAN subsets above; the Operator holds only HUB_OPERATOR / CORE_FLUX_OPERATOR / FRV_OPERATOR
+// plus `reallocate` (no registry, no Governance). The Critical and Fast-Track Timelocks receive
+// nothing on the Hub stack.
