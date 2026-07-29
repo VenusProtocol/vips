@@ -91,14 +91,6 @@ const encodeBatch = (b: number) =>
     ),
   }));
 
-// True while any Hub-stack address is still a placeholder. The dedup check keys on raw addresses, so it
-// only becomes meaningful once distinct real addresses are filled — guard it until then.
-const HAS_PLACEHOLDER =
-  OPERATOR === ZERO ||
-  HUB_REGISTRY === ZERO ||
-  STACKS.some(s => [s.hub, s.core, s.flux, s.frv].some(a => a === ZERO));
-const structuralIt = HAS_PLACEHOLDER ? it.skip : it;
-
 // Everything the Normal Timelock gets that the Guardian deliberately does NOT: add/remove yield groups
 // and resources, raise/lower caps, the queues, the fee setters, sweep, updateResourceAdapter,
 // setBlocksPerYear, unpause, and the whole registry. Computed as a set difference so it stays correct
@@ -199,7 +191,7 @@ forking(BLOCK_NUMBER, async () => {
       for (let b = 1; b < N; b++) expect(BATCHES[b].length).to.equal(77);
     });
 
-    structuralIt("contains no duplicate (contract, sig, account) entry", () => {
+    it("contains no duplicate (contract, sig, account) entry", () => {
       const keys = GRANTS.map(g => `${addr(g.contract)}|${g.sig}|${addr(g.account)}`);
       expect(new Set(keys).size).to.equal(GRANTS.length);
     });

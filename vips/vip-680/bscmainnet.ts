@@ -123,9 +123,7 @@ const assetGrants = (s: HubStack): AcmCommand[] => [
 // so nothing else would catch a drift.
 export const buildAcmBatches = (): AcmCommand[][] =>
   STACKS.map((s, i) =>
-    i === 0
-      ? [...assetGrants(s), ...grants(HUB_REGISTRY, HUB_REGISTRY_GOVERNANCE, NORMAL_TIMELOCK)]
-      : assetGrants(s),
+    i === 0 ? [...assetGrants(s), ...grants(HUB_REGISTRY, HUB_REGISTRY_GOVERNANCE, NORMAL_TIMELOCK)] : assetGrants(s),
   );
 
 export const vip680Bscmainnet = () => {
@@ -149,7 +147,7 @@ exchange rate rises as yield accrues. Fees launch disabled at 0/0/0.
 
 The Hub uses an asymmetric permission model, provisioned identically on all three stacks:
 
-- **Normal Timelock** — the full Governance role set on each Hub, on its Core, FRV and Flux sources,
+- **Normal Timelock** — the full Governance role set on each Hub, on its Core, Flux and FRV sources,
   and on the HubRegistry.
 - **Guardian** — instant emergency containment only: pause the Hub, a yield group or a resource,
   \`emergencyReallocate\` (works while the Hub is paused), and \`forceRemoveResource\` on FRV. It
