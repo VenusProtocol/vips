@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip649, {
   BNBX_REDEEM_AMOUNT,
   BNB_RETURN_AMOUNT,
   BNBx,
@@ -17,7 +17,7 @@ import vip664, {
   STAKE_MANAGER_V2,
   TOKEN_REDEEMER,
   VTREASURY,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-649/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 import ERC20_ABI from "./abi/erc20.json";
 import OWNABLE2STEP_ABI from "./abi/ownable2Step.json";
@@ -105,7 +105,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("every redeemed market's cash covers the treasury's full position (full redeem cannot revert)", async () => {
+    it("every redeemed market's cash covers the treasury's full position at this block", async () => {
       for (let i = 0; i < REDEEM_MARKETS.length; i++) {
         const c = vTokenContracts[i];
         const cash = await c.getCash();
@@ -133,7 +133,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-664 Treasury Fund Cleanup Phase 2", await vip664(), {
+  testVip("VIP-649 Treasury Fund Cleanup Phase 2", await vip649(), {
     proposer: "0x34221485302f6F2029660a000908B5FCABB9BC6e",
     supporters: [
       "0x5176671de05380379399b669ed276feec99d59cb",

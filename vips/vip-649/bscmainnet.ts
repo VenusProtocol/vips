@@ -15,8 +15,9 @@ export const VTREASURY = bscmainnet.VTREASURY;
 export const GUARDIAN = bscmainnet.GUARDIAN; // 0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B
 export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK; // 0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396
 
-// TokenRedeemer (VIP-594) — owned by the Normal Timelock. redeemAndTransfer redeems the redeemer's
-// full vToken balance and sends the underlying to `destination`.
+// TokenRedeemer — owned by the Normal Timelock; the same contract used for treasury redemptions since
+// VIP-307. redeemAndTransfer redeems the redeemer's full vToken balance and sends the underlying to
+// `destination`.
 export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 
 // Precedented Venus dev recipient (VIP-628 / VIP-641). It is the single handling address for this
@@ -61,9 +62,10 @@ export const BUYBACKS = [
 // Deprecation gate verified on-chain for every market: collateralFactor, supplyCap and borrowCap
 // are all 0. Each position is withdrawn (as the vToken) from VTreasury to the TokenRedeemer and
 // redeemed in full to the underlying, which is sent straight to the dev recipient for handling.
-// Market cash comfortably exceeds every position (verified on-chain, including the two thinnest —
-// vUSDT Tron and vETH — where cash still sits above the treasury position), so a full redeemAndTransfer
-// cannot revert on insufficient cash.
+// Available cash exceeds the treasury position in every market (verified on-chain), so a full
+// redeemAndTransfer succeeds. Headroom is thin in four of them — the treasury is effectively the whole
+// supply, so the redeem drains the market near-empty: vUSDT Tron 99.5% of cash, vETH 98.8%,
+// vUSDT Stablecoins 93.0%, vUSDT Meme 78.7%.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Isolated pools (8)
@@ -144,21 +146,21 @@ export const BNBX_REDEEM_AMOUNT = "31139027608566113112"; // 31.1390276085661131
 // this; any trivial remainder from a late rate tick stays in the Timelock (Venus-controlled).
 export const BNB_RETURN_AMOUNT = "34562765676008670355"; // 34.562765676008670355 BNB
 
-export const vip664 = () => {
+export const vip649 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain] Treasury Fund Cleanup Phase 2 — recover deprecated-market and third-party positions",
+    title: "VIP-649 [BNB Chain] Treasury Fund Cleanup Phase 2 — recover deprecated-market and third-party positions",
     description: `#### Summary
 
 Phase 2 of the Venus Treasury cleanup (following [VIP-646](https://app.venus.io/#/governance/proposal/646?chainId=56)) recovers funds still held **outside** VTreasury on BNB Chain: vToken positions in fully-deprecated markets, and receipt tokens in third-party staking protocols. VTreasury cannot make external calls, so every recovery first moves the tokens out of VTreasury.
 
-The recovered assets are consolidated at the precedented Venus dev recipient (${DEV_RECIPIENT}), which converts / unstakes them off-chain and returns the proceeds to the treasury in a later step. BNBx, being exitable to liquid BNB instantly on-chain, is instead returned straight to VTreasury.
+In total this proposal executes 47 commands — 10 transferOwnership, 22 withdrawTreasuryBEP20, 13 redeemAndTransfer, one redeemBnbxForBnb and one plain BNB transfer — and routes **≈ $101,900** of positions to the Venus dev recipient (${DEV_RECIPIENT}) for off-chain conversion / unstaking, with the proceeds returned to the treasury in a later step. The one exception is BNBx, which has an instant on-chain exit: **34.562765676008670355 BNB (≈ $19,900)** is redeemed and sent straight back to VTreasury within this same proposal. All amounts below were read on-chain while preparing this VIP and will differ marginally at execution as interest accrues.
 
 This VIP has three parts:
 
 #### Part 1 — TokenBuyback ownership → Guardian
 
-Starts a two-step ownership transfer of the ten Token Converter Phase-2 "Active" TokenBuyback contracts from the Normal Timelock to the Guardian. \`sweepToken\` on these contracts is \`onlyOwner\`; handing ownership to the Guardian lets low-liquidity dust be swept without a full VIP each time. This only sets \`pendingOwner\` — the Guardian must complete the transfer with \`acceptOwnership()\`.
+Starts a two-step ownership transfer of the ten Token Converter Phase-2 "Active" TokenBuyback contracts from the Normal Timelock to the Guardian. sweepToken on these contracts is onlyOwner; handing ownership to the Guardian lets low-liquidity dust be swept without a full VIP each time. This only sets pendingOwner — the Guardian must complete the transfer with acceptOwnership(). Beyond the six VTreasury buybacks, the set also covers the Prime, RiskFund and XVSVaultTreasury buyback flows.
 
 - BTCB Treasury buyback: ${BTCB_BUYBACK}
 - ETH Treasury buyback: ${ETH_BUYBACK}
@@ -171,29 +173,63 @@ Starts a two-step ownership transfer of the ten Token Converter Phase-2 "Active"
 - RiskFund buyback: ${RISK_FUND_BUYBACK}
 - XVS buyback: ${XVS_BUYBACK_2}
 
-#### Part 2 — Redeem 13 deprecated-market positions
+#### Part 2 — Redeem 13 deprecated-market positions (≈ $87,400)
 
-Each of these markets has collateral factor, supply cap and borrow cap all set to 0 (deprecated). For each, the position is withdrawn (as the vToken) from VTreasury to the Token Redeemer, then redeemed in full to the underlying and sent to the dev recipient. Market cash comfortably exceeds every treasury position (verified on-chain), so each redemption is done in full.
+Every one of these markets has collateral factor, supply cap and borrow cap all set to 0 (deprecated), verified on-chain. Two commands per market: the whole vToken position is withdrawn from VTreasury to the Token Redeemer, then redeemAndTransfer redeems the redeemer's full balance to the underlying and sends it to the dev recipient. Nothing is left on the redeemer, and the treasury's vToken balance in each market becomes exactly 0.
 
-Isolated pools (8): vWBNB (Liquid Staked BNB), vUSDT (GameFi), vUSDT (DeFi), vUSDT (Tron), vUSDT (Stablecoins), vBTCB (BTC), vUSDT (Meme), vETH (Liquid Staked ETH).
-Core pool (5): vTRXOLD, vBUSD, vTUSD (new-TUSD market), vDOT, vMATIC.
+Isolated pools (8):
 
-- The three thin USDT pools (**Tron**, **Stablecoins**, **Meme**) are drained near-empty, because the treasury is effectively their entire supply.
-- Out of scope: vUST / vLUNA (already unlisted — handled with the write-off proposal).
+- vWBNB (Liquid Staked BNB) — 41.2587 WBNB, ≈ $23,805
+- vUSDT (GameFi) — 16,534.89 USDT, ≈ $16,512
+- vUSDT (DeFi) — 10,868.58 USDT, ≈ $10,854
+- vUSDT (Tron) — 10,355.92 USDT, ≈ $10,342
+- vUSDT (Stablecoins) — 10,182.18 USDT, ≈ $10,168
+- vBTCB (BTC) — 0.1001 BTCB, ≈ $6,423
+- vUSDT (Meme) — 5,127.20 USDT, ≈ $5,120
+- vETH (Liquid Staked ETH) — 2.0084 ETH, ≈ $3,839
 
-#### Part 3 — Positions transferred whole to the dev recipient
+Core pool (5), all dust — ≈ $294 combined:
 
-Rule: exit natively where an immediate on-chain exit exists; otherwise transfer the token to the dev recipient (${DEV_RECIPIENT}) for off-chain handling.
+- vTRXOLD — 856.86 TRX, ≈ $281
+- vBUSD — 6.5093 BUSD
+- vTUSD (new-TUSD market) — 5.6993 TUSD
+- vDOT — 0.1442 DOT
+- vMATIC — 1.3188 MATIC
 
-- **vTUSDOLD** — a deprecated market whose market cash is 0 (fully illiquid), so it cannot be redeemed on-chain. The vTUSDOLD vToken itself is transferred to the dev recipient, which works the positions out off-chain via the TUSDOLD buyback. Handling it here avoids a separate later VIP.
-- **Seven third-party receipt tokens** with no synchronous on-chain exit (7–15 day cooldowns or off-chain-only redemption) are transferred whole to the dev recipient: SolvBTC, xSolvBTC, ankrBNB, asBNB, BETH, slisBNB, stkBNB.
-- **BNBx (Stader)** is exited natively: it is withdrawn to the Normal Timelock, redeemed for BNB via \`StakeManagerV2.redeemBnbxForBnb\` (instant, zero-fee), and the BNB is forwarded to VTreasury. Stader V2 is in sunset mode, where \`paused()\` and \`feeBps\` gate only the asynchronous \`requestWithdraw\` path — not the instant \`redeemBnbxForBnb\`, which pays the full BNB value with no fee.
+Notes on liquidity: available cash exceeds the treasury position in every one of the 13 markets at the time of writing, so each position can be redeemed in full. In four of them the treasury is effectively the whole supply, so the redemption drains the market close to empty — vUSDT (Tron) 99.5% of cash, vETH (Liquid Staked ETH) 98.8%, vUSDT (Stablecoins) 93.0%, vUSDT (Meme) 78.7%. These are deprecated markets with no remaining protocol use, so that is the intended outcome.
+
+Out of scope: vUST / vLUNA (already unlisted — handled with the write-off proposal).
+
+#### Part 3 — Positions transferred whole to the dev recipient (≈ $14,500)
+
+Rule: exit natively where an immediate on-chain exit exists; otherwise transfer the token to the dev recipient (${DEV_RECIPIENT}) for off-chain handling. Each of these is a single withdrawTreasuryBEP20 for the whole balance.
+
+- **vTUSDOLD** (234,046.29 vTUSDOLD ≈ 4,882.82 TUSDOLD, ≈ $4,860) — also a deprecated market, but its market cash is **0**, so the position cannot be redeemed on-chain at all. The vTUSDOLD vToken itself is transferred to the dev recipient, which works the position out off-chain via the TUSDOLD buyback. Handling it here avoids a separate later VIP.
+- **Seven third-party receipt tokens** with no synchronous on-chain exit (7–15 day cooldowns or off-chain-only redemption), transferred whole:
+  - SolvBTC — 0.050193, ≈ $3,219
+  - ankrBNB — 3.309767, ≈ $2,113
+  - asBNB — 3.347217, ≈ $2,057
+  - BETH — 0.719466, ≈ $1,374
+  - slisBNB — 1.242290, ≈ $743
+  - stkBNB — 0.223709, ≈ $136
+  - xSolvBTC — 0.000058, ≈ $4
+- **BNBx (Stader)** is exited natively rather than handed off: 31.139027608566113112 BNBx is withdrawn to the Normal Timelock, redeemed for BNB via StakeManagerV2.redeemBnbxForBnb (instant, zero-fee), and 34.562765676008670355 BNB is forwarded to VTreasury. Stader V2 is in sunset mode, where paused() and feeBps gate only the asynchronous requestWithdraw path — not the instant redeemBnbxForBnb, which pays the full BNB value with no fee. Any trivial remainder from a late rate tick stays in the Timelock, which is Venus-controlled.
 
 wBETH is intentionally retained — it is the treasury's only yield-bearing position.
 
+After execution, VTreasury's exposure to deprecated markets and third-party staking receipt tokens on BNB Chain is 0, across both the core pool and all isolated pools.
+
 #### Note on the vUST interest-rate change
 
-Repointing vUST to a 0% interest-rate model is **not** part of this VIP. vUST's \`admin\` is the Guardian, not the Normal Timelock, so \`_setInterestRateModel\` cannot be executed by governance; it must be done by the Guardian directly (or folded into the vUST write-off proposal).
+Repointing vUST to a 0% interest-rate model is **not** part of this VIP. vUST's admin is the Guardian, not the Normal Timelock, so _setInterestRateModel cannot be executed by governance; it must be done by the Guardian directly (or folded into the vUST write-off proposal).
+
+#### References
+
+- [VIP-646](https://app.venus.io/#/governance/proposal/646?chainId=56) — Treasury Cleanup Phase 1 (token transfers to the buyback contracts)
+- Token Redeemer (${TOKEN_REDEEMER}) — the same contract used for treasury redemptions since [VIP-307](https://app.venus.io/#/governance/proposal/307?chainId=56); owned by the Normal Timelock
+- Dev-recipient handling precedent: [VIP-628](https://app.venus.io/#/governance/proposal/628?chainId=56), [VIP-641](https://app.venus.io/#/governance/proposal/641?chainId=56)
+- [TokenBuyback Phase-2 "Active" contract list](https://docs-v4.venus.io/deployed-contracts/token-converters)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/747)
 
 #### Voting options
 
@@ -271,4 +307,4 @@ Repointing vUST to a 0% interest-rate model is **not** part of this VIP. vUST's 
   );
 };
 
-export default vip664;
+export default vip649;
