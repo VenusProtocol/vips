@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip665, {
+import vip648, {
   RECIPIENT,
   TOKEN_REDEEMER,
   USDC,
@@ -13,7 +13,7 @@ import vip665, {
   USDC_TOTAL,
   VUSDC_AMOUNT,
   vUSDC,
-} from "../../vips/vip-665/bscmainnet";
+} from "../../vips/vip-648/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 
 const { VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
@@ -49,7 +49,7 @@ forking(110000000, async () => {
     });
   });
 
-  testVip("VIP-665 Withdraw 3.1M USDC from Treasury for Finance", await vip665());
+  testVip("VIP-648 Venus 2026 H1 Operating Costs", await vip648());
 
   describe("Post-VIP behavior", async () => {
     it("recipient received exactly 3,100,000 USDC", async () => {
