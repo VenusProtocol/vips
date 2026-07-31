@@ -68,6 +68,8 @@ export const CORE_BEACON = "0xbBEe25aE7d2Db035Afc327fb0096fC88FDfF3170";
 export const FRV_BEACON = "0x6196Ec22133610132563B03b6Fad5aa766A9C037";
 export const FLUX_BEACON = "0x6b9CA74F82848668EA04D56E0A8396A816ba5330";
 // CALLED by this VIP: Normal-Timelock-owned ProxyAdmin that upgrades the HubRegistry proxy to HUB_REGISTRY_IMPL.
+// Bespoke, not the chain's DefaultProxyAdmin as on mainnet. Left as is: this VIP already executed on
+// testnet, and a future VIP can move the admin whenever it suits.
 export const HUB_REGISTRY_PROXY_ADMIN = "0x9f8413eEE33D434F6D4f40C83181f32A831c9ef7";
 export const MIGRATOR = "0x343D518d8C89f9B5D770000F1ed80f45bF1419f5"; // immutable, permissionless — no wiring
 

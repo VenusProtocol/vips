@@ -40,14 +40,14 @@ import {
 // VIP-680 part 1 — USDT and USDC. Part 2 is simulated on top of this one and reuses every assertion
 // here via ./shared.
 //
-// The fork block is after the Hub stack was deployed but before the aggregator was seeded, so the
-// before() hook seeds the batches itself. Re-pin this after the production seeding transactions and
-// the deep-compare will validate the real batches instead — see provisionAcmBatches.ts.
+// The fork block is after the whole Hub stack was deployed but before the aggregator was seeded, so
+// the before() hook seeds the batches itself. Re-pin this after the production seeding transactions
+// and the deep-compare will validate the real batches instead — see provisionAcmBatches.ts.
 //
 // Keep it a live block, never 0: forking() wraps its callback in try/catch, so a block the RPC rejects
 // would report zero tests and exit 0, a silent pass.
 // ---------------------------------------------------------------------------------------------------
-const BLOCK_NUMBER = 112783065;
+const BLOCK_NUMBER = 113200610;
 
 const BATCHES = buildAcmBatchesPart1();
 const GRANTS = flattenGrants(BATCHES);

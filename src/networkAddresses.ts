@@ -46,6 +46,7 @@ export const NETWORK_ADDRESSES = {
     UNITROLLER: bscmainnetDeployedContracts.addresses.Unitroller,
     VAI: bscmainnetDeployedContracts.addresses.VAI,
     VTREASURY: bscmainnetDeployedContracts.addresses.VTreasury,
+    DEFAULT_PROXY_ADMIN: bscmainnetDeployedContracts.addresses.DefaultProxyAdmin,
     POOL_REGISTRY: ilBscmainnetDeployedContracts.addresses.PoolRegistry,
     BINANCE_ORACLE: oracleBscmainnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBscmainnetContracts.addresses.ResilientOracle,

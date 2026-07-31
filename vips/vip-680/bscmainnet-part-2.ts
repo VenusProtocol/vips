@@ -17,12 +17,12 @@ import { aggregatorSandwich, buildAcmBatchesPart2, onboardingMeta, stackCommands
 // THE AGGREGATOR IS REQUIRED HERE TOO, for a different reason than in part 1. Inline this would be 94
 // commands, which DOES fit proposalMaxOperations of 100 — the operation count is not what rules it
 // out. `propose()` is: GovernorBravo copies every target, value, signature and calldata into storage
-// in one transaction. Measured on the fork block below, the inline variant's propose() needed
-// 22,954,977 gas — 136.8% of the 16,777,216 per-tx cap — and failed the framework's assertion before
-// execute() was ever reached. Do not "reclaim" the 6-command margin under proposalMaxOperations.
+// in one transaction. Measured on a bscmainnet fork, the inline variant's propose() needed 22,954,977
+// gas — 136.8% of the 16,777,216 per-tx cap — and failed the framework's assertion before execute() was
+// ever reached. Do not "reclaim" the 6-command margin under proposalMaxOperations.
 //
-// GAS (bscmainnet fork at block 112783065, on top of part 1): propose() 3,528,985 (21.0%),
-// queue() 1,057,724, execute() 6,148,240 (36.6%).
+// GAS (bscmainnet fork at block 113200610, on top of part 1): propose() 3,530,169 (21.0%),
+// queue() 1,057,724, execute() 6,150,240 (36.7%).
 //
 // Only the grants are batched; see bscmainnet-part-1.ts for why the wiring stays inline, and for the
 // ordering rules, which are identical here.

@@ -46,7 +46,7 @@ import {
 // Each part runs under its own gas budget, which is the point of the split. testVip asserts the per-tx
 // cap on propose, queue and execute, so a regression fails here rather than on chain.
 // ---------------------------------------------------------------------------------------------------
-const BLOCK_NUMBER = 112783065;
+const BLOCK_NUMBER = 113200610;
 
 const BATCHES_PART_1 = buildAcmBatchesPart1();
 const BATCHES = buildAcmBatchesPart2();

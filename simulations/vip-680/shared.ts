@@ -16,6 +16,7 @@ import {
   CORE_PERCENTAGE_CAP_BPS,
   CRITICAL_TIMELOCK,
   DEFAULT_ADMIN_ROLE,
+  DEFAULT_PROXY_ADMIN,
   FAST_TRACK_TIMELOCK,
   FLUX_ABSOLUTE_CAP,
   FLUX_BEACON,
@@ -26,7 +27,6 @@ import {
   GUARDIAN,
   HUB_BEACON,
   HUB_REGISTRY,
-  HUB_REGISTRY_PROXY_ADMIN,
   type HubStack,
   NORMAL_TIMELOCK,
   OPERATOR,
@@ -221,20 +221,31 @@ export const seedBatchesOnFork = async (
 // every asset at once. If any were still deployer-owned, the permissions granted below would be worth
 // nothing, because the code they gate could be swapped underneath.
 // ---------------------------------------------------------------------------------------------------
+// keccak256("eip1967.proxy.admin") - 1. The admin slot is only writable by the admin itself, so this
+// is the authoritative read.
+const EIP1967_ADMIN_SLOT = "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103";
+
 export const describeUpgradeAuthority = () => {
   describe("Upgrade authority (pre-existing, not set by this proposal)", () => {
-    it("every beacon and the registry ProxyAdmin is owned by the Normal Timelock", async () => {
+    it("every beacon and the registry's ProxyAdmin is owned by the Normal Timelock", async () => {
       const targets: [string, string][] = [
         ["Hub beacon", HUB_BEACON],
         ["Core beacon", CORE_BEACON],
         ["Flux beacon", FLUX_BEACON],
         ["FRV beacon", FRV_BEACON],
-        ["HubRegistry ProxyAdmin", HUB_REGISTRY_PROXY_ADMIN],
+        ["DefaultProxyAdmin", DEFAULT_PROXY_ADMIN],
       ];
       for (const [label, target] of targets) {
         const ownable = await ethers.getContractAt(OWNABLE_ABI, target);
         expect(addr(await ownable.owner())).to.equal(addr(NORMAL_TIMELOCK), `${label} is not Timelock-owned`);
       }
+    });
+
+    // Without this the check above is vacuous: it would prove some ProxyAdmin is Timelock-owned, not
+    // that the one admining THIS proxy is. The admin slot is the only on-chain authority on that.
+    it("the HubRegistry proxy is admined by that ProxyAdmin", async () => {
+      const slot = await ethers.provider.getStorageAt(HUB_REGISTRY, EIP1967_ADMIN_SLOT);
+      expect(addr(ethers.utils.getAddress(`0x${slot.slice(-40)}`))).to.equal(addr(DEFAULT_PROXY_ADMIN));
     });
   });
 };

@@ -10,24 +10,33 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 // STATUS: the Hub stack is DEPLOYED on BNB Chain mainnet. Every address below is filled from
 // venus-liquidity-hub/deployments/bscmainnet/<Name>.json and verified on-chain (see below).
 //
-// Verified live on bscmainnet (2026-07-29, block ~112.78M):
+// Verified live on bscmainnet (2026-07-29 for the Hub stacks, 2026-07-31 for the registry):
 //   - USDT / USDC / U all decimals() == 18, so caps below are in 18-dec asset units uniformly.
 //   - Every Core vToken.underlying() and Flux fToken.asset() equals its asset (all six).
 //   - Per stack (all 36 bindings): hub.asset() == asset, hub.pendingOwner() == NORMAL_TIMELOCK,
 //     hub.accessControlManager() == ACM; and every Core/Flux/FRV source hub()/asset()/
 //     accessControlManager() correct. The sources have NO setter for _accessControlManager/_hub, so
 //     this binding is unrepairable and the check is load-bearing.
-//   - HubRegistry pendingOwner() == NORMAL_TIMELOCK and accessControlManager() == ACM; all four
-//     beacons and the registry ProxyAdmin owner() == NORMAL_TIMELOCK; AdapterFlux resolver == Fluid
-//     LendingResolver 0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569.
+//   - HubRegistry pendingOwner() == NORMAL_TIMELOCK, accessControlManager() == ACM, getHubsCount() == 0;
+//     its EIP-1967 admin slot holds DEFAULT_PROXY_ADMIN, whose getProxyImplementation() returns the
+//     implementation recorded in HubRegistryImpl.json (0x4426a09d5425ca2103896A88C1e9a1F5779a4d3a).
+//   - All four beacons and DEFAULT_PROXY_ADMIN owner() == NORMAL_TIMELOCK; AdapterFlux resolver ==
+//     Fluid LendingResolver 0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569.
 //   - Of the four governance accounts, only NORMAL_TIMELOCK holds DEFAULT_ADMIN_ROLE on the ACM, so
 //     this proposal must be REGULAR.
 //   - AuxiliaryCommandsAggregator batchCount() == 2 (== ACM_BATCH_INDEX_BASE_PART_1), owner() ==
 //     NORMAL_TIMELOCK; NORMAL and FAST_TRACK hold executeBatch(uint256).
 // ===================================================================================================
 
-const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, VTREASURY } =
-  NETWORK_ADDRESSES.bscmainnet;
+const {
+  ACCESS_CONTROL_MANAGER,
+  NORMAL_TIMELOCK,
+  FAST_TRACK_TIMELOCK,
+  CRITICAL_TIMELOCK,
+  GUARDIAN,
+  VTREASURY,
+  DEFAULT_PROXY_ADMIN,
+} = NETWORK_ADDRESSES.bscmainnet;
 
 export const ACM = ACCESS_CONTROL_MANAGER; // 0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555
 export { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK };
@@ -80,7 +89,7 @@ export const ACM_BATCH_INDEX_BASE_PART_2 = 4;
 // ---------------------------------------------------------------------------------------------------
 // Shared Hub infrastructure — one deployment per chain.
 // ---------------------------------------------------------------------------------------------------
-export const HUB_REGISTRY: string = "0x4196932b0c76A114178236C00A5e140f27866790"; // HubRegistry.json — CALLED (acceptOwnership, addHub)
+export const HUB_REGISTRY: string = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2"; // HubRegistry.json — CALLED (acceptOwnership, addHub)
 export const ADAPTER_CORE_V1 = "0x4E514a0C7aB9d140eE204dfA0017574270D92944"; // AdapterCoreV1.json — shared by every Core source
 export const ADAPTER_FRV = "0x1FA0365bDd603452CE96BE3c0e12Db5515a35902"; // AdapterFRV.json — shared (unused until a vault exists)
 export const ADAPTER_FLUX = "0xA81bDf813A428053E764C34Bc679b3E4d0807be3"; // AdapterFlux.json — shared by every Flux source
@@ -91,7 +100,7 @@ export const HUB_BEACON = "0x0f20e1004962e2DF16c16FC15460Dc6480626321";
 export const CORE_BEACON = "0x195a0F1BCF73C3Beb609a1271E8E08b8E4c098C6";
 export const FRV_BEACON = "0x8A5EceDD726246682402430b9B24c19bF61B7f1d";
 export const FLUX_BEACON = "0x9bb6a3Ac5955fA8dc236560CA9D51483d1d79f15";
-export const HUB_REGISTRY_PROXY_ADMIN = "0x3E2fbA605c1d9D470FB2691c4AA59Eb0570caB3E";
+export { DEFAULT_PROXY_ADMIN }; // 0x6beb6D2695B67FEb73ad4f172E8E2975497187e4 — admins the HubRegistry proxy
 
 // Deliberately not asserted anywhere: the Migrator is non-upgradeable with no owner and no ACM, so
 // there is nothing to wire and nothing to check.

@@ -22,8 +22,8 @@ import { aggregatorSandwich, buildAcmBatchesPart1, onboardingMeta, stackCommands
 // acceptOwnership() could not be batched at all, since Ownable2Step checks msg.sender against
 // pendingOwner. It also leaves the substance of the proposal readable on chain.
 //
-// GAS (bscmainnet fork at block 112783065): propose() 6,267,444 (37.4% of the 16,777,216 per-tx cap),
-// queue() 1,976,072, execute() 11,973,069 (71.4%). testVip asserts the cap on all three. propose() is
+// GAS (bscmainnet fork at block 113200610): propose() 6,259,088 (37.3% of the 16,777,216 per-tx cap),
+// queue() 1,976,072, execute() 11,955,969 (71.3%). testVip asserts the cap on all three. propose() is
 // a real constraint, not just execute — see the measurement in bscmainnet-part-2.ts.
 //
 // Ordering that must not be reshuffled: the aggregator sandwich runs first, because every wiring
