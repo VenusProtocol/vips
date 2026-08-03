@@ -5,7 +5,7 @@ import { ACM_BATCH_INDEX_BASE_PART_1, HUB_REGISTRY, STACKS_PART_1 } from "./addr
 import { aggregatorSandwich, buildAcmBatchesPart1, onboardingMeta, stackCommands } from "./commands";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-680 — BNB Chain Mainnet. Liquidity Hub onboarding, PART 1 of 2: USDT and USDC. Part 2 onboards
+// VIP-650 — BNB Chain Mainnet. Liquidity Hub onboarding, PART 1 of 2: USDT and USDC. Part 2 onboards
 // U on the same pattern; see commands.ts for why the launch set is split and for every command built
 // here.
 //
@@ -35,10 +35,10 @@ import { aggregatorSandwich, buildAcmBatchesPart1, onboardingMeta, stackCommands
 // the ordering is "a latency optimization only, NOT a correctness requirement".
 // ---------------------------------------------------------------------------------------------------
 
-const VIP_NUMBER = 680;
+const VIP_NUMBER = 650;
 const FOLLOW_UP_VIP_NUMBER = VIP_NUMBER + 1;
 
-export const vip680Part1Bscmainnet = () => {
+export const vip650Part1Bscmainnet = () => {
   const batches = buildAcmBatchesPart1();
 
   const meta = onboardingMeta({
@@ -47,7 +47,7 @@ export const vip680Part1Bscmainnet = () => {
     stacks: STACKS_PART_1,
     batchIndexBase: ACM_BATCH_INDEX_BASE_PART_1,
     acceptsRegistry: true,
-    registryRoles: "`addHub` and `removeHub`",
+    registryRoles: "addHub and removeHub",
     scopeNote: `This is **part 1 of 2**. It onboards USDT and USDC, and performs the one-time acceptance of the
 HubRegistry's pending ownership. A follow-up proposal, **VIP-${FOLLOW_UP_VIP_NUMBER}**, onboards **U** on the same pattern.
 
@@ -74,4 +74,4 @@ follow-up touches.`,
   );
 };
 
-export default vip680Part1Bscmainnet;
+export default vip650Part1Bscmainnet;

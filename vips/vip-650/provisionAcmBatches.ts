@@ -9,12 +9,12 @@ import {
 import { type AcmCommand, buildAcmBatchesPart1, buildAcmBatchesPart2 } from "./commands";
 
 // ---------------------------------------------------------------------------------------------------
-// Stores VIP-680's ACM grants on the bscmainnet AuxiliaryCommandsAggregator, one batch per asset
+// Stores VIP-650 / VIP-651's ACM grants on the bscmainnet AuxiliaryCommandsAggregator, one batch per asset
 // stack, starting at that part's base index. Runs once per part, and the part must be explicit —
 // picking one silently is how grants end up in the wrong slot:
 //
-//   VIP_PART=1 npx hardhat run vips/vip-680/provisionAcmBatches.ts --network bscmainnet
-//   VIP_PART=2 npx hardhat run vips/vip-680/provisionAcmBatches.ts --network bscmainnet
+//   VIP_PART=1 npx hardhat run vips/vip-650/provisionAcmBatches.ts --network bscmainnet
+//   VIP_PART=2 npx hardhat run vips/vip-650/provisionAcmBatches.ts --network bscmainnet
 //
 // Run each once, by hand, from a wallet in the aggregator's `authorizedBatchers` allowlist, and only
 // once that part's VIP is final. Batches are append-only, so anything stored early is dead weight and
@@ -198,7 +198,7 @@ async function main() {
  2. ${part.vipFile} will encode exactly these commands (verify in the sim output):
 ${batches.map((_, b) => `      executeBatch(${part.base + b})   // ${batches[b].length} grants`).join("\n")}
 
- 3. simulations/vip-680/${part.vipFile}
+ 3. simulations/vip-650/${part.vipFile}
       const BLOCK_NUMBER = <a block AFTER ${lastBlock}>;
 
     This is what makes the simulation verify the REAL stored batches. Pinned at or

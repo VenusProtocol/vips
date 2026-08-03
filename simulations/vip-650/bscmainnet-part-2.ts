@@ -9,11 +9,11 @@ import {
   STACKS,
   STACKS_PART_1,
   STACKS_PART_2,
-} from "../../vips/vip-680/addresses/bscmainnet";
-import vip680Part1Bscmainnet from "../../vips/vip-680/bscmainnet-part-1";
-import vip680Part2Bscmainnet from "../../vips/vip-680/bscmainnet-part-2";
-import { assetGrants, buildAcmBatchesPart1, buildAcmBatchesPart2 } from "../../vips/vip-680/commands";
-import { ADD_HUB } from "../../vips/vip-680/permissions";
+} from "../../vips/vip-650/addresses/bscmainnet";
+import vip650Part1Bscmainnet from "../../vips/vip-650/bscmainnet-part-1";
+import vip651Part2Bscmainnet from "../../vips/vip-650/bscmainnet-part-2";
+import { assetGrants, buildAcmBatchesPart1, buildAcmBatchesPart2 } from "../../vips/vip-650/commands";
+import { ADD_HUB } from "../../vips/vip-650/permissions";
 import {
   PROPOSER,
   SUPPORTERS,
@@ -39,7 +39,7 @@ import {
 } from "./shared";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-680 part 2 — U. Simulated in the sequence mainnet will see: part 1 executes as setup, then part
+// VIP-651 part 2 — U. Simulated in the sequence mainnet will see: part 1 executes as setup, then part
 // 2 is proposed and executed against the resulting state. Fork block matches part 1's, so the two
 // simulations agree on the pre-state.
 //
@@ -86,7 +86,7 @@ forking(BLOCK_NUMBER, async () => {
     registryAccepted: false,
   });
 
-  testVip("VIP-680 part 1 (setup for the part-2 simulation)", await vip680Part1Bscmainnet(), {
+  testVip("VIP-650 part 1 (setup for the part-2 simulation)", await vip650Part1Bscmainnet(), {
     proposer: PROPOSER,
     supporters: SUPPORTERS,
   });
@@ -129,7 +129,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("Liquidity Hub onboarding (U) on BNB Chain — part 2 of 2", await vip680Part2Bscmainnet(), {
+  testVip("VIP-651 Liquidity Hub onboarding (U) on BNB Chain — part 2 of 2", await vip651Part2Bscmainnet(), {
     proposer: PROPOSER,
     supporters: SUPPORTERS,
     callbackAfterExecution: makeExecutionCallback({

@@ -2,7 +2,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 // ===================================================================================================
-// VIP-680 [BNB Chain Mainnet] — Liquidity Hub address book, shared by BOTH onboarding proposals in
+// VIP-650 / VIP-651 [BNB Chain Mainnet] — Liquidity Hub address book, shared by BOTH onboarding proposals in
 // this directory (bscmainnet-part-1.ts = USDT + USDC, bscmainnet-part-2.ts = U). Launch set: THREE
 // Hubs, one per asset. One Hub proxy + three source proxies (Core / Flux / FRV) per asset; the
 // registry, the three adapters, the four beacons and the Migrator are shared once per chain.

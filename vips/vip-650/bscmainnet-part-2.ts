@@ -5,7 +5,7 @@ import { ACM_BATCH_INDEX_BASE_PART_2, HUB_REGISTRY, STACKS_PART_2 } from "./addr
 import { aggregatorSandwich, buildAcmBatchesPart2, onboardingMeta, stackCommands } from "./commands";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-680 — BNB Chain Mainnet. Liquidity Hub onboarding, PART 2 of 2: U. Part 1 onboards USDT and
+// VIP-651 — BNB Chain Mainnet. Liquidity Hub onboarding, PART 2 of 2: U. Part 1 onboards USDT and
 // USDC and is executed first; both build every command from ./commands.ts.
 //
 // This part does not accept the HubRegistry's pending ownership — part 1 does, and a second
@@ -29,10 +29,10 @@ import { aggregatorSandwich, buildAcmBatchesPart2, onboardingMeta, stackCommands
 // ---------------------------------------------------------------------------------------------------
 
 // Its own on-chain proposal, so its own VIP number — see the note in bscmainnet-part-1.ts.
-const PRECEDING_VIP_NUMBER = 680;
+const PRECEDING_VIP_NUMBER = 650;
 const VIP_NUMBER = PRECEDING_VIP_NUMBER + 1;
 
-export const vip680Part2Bscmainnet = () => {
+export const vip651Part2Bscmainnet = () => {
   const batches = buildAcmBatchesPart2();
 
   const meta = onboardingMeta({
@@ -42,7 +42,7 @@ export const vip680Part2Bscmainnet = () => {
     batchIndexBase: ACM_BATCH_INDEX_BASE_PART_2,
     acceptsRegistry: false,
     // One clause; the rationale is in the Notes bullet below.
-    registryRoles: "`addHub` alone",
+    registryRoles: "addHub alone",
     scopeNote: `This is **part 2 of 2**, completing the Liquidity Hub launch set on BNB Chain. The preceding
 proposal, **VIP-${PRECEDING_VIP_NUMBER}**, onboarded USDT and USDC and accepted the HubRegistry's pending ownership; this one
 onboards U on the identical pattern and adds it to the same registry.
@@ -52,11 +52,11 @@ transaction needs more gas than BNB Chain's per-transaction cap of 16,777,216 al
 stacks are independent contract sets: this proposal configures only the U stack and changes nothing
 about the USDT or USDC Hubs.`,
     extraNotes: [
-      "The batch re-issues the registry's `addHub` role to the Normal Timelock, which the preceding " +
+      "The batch re-issues the registry's addHub role to the Normal Timelock, which the preceding " +
         "proposal already granted. Re-granting a role that is already held writes nothing and emits " +
         "nothing on chain, so it costs roughly 8,000 gas out of this proposal's 6,148,240. It is " +
-        "carried so that this proposal's own `addHub` call is authorised by its own grants rather " +
-        "than by the preceding proposal having landed first. The registry's `removeHub` role is " +
+        "carried so that this proposal's own addHub call is authorised by its own grants rather " +
+        "than by the preceding proposal having landed first. The registry's removeHub role is " +
         "deliberately not re-issued: this proposal never calls it.",
     ],
   });
@@ -78,4 +78,4 @@ about the USDT or USDC Hubs.`,
   );
 };
 
-export default vip680Part2Bscmainnet;
+export default vip651Part2Bscmainnet;

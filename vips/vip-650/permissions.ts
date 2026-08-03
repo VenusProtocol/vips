@@ -1,5 +1,5 @@
 // ===================================================================================================
-// VIP-680 — Liquidity Hub ACM role-string sets, shared by the mainnet and testnet proposals.
+// VIP-650 / VIP-651 — Liquidity Hub ACM role-string sets, shared by the mainnet and testnet proposals.
 //
 // Every string is the literal signature passed to `_checkAccessAllowed(...)` in the deployed
 // contracts, copied verbatim — the ACM role is `keccak256(targetContract, roleString)`, so a string

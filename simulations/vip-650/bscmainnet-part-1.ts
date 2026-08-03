@@ -8,10 +8,10 @@ import {
   STACKS,
   STACKS_PART_1,
   STACKS_PART_2,
-} from "../../vips/vip-680/addresses/bscmainnet";
-import vip680Part1Bscmainnet from "../../vips/vip-680/bscmainnet-part-1";
-import { assetGrants, buildAcmBatchesPart1 } from "../../vips/vip-680/commands";
-import { ADD_HUB, HUB_REGISTRY_GOVERNANCE } from "../../vips/vip-680/permissions";
+} from "../../vips/vip-650/addresses/bscmainnet";
+import vip650Part1Bscmainnet from "../../vips/vip-650/bscmainnet-part-1";
+import { assetGrants, buildAcmBatchesPart1 } from "../../vips/vip-650/commands";
+import { ADD_HUB, HUB_REGISTRY_GOVERNANCE } from "../../vips/vip-650/permissions";
 import {
   PROPOSER,
   SUPPORTERS,
@@ -37,7 +37,7 @@ import {
 } from "./shared";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-680 part 1 — USDT and USDC. Part 2 is simulated on top of this one and reuses every assertion
+// VIP-650 part 1 — USDT and USDC. Part 2 is simulated on top of this one and reuses every assertion
 // here via ./shared.
 //
 // The fork block is after the production seeding transactions (batches 2 and 3 landed at 113,735,454
@@ -77,7 +77,7 @@ forking(BLOCK_NUMBER, async () => {
     registryAccepted: false,
   });
 
-  testVip("VIP-680 Liquidity Hub onboarding (USDT, USDC) on BNB Chain — part 1 of 2", await vip680Part1Bscmainnet(), {
+  testVip("VIP-650 Liquidity Hub onboarding (USDT, USDC) on BNB Chain — part 1 of 2", await vip650Part1Bscmainnet(), {
     proposer: PROPOSER,
     supporters: SUPPORTERS,
     callbackAfterExecution: makeExecutionCallback({

@@ -31,8 +31,8 @@ import {
   NORMAL_TIMELOCK,
   OPERATOR,
   VTREASURY,
-} from "../../vips/vip-680/addresses/bscmainnet";
-import { AcmCommand } from "../../vips/vip-680/commands";
+} from "../../vips/vip-650/addresses/bscmainnet";
+import { AcmCommand } from "../../vips/vip-650/commands";
 import {
   CORE_FLUX_GOVERNANCE,
   CORE_FLUX_GUARDIAN,
@@ -42,7 +42,7 @@ import {
   HUB_GUARDIAN,
   HUB_REGISTRY_GOVERNANCE,
   REALLOCATE,
-} from "../../vips/vip-680/permissions";
+} from "../../vips/vip-650/permissions";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import AUX_AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
 import HUB_ABI from "./abi/Hub.json";
@@ -185,7 +185,7 @@ export const requireBatchesOnChain = async (
   const needed = batchIndexBase + batches.length;
   if (batchCount < needed) {
     throw new Error(
-      `[vip-680] aggregator holds ${batchCount} batches at this fork block, but the proposal replays ` +
+      `[vip-650] aggregator holds ${batchCount} batches at this fork block, but the proposal replays ` +
         `indices ${batchIndexBase}..${needed - 1}. Either provisionAcmBatches.ts has not run for this ` +
         "part, or BLOCK_NUMBER is pinned before its seeding transaction.",
     );

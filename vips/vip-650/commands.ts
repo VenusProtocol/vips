@@ -39,7 +39,7 @@ import {
 } from "./permissions";
 
 // ===================================================================================================
-// VIP-680 [BNB Chain Mainnet] — command builders shared by both Liquidity Hub onboarding proposals.
+// VIP-650 / VIP-651 [BNB Chain Mainnet] — command builders shared by both Liquidity Hub onboarding proposals.
 //
 //   bscmainnet-part-1.ts  USDT + USDC, plus the one-time HubRegistry ownership acceptance
 //   bscmainnet-part-2.ts  U
@@ -214,9 +214,7 @@ export const onboardingMeta = (opts: {
   const stackCount = stacks.length;
   const hub = stackCount === 1 ? "Hub" : "Hubs";
   const batchPhrase = stackCount === 1 ? "the pre-seeded batch" : `the ${stackCount} pre-seeded batches`;
-  const batchCalls = stacks
-    .map((_, i) => `\`getBatch(${batchIndexBase + i})\``)
-    .join(stackCount === 2 ? " and " : ", ");
+  const batchCalls = stacks.map((_, i) => `getBatch(${batchIndexBase + i})`).join(stackCount === 2 ? " and " : ", ");
   const batchIndexList =
     stackCount === 1
       ? `batch index ${batchIndexBase}`
@@ -252,26 +250,26 @@ The Hub uses an asymmetric permission model, provisioned identically on every st
 - **Normal Timelock** — the full Governance role set on each Hub and on its Core, Flux and FRV
   sources, plus ${registryRoles} on the **HubRegistry**.
 - **Guardian** — instant emergency containment only: pause the Hub, a yield group or a resource,
-  \`emergencyReallocate\` (works while the Hub is paused), and \`forceRemoveResource\` on FRV. It
+  emergencyReallocate (works while the Hub is paused), and forceRemoveResource on FRV. It
   receives no unpause, no cap changes, no queues, no fees, no adapter repointing, and nothing on the
   registry.
 - **Operator** — the routine keeper: raise and lower the yield-group and per-resource caps, lower the
   per-transaction withdrawal cap, reorder the inner and outer queues, pause the Hub, a group or a
-  resource, and the operator-exclusive \`reallocate\`.
+  resource, and the operator-exclusive reallocate.
 
-The Critical and Fast-Track Timelocks receive no permissions in this proposal. \`reallocate\` is
+The Critical and Fast-Track Timelocks receive no permissions in this proposal. reallocate is
 granted to the Operator only.
 
 #### Caps and routing (identical per asset)
 
 - **Core** — absolute cap 2,000,000,000; percentage cap disabled. Deposits land here first.
-- **Flux** — absolute cap 7,000,000; percentage cap 20% of Hub TVL. Fills via \`reallocate\`.
+- **Flux** — absolute cap 7,000,000; percentage cap 20% of Hub TVL. Fills via reallocate.
 - **FRV** — absolute cap 5,000,000; percentage cap 30%. Registered but unwired (no live vault).
 - Outer deposit queue **[Core, Flux]**, outer withdraw queue **[Flux, Core, FRV]** on each Hub.
 
 #### Actions (one atomic transaction, in order)
 
-1. Grant \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager to the AuxiliaryCommandsAggregator, execute
+1. Grant DEFAULT_ADMIN_ROLE on the AccessControlManager to the AuxiliaryCommandsAggregator, execute
    ${batchPhrase} of permission grants${
       stackCount === 1 ? "" : " (one per asset)"
     }, then revoke that role again in the same
@@ -282,7 +280,7 @@ granted to the Operator only.
 2. ${acceptsRegistry ? "Accept the pending ownership of the **HubRegistry**, then register" : "Register"} the ${
       stackCount === 1 ? "Hub" : `${stackCount} Hubs`
     } in the registry, before any yield group is added, so
-   ${stackCount === 1 ? "the" : "each"} \`HubAdded\` event precedes every \`YieldGroupAdded\`.
+   ${stackCount === 1 ? "the" : "each"} HubAdded event precedes every YieldGroupAdded.
 3. ${perAsset("accept the Hub's pending ownership (retiring the deployer's owner key); on the")}
    **Core** source register the vToken behind its adapter and set the inner queues; on the **Flux**
    source register the fToken behind its adapter and set the inner queues; register the Core, Flux
@@ -290,7 +288,7 @@ granted to the Operator only.
    its outer withdraw queue at **[Flux, Core, FRV]**.
 4. ${perAsset("withdraw **10 tokens** from the Venus Treasury, approve the Hub for exactly that")}
    amount, and deposit it. The resulting shares are minted to the burn address
-   \`0x000000000000000000000000000000000000dEaD\`, so every Hub launches already seeded and can never
+   0x000000000000000000000000000000000000dEaD, so every Hub launches already seeded and can never
    return to a zero-supply state.
 
 #### Notes
@@ -315,7 +313,7 @@ granted to the Operator only.
 
 #### Security and additional considerations
 
-- The \`DEFAULT_ADMIN_ROLE\` grant to the AuxiliaryCommandsAggregator is scoped to this proposal: it is
+- The DEFAULT_ADMIN_ROLE grant to the AuxiliaryCommandsAggregator is scoped to this proposal: it is
   granted, used to replay ${batchPhrase}, and revoked in the same transaction. The aggregator replays
   whatever was stored under ${
     stackCount === 1 ? "that index" : "those indices"
@@ -323,9 +321,9 @@ granted to the Operator only.
   check; they are frozen on-chain and readable via ${batchCalls}.
 - The **Operator** and the **Guardian** are multisigs, not timelocks: anything they are granted here
   takes effect with no governance delay. Both are deliberately one-directional. The Operator can
-  tighten, rebalance and pause, and can raise a yield-group cap to make room for a \`reallocate\`, but
+  tighten, rebalance and pause, and can raise a yield-group cap to make room for a reallocate, but
   cannot unpause, change fees, add or remove a yield group or resource, repoint an adapter, or
-  \`sweep\`. The Guardian can only pause and route funds out of danger; it holds no unpause, so it can
+  sweep. The Guardian can only pause and route funds out of danger; it holds no unpause, so it can
   never undo a governance-ordered pause.
 - Every Hub and yield source sits behind a beacon, and the HubRegistry behind a proxy, whose upgrade
   authority is the Normal Timelock. This proposal does not change that, and does not upgrade anything.
@@ -335,19 +333,16 @@ granted to the Operator only.
 #### Deployed contracts (BNB Chain)
 
 ${stacks
-  .map(
-    s =>
-      `- **${s.key}** — Hub \`${s.hub}\`, Core source \`${s.core}\`, Flux source \`${s.flux}\`, FRV source \`${s.frv}\``,
-  )
+  .map(s => `- **${s.key}** — Hub ${s.hub}, Core source ${s.core}, Flux source ${s.flux}, FRV source ${s.frv}`)
   .join("\n")}
 
 Shared across all assets:
 
-- HubRegistry: \`${HUB_REGISTRY}\`
-- AdapterCoreV1: \`${ADAPTER_CORE_V1}\` · AdapterFlux: \`${ADAPTER_FLUX}\` · AdapterFRV: \`${ADAPTER_FRV}\`
-- AuxiliaryCommandsAggregator: \`${AUX_COMMANDS_AGGREGATOR}\` (${batchIndexList})
-- Operator: \`${OPERATOR}\` · Guardian: \`${GUARDIAN}\`
-- Venus Treasury (funds the bootstrap deposits): \`${VTREASURY}\``,
+- HubRegistry: ${HUB_REGISTRY}
+- AdapterCoreV1: ${ADAPTER_CORE_V1} · AdapterFlux: ${ADAPTER_FLUX} · AdapterFRV: ${ADAPTER_FRV}
+- AuxiliaryCommandsAggregator: ${AUX_COMMANDS_AGGREGATOR} (${batchIndexList})
+- Operator: ${OPERATOR} · Guardian: ${GUARDIAN}
+- Venus Treasury (funds the bootstrap deposits): ${VTREASURY}`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",

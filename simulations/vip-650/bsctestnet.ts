@@ -15,15 +15,15 @@ import {
   HUB_REGISTRY,
   HUB_USDT,
   NORMAL_TIMELOCK,
-} from "../../vips/vip-680/addresses/bsctestnet";
-import vip680 from "../../vips/vip-680/bsctestnet";
+} from "../../vips/vip-650/addresses/bsctestnet";
+import vip680 from "../../vips/vip-650/bsctestnet";
 import {
   CORE_FLUX_GOVERNANCE,
   FRV_GOVERNANCE,
   HUB_GOVERNANCE,
   HUB_REGISTRY_GOVERNANCE,
   REALLOCATE,
-} from "../../vips/vip-680/permissions";
+} from "../../vips/vip-650/permissions";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
 import HUB_REGISTRY_ABI from "./abi/HubRegistry.json";
