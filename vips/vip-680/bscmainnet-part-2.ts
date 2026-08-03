@@ -21,8 +21,8 @@ import { aggregatorSandwich, buildAcmBatchesPart2, onboardingMeta, stackCommands
 // gas — 136.8% of the 16,777,216 per-tx cap — and failed the framework's assertion before execute() was
 // ever reached. Do not "reclaim" the 6-command margin under proposalMaxOperations.
 //
-// GAS (bscmainnet fork at block 113200610, on top of part 1): propose() 3,530,169 (21.0%),
-// queue() 1,057,724, execute() 6,150,240 (36.7%).
+// GAS (bscmainnet fork at block 113736000, on top of part 1, against the batches actually stored on
+// chain): propose() 3,530,169 (21.0%), queue() 1,057,724, execute() 6,148,240 (36.6%).
 //
 // Only the grants are batched; see bscmainnet-part-1.ts for why the wiring stays inline, and for the
 // ordering rules, which are identical here.

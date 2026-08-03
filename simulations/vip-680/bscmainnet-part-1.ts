@@ -32,22 +32,22 @@ import {
   initSimState,
   makeExecutionCallback,
   newSimState,
+  requireBatchesOnChain,
   roleId,
-  seedBatchesOnFork,
 } from "./shared";
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-680 part 1 — USDT and USDC. Part 2 is simulated on top of this one and reuses every assertion
 // here via ./shared.
 //
-// The fork block is after the whole Hub stack was deployed but before the aggregator was seeded, so
-// the before() hook seeds the batches itself. Re-pin this after the production seeding transactions
-// and the deep-compare will validate the real batches instead — see provisionAcmBatches.ts.
+// The fork block is after the production seeding transactions (batches 2 and 3 landed at 113,735,454
+// and 113,735,462), so the before() hook writes nothing and the deep-compare validates the batches
+// actually stored on chain — see provisionAcmBatches.ts.
 //
 // Keep it a live block, never 0: forking() wraps its callback in try/catch, so a block the RPC rejects
 // would report zero tests and exit 0, a silent pass.
 // ---------------------------------------------------------------------------------------------------
-const BLOCK_NUMBER = 113200610;
+const BLOCK_NUMBER = 113736000;
 
 const BATCHES = buildAcmBatchesPart1();
 const GRANTS = flattenGrants(BATCHES);
@@ -58,7 +58,7 @@ forking(BLOCK_NUMBER, async () => {
   before(async () => {
     // Every stack, not just part 1's, so this file can assert part 1 leaves part 2's stack alone.
     await initSimState(state, STACKS);
-    await seedBatchesOnFork(state.aggregator, BATCHES, ACM_BATCH_INDEX_BASE_PART_1);
+    await requireBatchesOnChain(state.aggregator, BATCHES, ACM_BATCH_INDEX_BASE_PART_1);
   });
 
   describeAggregatorBatches(state, BATCHES, ACM_BATCH_INDEX_BASE_PART_1);

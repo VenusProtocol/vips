@@ -24,8 +24,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 //     Fluid LendingResolver 0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569.
 //   - Of the four governance accounts, only NORMAL_TIMELOCK holds DEFAULT_ADMIN_ROLE on the ACM, so
 //     this proposal must be REGULAR.
-//   - AuxiliaryCommandsAggregator batchCount() == 2 (== ACM_BATCH_INDEX_BASE_PART_1), owner() ==
-//     NORMAL_TIMELOCK; NORMAL and FAST_TRACK hold executeBatch(uint256).
+//   - AuxiliaryCommandsAggregator owner() == NORMAL_TIMELOCK; NORMAL and FAST_TRACK hold
+//     executeBatch(uint256). batchCount() == 5, i.e. both parts' batches are stored (see below).
 // ===================================================================================================
 
 const {
@@ -77,12 +77,16 @@ export const AUX_COMMANDS_AGGREGATOR = "0x528A428748dfE73DFcc844176B401475D18310
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 // Part 1 takes two consecutive slots (USDT = base, USDC = base+1), part 2 one. Each part pins its own
-// base rather than deriving part 2's from part 1's: batches are append-only and the parts are seeded
-// at different times, so anything another VIP appends in between shifts part 2 alone.
+// base rather than deriving part 2's from part 1's: batches are append-only, so anything another VIP
+// appends between the two seeding runs would shift part 2 alone.
 //
-// TODO(ops): re-verify both immediately before their runs of provisionAcmBatches.ts. That script
-// asserts batchCount() == the selected part's base and uses the indexed addBatch overload, so a stale
-// value reverts rather than landing grants in the wrong slot.
+// SEEDED AND VERIFIED ON MAINNET by provisionAcmBatches.ts:
+//   index 2  block 113,735,454  79 calls (USDT + the registry's addHub/removeHub)
+//   index 3  block 113,735,462  77 calls (USDC)
+//   index 4  block 113,735,798  78 calls (U + the redundant addHub re-grant)
+// The script read each one back call-for-call after storing it, and the simulations deep-compare the
+// stored bytes against the builder on every run. These indices are frozen: changing any role string,
+// address or cap invalidates the stored batches, which would then have to be re-seeded at new slots.
 export const ACM_BATCH_INDEX_BASE_PART_1 = 2;
 export const ACM_BATCH_INDEX_BASE_PART_2 = 4;
 

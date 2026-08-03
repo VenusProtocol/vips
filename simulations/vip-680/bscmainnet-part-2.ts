@@ -34,8 +34,8 @@ import {
   initSimState,
   makeExecutionCallback,
   newSimState,
+  requireBatchesOnChain,
   roleId,
-  seedBatchesOnFork,
 } from "./shared";
 
 // ---------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ import {
 // Each part runs under its own gas budget, which is the point of the split. testVip asserts the per-tx
 // cap on propose, queue and execute, so a regression fails here rather than on chain.
 // ---------------------------------------------------------------------------------------------------
-const BLOCK_NUMBER = 113200610;
+const BLOCK_NUMBER = 113736000;
 
 const BATCHES_PART_1 = buildAcmBatchesPart1();
 const BATCHES = buildAcmBatchesPart2();
@@ -63,9 +63,9 @@ forking(BLOCK_NUMBER, async () => {
   before(async () => {
     // Every stack: this file verifies the end state of the whole launch set, not just U's.
     await initSimState(state, STACKS);
-    // Each part has its own base index, so they seed independently and in order.
-    await seedBatchesOnFork(state.aggregator, BATCHES_PART_1, ACM_BATCH_INDEX_BASE_PART_1);
-    await seedBatchesOnFork(state.aggregator, BATCHES, ACM_BATCH_INDEX_BASE_PART_2);
+    // Both parts' batches, since part 1 is replayed here as setup before part 2 is proposed.
+    await requireBatchesOnChain(state.aggregator, BATCHES_PART_1, ACM_BATCH_INDEX_BASE_PART_1);
+    await requireBatchesOnChain(state.aggregator, BATCHES, ACM_BATCH_INDEX_BASE_PART_2);
   });
 
   describeAggregatorBatches(state, BATCHES, ACM_BATCH_INDEX_BASE_PART_2);

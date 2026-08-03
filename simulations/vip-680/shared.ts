@@ -85,10 +85,6 @@ export const OWNABLE_ABI = ["function owner() view returns (address)"];
 const EXPECTED_MAX_WITHDRAWAL_SIZE = ethers.utils.parseUnits("10000000", 18); // 10,000,000 per tx
 const EXPECTED_DECIMALS = 24; // 18 asset decimals + decimalsOffset 6
 
-// In the aggregator's authorizedBatchers allowlist. Impersonated to seed batches on the fork, since
-// the real chain is only seeded once the VIP is final.
-const AUTHORIZED_BATCHER = "0x9b0A3EAE7f174937d31745B710BbeA68e9D1BEf7";
-
 // Voter override. The live REGULAR config needs 1,000,000 XVS to propose and 1,500,000 to reach
 // quorum. The framework's auto-resolver picks the only account over the threshold as proposer and
 // drops the default proposer from the pool, leaving ~1.41M for-votes — Defeated. These four together
@@ -173,46 +169,27 @@ export const initSimState = async (state: SimState, stacks: HubStack[]): Promise
   state.bound = await bindStacks(stacks);
 };
 
-// Base indices already on mainnet, so seedBatchesOnFork wrote nothing and the deep-compare reads real
-// chain state. For any other base the compare is self-referential — the test wrote the bytes it reads
-// back — which a green run makes easy to mistake for verification, so it is surfaced as a pending test.
+// The batches this proposal replays were stored on mainnet by provisionAcmBatches.ts, so the suite
+// reads them rather than writing them. Nothing here impersonates a batcher: a simulation that seeds
+// its own batches and then deep-compares them is comparing the builder against itself, and a green
+// run of that proves only that the encoder is deterministic.
 //
-// Tracked per base, not as one flag: "part 1 is on chain, part 2 is not" is the expected mid-launch
-// state and exactly how the part-2 simulation runs, and a single flag would let part 2 inherit part
-// 1's verdict.
-const realChainBases = new Set<number>();
-
-// Seeds on the fork only if the chain does not already hold all of this part's batches. Once the
-// production transactions exist and BLOCK_NUMBER is pinned after them, this is a no-op.
-export const seedBatchesOnFork = async (
+// Fails in before() rather than as an assertion so the cause is stated once, instead of surfacing as
+// dozens of downstream failures when executeBatch reverts BatchNotFound.
+export const requireBatchesOnChain = async (
   aggregator: Contract,
   batches: AcmCommand[][],
   batchIndexBase: number,
 ): Promise<void> => {
   const batchCount: number = (await aggregator.batchCount()).toNumber();
-  if (batchCount >= batchIndexBase + batches.length) {
-    realChainBases.add(batchIndexBase);
-    return;
-  }
-  if (batchCount > batchIndexBase) {
-    // Some but not all of this part's slots are taken. addBatch's indexed overload would revert
-    // InvalidBatchIndex a moment from now; fail here instead, where the cause is legible.
+  const needed = batchIndexBase + batches.length;
+  if (batchCount < needed) {
     throw new Error(
-      `[vip-680] aggregator is partially seeded for base ${batchIndexBase}: batchCount() is ${batchCount}, ` +
-        `expected either ${batchIndexBase} (nothing stored) or ${batchIndexBase + batches.length} (all stored). ` +
-        "Re-run provisionAcmBatches.ts and re-pin BLOCK_NUMBER.",
+      `[vip-680] aggregator holds ${batchCount} batches at this fork block, but the proposal replays ` +
+        `indices ${batchIndexBase}..${needed - 1}. Either provisionAcmBatches.ts has not run for this ` +
+        "part, or BLOCK_NUMBER is pinned before its seeding transaction.",
     );
   }
-  const batcher = await initMainnetUser(AUTHORIZED_BATCHER, ethers.utils.parseEther("1"));
-  for (let b = 0; b < batches.length; b++) {
-    await aggregator
-      .connect(batcher)
-      ["addBatch((address,bytes)[],uint256)"](encodeBatch(batches, b), batchIndexBase + b);
-  }
-  console.warn(
-    `\n  [vip-680] batches ${batchIndexBase}..${batchIndexBase + batches.length - 1} written on the fork ` +
-      `(mainnet batchCount() is ${batchCount}). Run provisionAcmBatches.ts, then re-pin BLOCK_NUMBER after it.\n`,
-  );
 };
 
 // ---------------------------------------------------------------------------------------------------
@@ -255,14 +232,15 @@ export const describeUpgradeAuthority = () => {
 // ---------------------------------------------------------------------------------------------------
 export const describeAggregatorBatches = (state: SimState, batches: AcmCommand[][], batchIndexBase: number) => {
   describe("Aggregator batches", () => {
-    it(`is comparing against REAL mainnet batches at index ${batchIndexBase}, not ones this test wrote`, function () {
-      if (!realChainBases.has(batchIndexBase)) {
-        // Pending, not failing: until provisionAcmBatches.ts has run on mainnet there is nothing real
-        // to compare against, and blocking the whole suite on that would help nobody. It shows up as
-        // a pending test so the gap stays visible in every run instead of being silently green.
-        this.skip();
-      }
-      expect(realChainBases.has(batchIndexBase)).to.equal(true);
+    // Everything below reads the chain, so this is what makes the rest mean anything: it fixes that
+    // indices batchIndexBase..+len were written by provisionAcmBatches.ts before this fork block, not
+    // by the suite itself.
+    it(`indices ${batchIndexBase}..${batchIndexBase + batches.length - 1} are already stored on mainnet`, async () => {
+      const batchCount: number = (await state.aggregator.batchCount()).toNumber();
+      expect(batchCount).to.be.at.least(
+        batchIndexBase + batches.length,
+        `aggregator holds ${batchCount} batches at this fork block`,
+      );
     });
 
     it("each stored batch is exactly the builder output, call for call", async () => {
