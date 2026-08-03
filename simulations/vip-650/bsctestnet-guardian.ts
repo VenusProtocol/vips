@@ -12,15 +12,15 @@ import {
   GUARDIAN,
   HUB_REGISTRY,
   HUB_USDT,
-} from "../../vips/vip-680/addresses/bsctestnet";
-import vip680Guardian from "../../vips/vip-680/bsctestnet-guardian";
+} from "../../vips/vip-650/addresses/bsctestnet";
+import vip680Guardian from "../../vips/vip-650/bsctestnet-guardian";
 import {
   CORE_FLUX_GOVERNANCE,
   FRV_GOVERNANCE,
   HUB_FULL,
   HUB_REGISTRY_GOVERNANCE,
   REALLOCATE,
-} from "../../vips/vip-680/permissions";
+} from "../../vips/vip-650/permissions";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 // bsctestnet block after the Liquidity Hub (USDT) redeployment and the FRV vault creation.
