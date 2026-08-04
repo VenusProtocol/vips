@@ -9,6 +9,25 @@ export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C0783
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
+// U token held idle in the PLP (no distribution speed, nothing accrued) and the
+// Venus dev recipient that converts it off-chain — same pair as VIP-641 / VIP-649.
+export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
+export const DEV_RECIPIENT = "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de";
+
+// ===========================================================================
+// wBNB funding sweep. The wBNB Prime leg (below) targets $35,000/month
+// (~59.1 WBNB), but the PLP holds only ~4.99 WBNB free of accrued rewards, so
+// the wBNB market would run dry mid-month. To fund it, sweep idle U out to the
+// dev recipient, which converts it to wBNB off-chain and returns the proceeds
+// to the PLP (mirrors VIP-641's WBNB-repayment sweep to the same recipient).
+//
+// Sizing (read on-chain 2026-08-04): monthly wBNB need $35,000 / $591.73
+// (Chainlink BNB/USD) = 59.15 WBNB; free wBNB in the PLP = 4.99 WBNB; shortfall
+// = 54.16 WBNB ≈ $32.05K. U trades ≈ $1, so 32,100 U covers the shortfall with a
+// small buffer and stays within the ~33,911 U the PLP holds idle.
+// ===========================================================================
+export const U_TO_SWEEP = parseUnits("32100", 18);
+
 // ===========================================================================
 // August 2026 Prime rewards allocation: $70,000 split 50/50 across the USDT
 // and wBNB supply markets ($35,000 each).
@@ -52,6 +71,17 @@ In July 2026, Venus generated **$166.6K** in reserves revenue and **$31.8K** in 
 
 This allocation is an estimate based on token prices at the time the reserves were collected. Actual allocations may vary due to price changes between collection and conversion into Prime reward tokens.
 
+## Funding the wBNB leg
+
+The USDT leg is fully funded from the PLP's existing USDT balance. The wBNB leg is not: at $35K (~59.1 WBNB for the month) the PLP holds only ~4.99 WBNB free of already-accrued rewards, so without a top-up the wBNB market would run dry mid-month.
+
+To fund it, this proposal sweeps **32,100 U** (≈ $32.1K) — currently sitting idle in the PLP with no distribution speed and nothing accrued to claimants — to the Venus dev recipient (${DEV_RECIPIENT}). The dev converts the U to wBNB off-chain and returns the proceeds to the PLP, covering the ~54.16 WBNB shortfall. This mirrors the WBNB-repayment sweep to the same recipient in [VIP-641](https://app.venus.io/#/governance/proposal/641?chainId=56). Because the U is idle (speed and accrued both 0), the sweep takes nothing from Prime claimants. As the conversion happens off-chain after execution, the wBNB will land in the PLP shortly after the proposal executes; accrueTokens caps accrual at the available balance, so the wBNB market simply under-accrues until the funds arrive.
+
+## Proposal actions
+
+1. **Prime reward speeds** — setTokensDistributionSpeed on the PrimeLiquidityProvider, setting the USDT and wBNB supply speeds to distribute $35K to each over August.
+2. **wBNB funding sweep** — sweepToken on the PrimeLiquidityProvider, transferring 32,100 U to the dev recipient for off-chain conversion into wBNB.
+
 ## Analysis
 
 All the data presented below can be found in the [Venus Prime dashboard](https://dune.com/xvslove_team/venus-prime).
@@ -78,6 +108,7 @@ The Normal Timelock already holds the setTokensDistributionSpeed ACM permission,
 
   return makeProposal(
     [
+      // 1. Set the August Prime reward distribution speeds ($35K each to USDT and wBNB suppliers).
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",
@@ -85,6 +116,12 @@ The Normal Timelock already holds the setTokensDistributionSpeed ACM permission,
           [USDT, WBNB],
           [NEW_PRIME_SPEED_FOR_USDT, NEW_PRIME_SPEED_FOR_WBNB],
         ],
+      },
+      // 2. Sweep idle U to the dev recipient to fund the wBNB leg (converted to wBNB off-chain).
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [U, DEV_RECIPIENT, U_TO_SWEEP],
       },
     ],
     meta,
