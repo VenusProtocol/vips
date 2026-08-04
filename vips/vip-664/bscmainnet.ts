@@ -59,11 +59,11 @@ export const vip664 = () => {
     title: "VIP-664 [BNB Chain] August 2026 Prime Rewards Allocation",
     description: `This proposal outlines the allocation of Prime Rewards on BNB Chain for August 2026, based on available funds. The allocation is retroactive, redistributing revenue generated through July 2026.
 
-July 2026 was the first month under Tokenomics Phase II, which increased Prime's share of reserves revenue from 20% to 40% and added a 20% share of liquidation revenue, up from 0% previously. The new revenue split took effect on-chain on 2026-07-01. At $70K, the August payout is 2.2x the amount distributed in July.
+July 2026 was the first full month under [Tokenomics Phase II — Prime Rewards Redesign](https://community.venus.io/t/venus-tokenomics-phase-ii-prime-rewards-redesign/5774), which increased Prime's share of reserves revenue from 20% to 40% and added a 20% share of liquidation revenue, up from 0% previously (the XVS Vault's share of both dropped to 0%). This split was enacted on-chain by [VIP-638](https://app.venus.io/#/governance/proposal/638?chainId=56), which re-routed the ProtocolShareReserve distribution configs so the USDT and U Prime buybacks each take 20% of spread/reserves income (40% combined) and 10% of liquidation income (20% combined). The new split therefore applies to all revenue accrued from 2026-07-01 onward. At $70K, the August payout is 2.2x the amount distributed in July.
 
 ## Allocation Strategy
 
-In July 2026, Venus generated **$166.6K** in reserves revenue and **$31.8K** in liquidation revenue on BNB Chain. Under the Phase II split, **$73.0K** of this is allocated to Prime and will be distributed as rewards in August 2026.
+In July 2026, Venus generated **$166.6K** in reserves revenue and **$31.8K** in liquidation revenue on BNB Chain. Under the Phase II split (40% of reserves + 20% of liquidation, per VIP-638), **$73.0K** of this is allocated to Prime (≈ 40% × $166.6K + 20% × $31.8K) and will be distributed as rewards in August 2026.
 
 **Proposed allocation strategy:**
 
@@ -87,7 +87,7 @@ To fund it, this proposal sweeps **33,500 U** (≈ $33.5K) — currently sitting
 
 ## Analysis
 
-All the data presented below can be found in the [Venus Prime dashboard](https://dune.com/xvslove_team/venus-prime).
+All the data presented below can be found in the [Venus Prime dashboard](https://dune.com/xvslove_team/venus-prime). Period-boundary figures are point-in-time reads taken from that dashboard when each monthly proposal is prepared; because the dashboard refreshes continuously, this period's opening values (end of July) can differ marginally from the closing values quoted for the same point in last month's [VIP-639](https://app.venus.io/#/governance/proposal/639?chainId=56) — for example USDT supply ~$191.5M here vs $192.3M there, USDT reserve revenue $37.2K vs $36.2K, and the Prime supplier count 246 vs 245. These are snapshot-timing differences, not restated figures.
 
 ### Prime markets — Activity, reserves and rewards
 
