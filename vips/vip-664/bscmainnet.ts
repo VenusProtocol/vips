@@ -16,17 +16,20 @@ export const DEV_RECIPIENT = "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de";
 
 // ===========================================================================
 // wBNB funding sweep. The wBNB Prime leg (below) targets $35,000/month
-// (~59.1 WBNB), but the PLP holds only ~4.99 WBNB free of accrued rewards, so
+// (~59.20 WBNB), but the PLP holds only ~4.9 WBNB free of accrued rewards, so
 // the wBNB market would run dry mid-month. To fund it, sweep idle U out to the
 // dev recipient, which converts it to wBNB off-chain and returns the proceeds
 // to the PLP (mirrors VIP-641's WBNB-repayment sweep to the same recipient).
 //
-// Sizing (read on-chain 2026-08-04): monthly wBNB need $35,000 / $591.73
-// (Chainlink BNB/USD) = 59.15 WBNB; free wBNB in the PLP = 4.99 WBNB; shortfall
-// = 54.16 WBNB ≈ $32.05K. U trades ≈ $1, so 32,100 U covers the shortfall with a
-// small buffer and stays within the ~33,911 U the PLP holds idle.
+// Sizing (read on-chain 2026-08-04, all priced at the single BNB_PRICE_USD
+// below): monthly wBNB need $35,000 / $591.19323 = 59.20 WBNB; free wBNB in the
+// PLP ≈ 4.9 WBNB; shortfall ≈ 54.3 WBNB ≈ $32.1K. U trades ≈ $1, so 33,500 U
+// covers the shortfall with a ~4% buffer for BNB-price drift and conversion
+// slippage over the ~3-day proposal-to-execution window (VIP-620 budgeted ~1%
+// on a comparable swap; free wBNB also keeps accruing down pre-execution). It
+// leaves only ~411 U of the ~33,911 U the PLP holds idle.
 // ===========================================================================
-export const U_TO_SWEEP = parseUnits("32100", 18);
+export const U_TO_SWEEP = parseUnits("33500", 18);
 
 // ===========================================================================
 // August 2026 Prime rewards allocation: $70,000 split 50/50 across the USDT
@@ -73,14 +76,14 @@ This allocation is an estimate based on token prices at the time the reserves we
 
 ## Funding the wBNB leg
 
-The USDT leg is fully funded from the PLP's existing USDT balance. The wBNB leg is not: at $35K (~59.1 WBNB for the month) the PLP holds only ~4.99 WBNB free of already-accrued rewards, so without a top-up the wBNB market would run dry mid-month.
+The USDT leg is fully funded from the PLP's existing USDT balance. The wBNB leg is not: at $35K (~59.20 WBNB for the month, priced at the BNB/USD Chainlink read of $591.19323) the PLP holds only ~4.9 WBNB free of already-accrued rewards, so without a top-up the wBNB market would run dry mid-month.
 
-To fund it, this proposal sweeps **32,100 U** (≈ $32.1K) — currently sitting idle in the PLP with no distribution speed and nothing accrued to claimants — to the Venus dev recipient (${DEV_RECIPIENT}). The dev converts the U to wBNB off-chain and returns the proceeds to the PLP, covering the ~54.16 WBNB shortfall. This mirrors the WBNB-repayment sweep to the same recipient in [VIP-641](https://app.venus.io/#/governance/proposal/641?chainId=56). Because the U is idle (speed and accrued both 0), the sweep takes nothing from Prime claimants. As the conversion happens off-chain after execution, the wBNB will land in the PLP shortly after the proposal executes; accrueTokens caps accrual at the available balance, so the wBNB market simply under-accrues until the funds arrive.
+To fund it, this proposal sweeps **33,500 U** (≈ $33.5K) — currently sitting idle in the PLP with no distribution speed and nothing accrued to claimants — to the Venus dev recipient (${DEV_RECIPIENT}). The dev converts the U to wBNB off-chain and returns the proceeds to the PLP, covering the ~54.3 WBNB shortfall with a ~4% buffer for BNB-price drift and conversion slippage over the ~3-day proposal-to-execution window (for reference, VIP-620 budgeted ~1% on a comparable swap). This mirrors the WBNB-repayment sweep to the same recipient in [VIP-641](https://app.venus.io/#/governance/proposal/641?chainId=56). Because the U is idle (speed and accrued both 0), the sweep takes nothing from Prime claimants, and it leaves ~411 U of the ~33,911 U the PLP holds idle. As the conversion happens off-chain after execution, the wBNB will land in the PLP shortly after the proposal executes; accrueTokens caps accrual at the available balance, so the wBNB market simply under-accrues until the funds arrive.
 
 ## Proposal actions
 
 1. **Prime reward speeds** — setTokensDistributionSpeed on the PrimeLiquidityProvider, setting the USDT and wBNB supply speeds to distribute $35K to each over August.
-2. **wBNB funding sweep** — sweepToken on the PrimeLiquidityProvider, transferring 32,100 U to the dev recipient for off-chain conversion into wBNB.
+2. **wBNB funding sweep** — sweepToken on the PrimeLiquidityProvider, transferring 33,500 U to the dev recipient for off-chain conversion into wBNB.
 
 ## Analysis
 
