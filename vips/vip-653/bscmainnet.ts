@@ -47,51 +47,54 @@ export interface SupplyCapEntry {
 
 const meta = {
   version: "v2",
-  title: "VIP-664 [BNB Chain] Risk Parameter Update (June 2026 Re-proposal)",
+  title: "VIP-653 [BNB Chain] Core Pool Risk Parameter Update",
   description: `#### Summary
 
-Re-proposal of the 2026-06-23 BNB Core risk-parameter update (Allez Labs consolidated change table, plus Venus additions), with three deliberate departures from that table: **wBETH is dropped**, and **USDe** and **FDUSD** land above the proposed values. Each is called out below. Every current value was read on-chain from the BNB Core Comptroller and matches what this proposal re-passes.
+This proposal updates collateral factors, the XVS supply cap, and the sUSDe liquidation incentive in the BNB Chain Core pool. Liquidation thresholds are re-passed unchanged on every collateral-factor row, so no existing position becomes liquidatable. Refer to the community post for the full background and rationale.
 
-**No liquidation threshold moves.** \`setCollateralFactor(address,uint256,uint256)\` takes the collateral factor and the liquidation threshold together, so every row re-passes its current on-chain threshold verbatim; the setter only writes the threshold when the value differs, so no threshold is written at all and no \`NewLiquidationThreshold\` event is emitted. No existing position becomes liquidatable — the collateral-factor cuts reduce new borrow power only. E-Mode parameters are equally untouched: this setter is hardcoded to the core pool.
+#### Proposed Changes
 
-Full rationale: [Allez Labs — Risk Parameter Updates 2026-06-23](https://community.venus.io/t/allez-labs-risk-parameter-updates-2026-06-23/5835/1).
+- **asBNB** — Core, collateral factor: 72% → 60%
+- **slisBNB** — Core, collateral factor: 80% → 72%
+- **XRP** — Core, collateral factor: 65% → 50%
+- **SOL** — Core, collateral factor: 72% → 65%
+- **USDe** — Core, collateral factor: 75% → 70%
+- **FDUSD** — Core, collateral factor: 75% → 65%
+- **XVS** — Core, collateral factor: 0% → 45%
+- **XVS** — Core, supply cap: 1.85M XVS → 1.15M XVS
+- **sUSDe** — E-Mode "Stablecoins" (pool 1), liquidation incentive: 8% → 6%
 
-#### Core Pool — collateral-factor changes
+#### Actions
 
-- **asBNB**: 72% → 60% (low DEX exit liquidity vs supply).
-- **slisBNB**: 80% → 72% (move to sub-BNB CF).
-- **XRP**: 65% → 50% (calibrated to EVT 5yr / 2h).
-- **SOL**: 72% → 65% (EVT 5yr / 2h + on-chain liquidity).
-- **USDe**: 75% → 70%. The forum post proposed 50% on minimal BSC DEX depth; this proposal reduces to 70% instead.
-- **FDUSD**: 75% → 65% (the post proposed 50%; see stranded-exposure note below).
-- **XVS**: 0% → 45% — resume as collateral, paired with the supply-cap reduction below. Liquidation threshold stays 60% (untouched).
+This VIP performs the following 10 actions on BNB Chain. Actions 1-9 target the Core pool Comptroller 0xfD36E2c2a6789Db23113685031d7F16329158384; action 10 targets the Emergency Brake 0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec.
 
-**wBETH is excluded.** The table proposed 80% → 60% on liquidation load at a −10% price move. It is not part of this proposal; wBETH keeps its current 80% collateral factor.
+1. **asBNB collateral factor 72% → 60%** — Calls setCollateralFactor(address,uint256,uint256) on the Core Comptroller for vasBNB (0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF), with the liquidation threshold re-passed unchanged at 72%.
+2. **slisBNB collateral factor 80% → 72%** — Calls setCollateralFactor(address,uint256,uint256) for vslisBNB (0x89c910Eb8c90df818b4649b508Ba22130Dc73Adc), liquidation threshold unchanged at 80%.
+3. **XRP collateral factor 65% → 50%** — Calls setCollateralFactor(address,uint256,uint256) for vXRP (0xB248a295732e0225acd3337607cc01068e3b9c10), liquidation threshold unchanged at 65%.
+4. **SOL collateral factor 72% → 65%** — Calls setCollateralFactor(address,uint256,uint256) for vSOL (0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC), liquidation threshold unchanged at 72%.
+5. **USDe collateral factor 75% → 70%** — Calls setCollateralFactor(address,uint256,uint256) for vUSDe (0x74ca6930108F775CC667894EEa33843e691680d7), liquidation threshold unchanged at 75%.
+6. **FDUSD collateral factor 75% → 65%** — Calls setCollateralFactor(address,uint256,uint256) for vFDUSD (0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba), liquidation threshold unchanged at 75%.
+7. **XVS collateral factor 0% → 45%** — Calls setCollateralFactor(address,uint256,uint256) for vXVS (0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D), resuming XVS as collateral. Its liquidation threshold remains 60% and is re-passed unchanged.
+8. **sUSDe liquidation incentive 8% → 6%** — Calls setLiquidationIncentive(uint96,address,uint256) on the Core Comptroller for pool 1 (E-Mode "Stablecoins") and vsUSDe (0x699658323d58eE25c69F1a29d476946ab011bD18), aligning sUSDe with USDe at 6% in the same pool.
+9. **XVS supply cap 1.85M → 1.15M XVS** — Calls setMarketSupplyCaps(address[],uint256[]) on the Core Comptroller for vXVS (0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D), setting the supply cap to 1,150,000 XVS, approximately $3.1M at current prices.
+10. **Clear the emergency-brake collateral-factor snapshot for XVS** — Calls resetCFSnapshot(address) on the Emergency Brake for vXVS (0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D). The brake recorded XVS's pre-brake pair (55% / 60%) when it set the collateral factor to 0% on 24 June 2026. That snapshot is write-once, so clearing it stops the stale 55% from being read as the governed value and lets a future brake record the value this proposal sets. This changes no market parameter.
 
-#### Core Pool — supply-cap change
+PT-sUSDE-26JUN2025 is not part of this proposal: its collateral factor and liquidation threshold were already set to 0% on 12 July 2026.
 
-- **XVS**: supply cap 1,850,000 → 1,150,000 XVS. About 898.6k XVS is supplied today, so the new cap is above current usage and strands no existing supplier; it bounds further growth. Together with the 45% collateral factor, the borrow power this resumption can create is capped at ~517,500 XVS-equivalent (~$1.4M at the 2026-08-05 price of ~$2.70), against ~$2.5M under a 50% factor at the old cap. Borrowing XVS itself remains paused with a zero borrow cap.
+Implementation and fork simulation: [VenusProtocol/vips#749](https://github.com/VenusProtocol/vips/pull/749). Risk analysis: [Allez Labs — Risk Parameter Updates 2026-06-23](https://community.venus.io/t/allez-labs-risk-parameter-updates-2026-06-23/5835/1).
 
-#### E-Mode "Stablecoins" pool (pool 1) — liquidation-incentive change
+#### Voting options
 
-- **sUSDe**: liquidation incentive 8% → 6%. Beyond aligning with USDe (6%) in the same pool, this restores a solvency margin: at the pool's 92.5% liquidation threshold, an 8% incentive leaves a liquidator eligible to seize 99.9% of the collateral backing a liquidatable position, versus 98.05% at 6%.
-
-#### Emergency-brake snapshot
-
-XVS's collateral factor was set to 0% on 2026-06-24 by the emergency brake, which recorded the pre-brake pair (55% / 60%) as a snapshot. That snapshot is write-once, so leaving it in place would keep pointing at 55% rather than the 45% governed here, and would prevent a future brake from recording the value this proposal sets. The proposal therefore also calls \`resetCFSnapshot\` on the emergency brake for the XVS market, clearing it. This changes no market parameter.
-
-#### FDUSD note
-
-FDUSD lands at CF 65%. At 65% two small positions become repay-only (not liquidatable — the liquidation threshold is untouched): ~$193K debt on one account (~$3.9K short of its 66.34% break-even) and a ~$18K dust account, for ~$206K of accepted stranded exposure. That figure was measured against the original June bundle, which also cut wBETH to 60% and USDe to 50%; since dropping and softening those rows can only raise an account's borrow power, it is an upper bound here. The multi-million looping position that forced the June rollback is no longer present.
-
-PT-sUSDE-26JUN2025 (in the original post at CF 70% → 0%) is excluded: its CF and LT were already set to 0% on 2026-07-12.
+- **For** — Execute the proposal
+- **Against** — Do not execute the proposal
+- **Abstain** — Indifferent to execution
 `,
   forDescription: "I agree that Venus Protocol should proceed with this proposal",
   againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
 };
 
-export const vip664 = () =>
+export const vip653 = () =>
   makeProposal(
     [
       // ──────────────────────────────────────────────────────────────────────────
@@ -137,4 +140,4 @@ export const vip664 = () =>
     ProposalType.REGULAR,
   );
 
-export default vip664;
+export default vip653;

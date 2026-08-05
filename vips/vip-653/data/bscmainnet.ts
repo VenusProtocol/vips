@@ -109,7 +109,7 @@ export const liChanges: LIEntry[] = [
 
 // EBrake CF snapshot for vXVS, recorded by the 2026-06-24 emergency action
 // (`decreaseCF`, first-write-wins). It still holds the pre-brake pair, which is
-// the 55% figure that predates this VIP's 50% resume. The VIP clears it so the
+// the 55% figure that predates this VIP's 45% resume. The VIP clears it so the
 // stale pair cannot be mistaken for the governed value, and so a future brake
 // snapshots the CF this VIP actually sets.
 export const xvsCFSnapshot = {

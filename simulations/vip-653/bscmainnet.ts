@@ -6,8 +6,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664 from "../../vips/vip-664/bscmainnet";
-import * as data from "../../vips/vip-664/data/bscmainnet";
+import vip653 from "../../vips/vip-653/bscmainnet";
+import * as data from "../../vips/vip-653/data/bscmainnet";
 import BSC_COMPTROLLER_ABI from "./abi/BscComptroller.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -30,7 +30,7 @@ const SUPPORTERS = ["0x34221485302f6F2029660a000908B5FCABB9BC6e", "0x5176671de05
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const XVS_WHALE = "0x051100480289e704d20e9DB4804837068f3f9204"; // XVSVault holds ~9M XVS
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-const E2E_USER = "0x0000000000000000000000000000000000000664";
+const E2E_USER = "0x0000000000000000000000000000000000000653";
 
 const ERC20_ABI = [
   "function approve(address spender, uint256 amount) returns (bool)",
@@ -149,7 +149,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-664 BNB Chain Risk Parameter Update", await vip664(), {
+  testVip("VIP-653 BNB Chain Core Pool Risk Parameter Update", await vip653(), {
     proposer: PROPOSER,
     supporters: SUPPORTERS,
     callbackAfterExecution: async tx =>
