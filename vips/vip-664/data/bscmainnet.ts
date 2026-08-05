@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { CFEntry, EModeInvariant, LIEntry } from "../bscmainnet";
+import { CFEntry, EModeInvariant, LIEntry, SupplyCapEntry } from "../bscmainnet";
 
 // BNB Core Comptroller (Diamond / Unitroller).
 export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -68,13 +68,28 @@ export const cfChanges: CFEntry[] = [
     new: parseUnits("0.65", 18),
     liquidationThreshold: parseUnits("0.75", 18),
   },
-  // XVS: resume as collateral, 0% -> 50%. LT stays 60% (untouched).
+  // XVS: resume as collateral, 0% -> 45%. LT stays 60% (untouched). Paired with
+  // the supply-cap reduction below, which bounds how much collateral the
+  // resumption can actually admit.
   {
     symbol: "XVS",
     vToken: vXVS,
     old: "0",
-    new: parseUnits("0.5", 18),
+    new: parseUnits("0.45", 18),
     liquidationThreshold: parseUnits("0.6", 18),
+  },
+];
+
+// Market-wide supply-cap change. setMarketSupplyCaps(address[],uint256[]) stores
+// one cap per vToken regardless of pool. The new cap is above the ~898.6k XVS
+// currently supplied, so it does not strand existing suppliers — it caps further
+// growth of the exposure the collateral-factor resumption reopens.
+export const supplyCapChanges: SupplyCapEntry[] = [
+  {
+    symbol: "XVS",
+    vToken: vXVS,
+    old: parseUnits("1850000", 18),
+    new: parseUnits("1150000", 18),
   },
 ];
 

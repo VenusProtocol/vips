@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -24,7 +25,7 @@ const FORK_BLOCK = 113850000;
 const PROPOSER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 const SUPPORTERS = ["0x34221485302f6F2029660a000908B5FCABB9BC6e", "0x5176671de05380379399b669ed276feec99d59cb"];
 
-// XVS whale + market for the behavioral proof (XVS CF 0% -> 50%). Borrow a small
+// XVS whale + market for the behavioral proof (XVS CF 0% -> governed value). Borrow a small
 // amount of USDT against supplied XVS — impossible while XVS CF was 0%.
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const XVS_WHALE = "0x051100480289e704d20e9DB4804837068f3f9204"; // XVSVault holds ~9M XVS
@@ -86,6 +87,12 @@ forking(FORK_BLOCK, async () => {
   const emodeKey = (e: { poolId: number; vToken: string }) => `${e.poolId}:${e.vToken.toLowerCase()}`;
   const emodeBefore = new Map<string, { cf: string; lt: string }>();
 
+  // The XVS row drives the expected borrow power in the behavioural test below.
+  const xvsCFRow = data.cfChanges.find(c => c.vToken.toLowerCase() === data.vXVS.toLowerCase());
+  if (!xvsCFRow) {
+    throw new Error("XVS row missing from cfChanges");
+  }
+
   before(async () => {
     await pinOraclePrices([...data.cfChanges.map(c => c.vToken), ...data.liChanges.map(l => l.vToken), vUSDT]);
   });
@@ -126,6 +133,15 @@ forking(FORK_BLOCK, async () => {
       expect(emodeBefore.size).to.equal(data.emodeInvariants.length);
     });
 
+    it("matches current market supply caps", async () => {
+      for (const s of data.supplyCapChanges) {
+        expect((await comptroller.supplyCaps(s.vToken)).toString()).to.equal(
+          s.old.toString(),
+          `${s.symbol} supply cap`,
+        );
+      }
+    });
+
     it("still holds the EBrake CF snapshot recorded on 2026-06-24", async () => {
       const [cf, lt] = await ebrake.getMarketCFSnapshot(data.vXVS, 0);
       expect(cf.toString()).to.equal(data.xvsCFSnapshot.oldCF.toString(), "XVS snapshot CF");
@@ -143,8 +159,14 @@ forking(FORK_BLOCK, async () => {
         // NewLiquidationThreshold is expected ZERO times: every collateral-factor row
         // re-passes its current threshold, so the setter must not write one. This is the
         // assertion that fails loudly if a threshold is ever changed by accident.
-        ["NewCollateralFactor", "NewLiquidationIncentive", "NewLiquidationThreshold", "CFSnapshotReset"],
-        [data.cfChanges.length, data.liChanges.length, 0, 1],
+        [
+          "NewCollateralFactor",
+          "NewLiquidationIncentive",
+          "NewSupplyCap",
+          "NewLiquidationThreshold",
+          "CFSnapshotReset",
+        ],
+        [data.cfChanges.length, data.liChanges.length, data.supplyCapChanges.length, 0, 1],
       ),
   });
 
@@ -184,6 +206,26 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    it("applies new market supply caps", async () => {
+      for (const s of data.supplyCapChanges) {
+        expect((await comptroller.supplyCaps(s.vToken)).toString()).to.equal(
+          s.new.toString(),
+          `${s.symbol} supply cap`,
+        );
+      }
+    });
+
+    it("keeps the new XVS supply cap above the amount already supplied", async () => {
+      const vToken = new ethers.Contract(data.vXVS, VTOKEN_ABI, ethers.provider);
+      const [totalSupply, exchangeRate] = await Promise.all([vToken.totalSupply(), vToken.exchangeRateStored()]);
+      const suppliedUnderlying = totalSupply.mul(exchangeRate).div(parseUnits("1", 18));
+      const cap = await comptroller.supplyCaps(data.vXVS);
+      expect(suppliedUnderlying.lt(cap)).to.equal(
+        true,
+        `supplied ${suppliedUnderlying.toString()} must stay below cap ${cap.toString()}`,
+      );
+    });
+
     it("clears the EBrake CF snapshot for XVS", async () => {
       const [cf, lt] = await ebrake.getMarketCFSnapshot(data.vXVS, 0);
       expect(cf.toString()).to.equal(data.xvsCFSnapshot.newCF.toString(), "XVS snapshot CF");
@@ -194,7 +236,7 @@ forking(FORK_BLOCK, async () => {
   describe("Post-VIP behaviour (bscmainnet)", () => {
     let user: Awaited<ReturnType<typeof initMainnetUser>>;
     const supplyAmount = parseUnits("1000", 18); // 1000 XVS (18 decimals) at pinned $1
-    const borrowAmount = parseUnits("100", 18); // 100 USDT << 50% of $1000 borrow power
+    const borrowAmount = parseUnits("100", 18); // 100 USDT, well inside the borrow power below
 
     before(async () => {
       const whale = await initMainnetUser(XVS_WHALE, ethers.utils.parseEther("1"));
@@ -209,12 +251,34 @@ forking(FORK_BLOCK, async () => {
       await comptroller.connect(user).enterMarkets([data.vXVS]);
     });
 
-    it("XVS supplied as collateral now yields non-zero account liquidity (CF 0% -> 50%)", async () => {
+    // getBorrowingPower weights collateral by the COLLATERAL FACTOR;
+    // getAccountLiquidity weights it by the LIQUIDATION THRESHOLD
+    // (WeightFunction.USE_COLLATERAL_FACTOR vs USE_LIQUIDATION_THRESHOLD in
+    // PolicyFacet). Both are asserted against values derived from the data file, so
+    // the pair pins the collateral factor this VIP sets *and* the threshold it must
+    // leave alone. Reading only getAccountLiquidity would measure the threshold while
+    // claiming to measure borrow power.
+    const expectedFor = (weight: typeof xvsCFRow.new) => supplyAmount.mul(weight).div(parseUnits("1", 18));
+    const assertClose = (actual: BigNumber, expected: BigNumber, label: string) => {
+      expect(actual.sub(expected).abs().lte(parseUnits("1", 18))).to.equal(
+        true,
+        `${label}: got ${actual.toString()}, expected ~${expected.toString()}`,
+      );
+    };
+
+    it("yields borrow power equal to the governed collateral factor (CF 0% -> new)", async () => {
+      const [err, borrowPower, shortfall] = await comptroller.getBorrowingPower(E2E_USER);
+      expect(err.toString()).to.equal("0");
+      expect(shortfall.toString()).to.equal("0");
+      // Any non-zero borrow power was impossible while the collateral factor was 0.
+      assertClose(borrowPower, expectedFor(xvsCFRow.new), "borrow power");
+    });
+
+    it("still values the collateral at the unchanged 60% liquidation threshold", async () => {
       const [err, liquidity, shortfall] = await comptroller.getAccountLiquidity(E2E_USER);
       expect(err.toString()).to.equal("0");
       expect(shortfall.toString()).to.equal("0");
-      // ~50% of $1000 collateral => ~$500 borrow power; impossible while CF was 0.
-      expect(liquidity.gt(parseUnits("400", 18))).to.equal(true, "expected non-zero XVS borrow power");
+      assertClose(liquidity, expectedFor(xvsCFRow.liquidationThreshold), "liquidation-weighted liquidity");
     });
 
     it("allows borrowing USDT against XVS collateral", async () => {

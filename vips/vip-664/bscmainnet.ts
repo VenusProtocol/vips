@@ -37,12 +37,20 @@ export interface EModeInvariant {
   vToken: string;
 }
 
+// Market-wide supply-cap change. setMarketSupplyCaps(address[],uint256[]).
+export interface SupplyCapEntry {
+  symbol: string;
+  vToken: string;
+  old: BigNumberish;
+  new: BigNumberish;
+}
+
 const meta = {
   version: "v2",
   title: "VIP-664 [BNB Chain] Risk Parameter Update (June 2026 Re-proposal)",
   description: `#### Summary
 
-Re-proposal of the 2026-06-23 BNB Core risk-parameter update (Allez Labs consolidated change table, plus two Venus additions), with three deliberate departures from that table: **wBETH is dropped**, and **USDe** and **FDUSD** land above the proposed values. Each is called out below. Every current value was read on-chain from the BNB Core Comptroller and matches what this proposal re-passes.
+Re-proposal of the 2026-06-23 BNB Core risk-parameter update (Allez Labs consolidated change table, plus Venus additions), with three deliberate departures from that table: **wBETH is dropped**, and **USDe** and **FDUSD** land above the proposed values. Each is called out below. Every current value was read on-chain from the BNB Core Comptroller and matches what this proposal re-passes.
 
 **No liquidation threshold moves.** \`setCollateralFactor(address,uint256,uint256)\` takes the collateral factor and the liquidation threshold together, so every row re-passes its current on-chain threshold verbatim; the setter only writes the threshold when the value differs, so no threshold is written at all and no \`NewLiquidationThreshold\` event is emitted. No existing position becomes liquidatable — the collateral-factor cuts reduce new borrow power only. E-Mode parameters are equally untouched: this setter is hardcoded to the core pool.
 
@@ -56,9 +64,13 @@ Full rationale: [Allez Labs — Risk Parameter Updates 2026-06-23](https://commu
 - **SOL**: 72% → 65% (EVT 5yr / 2h + on-chain liquidity).
 - **USDe**: 75% → 70%. The forum post proposed 50% on minimal BSC DEX depth; this proposal reduces to 70% instead.
 - **FDUSD**: 75% → 65% (the post proposed 50%; see stranded-exposure note below).
-- **XVS**: 0% → 50% — resume as collateral. Liquidation threshold stays 60% (untouched).
+- **XVS**: 0% → 45% — resume as collateral, paired with the supply-cap reduction below. Liquidation threshold stays 60% (untouched).
 
 **wBETH is excluded.** The table proposed 80% → 60% on liquidation load at a −10% price move. It is not part of this proposal; wBETH keeps its current 80% collateral factor.
+
+#### Core Pool — supply-cap change
+
+- **XVS**: supply cap 1,850,000 → 1,150,000 XVS. About 898.6k XVS is supplied today, so the new cap is above current usage and strands no existing supplier; it bounds further growth. Together with the 45% collateral factor, the borrow power this resumption can create is capped at ~517,500 XVS-equivalent (~$1.4M at the 2026-08-05 price of ~$2.70), against ~$2.5M under a 50% factor at the old cap. Borrowing XVS itself remains paused with a zero borrow cap.
 
 #### E-Mode "Stablecoins" pool (pool 1) — liquidation-incentive change
 
@@ -66,7 +78,7 @@ Full rationale: [Allez Labs — Risk Parameter Updates 2026-06-23](https://commu
 
 #### Emergency-brake snapshot
 
-XVS's collateral factor was set to 0% on 2026-06-24 by the emergency brake, which recorded the pre-brake pair (55% / 60%) as a snapshot. That snapshot is write-once, so leaving it in place would keep pointing at 55% rather than the 50% governed here, and would prevent a future brake from recording the value this proposal sets. The proposal therefore also calls \`resetCFSnapshot\` on the emergency brake for the XVS market, clearing it. This changes no market parameter.
+XVS's collateral factor was set to 0% on 2026-06-24 by the emergency brake, which recorded the pre-brake pair (55% / 60%) as a snapshot. That snapshot is write-once, so leaving it in place would keep pointing at 55% rather than the 45% governed here, and would prevent a future brake from recording the value this proposal sets. The proposal therefore also calls \`resetCFSnapshot\` on the emergency brake for the XVS market, clearing it. This changes no market parameter.
 
 #### FDUSD note
 
@@ -101,10 +113,19 @@ export const vip664 = () =>
       })),
 
       // ──────────────────────────────────────────────────────────────────────────
+      // Market-wide supply-cap reduction (XVS).
+      // ──────────────────────────────────────────────────────────────────────────
+      {
+        target: bsc.COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [bsc.supplyCapChanges.map(s => s.vToken), bsc.supplyCapChanges.map(s => s.new)],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────────
       // Clear the EBrake's stale CF snapshot for XVS. It still holds the
       // pre-brake 55%/60% pair from 2026-06-24; the snapshot is first-write-wins,
       // so leaving it would keep advertising 55% as the value to restore and
-      // would stop a future brake from recording the 50% set above.
+      // would stop a future brake from recording the 45% set above.
       // ──────────────────────────────────────────────────────────────────────────
       {
         target: bsc.EBRAKE,
