@@ -8,7 +8,6 @@ export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 // ─── vToken addresses (BNB Core).
 const vasBNB = "0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF";
 const vslisBNB = "0x89c910Eb8c90df818b4649b508Ba22130Dc73Adc";
-const vwBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 const vXRP = "0xB248a295732e0225acd3337607cc01068e3b9c10";
 const vSOL = "0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC";
 const vUSDe = "0x74ca6930108F775CC667894EEa33843e691680d7";
@@ -39,13 +38,6 @@ export const cfChanges: CFEntry[] = [
     liquidationThreshold: parseUnits("0.8", 18),
   },
   {
-    symbol: "wBETH",
-    vToken: vwBETH,
-    old: parseUnits("0.8", 18),
-    new: parseUnits("0.6", 18),
-    liquidationThreshold: parseUnits("0.8", 18),
-  },
-  {
     symbol: "XRP",
     vToken: vXRP,
     old: parseUnits("0.65", 18),
@@ -63,7 +55,7 @@ export const cfChanges: CFEntry[] = [
     symbol: "USDe",
     vToken: vUSDe,
     old: parseUnits("0.75", 18),
-    new: parseUnits("0.5", 18),
+    new: parseUnits("0.7", 18),
     liquidationThreshold: parseUnits("0.75", 18),
   },
   {

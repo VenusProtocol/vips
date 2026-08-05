@@ -37,10 +37,9 @@ Full rationale: [Allez Labs — Risk Parameter Updates 2026-06-23](https://commu
 
 - **asBNB**: 72% → 60% (low DEX exit liquidity vs supply).
 - **slisBNB**: 80% → 72% (move to sub-BNB CF).
-- **wBETH**: 80% → 60% (liquidation load at a −10% price move).
 - **XRP**: 65% → 50% (calibrated to EVT 5yr / 2h).
 - **SOL**: 72% → 65% (EVT 5yr / 2h + on-chain liquidity).
-- **USDe**: 75% → 50% (minimal BSC DEX depth).
+- **USDe**: 75% → 70% (minimal BSC DEX depth).
 - **FDUSD**: 75% → 65% (right-sized; see stranded-exposure note below).
 - **XVS**: 0% → 50% — resume as collateral. Liquidation threshold stays 60% (untouched).
 
