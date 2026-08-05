@@ -24,12 +24,27 @@ export interface LIEntry {
   new: BigNumberish;
 }
 
+// An E-Mode (poolId > 0) entry whose collateral factor and liquidation threshold
+// this VIP must leave untouched. Deliberately carries no expected value: the
+// simulation snapshots each one before execution and asserts it is identical
+// after. E-Mode parameters are moved independently of this VIP (sUSDe's pool-1 CF
+// moved between the fork block and 2026-08-05), so pinning numbers here would
+// break on drift while proving nothing extra — the property under test is
+// "unchanged by this proposal", not "equal to some constant".
+export interface EModeInvariant {
+  symbol: string;
+  poolId: number;
+  vToken: string;
+}
+
 const meta = {
   version: "v2",
   title: "VIP-664 [BNB Chain] Risk Parameter Update (June 2026 Re-proposal)",
   description: `#### Summary
 
-Re-proposal of the 2026-06-23 BNB Core risk-parameter update (Allez Labs consolidated change table, plus two Venus additions). All values were read on-chain from the BNB Core Comptroller on 2026-08-04 and match the table. Liquidation thresholds are left unchanged for every collateral-factor row, so no existing position becomes liquidatable — the collateral-factor cuts reduce new borrow power only.
+Re-proposal of the 2026-06-23 BNB Core risk-parameter update (Allez Labs consolidated change table, plus two Venus additions), with three deliberate departures from that table: **wBETH is dropped**, and **USDe** and **FDUSD** land above the proposed values. Each is called out below. Every current value was read on-chain from the BNB Core Comptroller and matches what this proposal re-passes.
+
+**No liquidation threshold moves.** \`setCollateralFactor(address,uint256,uint256)\` takes the collateral factor and the liquidation threshold together, so every row re-passes its current on-chain threshold verbatim; the setter only writes the threshold when the value differs, so no threshold is written at all and no \`NewLiquidationThreshold\` event is emitted. No existing position becomes liquidatable — the collateral-factor cuts reduce new borrow power only. E-Mode parameters are equally untouched: this setter is hardcoded to the core pool.
 
 Full rationale: [Allez Labs — Risk Parameter Updates 2026-06-23](https://community.venus.io/t/allez-labs-risk-parameter-updates-2026-06-23/5835/1).
 
@@ -39,17 +54,23 @@ Full rationale: [Allez Labs — Risk Parameter Updates 2026-06-23](https://commu
 - **slisBNB**: 80% → 72% (move to sub-BNB CF).
 - **XRP**: 65% → 50% (calibrated to EVT 5yr / 2h).
 - **SOL**: 72% → 65% (EVT 5yr / 2h + on-chain liquidity).
-- **USDe**: 75% → 70% (minimal BSC DEX depth).
-- **FDUSD**: 75% → 65% (right-sized; see stranded-exposure note below).
+- **USDe**: 75% → 70%. The forum post proposed 50% on minimal BSC DEX depth; this proposal reduces to 70% instead.
+- **FDUSD**: 75% → 65% (the post proposed 50%; see stranded-exposure note below).
 - **XVS**: 0% → 50% — resume as collateral. Liquidation threshold stays 60% (untouched).
+
+**wBETH is excluded.** The table proposed 80% → 60% on liquidation load at a −10% price move. It is not part of this proposal; wBETH keeps its current 80% collateral factor.
 
 #### E-Mode "Stablecoins" pool (pool 1) — liquidation-incentive change
 
-- **sUSDe**: liquidation incentive 8% → 6%, aligning with USDe (6%) in the same pool.
+- **sUSDe**: liquidation incentive 8% → 6%. Beyond aligning with USDe (6%) in the same pool, this restores a solvency margin: at the pool's 92.5% liquidation threshold, an 8% incentive leaves a liquidator eligible to seize 99.9% of the collateral backing a liquidatable position, versus 98.05% at 6%.
+
+#### Emergency-brake snapshot
+
+XVS's collateral factor was set to 0% on 2026-06-24 by the emergency brake, which recorded the pre-brake pair (55% / 60%) as a snapshot. That snapshot is write-once, so leaving it in place would keep pointing at 55% rather than the 50% governed here, and would prevent a future brake from recording the value this proposal sets. The proposal therefore also calls \`resetCFSnapshot\` on the emergency brake for the XVS market, clearing it. This changes no market parameter.
 
 #### FDUSD note
 
-FDUSD lands at CF 65% (the forum post proposed 50%). At 65% two small positions become repay-only (not liquidatable — the liquidation threshold is untouched): ~$193K debt on one account (~$3.9K short of its 66.34% break-even) and a ~$18K dust account, for ~$206K of accepted stranded exposure. The multi-million looping position that forced the June rollback is no longer present.
+FDUSD lands at CF 65%. At 65% two small positions become repay-only (not liquidatable — the liquidation threshold is untouched): ~$193K debt on one account (~$3.9K short of its 66.34% break-even) and a ~$18K dust account, for ~$206K of accepted stranded exposure. That figure was measured against the original June bundle, which also cut wBETH to 60% and USDe to 50%; since dropping and softening those rows can only raise an account's borrow power, it is an upper bound here. The multi-million looping position that forced the June rollback is no longer present.
 
 PT-sUSDE-26JUN2025 (in the original post at CF 70% → 0%) is excluded: its CF and LT were already set to 0% on 2026-07-12.
 `,
@@ -78,6 +99,18 @@ export const vip664 = () =>
         signature: "setLiquidationIncentive(uint96,address,uint256)",
         params: [l.poolId, l.vToken, l.new],
       })),
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // Clear the EBrake's stale CF snapshot for XVS. It still holds the
+      // pre-brake 55%/60% pair from 2026-06-24; the snapshot is first-write-wins,
+      // so leaving it would keep advertising 55% as the value to restore and
+      // would stop a future brake from recording the 50% set above.
+      // ──────────────────────────────────────────────────────────────────────────
+      {
+        target: bsc.EBRAKE,
+        signature: "resetCFSnapshot(address)",
+        params: [bsc.vXVS],
+      },
     ],
     meta,
     ProposalType.REGULAR,

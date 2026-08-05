@@ -24,9 +24,8 @@ const FORK_BLOCK = 113850000;
 const PROPOSER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
 const SUPPORTERS = ["0x34221485302f6F2029660a000908B5FCABB9BC6e", "0x5176671de05380379399b669ed276feec99d59cb"];
 
-// XVS market + whale for the behavioral proof (XVS CF 0% -> 50%). Borrow a small
+// XVS whale + market for the behavioral proof (XVS CF 0% -> 50%). Borrow a small
 // amount of USDT against supplied XVS — impossible while XVS CF was 0%.
-const vXVS = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const XVS_WHALE = "0x051100480289e704d20e9DB4804837068f3f9204"; // XVSVault holds ~9M XVS
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
@@ -36,6 +35,21 @@ const ERC20_ABI = [
   "function approve(address spender, uint256 amount) returns (bool)",
   "function balanceOf(address account) view returns (uint256)",
   "function transfer(address to, uint256 amount) returns (bool)",
+];
+
+const EBRAKE_ABI = [
+  "function getMarketCFSnapshot(address market, uint96 poolId) view returns (uint256 cf, uint256 lt)",
+];
+
+// JSON fragment (not human-readable) so it can be handed to expectEvents alongside
+// the comptroller ABI.
+const EBRAKE_EVENT_ABI = [
+  {
+    type: "event",
+    name: "CFSnapshotReset",
+    anonymous: false,
+    inputs: [{ name: "market", type: "address", indexed: true }],
+  },
 ];
 
 // Pin the given vTokens' underlyings to $1 via the Chainlink oracle so the mined
@@ -66,6 +80,11 @@ const pinOraclePrices = async (vTokens: string[]): Promise<void> => {
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(data.COMPTROLLER, BSC_COMPTROLLER_ABI, ethers.provider);
+  const ebrake = new ethers.Contract(data.EBRAKE, EBRAKE_ABI, ethers.provider);
+
+  // Pre-VIP snapshot of the E-Mode entries that must not move, compared after execution.
+  const emodeKey = (e: { poolId: number; vToken: string }) => `${e.poolId}:${e.vToken.toLowerCase()}`;
+  const emodeBefore = new Map<string, { cf: string; lt: string }>();
 
   before(async () => {
     await pinOraclePrices([...data.cfChanges.map(c => c.vToken), ...data.liChanges.map(l => l.vToken), vUSDT]);
@@ -94,6 +113,24 @@ forking(FORK_BLOCK, async () => {
         );
       }
     });
+
+    it("records the E-Mode collateral factors and liquidation thresholds that must not move", async () => {
+      for (const e of data.emodeInvariants) {
+        const md = await comptroller.poolMarkets(e.poolId, e.vToken);
+        expect(md.isListed).to.equal(true, `${e.symbol} pool ${e.poolId} listed`);
+        emodeBefore.set(emodeKey(e), {
+          cf: md.collateralFactorMantissa.toString(),
+          lt: md.liquidationThresholdMantissa.toString(),
+        });
+      }
+      expect(emodeBefore.size).to.equal(data.emodeInvariants.length);
+    });
+
+    it("still holds the EBrake CF snapshot recorded on 2026-06-24", async () => {
+      const [cf, lt] = await ebrake.getMarketCFSnapshot(data.vXVS, 0);
+      expect(cf.toString()).to.equal(data.xvsCFSnapshot.oldCF.toString(), "XVS snapshot CF");
+      expect(lt.toString()).to.equal(data.xvsCFSnapshot.oldLT.toString(), "XVS snapshot LT");
+    });
   });
 
   testVip("VIP-664 BNB Chain Risk Parameter Update", await vip664(), {
@@ -102,9 +139,12 @@ forking(FORK_BLOCK, async () => {
     callbackAfterExecution: async tx =>
       expectEvents(
         tx,
-        [BSC_COMPTROLLER_ABI],
-        ["NewCollateralFactor", "NewLiquidationIncentive"],
-        [data.cfChanges.length, data.liChanges.length],
+        [BSC_COMPTROLLER_ABI, EBRAKE_EVENT_ABI],
+        // NewLiquidationThreshold is expected ZERO times: every collateral-factor row
+        // re-passes its current threshold, so the setter must not write one. This is the
+        // assertion that fails loudly if a threshold is ever changed by accident.
+        ["NewCollateralFactor", "NewLiquidationIncentive", "NewLiquidationThreshold", "CFSnapshotReset"],
+        [data.cfChanges.length, data.liChanges.length, 0, 1],
       ),
   });
 
@@ -131,6 +171,24 @@ forking(FORK_BLOCK, async () => {
         );
       }
     });
+
+    it("leaves every E-Mode collateral factor and liquidation threshold untouched", async () => {
+      for (const e of data.emodeInvariants) {
+        const before = emodeBefore.get(emodeKey(e));
+        if (!before) {
+          throw new Error(`${e.symbol} pool ${e.poolId}: pre-VIP snapshot missing`);
+        }
+        const md = await comptroller.poolMarkets(e.poolId, e.vToken);
+        expect(md.collateralFactorMantissa.toString()).to.equal(before.cf, `${e.symbol} pool ${e.poolId} CF`);
+        expect(md.liquidationThresholdMantissa.toString()).to.equal(before.lt, `${e.symbol} pool ${e.poolId} LT`);
+      }
+    });
+
+    it("clears the EBrake CF snapshot for XVS", async () => {
+      const [cf, lt] = await ebrake.getMarketCFSnapshot(data.vXVS, 0);
+      expect(cf.toString()).to.equal(data.xvsCFSnapshot.newCF.toString(), "XVS snapshot CF");
+      expect(lt.toString()).to.equal(data.xvsCFSnapshot.newLT.toString(), "XVS snapshot LT");
+    });
   });
 
   describe("Post-VIP behaviour (bscmainnet)", () => {
@@ -145,10 +203,10 @@ forking(FORK_BLOCK, async () => {
       const xvs = new ethers.Contract(XVS, ERC20_ABI, ethers.provider);
       await xvs.connect(whale).transfer(E2E_USER, supplyAmount);
 
-      const vXVSContract = new ethers.Contract(vXVS, VTOKEN_ABI, ethers.provider);
-      await xvs.connect(user).approve(vXVS, supplyAmount);
+      const vXVSContract = new ethers.Contract(data.vXVS, VTOKEN_ABI, ethers.provider);
+      await xvs.connect(user).approve(data.vXVS, supplyAmount);
       await vXVSContract.connect(user).mint(supplyAmount);
-      await comptroller.connect(user).enterMarkets([vXVS]);
+      await comptroller.connect(user).enterMarkets([data.vXVS]);
     });
 
     it("XVS supplied as collateral now yields non-zero account liquidity (CF 0% -> 50%)", async () => {
