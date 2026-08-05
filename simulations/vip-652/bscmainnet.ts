@@ -14,8 +14,8 @@ import {
   USDT,
   U_TO_SWEEP,
   WBNB,
-  vip664,
-} from "../../vips/vip-664/bscmainnet";
+  vip652,
+} from "../../vips/vip-652/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import ERC20_ABI from "./abi/erc20.json";
 
@@ -55,7 +55,7 @@ forking(113800000, async () => {
     });
   });
 
-  testVip("VIP-664", await vip664(), {
+  testVip("VIP-652", await vip652(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [1]);
