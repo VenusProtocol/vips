@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999, {
@@ -162,6 +162,25 @@ forking(BLOCK_NUMBER, async () => {
     for (const { symbol, asset } of APRO_ASSETS) {
       it(`${symbol}: getPrice resolves through the pivot and returns the unchanged MAIN price`, async () => {
         expect(await resilientOracle.getPrice(asset)).to.equal(preVipPrice[asset]);
+      });
+    }
+
+    for (const { symbol, asset } of APRO_ASSETS) {
+      it(`${symbol}: a pivot outside the ±2% band blocks pricing`, async () => {
+        const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        const main = preVipPrice[asset];
+        // Inside the band (pivot/main = 0.985) -> still prices, and the granted setDirectPrice works.
+        await aproOracle.connect(timelock).setDirectPrice(asset, main.mul(985).div(1000));
+        expect(await resilientOracle.getPrice(asset)).to.equal(main);
+        // Below the band (0.975) -> no FALLBACK, so getPrice reverts.
+        await aproOracle.connect(timelock).setDirectPrice(asset, main.mul(975).div(1000));
+        await expect(resilientOracle.getPrice(asset)).to.be.revertedWith("invalid resilient oracle price");
+        // Above the band (1.025) -> reverts too.
+        await aproOracle.connect(timelock).setDirectPrice(asset, main.mul(1025).div(1000));
+        await expect(resilientOracle.getPrice(asset)).to.be.revertedWith("invalid resilient oracle price");
+        // Clearing the direct price restores the live feed.
+        await aproOracle.connect(timelock).setDirectPrice(asset, 0);
+        expect(await resilientOracle.getPrice(asset)).to.equal(main);
       });
     }
 
