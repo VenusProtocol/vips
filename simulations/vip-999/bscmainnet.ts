@@ -81,12 +81,6 @@ forking(BLOCK_NUMBER, async () => {
   // config per asset.
   // =====================================================================================
   testVip("VIP-999 Add APRO pivot for BStocks", await vip999(), {
-    proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
-    supporters: [
-      "0x5176671de05380379399b669ed276feec99d59cb",
-      "0xc444949e0054a23c44fc45789738bdf64aed2391",
-      "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
-    ],
     callbackAfterExecution: async txResponse => {
       // APRO oracle feed configs (ChainlinkOracle.TokenConfigAdded).
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [APRO_ASSETS.length]);
