@@ -21,9 +21,7 @@ export interface AproAsset {
   symbol: string;
   asset: string;
   feed: string;
-  // The feed's own AccessControlledOffchainAggregator access controller. Contract callers (our APRO
-  // oracle) must be whitelisted here via addAccess; used only by the simulation to mimic the
-  // off-chain whitelisting APRO performs before this VIP executes.
+  // The feed's own AccessControlledOffchainAggregator access controller
   accessController: string;
 }
 
@@ -91,15 +89,6 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
    observed Atlas-vs-APRO spread peaks near 1.6%, so ±2% keeps normal operation inside the band
    while still rejecting a genuine divergence.
 
-#### Execution precondition
-
-APRO must whitelist the APRO oracle (\`0x04480f1Ba2252CDF89deB022B58d0a03d1B4cF91\`) as an authorised
-contract reader on the access controller of all four price feeds **before this VIP executes**. The
-feeds are \`AccessControlledOffchainAggregator\`s that reject contract callers unless whitelisted; with
-a PIVOT enabled and no FALLBACK, an unreadable pivot makes \`ResilientOracle.getPrice\` revert for
-these assets, which would block supply and redeem on the four markets. This must be re-checked after
-the timelock delay and immediately before execution.
-
 #### Voting options
 
 - **For** — Execute this proposal
@@ -121,8 +110,6 @@ the timelock delay and immediately before execution.
         signature: "giveCallPermission(address,string,address)",
         params: [APRO_ORACLE, "setTokenConfig(TokenConfig)", bscmainnet.NORMAL_TIMELOCK],
       },
-      // Also grant setDirectPrice so governance can manually pin a price on the APRO oracle if a
-      // feed ever fails (emergency override), matching the other Venus Chainlink-style oracles.
       {
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",

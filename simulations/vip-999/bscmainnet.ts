@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip999, {
@@ -22,7 +22,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const BLOCK_NUMBER = 112419380;
+const BLOCK_NUMBER = 115099000;
 const STALE_PERIOD_OVERRIDE = 315360000; // 10 years
 const ADDRESS_ZERO = ethers.constants.AddressZero;
 
@@ -65,6 +65,13 @@ forking(BLOCK_NUMBER, async () => {
 
       it(`${symbol}: BoundValidator has no anchor config`, async () => {
         expect((await boundValidator.validateConfigs(asset)).asset).to.equal(ADDRESS_ZERO);
+      });
+    }
+
+    for (const { symbol, accessController } of APRO_ASSETS) {
+      it(`${symbol}: APRO has whitelisted the APRO oracle on the feed's access controller`, async () => {
+        const controller = new ethers.Contract(accessController, APRO_ACCESS_CONTROL_ABI, ethers.provider);
+        expect(await controller.hasAccess(APRO_ORACLE, "0x")).to.equal(true);
       });
     }
   });
@@ -132,13 +139,13 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   // =====================================================================================
-  // POST-VIP behavioral proof — the APRO pivot is live and mandatory: pricing reverts until
-  // the APRO oracle is whitelisted on each feed, then resolves through the validated pivot.
+  // POST-VIP behavioral proof — the APRO pivot is live and mandatory: pricing resolves through the
+  // APRO feeds, and setDirectPrice stays gated to the account the VIP granted it to.
   // =====================================================================================
-  describe("Post-VIP behavior: APRO pivot requires feed whitelisting", () => {
+  describe("Post-VIP behavior: the APRO pivot gates pricing", () => {
     before(async () => {
       // The governance delay warped past the feeds' stale windows; bump the MAIN (Atlas) and PIVOT
-      // (APRO) stale periods so the only remaining failure mode isolated below is the feed whitelist.
+      // stale periods so what the assertions below exercise is the new config, not fork time.
       for (const { asset } of APRO_ASSETS) {
         for (const oracleAddr of [ATLAS_ORACLE, APRO_ORACLE]) {
           await setMaxStalePeriodInChainlinkOracle(
@@ -152,27 +159,18 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("pricing reverts while the APRO oracle is not whitelisted on the feeds", async () => {
-      for (const { asset } of APRO_ASSETS) {
-        // The pivot read (contract call into the feed) fails; with no FALLBACK, getPrice reverts.
-        await expect(resilientOracle.getPrice(asset)).to.be.reverted;
-      }
-    });
+    for (const { symbol, asset } of APRO_ASSETS) {
+      it(`${symbol}: getPrice resolves through the pivot and returns the unchanged MAIN price`, async () => {
+        expect(await resilientOracle.getPrice(asset)).to.equal(preVipPrice[asset]);
+      });
+    }
 
-    it("after APRO whitelists our oracle, the pivot resolves and validates the MAIN price", async () => {
-      for (const { accessController } of APRO_ASSETS) {
-        const controller = new ethers.Contract(accessController, APRO_ACCESS_CONTROL_ABI, ethers.provider);
-        const owner = await initMainnetUser(await controller.owner(), ethers.utils.parseEther("1"));
-        expect(await controller.hasAccess(APRO_ORACLE, "0x")).to.equal(false);
-        await controller.connect(owner).addAccess(APRO_ORACLE);
-        expect(await controller.hasAccess(APRO_ORACLE, "0x")).to.equal(true);
-      }
-
-      for (const { asset } of APRO_ASSETS) {
-        // MAIN (Atlas) price is unchanged; it now resolves only because it passes the APRO pivot band.
-        const price = await resilientOracle.getPrice(asset);
-        expect(price).to.equal(preVipPrice[asset]);
-      }
+    it("setDirectPrice on the APRO oracle stays restricted to the granted account", async () => {
+      const [attacker] = await ethers.getSigners();
+      await expect(aproOracle.connect(attacker).setDirectPrice(APRO_ASSETS[0].asset, 1)).to.be.revertedWithCustomError(
+        aproOracle,
+        "Unauthorized",
+      );
     });
   });
 });
