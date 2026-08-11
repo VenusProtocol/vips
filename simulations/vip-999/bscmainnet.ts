@@ -17,6 +17,7 @@ import vip999, {
   BOUND_VALIDATOR,
   FIVE_PCT_LOWER_BOUND,
   FIVE_PCT_UPPER_BOUND,
+  ORACLE_GUARDIAN,
   SLIS_BNB,
   SLIS_BNB_ATLAS_FEED,
   SLIS_BNB_MAIN_ORACLE,
@@ -214,10 +215,10 @@ forking(BLOCK_NUMBER, async () => {
         }
       });
 
-      it("Guardian granted setDirectPrice on the APRO oracle", async () => {
+      it("Oracle Guardian granted setDirectPrice on the APRO oracle", async () => {
         const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
         expect(
-          await acm.isAllowedToCall(bscmainnet.GUARDIAN, "setDirectPrice(address,uint256)", { from: APRO_ORACLE }),
+          await acm.isAllowedToCall(ORACLE_GUARDIAN, "setDirectPrice(address,uint256)", { from: APRO_ORACLE }),
         ).to.equal(true);
       });
 

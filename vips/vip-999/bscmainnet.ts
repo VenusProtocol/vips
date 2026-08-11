@@ -12,6 +12,8 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 export const APRO_ORACLE = "0x04480f1Ba2252CDF89deB022B58d0a03d1B4cF91";
 export const APRO_MAX_STALE_PERIOD = 3900;
 
+export const ORACLE_GUARDIAN = "0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF";
+
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 
 export const FIVE_PCT_UPPER_BOUND = parseUnits("1.05", 18);
@@ -127,8 +129,9 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
    pendingOwner; this call completes the two-step transfer so governance owns it.
 2. **Grant permissions on the APRO oracle** via the Access Control Manager (per-contract permissions
    for the newly deployed oracle): the Normal Timelock gets \`setTokenConfig(TokenConfig)\` and
-   \`setDirectPrice(address,uint256)\`; the Guardian additionally gets \`setDirectPrice(address,uint256)\`
-   so it can also manually pin an emergency price without waiting on a timelock delay.
+   \`setDirectPrice(address,uint256)\`; the [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF)
+   additionally gets \`setDirectPrice(address,uint256)\` so it can also manually pin an emergency price
+   without waiting on a timelock delay.
 3. **Configure the APRO feeds** on the APRO oracle for the four assets (feed address + a 3900s max stale
    period).
 4. **Insert APRO as PIVOT** in the ResilientOracle for the four assets: oracles become
@@ -192,7 +195,7 @@ anchor config today.
       {
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [APRO_ORACLE, "setDirectPrice(address,uint256)", bscmainnet.GUARDIAN],
+        params: [APRO_ORACLE, "setDirectPrice(address,uint256)", ORACLE_GUARDIAN],
       },
 
       // 2. BStocks: configure the APRO feeds on the APRO oracle
