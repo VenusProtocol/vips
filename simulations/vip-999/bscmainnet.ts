@@ -109,6 +109,13 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
+    it("Guardian granted setDirectPrice on the APRO oracle", async () => {
+      const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+      expect(
+        await acm.isAllowedToCall(bscmainnet.GUARDIAN, "setDirectPrice(address,uint256)", { from: APRO_ORACLE }),
+      ).to.equal(true);
+    });
+
     for (const { symbol, asset, feed } of APRO_ASSETS) {
       it(`${symbol}: APRO feed configured with the expected feed + max stale period`, async () => {
         const cfg = await aproOracle.tokenConfigs(asset);
@@ -184,6 +191,15 @@ forking(BLOCK_NUMBER, async () => {
         aproOracle,
         "Unauthorized",
       );
+    });
+
+    it("Guardian can also call setDirectPrice on the APRO oracle", async () => {
+      const asset = APRO_ASSETS[0].asset;
+      const guardian = await initMainnetUser(bscmainnet.GUARDIAN, ethers.utils.parseEther("1"));
+      const main = preVipPrice[asset];
+      await aproOracle.connect(guardian).setDirectPrice(asset, main);
+      expect(await resilientOracle.getPrice(asset)).to.equal(main);
+      await aproOracle.connect(guardian).setDirectPrice(asset, 0);
     });
   });
 });

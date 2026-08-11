@@ -73,10 +73,10 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
 
 1. **Accept ownership of the APRO oracle.** The oracle was deployed with the Normal Timelock as
    pendingOwner; this call completes the two-step transfer so governance owns it.
-2. **Grant the Normal Timelock permission** to call \`setTokenConfig(TokenConfig)\` and
-   \`setDirectPrice(address,uint256)\` on the APRO oracle via the Access Control Manager (per-contract
-   permissions for the newly deployed oracle; \`setDirectPrice\` allows an emergency manual price
-   override).
+2. **Grant permissions on the APRO oracle** via the Access Control Manager (per-contract permissions
+   for the newly deployed oracle): the Normal Timelock gets \`setTokenConfig(TokenConfig)\` and
+   \`setDirectPrice(address,uint256)\`; the Guardian additionally gets \`setDirectPrice(address,uint256)\`
+   so it can also manually pin an emergency price without waiting on a timelock delay.
 3. **Configure the APRO feeds** on the APRO oracle for the four assets (feed address + a 3800s max stale
    period, matching the Atlas feeds).
 4. **Insert APRO as PIVOT** in the ResilientOracle for the four assets: oracles become
@@ -114,6 +114,11 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [APRO_ORACLE, "setDirectPrice(address,uint256)", bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [APRO_ORACLE, "setDirectPrice(address,uint256)", bscmainnet.GUARDIAN],
       },
 
       // ────────────────────────────────────────────────────────────────
