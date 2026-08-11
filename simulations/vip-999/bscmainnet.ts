@@ -21,14 +21,18 @@ import vip999, {
   SLIS_BNB_ATLAS_FEED,
   SLIS_BNB_MAIN_ORACLE,
   SOLV_BTC,
+  SOLV_BTC_ER_MAX_STALE_PERIOD,
   SOLV_BTC_FALLBACK_ORACLE,
   SOLV_BTC_MAIN_ORACLE,
+  SOLV_BTC_NEW_ER_FEED,
   SOLV_BTC_PIVOT_ORACLE,
   TWO_PCT_LOWER_BOUND,
   TWO_PCT_UPPER_BOUND,
   X_SOLV_BTC,
   X_SOLV_BTC_OLD_MAIN_ORACLE,
   X_SOLV_BTC_ONE_JUMP_ORACLE,
+  X_SOLV_BTC_SVR_FEED,
+  X_SOLV_BTC_SVR_MAX_STALE_PERIOD,
 } from "../../vips/vip-999/bscmainnet";
 import ACM_ABI from "./abi/accessControlManager.json";
 import APRO_ACCESS_CONTROL_ABI from "./abi/aproAccessControl.json";
@@ -48,6 +52,38 @@ const expectCloseTo = (actual: BigNumber, expected: BigNumber, toleranceBps: num
   expect(diff.lte(tolerance), `expected ${actual} to be within ${toleranceBps} bps of ${expected}`).to.be.true;
 };
 
+// Every exchange-rate leg under SolvBTC/xSolvBTC goes stale over the simulated governance delay, and the
+// two PIVOT legs carry internal staleness checks setMaxStalePeriodInChainlinkOracle can't reach. So read
+// each leg's live rate and pin it with setDirectPrice, which getPrice returns without any staleness
+// check. The two MAIN legs are the feeds this VIP configures, so they're read behind an evm_snapshot —
+// the VIP itself still executes against untouched pre-VIP config.
+const pinSolvBtcFamilyLegs = async () => {
+  // Intermediate oracles behind the PIVOTs: SolvBTC/BTC Fundamental, and RedStone for xSolvBTC.
+  const SOLVBTC_FUNDAMENTAL_ORACLE = "0x4521589226ef07d9805936de42F1ACF394B2B221";
+  const chainlinkOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, bscmainnet.CHAINLINK_ORACLE);
+  const legs: [Contract, string][] = [
+    [chainlinkOracle, SOLV_BTC],
+    [chainlinkOracle, X_SOLV_BTC],
+    [await ethers.getContractAt(CHAINLINK_ORACLE_ABI, SOLVBTC_FUNDAMENTAL_ORACLE), SOLV_BTC],
+    [await ethers.getContractAt(CHAINLINK_ORACLE_ABI, bscmainnet.REDSTONE_ORACLE), X_SOLV_BTC],
+  ];
+
+  const snapshotId = await ethers.provider.send("evm_snapshot", []);
+  let timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+  await chainlinkOracle.connect(timelock).setTokenConfigs([
+    [SOLV_BTC, SOLV_BTC_NEW_ER_FEED, SOLV_BTC_ER_MAX_STALE_PERIOD],
+    [X_SOLV_BTC, X_SOLV_BTC_SVR_FEED, X_SOLV_BTC_SVR_MAX_STALE_PERIOD],
+  ]);
+  const rates = await Promise.all(legs.map(([oracle, asset]) => oracle.getPrice(asset)));
+  await ethers.provider.send("evm_revert", [snapshotId]);
+
+  // Re-fund: the revert rolled back the impersonated timelock's balance along with everything else.
+  timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+  for (const [i, [oracle, asset]] of legs.entries()) {
+    await oracle.connect(timelock).setDirectPrice(asset, rates[i]);
+  }
+};
+
 forking(BLOCK_NUMBER, async () => {
   let resilientOracle: Contract;
   let aproOracle: Contract;
@@ -62,9 +98,10 @@ forking(BLOCK_NUMBER, async () => {
     boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
     sharedChainlinkOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, bscmainnet.CHAINLINK_ORACLE);
     atlasOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, ATLAS_ORACLE);
-    for (const asset of [...APRO_ASSETS.map(a => a.asset), AS_BNB, SLIS_BNB, SOLV_BTC]) {
+    for (const asset of [...APRO_ASSETS.map(a => a.asset), AS_BNB, SLIS_BNB, SOLV_BTC, X_SOLV_BTC]) {
       preVipPrice[asset] = await resilientOracle.getPrice(asset);
     }
+    await pinSolvBtcFamilyLegs();
   });
 
   // =====================================================================================
@@ -138,9 +175,8 @@ forking(BLOCK_NUMBER, async () => {
         expect((await boundValidator.validateConfigs(X_SOLV_BTC)).asset).to.equal(ADDRESS_ZERO);
       });
 
-      it("xSolvBTC: the new OneJumpOracle exists but can't price yet (SVR feed unset)", async () => {
-        const oneJumpOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, X_SOLV_BTC_ONE_JUMP_ORACLE);
-        await expect(oneJumpOracle.getPrice(X_SOLV_BTC)).to.be.reverted;
+      it("xSolvBTC: the new OneJumpOracle's SVR feed is not configured yet", async () => {
+        expect((await sharedChainlinkOracle.tokenConfigs(X_SOLV_BTC)).feed).to.equal(ADDRESS_ZERO);
       });
     });
   });
@@ -305,14 +341,13 @@ forking(BLOCK_NUMBER, async () => {
       describe("Atlas (asBNB/slisBNB)", () => {
         before(async () => {
           const NATIVE_TOKEN = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
-          const REDSTONE_ORACLE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
           // slisBNB's MAIN (and, through it, asBNB's MAIN) needs BNB/USD from the shared ResilientOracle.
           // BNB's own PIVOT is backed by the same external RedStone feed noted in the SolvBTC family
           // block below — its staleness can't be overridden — so BNB's MAIN + FALLBACK are bumped to
           // let the MAIN-vs-FALLBACK comparison carry it once the PIVOT read is caught and ignored.
           for (const [oracleAddr, asset] of [
             [bscmainnet.CHAINLINK_ORACLE, NATIVE_TOKEN],
-            [REDSTONE_ORACLE, NATIVE_TOKEN],
+            [bscmainnet.REDSTONE_ORACLE, NATIVE_TOKEN],
             [ATLAS_ORACLE, NATIVE_TOKEN],
           ]) {
             await setMaxStalePeriodInChainlinkOracle(
@@ -346,21 +381,20 @@ forking(BLOCK_NUMBER, async () => {
         });
       });
 
+      // Prices resolve for real here — every exchange-rate leg was pinned pre-warp by
+      // pinSolvBtcFamilyLegs() to the rate it had under this VIP's own config, and a
+      // direct price is returned without any staleness check. Both MAINs change (SolvBTC: market-price
+      // feed -> Exchange Rate feed; xSolvBTC: RedStone-fundamental wrapper -> SVR OneJumpOracle), so an
+      // exact match against the pre-VIP price isn't the right bar — 2% is.
       describe("SolvBTC family", () => {
         before(async () => {
           const BTC_B = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
-          const REDSTONE_ORACLE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
-          // BTCB backs the MAIN wrapper as UNDERLYING_TOKEN — its own MAIN/PIVOT/FALLBACK feeds need
-          // bumping too, or its price goes stale under the simulated governance delay.
-          for (const [oracleAddr, asset] of [
-            [bscmainnet.CHAINLINK_ORACLE, SOLV_BTC],
-            [bscmainnet.CHAINLINK_ORACLE, BTC_B],
-            [REDSTONE_ORACLE, BTC_B],
-            [ATLAS_ORACLE, BTC_B],
-          ]) {
+          // BTCB is the UNDERLYING_TOKEN of every wrapper in this family, priced through the shared
+          // ResilientOracle — its own three legs still need bumping.
+          for (const oracleAddr of [bscmainnet.CHAINLINK_ORACLE, bscmainnet.REDSTONE_ORACLE, ATLAS_ORACLE]) {
             await setMaxStalePeriodInChainlinkOracle(
               oracleAddr,
-              asset,
+              BTC_B,
               ADDRESS_ZERO,
               bscmainnet.NORMAL_TIMELOCK,
               STALE_PERIOD_OVERRIDE,
@@ -368,19 +402,12 @@ forking(BLOCK_NUMBER, async () => {
           }
         });
 
-        // SolvBTC's MAIN changes, so an exact preVipPrice match isn't the right bar, and
-        // resilientOracle.getPrice() reverts post-VIP since the PIVOT's external RedStone feed goes
-        // stale under the simulated delay (its staleness can't be overridden). Query the MAIN wrapper
-        // directly instead. xSolvBTC can't be checked the same way — its new MAIN wrapper sources
-        // SolvBTC's price via SolvBTC's ResilientOracle internally, hitting the same staleness issue.
-        it("SolvBTC: MAIN wrapper resolves a price after the feed swap", async () => {
-          const mainWrapper = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SOLV_BTC_MAIN_ORACLE);
-          expect(await mainWrapper.getPrice(SOLV_BTC)).to.be.gt(0);
+        it("SolvBTC: getPrice resolves through the full stack, within 2% of the pre-VIP price", async () => {
+          expectCloseTo(await resilientOracle.getPrice(SOLV_BTC), preVipPrice[SOLV_BTC], 200);
         });
 
-        it("SolvBTC: MAIN wrapper price hasn't moved more than 2% versus the pre-VIP price", async () => {
-          const mainWrapper = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SOLV_BTC_MAIN_ORACLE);
-          expectCloseTo(await mainWrapper.getPrice(SOLV_BTC), preVipPrice[SOLV_BTC], 200);
+        it("xSolvBTC: getPrice resolves through the full stack, within 2% of the pre-VIP price", async () => {
+          expectCloseTo(await resilientOracle.getPrice(X_SOLV_BTC), preVipPrice[X_SOLV_BTC], 200);
         });
       });
     });
