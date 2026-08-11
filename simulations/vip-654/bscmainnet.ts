@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip654, {
   APRO_ASSETS,
   APRO_MAX_STALE_PERIOD,
   APRO_ORACLE,
@@ -34,7 +34,7 @@ import vip999, {
   X_SOLV_BTC_ONE_JUMP_ORACLE,
   X_SOLV_BTC_SVR_FEED,
   X_SOLV_BTC_SVR_MAX_STALE_PERIOD,
-} from "../../vips/vip-999/bscmainnet";
+} from "../../vips/vip-654/bscmainnet";
 import ACM_ABI from "./abi/accessControlManager.json";
 import APRO_ACCESS_CONTROL_ABI from "./abi/aproAccessControl.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
@@ -194,7 +194,7 @@ forking(BLOCK_NUMBER, async () => {
   // =====================================================================================
   // EXECUTION
   // =====================================================================================
-  testVip("VIP-999 BNB Chain oracle updates", await vip999(), {
+  testVip("VIP-654 BNB Chain oracle updates", await vip654(), {
     callbackAfterExecution: async txResponse => {
       // APRO (4) + Atlas (2: asBNB, slisBNB) + shared ChainlinkOracle (2: SolvBTC, xSolvBTC) feed configs.
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [8]);

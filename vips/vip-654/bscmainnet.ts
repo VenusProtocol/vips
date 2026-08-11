@@ -95,10 +95,10 @@ export const X_SOLV_BTC_OLD_MAIN_ORACLE = "0xf5534f78Df9b610B19A63956d498d00CFaD
 export const X_SOLV_BTC_SVR_FEED = "0x71cdD4BD7C42C752325cC7208deC1b3B418F1706";
 export const X_SOLV_BTC_SVR_MAX_STALE_PERIOD = 86700;
 
-export const vip999 = () => {
+export const vip654 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] Oracle updates: APRO PIVOT for BStocks, asBNB/slisBNB/SolvBTC/xSolvBTC",
+    title: "VIP-654 [BNB Chain] Oracle updates: APRO PIVOT for BStocks, asBNB/slisBNB/SolvBTC/xSolvBTC",
     description: `#### Summary
 
 Oracle configuration updates across 8 BNB Chain Core Pool markets, per the Venus Oracle Mastersheet:
@@ -113,7 +113,7 @@ Oracle configuration updates across 8 BNB Chain Core Pool markets, per the Venus
    demote the current RedStone-fundamental wrapper to PIVOT, add a new ±2% BoundValidator band.
 
 Alongside these, the [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF)
-is granted \`setDirectPrice(address,uint256)\` on the new APRO oracle and on the existing
+is granted setDirectPrice(address,uint256) on the new APRO oracle and on the existing
 [Atlas oracle](https://bscscan.com/address/0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0) — see
 "Oracle Guardian permissions" below.
 
@@ -133,9 +133,9 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
 1. **Accept ownership of the APRO oracle.** The oracle was deployed with the Normal Timelock as
    pendingOwner; this call completes the two-step transfer so governance owns it.
 2. **Grant permissions on the APRO oracle** via the Access Control Manager (per-contract permissions
-   for the newly deployed oracle): the Normal Timelock gets \`setTokenConfig(TokenConfig)\` and
-   \`setDirectPrice(address,uint256)\`; the [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF)
-   additionally gets \`setDirectPrice(address,uint256)\` so it can also manually pin an emergency price
+   for the newly deployed oracle): the Normal Timelock gets setTokenConfig(TokenConfig) and
+   setDirectPrice(address,uint256); the [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF)
+   additionally gets setDirectPrice(address,uint256) so it can also manually pin an emergency price
    without waiting on a timelock delay.
 3. **Configure the APRO feeds** on the APRO oracle for the four assets (feed address + a 3900s max stale
    period).
@@ -149,34 +149,34 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
 
 #### Details — asBNB (BNB Chain)
 
-Switch the PIVOT from the Binance-fed adapter to Atlas (\`ATL:asBNB/USD\`, ms=86,700s). MAIN and
+Switch the PIVOT from the Binance-fed adapter to Atlas (ATL:asBNB/USD, ms=86,700s). MAIN and
 BoundValidator (±5%) are unchanged.
 
 #### Details — slisBNB (BNB Chain)
 
-Add Atlas as PIVOT (\`ATL:slisBNB/USD\`, ms=1,200s); slisBNB currently has no PIVOT/FALLBACK. MAIN is
+Add Atlas as PIVOT (ATL:slisBNB/USD, ms=1,200s); slisBNB currently has no PIVOT/FALLBACK. MAIN is
 unchanged. Set a new ±5% BoundValidator band — slisBNB has no anchor config today.
 
 #### Details — SolvBTC (BNB Chain)
 
-Switch the MAIN oracle's underlying feed from the Chainlink \`solvBTC/BTC\` market-price feed to the
-Chainlink \`SOLVBTC/BTC Exchange Rate\` feed (ms=86,700s) — the MAIN OneJumpOracle wrapper address in
+Switch the MAIN oracle's underlying feed from the Chainlink solvBTC/BTC market-price feed to the
+Chainlink SOLVBTC/BTC Exchange Rate feed (ms=86,700s) — the MAIN OneJumpOracle wrapper address in
 the ResilientOracle is unchanged, only the feed it reads (configured on the shared ChainlinkOracle,
 keyed by SolvBTC) changes. PIVOT is unchanged. Drop the FALLBACK slot — the RedStone
-\`SolvBTC/BTC market price\` feed backing it is dead. Tighten the BoundValidator band from ±5% to ±2%.
+SolvBTC/BTC market price feed backing it is dead. Tighten the BoundValidator band from ±5% to ±2%.
 
 #### Details — xSolvBTC (BNB Chain)
 
-Promote a new OneJumpOracle to MAIN: it reads a Chainlink SVR \`xSolvBTC/SolvBTC Exchange Rate\` feed
+Promote a new OneJumpOracle to MAIN: it reads a Chainlink SVR xSolvBTC/SolvBTC Exchange Rate feed
 (ms=86,700s, configured on the shared ChainlinkOracle keyed by xSolvBTC) and combines it with SolvBTC's
-own ResilientOracle price. The current MAIN — a RedStone \`SolvBTC.BBN_FUNDAMENTAL\` exchange-rate
+own ResilientOracle price. The current MAIN — a RedStone SolvBTC.BBN_FUNDAMENTAL exchange-rate
 wrapper — is demoted to PIVOT, unchanged otherwise. Set a new ±2% BoundValidator band — xSolvBTC has no
 anchor config today.
 
 #### Oracle Guardian permissions
 
 The [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF) already holds
-\`setDirectPrice(address,uint256)\` on the [Chainlink](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
+setDirectPrice(address,uint256) on the [Chainlink](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
 and [RedStone](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a) oracles, granted in
 VIP-403, so it can pin an emergency price without waiting on a timelock delay. It does not hold that
 permission on the Atlas oracle, which since VIP-628 is the MAIN source for six of the eight markets in
@@ -184,10 +184,10 @@ this VIP (the four BStocks, asBNB and slisBNB). This proposal grants it on both 
 Atlas.
 
 This matters for the markets changed here: once a PIVOT is enabled with no FALLBACK, a bad or stale MAIN
-price makes \`ResilientOracle.getPrice\` revert and the market unpriceable. Holding \`setDirectPrice\` on the
+price makes ResilientOracle.getPrice revert and the market unpriceable. Holding setDirectPrice on the
 PIVOT oracle alone only lets the Guardian move the sanity checker; the lever that corrects a faulty MAIN
 is on Atlas. Note this permission extends to every asset priced by Atlas, not only the ones in this VIP.
-\`setTokenConfig\` is deliberately not granted — feed configuration stays with governance.
+setTokenConfig is deliberately not granted — feed configuration stays with governance.
 
 #### Voting options
 
@@ -332,4 +332,4 @@ is on Atlas. Note this permission extends to every asset priced by Atlas, not on
   );
 };
 
-export default vip999;
+export default vip654;
