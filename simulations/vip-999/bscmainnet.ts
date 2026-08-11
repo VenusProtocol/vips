@@ -133,6 +133,15 @@ forking(BLOCK_NUMBER, async () => {
         });
       }
 
+      it("Oracle Guardian cannot setDirectPrice on the APRO or Atlas oracles yet", async () => {
+        const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        for (const oracle of [APRO_ORACLE, ATLAS_ORACLE]) {
+          expect(
+            await acm.isAllowedToCall(ORACLE_GUARDIAN, "setDirectPrice(address,uint256)", { from: oracle }),
+          ).to.equal(false, oracle);
+        }
+      });
+
       for (const { symbol, accessController } of APRO_ASSETS) {
         it(`${symbol}: APRO has whitelisted the APRO oracle on the feed's access controller`, async () => {
           const controller = new ethers.Contract(accessController, APRO_ACCESS_CONTROL_ABI, ethers.provider);
@@ -215,11 +224,20 @@ forking(BLOCK_NUMBER, async () => {
         }
       });
 
-      it("Oracle Guardian granted setDirectPrice on the APRO oracle", async () => {
+      it("Oracle Guardian granted setDirectPrice on the APRO and Atlas oracles", async () => {
+        const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+        for (const oracle of [APRO_ORACLE, ATLAS_ORACLE]) {
+          expect(
+            await acm.isAllowedToCall(ORACLE_GUARDIAN, "setDirectPrice(address,uint256)", { from: oracle }),
+          ).to.equal(true, oracle);
+        }
+      });
+
+      it("Oracle Guardian was not granted setTokenConfig on Atlas", async () => {
         const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
         expect(
-          await acm.isAllowedToCall(ORACLE_GUARDIAN, "setDirectPrice(address,uint256)", { from: APRO_ORACLE }),
-        ).to.equal(true);
+          await acm.isAllowedToCall(ORACLE_GUARDIAN, "setTokenConfig(TokenConfig)", { from: ATLAS_ORACLE }),
+        ).to.equal(false);
       });
 
       for (const { symbol, asset, feed } of APRO_ASSETS) {

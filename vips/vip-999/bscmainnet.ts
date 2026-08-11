@@ -112,6 +112,11 @@ Oracle configuration updates across 8 BNB Chain Core Pool markets, per the Venus
 5. **xSolvBTC** — promote a new OneJumpOracle (reading a Chainlink SVR exchange-rate feed) to MAIN,
    demote the current RedStone-fundamental wrapper to PIVOT, add a new ±2% BoundValidator band.
 
+Alongside these, the [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF)
+is granted \`setDirectPrice(address,uint256)\` on the new APRO oracle and on the existing
+[Atlas oracle](https://bscscan.com/address/0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0) — see
+"Oracle Guardian permissions" below.
+
 #### Details — BStocks (BNB Chain)
 
 The four tokenized-stock (BStocks) assets — SK Hynix (SKHYB), NVIDIA (NVDAB), SpaceX (SPCXB) and
@@ -168,6 +173,22 @@ own ResilientOracle price. The current MAIN — a RedStone \`SolvBTC.BBN_FUNDAME
 wrapper — is demoted to PIVOT, unchanged otherwise. Set a new ±2% BoundValidator band — xSolvBTC has no
 anchor config today.
 
+#### Oracle Guardian permissions
+
+The [Oracle Guardian](https://bscscan.com/address/0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF) already holds
+\`setDirectPrice(address,uint256)\` on the [Chainlink](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
+and [RedStone](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a) oracles, granted in
+VIP-403, so it can pin an emergency price without waiting on a timelock delay. It does not hold that
+permission on the Atlas oracle, which since VIP-628 is the MAIN source for six of the eight markets in
+this VIP (the four BStocks, asBNB and slisBNB). This proposal grants it on both the new APRO oracle and
+Atlas.
+
+This matters for the markets changed here: once a PIVOT is enabled with no FALLBACK, a bad or stale MAIN
+price makes \`ResilientOracle.getPrice\` revert and the market unpriceable. Holding \`setDirectPrice\` on the
+PIVOT oracle alone only lets the Guardian move the sanity checker; the lever that corrects a faulty MAIN
+is on Atlas. Note this permission extends to every asset priced by Atlas, not only the ones in this VIP.
+\`setTokenConfig\` is deliberately not granted — feed configuration stays with governance.
+
 #### Voting options
 
 - **For** — Execute this proposal
@@ -196,6 +217,11 @@ anchor config today.
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [APRO_ORACLE, "setDirectPrice(address,uint256)", ORACLE_GUARDIAN],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ATLAS_ORACLE, "setDirectPrice(address,uint256)", ORACLE_GUARDIAN],
       },
 
       // 2. BStocks: configure the APRO feeds on the APRO oracle
