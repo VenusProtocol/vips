@@ -6,16 +6,19 @@ import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Newly deployed APRO oracle (a ChainlinkOracle instance).
+// ================================================================================
+// =====  Newly deployed APRO oracle, for BStocks: APRO added as PIVOT =====
+// ================================================================================
 export const APRO_ORACLE = "0x04480f1Ba2252CDF89deB022B58d0a03d1B4cF91";
+export const APRO_MAX_STALE_PERIOD = 3900;
 
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
-export const ATLAS_ORACLE = "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0";
-export const MAX_STALE_PERIOD = 3800;
 
-// ±2% anchor band
-export const UPPER_BOUND = parseUnits("1.02", 18);
-export const LOWER_BOUND = parseUnits("0.98", 18);
+export const FIVE_PCT_UPPER_BOUND = parseUnits("1.05", 18);
+export const FIVE_PCT_LOWER_BOUND = parseUnits("0.95", 18);
+
+export const TWO_PCT_UPPER_BOUND = parseUnits("1.02", 18);
+export const TWO_PCT_LOWER_BOUND = parseUnits("0.98", 18);
 
 export interface AproAsset {
   symbol: string;
@@ -52,11 +55,62 @@ export const APRO_ASSETS: AproAsset[] = [
   },
 ];
 
+export const ATLAS_ORACLE = "0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0"; // also the new PIVOT for asBNB and slisBNB below
+
+// ================================================================================
+// ===== asBNB: PIVOT switched from Binance to Atlas =====
+// ================================================================================
+export const AS_BNB = "0x77734e70b6E88b4d82fE632a168EDf6e700912b6";
+export const AS_BNB_MAIN_ORACLE = "0x652B90D1d45a7cD5BE82c5Fb61a4A00bA126dde5"; // unchanged MAIN adapter
+export const AS_BNB_BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820"; // demoted PIVOT -> unset
+export const AS_BNB_ATLAS_FEED = "0x91c3c652e7f909902259b4eb37393f5887c64b3a";
+export const AS_BNB_ATLAS_MAX_STALE_PERIOD = 86700;
+
+// ================================================================================
+// ===== slisBNB: new Atlas PIVOT + new ±5% bound =====
+// ================================================================================
+export const SLIS_BNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
+export const SLIS_BNB_MAIN_ORACLE = "0xDDE6446E66c786afF4cd3D183a908bCDa57DF9c1"; // SlisBNBOracle (Lista StakeManager convertSnBnbToBnb rate x BNB/USD), unchanged
+export const SLIS_BNB_ATLAS_FEED = "0x7b9f35937a0047696a51afbc5abefefb5b64b9d2"; // Atlas added as new PIVOT
+export const SLIS_BNB_ATLAS_MAX_STALE_PERIOD = 1200;
+
+// ================================================================================
+// ===== SolvBTC: MAIN feed swapped to Exchange Rate, dead FALLBACK dropped, bound tightened to ±2% =====
+// ================================================================================
+export const SOLV_BTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
+export const SOLV_BTC_MAIN_ORACLE = "0x3f4bC081E749032cffF29dcA2E8408Ec375e745A"; // OneJumpOracle, unchanged; INTERMEDIATE_ORACLE = shared ChainlinkOracle
+export const SOLV_BTC_PIVOT_ORACLE = "0x1f785B1AFE0808d69d1188db9e47b7B9Dd95ab09"; // unchanged (OneJumpOracle)
+export const SOLV_BTC_FALLBACK_ORACLE = "0xA3E6F08e3C1baD83e1971909483F27Cdd19937FC"; // dead RedStone feed, dropped
+export const SOLV_BTC_NEW_ER_FEED = "0xC2453C637BbBC53Ca6aBd1F139D1352CCeb55eB1"; // Chainlink SOLVBTC/BTC Exchange Rate
+export const SOLV_BTC_ER_MAX_STALE_PERIOD = 86700;
+
+// ================================================================================
+// ===== xSolvBTC: new OneJumpOracle promoted to MAIN, old wrapper demoted to PIVOT, new ±2% bound =====
+// ================================================================================
+export const X_SOLV_BTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+export const X_SOLV_BTC_ONE_JUMP_ORACLE = "0xDfDbF9DAFbc94Cb1F827d3364637dDBB26823739"; // ChainlinkOracle is the INTERMEDIATE_ORACLE
+export const X_SOLV_BTC_OLD_MAIN_ORACLE = "0xf5534f78Df9b610B19A63956d498d00CFaD8B9D3"; // OneJumpOracle, demoted MAIN -> PIVOT; INTERMEDIATE_ORACLE = RedstoneOracle (SolvBTC.BBN_FUNDAMENTAL)
+export const X_SOLV_BTC_SVR_FEED = "0x71cdD4BD7C42C752325cC7208deC1b3B418F1706";
+export const X_SOLV_BTC_SVR_MAX_STALE_PERIOD = 86700;
+
 export const vip999 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] Add APRO oracle as PIVOT for BStocks markets (SKHYB, NVDAB, SPCXB, TSLAB)",
+    title: "VIP-999 [BNB Chain] Oracle updates: APRO PIVOT for BStocks, asBNB/slisBNB/SolvBTC/xSolvBTC",
     description: `#### Summary
+
+Oracle configuration updates across 8 BNB Chain Core Pool markets, per the Venus Oracle Mastersheet:
+
+1. **BStocks (SKHYB, NVDAB, SPCXB, TSLAB)** — add the newly deployed APRO oracle as PIVOT (Atlas stays
+   MAIN), with a ±5% BoundValidator band.
+2. **asBNB** — switch PIVOT from Binance to Atlas (MAIN unchanged).
+3. **slisBNB** — add Atlas as PIVOT (MAIN unchanged) with a new ±5% BoundValidator band.
+4. **SolvBTC** — switch the MAIN feed source from a market-price feed to an Exchange Rate feed, drop
+   the dead RedStone FALLBACK, tighten the BoundValidator band to ±2%.
+5. **xSolvBTC** — promote a new OneJumpOracle (reading a Chainlink SVR exchange-rate feed) to MAIN,
+   demote the current RedStone-fundamental wrapper to PIVOT, add a new ±2% BoundValidator band.
+
+#### Details — BStocks (BNB Chain)
 
 The four tokenized-stock (BStocks) assets — SK Hynix (SKHYB), NVIDIA (NVDAB), SpaceX (SPCXB) and
 Tesla (TSLAB) — currently price from a single source: the Atlas Oracle configured as MAIN with no PIVOT
@@ -69,25 +123,47 @@ the MAIN source; APRO becomes the loose sanity checker (PIVOT). With a PIVOT ena
 ResilientOracle requires the MAIN price to fall within the BoundValidator band around the PIVOT price,
 otherwise pricing reverts — strengthening the oracle setup for these markets.
 
-#### Details — BNB Chain
-
 1. **Accept ownership of the APRO oracle.** The oracle was deployed with the Normal Timelock as
    pendingOwner; this call completes the two-step transfer so governance owns it.
 2. **Grant permissions on the APRO oracle** via the Access Control Manager (per-contract permissions
    for the newly deployed oracle): the Normal Timelock gets \`setTokenConfig(TokenConfig)\` and
    \`setDirectPrice(address,uint256)\`; the Guardian additionally gets \`setDirectPrice(address,uint256)\`
    so it can also manually pin an emergency price without waiting on a timelock delay.
-3. **Configure the APRO feeds** on the APRO oracle for the four assets (feed address + a 3800s max stale
-   period, matching the Atlas feeds).
+3. **Configure the APRO feeds** on the APRO oracle for the four assets (feed address + a 3900s max stale
+   period).
 4. **Insert APRO as PIVOT** in the ResilientOracle for the four assets: oracles become
    [Atlas (MAIN), APRO (PIVOT), 0 (no FALLBACK)] with enable flags [true, true, false]. Atlas is
    unchanged as MAIN.
-5. **Set the BoundValidator anchor band** for the four assets to ±2% (upper 1.02, lower 0.98) so the
-   MAIN (Atlas) price is validated against the PIVOT (APRO) price. The band has to absorb the gap
-   between two independent feeds — each feed's own deviation threshold plus the skew between their
-   ~1h heartbeats — rather than a single feed's threshold. Over a 14-day sample of both feeds the
-   observed Atlas-vs-APRO spread peaks near 1.6%, so ±2% keeps normal operation inside the band
-   while still rejecting a genuine divergence.
+5. **Set the BoundValidator anchor band** for the four assets to ±5% (upper 1.05, lower 0.95). APRO's
+   1% deviation threshold and ~1h heartbeat mean two independent feeds can legitimately sit ~2% apart
+   from routine vendor lag alone, before adding heartbeat lag across a closed or thin equity session —
+   a ±2% bound would pause these markets on ordinary operation rather than on a real oracle failure.
+
+#### Details — asBNB (BNB Chain)
+
+Switch the PIVOT from the Binance-fed adapter to Atlas (\`ATL:asBNB/USD\`, ms=86,700s). MAIN and
+BoundValidator (±5%) are unchanged.
+
+#### Details — slisBNB (BNB Chain)
+
+Add Atlas as PIVOT (\`ATL:slisBNB/USD\`, ms=1,200s); slisBNB currently has no PIVOT/FALLBACK. MAIN is
+unchanged. Set a new ±5% BoundValidator band — slisBNB has no anchor config today.
+
+#### Details — SolvBTC (BNB Chain)
+
+Switch the MAIN oracle's underlying feed from the Chainlink \`solvBTC/BTC\` market-price feed to the
+Chainlink \`SOLVBTC/BTC Exchange Rate\` feed (ms=86,700s) — the MAIN OneJumpOracle wrapper address in
+the ResilientOracle is unchanged, only the feed it reads (configured on the shared ChainlinkOracle,
+keyed by SolvBTC) changes. PIVOT is unchanged. Drop the FALLBACK slot — the RedStone
+\`SolvBTC/BTC market price\` feed backing it is dead. Tighten the BoundValidator band from ±5% to ±2%.
+
+#### Details — xSolvBTC (BNB Chain)
+
+Promote a new OneJumpOracle to MAIN: it reads a Chainlink SVR \`xSolvBTC/SolvBTC Exchange Rate\` feed
+(ms=86,700s, configured on the shared ChainlinkOracle keyed by xSolvBTC) and combines it with SolvBTC's
+own ResilientOracle price. The current MAIN — a RedStone \`SolvBTC.BBN_FUNDAMENTAL\` exchange-rate
+wrapper — is demoted to PIVOT, unchanged otherwise. Set a new ±2% BoundValidator band — xSolvBTC has no
+anchor config today.
 
 #### Voting options
 
@@ -101,9 +177,7 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
 
   return makeProposal(
     [
-      // ────────────────────────────────────────────────────────────────
-      // 1. Ownership + ACM permission for the newly deployed APRO oracle
-      // ────────────────────────────────────────────────────────────────
+      // 1. BStocks: accept ownership + ACM permissions for the newly deployed APRO oracle
       { target: APRO_ORACLE, signature: "acceptOwnership()", params: [] },
       {
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
@@ -121,18 +195,38 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
         params: [APRO_ORACLE, "setDirectPrice(address,uint256)", bscmainnet.GUARDIAN],
       },
 
-      // ────────────────────────────────────────────────────────────────
-      // 2. Configure APRO feeds on the APRO oracle
-      // ────────────────────────────────────────────────────────────────
+      // 2. BStocks: configure the APRO feeds on the APRO oracle
       {
         target: APRO_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
-        params: [APRO_ASSETS.map(({ asset, feed }) => [asset, feed, MAX_STALE_PERIOD])],
+        params: [APRO_ASSETS.map(({ asset, feed }) => [asset, feed, APRO_MAX_STALE_PERIOD])],
       },
 
-      // ────────────────────────────────────────────────────────────────
-      // 3. Insert APRO as PIVOT in the ResilientOracle (Atlas stays MAIN)
-      // ────────────────────────────────────────────────────────────────
+      // 3. asBNB/slisBNB: configure the new Atlas feeds
+      {
+        target: ATLAS_ORACLE,
+        signature: "setTokenConfigs((address,address,uint256)[])",
+        params: [
+          [
+            [AS_BNB, AS_BNB_ATLAS_FEED, AS_BNB_ATLAS_MAX_STALE_PERIOD],
+            [SLIS_BNB, SLIS_BNB_ATLAS_FEED, SLIS_BNB_ATLAS_MAX_STALE_PERIOD],
+          ],
+        ],
+      },
+
+      // 4. SolvBTC/xSolvBTC: configure the feeds on the shared ChainlinkOracle
+      {
+        target: bscmainnet.CHAINLINK_ORACLE,
+        signature: "setTokenConfigs((address,address,uint256)[])",
+        params: [
+          [
+            [SOLV_BTC, SOLV_BTC_NEW_ER_FEED, SOLV_BTC_ER_MAX_STALE_PERIOD],
+            [X_SOLV_BTC, X_SOLV_BTC_SVR_FEED, X_SOLV_BTC_SVR_MAX_STALE_PERIOD],
+          ],
+        ],
+      },
+
+      // 5a. BStocks: insert APRO as PIVOT in the ResilientOracle
       {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
@@ -146,13 +240,62 @@ otherwise pricing reverts — strengthening the oracle setup for these markets.
         ],
       },
 
-      // ────────────────────────────────────────────────────────────────
-      // 4. Set the BoundValidator anchor band for MAIN-vs-PIVOT validation
-      // ────────────────────────────────────────────────────────────────
+      // 5b. asBNB/slisBNB: ResilientOracle PIVOT switched to Atlas
+      {
+        target: bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
+        params: [
+          [
+            // asBNB: PIVOT switched from Binance to Atlas
+            [AS_BNB, [AS_BNB_MAIN_ORACLE, ATLAS_ORACLE, constants.AddressZero], [true, true, false], false],
+            // slisBNB: new Atlas PIVOT + new ±5% bound
+            [SLIS_BNB, [SLIS_BNB_MAIN_ORACLE, ATLAS_ORACLE, constants.AddressZero], [true, true, false], false],
+          ],
+        ],
+      },
+
+      // 5c. SolvBTC/xSolvBTC: ResilientOracle MAIN/PIVOT/FALLBACK updates
+      {
+        target: bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
+        params: [
+          [
+            // SolvBTC: MAIN feed swapped to Exchange Rate, dead FALLBACK dropped, bound tightened to ±2%
+            [
+              SOLV_BTC,
+              [SOLV_BTC_MAIN_ORACLE, SOLV_BTC_PIVOT_ORACLE, constants.AddressZero],
+              [true, true, false],
+              false,
+            ],
+            // xSolvBTC: new OneJumpOracle promoted to MAIN, old wrapper demoted to PIVOT, new ±2% bound
+            [
+              X_SOLV_BTC,
+              [X_SOLV_BTC_ONE_JUMP_ORACLE, X_SOLV_BTC_OLD_MAIN_ORACLE, constants.AddressZero],
+              [true, true, false],
+              false,
+            ],
+          ],
+        ],
+      },
+
+      // 6a. BStocks: BoundValidator anchor bands at ±5%
       {
         target: BOUND_VALIDATOR,
         signature: "setValidateConfigs((address,uint256,uint256)[])",
-        params: [APRO_ASSETS.map(({ asset }) => [asset, UPPER_BOUND, LOWER_BOUND])],
+        params: [APRO_ASSETS.map(({ asset }) => [asset, FIVE_PCT_UPPER_BOUND, FIVE_PCT_LOWER_BOUND])],
+      },
+
+      // 6b. slisBNB/SolvBTC/xSolvBTC: BoundValidator anchor bands
+      {
+        target: BOUND_VALIDATOR,
+        signature: "setValidateConfigs((address,uint256,uint256)[])",
+        params: [
+          [
+            [SLIS_BNB, FIVE_PCT_UPPER_BOUND, FIVE_PCT_LOWER_BOUND],
+            [SOLV_BTC, TWO_PCT_UPPER_BOUND, TWO_PCT_LOWER_BOUND],
+            [X_SOLV_BTC, TWO_PCT_UPPER_BOUND, TWO_PCT_LOWER_BOUND],
+          ],
+        ],
       },
     ],
     meta,
