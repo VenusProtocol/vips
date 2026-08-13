@@ -16,7 +16,6 @@ import vip664, {
   INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
   LATE_PENALTY_RATE,
-  LIQUIDATION_ADAPTER,
   LIQUIDATION_INCENTIVE,
   LIQUIDATION_THRESHOLD,
   LOCK_DURATION,
@@ -37,7 +36,6 @@ import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
-import LIQUIDATION_ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -62,7 +60,6 @@ forking(FORK_BLOCK, async () => {
   const controller = new ethers.Contract(INSTITUTIONAL_VAULT_CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
-  const liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, LIQUIDATION_ADAPTER_ABI, ethers.provider);
   const cashPlus = new ethers.Contract(CASH_PLUS, ERC20_ABI, ethers.provider);
   const u = new ethers.Contract(U, ERC20_ABI, ethers.provider);
   const feed = new ethers.Contract(CASH_PLUS_NAV_FEED, FEED_ABI, ethers.provider);
