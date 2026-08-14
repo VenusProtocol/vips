@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip655, {
   CASH_PLUS,
   CASH_PLUS_NAV_FEED,
   CHAINLINK_ORACLE,
@@ -33,7 +33,7 @@ import vip664, {
   U,
   VAULT_NAME,
   VAULT_SYMBOL,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-655/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
@@ -119,7 +119,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-664 List the Asseto CASH+ Fixed-Term Institutional Loan Vault", await vip664(true), {
+  testVip("VIP-655 List the Asseto CASH+ Fixed-Term Institutional Loan Vault", await vip655(true), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
