@@ -31,7 +31,8 @@ export const LIQUIDATOR = "0xfb4c772fe9D1FB57cf70c1aF3AD768B8e62cb8cd";
 // Mirror VIP-596 (XAUM): use the CHAINLINK_MAX_STALE_PERIOD *constant* (26h), NOT the live
 // on-chain maxStalePeriod (86,700s ≈ 24h5m) configured for XAUM/U — the two have diverged, and
 // 86,700s leaves only ~3.6 min of margin over the CASH+ NAV feed's observed ~24h1m publishing
-// cadence, so any routine delay would brick pricing. 93,600s gives ~1h35m of headroom.
+// cadence, so any routine delay would brick pricing. 93,600s gives ~2h of headroom (7,116s over
+// the feed's largest observed ~24h1m gap).
 // TODO: confirm 26h against the CASH+ NAV feed's contracted heartbeat/SLA (weekend/holiday
 //       behaviour) and widen if the SLA is looser.
 export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26h
@@ -119,6 +120,7 @@ This VIP lists a new fixed-term institutional loan vault (Asseto) on the Venus I
 - *Collateral tracks the live NAV feed.* Because CASH+ is now priced from a live feed (not a frozen/manual price), the ≈$666,663 collateral / ≈$566,663 liquidation-threshold-cap figures are a snapshot at the authoring NAV, not a fixed value. A decline in the CASH+ NAV lowers the collateral value in real time, so **a NAV drop is a live liquidation trigger** — governance does not have to re-post a price for the vault to become under-collateralised.
 - *Feed staleness affects only the price-gated paths.* If the CASH+ NAV feed exceeds its 26h window, getPrice(CASH+) reverts and only the price-gated functions revert — most importantly **claimRaisedFunds** (the institution's drawdown), plus withdrawCollateral during Lock, liquidate / liquidateOverdueVault / repayBadDebt, and the liquidity views that monitoring/front-end read. Lender deposit / redeem / repay, depositCollateral and vault state advancement are unaffected. Keeping the CASH+ NAV feed publishing within its heartbeat is therefore an operational requirement for this vault.
 - *Liquidation is largely market-unfillable.* 6,101.54 CASH+ is ≈74% of the total CASH+ supply, so the 10% incentive is not realistically fillable on the open market — liquidation is expected to be a guardian/settler action in practice.
+- *CASH+ is issuer-controlled, pausable and blacklistable.* CASH+ is an upgradeable token controlled by Asseto with a global pause switch and a per-address blacklist. Both are inactive today (the token is unpaused and the deal liquidator is not blacklisted), but Asseto can unilaterally pause CASH+ or blacklist the vault or the liquidator, which would freeze all CASH+ movement — including a collateral seizure during liquidation. This issuer-trust risk is inherent to using CASH+ as collateral.
 - *Inverse shadow caveat.* ChainlinkOracle.prices(CASH+) must remain 0 (verified 0 today): the ChainlinkOracle returns a stored direct price whenever non-zero and never reads the feed config, so a future setDirectPrice(CASH+, …) would silently shadow this live feed until reset to 0.
 
 **Access control.** No new AccessControlManager permissions are required — the Normal Timelock already holds createVault on the controller, setLiquidatorWhitelist on the adapter, and setTokenConfig on both oracles (granted in VIP-627 / VIP-640).

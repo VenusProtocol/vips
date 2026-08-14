@@ -24,6 +24,8 @@ import vip664, {
   MARGIN_RATE,
   MAX_BORROW_CAP,
   MIN_BORROW_CAP,
+  MIN_SUPPLIER_DEPOSIT,
+  ONE_YEAR,
   OPEN_DURATION,
   RESERVE_FACTOR,
   RESILIENT_ORACLE,
@@ -52,6 +54,14 @@ const FEED_ABI = ["function latestRoundData() view returns (uint80,int256,uint25
 // IVaultTypes.VaultState
 const VaultState = { WaitingForMargin: 0, MarginDeposited: 1, Fundraising: 2 };
 
+// Sim-only: a fresh lender used for the fundraising leg. U ("United Stables") is a plain
+// OpenZeppelin upgradeable ERC20 whose `_balances` mapping sits at storage slot 51 (verified
+// on-chain), so we can deal U directly by writing that slot — no whale, no blacklist dependency.
+const LENDER = "0xE110000000000000000000000000000000000e11";
+const U_BALANCES_SLOT = 51;
+// Second ChainlinkOracle instance used as the PIVOT source for U in the ResilientOracle.
+const U_PIVOT_CHAINLINK_ORACLE = "0x9e6928ec418948ceb9f1cd9872fd312b13d841d0";
+
 forking(FORK_BLOCK, async () => {
   const controller = new ethers.Contract(INSTITUTIONAL_VAULT_CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -72,20 +82,21 @@ forking(FORK_BLOCK, async () => {
 
     // Sim-only staleness workaround. createVault probes the ResilientOracle for BOTH assets
     // (it reverts unless getPrice(U) and getPrice(CASH+) are non-zero). CASH+ is handled by the
-    // VIP itself (its ChainlinkOracle config is written with ONE_YEAR when simulations=true), but
-    // U is a pre-existing market the VIP does not touch: its Chainlink main feed (86,700s window)
-    // goes stale once the mined governance lifecycle warps block.timestamp ~2 days forward, which
-    // would make createVault revert on getPrice(U). Repoint U to the ChainlinkOracle as its single
-    // source and pin the fork-block price (setDirectPrice skips the stale check) so the VIP's
-    // createVault prices U without reverting. This does not affect anything the VIP asserts.
-    const uPrice = await resilientOracle.getPrice(U);
-    await resilientOracle.connect(timelock).setTokenConfig({
-      asset: U,
-      oracles: [CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      enableFlagsForOracles: [true, false, false],
-      cachingEnabled: false,
-    });
-    await chainlinkOracle.connect(timelock).setDirectPrice(U, uPrice);
+    // VIP itself (its ChainlinkOracle config is written with ONE_YEAR when simulations=true). U is
+    // a pre-existing market the VIP does not touch: the ResilientOracle prices it from a main +
+    // pivot pair of Chainlink feeds (no fallback), both on ~24h (86,700s) stale windows. Once the
+    // mined governance lifecycle warps block.timestamp ~2 days forward both feeds go stale, and
+    // with no fallback configured getPrice(U) needs BOTH the main and the pivot fresh — so
+    // createVault would revert on getPrice(U). Widen both feeds' stale windows to ONE_YEAR on
+    // their respective ChainlinkOracle instances (NORMAL_TIMELOCK holds setTokenConfig on both).
+    // This leaves U's ResilientOracle config untouched and writes NO direct price (prices[U] stays
+    // 0), so it does not introduce the stored-price shadow hazard the VIP description warns about,
+    // and touches nothing the VIP asserts.
+    const uPivotOracle = new ethers.Contract(U_PIVOT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+    const uMainFeed = (await chainlinkOracle.tokenConfigs(U)).feed;
+    const uPivotFeed = (await uPivotOracle.tokenConfigs(U)).feed;
+    await chainlinkOracle.connect(timelock).setTokenConfig({ asset: U, feed: uMainFeed, maxStalePeriod: ONE_YEAR });
+    await uPivotOracle.connect(timelock).setTokenConfig({ asset: U, feed: uPivotFeed, maxStalePeriod: ONE_YEAR });
   });
 
   describe("Pre-VIP behavior", () => {
@@ -145,6 +156,7 @@ forking(FORK_BLOCK, async () => {
       expect(config.reserveFactor).to.equal(RESERVE_FACTOR);
       expect(config.minBorrowCap).to.equal(MIN_BORROW_CAP);
       expect(config.maxBorrowCap).to.equal(MAX_BORROW_CAP);
+      expect(config.minSupplierDeposit).to.equal(MIN_SUPPLIER_DEPOSIT);
       expect(config.openDuration).to.equal(OPEN_DURATION);
       expect(config.lockDuration).to.equal(LOCK_DURATION);
       expect(config.settlementWindow).to.equal(SETTLEMENT_WINDOW);
@@ -156,6 +168,9 @@ forking(FORK_BLOCK, async () => {
       expect(inst.idealCollateralAmount).to.equal(IDEAL_COLLATERAL_AMOUNT);
       expect(inst.marginRate).to.equal(MARGIN_RATE);
       expect(inst.institutionOperator).to.equal(INSTITUTION_OPERATOR);
+      // positionTokenId is overwritten by the controller (createVault ignores the passed 0). The
+      // position NFT counter is at 1 (the legacy vault holds tokenId 1), so this vault mints 2.
+      expect(inst.positionTokenId).to.equal(2);
     });
 
     it("stores the risk config", async () => {
@@ -219,6 +234,36 @@ forking(FORK_BLOCK, async () => {
 
       await vault.connect(operator).depositCollateral(IDEAL_COLLATERAL_AMOUNT.sub(marginAmount));
       expect(await cashPlus.balanceOf(vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT);
+    });
+
+    it("a lender funds the vault -> shares minted and totalRaised recorded", async () => {
+      expect(await vault.state()).to.equal(VaultState.Fundraising);
+
+      const lenderAmount = parseUnits("100000", 18); // 100k U, within the 500k max borrow cap
+      const lender = await initMainnetUser(LENDER, parseUnits("1"));
+
+      // Deal U to the lender by writing its ERC20 balance slot directly (no whale / blacklist dep).
+      const balanceSlot = ethers.utils.solidityKeccak256(["uint256", "uint256"], [LENDER, U_BALANCES_SLOT]);
+      await ethers.provider.send("hardhat_setStorageAt", [
+        U,
+        balanceSlot,
+        ethers.utils.hexZeroPad(lenderAmount.toHexString(), 32),
+      ]);
+      const u = new ethers.Contract(U, ERC20_ABI, ethers.provider);
+      expect(await u.balanceOf(LENDER)).to.equal(lenderAmount);
+      await u.connect(lender).approve(vault.address, lenderAmount);
+
+      const expectedShares = await vault.previewDeposit(lenderAmount);
+      const totalRaisedBefore = (await vault.runtime()).totalRaised;
+
+      await expect(vault.connect(lender).deposit(lenderAmount, LENDER))
+        .to.emit(vault, "Deposit")
+        .withArgs(LENDER, LENDER, lenderAmount, expectedShares);
+
+      // Shares minted to the lender, totalRaised advanced by the deposit, and the U landed in the vault.
+      expect(await vault.balanceOf(LENDER)).to.equal(expectedShares);
+      expect((await vault.runtime()).totalRaised).to.equal(totalRaisedBefore.add(lenderAmount));
+      expect(await u.balanceOf(vault.address)).to.equal(lenderAmount);
     });
   });
 });
