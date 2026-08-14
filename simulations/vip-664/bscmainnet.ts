@@ -16,8 +16,10 @@ import vip664, {
   INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
   LATE_PENALTY_RATE,
+  LIQUIDATION_ADAPTER,
   LIQUIDATION_INCENTIVE,
   LIQUIDATION_THRESHOLD,
+  LIQUIDATOR,
   LOCK_DURATION,
   MARGIN_RATE,
   MAX_BORROW_CAP,
@@ -44,6 +46,12 @@ const FORK_BLOCK = 115672492;
 
 const FEED_ABI = ["function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)"];
 const POSITION_TOKEN_ABI = ["function ownerOf(uint256) view returns (address)"];
+const ADAPTER_ABI = [
+  "event LiquidatorWhitelistUpdated(address indexed liquidator, bool approved)",
+  "event SettlerWhitelistUpdated(address indexed settler, bool approved)",
+  "function isWhitelistedLiquidator(address) view returns (bool)",
+  "function isWhitelistedSettler(address) view returns (bool)",
+];
 
 // The legacy vault's operator holds token 1, so createVault mints 2 for this deal.
 const EXPECTED_POSITION_TOKEN_ID = 2;
@@ -64,6 +72,7 @@ forking(FORK_BLOCK, async () => {
   const u = new ethers.Contract(U, ERC20_ABI, ethers.provider);
   const feed = new ethers.Contract(CASH_PLUS_NAV_FEED, FEED_ABI, ethers.provider);
   const positionToken = new ethers.Contract(POSITION_TOKEN, POSITION_TOKEN_ABI, ethers.provider);
+  const adapter = new ethers.Contract(LIQUIDATION_ADAPTER, ADAPTER_ABI, ethers.provider);
 
   let timelock: any;
   let vaultsBefore: BigNumber;
@@ -108,6 +117,11 @@ forking(FORK_BLOCK, async () => {
     it("CASH+ is not priced by the ResilientOracle yet (getPrice reverts)", async () => {
       await expect(resilientOracle.getPrice(CASH_PLUS)).to.be.reverted;
     });
+
+    it("the deal liquidator is whitelisted for neither liquidation path yet", async () => {
+      expect(await adapter.isWhitelistedLiquidator(LIQUIDATOR)).to.equal(false);
+      expect(await adapter.isWhitelistedSettler(LIQUIDATOR)).to.equal(false);
+    });
   });
 
   testVip("VIP-664 List the Asseto CASH+ Fixed-Term Institutional Loan Vault", await vip664(true), {
@@ -115,6 +129,7 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultCreated"], [1]);
+      await expectEvents(txResponse, [ADAPTER_ABI], ["LiquidatorWhitelistUpdated", "SettlerWhitelistUpdated"], [1, 1]);
     },
   });
 
@@ -179,6 +194,12 @@ forking(FORK_BLOCK, async () => {
       const resilientPrice = await resilientOracle.getPrice(CASH_PLUS);
       expect(resilientPrice).to.be.gt(0);
       expect(resilientPrice).to.equal(chainlinkPrice);
+    });
+
+    it("whitelists the deal liquidator for both liquidation paths", async () => {
+      // liquidate (HF-based) -> onlyWhitelistedLiquidator; liquidateOverdueVault -> onlyWhitelistedSettler
+      expect(await adapter.isWhitelistedLiquidator(LIQUIDATOR)).to.equal(true);
+      expect(await adapter.isWhitelistedSettler(LIQUIDATOR)).to.equal(true);
     });
   });
 

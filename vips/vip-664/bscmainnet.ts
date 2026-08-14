@@ -7,15 +7,21 @@ import { makeProposal } from "src/utils";
 export const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
 export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
+export const LIQUIDATION_ADAPTER = "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd";
 
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666"; // loan (supply) asset, 18 dec
 export const CASH_PLUS = "0x1775504c5873e179Ea2f8ABFcE3861EC74D159bc"; // collateral, 18 dec
 export const CASH_PLUS_NAV_FEED = "0xad2388190FCDc5f1d17ef5cB3106E8b781C9193d"; // Chainlink CASH+ NAV, 18 dec
 
 export const INSTITUTION_OPERATOR = "0x9510A850FB13FC060b50F4fD4974c5326Fd78B06";
+// Deal's dedicated liquidator — whitelisted on the adapter for both liquidation paths (HF-based
+// liquidate + deadline-based liquidateOverdueVault).
+export const LIQUIDATOR = "0xfb4c772fe9D1FB57cf70c1aF3AD768B8e62cb8cd";
 
-// 24h feed heartbeat (largest observed publish gap 86,425s) plus 1h of margin.
-export const CHAINLINK_MAX_STALE_PERIOD = 90000; // 25h
+// TODO: confirm the 26h window against the CASH+ NAV feed's contracted heartbeat/SLA (weekend/holiday
+// behaviour); widen if the SLA is looser. VIP-596's CHAINLINK_MAX_STALE_PERIOD — NOT XAUM's live 86,700s,
+// which has diverged and would leave only ~3.6 min of margin over the feed's ~24h publish cadence.
+export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26h — ~2h margin over the largest observed gap (86,425s)
 export const ONE_YEAR = 31536000; // sim-only window
 
 export const FIXED_APY = 270; // 2.7% (bps)
@@ -70,11 +76,11 @@ export const vip664 = (simulations = false) => {
     title: "VIP-664 [BNB Chain] List the Asseto CASH+ Fixed-Term Institutional Loan Vault",
     description: `#### Summary
 
-This VIP lists a new fixed-term institutional loan vault (Asseto) on the Venus Institutional Fixed Rate Vault system on BNB Chain. The institution borrows up to 500,000 U for a 30-day fixed term at a 2.7% fixed APY, collateralised by Asseto's tokenized cash-management fund token CASH+. The VIP first configures CASH+ pricing from the live Chainlink "CASH+ NAV" feed, then creates the vault.
+This VIP lists a new fixed-term institutional loan vault (Asseto) on the Venus Institutional Fixed Rate Vault system on BNB Chain. The institution borrows up to 500,000 U for a 30-day fixed term at a 2.7% fixed APY, collateralised by Asseto's tokenized cash-management fund token CASH+. The VIP first configures CASH+ pricing from the live Chainlink "CASH+ NAV" feed, then creates the vault and whitelists the deal's dedicated liquidator.
 
 #### Description
 
-**Oracle.** CASH+ is priced from the Chainlink "CASH+ NAV" feed ([${CASH_PLUS_NAV_FEED}](https://data.chain.link/feeds/bsc/mainnet/cashplus-nav)) — an 18-decimal feed reporting the fund's live net asset value in USD (~$109.28 at authoring). The feed is registered on the ChainlinkOracle and CASH+ is wired to the ResilientOracle with the ChainlinkOracle as its single main source (no pivot, no fallback, no BoundValidator), mirroring VIP-596 (XAUM). The maxStalePeriod is 25h (90,000s), giving ~1h of margin over the feed's 24h heartbeat (largest observed publish gap: 86,425s, including weekends).
+**Oracle.** CASH+ is priced from the Chainlink "CASH+ NAV" feed ([${CASH_PLUS_NAV_FEED}](https://data.chain.link/feeds/bsc/mainnet/cashplus-nav)) — an 18-decimal feed reporting the fund's live net asset value in USD (~$109.28 at authoring). The feed is registered on the ChainlinkOracle and CASH+ is wired to the ResilientOracle with the ChainlinkOracle as its single main source (no pivot, no fallback, no BoundValidator), mirroring VIP-596 (XAUM). The maxStalePeriod is 26h (93,600s) — VIP-596's CHAINLINK_MAX_STALE_PERIOD — giving ~2h of margin over the feed's ~24h heartbeat (largest observed publish gap: 86,425s, including weekends). The window should be confirmed against the CASH+ NAV feed's contracted heartbeat/SLA before proposing.
 
 **Vault terms.**
 
@@ -86,24 +92,29 @@ This VIP lists a new fixed-term institutional loan vault (Asseto) on the Venus I
 - Open window: 7 days · Lock (loan term): 30 days · Settlement window: 3 days
 - Ideal collateral: 6,101.54 CASH+ (≈ $666,663 at authoring NAV) · Margin rate: 1%
 - Liquidation threshold: 85% · Liquidation incentive: 10% · Late-penalty rate: 10%
+- Dedicated liquidator whitelisted on the adapter for both liquidation paths: ${LIQUIDATOR}
 
 **Risk.**
 
 - *Collateral tracks the live NAV feed.* Because CASH+ is now priced from a live feed (not a frozen/manual price), the ≈$666,663 collateral / ≈$566,663 liquidation-threshold-cap figures are a snapshot at the authoring NAV, not a fixed value. A decline in the CASH+ NAV lowers the collateral value in real time, so **a NAV drop is a live liquidation trigger** — governance does not have to re-post a price for the vault to become under-collateralised.
-- *Feed staleness affects only the price-gated paths.* If the CASH+ NAV feed exceeds its 25h window, getPrice(CASH+) reverts and only the price-gated functions revert — most importantly **claimRaisedFunds** (the institution's drawdown), plus withdrawCollateral during Lock, liquidate / liquidateOverdueVault / repayBadDebt, and the liquidity views that monitoring/front-end read. Lender deposit / redeem / repay, depositCollateral and vault state advancement are unaffected. Keeping the CASH+ NAV feed publishing within its heartbeat is therefore an operational requirement for this vault.
+- *Feed staleness affects only the price-gated paths.* If the CASH+ NAV feed exceeds its 26h window, getPrice(CASH+) reverts and only the price-gated functions revert — most importantly **claimRaisedFunds** (the institution's drawdown), plus withdrawCollateral during Lock, liquidate / liquidateOverdueVault / repayBadDebt, and the liquidity views that monitoring/front-end read. Lender deposit / redeem / repay, depositCollateral and vault state advancement are unaffected. Keeping the CASH+ NAV feed publishing within its heartbeat is therefore an operational requirement for this vault.
 - *Liquidation is largely market-unfillable.* 6,101.54 CASH+ is ≈74% of the total CASH+ supply, so the 10% incentive is not realistically fillable on the open market — liquidation is expected to be a guardian/settler action in practice.
 - *CASH+ is pausable and has an issuer-controlled blacklist.* The token exposes \`paused()\` and \`isBlacklisted(address)\` — both false today, which is why deposits work. But Asseto can unilaterally pause CASH+ transfers, or blacklist the vault, at any time. Any of those freezes every collateral movement: depositCollateral and withdrawCollateral, and — most importantly — the collateral-seizing leg of liquidate / liquidateOverdueVault, so a seizure could be blocked exactly when it is needed. Venus cannot override this; it is counterparty risk carried by the deal, not a protocol parameter.
 - *Inverse shadow caveat.* ChainlinkOracle.prices(CASH+) must remain 0 (verified 0 today): the ChainlinkOracle returns a stored direct price whenever non-zero and never reads the feed config, so a future setDirectPrice(CASH+, …) would silently shadow this live feed until reset to 0.
 
-**Access control.** No new AccessControlManager permissions are required — the Normal Timelock already holds createVault on the controller and setTokenConfig on both oracles (granted in VIP-627 / VIP-640).
+**Access control.** No new AccessControlManager permissions are required — the Normal Timelock already holds createVault on the controller, setLiquidatorWhitelist and setSettlerWhitelist on the adapter, and setTokenConfig on both oracles (granted in VIP-627 / VIP-640).
 
-**Follow-up (out of scope).** Opening the vault after the institution deposits its margin (openVault) is a Critical Guardian multisig action and is not part of this VIP. The Critical Guardian is already whitelisted as a settler (VIP-627), so no settler command is included here.
+**Liquidator.** The deal's dedicated liquidator (${LIQUIDATOR}) is whitelisted on the LiquidationAdapter for **both** liquidation entry points: the HF-based \`liquidate\` (liquidator whitelist) and the deadline-based \`liquidateOverdueVault\` (settler whitelist), so it can act in both an under-collateralisation and a term-overdue scenario. The Critical Guardian remains a settler from VIP-627.
+
+**Follow-up (out of scope).** Opening the vault after the institution deposits its margin (openVault) is a Critical Guardian multisig action and is not part of this VIP.
 
 #### Actions
 
-1. Register the CASH+ NAV feed on the ChainlinkOracle — setTokenConfig(CASH+, feed, 25h).
+1. Register the CASH+ NAV feed on the ChainlinkOracle — setTokenConfig(CASH+, feed, 26h).
 2. Wire CASH+ into the ResilientOracle with the ChainlinkOracle as its single main source.
 3. Create the Asseto vault on the controller — createVault(...).
+4. Whitelist the deal liquidator on the adapter for the HF-based path — setLiquidatorWhitelist(liquidator, true).
+5. Whitelist the deal liquidator on the adapter for the overdue path — setSettlerWhitelist(liquidator, true).
 
 #### Voting options
 
@@ -142,6 +153,20 @@ This VIP lists a new fixed-term institutional loan vault (Asseto) on the Venus I
           "createVault((address,uint256,uint256,uint256,uint256,uint256,uint40,uint40,uint40)," +
           "(address,uint256,uint256,address,uint256),(uint256,uint256,uint256),string,string,string)",
         params: [vaultConfig, instConfig, riskConfig, VAULT_NAME, VAULT_SYMBOL, INSTITUTION_NAME],
+      },
+
+      // Whitelist the deal's dedicated liquidator for BOTH liquidation paths:
+      //   liquidate (HF-based)            -> onlyWhitelistedLiquidator
+      //   liquidateOverdueVault (deadline)-> onlyWhitelistedSettler
+      {
+        target: LIQUIDATION_ADAPTER,
+        signature: "setLiquidatorWhitelist(address,bool)",
+        params: [LIQUIDATOR, true],
+      },
+      {
+        target: LIQUIDATION_ADAPTER,
+        signature: "setSettlerWhitelist(address,bool)",
+        params: [LIQUIDATOR, true],
       },
     ],
     meta,
