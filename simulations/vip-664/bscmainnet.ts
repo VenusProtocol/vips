@@ -38,6 +38,7 @@ import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
+import ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -46,12 +47,6 @@ const FORK_BLOCK = 115672492;
 
 const FEED_ABI = ["function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)"];
 const POSITION_TOKEN_ABI = ["function ownerOf(uint256) view returns (address)"];
-const ADAPTER_ABI = [
-  "event LiquidatorWhitelistUpdated(address indexed liquidator, bool approved)",
-  "event SettlerWhitelistUpdated(address indexed settler, bool approved)",
-  "function isWhitelistedLiquidator(address) view returns (bool)",
-  "function isWhitelistedSettler(address) view returns (bool)",
-];
 
 // The legacy vault's operator holds token 1, so createVault mints 2 for this deal.
 const EXPECTED_POSITION_TOKEN_ID = 2;

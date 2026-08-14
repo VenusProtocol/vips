@@ -18,9 +18,6 @@ export const INSTITUTION_OPERATOR = "0x9510A850FB13FC060b50F4fD4974c5326Fd78B06"
 // liquidate + deadline-based liquidateOverdueVault).
 export const LIQUIDATOR = "0xfb4c772fe9D1FB57cf70c1aF3AD768B8e62cb8cd";
 
-// TODO: confirm the 26h window against the CASH+ NAV feed's contracted heartbeat/SLA (weekend/holiday
-// behaviour); widen if the SLA is looser. VIP-596's CHAINLINK_MAX_STALE_PERIOD — NOT XAUM's live 86,700s,
-// which has diverged and would leave only ~3.6 min of margin over the feed's ~24h publish cadence.
 export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26h — ~2h margin over the largest observed gap (86,425s)
 export const ONE_YEAR = 31536000; // sim-only window
 
