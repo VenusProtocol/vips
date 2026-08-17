@@ -12,6 +12,8 @@ import vip999, {
   FIXED_RATE_VAULT_CONTROLLER,
   INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
+  MINT_BURN_AUTHORIZED,
+  PAUSE_UNPAUSE_AUTHORIZED,
   SUPPLY_ASSET,
   VAULT_SHARE_NAME,
   VAULT_SHARE_SYMBOL,
@@ -23,14 +25,14 @@ import vip999, {
   vaultConfig,
 } from "../../vips/vip-999/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
+import CUSTODY_RECEIPT_TOKEN_ABI from "./abi/CustodyReceiptToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
-import ERC20_ABI from "./abi/VenusERC20.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 117573000;
+const FORK_BLOCK = 125582517;
 
 const USDT_FAUCET_ABI = ["function allocateTo(address to, uint256 amount) external"];
 const CHAINLINK_ORACLE_GETPRICE_ABI = ["function getPrice(address) external view returns (uint256)"];
@@ -58,10 +60,10 @@ forking(FORK_BLOCK, async () => {
     oracle = await ethers.getContractAt(ORACLE_ABI, bsctestnet.RESILIENT_ORACLE);
     acm = await ethers.getContractAt(ACM_ABI, bsctestnet.ACCESS_CONTROL_MANAGER);
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
-    usdt = await ethers.getContractAt(ERC20_ABI, SUPPLY_ASSET);
+    usdt = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, SUPPLY_ASSET);
     timelock = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
-    vceBTC = await ethers.getContractAt(ERC20_ABI, VCEBTC);
+    vceBTC = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, VCEBTC);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -82,14 +84,17 @@ forking(FORK_BLOCK, async () => {
       await expect(oracle.getPrice(VCEBTC)).to.be.reverted;
     });
 
-    it("Timelock and Guardian cannot yet mint/burn vceBTC", async () => {
+    it("no account can yet mint/burn or pause/unpause vceBTC", async () => {
       const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bsctestnet.NORMAL_TIMELOCK, "mint(address,uint256)"),
-      ).to.equal(false);
-      expect(await acm.connect(vceBtcAsCaller).isAllowedToCall(bsctestnet.GUARDIAN, "mint(address,uint256)")).to.equal(
-        false,
-      );
+      const acmAsToken = acm.connect(vceBtcAsCaller);
+      for (const account of MINT_BURN_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "mint(address,uint256)")).to.equal(false);
+        expect(await acmAsToken.isAllowedToCall(account, "burn(address,uint256)")).to.equal(false);
+      }
+      for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "pause()")).to.equal(false);
+        expect(await acmAsToken.isAllowedToCall(account, "unpause()")).to.equal(false);
+      }
     });
   });
 
@@ -109,20 +114,22 @@ forking(FORK_BLOCK, async () => {
       expect(await vceBTC.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
 
-    it("Timelock and Guardian can mint/burn vceBTC", async () => {
+    it("the mint/burn authorized accounts can mint/burn vceBTC", async () => {
       const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bsctestnet.NORMAL_TIMELOCK, "mint(address,uint256)"),
-      ).to.equal(true);
-      expect(await acm.connect(vceBtcAsCaller).isAllowedToCall(bsctestnet.GUARDIAN, "mint(address,uint256)")).to.equal(
-        true,
-      );
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bsctestnet.NORMAL_TIMELOCK, "burn(address,uint256)"),
-      ).to.equal(true);
-      expect(await acm.connect(vceBtcAsCaller).isAllowedToCall(bsctestnet.GUARDIAN, "burn(address,uint256)")).to.equal(
-        true,
-      );
+      const acmAsToken = acm.connect(vceBtcAsCaller);
+      for (const account of MINT_BURN_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "mint(address,uint256)")).to.equal(true);
+        expect(await acmAsToken.isAllowedToCall(account, "burn(address,uint256)")).to.equal(true);
+      }
+    });
+
+    it("the pause/unpause authorized accounts (all timelocks + Guardian) can pause/unpause vceBTC", async () => {
+      const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
+      const acmAsToken = acm.connect(vceBtcAsCaller);
+      for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "pause()")).to.equal(true);
+        expect(await acmAsToken.isAllowedToCall(account, "unpause()")).to.equal(true);
+      }
     });
 
     it("the Normal Timelock can mint and burn vceBTC", async () => {
@@ -139,6 +146,37 @@ forking(FORK_BLOCK, async () => {
       await vceBTC.connect(timelock).burn(recipient, amount);
       expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore);
       expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
+    });
+
+    it("the Normal Timelock can pause/unpause: pausing blocks transfers but not mint/burn", async () => {
+      const [, holderSigner] = await ethers.getSigners();
+      const holder = await holderSigner.getAddress();
+      const amount = parseUnits("1", 18);
+
+      expect(await vceBTC.paused()).to.equal(false);
+
+      // Pause transfers.
+      await vceBTC.connect(timelock).pause();
+      expect(await vceBTC.paused()).to.equal(true);
+
+      // Mint/burn remain available while paused.
+      await vceBTC.connect(timelock).mint(holder, amount);
+      expect(await vceBTC.balanceOf(holder)).to.equal(amount);
+
+      // Holder-to-holder transfers are blocked while paused.
+      await expect(vceBTC.connect(holderSigner).transfer(bsctestnet.GUARDIAN, amount)).to.be.revertedWithCustomError(
+        vceBTC,
+        "ActionPaused",
+      );
+
+      // Unpause and confirm transfers work again.
+      await vceBTC.connect(timelock).unpause();
+      expect(await vceBTC.paused()).to.equal(false);
+      await vceBTC.connect(holderSigner).transfer(bsctestnet.GUARDIAN, amount);
+      expect(await vceBTC.balanceOf(holder)).to.equal(0);
+
+      // Clean up the minted supply so later totalSupply assertions are unaffected.
+      await vceBTC.connect(timelock).burn(bsctestnet.GUARDIAN, amount);
     });
 
     it("initial vceBTC collateral was minted to the Guardian", async () => {

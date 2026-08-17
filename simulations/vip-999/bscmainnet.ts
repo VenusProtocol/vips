@@ -20,6 +20,8 @@ import vip999, {
   INITIAL_SUPPLY_RECIPIENT,
   INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
+  MINT_BURN_AUTHORIZED,
+  PAUSE_UNPAUSE_AUTHORIZED,
   REDSTONE_ORACLE,
   SUPPLY_ASSET,
   VAULT_SHARE_NAME,
@@ -33,14 +35,14 @@ import vip999, {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
+import CUSTODY_RECEIPT_TOKEN_ABI from "./abi/CustodyReceiptToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
-import ERC20_ABI from "./abi/VenusERC20.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 108402150;
+const FORK_BLOCK = 116439415;
 
 const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // Binance Hot Wallet
 const LENDER = "0x2222222222222222222222222222222222222222"; // dummy test lender
@@ -93,19 +95,15 @@ forking(FORK_BLOCK, async () => {
     oracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
     acm = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
-    btcb = await ethers.getContractAt(ERC20_ABI, BTCB);
-    usdt = await ethers.getContractAt(ERC20_ABI, SUPPLY_ASSET);
+    btcb = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, BTCB);
+    usdt = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, SUPPLY_ASSET);
     timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
 
     // Capture the BTCB price while the fork-block feed data is still fresh
     btcbPriceAtFork = await oracle.getPrice(BTCB);
 
-    // Reproduce the prerequisite controller/vault-upgrade VIP (VIP-640), which upgrades the
-    // controller/vault implementations and re-grants the 6-arg createVault permission.
-    await pretendExecutingVip(await vip640(), bscmainnet.NORMAL_TIMELOCK);
-
-    vceBTC = await ethers.getContractAt(ERC20_ABI, VCEBTC);
+    vceBTC = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, VCEBTC);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -126,20 +124,17 @@ forking(FORK_BLOCK, async () => {
       await expect(oracle.getPrice(VCEBTC)).to.be.reverted;
     });
 
-    it("Timelock and Guardian cannot yet mint/burn vceBTC", async () => {
+    it("no account can yet mint/burn or pause/unpause vceBTC", async () => {
       const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, "mint(address,uint256)"),
-      ).to.equal(false);
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.CRITICAL_GUARDIAN, "mint(address,uint256)"),
-      ).to.equal(false);
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, "burn(address,uint256)"),
-      ).to.equal(false);
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.CRITICAL_GUARDIAN, "burn(address,uint256)"),
-      ).to.equal(false);
+      const acmAsToken = acm.connect(vceBtcAsCaller);
+      for (const account of MINT_BURN_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "mint(address,uint256)")).to.equal(false);
+        expect(await acmAsToken.isAllowedToCall(account, "burn(address,uint256)")).to.equal(false);
+      }
+      for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "pause()")).to.equal(false);
+        expect(await acmAsToken.isAllowedToCall(account, "unpause()")).to.equal(false);
+      }
     });
 
     it("BTCB's live sub-oracle configs match the feeds and stale periods the VIP clones", async () => {
@@ -191,20 +186,22 @@ forking(FORK_BLOCK, async () => {
       expect(await vceBTC.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
 
-    it("Timelock and Guardian can mint/burn vceBTC", async () => {
+    it("the mint/burn authorized accounts can mint/burn vceBTC", async () => {
       const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, "mint(address,uint256)"),
-      ).to.equal(true);
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.CRITICAL_GUARDIAN, "mint(address,uint256)"),
-      ).to.equal(true);
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, "burn(address,uint256)"),
-      ).to.equal(true);
-      expect(
-        await acm.connect(vceBtcAsCaller).isAllowedToCall(bscmainnet.CRITICAL_GUARDIAN, "burn(address,uint256)"),
-      ).to.equal(true);
+      const acmAsToken = acm.connect(vceBtcAsCaller);
+      for (const account of MINT_BURN_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "mint(address,uint256)")).to.equal(true);
+        expect(await acmAsToken.isAllowedToCall(account, "burn(address,uint256)")).to.equal(true);
+      }
+    });
+
+    it("the pause/unpause authorized accounts (all timelocks + Critical Guardian) can pause/unpause vceBTC", async () => {
+      const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
+      const acmAsToken = acm.connect(vceBtcAsCaller);
+      for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
+        expect(await acmAsToken.isAllowedToCall(account, "pause()")).to.equal(true);
+        expect(await acmAsToken.isAllowedToCall(account, "unpause()")).to.equal(true);
+      }
     });
 
     it("the Normal Timelock can mint and burn vceBTC", async () => {

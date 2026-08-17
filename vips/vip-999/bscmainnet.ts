@@ -5,15 +5,8 @@ import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// TODO before proposing:
-// 1. Execute the controller/vault upgrade VIP (vip-640) first, then remove the
-//    pretendExecutingVip(vip640) prerequisite from the simulation.
-// 2. Redeploy vceBTC from fixed-rate-vaults CustodyReceiptToken (current deployment is the older
-//    VenusERC20 bytecode without pause/unpause), transfer ownership to the Normal Timelock,
-//    update VCEBTC, add pause()/unpause() ACM grants, and update the simulations.
-
 // Deployed vceBTC
-export const VCEBTC = "0xba63642A893b0F15aDE730943972824c9e2147a7";
+export const VCEBTC = "0xab7d138c6e6ff1bfd3ac871d0db08f9442ce927f";
 
 export const FIXED_RATE_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
 export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
@@ -91,6 +84,16 @@ export const VAULT_SHARE_NAME = "FRV Solv BTCB 17AUG2026 30";
 export const VAULT_SHARE_SYMBOL = "FRV-sv-17AUG2026-30";
 export const INSTITUTION_NAME = "Solv(Ceffu custody)";
 
+// Accounts allowed to mint / burn vceBTC: Normal Timelock + Critical Guardian.
+export const MINT_BURN_AUTHORIZED = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.CRITICAL_GUARDIAN];
+
+// Accounts allowed to pause / unpause vceBTC transfers (emergency safeguard): all timelocks + Critical Guardian.
+export const PAUSE_UNPAUSE_AUTHORIZED = [
+  bscmainnet.NORMAL_TIMELOCK,
+  bscmainnet.FAST_TRACK_TIMELOCK,
+  bscmainnet.CRITICAL_GUARDIAN,
+];
+
 export const vip999 = () => {
   const meta = {
     version: "v2",
@@ -103,7 +106,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
 
 1. **Oracle** — price vceBTC identically to BTCB by cloning BTCB's full oracle configuration: the Chainlink / RedStone / Atlas sub-oracle feeds and stale periods, the BoundValidator bounds, and the ResilientOracle token config.
 2. **Ownership** — accept ownership of vceBTC (already transferred to the Normal Timelock by the deployer).
-3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
+3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Critical Guardian, and grant \`pause()\` and \`unpause()\` to all timelocks and the Critical Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
 4. **Initial supply** — mint the initial vceBTC collateral to the Ceffu multisig.
 5. **Vault creation** — create the Fixed Rate Vault with vceBTC as collateral.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -142,28 +145,32 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
       },
 
       // ──────────────────────────────────────────────────────────────────────
-      // 3. Access control — vceBTC mint/burn
+      // 3. Access control — vceBTC mint/burn + pause/unpause
       // ──────────────────────────────────────────────────────────────────────
-      {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "mint(address,uint256)", bscmainnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "mint(address,uint256)", bscmainnet.CRITICAL_GUARDIAN],
-      },
-      {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "burn(address,uint256)", bscmainnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "burn(address,uint256)", bscmainnet.CRITICAL_GUARDIAN],
-      },
+      ...MINT_BURN_AUTHORIZED.flatMap(account => [
+        {
+          target: bscmainnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "mint(address,uint256)", account],
+        },
+        {
+          target: bscmainnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "burn(address,uint256)", account],
+        },
+      ]),
+      ...PAUSE_UNPAUSE_AUTHORIZED.flatMap(account => [
+        {
+          target: bscmainnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "pause()", account],
+        },
+        {
+          target: bscmainnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "unpause()", account],
+        },
+      ]),
 
       // ──────────────────────────────────────────────────────────────────────
       // 4. Mint initial vceBTC collateral

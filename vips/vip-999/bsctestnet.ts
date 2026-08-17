@@ -6,12 +6,7 @@ import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-// TODO before proposing:
-// 1. Redeploy vceBTC from fixed-rate-vaults CustodyReceiptToken (current deployment is the older
-//    VenusERC20 bytecode without pause/unpause), transfer ownership to the Normal Timelock,
-//    update VCEBTC, add pause()/unpause() ACM grants, and update the simulations.
-
-export const VCEBTC = "0x3C5Fc884BF6d1Ec8957A75EF6436b3B5750A57da";
+export const VCEBTC = "0xd5DEb631cB6c6a667e926a482aadc95a471b120c";
 export const FIXED_RATE_VAULT_CONTROLLER = "0xf77dED2A00F94e33C392126238360D4642c16Ba2";
 export const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
 export const CHAINLINK_ORACLE = bsctestnet.CHAINLINK_ORACLE;
@@ -26,7 +21,7 @@ export const SUPPLY_ASSET = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 export const INSTITUTION_OPERATOR = "0x4cD6300F5cb8D6BbA5E646131c3522664C10dF11";
 
 // Initial vceBTC collateral supply
-export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.92", 18);
+export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.47", 18);
 
 // VaultConfig: [supplyAsset, fixedAPY(bps), reserveFactor(1e18), minBorrowCap,
 //   maxBorrowCap, minSupplierDeposit, openDuration, lockDuration, settlementWindow]
@@ -47,7 +42,7 @@ export const vaultConfig = [
 //                       institutionOperator, positionTokenId]
 export const instConfig = [
   VCEBTC, // collateral = vceBTC (18 decimals)
-  parseUnits("21.92", 18), // idealCollateralAmount = 21.92 BTCB
+  parseUnits("21.47", 18), // idealCollateralAmount = 21.47 BTCB
   parseUnits("0.005", 18), // marginRate = 0.5% (must be > 0; createVault reverts InvalidConfig if 0)
   INSTITUTION_OPERATOR,
   0, // positionTokenId assigned by the controller
@@ -59,6 +54,17 @@ export const riskConfig = [parseUnits("0.9", 18), parseUnits("1.1", 18), parseUn
 export const VAULT_SHARE_NAME = "FRV Solv BTCB 24JUL2026 30";
 export const VAULT_SHARE_SYMBOL = "FRV-sv-24JUL2026-30";
 export const INSTITUTION_NAME = "Ceffu";
+
+// Accounts allowed to mint / burn vceBTC: Normal Timelock + Guardian.
+export const MINT_BURN_AUTHORIZED = [bsctestnet.NORMAL_TIMELOCK, bsctestnet.GUARDIAN];
+
+// Accounts allowed to pause / unpause vceBTC transfers (emergency safeguard): all timelocks + Guardian.
+export const PAUSE_UNPAUSE_AUTHORIZED = [
+  bsctestnet.NORMAL_TIMELOCK,
+  bsctestnet.FAST_TRACK_TIMELOCK,
+  bsctestnet.CRITICAL_TIMELOCK,
+  bsctestnet.GUARDIAN,
+];
 
 export const vip999 = () => {
   const meta = {
@@ -72,7 +78,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
 
 1. **Oracle** — price vceBTC identically to BTCB by mirroring BTCB's oracle setup: set a fixed direct price on the Chainlink main sub-oracle (equal to BTCB's price) and point the ResilientOracle token config at that sub-oracle (main only; pivot / fallback disabled, no bound validation — matching BTCB on testnet).
 2. **Ownership** — accept ownership of vceBTC (already transferred to the Normal Timelock by the deployer).
-3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
+3. **Access control** — grant \`mint(address,uint256)\`, \`burn(address,uint256)\`, \`pause()\` and \`unpause()\` on vceBTC to the Normal Timelock and the Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
 4. **Initial supply** — mint the initial vceBTC collateral to the Guardian.
 5. **Vault creation** — create the Fixed Rate Vault with vceBTC as collateral.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -113,28 +119,32 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
       },
 
       // ──────────────────────────────────────────────────────────────────────
-      // 3. Access control — vceBTC mint/burn
+      // 3. Access control — vceBTC mint/burn + pause/unpause
       // ──────────────────────────────────────────────────────────────────────
-      {
-        target: bsctestnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "mint(address,uint256)", bsctestnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: bsctestnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "mint(address,uint256)", bsctestnet.GUARDIAN],
-      },
-      {
-        target: bsctestnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "burn(address,uint256)", bsctestnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: bsctestnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [VCEBTC, "burn(address,uint256)", bsctestnet.GUARDIAN],
-      },
+      ...MINT_BURN_AUTHORIZED.flatMap(account => [
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "mint(address,uint256)", account],
+        },
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "burn(address,uint256)", account],
+        },
+      ]),
+      ...PAUSE_UNPAUSE_AUTHORIZED.flatMap(account => [
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "pause()", account],
+        },
+        {
+          target: bsctestnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [VCEBTC, "unpause()", account],
+        },
+      ]),
 
       // ──────────────────────────────────────────────────────────────────────
       // 4. Mint initial vceBTC collateral
