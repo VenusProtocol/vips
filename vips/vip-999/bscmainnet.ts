@@ -5,12 +5,9 @@ import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Deployed vceBTC
-export const VCEBTC = "0xab7d138c6e6ff1bfd3ac871d0db08f9442ce927f";
-
+export const VCEBTC = "0xAB7D138c6e6fF1bfD3ac871d0dB08f9442Ce927F";
 export const FIXED_RATE_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
 export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
-
 export const CHAINLINK_ORACLE = bscmainnet.CHAINLINK_ORACLE;
 export const REDSTONE_ORACLE = bscmainnet.REDSTONE_ORACLE;
 export const ATLAS_ORACLE = bscmainnet.ATLAS_ORACLE;
@@ -43,34 +40,30 @@ export const BTCB_LOWER_BOUND = parseUnits("0.99", 18);
 
 // USDT
 export const SUPPLY_ASSET = "0x55d398326f99059fF775485246999027B3197955";
-
 export const INSTITUTION_OPERATOR = "0x8972E6F8874406D294fc0380afBDA839B1b96262";
-
-// Initial vceBTC collateral supply
 export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.47", 18);
 
 // Recipient of the initial vceBTC collateral mint (multisig)
 export const INITIAL_SUPPLY_RECIPIENT = "0x5D1507d5Cfb3d031C3209e9FB8e2644e4094Ea01";
 
-// Fixed Rate Vault configuration.
 // VaultConfig: [supplyAsset, fixedAPY(bps), reserveFactor(1e18), minBorrowCap,
 //               maxBorrowCap, minSupplierDeposit, openDuration, lockDuration, settlementWindow]
 export const vaultConfig = [
   SUPPLY_ASSET,
   600, // fixedAPY = 6%
   parseUnits("0.3", 18), // reserveFactor = 30%
-  parseUnits("500000", 18), // minBorrowCap = 500k USDT (must be > 0; createVault reverts if 0)
+  parseUnits("10", 18), // minBorrowCap = 10 USDT (must be > 0; createVault reverts if 0)
   parseUnits("1000000", 18), // maxBorrowCap = 1M
   0, // minSupplierDeposit
   7 * 24 * 60 * 60, // openDuration = 7 days
-  30 * 24 * 60 * 60, // lockDuration = 1 month
+  30 * 24 * 60 * 60, // lockDuration = 30 days
   3 * 24 * 60 * 60, // settlementWindow = 3 days
 ];
 
 // InstitutionalConfig: [collateralAsset, idealCollateralAmount, marginRate(1e18),
 //                       institutionOperator, positionTokenId]
 export const instConfig = [
-  VCEBTC, // collateral = vceBTC
+  VCEBTC,
   parseUnits("21.47", 18), // idealCollateralAmount = 21.47 BTCB
   parseUnits("0.005", 18), // marginRate = 0.5% (must be > 0; createVault reverts InvalidConfig if 0)
   INSTITUTION_OPERATOR,
@@ -84,15 +77,9 @@ export const VAULT_SHARE_NAME = "FRV Solv BTCB 17AUG2026 30";
 export const VAULT_SHARE_SYMBOL = "FRV-sv-17AUG2026-30";
 export const INSTITUTION_NAME = "Solv(Ceffu custody)";
 
-// Accounts allowed to mint / burn vceBTC: Normal Timelock + Critical Guardian.
 export const MINT_BURN_AUTHORIZED = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.CRITICAL_GUARDIAN];
 
-// Accounts allowed to pause / unpause vceBTC transfers (emergency safeguard): all timelocks + Critical Guardian.
-export const PAUSE_UNPAUSE_AUTHORIZED = [
-  bscmainnet.NORMAL_TIMELOCK,
-  bscmainnet.FAST_TRACK_TIMELOCK,
-  bscmainnet.CRITICAL_GUARDIAN,
-];
+export const PAUSE_UNPAUSE_AUTHORIZED = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.CRITICAL_GUARDIAN];
 
 export const vip999 = () => {
   const meta = {
@@ -106,7 +93,7 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
 
 1. **Oracle** — price vceBTC identically to BTCB by cloning BTCB's full oracle configuration: the Chainlink / RedStone / Atlas sub-oracle feeds and stale periods, the BoundValidator bounds, and the ResilientOracle token config.
 2. **Ownership** — accept ownership of vceBTC (already transferred to the Normal Timelock by the deployer).
-3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Critical Guardian, and grant \`pause()\` and \`unpause()\` to all timelocks and the Critical Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
+3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Critical Guardian, and grant \`pause()\` and \`unpause()\` to the Normal Timelock and the Critical Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
 4. **Initial supply** — mint the initial vceBTC collateral to the Ceffu multisig.
 5. **Vault creation** — create the Fixed Rate Vault with vceBTC as collateral.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",

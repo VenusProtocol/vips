@@ -5,9 +5,8 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { forking, testVip } from "src/vip-framework";
 
-import vip640 from "../../vips/vip-640/bscmainnet";
 import vip999, {
   ATLAS_ORACLE,
   BOUND_VALIDATOR,
@@ -159,17 +158,14 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-999 Create Ceffu Custody BTC Fixed Rate Vault", await vip999(), {
+    proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
+    supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
     callbackAfterExecution: async () => {
-      // createVault executed against the stub oracle set in the last pre-VIP step; restore the
-      // original oracle so everything below runs against production wiring.
       await controller.connect(timelock).setOracle(originalControllerOracle);
-      // Snapshot the VIP-set vceBTC sub-oracle configs before the stale-period bump rewrites them.
       for (const { name, address } of BTCB_ORACLE_CONFIGS) {
         const subOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, address);
         vceBtcConfigsAfterVip[name] = await subOracle.tokenConfigs(VCEBTC);
       }
-      // Fork feed data is frozen at the fork block while testVip advanced simulated time past the
-      // real stale periods: bump them for every priced asset (vceBTC's config only exists now).
       await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt, vceBTC]);
     },
   });
@@ -195,7 +191,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("the pause/unpause authorized accounts (all timelocks + Critical Guardian) can pause/unpause vceBTC", async () => {
+    it("the pause/unpause authorized accounts (Normal Timelock + Critical Guardian) can pause/unpause vceBTC", async () => {
       const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
       const acmAsToken = acm.connect(vceBtcAsCaller);
       for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
@@ -218,6 +214,33 @@ forking(FORK_BLOCK, async () => {
       await vceBTC.connect(timelock).burn(recipient, amount);
       expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore);
       expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
+    });
+
+    it("the Normal Timelock can pause/unpause: pausing blocks transfers but not mint/burn", async () => {
+      const [, holderSigner] = await ethers.getSigners();
+      const holder = await holderSigner.getAddress();
+      const amount = parseUnits("1", 18);
+
+      expect(await vceBTC.paused()).to.equal(false);
+
+      await vceBTC.connect(timelock).pause();
+      expect(await vceBTC.paused()).to.equal(true);
+
+      await vceBTC.connect(timelock).mint(holder, amount);
+      expect(await vceBTC.balanceOf(holder)).to.equal(amount);
+
+      await expect(vceBTC.connect(holderSigner).transfer(bscmainnet.GUARDIAN, amount)).to.be.revertedWithCustomError(
+        vceBTC,
+        "ActionPaused",
+      );
+
+      await vceBTC.connect(timelock).unpause();
+      expect(await vceBTC.paused()).to.equal(false);
+      await vceBTC.connect(holderSigner).transfer(bscmainnet.GUARDIAN, amount);
+      expect(await vceBTC.balanceOf(holder)).to.equal(0);
+
+      // Clean up the minted supply so later totalSupply assertions are unaffected.
+      await vceBTC.connect(timelock).burn(bscmainnet.GUARDIAN, amount);
     });
 
     it("initial vceBTC collateral was minted to the Ceffu multisig", async () => {
