@@ -8,8 +8,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // TODO before proposing:
 // 1. Execute the controller/vault upgrade VIP (vip-640) first, then remove the
 //    pretendExecutingVip(vip640) prerequisite from the simulation.
-// 2. Set the real Ceffu institution operator address (INSTITUTION_OPERATOR below).
-// 3. Redeploy vceBTC from fixed-rate-vaults CustodyReceiptToken (current deployment is the older
+// 2. Redeploy vceBTC from fixed-rate-vaults CustodyReceiptToken (current deployment is the older
 //    VenusERC20 bytecode without pause/unpause), transfer ownership to the Normal Timelock,
 //    update VCEBTC, add pause()/unpause() ACM grants, and update the simulations.
 
@@ -52,11 +51,10 @@ export const BTCB_LOWER_BOUND = parseUnits("0.99", 18);
 // USDT
 export const SUPPLY_ASSET = "0x55d398326f99059fF775485246999027B3197955";
 
-// TODO(2): placeholder — replace with the real Ceffu operator address
-export const INSTITUTION_OPERATOR = "0x1111111111111111111111111111111111111111";
+export const INSTITUTION_OPERATOR = "0x8972E6F8874406D294fc0380afBDA839B1b96262";
 
 // Initial vceBTC collateral supply
-export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.92", 18);
+export const VCEBTC_INITIAL_SUPPLY = parseUnits("21.47", 18);
 
 // Recipient of the initial vceBTC collateral mint (multisig)
 export const INITIAL_SUPPLY_RECIPIENT = "0x5D1507d5Cfb3d031C3209e9FB8e2644e4094Ea01";
@@ -68,7 +66,7 @@ export const vaultConfig = [
   SUPPLY_ASSET,
   600, // fixedAPY = 6%
   parseUnits("0.3", 18), // reserveFactor = 30%
-  parseUnits("10", 18), // minBorrowCap = 10 USDT (must be > 0; createVault reverts if 0)
+  parseUnits("500000", 18), // minBorrowCap = 500k USDT (must be > 0; createVault reverts if 0)
   parseUnits("1000000", 18), // maxBorrowCap = 1M
   0, // minSupplierDeposit
   7 * 24 * 60 * 60, // openDuration = 7 days
@@ -80,7 +78,7 @@ export const vaultConfig = [
 //                       institutionOperator, positionTokenId]
 export const instConfig = [
   VCEBTC, // collateral = vceBTC
-  parseUnits("21.92", 18), // idealCollateralAmount = 21.92 BTCB
+  parseUnits("21.47", 18), // idealCollateralAmount = 21.47 BTCB
   parseUnits("0.005", 18), // marginRate = 0.5% (must be > 0; createVault reverts InvalidConfig if 0)
   INSTITUTION_OPERATOR,
   0, // positionTokenId assigned by the controller
@@ -89,9 +87,9 @@ export const instConfig = [
 // RiskConfig: [liquidationThreshold(1e18), liquidationIncentive(1e18), latePenaltyRate(1e18)]
 export const riskConfig = [parseUnits("0.9", 18), parseUnits("1.1", 18), parseUnits("1.1", 18)];
 
-export const VAULT_SHARE_NAME = "FRV Solv BTCB 24JUL2026 30";
-export const VAULT_SHARE_SYMBOL = "FRV-sv-24JUL2026-30";
-export const INSTITUTION_NAME = "Ceffu";
+export const VAULT_SHARE_NAME = "FRV Solv BTCB 17AUG2026 30";
+export const VAULT_SHARE_SYMBOL = "FRV-sv-17AUG2026-30";
+export const INSTITUTION_NAME = "Solv(Ceffu custody)";
 
 export const vip999 = () => {
   const meta = {
