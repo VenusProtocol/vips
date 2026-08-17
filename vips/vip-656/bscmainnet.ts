@@ -52,7 +52,7 @@ export const vaultConfig = [
   SUPPLY_ASSET,
   600, // fixedAPY = 6%
   parseUnits("0.3", 18), // reserveFactor = 30%
-  parseUnits("10", 18), // minBorrowCap = 10 USDT (must be > 0; createVault reverts if 0)
+  parseUnits("500000", 18), // minBorrowCap = 500k USDT (must be > 0; createVault reverts if 0)
   parseUnits("1000000", 18), // maxBorrowCap = 1M
   0, // minSupplierDeposit
   7 * 24 * 60 * 60, // openDuration = 7 days
@@ -81,21 +81,52 @@ export const MINT_BURN_AUTHORIZED = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.CRIT
 
 export const PAUSE_UNPAUSE_AUTHORIZED = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.CRITICAL_GUARDIAN];
 
-export const vip999 = () => {
+export const vip656 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] Create Ceffu Custody BTC Fixed Rate Vault (DRAFT)",
+    title: "VIP-656 [BNB Chain] Ceffu Custody BTC Fixed Rate Vault",
     description: `#### Summary
 
-This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu Custody BTC for Venus")**, and creates a new Venus **Fixed Rate Vault** (Institutional Loan Vault) that uses vceBTC as collateral. vceBTC is an accounting mirror for BTC held in custody by Ceffu; its supply is controlled by Venus governance and priced identically to BTCB.
+This proposal onboards **vceBTC** ("Ceffu Custody BTC for Venus"), a governance-controlled token representing BTC held in Ceffu custody and priced identically to BTCB, and creates an Institutional Fixed Rate Vault that uses it as collateral for a 1,000,000 USDT, 30-day loan supplied at a fixed 4.2%. Refer to the community post for the full background and rationale.
 
 #### Actions
 
-1. **Oracle** — price vceBTC identically to BTCB by cloning BTCB's full oracle configuration: the Chainlink / RedStone / Atlas sub-oracle feeds and stale periods, the BoundValidator bounds, and the ResilientOracle token config.
-2. **Ownership** — accept ownership of vceBTC (already transferred to the Normal Timelock by the deployer).
-3. **Access control** — grant \`mint(address,uint256)\` and \`burn(address,uint256)\` on vceBTC to the Normal Timelock and the Critical Guardian, and grant \`pause()\` and \`unpause()\` to the Normal Timelock and the Critical Guardian. (The \`createVault(...)\` permission on the InstitutionalVaultController is granted by the separate controller/vault-upgrade VIP.)
-4. **Initial supply** — mint the initial vceBTC collateral to the Ceffu multisig.
-5. **Vault creation** — create the Fixed Rate Vault with vceBTC as collateral.`,
+This VIP performs the following 16 actions on BNB Chain:
+
+1. **Chainlink feed for vceBTC** — Calls setTokenConfig((address,address,uint256)) on ChainlinkOracle (0x1B2103441A0A108daD8848D8F5d790e4D402921F), registering vceBTC (0xAB7D138c6e6fF1bfD3ac871d0dB08f9442Ce927F) against BTCB's Chainlink feed (0x8ECF7dE377F788A813F5215668E282556b35f300) with a 100-second maximum stale period.
+2. **RedStone feed for vceBTC** — Calls setTokenConfig((address,address,uint256)) on RedStoneOracle (0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a), registering vceBTC against BTCB's RedStone feed (0xa51738d1937FFc553d5070f43300B385AA2D9F55) with a 100-second maximum stale period.
+3. **Atlas feed for vceBTC** — Calls setTokenConfig((address,address,uint256)) on AtlasOracle (0x9E6928Ec418948ceb9f1cd9872fD312b13D841D0), registering vceBTC against BTCB's Atlas feed (0x4f6c53fb9CdD46269d24bCa4E68bB680879132fc) with a 120-second maximum stale period.
+4. **Price bounds** — Calls setValidateConfig((address,uint256,uint256)) on BoundValidator (0x6E332fF0bB52475304494E4AE5063c1051c7d735), applying to vceBTC the same 1.01 upper and 0.99 lower bound ratios currently applied to BTCB.
+5. **ResilientOracle configuration** — Calls setTokenConfig((address,address[3],bool[3],bool)) on ResilientOracle (0x6592b5DE802159F3E74B2486b091D11a8256ab8A), enabling the three sub-oracles above as the main, pivot and fallback oracles for vceBTC. From this point vceBTC returns the same price as BTCB.
+6. **Ownership** — Calls acceptOwnership() on vceBTC (0xAB7D138c6e6fF1bfD3ac871d0dB08f9442Ce927F), completing the transfer of ownership to the Normal Timelock (0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396), which the deployer has already offered.
+7. **Mint permission — Normal Timelock** — Calls giveCallPermission(address,string,address) on AccessControlManager (0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555), granting mint(address,uint256) on vceBTC to the Normal Timelock.
+8. **Burn permission — Normal Timelock** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting burn(address,uint256) on vceBTC to the Normal Timelock.
+9. **Mint permission — Critical Guardian** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting mint(address,uint256) on vceBTC to the Critical Guardian (0x7B1AE5Ea599bC56734624b95589e7E8E64C351c9).
+10. **Burn permission — Critical Guardian** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting burn(address,uint256) on vceBTC to the Critical Guardian.
+11. **Pause permission — Normal Timelock** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting pause() on vceBTC to the Normal Timelock.
+12. **Unpause permission — Normal Timelock** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting unpause() on vceBTC to the Normal Timelock.
+13. **Pause permission — Critical Guardian** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting pause() on vceBTC to the Critical Guardian.
+14. **Unpause permission — Critical Guardian** — Calls giveCallPermission(address,string,address) on AccessControlManager, granting unpause() on vceBTC to the Critical Guardian.
+15. **Initial collateral mint** — Calls mint(address,uint256) on vceBTC, minting 21.47 vceBTC to the custody multisig (0x5D1507d5Cfb3d031C3209e9FB8e2644e4094Ea01), matching the BTC held under custody. This is the entire supply of vceBTC.
+16. **Vault creation** — Calls createVault(...) on InstitutionalVaultController (0x6D9e91cB766259af42619c14c994E694E57e6E85), creating the vault FRV Solv BTCB 17AUG2026 30 (FRV-sv-17AUG2026-30) for the institution Solv(Ceffu custody), with the configuration below.
+
+#### Vault configuration
+
+- **Supply asset** — USDT (0x55d398326f99059fF775485246999027B3197955)
+- **Fixed APY** — 6%
+- **Reserve factor** — 30% (4.2% fixed supply rate)
+- **Borrow cap** — 500,000 – 1,000,000 USDT
+- **Minimum supplier deposit** — 0
+- **Open / lock / settlement** — 7 days / 30 days / 3 days
+- **Collateral asset** — vceBTC (0xAB7D138c6e6fF1bfD3ac871d0dB08f9442Ce927F)
+- **Ideal collateral amount** — 21.47 vceBTC
+- **Margin rate** — 0.5%
+- **Institution operator** — 0x8972E6F8874406D294fc0380afBDA839B1b96262
+- **Liquidation threshold** — 90%
+- **Liquidation incentive** — 10%
+- **Late penalty rate** — 10%
+
+This proposal depends on the Institutional Fixed Rate Vault upgrade VIP, which must be executed first: it grants the createVault permission used in action 16.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -183,4 +214,4 @@ This proposal onboards a new custody-mirror collateral token, **vceBTC ("Ceffu C
   );
 };
 
-export default vip999;
+export default vip656;

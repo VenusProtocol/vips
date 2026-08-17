@@ -5,48 +5,57 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
+import { initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip656, {
+  ATLAS_ORACLE,
+  BOUND_VALIDATOR,
+  BTCB,
+  BTCB_LOWER_BOUND,
+  BTCB_ORACLE_CONFIGS,
+  BTCB_UPPER_BOUND,
   CHAINLINK_ORACLE,
   FIXED_RATE_VAULT_CONTROLLER,
+  INITIAL_SUPPLY_RECIPIENT,
   INSTITUTION_NAME,
   INSTITUTION_OPERATOR,
   MINT_BURN_AUTHORIZED,
   PAUSE_UNPAUSE_AUTHORIZED,
+  REDSTONE_ORACLE,
   SUPPLY_ASSET,
   VAULT_SHARE_NAME,
   VAULT_SHARE_SYMBOL,
   VCEBTC,
-  VCEBTC_DIRECT_PRICE,
   VCEBTC_INITIAL_SUPPLY,
   instConfig,
   riskConfig,
   vaultConfig,
-} from "../../vips/vip-999/bsctestnet";
+} from "../../vips/vip-656/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
+import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
+import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import CUSTODY_RECEIPT_TOKEN_ABI from "./abi/CustodyReceiptToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ORACLE_ABI from "./abi/ResilientOracle.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 125582517;
+const FORK_BLOCK = 116439415;
 
-const USDT_FAUCET_ABI = ["function allocateTo(address to, uint256 amount) external"];
-const CHAINLINK_ORACLE_GETPRICE_ABI = ["function getPrice(address) external view returns (uint256)"];
-
+const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // Binance Hot Wallet
+const LENDER = "0x2222222222222222222222222222222222222222"; // dummy test lender
 const DEAD = "0x000000000000000000000000000000000000dEaD";
 
 // Every governance account that could plausibly be granted mint/burn or pause/unpause, so the
 // negative tests below pin down exactly which of them the VIP does *not* authorize.
 const GOVERNANCE_ACCOUNTS: Record<string, string> = {
-  "Normal Timelock": bsctestnet.NORMAL_TIMELOCK,
-  "Fast-track Timelock": bsctestnet.FAST_TRACK_TIMELOCK,
-  "Critical Timelock": bsctestnet.CRITICAL_TIMELOCK,
-  Guardian: bsctestnet.GUARDIAN,
+  "Normal Timelock": bscmainnet.NORMAL_TIMELOCK,
+  "Fast-track Timelock": bscmainnet.FAST_TRACK_TIMELOCK,
+  "Critical Timelock": bscmainnet.CRITICAL_TIMELOCK,
+  Guardian: bscmainnet.GUARDIAN,
+  "Critical Guardian": bscmainnet.CRITICAL_GUARDIAN,
 };
 
 const label = (address: string): string =>
@@ -54,6 +63,27 @@ const label = (address: string): string =>
 
 const notAuthorizedTo = (authorized: string[]): string[] =>
   Object.values(GOVERNANCE_ACCOUNTS).filter(a => !authorized.includes(a));
+
+// Minimal price-oracle stub that always returns 1e18 — swapped in so getPrice-probing calls
+// succeed against feeds that are stale on the fork or not configured yet.
+// Source (compiled with solc 0.8.25, optimizer off):
+//   contract StubOracle {
+//       function getPrice(address) external pure returns (uint256) { return 1e18; }
+//   }
+const STUB_ORACLE_BYTECODE =
+  "0x6080604052348015600e575f80fd5b5061015e8061001c5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c806341976e091461002d575b5f80fd5b610047600480360381019061004291906100cc565b61005d565b604051610054919061010f565b60405180910390f35b5f670de0b6b3a76400009050919050565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61009b82610072565b9050919050565b6100ab81610091565b81146100b5575f80fd5b50565b5f813590506100c6816100a2565b92915050565b5f602082840312156100e1576100e061006e565b5b5f6100ee848285016100b8565b91505092915050565b5f819050919050565b610109816100f7565b82525050565b5f6020820190506101225f830184610100565b9291505056fea26469706673582212209282f7f2d85233912d0088d6dc45ce2459097d2866597e41f0a286059758c12c64736f6c63430008190033";
+
+const deployStubOracle = async (): Promise<Contract> => {
+  const [deployer] = await ethers.getSigners();
+  const factory = new ethers.ContractFactory(
+    ["function getPrice(address) external pure returns (uint256)"],
+    STUB_ORACLE_BYTECODE,
+    deployer,
+  );
+  const stubOracle = await factory.deploy();
+  await stubOracle.deployed();
+  return stubOracle;
+};
 
 // IVaultTypes.VaultState
 const VaultState = {
@@ -70,23 +100,32 @@ forking(FORK_BLOCK, async () => {
   let acm: Contract;
   let controller: Contract;
   let vceBTC: Contract;
+  let btcb: Contract;
   let usdt: Contract;
   let timelock: any;
   let vaultsBefore: any;
+  let btcbPriceAtFork: any;
+  let originalControllerOracle: string;
+  const vceBtcConfigsAfterVip: Record<string, any> = {};
 
   before(async () => {
-    oracle = await ethers.getContractAt(ORACLE_ABI, bsctestnet.RESILIENT_ORACLE);
-    acm = await ethers.getContractAt(ACM_ABI, bsctestnet.ACCESS_CONTROL_MANAGER);
+    oracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
+    acm = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
+    btcb = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, BTCB);
     usdt = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, SUPPLY_ASSET);
-    timelock = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, parseUnits("40"));
+    timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
+
+    // Capture the BTCB price while the fork-block feed data is still fresh
+    btcbPriceAtFork = await oracle.getPrice(BTCB);
+
     vceBTC = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, VCEBTC);
   });
 
   describe("Pre-VIP behavior", () => {
     it("vceBTC is deployed with correct ACM, name, symbol, and decimals", async () => {
-      expect(await vceBTC.accessControlManager()).to.equal(bsctestnet.ACCESS_CONTROL_MANAGER);
+      expect(await vceBTC.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
       expect(await vceBTC.name()).to.equal("Ceffu Custody BTC for Venus");
       expect(await vceBTC.symbol()).to.equal("vceBTC");
       expect(await vceBTC.decimals()).to.equal(18);
@@ -94,8 +133,8 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("ownership has been offered to the Normal Timelock but not yet accepted", async () => {
-      expect(await vceBTC.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await vceBTC.owner()).to.not.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await vceBTC.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+      expect(await vceBTC.owner()).to.not.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("vceBTC has no oracle config yet (getPrice reverts)", async () => {
@@ -114,21 +153,50 @@ forking(FORK_BLOCK, async () => {
         expect(await acmAsToken.isAllowedToCall(account, "unpause()")).to.equal(false);
       }
     });
+
+    it("BTCB's live sub-oracle configs match the feeds and stale periods the VIP clones", async () => {
+      for (const { name, address, feed, maxStalePeriod } of BTCB_ORACLE_CONFIGS) {
+        const subOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, address);
+        const config = await subOracle.tokenConfigs(BTCB);
+        expect(config.feed, name).to.equal(feed);
+        expect(config.maxStalePeriod, name).to.equal(maxStalePeriod);
+      }
+    });
+
+    // createVault probes getPrice() for both vault assets, but on the fork the feeds are stale by
+    // execution time (testVip advances days) and vceBTC's config doesn't exist until the VIP runs.
+    // Swap the controller's oracle for an always-1e18 stub; callbackAfterExecution restores it.
+    it("[Test-Only] swaps the controller's oracle for a stub so createVault's price probe passes during execution", async () => {
+      originalControllerOracle = await controller.oracle();
+      expect(originalControllerOracle).to.equal(bscmainnet.RESILIENT_ORACLE);
+      const stubOracle = await deployStubOracle();
+      await controller.connect(timelock).setOracle(stubOracle.address);
+      expect(await controller.oracle()).to.equal(stubOracle.address);
+    });
   });
 
-  testVip("VIP-999 Create Ceffu Custody BTC Fixed Rate Vault (Testnet)", await vip999());
+  testVip("VIP-656 Create Ceffu Custody BTC Fixed Rate Vault", await vip656(), {
+    proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
+    supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
+    callbackAfterExecution: async () => {
+      await controller.connect(timelock).setOracle(originalControllerOracle);
+      for (const { name, address } of BTCB_ORACLE_CONFIGS) {
+        const subOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, address);
+        vceBtcConfigsAfterVip[name] = await subOracle.tokenConfigs(VCEBTC);
+      }
+      await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt, vceBTC]);
+    },
+  });
 
   describe("Post-VIP behavior", () => {
-    it("vceBTC is priced at the fixed direct price set on the Chainlink sub-oracle", async () => {
-      const chainlink = await ethers.getContractAt(CHAINLINK_ORACLE_GETPRICE_ABI, CHAINLINK_ORACLE);
+    it("vceBTC is priced close to BTCB", async () => {
       const vceBtcPrice = await oracle.getPrice(VCEBTC);
-      expect(vceBtcPrice).to.equal(VCEBTC_DIRECT_PRICE);
-      // ResilientOracle proxies to the Chainlink main sub-oracle, which returns the direct price.
-      expect(vceBtcPrice).to.equal(await chainlink.getPrice(VCEBTC));
+      const tolerance = btcbPriceAtFork.div(100); // 1% tolerance
+      expect(vceBtcPrice).to.be.closeTo(btcbPriceAtFork, tolerance);
     });
 
     it("the Normal Timelock accepted ownership of vceBTC", async () => {
-      expect(await vceBTC.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await vceBTC.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
       expect(await vceBTC.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
 
@@ -141,7 +209,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("the pause/unpause authorized accounts (all timelocks + Guardian) can pause/unpause vceBTC", async () => {
+    it("the pause/unpause authorized accounts (Normal Timelock + Critical Guardian) can pause/unpause vceBTC", async () => {
       const vceBtcAsCaller = await initMainnetUser(VCEBTC, parseUnits("1"));
       const acmAsToken = acm.connect(vceBtcAsCaller);
       for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
@@ -150,9 +218,9 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("initial vceBTC collateral was minted to the Guardian", async () => {
+    it("initial vceBTC collateral was minted to the Ceffu multisig", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
-      expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(VCEBTC_INITIAL_SUPPLY);
+      expect(await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT)).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
 
     it("a Fixed Rate Vault backed by vceBTC was created with the configured parameters and names", async () => {
@@ -200,8 +268,7 @@ forking(FORK_BLOCK, async () => {
     let outsider: SignerWithAddress;
 
     before(async () => {
-      const signers = await ethers.getSigners();
-      outsider = signers[4];
+      [, , outsider] = await ethers.getSigners();
     });
 
     for (const account of MINT_BURN_AUTHORIZED) {
@@ -232,12 +299,12 @@ forking(FORK_BLOCK, async () => {
           "Unauthorized",
         );
         await expect(
-          vceBTC.connect(caller).burn(bsctestnet.GUARDIAN, amount),
+          vceBTC.connect(caller).burn(INITIAL_SUPPLY_RECIPIENT, amount),
           label(account),
         ).to.be.revertedWithCustomError(vceBTC, "Unauthorized");
       }
       await expect(vceBTC.connect(outsider).mint(DEAD, amount)).to.be.revertedWithCustomError(vceBTC, "Unauthorized");
-      await expect(vceBTC.connect(outsider).burn(bsctestnet.GUARDIAN, amount)).to.be.revertedWithCustomError(
+      await expect(vceBTC.connect(outsider).burn(INITIAL_SUPPLY_RECIPIENT, amount)).to.be.revertedWithCustomError(
         vceBTC,
         "Unauthorized",
       );
@@ -246,22 +313,23 @@ forking(FORK_BLOCK, async () => {
     // burn() takes no allowance: an authorized account can destroy any holder's balance, including
     // collateral already sitting in a vault. Documenting the power the VIP hands out.
     it("burn needs no allowance from the holder whose balance is destroyed", async () => {
-      expect(await vceBTC.allowance(bsctestnet.GUARDIAN, bsctestnet.NORMAL_TIMELOCK)).to.equal(0);
+      const caller = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
+      expect(await vceBTC.allowance(INITIAL_SUPPLY_RECIPIENT, bscmainnet.CRITICAL_GUARDIAN)).to.equal(0);
 
-      const balanceBefore = await vceBTC.balanceOf(bsctestnet.GUARDIAN);
+      const balanceBefore = await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT);
       const supplyBefore = await vceBTC.totalSupply();
-      await vceBTC.connect(timelock).burn(bsctestnet.GUARDIAN, amount);
-      expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(balanceBefore.sub(amount));
+      await vceBTC.connect(caller).burn(INITIAL_SUPPLY_RECIPIENT, amount);
+      expect(await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT)).to.equal(balanceBefore.sub(amount));
       expect(await vceBTC.totalSupply()).to.equal(supplyBefore.sub(amount));
 
       // Restore the initial supply for the assertions that follow.
-      await vceBTC.connect(timelock).mint(bsctestnet.GUARDIAN, amount);
+      await vceBTC.connect(caller).mint(INITIAL_SUPPLY_RECIPIENT, amount);
       expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
     });
 
     it("burning more than a holder's balance reverts", async () => {
-      const balance = await vceBTC.balanceOf(bsctestnet.GUARDIAN);
-      await expect(vceBTC.connect(timelock).burn(bsctestnet.GUARDIAN, balance.add(1))).to.be.revertedWith(
+      const balance = await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT);
+      await expect(vceBTC.connect(timelock).burn(INITIAL_SUPPLY_RECIPIENT, balance.add(1))).to.be.revertedWith(
         "ERC20: burn amount exceeds balance",
       );
     });
@@ -274,7 +342,7 @@ forking(FORK_BLOCK, async () => {
 
     it("total supply is unchanged by these tests", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
-      expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(VCEBTC_INITIAL_SUPPLY);
+      expect(await vceBTC.balanceOf(INITIAL_SUPPLY_RECIPIENT)).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
   });
 
@@ -284,8 +352,7 @@ forking(FORK_BLOCK, async () => {
     let spender: SignerWithAddress;
 
     before(async () => {
-      const signers = await ethers.getSigners();
-      [holder, spender] = [signers[2], signers[3]];
+      [, holder, spender] = await ethers.getSigners();
     });
 
     afterEach(async () => {
@@ -308,7 +375,7 @@ forking(FORK_BLOCK, async () => {
     }
 
     it("an account without the grant cannot pause or unpause", async () => {
-      for (const account of [...notAuthorizedTo(PAUSE_UNPAUSE_AUTHORIZED), INSTITUTION_OPERATOR]) {
+      for (const account of notAuthorizedTo(PAUSE_UNPAUSE_AUTHORIZED)) {
         const caller = await initMainnetUser(account, parseUnits("1"));
         await expect(vceBTC.connect(caller).pause(), label(account)).to.be.revertedWithCustomError(
           vceBTC,
@@ -365,11 +432,67 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  describe("Oracle configuration for BTCB and vceBTC", () => {
+    it("BTCB price is available from ResilientOracle", async () => {
+      const btcbPrice = await oracle.getPrice(BTCB);
+      expect(btcbPrice).to.be.gt(0);
+    });
+
+    it("vceBTC price is available from ResilientOracle", async () => {
+      const vceBtcPrice = await oracle.getPrice(VCEBTC);
+      expect(vceBtcPrice).to.be.gt(0);
+    });
+
+    it("vceBTC price matches BTCB price configuration", async () => {
+      const btcbPrice = await oracle.getPrice(BTCB);
+      const vceBtcPrice = await oracle.getPrice(VCEBTC);
+      expect(vceBtcPrice).to.equal(btcbPrice);
+    });
+
+    // Together with the pre-VIP check that BTCB's live configs match BTCB_ORACLE_CONFIGS, this proves
+    // vceBTC's configs are exact clones of BTCB's.
+    for (const { name, feed, maxStalePeriod } of BTCB_ORACLE_CONFIGS) {
+      it(`vceBTC ${name} config clones BTCB's feed and stale period`, async () => {
+        const vceBtcConfig = vceBtcConfigsAfterVip[name];
+        expect(vceBtcConfig, `${name} snapshot missing — callbackAfterExecution did not run`).to.not.be.undefined;
+        expect(vceBtcConfig.asset).to.equal(VCEBTC);
+        expect(vceBtcConfig.feed).to.equal(feed);
+        expect(vceBtcConfig.maxStalePeriod).to.equal(maxStalePeriod);
+      });
+    }
+
+    it("vceBTC ResilientOracle config mirrors BTCB's (same sub-oracles, all enabled)", async () => {
+      const btcbConfig = await oracle.getTokenConfig(BTCB);
+      const vceBtcConfig = await oracle.getTokenConfig(VCEBTC);
+      expect(vceBtcConfig.asset).to.equal(VCEBTC);
+      expect(vceBtcConfig.oracles).to.deep.equal([CHAINLINK_ORACLE, REDSTONE_ORACLE, ATLAS_ORACLE]);
+      expect(vceBtcConfig.oracles).to.deep.equal(btcbConfig.oracles);
+      expect(vceBtcConfig.enableFlagsForOracles).to.deep.equal(btcbConfig.enableFlagsForOracles);
+      expect(vceBtcConfig.cachingEnabled).to.equal(btcbConfig.cachingEnabled);
+      expect(vceBtcConfig.cachingEnabled).to.equal(false);
+    });
+
+    it("BTCB bounds are configured correctly in BoundValidator", async () => {
+      const boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
+      const btcbBounds = await boundValidator.validateConfigs(BTCB);
+      expect(btcbBounds.asset).to.equal(BTCB);
+      expect(btcbBounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
+      expect(btcbBounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
+    });
+
+    it("vceBTC bounds are configured correctly in BoundValidator (cloned from BTCB)", async () => {
+      const boundValidator = await ethers.getContractAt(BOUND_VALIDATOR_ABI, BOUND_VALIDATOR);
+      const vceBtcBounds = await boundValidator.validateConfigs(VCEBTC);
+      expect(vceBtcBounds.asset).to.equal(VCEBTC);
+      expect(vceBtcBounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
+      expect(vceBtcBounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
+    });
+  });
+
   describe("Vault lifecycle", () => {
     let vault: Contract;
     let institution: any;
     let lender: any;
-    let LENDER: string;
 
     const idealCollateralAmount = BigNumber.from(instConfig[1]);
     const marginRate = BigNumber.from(instConfig[2]);
@@ -385,17 +508,13 @@ forking(FORK_BLOCK, async () => {
       vault = await ethers.getContractAt(VAULT_ABI, vaultAddress);
 
       institution = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
+      lender = await initMainnetUser(LENDER, parseUnits("1"));
 
-      // Lender is a pre-funded Hardhat signer (account #1), so no impersonation is needed.
-      const [deployer, lenderSigner] = await ethers.getSigners();
-      lender = lenderSigner;
-      LENDER = await lenderSigner.getAddress();
-
-      // Fund the institution with vceBTC collateral and both parties with the supply asset (USDT).
+      // Fund the institution with vceBTC collateral and both parties with the supply asset.
       await vceBTC.connect(timelock).mint(INSTITUTION_OPERATOR, idealCollateralAmount);
-      const usdtFaucet = await ethers.getContractAt(USDT_FAUCET_ABI, SUPPLY_ASSET);
-      await usdtFaucet.connect(deployer).allocateTo(LENDER, lenderDepositAmount);
-      await usdtFaucet.connect(deployer).allocateTo(INSTITUTION_OPERATOR, lenderDepositAmount.div(5)); // buffer to cover interest on repay (principal comes from claimed funds)
+      const whale = await initMainnetUser(USDT_WHALE, parseUnits("1"));
+      await usdt.connect(whale).transfer(LENDER, lenderDepositAmount);
+      await usdt.connect(whale).transfer(INSTITUTION_OPERATOR, lenderDepositAmount.div(5)); // to repay principal + interest
     });
 
     it("institution deposits margin collateral (WaitingForMargin -> MarginDeposited)", async () => {
@@ -413,7 +532,7 @@ forking(FORK_BLOCK, async () => {
     // The emergency safeguard, exercised on the live vault: while vceBTC is paused the institution
     // cannot move collateral in or out, because both directions are holder-to-holder transfers.
     it("a vceBTC pause blocks collateral deposits into the vault", async () => {
-      const guardian = await initMainnetUser(bsctestnet.GUARDIAN, parseUnits("1"));
+      const guardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
       await vceBTC.connect(guardian).pause();
       await expect(
         vault.connect(institution).depositCollateral(idealCollateralAmount.sub(marginAmount)),
@@ -496,7 +615,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("a vceBTC pause blocks the institution from withdrawing its collateral", async () => {
-      const guardian = await initMainnetUser(bsctestnet.GUARDIAN, parseUnits("1"));
+      const guardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
       const collateral = await vceBTC.balanceOf(vault.address);
       await vceBTC.connect(guardian).pause();
       await expect(vault.connect(institution).withdrawCollateral(collateral)).to.be.revertedWithCustomError(
