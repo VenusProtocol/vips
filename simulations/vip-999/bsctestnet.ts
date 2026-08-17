@@ -1,4 +1,5 @@
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { takeSnapshot, time } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -36,6 +37,23 @@ const FORK_BLOCK = 125582517;
 
 const USDT_FAUCET_ABI = ["function allocateTo(address to, uint256 amount) external"];
 const CHAINLINK_ORACLE_GETPRICE_ABI = ["function getPrice(address) external view returns (uint256)"];
+
+const DEAD = "0x000000000000000000000000000000000000dEaD";
+
+// Every governance account that could plausibly be granted mint/burn or pause/unpause, so the
+// negative tests below pin down exactly which of them the VIP does *not* authorize.
+const GOVERNANCE_ACCOUNTS: Record<string, string> = {
+  "Normal Timelock": bsctestnet.NORMAL_TIMELOCK,
+  "Fast-track Timelock": bsctestnet.FAST_TRACK_TIMELOCK,
+  "Critical Timelock": bsctestnet.CRITICAL_TIMELOCK,
+  Guardian: bsctestnet.GUARDIAN,
+};
+
+const label = (address: string): string =>
+  Object.entries(GOVERNANCE_ACCOUNTS).find(([, a]) => a === address)?.[0] ?? address;
+
+const notAuthorizedTo = (authorized: string[]): string[] =>
+  Object.values(GOVERNANCE_ACCOUNTS).filter(a => !authorized.includes(a));
 
 // IVaultTypes.VaultState
 const VaultState = {
@@ -132,53 +150,6 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("the Normal Timelock can mint and burn vceBTC", async () => {
-      const recipient = "0x000000000000000000000000000000000000dEaD";
-      const amount = parseUnits("1", 18);
-
-      const supplyBefore = await vceBTC.totalSupply();
-      const balanceBefore = await vceBTC.balanceOf(recipient);
-
-      await vceBTC.connect(timelock).mint(recipient, amount);
-      expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore.add(amount));
-      expect(await vceBTC.totalSupply()).to.equal(supplyBefore.add(amount));
-
-      await vceBTC.connect(timelock).burn(recipient, amount);
-      expect(await vceBTC.balanceOf(recipient)).to.equal(balanceBefore);
-      expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
-    });
-
-    it("the Normal Timelock can pause/unpause: pausing blocks transfers but not mint/burn", async () => {
-      const [, holderSigner] = await ethers.getSigners();
-      const holder = await holderSigner.getAddress();
-      const amount = parseUnits("1", 18);
-
-      expect(await vceBTC.paused()).to.equal(false);
-
-      // Pause transfers.
-      await vceBTC.connect(timelock).pause();
-      expect(await vceBTC.paused()).to.equal(true);
-
-      // Mint/burn remain available while paused.
-      await vceBTC.connect(timelock).mint(holder, amount);
-      expect(await vceBTC.balanceOf(holder)).to.equal(amount);
-
-      // Holder-to-holder transfers are blocked while paused.
-      await expect(vceBTC.connect(holderSigner).transfer(bsctestnet.GUARDIAN, amount)).to.be.revertedWithCustomError(
-        vceBTC,
-        "ActionPaused",
-      );
-
-      // Unpause and confirm transfers work again.
-      await vceBTC.connect(timelock).unpause();
-      expect(await vceBTC.paused()).to.equal(false);
-      await vceBTC.connect(holderSigner).transfer(bsctestnet.GUARDIAN, amount);
-      expect(await vceBTC.balanceOf(holder)).to.equal(0);
-
-      // Clean up the minted supply so later totalSupply assertions are unaffected.
-      await vceBTC.connect(timelock).burn(bsctestnet.GUARDIAN, amount);
-    });
-
     it("initial vceBTC collateral was minted to the Guardian", async () => {
       expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
       expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(VCEBTC_INITIAL_SUPPLY);
@@ -221,6 +192,176 @@ forking(FORK_BLOCK, async () => {
       expect(await vault.name()).to.equal(VAULT_SHARE_NAME);
       expect(await vault.symbol()).to.equal(VAULT_SHARE_SYMBOL);
       expect(await vault.institutionName()).to.equal(INSTITUTION_NAME);
+    });
+  });
+
+  describe("vceBTC mint / burn", () => {
+    const amount = parseUnits("1", 18);
+    let outsider: SignerWithAddress;
+
+    before(async () => {
+      const signers = await ethers.getSigners();
+      outsider = signers[4];
+    });
+
+    for (const account of MINT_BURN_AUTHORIZED) {
+      it(`${label(account)} can mint and burn vceBTC`, async () => {
+        const caller = await initMainnetUser(account, parseUnits("1"));
+        const supplyBefore = await vceBTC.totalSupply();
+        const balanceBefore = await vceBTC.balanceOf(DEAD);
+
+        await expect(vceBTC.connect(caller).mint(DEAD, amount))
+          .to.emit(vceBTC, "Transfer")
+          .withArgs(ethers.constants.AddressZero, DEAD, amount);
+        expect(await vceBTC.balanceOf(DEAD)).to.equal(balanceBefore.add(amount));
+        expect(await vceBTC.totalSupply()).to.equal(supplyBefore.add(amount));
+
+        await expect(vceBTC.connect(caller).burn(DEAD, amount))
+          .to.emit(vceBTC, "Transfer")
+          .withArgs(DEAD, ethers.constants.AddressZero, amount);
+        expect(await vceBTC.balanceOf(DEAD)).to.equal(balanceBefore);
+        expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
+      });
+    }
+
+    it("an account without the grant cannot mint or burn", async () => {
+      for (const account of [...notAuthorizedTo(MINT_BURN_AUTHORIZED), INSTITUTION_OPERATOR]) {
+        const caller = await initMainnetUser(account, parseUnits("1"));
+        await expect(vceBTC.connect(caller).mint(DEAD, amount), label(account)).to.be.revertedWithCustomError(
+          vceBTC,
+          "Unauthorized",
+        );
+        await expect(
+          vceBTC.connect(caller).burn(bsctestnet.GUARDIAN, amount),
+          label(account),
+        ).to.be.revertedWithCustomError(vceBTC, "Unauthorized");
+      }
+      await expect(vceBTC.connect(outsider).mint(DEAD, amount)).to.be.revertedWithCustomError(vceBTC, "Unauthorized");
+      await expect(vceBTC.connect(outsider).burn(bsctestnet.GUARDIAN, amount)).to.be.revertedWithCustomError(
+        vceBTC,
+        "Unauthorized",
+      );
+    });
+
+    // burn() takes no allowance: an authorized account can destroy any holder's balance, including
+    // collateral already sitting in a vault. Documenting the power the VIP hands out.
+    it("burn needs no allowance from the holder whose balance is destroyed", async () => {
+      expect(await vceBTC.allowance(bsctestnet.GUARDIAN, bsctestnet.NORMAL_TIMELOCK)).to.equal(0);
+
+      const balanceBefore = await vceBTC.balanceOf(bsctestnet.GUARDIAN);
+      const supplyBefore = await vceBTC.totalSupply();
+      await vceBTC.connect(timelock).burn(bsctestnet.GUARDIAN, amount);
+      expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(balanceBefore.sub(amount));
+      expect(await vceBTC.totalSupply()).to.equal(supplyBefore.sub(amount));
+
+      // Restore the initial supply for the assertions that follow.
+      await vceBTC.connect(timelock).mint(bsctestnet.GUARDIAN, amount);
+      expect(await vceBTC.totalSupply()).to.equal(supplyBefore);
+    });
+
+    it("burning more than a holder's balance reverts", async () => {
+      const balance = await vceBTC.balanceOf(bsctestnet.GUARDIAN);
+      await expect(vceBTC.connect(timelock).burn(bsctestnet.GUARDIAN, balance.add(1))).to.be.revertedWith(
+        "ERC20: burn amount exceeds balance",
+      );
+    });
+
+    it("minting to the zero address reverts", async () => {
+      await expect(vceBTC.connect(timelock).mint(ethers.constants.AddressZero, amount)).to.be.revertedWith(
+        "ERC20: mint to the zero address",
+      );
+    });
+
+    it("total supply is unchanged by these tests", async () => {
+      expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
+      expect(await vceBTC.balanceOf(bsctestnet.GUARDIAN)).to.equal(VCEBTC_INITIAL_SUPPLY);
+    });
+  });
+
+  describe("vceBTC pause / unpause", () => {
+    const amount = parseUnits("1", 18);
+    let holder: SignerWithAddress;
+    let spender: SignerWithAddress;
+
+    before(async () => {
+      const signers = await ethers.getSigners();
+      [holder, spender] = [signers[2], signers[3]];
+    });
+
+    afterEach(async () => {
+      if (await vceBTC.paused()) {
+        await vceBTC.connect(timelock).unpause();
+      }
+    });
+
+    for (const account of PAUSE_UNPAUSE_AUTHORIZED) {
+      it(`${label(account)} can pause and unpause vceBTC`, async () => {
+        const caller = await initMainnetUser(account, parseUnits("1"));
+        expect(await vceBTC.paused()).to.equal(false);
+
+        await expect(vceBTC.connect(caller).pause()).to.emit(vceBTC, "Paused").withArgs(account);
+        expect(await vceBTC.paused()).to.equal(true);
+
+        await expect(vceBTC.connect(caller).unpause()).to.emit(vceBTC, "Unpaused").withArgs(account);
+        expect(await vceBTC.paused()).to.equal(false);
+      });
+    }
+
+    it("an account without the grant cannot pause or unpause", async () => {
+      for (const account of [...notAuthorizedTo(PAUSE_UNPAUSE_AUTHORIZED), INSTITUTION_OPERATOR]) {
+        const caller = await initMainnetUser(account, parseUnits("1"));
+        await expect(vceBTC.connect(caller).pause(), label(account)).to.be.revertedWithCustomError(
+          vceBTC,
+          "Unauthorized",
+        );
+        await expect(vceBTC.connect(caller).unpause(), label(account)).to.be.revertedWithCustomError(
+          vceBTC,
+          "Unauthorized",
+        );
+      }
+      await expect(vceBTC.connect(holder).pause()).to.be.revertedWithCustomError(vceBTC, "Unauthorized");
+      await expect(vceBTC.connect(holder).unpause()).to.be.revertedWithCustomError(vceBTC, "Unauthorized");
+    });
+
+    it("pausing twice reverts, and unpausing while unpaused reverts", async () => {
+      await expect(vceBTC.connect(timelock).unpause()).to.be.revertedWithCustomError(vceBTC, "NotPaused");
+      await vceBTC.connect(timelock).pause();
+      await expect(vceBTC.connect(timelock).pause()).to.be.revertedWithCustomError(vceBTC, "AlreadyPaused");
+    });
+
+    it("while paused, transfer and transferFrom revert but mint, burn and approve still work", async () => {
+      const holderAddress = await holder.getAddress();
+      const spenderAddress = await spender.getAddress();
+
+      await vceBTC.connect(timelock).mint(holderAddress, amount);
+      await vceBTC.connect(timelock).pause();
+
+      // Both transfer paths are blocked while paused.
+      await expect(vceBTC.connect(holder).transfer(spenderAddress, amount)).to.be.revertedWithCustomError(
+        vceBTC,
+        "ActionPaused",
+      );
+      await vceBTC.connect(holder).approve(spenderAddress, amount); // approvals are not transfers
+      expect(await vceBTC.allowance(holderAddress, spenderAddress)).to.equal(amount);
+      await expect(
+        vceBTC.connect(spender).transferFrom(holderAddress, spenderAddress, amount),
+      ).to.be.revertedWithCustomError(vceBTC, "ActionPaused");
+
+      // Custody can still be reconciled while transfers are frozen.
+      await vceBTC.connect(timelock).mint(holderAddress, amount);
+      expect(await vceBTC.balanceOf(holderAddress)).to.equal(amount.mul(2));
+      await vceBTC.connect(timelock).burn(holderAddress, amount);
+      expect(await vceBTC.balanceOf(holderAddress)).to.equal(amount);
+
+      // Unpausing restores transfers.
+      await vceBTC.connect(timelock).unpause();
+      await vceBTC.connect(spender).transferFrom(holderAddress, spenderAddress, amount);
+      expect(await vceBTC.balanceOf(holderAddress)).to.equal(0);
+      expect(await vceBTC.balanceOf(spenderAddress)).to.equal(amount);
+
+      // Clean up so the total-supply assertions below still hold.
+      await vceBTC.connect(timelock).burn(spenderAddress, amount);
+      expect(await vceBTC.totalSupply()).to.equal(VCEBTC_INITIAL_SUPPLY);
     });
   });
 
@@ -269,6 +410,17 @@ forking(FORK_BLOCK, async () => {
       expect(await vault.state()).to.equal(VaultState.Fundraising);
     });
 
+    // The emergency safeguard, exercised on the live vault: while vceBTC is paused the institution
+    // cannot move collateral in or out, because both directions are holder-to-holder transfers.
+    it("a vceBTC pause blocks collateral deposits into the vault", async () => {
+      const guardian = await initMainnetUser(bsctestnet.GUARDIAN, parseUnits("1"));
+      await vceBTC.connect(guardian).pause();
+      await expect(
+        vault.connect(institution).depositCollateral(idealCollateralAmount.sub(marginAmount)),
+      ).to.be.revertedWithCustomError(vceBTC, "ActionPaused");
+      await vceBTC.connect(guardian).unpause();
+    });
+
     it("institution tops up collateral to the full ideal amount", async () => {
       await vault.connect(institution).depositCollateral(idealCollateralAmount.sub(marginAmount));
       expect(await vceBTC.balanceOf(vault.address)).to.equal(idealCollateralAmount);
@@ -315,6 +467,43 @@ forking(FORK_BLOCK, async () => {
       await vault.connect(lender).redeem(shares, LENDER, LENDER);
       expect(await usdt.balanceOf(LENDER)).to.equal(usdtBefore.add(expectedAssets));
       expect(await vault.balanceOf(LENDER)).to.equal(0);
+    });
+
+    // burn() moves no tokens the vault can observe: the vault tracks collateral in storage
+    // (_instRuntime.totalCollateralDeposited) and prices *that*, so burning the vault's balance
+    // leaves its accounting and USD valuation untouched while the tokens are gone. Reverted via
+    // snapshot so the happy-path withdrawal below still runs.
+    it("burning the vault's collateral is invisible to the vault's own accounting", async () => {
+      const snapshot = await takeSnapshot();
+
+      const collateral = await vceBTC.balanceOf(vault.address);
+      const trackedBefore = (await vault.institutionalRuntime()).totalCollateralDeposited;
+      const valueBefore = await vault.getCollateralValueUSD();
+      expect(trackedBefore).to.equal(collateral);
+
+      await vceBTC.connect(timelock).burn(vault.address, collateral);
+      expect(await vceBTC.balanceOf(vault.address)).to.equal(0);
+      expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(trackedBefore);
+      expect(await vault.getCollateralValueUSD()).to.equal(valueBefore);
+
+      // The shortfall only surfaces when the vault tries to move the tokens it no longer holds.
+      await expect(vault.connect(institution).withdrawCollateral(collateral)).to.be.revertedWith(
+        "ERC20: transfer amount exceeds balance",
+      );
+
+      await snapshot.restore();
+      expect(await vceBTC.balanceOf(vault.address)).to.equal(collateral);
+    });
+
+    it("a vceBTC pause blocks the institution from withdrawing its collateral", async () => {
+      const guardian = await initMainnetUser(bsctestnet.GUARDIAN, parseUnits("1"));
+      const collateral = await vceBTC.balanceOf(vault.address);
+      await vceBTC.connect(guardian).pause();
+      await expect(vault.connect(institution).withdrawCollateral(collateral)).to.be.revertedWithCustomError(
+        vceBTC,
+        "ActionPaused",
+      );
+      await vceBTC.connect(guardian).unpause();
     });
 
     it("the institution withdraws its collateral", async () => {
