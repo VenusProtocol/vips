@@ -23,10 +23,13 @@ import {
 //     passes; it is a deployed InstitutionalLoanVault clone, currently in lifecycle state
 //     MarginDeposited (pre-Fundraising, maxDeposit == 0).
 //   - Ceffu (USDT) vault: NOT yet deployed. Its address is fixed by CREATE2 — the controller clones
-//     the vault with Clones.cloneDeterministic(salt = keccak256(institutionOperator, nonce)) — and is
-//     read straight from the live controller: InstitutionalVaultController(CONTROLLER)
-//     .predictVaultAddress(CEFFU_INSTITUTION) == CEFFU_VAULT (checked at HEAD and at 116,780,000, so
-//     the institution's nonce has not advanced). Its supplyAsset will be USDT, matching the USDT Hub.
+//     the vault with Clones.cloneDeterministic(salt = keccak256(institutionOperator, nonce)) — and at
+//     the Ceffu institution's CURRENT (zero) nonce the live controller derives exactly CEFFU_VAULT:
+//     InstitutionalVaultController(CONTROLLER).predictVaultAddress(CEFFU_INSTITUTION) == CEFFU_VAULT
+//     (checked at HEAD and at 116,780,000). This equality is a build-time preimage check ONLY — once
+//     the vault is deployed createVault increments the nonce and the predictor returns a different
+//     clone, so the deploy-first gate (scripts/checkCeffuVaultReady.ts), not the predictor, is what
+//     proves the address at proposal time. Its supplyAsset will be USDT, matching the USDT Hub.
 //   - ADAPTER_FRV is the shared FRV adapter registered by VIP-650/651.
 //   - Normal Timelock holds every role called below on both FRV sources and Hubs (ACM.hasRole);
 //     Operator holds `reallocate` on both Hubs.
@@ -55,13 +58,13 @@ export { ADAPTER_FRV };
 export const CASH_PLUS_VAULT = "0x41179fc6ff878b7795B900888E0B61fd8029bceA";
 
 // Ceffu fixed-rate vault for USDT. NOT yet deployed: the address is the deterministic CREATE2 clone
-// address the InstitutionalVaultController will mint for institution CEFFU_INSTITUTION at its current
-// nonce, read live from the controller (predictVaultAddress(CEFFU_INSTITUTION) == CEFFU_VAULT — see
-// the header). The vault must be deployed by the fixed-rate-vaults workstream at this address before
-// this VIP is proposed — that deployment, not the sim, is the real guarantee; addResource reverts
-// ResourceNotContract on a codeless address, so the atomic VIP fails closed if it is missing. The
-// sim's predictVaultAddress assertion is only a sanity check that the literal below still matches the
-// controller at the fork block. All EIP-55 checksummed so ethers validates the literals.
+// the InstitutionalVaultController mints for institution CEFFU_INSTITUTION at its current (zero) nonce
+// (predictVaultAddress(CEFFU_INSTITUTION) == CEFFU_VAULT — see the header). The vault must be deployed
+// by the fixed-rate-vaults workstream at this address before this VIP is proposed; that deployment,
+// not the sim, is the real guarantee (addResource reverts ResourceNotContract on a codeless address,
+// so the atomic VIP fails closed if it is missing). scripts/checkCeffuVaultReady.ts is the deploy-first
+// gate that verifies it on live bscmainnet before proposing. All EIP-55 checksummed so ethers
+// validates the literals.
 export const CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85"; // InstitutionalVaultController proxy
 export const CEFFU_INSTITUTION = "0x8972E6F8874406D294fc0380afBDA839B1b96262"; // Ceffu institution operator
 export const CEFFU_VAULT = "0x086fd7972510dF9d9cFdc4efB8677fc72d290103"; // predictVaultAddress(CEFFU_INSTITUTION)
@@ -90,16 +93,21 @@ can \`reallocate\` funds into the vaults. Registering a vault does NOT auto-rout
 FRV source stays out of the Hub's outer deposit queue, so lender deposits continue to land in
 Core/Flux and FRV is filled only by the Operator's reallocate.
 
-The **Ceffu** vault is not yet deployed. Its address is deterministic: the
-InstitutionalVaultController clones it via \`Clones.cloneDeterministic\` with
-\`salt = keccak256(institutionOperator, nonce)\`, so the address is fixed before deployment and read
-straight from the controller today — \`predictVaultAddress(${CEFFU_INSTITUTION}) == ${CEFFU_VAULT}\`
-(this holds only while the institution's nonce is unchanged). All six commands form one atomic
-transaction, and \`addResource\` reverts with \`ResourceNotContract\` against an address that holds no
-code, so the whole VIP reverts unless the Ceffu vault is already deployed at this address when it
-executes. This proposal is therefore submitted only after the Ceffu vault has been deployed at
-${CEFFU_VAULT}; that deployment — not any simulation assertion — is what guarantees the address is
-correct at execution time.
+The **Ceffu** vault address ${CEFFU_VAULT} is the deterministic CREATE2 clone the
+InstitutionalVaultController mints for the Ceffu institution (${CEFFU_INSTITUTION}) at nonce 0 —
+\`salt = keccak256(institutionOperator, nonce)\` — so it is fixed ahead of deployment. This proposal
+is submitted only AFTER that vault has been deployed at ${CEFFU_VAULT} and verified there (code
+present, \`asset() == USDT\`, registered on the controller); the deploy-first gate script noted below
+performs exactly that check before proposing. That deployment, not any prediction, is the guarantee:
+all six commands are one atomic transaction and \`addResource\` reverts with \`ResourceNotContract\`
+against a codeless address, so the whole VIP fails closed if the Ceffu vault is not live at this
+address when it executes.
+
+To verify the Ceffu address, inspect the DEPLOYED vault at ${CEFFU_VAULT} — its on-chain code,
+\`asset()\`, and \`InstitutionalVaultController.isRegistered(${CEFFU_VAULT})\`. Re-running
+\`predictVaultAddress(${CEFFU_INSTITUTION})\` is NOT a valid check once the vault is live: \`createVault\`
+increments the institution's nonce, after which the predictor returns the institution's next clone,
+not this address.
 
 #### Actions (one atomic transaction, in order)
 
@@ -138,15 +146,22 @@ every Hub and FRV source, so it calls \`addResource\`, \`setInnerWithdrawQueue\`
   the VIP that later adds FRV to the Hub's outer deposit queue, together with that decision.
 - The outer withdraw queues are unchanged — FRV already sits last in each Hub's [Flux, Core, FRV].
 - Absolute caps, fees, outer queues and the USDC Hub are untouched.
+- **Deploy-first gate.** Because the Ceffu leg wires an externally-deployed vault, this VIP must not be
+  proposed until that vault is live. \`scripts/checkCeffuVaultReady.ts\` (run against bscmainnet) enforces
+  it: it fails unless ${CEFFU_VAULT} holds code, is registered on the controller for the Ceffu
+  institution, and reports \`asset() == USDT\`. Run it immediately before proposing.
 
 #### Security / operational guardrails (reviewer findings — record before merge)
 
 - **Do not \`reallocate\` funds into the CASH+ or Ceffu vault yet.** On the InstitutionalVaultController
-  the \`sweep(address,address)\` and \`setTreasury(address)\` roles are held by the CriticalGuardian
-  3-of-6 Safe with no timelock delay, and \`BaseVault.sweep\` does not exclude the supply asset, so that
-  Safe could move vault capital while AdapterFRV still marks full principal. Not exploitable while a
-  vault is pre-Fundraising (\`maxDeposit == 0\`), so this VIP ships safely, but funds must not be pushed
-  in until those controller roles are narrowed to the Normal Timelock and the sweep guard is added.
+  the \`sweep(address,address)\`, \`setTreasury(address)\`, \`openVault\`, \`closeVault\` and \`cancelVault\`
+  roles are all held by the CriticalGuardian 3-of-6 Safe (0x7B1AE5Ea599bC56734624b95589e7E8E64C351c9)
+  with no timelock delay — verified on-chain. \`BaseVault.sweep\` does not exclude the supply asset, so
+  that Safe could move vault capital while AdapterFRV still marks full principal; the lifecycle
+  functions additionally let it open, close or cancel a vault inside the proposal-to-execution window.
+  None of this is exploitable while a vault is pre-Fundraising (\`maxDeposit == 0\`), so this VIP ships
+  safely, but funds must not be pushed in until the controller's authority is audited — those roles
+  narrowed to the Normal Timelock and the \`sweep\` supply-asset guard added.
 - The FRV per-source cap is the primary containment for FRV illiquidity; the secondary exit-fee brake
   is currently off (\`redeemFeeBps == 0\`). This VIP does not set a redeem fee — no value was specified
   in the approved scope and risk parameters are not assumed. Raising the cap only creates headroom;

@@ -26,8 +26,12 @@ import ACM_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
 import YIELD_GROUP_FRV_ABI from "./abi/YieldGroupFRV.json";
 
-// Minimal read-only ABI for the InstitutionalVaultController's deterministic-address predictor.
-const CONTROLLER_ABI = ["function predictVaultAddress(address institution) view returns (address)"];
+// Minimal read-only ABI for the InstitutionalVaultController's deterministic-address predictor and
+// its per-institution vault nonce (used to document why the prediction is a build-time check only).
+const CONTROLLER_ABI = [
+  "function predictVaultAddress(address institution) view returns (address)",
+  "function institutionNonce(address institution) view returns (uint256)",
+];
 
 // Deployed (runtime) bytecode of a minimal stand-in for the not-yet-deployed Ceffu FRV vault, etched
 // at CEFFU_VAULT so the Hub-side wiring can be simulated (the real vault ships from the fixed-rate-
@@ -129,17 +133,29 @@ forking(FORK_BLOCK, async () => {
       expect((await usdtFrv.innerWithdrawQueue()).length).to.equal(0);
     });
 
-    it("the controller still predicts CEFFU_VAULT as its next vault for the Ceffu institution", async () => {
-      // The VIP hard-codes CEFFU_VAULT; prove it is exactly what the live controller would deploy
-      // next (institution nonce unchanged since the address was read). If the institution deploys a
-      // different vault first, this fails and the VIP's address must be re-derived before shipping.
+    it("[build-time check] CEFFU_VAULT is the controller's nonce-0 CREATE2 clone for the Ceffu institution", async () => {
+      // This confirms the hard-coded CEFFU_VAULT literal is exactly the address the controller derives
+      // for the Ceffu institution at its CURRENT (zero) nonce — a preimage sanity check that catches a
+      // typo'd address, nothing more. It is NOT a check a voter can reproduce once this VIP ships:
+      // createVault increments institutionNonce, so after the Ceffu vault is deployed
+      // predictVaultAddress(CEFFU_INSTITUTION) returns the institution's NEXT clone, not CEFFU_VAULT.
+      // (Verified on bscmainnet: the two institutions that have already deployed both sit at nonce 1 and
+      // predict a different, codeless address than their live vault.) Post-deployment address/config
+      // correctness is enforced off-fork by the deploy-first gate (scripts/checkCeffuVaultReady.ts), not
+      // by this assertion.
+      expect((await controller.institutionNonce(CEFFU_INSTITUTION)).toNumber()).to.equal(0);
       expect(addr(await controller.predictVaultAddress(CEFFU_INSTITUTION))).to.equal(addr(CEFFU_VAULT));
     });
 
-    it("[Test-Only] etches a minimal FRV-vault stub at the predicted Ceffu address", async () => {
-      // The Ceffu vault is not deployed yet (fixed-rate-vaults workstream). Etch a stand-in at the
-      // deterministic address so addResource / the reallocate push exercise the real Hub-side code
-      // paths. asset() must return USDT for addResource's asset-match check to pass.
+    it("[Test-Only] etches a minimal FRV-vault stand-in at the predicted Ceffu address", async () => {
+      // The Ceffu vault does not exist at ANY historical block (the fixed-rate-vaults workstream ships
+      // it later), so this fork sim cannot exercise the real contract — it etches a minimal stand-in at
+      // the deterministic address purely to drive the Hub-side code paths (addResource's asset-match,
+      // the inner withdraw-queue setter, the cap raise, and the reallocate registry gate). asset() must
+      // return USDT for addResource's asset-match check to pass. The REAL vault's code, asset and
+      // lifecycle state are therefore NOT verified here; that is enforced off-fork, at proposal time, by
+      // scripts/checkCeffuVaultReady.ts. FOLLOW-UP: once the Ceffu vault is deployed, bump FORK_BLOCK
+      // past its deployment and drop this etch so the sim asserts the live vault directly.
       expect(await ethers.provider.getCode(CEFFU_VAULT)).to.equal("0x");
       await ethers.provider.send("hardhat_setCode", [addr(CEFFU_VAULT), MOCK_FRV_VAULT_BYTECODE]);
       const stub = new ethers.Contract(CEFFU_VAULT, ["function asset() view returns (address)"], ethers.provider);
