@@ -295,6 +295,10 @@ If passed, this VIP will list three new non-borrowable collateral markets — Ve
         params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
       },
 
+      // Enable Oracle Dynamic Protection Mode / "E-brake" (DBO) for the vhToken with a 5% deviation
+      // trigger. Must stay last: setTokenConfig seeds minPrice and maxPrice from
+      // RESILIENT_ORACLE.getPrice(asset), so it reverts unless the capped oracle is already
+      // registered above. The seeding is why no separate bounds command is needed.
       {
         target: DEVIATION_BOUNDED_ORACLE,
         signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",

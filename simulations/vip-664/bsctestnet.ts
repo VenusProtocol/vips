@@ -190,6 +190,16 @@ forking(FORK_BLOCK, async () => {
           expect(cfg.cachingEnabled).to.equal(false);
         });
 
+        it("seeds the E-brake bounds from the live price", async () => {
+          // setTokenConfig seeds both bounds from the resilient price, so no bounds command is
+          // needed — but it also means it reverts if the oracle is not registered first.
+          const cfg = await dbo.assetProtectionConfig(m.vToken.underlying.address);
+          const price = await resilientOracle.getPrice(m.vToken.underlying.address);
+          expect(cfg.minPrice).to.equal(price);
+          expect(cfg.maxPrice).to.equal(price);
+          expect(cfg.currentlyUsingProtectedPrice).to.equal(false);
+        });
+
         it("market has correct owner", async () => {
           expect(await vToken.admin()).to.equal(bsctestnet.NORMAL_TIMELOCK);
         });
