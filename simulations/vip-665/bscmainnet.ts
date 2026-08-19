@@ -11,6 +11,9 @@ import { OPERATOR, STACKS } from "../../vips/vip-650/addresses/bscmainnet";
 import vip665, {
   ADAPTER_FRV,
   CASH_PLUS_VAULT,
+  CEFFU_INSTITUTION,
+  CEFFU_VAULT,
+  CONTROLLER,
   FRV_ABSOLUTE_CAP,
   FRV_PERCENTAGE_CAP_BPS_NEW,
   FRV_PERCENTAGE_CAP_BPS_OLD,
@@ -23,6 +26,25 @@ import ACM_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
 import YIELD_GROUP_FRV_ABI from "./abi/YieldGroupFRV.json";
 
+// Minimal read-only ABI for the InstitutionalVaultController's deterministic-address predictor.
+const CONTROLLER_ABI = ["function predictVaultAddress(address institution) view returns (address)"];
+
+// Deployed (runtime) bytecode of a minimal stand-in for the not-yet-deployed Ceffu FRV vault, etched
+// at CEFFU_VAULT so the Hub-side wiring can be simulated (the real vault ships from the fixed-rate-
+// vaults workstream). It implements only the surface the Hub / AdapterFRV touch: asset() == BSC USDT
+// (so addResource's asset-match check passes), balanceOf() == 0 (so AdapterFRV values the FRV source's
+// position at 0 and totalAssets() reads succeed), maxDeposit()/maxWithdraw() == 0 (pre-Fundraising),
+// and a no-op updateVaultState(). Source (solc 0.8.26, optimizer 200 runs):
+//   contract MockFRVVault {
+//     function asset() external pure returns (address) { return 0x55d3...7955; } // BSC USDT
+//     function balanceOf(address) external pure returns (uint256) { return 0; }
+//     function maxDeposit(address) external pure returns (uint256) { return 0; }
+//     function maxWithdraw(address) external pure returns (uint256) { return 0; }
+//     function updateVaultState() external {}
+//   }
+const MOCK_FRV_VAULT_BYTECODE =
+  "0x6080604052348015600e575f80fd5b5060043610604e575f3560e01c806338d52e0f146052578063402d267d14607957806370a08231146079578063746b70f5146096578063ce96cb77146079575b5f80fd5b6040517355d398326f99059ff775485246999027b319795581526020015b60405180910390f35b608960843660046098565b505f90565b6040519081526020016070565b005b5f6020828403121560a7575f80fd5b81356001600160a01b038116811460bc575f80fd5b939250505056fea264697066735822122086ead7350122d5f6033cd25f6c84f3d37889c634b13c796bde6ab767b9c75b1a64736f6c634300081a0033";
+
 const { bscmainnet } = NETWORK_ADDRESSES;
 const ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
 const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
@@ -31,35 +53,42 @@ const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
 // is warm across reruns; every asserted fact is stable across that small gap.
 const FORK_BLOCK = 116780000;
 
-// U stack addresses (Core source + its vToken resource, Flux source) reused from VIP-650's address
-// book instead of being re-literalled here. The Core leg funds the 1-token behavioural push.
+// Core source + its vToken resource, Flux source per Hub, reused from VIP-650's address book instead
+// of being re-literalled here. Each Core leg funds the 1-token behavioural push on its Hub.
 const uStack = STACKS.find(s => s.key === "U");
 if (!uStack) throw new Error("VIP-665 sim: no U Hub stack in the VIP-650 address book");
 const U_CORE_SOURCE = uStack.core;
 const U_VTOKEN = uStack.vToken;
 const U_FLUX_SOURCE = uStack.flux;
 
+const usdtStack = STACKS.find(s => s.key === "USDT");
+if (!usdtStack) throw new Error("VIP-665 sim: no USDT Hub stack in the VIP-650 address book");
+const USDT_CORE_SOURCE = usdtStack.core;
+const USDT_VTOKEN = usdtStack.vToken;
+
 const addr = (a: string) => ethers.utils.getAddress(a);
 const roleId = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
 
-// A small, cap-safe reallocate push into the CASH+ vault. 1 U sits inside the FRV group's effective
-// cap on both sides of the raise (min(5M, 30% / 50% of the U Hub's ~10-token TVL)) and inside the U
-// Core source's ~10 tokens, so the pull leg is never the thing that reverts.
+// A small, cap-safe reallocate push into an FRV vault. 1 asset unit (all three Hub assets are 18-dec)
+// sits inside the FRV group's effective cap on both sides of the raise and inside the Core source's
+// liquidity, so the pull leg is never the thing that reverts.
 const PUSH = parseUnits("1", 18);
 
-// Push 1 U from Core into the FRV group's CASH+ vault. The pull leg funds the Hub; the push leg is
+// Push 1 asset unit from Core into the FRV group's vault. The pull leg funds the Hub; the push leg is
 // the assertion target. Returns the raw call promise so each caller can match its own revert.
-const reallocatePushIntoVault = (hub: Contract) =>
+const reallocatePushIntoVault = (hub: Contract, coreSource: string, vToken: string, frvSource: string, vault: string) =>
   hub.reallocate(
-    [{ yieldGroup: U_CORE_SOURCE, resource: U_VTOKEN, amount: PUSH }],
-    [{ yieldGroup: U_FRV_SOURCE, resource: CASH_PLUS_VAULT, amount: PUSH }],
+    [{ yieldGroup: coreSource, resource: vToken, amount: PUSH }],
+    [{ yieldGroup: frvSource, resource: vault, amount: PUSH }],
   );
 
 forking(FORK_BLOCK, async () => {
   const uHub = new ethers.Contract(U_HUB, HUB_ABI, ethers.provider);
   const usdtHub = new ethers.Contract(USDT_HUB, HUB_ABI, ethers.provider);
   const uFrv = new ethers.Contract(U_FRV_SOURCE, YIELD_GROUP_FRV_ABI, ethers.provider);
+  const usdtFrv = new ethers.Contract(USDT_FRV_SOURCE, YIELD_GROUP_FRV_ABI, ethers.provider);
+  const controller = new ethers.Contract(CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
 
   // Both Hubs paired with their FRV source, iterated by the cap assertions on either side of the VIP.
@@ -92,6 +121,31 @@ forking(FORK_BLOCK, async () => {
       expect((await uFrv.innerWithdrawQueue()).length).to.equal(0);
     });
 
+    it("the Ceffu vault is unregistered on the USDT FRV source, inner queues empty", async () => {
+      expect(await usdtFrv.resources()).to.deep.equal([]);
+      const [registered] = await usdtFrv.resourceConfig(CEFFU_VAULT);
+      expect(registered).to.equal(false);
+      expect((await usdtFrv.innerDepositQueue()).length).to.equal(0);
+      expect((await usdtFrv.innerWithdrawQueue()).length).to.equal(0);
+    });
+
+    it("the controller still predicts CEFFU_VAULT as its next vault for the Ceffu institution", async () => {
+      // The VIP hard-codes CEFFU_VAULT; prove it is exactly what the live controller would deploy
+      // next (institution nonce unchanged since the address was read). If the institution deploys a
+      // different vault first, this fails and the VIP's address must be re-derived before shipping.
+      expect(addr(await controller.predictVaultAddress(CEFFU_INSTITUTION))).to.equal(addr(CEFFU_VAULT));
+    });
+
+    it("[Test-Only] etches a minimal FRV-vault stub at the predicted Ceffu address", async () => {
+      // The Ceffu vault is not deployed yet (fixed-rate-vaults workstream). Etch a stand-in at the
+      // deterministic address so addResource / the reallocate push exercise the real Hub-side code
+      // paths. asset() must return USDT for addResource's asset-match check to pass.
+      expect(await ethers.provider.getCode(CEFFU_VAULT)).to.equal("0x");
+      await ethers.provider.send("hardhat_setCode", [addr(CEFFU_VAULT), MOCK_FRV_VAULT_BYTECODE]);
+      const stub = new ethers.Contract(CEFFU_VAULT, ["function asset() view returns (address)"], ethers.provider);
+      expect(addr(await stub.asset())).to.equal(addr(usdtStack.asset));
+    });
+
     it("both FRV yield groups are registered, unpaused, at (5,000,000, 30%)", async () => {
       await expectFrvCaps(FRV_PERCENTAGE_CAP_BPS_OLD);
       uEffectiveCapBefore = await uHub.yieldGroupEffectiveCap(U_FRV_SOURCE);
@@ -101,6 +155,8 @@ forking(FORK_BLOCK, async () => {
       const held: [string, string][] = [
         [U_FRV_SOURCE, "addResource(address,address)"],
         [U_FRV_SOURCE, "setInnerWithdrawQueue(address[])"],
+        [USDT_FRV_SOURCE, "addResource(address,address)"],
+        [USDT_FRV_SOURCE, "setInnerWithdrawQueue(address[])"],
         [U_HUB, "raiseYieldGroupCap(address,uint256,uint16)"],
         [USDT_HUB, "raiseYieldGroupCap(address,uint256,uint16)"],
       ];
@@ -111,21 +167,33 @@ forking(FORK_BLOCK, async () => {
 
     it("an Operator push into the CASH+ vault reverts ResourceNotRegistered", async () => {
       const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
-      await expect(reallocatePushIntoVault(uHub.connect(operator)))
+      await expect(
+        reallocatePushIntoVault(uHub.connect(operator), U_CORE_SOURCE, U_VTOKEN, U_FRV_SOURCE, CASH_PLUS_VAULT),
+      )
         .to.be.revertedWithCustomError(uFrv, "ResourceNotRegistered")
         .withArgs(addr(CASH_PLUS_VAULT));
     });
+
+    it("an Operator push into the Ceffu vault reverts ResourceNotRegistered", async () => {
+      const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      await expect(
+        reallocatePushIntoVault(usdtHub.connect(operator), USDT_CORE_SOURCE, USDT_VTOKEN, USDT_FRV_SOURCE, CEFFU_VAULT),
+      )
+        .to.be.revertedWithCustomError(usdtFrv, "ResourceNotRegistered")
+        .withArgs(addr(CEFFU_VAULT));
+    });
   });
 
-  testVip("VIP-665 Wire Cash+ FRV vault into the U Liquidity Hub and raise FRV caps", await vip665(), {
+  testVip("VIP-665 Wire Cash+ and Ceffu FRV vaults into the Liquidity Hub and raise FRV caps", await vip665(), {
     callbackAfterExecution: async (tx: TransactionResponse) => {
-      // One resource registration + its inner withdraw-queue setter on the U FRV source, and one cap
-      // raise on each of the two Hubs. No inner deposit-queue event (that command was dropped).
+      // One resource registration + its inner withdraw-queue setter on each FRV source (U/CASH+ and
+      // USDT/Ceffu), and one cap raise on each of the two Hubs. No inner deposit-queue event (that
+      // command was dropped from both legs).
       await expectEvents(
         tx,
         [YIELD_GROUP_FRV_ABI, HUB_ABI],
         ["ResourceAdded", "InnerWithdrawQueueSet", "YieldGroupCapRaised"],
-        [1, 1, 2],
+        [2, 2, 2],
       );
     },
   });
@@ -142,6 +210,19 @@ forking(FORK_BLOCK, async () => {
     it("sets the U FRV source's inner withdraw queue to the CASH+ vault, leaving the deposit queue empty", async () => {
       expect((await uFrv.innerWithdrawQueue()).map(addr)).to.deep.equal([addr(CASH_PLUS_VAULT)]);
       expect((await uFrv.innerDepositQueue()).length).to.equal(0);
+    });
+
+    it("registers the Ceffu vault on the USDT FRV source behind AdapterFRV", async () => {
+      expect((await usdtFrv.resources()).map(addr)).to.deep.equal([addr(CEFFU_VAULT)]);
+      const [registered, paused, boundAdapter] = await usdtFrv.resourceConfig(CEFFU_VAULT);
+      expect(registered).to.equal(true);
+      expect(paused).to.equal(false);
+      expect(addr(boundAdapter)).to.equal(addr(ADAPTER_FRV));
+    });
+
+    it("sets the USDT FRV source's inner withdraw queue to the Ceffu vault, leaving the deposit queue empty", async () => {
+      expect((await usdtFrv.innerWithdrawQueue()).map(addr)).to.deep.equal([addr(CEFFU_VAULT)]);
+      expect((await usdtFrv.innerDepositQueue()).length).to.equal(0);
     });
 
     it("raises the FRV percentage cap to 50% on both Hubs, absolute cap unchanged", async () => {
@@ -169,16 +250,27 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Post-VIP behaviour (bscmainnet)", () => {
+    // Registration is live for both vaults: the push no longer reverts ResourceNotRegistered. Each
+    // vault is pre-Fundraising (maxDeposit == 0 — CASH+ is in state MarginDeposited on-chain, the
+    // Ceffu stand-in returns 0), so the push reverts at the vault-capacity gate instead — a different
+    // error, which is exactly the registration proof. A full fund-movement round trip is out of scope
+    // here: opening a vault into Fundraising is an institution/controller action, not Hub governance,
+    // and the vaults live in the separate fixed-rate-vaults workstream. Once open, the same call funds.
     it("an Operator push into the CASH+ vault now clears the registry, failing only on vault capacity", async () => {
-      // Registration is live: the push no longer reverts ResourceNotRegistered. The CASH+ vault is
-      // still pre-Fundraising (state MarginDeposited), so its maxDeposit is 0 and the push reverts at
-      // the vault-capacity gate instead — a different error, which is exactly the registration proof.
-      // A full fund-movement round trip is out of scope here: opening the vault into Fundraising is an
-      // institution/controller action, not a Hub-governance one, and the vault lives in the separate
-      // fixed-rate-vaults workstream. Once it opens for Fundraising, this same call places funds.
       const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
-      await expect(reallocatePushIntoVault(uHub.connect(operator)))
+      await expect(
+        reallocatePushIntoVault(uHub.connect(operator), U_CORE_SOURCE, U_VTOKEN, U_FRV_SOURCE, CASH_PLUS_VAULT),
+      )
         .to.be.revertedWithCustomError(uFrv, "ResourceCapacityExceeded")
+        .withArgs(PUSH, 0);
+    });
+
+    it("an Operator push into the Ceffu vault now clears the registry, failing only on vault capacity", async () => {
+      const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      await expect(
+        reallocatePushIntoVault(usdtHub.connect(operator), USDT_CORE_SOURCE, USDT_VTOKEN, USDT_FRV_SOURCE, CEFFU_VAULT),
+      )
+        .to.be.revertedWithCustomError(usdtFrv, "ResourceCapacityExceeded")
         .withArgs(PUSH, 0);
     });
   });
