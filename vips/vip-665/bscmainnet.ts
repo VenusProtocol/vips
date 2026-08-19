@@ -1,65 +1,57 @@
-import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+
+import {
+  ADAPTER_FRV,
+  FRV_ABSOLUTE_CAP,
+  FRV_PERCENTAGE_CAP_BPS as FRV_PERCENTAGE_CAP_BPS_OLD,
+  STACKS,
+} from "../vip-650/addresses/bscmainnet";
 
 // ===================================================================================================
 // VIP-665 [BNB Chain] — Wire the Cash+ FRV vault into the U Liquidity Hub, raise the FRV cap to 50%
 //
-// VIP-650 / VIP-651 onboarded the Liquidity Hub on BNB Chain mainnet for USDT, USDC and U. On every
-// Hub the FRV (Fixed-Rate Vault) yield source was registered as a yield group but left UNWIRED — no
-// fixed-rate vault existed yet to register as a resource. Each FRV group launched with an absolute
-// cap of 5,000,000 and a 30% (3000 bps) percentage-of-TVL cap, sits LAST in the outer withdraw queue
-// [Flux, Core, FRV] and is deliberately kept OUT of the outer deposit queue (FRV is filled by the
-// Operator's `reallocate`, not by the deposit cascade).
+// Hub-side wiring so the Operator can allocate funds into fixed-rate vaults (VPD-1867 / VDB-53). See
+// meta.description below for the full rationale; this banner only records the on-chain verification.
 //
-// The Asseto CASH+ fixed-rate vault for the U asset is now deployed, so this proposal does the
-// Hub-side wiring needed before the Operator can allocate funds into it (VPD-1867):
-//   - register the CASH+ vault as a resource on the U Hub's FRV source (behind the shared AdapterFRV);
-//   - set that source's inner deposit/withdraw queues to the vault, mirroring the Core/Flux wiring;
-//   - raise the FRV percentage cap from 30% to 50% on BOTH the U and USDT Hubs (absolute cap
-//     unchanged at 5,000,000), so headroom exists for reallocations once vaults are live.
-//
-// The Ceffu FRV vault for the USDT Hub is NOT yet deployed, so its resource registration is left to a
-// follow-up VIP; only the USDT Hub's FRV cap is raised here (policy, independent of any vault).
-//
-// Every command is callable DIRECTLY by the Normal Timelock: VIP-650/651 granted it the full
-// Governance role set on each Hub and FRV source (addResource / setInnerDepositQueue /
-// setInnerWithdrawQueue on the source, raiseYieldGroupCap on the Hub), so NO new ACM grants and no
-// aggregator are needed.
-//
-// Addresses — from venus-liquidity-hub/deployments/bscmainnet/ and VIP-650's address book, each
-// re-verified on-chain at block 116,788,760:
-//   - U Hub / U FRV source / USDT Hub / USDT FRV source: hub.asset() / source.asset() match their
-//     asset; both FRV groups have yieldGroupConfig == (5,000,000e18, 3000 bps, registered, unpaused)
-//     and resources() == [] (unwired).
-//   - CASH+ vault: asset() == U and AdapterFRV.asset(vault) == U (so addResource's asset-match check
-//     passes); it is a deployed contract, currently in lifecycle state MarginDeposited (pre-Fundraising).
+// Re-verified on-chain at block 116,788,760 (the sim forks a little earlier, at 116,780,000; every
+// fact below is stable across that gap):
+//   - U / USDT Hub and FRV source addresses reused from VIP-650's address book (STACKS); each
+//     source.asset() matches its Hub asset, both FRV groups have
+//     yieldGroupConfig == (5,000,000e18, 3000 bps, registered, unpaused) and resources() == [].
+//   - CASH+ vault: asset() == U and AdapterFRV.asset(vault) == U, so addResource's asset-match check
+//     passes; it is a deployed InstitutionalLoanVault clone, currently in lifecycle state
+//     MarginDeposited (pre-Fundraising, maxDeposit == 0).
 //   - ADAPTER_FRV is the shared FRV adapter registered by VIP-650/651.
-//   - Normal Timelock holds every role called below (verified via ACM.hasRole); Operator holds
-//     `reallocate` on both Hubs.
+//   - Normal Timelock holds every role called below (ACM.hasRole); Operator holds `reallocate`.
 // ===================================================================================================
 
-// --- U Hub stack (asset U = 0xcE24439F2D9C6a2289F741120FE202248B666666) ---
-export const U_HUB = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
-export const U_FRV_SOURCE = "0x30908eddB9E94add7AC9944a0adda66d80B89143";
+// Hub / FRV-source addresses come from VIP-650's verified address book rather than being re-literalled.
+const stack = (key: string) => {
+  const found = STACKS.find(s => s.key === key);
+  if (!found) throw new Error(`VIP-665: no ${key} Hub stack in the VIP-650 address book`);
+  return found;
+};
+const uStack = stack("U");
+const usdtStack = stack("USDT");
 
-// --- USDT Hub stack (asset USDT = 0x55d398326f99059fF775485246999027B3197955) ---
-export const USDT_HUB = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
-export const USDT_FRV_SOURCE = "0x621eF38cE0C4e7060fF0bF3D609E3D46EC144bE7";
+export const U_HUB = uStack.hub;
+export const U_FRV_SOURCE = uStack.frv;
+export const USDT_HUB = usdtStack.hub;
+export const USDT_FRV_SOURCE = usdtStack.frv;
 
-// Shared FRV adapter (venus-liquidity-hub/deployments/bscmainnet/AdapterFRV.json), same instance
-// VIP-650/651 registered. AdapterFRV.asset(CASH_PLUS_VAULT) == U, so addResource does not revert
-// ResourceAssetMismatch, and its validateRegistration is a no-op.
-export const ADAPTER_FRV = "0x1FA0365bDd603452CE96BE3c0e12Db5515a35902";
+// Shared FRV adapter (VIP-650). AdapterFRV.asset(CASH_PLUS_VAULT) == U, so addResource does not revert
+// ResourceAssetMismatch and its validateRegistration is a no-op.
+export { ADAPTER_FRV };
 
 // Asseto CASH+ fixed-rate vault for U (deployed by the fixed-rate-vaults workstream). asset() == U.
-export const CASH_PLUS_VAULT = "0x41179fc6ff878b7795b900888e0b61fd8029bcea";
+// EIP-55 checksummed so ethers validates the literal.
+export const CASH_PLUS_VAULT = "0x41179fc6ff878b7795B900888E0B61fd8029bceA";
 
 // FRV yield-group cap on each Hub. Absolute cap is UNCHANGED (the launch value); only the percentage
 // dimension is raised 30% -> 50%. `_effectiveCap` takes the lower of the two, so the effective FRV
 // ceiling is min(5,000,000, 50% x Hub TVL).
-export const FRV_ABSOLUTE_CAP = parseUnits("5000000", 18).toString(); // 5,000,000 tokens (unchanged)
-export const FRV_PERCENTAGE_CAP_BPS_OLD = 3_000; // 30% — launch value, asserted pre-VIP
+export { FRV_ABSOLUTE_CAP, FRV_PERCENTAGE_CAP_BPS_OLD };
 export const FRV_PERCENTAGE_CAP_BPS_NEW = 5_000; // 50% — set by this proposal
 
 export const vip665 = () => {
@@ -88,14 +80,14 @@ On the **U** Hub's FRV source (\`${U_FRV_SOURCE}\`):
 
 1. \`addResource(${CASH_PLUS_VAULT}, AdapterFRV)\` — register the CASH+ vault behind the shared FRV
    adapter. Reverts unless the vault's asset matches the source asset (U), which it does.
-2. \`setInnerDepositQueue([CASH+ vault])\` — mirror the Core/Flux inner-queue wiring.
-3. \`setInnerWithdrawQueue([CASH+ vault])\` — so FRV funds are reachable via the normal withdraw path
-   once the vault reaches a terminal state.
+2. \`setInnerWithdrawQueue([CASH+ vault])\` — so any funds later placed in the vault are reachable via
+   the Hub's normal withdraw path once the vault reaches a terminal state. This is the withdraw side
+   only; the inner **deposit** queue is deliberately left empty (see Notes).
 
 On the Hubs:
 
-4. \`raiseYieldGroupCap(U FRV source, 5,000,000, 5000 bps)\` on the U Hub.
-5. \`raiseYieldGroupCap(USDT FRV source, 5,000,000, 5000 bps)\` on the USDT Hub.
+3. \`raiseYieldGroupCap(U FRV source, 5,000,000, 5000 bps)\` on the U Hub.
+4. \`raiseYieldGroupCap(USDT FRV source, 5,000,000, 5000 bps)\` on the USDT Hub.
 
 Both cap changes keep the absolute cap at 5,000,000 and only raise the percentage dimension from 3000
 to 5000 bps, which the Hub's raise guard accepts (absolute unchanged, percentage strictly increases).
@@ -103,16 +95,31 @@ to 5000 bps, which the Hub's raise guard accepts (absolute unchanged, percentage
 #### Access control
 
 No ACM grants are needed. VIP-650/651 granted the **Normal Timelock** the full Governance role set on
-every Hub and FRV source, so it calls \`addResource\`, \`setInnerDepositQueue\`,
-\`setInnerWithdrawQueue\` and \`raiseYieldGroupCap\` directly.
+every Hub and FRV source, so it calls \`addResource\`, \`setInnerWithdrawQueue\` and
+\`raiseYieldGroupCap\` directly.
 
 #### Notes
 
-- Adding the CASH+ vault to the FRV source's inner deposit queue does NOT auto-route deposits into it.
-  The FRV source is deliberately kept out of each Hub's outer deposit queue, so lender deposits keep
-  routing to Core/Flux; FRV is filled only by the Operator's \`reallocate\`.
+- The FRV source's inner **deposit** queue is left empty on purpose. The Operator's \`reallocate\`
+  targets the vault resource explicitly, so it does not depend on the inner deposit queue; setting it
+  would only pre-arm automatic cascade routing into FRV, which nothing here needs. It can be set by
+  the VIP that later adds FRV to the Hub's outer deposit queue, together with that decision.
 - The outer withdraw queues are unchanged — FRV already sits last in each Hub's [Flux, Core, FRV].
 - Absolute caps, fees, outer queues and the USDC Hub are untouched.
+
+#### Security / operational guardrails (reviewer findings — record before merge)
+
+- **Do not \`reallocate\` funds into the CASH+ vault yet.** On the InstitutionalVaultController the
+  \`sweep(address,address)\` and \`setTreasury(address)\` roles are held by the CriticalGuardian 3-of-6
+  Safe with no timelock delay, and \`BaseVault.sweep\` does not exclude the supply asset, so that Safe
+  could move vault capital while AdapterFRV still marks full principal. Not exploitable while the vault
+  is pre-Fundraising (\`maxDeposit == 0\`), so this VIP ships safely, but funds must not be pushed in
+  until those controller roles are narrowed to the Normal Timelock and the sweep guard is added.
+- The FRV per-source cap is the primary containment for FRV illiquidity; the secondary exit-fee brake
+  is currently off (\`redeemFeeBps == 0\`). This VIP does not set a redeem fee — no value was specified
+  in the approved scope and risk parameters are not assumed. Raising the cap only creates headroom;
+  the Operator holding off on reallocations (above) keeps the effective exposure at zero until the
+  exit-fee decision is made.
 
 #### Deployed contracts (BNB Chain)
 
@@ -127,17 +134,12 @@ every Hub and FRV source, so it calls \`addResource\`, \`setInnerDepositQueue\`,
 
   return makeProposal(
     [
-      // --- U Hub: wire the CASH+ vault on the FRV source (addResource before the queue setters,
-      //     which reject unregistered resources) ---
+      // --- U Hub: register the CASH+ vault on the FRV source (addResource must precede the withdraw
+      //     queue setter, which rejects unregistered resources) ---
       {
         target: U_FRV_SOURCE,
         signature: "addResource(address,address)",
         params: [CASH_PLUS_VAULT, ADAPTER_FRV],
-      },
-      {
-        target: U_FRV_SOURCE,
-        signature: "setInnerDepositQueue(address[])",
-        params: [[CASH_PLUS_VAULT]],
       },
       {
         target: U_FRV_SOURCE,
