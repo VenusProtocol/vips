@@ -1,0 +1,29 @@
+name: Multica Review Dispatch
+
+on:
+  issue_comment:
+    types: [created] # comment containing @multica-review
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    # PR comment only, and only from org members / collaborators / owner —
+    # blocks random public accounts from triggering a review run.
+    if: >-
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '@multica-review') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Multica PR Review Squad
+        env:
+          HOOK_URL: ${{ secrets.MULTICA_REVIEW_HOOK_URL }} # token is embedded in the URL
+          PR_URL: ${{ github.event.issue.html_url }}
+          BY: ${{ github.event.sender.login }}
+        run: |
+          curl -fsS --retry 3 -X POST "$HOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg url "$PR_URL" --arg by "$BY" \
+              '{source:"github",pr_url:$url,requested_by:$by,assignee:"PR Review Squad"}')"
