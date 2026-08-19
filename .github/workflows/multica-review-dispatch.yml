@@ -6,24 +6,43 @@ on:
 
 permissions:
   contents: read
+  issues: write # add the 👀 reaction on the triggering comment
+  pull-requests: write
 
 jobs:
   dispatch:
-    # PR comment only, and only from org members / collaborators / owner —
-    # blocks random public accounts from triggering a review run.
+    # PR comment only; not from a bot (blocks re-trigger loops); and only from
+    # org members / collaborators / owner — blocks random public accounts.
     if: >-
       github.event.issue.pull_request != null &&
+      github.event.comment.user.type != 'Bot' &&
       contains(github.event.comment.body, '@multica-review') &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     steps:
+      - name: Acknowledge the comment with 👀
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST \
+            "/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" \
+            -f content=eyes
+
       - name: Trigger Multica PR Review Squad
         env:
           HOOK_URL: ${{ secrets.MULTICA_REVIEW_HOOK_URL }} # token is embedded in the URL
+          REPO: ${{ github.repository }}
           PR_URL: ${{ github.event.issue.html_url }}
+          PR_NUM: ${{ github.event.issue.number }}
           BY: ${{ github.event.sender.login }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          COMMENT_URL: ${{ github.event.comment.html_url }}
+          COMMENT_BODY: ${{ github.event.comment.body }} # via env, never interpolated into the shell
         run: |
           curl -fsS --retry 3 -X POST "$HOOK_URL" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg url "$PR_URL" --arg by "$BY" \
-              '{source:"github",pr_url:$url,requested_by:$by,assignee:"PR Review Squad"}')"
+            -d "$(jq -n \
+                  --arg repo "$REPO" --arg url "$PR_URL" --arg num "$PR_NUM" \
+                  --arg by "$BY" --arg cid "$COMMENT_ID" --arg curl "$COMMENT_URL" \
+                  --arg cbody "$COMMENT_BODY" \
+              '{source:"github",repo:$repo,pr_url:$url,pr_number:$num,requested_by:$by,comment_id:$cid,comment_url:$curl,comment_body:$cbody,assignee:"PR Review Squad"}')"
