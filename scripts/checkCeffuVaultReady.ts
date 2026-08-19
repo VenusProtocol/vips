@@ -1,5 +1,5 @@
 /**
- * Deploy-first gate for VIP-665 (wire Cash+ and Ceffu FRV vaults into the Liquidity Hub).
+ * Deploy-first gate for VIP-657 (wire Cash+ and Ceffu FRV vaults into the Liquidity Hub).
  *
  * The Ceffu leg registers an externally-deployed fixed-rate vault at a deterministic CREATE2 address
  * (${CEFFU_VAULT}). All six VIP commands are one atomic transaction and `addResource` reverts with
@@ -7,7 +7,7 @@
  * vault is not live when it executes. The fork simulation runs at a historical block where the vault
  * does not exist and can only etch a stand-in, so it cannot prove the real vault is ready.
  *
- * This script is that proof. Run it against live bscmainnet immediately BEFORE proposing VIP-665; it
+ * This script is that proof. Run it against live bscmainnet immediately BEFORE proposing VIP-657; it
  * exits non-zero unless every precondition below holds:
  *   1. The Ceffu vault holds code and is registered on the InstitutionalVaultController for the Ceffu
  *      institution (proving it is the intended vault, not some other clone at a colliding address).
@@ -21,7 +21,7 @@
 import { ethers } from "hardhat";
 
 import { STACKS } from "../vips/vip-650/addresses/bscmainnet";
-import { CASH_PLUS_VAULT, CEFFU_INSTITUTION, CEFFU_VAULT, CONTROLLER } from "../vips/vip-665/bscmainnet";
+import { CASH_PLUS_VAULT, CEFFU_INSTITUTION, CEFFU_VAULT, CONTROLLER } from "../vips/vip-657/bscmainnet";
 
 const CONTROLLER_ABI = [
   "function isRegistered(address) view returns (bool)",
@@ -47,7 +47,7 @@ async function main() {
   // --- Ceffu leg: the vault must be deployed, registered for the Ceffu institution, and hold USDT ---
   const ceffuCode = await ethers.provider.getCode(CEFFU_VAULT);
   if (ceffuCode === "0x") {
-    failures.push(`Ceffu vault ${CEFFU_VAULT} holds no code — not deployed yet. Do NOT propose VIP-665.`);
+    failures.push(`Ceffu vault ${CEFFU_VAULT} holds no code — not deployed yet. Do NOT propose VIP-657.`);
   } else {
     const registered = await controller.isRegistered(CEFFU_VAULT);
     if (!registered) failures.push(`Ceffu vault ${CEFFU_VAULT} is not registered on the controller.`);
@@ -78,15 +78,15 @@ async function main() {
   }
 
   if (failures.length > 0) {
-    console.error("VIP-665 deploy-first gate FAILED:");
+    console.error("VIP-657 deploy-first gate FAILED:");
     for (const f of failures) console.error(`  - ${f}`);
-    throw new Error("VIP-665 preconditions not met — do not propose.");
+    throw new Error("VIP-657 preconditions not met — do not propose.");
   }
 
-  console.log("VIP-665 deploy-first gate PASSED:");
+  console.log("VIP-657 deploy-first gate PASSED:");
   console.log(`  - Ceffu vault ${CEFFU_VAULT}: deployed, registered for ${CEFFU_INSTITUTION}, asset == USDT`);
   console.log(`  - Cash+ vault ${CASH_PLUS_VAULT}: deployed, asset == U`);
-  console.log("VIP-665 is safe to propose.");
+  console.log("VIP-657 is safe to propose.");
 }
 
 main().catch(error => {

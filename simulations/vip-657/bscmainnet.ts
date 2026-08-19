@@ -8,7 +8,7 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import { OPERATOR, STACKS } from "../../vips/vip-650/addresses/bscmainnet";
-import vip665, {
+import vip657, {
   ADAPTER_FRV,
   CASH_PLUS_VAULT,
   CEFFU_INSTITUTION,
@@ -21,7 +21,7 @@ import vip665, {
   USDT_HUB,
   U_FRV_SOURCE,
   U_HUB,
-} from "../../vips/vip-665/bscmainnet";
+} from "../../vips/vip-657/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
 import YIELD_GROUP_FRV_ABI from "./abi/YieldGroupFRV.json";
@@ -60,13 +60,13 @@ const FORK_BLOCK = 116780000;
 // Core source + its vToken resource, Flux source per Hub, reused from VIP-650's address book instead
 // of being re-literalled here. Each Core leg funds the 1-token behavioural push on its Hub.
 const uStack = STACKS.find(s => s.key === "U");
-if (!uStack) throw new Error("VIP-665 sim: no U Hub stack in the VIP-650 address book");
+if (!uStack) throw new Error("VIP-657 sim: no U Hub stack in the VIP-650 address book");
 const U_CORE_SOURCE = uStack.core;
 const U_VTOKEN = uStack.vToken;
 const U_FLUX_SOURCE = uStack.flux;
 
 const usdtStack = STACKS.find(s => s.key === "USDT");
-if (!usdtStack) throw new Error("VIP-665 sim: no USDT Hub stack in the VIP-650 address book");
+if (!usdtStack) throw new Error("VIP-657 sim: no USDT Hub stack in the VIP-650 address book");
 const USDT_CORE_SOURCE = usdtStack.core;
 const USDT_VTOKEN = usdtStack.vToken;
 
@@ -198,7 +198,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-665 Wire Cash+ and Ceffu FRV vaults into the Liquidity Hub and raise FRV caps", await vip665(), {
+  testVip("VIP-657 Wire Cash+ and Ceffu FRV vaults into the Liquidity Hub and raise FRV caps", await vip657(), {
     callbackAfterExecution: async (tx: TransactionResponse) => {
       // One resource registration on each FRV source (U/CASH+ and USDT/Ceffu), and one cap raise on
       // each of the two Hubs. Inner deposit and withdraw queues are left empty on both legs (manual).
