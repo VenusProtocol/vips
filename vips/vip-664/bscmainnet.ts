@@ -5,27 +5,9 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-// =============================================================================
-// DRAFT — VIP-664 [BNB Chain] List vhUSDT, vhUSDC and vhU in the Venus Core Pool
-// -----------------------------------------------------------------------------
-// This VIP is a WORK IN PROGRESS opened as a draft PR. The command structure,
-// risk parameters and oracle/E-brake design are complete; the only items that
-// remain are the deploy-dependent addresses and the fork simulation, which are
-// gated on the testnet deploy of the 3 capped ERC4626 oracles + 3 vTokens.
-//
-// PENDING BEFORE THIS VIP CAN BE PROPOSED (see PR description):
-//   1. Confirm the two still-open, risk-sensitive knobs (recommended values are
-//      baked in below and clearly labelled):
-//        - E-brake (DeviationBoundedOracle) thresholds — recommended 5% trigger
-//          / 2% reset / 1h cooldown (stable-appropriate; VIP-633's 16.67% is for
-//          volatile equities and is intentionally NOT copied).
-//        - Capped-oracle snapshot mode — recommended frozen snapshot
-//          (snapshotInterval = MaxUint256, gap 0), 5%/yr growth (from Notion).
-//   2. Deploy the 3 capped ERC4626Oracle instances (oracle repo) and 3 vToken
-//      markets (venus-protocol repo) on bsctestnet, then fill the TODO addresses
-//      below and author + run the fork simulation (simulations/vip-664).
-//   3. Confirm the VTreasury holds the bootstrap balance of each vhToken.
-// =============================================================================
+// VIP-664 [BNB Chain] List vhUSDT, vhUSDC and vhU in the Venus Core Pool.
+// The oracle and vToken addresses below are filled once the deploy PRs land; until then the
+// simulation cannot execute. Remaining prerequisites are tracked in the PR description.
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -45,18 +27,20 @@ export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = bscmainnet;
 
-// Capped ERC4626 oracle template (set at oracle-deploy time, documented here for review).
-// "vhToken resilient price = underlying resilient price x capped vault exchange rate" — Notion.
-export const ANNUAL_GROWTH_RATE = parseUnits("0.05", 18); // 5%/yr — from Notion
-export const SNAPSHOT_INTERVAL = constants.MaxUint256; // frozen snapshot (recommended)
-export const SNAPSHOT_GAP = 0;
+// Capped ERC4626 oracle: set at oracle-deploy time, asserted by the simulation.
+// Price = underlying resilient price x capped vault exchange rate, the asBNB/slisBNB CAPO design.
+// Both live BNB Chain instances run 5%/yr over a 30-day snapshot interval (VIP-605); the per-asset
+// snapshotGap is a deploy-time buffer over the seeded rate (asBNB 2.47%, slisBNB 0.34%), so it is
+// read from the deployed oracle rather than pinned here.
+export const CAPO_GROWTH_RATE_PER_YEAR = parseUnits("0.05", 18);
+export const CAPO_SNAPSHOT_INTERVAL = 30 * 24 * 60 * 60;
 
 // Oracle Dynamic Protection Mode / "E-brake" (DeviationBoundedOracle, see VIP-617).
 export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
 export const DBO_COOLDOWN_PERIOD = 3600; // 1h rolling window
-// Stable-appropriate thresholds (recommended). vhTokens are ~$1 stablecoin-correlated, so
-// VIP-633's 16.67% equity trigger is intentionally not reused. Contract bounds: trigger in
-// [5%, 50%], reset non-zero and below trigger, cooldown > 0.
+// vhTokens are ~$1 stablecoin-correlated, so VIP-633's 16.67% equity trigger is not reused.
+// Contract bounds: trigger in [MIN_THRESHOLD 5e16, MAX_THRESHOLD 50e16], reset non-zero and below
+// trigger, cooldown > 0.
 export const DBO_TRIGGER_THRESHOLD = parseUnits("0.05", 18); // 5% — the contract minimum
 export const DBO_RESET_THRESHOLD = parseUnits("0.02", 18); // 2%
 
@@ -71,6 +55,8 @@ export type MarketSpec = {
     comptroller: string;
     isLegacyPool: boolean;
   };
+  // TODO(deploy): the JumpRateModel deployed alongside the vToken.
+  rateModel: string;
   interestRateModel: {
     model: "jump";
     baseRatePerYear: string;
@@ -97,25 +83,11 @@ export type MarketSpec = {
   };
 };
 
-// All three markets: non-borrowable collateral, 24-decimal ERC4626 underlyings, Core pool.
 // exchangeRate scale = 18 + underlyingDecimals(24) - vTokenDecimals(8) = 34.
-//
-// Risk-parameter notes (mirrored in the VIP description so reviewers do not read them as contradictions):
-//   - IRM: a jump-rate IRM is wired only because the vToken constructor requires one; it is inert
-//     while borrowing is paused. The listing template's "IRM not needed" note is consistent with this.
-//   - CF == LT on every market (80/80, 82.5/82.5, 75/75) is intentional per the approved template:
-//     these are ~$1 stablecoin-correlated collaterals priced by a growth-capped oracle with the E-brake
-//     enabled, so no CF<->LT buffer is applied.
-//   - The differentiated CF/LT across the three (82.5 vhUSDC > 80 vhUSDT > 75 vhU) are the approved
-//     per-asset risk-manager values from the listing template; they track the relative maturity and
-//     depth of each underlying peg (USDC > USDT > USD1/U), not a single blanket setting.
-//   - Supply cap (10,000,000) is denominated in the underlying vhToken amount (24 decimals), NOT USD,
-//     since _setMarketSupplyCaps takes a token amount; at the ~$1 vault price that is ~$10M of exposure.
-//   - reserveFactor / vTokenReceiver / bootstrap amount were unspecified in the template and follow the
-//     standard Core-pool convention (reserve factor inert while borrowing is paused).
-//   - Protocol seize share is a global Comptroller parameter (not per-market) and is left unchanged.
+// Rationale for the risk parameters (CF == LT, the 82.5/80/75 split, the IRM on a non-borrowable
+// market) is in the VIP description below.
 const EXCHANGE_RATE = parseUnits("1", 34);
-const SUPPLY_CAP = parseUnits("10000000", 24); // 10,000,000 vhToken (24 dec)
+const SUPPLY_CAP = parseUnits("10000000", 24); // _setMarketSupplyCaps takes an underlying amount, not USD
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10%
 const RESERVE_FACTOR = parseUnits("0.1", 18); // 10% (inert while borrow is paused)
 const BOOTSTRAP_AMOUNT = parseUnits("100", 24); // ~$100 of underlying (24 dec)
@@ -138,6 +110,7 @@ export const MARKET_VHUSDT: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
+  rateModel: constants.AddressZero,
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -177,6 +150,7 @@ export const MARKET_VHUSDC: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
+  rateModel: constants.AddressZero,
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -216,6 +190,7 @@ export const MARKET_VHU: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
+  rateModel: constants.AddressZero,
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -266,7 +241,7 @@ If passed, this VIP will list three new non-borrowable collateral markets in the
 
 For each new market this VIP will:
 
-- Register the vhToken in the ResilientOracle using a dedicated capped **ERC4626Oracle** as the single price source. The oracle prices the vhToken as *underlying resilient price × capped vault exchange rate* (5%/yr growth cap), the same design as asBNB.
+- Register the vhToken in the ResilientOracle using a dedicated capped **ERC4626Oracle** as the single price source. The oracle prices the vhToken as *underlying resilient price × capped vault exchange rate* (5%/yr growth cap), the same design as the live asBNB and slisBNB capped oracles (5%/yr over a 30-day snapshot interval, VIP-605).
 - Add the market to the Core Pool Comptroller
 - Set the supply cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
@@ -312,7 +287,23 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 - **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
 - **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
 - **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
-- **Protocol seize share** is a global Comptroller-level parameter on the Core pool rather than a per-market setting, so it is not modified by this VIP; the existing Core-pool value applies to the new markets.`,
+- **Protocol seize share** is a global Comptroller-level parameter on the Core pool rather than a per-market setting, so it is not modified by this VIP; the existing Core-pool value applies to the new markets.
+
+#### Underlying tokens
+
+Each underlying was read directly from BNB Chain and matches the listing template:
+
+| Token | Address | Name | Decimals | ERC4626 asset | Resilient price of the asset |
+|---|---|---|---|---|---|
+| vhUSDT | [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226) | Venus Hub USDT | 24 | [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | $0.9991 |
+| vhUSDC | [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617) | Venus Hub USDC | 24 | [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | $0.9998 |
+| vhU | [0x0e5AA174d4F31b757a237eb1999DE151596788B0](https://bscscan.com/address/0x0e5AA174d4F31b757a237eb1999DE151596788B0) | Venus Hub U | 24 | [U](https://bscscan.com/address/0xcE24439F2D9C6a2289F741120FE202248B666666) | $0.9995 |
+
+All three vaults report a share price of ~1.0006 assets per share, so each 10,000,000-share supply cap is worth roughly $10M. U trades at ~$1, so the cap is comparable to the two USD stables.
+
+#### Prerequisite
+
+The bootstrap liquidity is withdrawn from the VTreasury, which currently holds **no** vhUSDT, vhUSDC or vhU. The Treasury must be funded with at least 100 of each vhToken before this VIP executes, otherwise \`withdrawTreasuryBEP20\` reverts. The Treasury does hold the underlying stables (USDT, USDC and U), so the funding can be done by depositing into each Venus Hub vault.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
