@@ -12,6 +12,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   BORROW_ACTION,
   CAPO_GROWTH_RATE_PER_YEAR,
+  CAPO_SEED_TIMESTAMP,
   CAPO_SNAPSHOT_INTERVAL,
   DBO_COOLDOWN_PERIOD,
   DBO_RESET_THRESHOLD,
@@ -21,6 +22,8 @@ import {
   PROTOCOL_SHARE_RESERVE,
   REDUCE_RESERVES_BLOCK_DELTA,
   convertAmountToVTokens,
+  seededSnapshot,
+  snapshotGap,
   vTokensRemaining,
   vip664,
 } from "../../vips/vip-664/bscmainnet";
@@ -82,8 +85,11 @@ forking(FORK_BLOCK, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, VTOKEN_ABI],
+        [COMPTROLLER_ABI, VTOKEN_ABI, CAPPED_ORACLE_ABI],
         [
+          "SnapshotUpdated",
+          "GrowthRateUpdated",
+          "SnapshotGapUpdated",
           "MarketListed",
           "NewSupplyCap",
           "ActionPausedMarket",
@@ -95,7 +101,7 @@ forking(FORK_BLOCK, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
         ],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       );
     },
   });
@@ -156,12 +162,18 @@ forking(FORK_BLOCK, async () => {
           expect(await cappedOracle.RESILIENT_ORACLE()).to.equal(bscmainnet.RESILIENT_ORACLE);
         });
 
-        it("caps the exchange rate at 5%/yr over a 30-day snapshot", async () => {
+        it("arms the growth cap at 5%/yr over a 30-day snapshot", async () => {
           expect(await cappedOracle.growthRatePerSecond()).to.equal(CAPO_GROWTH_RATE_PER_YEAR.div(SECONDS_PER_YEAR));
           expect(await cappedOracle.snapshotInterval()).to.equal(CAPO_SNAPSHOT_INTERVAL);
-          expect(await cappedOracle.snapshotGap()).to.be.gt(0);
-          // The seed must sit above the live rate, otherwise the market lists already capped.
+          expect(await cappedOracle.snapshotGap()).to.equal(snapshotGap(m.oracle.seedExchangeRate));
+          expect(await cappedOracle.snapshotMaxExchangeRate()).to.equal(seededSnapshot(m.oracle.seedExchangeRate));
+          expect(await cappedOracle.snapshotTimestamp()).to.equal(CAPO_SEED_TIMESTAMP);
+        });
+
+        it("does not list the market already capped", async () => {
+          // A seed below the live rate would cap the price the moment the market lists.
           expect(await cappedOracle.isCapped()).to.equal(false);
+          expect(await cappedOracle.getMaxAllowedExchangeRate()).to.be.gte(await cappedOracle.getUnderlyingAmount());
         });
 
         it("prices the vault at its ERC4626 asset price times the vault exchange rate", async () => {

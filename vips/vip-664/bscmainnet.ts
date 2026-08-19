@@ -27,13 +27,25 @@ export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = bscmainnet;
 
-// Capped ERC4626 oracle: set at oracle-deploy time, asserted by the simulation.
-// Price = underlying resilient price x capped vault exchange rate, the asBNB/slisBNB CAPO design.
-// Both live BNB Chain instances run 5%/yr over a 30-day snapshot interval (VIP-605); the per-asset
-// snapshotGap is a deploy-time buffer over the seeded rate (asBNB 2.47%, slisBNB 0.34%), so it is
-// read from the deployed oracle rather than pinned here.
+// Already deployed; backs vasBNB and vslisBNB with these exact params (base 0, multiplier 9%,
+// jump 200%, kink 50%), so no new interest rate model is deployed for these markets.
+export const JUMP_RATE_MODEL = "0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5";
+
+// Capped ERC4626 oracle. Price = underlying resilient price x capped vault exchange rate, the
+// asBNB/slisBNB design. The instances are deployed with the cap zeroed, so this VIP arms it.
+// Order is load-bearing: setSnapshot must precede setGrowthRate, because updateSnapshot() on an
+// oracle whose snapshotMaxExchangeRate is still 0 collapses the cap to snapshotGap alone. Same
+// three commands in the same order as VIP-530.
 export const CAPO_GROWTH_RATE_PER_YEAR = parseUnits("0.05", 18);
 export const CAPO_SNAPSHOT_INTERVAL = 30 * 24 * 60 * 60;
+// One snapshot interval of growth, the ratio VIP-530 applied to every asset it armed:
+// 5% * 30/365 = 0.41%.
+export const CAPO_SNAPSHOT_GAP_BPS = BigNumber.from(41);
+// Vault exchange rates below were read at block 116836175 (2026-08-19T10:57:40Z).
+export const CAPO_SEED_TIMESTAMP = 1787137060;
+
+export const snapshotGap = (exchangeRate: BigNumber) => exchangeRate.mul(CAPO_SNAPSHOT_GAP_BPS).div(10000);
+export const seededSnapshot = (exchangeRate: BigNumber) => exchangeRate.add(snapshotGap(exchangeRate));
 
 // Oracle Dynamic Protection Mode / "E-brake" (DeviationBoundedOracle, see VIP-617).
 export const DEVIATION_BOUNDED_ORACLE = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
@@ -55,7 +67,6 @@ export type MarketSpec = {
     comptroller: string;
     isLegacyPool: boolean;
   };
-  // TODO(deploy): the JumpRateModel deployed alongside the vToken.
   rateModel: string;
   interestRateModel: {
     model: "jump";
@@ -67,6 +78,8 @@ export type MarketSpec = {
   oracle: {
     // Capped ERC4626Oracle instance registered as the ResilientOracle main source for the vhToken.
     address: string;
+    // Live vault exchange rate the growth cap is seeded from.
+    seedExchangeRate: BigNumber;
   };
   riskParameters: {
     collateralFactor: BigNumber;
@@ -110,7 +123,7 @@ export const MARKET_VHUSDT: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
-  rateModel: constants.AddressZero,
+  rateModel: JUMP_RATE_MODEL,
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -118,7 +131,7 @@ export const MARKET_VHUSDT: MarketSpec = {
     jumpMultiplierPerYear: "2",
     kink: "0.5",
   },
-  oracle: { address: VHUSDT_ORACLE },
+  oracle: { address: VHUSDT_ORACLE, seedExchangeRate: parseUnits("1.000650000021349262", 18) },
   riskParameters: {
     collateralFactor: parseUnits("0.8", 18),
     liquidationThreshold: parseUnits("0.8", 18),
@@ -150,7 +163,7 @@ export const MARKET_VHUSDC: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
-  rateModel: constants.AddressZero,
+  rateModel: JUMP_RATE_MODEL,
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -158,7 +171,7 @@ export const MARKET_VHUSDC: MarketSpec = {
     jumpMultiplierPerYear: "2",
     kink: "0.5",
   },
-  oracle: { address: VHUSDC_ORACLE },
+  oracle: { address: VHUSDC_ORACLE, seedExchangeRate: parseUnits("1.000815629493107489", 18) },
   riskParameters: {
     collateralFactor: parseUnits("0.825", 18),
     liquidationThreshold: parseUnits("0.825", 18),
@@ -190,7 +203,7 @@ export const MARKET_VHU: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
-  rateModel: constants.AddressZero,
+  rateModel: JUMP_RATE_MODEL,
   interestRateModel: {
     model: "jump",
     baseRatePerYear: "0",
@@ -198,7 +211,7 @@ export const MARKET_VHU: MarketSpec = {
     jumpMultiplierPerYear: "2",
     kink: "0.5",
   },
-  oracle: { address: VHU_ORACLE },
+  oracle: { address: VHU_ORACLE, seedExchangeRate: parseUnits("1.000544217035461378", 18) },
   riskParameters: {
     collateralFactor: parseUnits("0.75", 18),
     liquidationThreshold: parseUnits("0.75", 18),
@@ -241,7 +254,8 @@ If passed, this VIP will list three new non-borrowable collateral markets in the
 
 For each new market this VIP will:
 
-- Register the vhToken in the ResilientOracle using a dedicated capped **ERC4626Oracle** as the single price source. The oracle prices the vhToken as *underlying resilient price × capped vault exchange rate* (5%/yr growth cap), the same design as the live asBNB and slisBNB capped oracles (5%/yr over a 30-day snapshot interval, VIP-605).
+- Arm the growth cap on the vhToken's capped **ERC4626Oracle** (seed the snapshot, set the growth rate and set the snapshot gap)
+- Register that oracle in the ResilientOracle as the single price source. It prices the vhToken as *underlying resilient price × capped vault exchange rate*, the same design as the live asBNB and slisBNB capped oracles.
 - Add the market to the Core Pool Comptroller
 - Set the supply cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
@@ -282,12 +296,26 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 
 #### Notes on the risk parameters
 
-- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
+- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. No new model is deployed: [0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5](https://bscscan.com/address/0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5) already carries exactly these parameters and already backs vasBNB and vslisBNB. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
 - **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
 - **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
 - **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
 - **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
 - **Protocol seize share** is a global Comptroller-level parameter on the Core pool rather than a per-market setting, so it is not modified by this VIP; the existing Core-pool value applies to the new markets.
+
+#### Capped oracle
+
+The oracles are deployed with the cap zeroed, exactly as the asBNB oracle was, so this VIP arms it per market with \`setSnapshot\`, \`setGrowthRate\` and \`setSnapshotGap\` — the same three commands in the same order as VIP-530. The permissions for all three already sit with the Normal, Fast-Track and Critical timelocks (granted repo-wide in VIP-517), so no new ACM grants are needed.
+
+| | Growth rate | Snapshot interval | Snapshot gap | Seeded exchange rate |
+|---|---|---|---|---|
+| vhUSDT | 5%/yr | 30 days | 41 bps (0.004102665000087531) | 1.004752665021436793 |
+| vhUSDC | 5%/yr | 30 days | 41 bps (0.004103344080921740) | 1.004918973574029229 |
+| vhU | 5%/yr | 30 days | 41 bps (0.004102231289845391) | 1.004646448325306769 |
+
+- **The 5%/yr growth rate leaves 2–3× headroom over observed yield.** The three vaults launched ~13 days before this was written, all from an exchange rate of exactly 1.0; measured growth annualises to 1.82% (vhUSDT), 2.29% (vhUSDC) and 1.52% (vhU). A 5% cap therefore does not bind in normal operation, and matches what asBNB and slisBNB run since VIP-605.
+- **The 41 bps gap is one snapshot interval of capped growth** (5% × 30/365 = 0.41%), the same ratio VIP-530 applied to every asset it armed — BNBx 7.53%/yr → 63 bps, ankrBNB 6.12%/yr → 51 bps, sUSDe 28.27%/yr → 236 bps, slisBNB 4.12%/yr → 34 bps.
+- Exchange rates were read at block 116836175 (\`2026-08-19T10:57:40Z\`), which is also the snapshot timestamp. Because the seed carries 41 bps of headroom on top of the growth allowance accruing from that timestamp, drift between authoring and execution does not cap the price at listing.
 
 #### Underlying tokens
 
@@ -311,6 +339,23 @@ The bootstrap liquidity is withdrawn from the VTreasury, which currently holds *
 
   return makeProposal(
     MARKETS.flatMap(m => [
+      // Arm the growth cap before the price source goes live. Order is load-bearing (see above).
+      {
+        target: m.oracle.address,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [seededSnapshot(m.oracle.seedExchangeRate), CAPO_SEED_TIMESTAMP],
+      },
+      {
+        target: m.oracle.address,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [CAPO_GROWTH_RATE_PER_YEAR, CAPO_SNAPSHOT_INTERVAL],
+      },
+      {
+        target: m.oracle.address,
+        signature: "setSnapshotGap(uint256)",
+        params: [snapshotGap(m.oracle.seedExchangeRate)],
+      },
+
       // Oracle configuration — single source: the capped ERC4626Oracle for the vhToken.
       // The ERC4626Oracle reads the underlying (USDT/USDC/USD1) price from the ResilientOracle
       // itself and applies the growth-rate cap on the vault exchange rate, so no extra feed
