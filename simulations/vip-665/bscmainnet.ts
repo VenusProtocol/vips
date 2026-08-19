@@ -170,9 +170,7 @@ forking(FORK_BLOCK, async () => {
     it("the Normal Timelock already holds every role this VIP calls (no ACM grants needed)", async () => {
       const held: [string, string][] = [
         [U_FRV_SOURCE, "addResource(address,address)"],
-        [U_FRV_SOURCE, "setInnerWithdrawQueue(address[])"],
         [USDT_FRV_SOURCE, "addResource(address,address)"],
-        [USDT_FRV_SOURCE, "setInnerWithdrawQueue(address[])"],
         [U_HUB, "raiseYieldGroupCap(address,uint256,uint16)"],
         [USDT_HUB, "raiseYieldGroupCap(address,uint256,uint16)"],
       ];
@@ -202,15 +200,9 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-665 Wire Cash+ and Ceffu FRV vaults into the Liquidity Hub and raise FRV caps", await vip665(), {
     callbackAfterExecution: async (tx: TransactionResponse) => {
-      // One resource registration + its inner withdraw-queue setter on each FRV source (U/CASH+ and
-      // USDT/Ceffu), and one cap raise on each of the two Hubs. No inner deposit-queue event (that
-      // command was dropped from both legs).
-      await expectEvents(
-        tx,
-        [YIELD_GROUP_FRV_ABI, HUB_ABI],
-        ["ResourceAdded", "InnerWithdrawQueueSet", "YieldGroupCapRaised"],
-        [2, 2, 2],
-      );
+      // One resource registration on each FRV source (U/CASH+ and USDT/Ceffu), and one cap raise on
+      // each of the two Hubs. Inner deposit and withdraw queues are left empty on both legs (manual).
+      await expectEvents(tx, [YIELD_GROUP_FRV_ABI, HUB_ABI], ["ResourceAdded", "YieldGroupCapRaised"], [2, 2]);
     },
   });
 
@@ -223,9 +215,9 @@ forking(FORK_BLOCK, async () => {
       expect(addr(boundAdapter)).to.equal(addr(ADAPTER_FRV));
     });
 
-    it("sets the U FRV source's inner withdraw queue to the CASH+ vault, leaving the deposit queue empty", async () => {
-      expect((await uFrv.innerWithdrawQueue()).map(addr)).to.deep.equal([addr(CASH_PLUS_VAULT)]);
+    it("leaves the U FRV source's inner deposit and withdraw queues empty", async () => {
       expect((await uFrv.innerDepositQueue()).length).to.equal(0);
+      expect((await uFrv.innerWithdrawQueue()).length).to.equal(0);
     });
 
     it("registers the Ceffu vault on the USDT FRV source behind AdapterFRV", async () => {
@@ -236,9 +228,9 @@ forking(FORK_BLOCK, async () => {
       expect(addr(boundAdapter)).to.equal(addr(ADAPTER_FRV));
     });
 
-    it("sets the USDT FRV source's inner withdraw queue to the Ceffu vault, leaving the deposit queue empty", async () => {
-      expect((await usdtFrv.innerWithdrawQueue()).map(addr)).to.deep.equal([addr(CEFFU_VAULT)]);
+    it("leaves the USDT FRV source's inner deposit and withdraw queues empty", async () => {
       expect((await usdtFrv.innerDepositQueue()).length).to.equal(0);
+      expect((await usdtFrv.innerWithdrawQueue()).length).to.equal(0);
     });
 
     it("raises the FRV percentage cap to 50% on both Hubs, absolute cap unchanged", async () => {

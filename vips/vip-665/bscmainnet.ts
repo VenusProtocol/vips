@@ -115,19 +115,13 @@ On the **U** Hub's FRV source (\`${U_FRV_SOURCE}\`):
 
 1. \`addResource(${CASH_PLUS_VAULT}, AdapterFRV)\` — register the CASH+ vault behind the shared FRV
    adapter. Reverts unless the vault's asset matches the source asset (U), which it does.
-2. \`setInnerWithdrawQueue([CASH+ vault])\` — so any funds later placed in the vault are reachable via
-   the Hub's normal withdraw path once the vault reaches a terminal state. This is the withdraw side
-   only; the inner **deposit** queue is deliberately left empty (see Notes).
-
-3. \`raiseYieldGroupCap(U FRV source, 5,000,000, 5000 bps)\` on the U Hub.
+2. \`raiseYieldGroupCap(U FRV source, 5,000,000, 5000 bps)\` on the U Hub.
 
 On the **USDT** Hub's FRV source (\`${USDT_FRV_SOURCE}\`):
 
-4. \`addResource(${CEFFU_VAULT}, AdapterFRV)\` — register the Ceffu vault behind the shared FRV
+3. \`addResource(${CEFFU_VAULT}, AdapterFRV)\` — register the Ceffu vault behind the shared FRV
    adapter. Reverts unless the vault's asset matches the source asset (USDT), which it will.
-5. \`setInnerWithdrawQueue([Ceffu vault])\` — withdraw side only, same rationale as the CASH+ leg.
-
-6. \`raiseYieldGroupCap(USDT FRV source, 5,000,000, 5000 bps)\` on the USDT Hub.
+4. \`raiseYieldGroupCap(USDT FRV source, 5,000,000, 5000 bps)\` on the USDT Hub.
 
 Both cap changes keep the absolute cap at 5,000,000 and only raise the percentage dimension from 3000
 to 5000 bps, which the Hub's raise guard accepts (absolute unchanged, percentage strictly increases).
@@ -135,15 +129,14 @@ to 5000 bps, which the Hub's raise guard accepts (absolute unchanged, percentage
 #### Access control
 
 No ACM grants are needed. VIP-650/651 granted the **Normal Timelock** the full Governance role set on
-every Hub and FRV source, so it calls \`addResource\`, \`setInnerWithdrawQueue\` and
-\`raiseYieldGroupCap\` directly.
+every Hub and FRV source, so it calls \`addResource\` and \`raiseYieldGroupCap\` directly.
 
 #### Notes
 
-- Each FRV source's inner **deposit** queue is left empty on purpose. The Operator's \`reallocate\`
-  targets the vault resource explicitly, so it does not depend on the inner deposit queue; setting it
-  would only pre-arm automatic cascade routing into FRV, which nothing here needs. It can be set by
-  the VIP that later adds FRV to the Hub's outer deposit queue, together with that decision.
+- Each FRV source's inner **deposit** and **withdraw** queues are left empty on purpose. The
+  Operator's \`reallocate\` targets the vault resource explicitly and does not depend on either queue;
+  setting them would only pre-arm automatic cascade routing into FRV, which nothing here needs. They
+  can be set by a later VIP together with the decision to add FRV to the Hub's outer deposit queue.
 - The outer withdraw queues are unchanged — FRV already sits last in each Hub's [Flux, Core, FRV].
 - Absolute caps, fees, outer queues and the USDC Hub are untouched.
 - **Deploy-first gate.** Because the Ceffu leg wires an externally-deployed vault, this VIP must not be
@@ -191,27 +184,17 @@ every Hub and FRV source, so it calls \`addResource\`, \`setInnerWithdrawQueue\`
         params: [CASH_PLUS_VAULT, ADAPTER_FRV],
       },
       {
-        target: U_FRV_SOURCE,
-        signature: "setInnerWithdrawQueue(address[])",
-        params: [[CASH_PLUS_VAULT]],
-      },
-      {
         target: U_HUB,
         signature: "raiseYieldGroupCap(address,uint256,uint16)",
         params: [U_FRV_SOURCE, FRV_ABSOLUTE_CAP, FRV_PERCENTAGE_CAP_BPS_NEW],
       },
 
-      // --- USDT Hub: register the Ceffu vault on the FRV source (same ordering), then raise the
+      // --- USDT Hub: register the Ceffu vault on the FRV source, then raise the
       //     USDT Hub FRV cap. FRV percentage cap goes 30% -> 50% on both Hubs (absolute unchanged) ---
       {
         target: USDT_FRV_SOURCE,
         signature: "addResource(address,address)",
         params: [CEFFU_VAULT, ADAPTER_FRV],
-      },
-      {
-        target: USDT_FRV_SOURCE,
-        signature: "setInnerWithdrawQueue(address[])",
-        params: [[CEFFU_VAULT]],
       },
       {
         target: USDT_HUB,
