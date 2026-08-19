@@ -1,0 +1,35 @@
+name: Venus Review Dispatch
+
+on:
+  issue_comment:
+    types: [created] # comment containing @venus-review
+  pull_request:
+    types: [ready_for_review] # PR marked ready auto-triggers
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '@venus-review'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Multica PR Review Squad
+        env:
+          HOOK_URL: ${{ secrets.MULTICA_REVIEW_HOOK_URL }}
+          HOOK_TOKEN: ${{ secrets.MULTICA_REVIEW_HOOK_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url || github.event.issue.html_url }}
+          PR_NUM: ${{ github.event.pull_request.number || github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          BY: ${{ github.event.sender.login }}
+        run: |
+          curl -fsS --retry 3 -X POST "$HOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $HOOK_TOKEN" \
+            -d "$(jq -n --arg repo "$REPO" --arg num "$PR_NUM" --arg url "$PR_URL" \
+                       --arg ev "$EVENT" --arg by "$BY" \
+              '{source:"github",event:$ev,repo:$repo,pr_number:$num,pr_url:$url,requested_by:$by,assignee:"PR Review Squad"}')"
