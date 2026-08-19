@@ -57,9 +57,11 @@ export const CASH_PLUS_VAULT = "0x41179fc6ff878b7795B900888E0B61fd8029bceA";
 // Ceffu fixed-rate vault for USDT. NOT yet deployed: the address is the deterministic CREATE2 clone
 // address the InstitutionalVaultController will mint for institution CEFFU_INSTITUTION at its current
 // nonce, read live from the controller (predictVaultAddress(CEFFU_INSTITUTION) == CEFFU_VAULT — see
-// the header). The vault must be deployed by the fixed-rate-vaults workstream before this VIP is
-// executed; the simulation asserts the prediction still holds at the fork block. All EIP-55
-// checksummed so ethers validates the literals.
+// the header). The vault must be deployed by the fixed-rate-vaults workstream at this address before
+// this VIP is proposed — that deployment, not the sim, is the real guarantee; addResource reverts
+// ResourceNotContract on a codeless address, so the atomic VIP fails closed if it is missing. The
+// sim's predictVaultAddress assertion is only a sanity check that the literal below still matches the
+// controller at the fork block. All EIP-55 checksummed so ethers validates the literals.
 export const CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85"; // InstitutionalVaultController proxy
 export const CEFFU_INSTITUTION = "0x8972E6F8874406D294fc0380afBDA839B1b96262"; // Ceffu institution operator
 export const CEFFU_VAULT = "0x086fd7972510dF9d9cFdc4efB8677fc72d290103"; // predictVaultAddress(CEFFU_INSTITUTION)
@@ -90,10 +92,14 @@ Core/Flux and FRV is filled only by the Operator's reallocate.
 
 The **Ceffu** vault is not yet deployed. Its address is deterministic: the
 InstitutionalVaultController clones it via \`Clones.cloneDeterministic\` with
-\`salt = keccak256(institutionOperator, nonce)\`, so it is fixed before deployment and read straight
-from the controller — \`predictVaultAddress(${CEFFU_INSTITUTION}) == ${CEFFU_VAULT}\`. The
-fixed-rate-vaults workstream must deploy the vault at this address (institution nonce unchanged)
-before this VIP is executed; the fork simulation asserts the prediction still holds.
+\`salt = keccak256(institutionOperator, nonce)\`, so the address is fixed before deployment and read
+straight from the controller today — \`predictVaultAddress(${CEFFU_INSTITUTION}) == ${CEFFU_VAULT}\`
+(this holds only while the institution's nonce is unchanged). All six commands form one atomic
+transaction, and \`addResource\` reverts with \`ResourceNotContract\` against an address that holds no
+code, so the whole VIP reverts unless the Ceffu vault is already deployed at this address when it
+executes. This proposal is therefore submitted only after the Ceffu vault has been deployed at
+${CEFFU_VAULT}; that deployment — not any simulation assertion — is what guarantees the address is
+correct at execution time.
 
 #### Actions (one atomic transaction, in order)
 
