@@ -99,6 +99,15 @@ export type MarketSpec = {
 
 // All three markets: non-borrowable collateral, 24-decimal ERC4626 underlyings, Core pool.
 // exchangeRate scale = 18 + underlyingDecimals(24) - vTokenDecimals(8) = 34.
+//
+// Risk-parameter notes (mirrored in the VIP description so reviewers do not read them as contradictions):
+//   - IRM: a jump-rate IRM is wired only because the vToken constructor requires one; it is inert
+//     while borrowing is paused. The listing template's "IRM not needed" note is consistent with this.
+//   - CF == LT on every market (80/80, 82.5/82.5, 75/75) is intentional per the approved template:
+//     these are ~$1 stablecoin-correlated collaterals priced by a growth-capped oracle with the E-brake
+//     enabled, so no CF<->LT buffer is applied.
+//   - reserveFactor / vTokenReceiver / bootstrap amount were unspecified in the template and follow the
+//     standard Core-pool convention (reserve factor inert while borrowing is paused).
 const EXCHANGE_RATE = parseUnits("1", 34);
 const SUPPLY_CAP = parseUnits("10000000", 24); // 10,000,000 vhToken (24 dec)
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10%
@@ -288,7 +297,13 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 - Reserve factor: 10%
 - Supply cap: 10,000,000 vhU
 - Borrow cap: 0 (borrowing disabled)
-- E-brake trigger / reset: 5% / 2%`,
+- E-brake trigger / reset: 5% / 2%
+
+#### Notes on the risk parameters
+
+- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
+- **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
+- **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
