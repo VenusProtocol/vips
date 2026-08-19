@@ -106,8 +106,14 @@ export type MarketSpec = {
 //   - CF == LT on every market (80/80, 82.5/82.5, 75/75) is intentional per the approved template:
 //     these are ~$1 stablecoin-correlated collaterals priced by a growth-capped oracle with the E-brake
 //     enabled, so no CF<->LT buffer is applied.
+//   - The differentiated CF/LT across the three (82.5 vhUSDC > 80 vhUSDT > 75 vhU) are the approved
+//     per-asset risk-manager values from the listing template; they track the relative maturity and
+//     depth of each underlying peg (USDC > USDT > USD1/U), not a single blanket setting.
+//   - Supply cap (10,000,000) is denominated in the underlying vhToken amount (24 decimals), NOT USD,
+//     since _setMarketSupplyCaps takes a token amount; at the ~$1 vault price that is ~$10M of exposure.
 //   - reserveFactor / vTokenReceiver / bootstrap amount were unspecified in the template and follow the
 //     standard Core-pool convention (reserve factor inert while borrowing is paused).
+//   - Protocol seize share is a global Comptroller parameter (not per-market) and is left unchanged.
 const EXCHANGE_RATE = parseUnits("1", 34);
 const SUPPLY_CAP = parseUnits("10000000", 24); // 10,000,000 vhToken (24 dec)
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10%
@@ -303,7 +309,10 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 
 - **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
 - **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
-- **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.`,
+- **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
+- **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
+- **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
+- **Protocol seize share** is a global Comptroller-level parameter on the Core pool rather than a per-market setting, so it is not modified by this VIP; the existing Core-pool value applies to the new markets.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
