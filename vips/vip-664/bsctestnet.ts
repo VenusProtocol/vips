@@ -228,6 +228,13 @@ If passed, this VIP will list three new non-borrowable collateral markets — Ve
         signature: "_setMarketSupplyCaps(address[],uint256[])",
         params: [[m.vToken.address], [m.riskParameters.supplyCap]],
       },
+      // Explicit, though a fresh market already defaults to 0: the borrow cap is a stated risk
+      // parameter, and relying on a default is what hid the unarmed price cap.
+      {
+        target: m.vToken.comptroller,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [[m.vToken.address], [m.riskParameters.borrowCap]],
+      },
       {
         target: m.vToken.comptroller,
         signature: "setActionsPaused(address[],uint8[],bool)",
@@ -247,6 +254,13 @@ If passed, this VIP will list three new non-borrowable collateral markets — Ve
         target: m.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: [REDUCE_RESERVES_BLOCK_DELTA],
+      },
+      // Set here rather than trusted from the vToken constructor, since this reuses an already
+      // deployed model instead of deploying one per market.
+      {
+        target: m.vToken.address,
+        signature: "_setInterestRateModel(address)",
+        params: [m.rateModel],
       },
       {
         target: m.vToken.address,

@@ -257,7 +257,7 @@ For each new market this VIP will:
 - Arm the growth cap on the vhToken's capped **ERC4626Oracle** (seed the snapshot, set the growth rate and set the snapshot gap)
 - Register that oracle in the ResilientOracle as the single price source. It prices the vhToken as *underlying resilient price × capped vault exchange rate*, the same design as the live asBNB and slisBNB capped oracles.
 - Add the market to the Core Pool Comptroller
-- Set the supply cap, collateral factor, liquidation threshold, liquidation incentive and reserve factor
+- Set the supply cap, borrow cap (0), interest rate model, collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
 - Provide bootstrap liquidity (minting an initial supply, burning 10% and sending the remainder to the VTreasury)
 - Pause borrowing for the market at launch (the markets are collateral-only)
@@ -301,7 +301,7 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 - **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
 - **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
 - **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
-- **Protocol seize share** is a global Comptroller-level parameter on the Core pool rather than a per-market setting, so it is not modified by this VIP; the existing Core-pool value applies to the new markets.
+- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken exposes no \`protocolSeizeShare\` getter or setter at all — the share is a constant in the implementation — which is why no Core-pool listing VIP sets it. The listing checklist asks for the value; there is nothing to configure.
 
 #### Capped oracle
 
@@ -384,6 +384,13 @@ The bootstrap liquidity is withdrawn from the VTreasury, which currently holds *
         signature: "_setMarketSupplyCaps(address[],uint256[])",
         params: [[m.vToken.address], [m.riskParameters.supplyCap]],
       },
+      // Explicit, though a fresh market already defaults to 0: the borrow cap is a stated risk
+      // parameter, and relying on a default is what hid the unarmed price cap.
+      {
+        target: m.vToken.comptroller,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [[m.vToken.address], [m.riskParameters.borrowCap]],
+      },
       // Pause borrowing for the market at launch (collateral-only markets).
       {
         target: m.vToken.comptroller,
@@ -404,6 +411,13 @@ The bootstrap liquidity is withdrawn from the VTreasury, which currently holds *
         target: m.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: [REDUCE_RESERVES_BLOCK_DELTA],
+      },
+      // Set here rather than trusted from the vToken constructor, since this reuses an already
+      // deployed model instead of deploying one per market.
+      {
+        target: m.vToken.address,
+        signature: "_setInterestRateModel(address)",
+        params: [m.rateModel],
       },
       {
         target: m.vToken.address,
