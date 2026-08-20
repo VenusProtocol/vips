@@ -110,6 +110,15 @@ const HBNB_SLOT = { totalSupply: 3, balanceOf: 4 };
 const previewRedeemAt = (shares: BigNumber, totalAssets: BigNumber, totalSupply: BigNumber): BigNumber =>
   shares.mul(totalAssets.add(1)).div(totalSupply.add(1));
 
+// Mirrors BaseVault._computeTotalInterest: totalRaised * fixedAPY * lockDuration / (BPS * YEAR),
+// with YEAR = 365 days.
+const BPS = 10_000;
+const YEAR = 365 * 24 * 60 * 60;
+const termInterest = (principal: BigNumber): BigNumber =>
+  principal.mul(FIXED_APY).mul(LOCK_DURATION).div(BigNumber.from(BPS).mul(YEAR));
+
+const reserveCut = (interest: BigNumber): BigNumber => interest.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
+
 const mappingSlot = (slotIndex: number, key: string): string =>
   ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [key, slotIndex]));
 
@@ -143,7 +152,18 @@ forking(FORK_BLOCK, async () => {
   const positionToken = new ethers.Contract(POSITION_TOKEN, POSITION_TOKEN_ABI, ethers.provider);
   const frvSource = new ethers.Contract(U_FRV_SOURCE, FRV_SOURCE_ABI, ethers.provider);
   const hub = new ethers.Contract(U_HUB, HUB_ABI, ethers.provider);
-  const coreSource = new ethers.Contract(U_CORE_SOURCE, FRV_SOURCE_ABI, ethers.provider);
+  // Core is a YieldGroupCore, not an FRV group — only the YieldGroupBase views are read from it.
+  const coreSource = new ethers.Contract(
+    U_CORE_SOURCE,
+    ["function totalAssets() view returns (uint256)"],
+    ethers.provider,
+  );
+  // The shared FRV adapter's own view of the position: 0 outside the vault's terminal states.
+  const adapterFrv = new ethers.Contract(
+    ADAPTER_FRV,
+    ["function maxWithdraw(address resource, address holder) view returns (uint256)"],
+    ethers.provider,
+  );
 
   let vaultsBefore: BigNumber;
   let fundraisingSnapshot: SnapshotRestorer;
@@ -360,18 +380,14 @@ forking(FORK_BLOCK, async () => {
     const marginAmount = IDEAL_COLLATERAL_AMOUNT.mul(MARGIN_RATE).div(parseUnits("1", 18));
     const LENDER_DEPOSIT = MAX_BORROW_CAP;
 
-    // 150,000 U borrowed for 30 days at a 2.7% fixed APY (BaseVault: YEAR = 365 days):
-    //   interest = 150,000e18 * 270 * 2,592,000 / (10,000 * 365 days) = 332.876712328767123287 U
+    // 150,000 U borrowed for 30 days at a 2.7% fixed APY = 332.876712328767123287 U of interest.
     // Suppliers share the principal plus that interest net of the 20% reserve factor (2.16% net APY),
     // pro rata to shares; the reserve cut goes to the ProtocolShareReserve at settlement.
-    const EXPECTED_INTEREST = BigNumber.from("332876712328767123287");
+    const EXPECTED_INTEREST = termInterest(MAX_BORROW_CAP);
     const EXPECTED_DEBT_AT_MATURITY = MAX_BORROW_CAP.add(EXPECTED_INTEREST);
-    // The reserve takes floor(interest x reserveFactor) and suppliers get the remainder, so the
-    // rounding dust stays with the suppliers rather than the reserve.
-    const EXPECTED_RESERVE_CUT = EXPECTED_INTEREST.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
-    const TOTAL_ASSETS_AT_MATURITY = MAX_BORROW_CAP.add(EXPECTED_INTEREST).sub(EXPECTED_RESERVE_CUT);
+    const EXPECTED_PROTOCOL_FEE = reserveCut(EXPECTED_INTEREST);
+    const TOTAL_ASSETS_AT_MATURITY = EXPECTED_DEBT_AT_MATURITY.sub(EXPECTED_PROTOCOL_FEE);
     const EXPECTED_LENDER_PROCEEDS = previewRedeemAt(LENDER_DEPOSIT, TOTAL_ASSETS_AT_MATURITY, MAX_BORROW_CAP);
-    const EXPECTED_PROTOCOL_FEE = EXPECTED_INTEREST.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
 
     before(async () => {
       const vaultAddress = await controller.allVaults(vaultsBefore);
@@ -527,12 +543,8 @@ forking(FORK_BLOCK, async () => {
 
     // 50,000 U for 30 days at 2.7%, same arithmetic as the lifecycle suite. The Hub is the only
     // supplier here, so it redeems the vault's entire assets at maturity.
-    const HUB_INTEREST = HUB_ALLOCATION.mul(FIXED_APY)
-      .mul(LOCK_DURATION)
-      .div(10000)
-      .div(365 * 24 * 60 * 60);
-    const HUB_RESERVE_CUT = HUB_INTEREST.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
-    const HUB_TOTAL_ASSETS_AT_MATURITY = HUB_ALLOCATION.add(HUB_INTEREST).sub(HUB_RESERVE_CUT);
+    const HUB_INTEREST = termInterest(HUB_ALLOCATION);
+    const HUB_TOTAL_ASSETS_AT_MATURITY = HUB_ALLOCATION.add(HUB_INTEREST).sub(reserveCut(HUB_INTEREST));
     const EXPECTED_HUB_PROCEEDS = previewRedeemAt(HUB_ALLOCATION, HUB_TOTAL_ASSETS_AT_MATURITY, HUB_ALLOCATION);
 
     before(async () => {
@@ -577,8 +589,12 @@ forking(FORK_BLOCK, async () => {
       await vault.connect(operator).updateVaultState();
       expect(await vault.state()).to.equal(VaultState.Lock);
 
-      // The adapter reports 0 withdrawable from Fundraising through PendingSettlement, so even a
-      // targeted pull leg against the vault reverts.
+      // The mechanism, AdapterFRV.maxWithdraw delegates to the vault's own maxWithdraw,
+      // which is 0 outside the terminal states — the accrued coupon in totalAssets is not
+      // deliverable mid-lock. So even a targeted pull leg against the vault reverts.
+      expect(await frvSource.totalAssets()).to.be.gt(HUB_ALLOCATION); // coupon is accruing
+      expect(await adapterFrv.maxWithdraw(vault.address, U_FRV_SOURCE)).to.equal(0);
+
       await expect(
         hub
           .connect(hubOperator)
@@ -607,6 +623,8 @@ forking(FORK_BLOCK, async () => {
 
     it("the Operator pulls the matured position back into Core, principal plus interest", async () => {
       expect(await vault.previewRedeem(HUB_ALLOCATION)).to.equal(EXPECTED_HUB_PROCEEDS);
+      expect(await adapterFrv.maxWithdraw(vault.address, U_FRV_SOURCE)).to.equal(EXPECTED_HUB_PROCEEDS);
+
       expect(await frvSource.maxWithdraw()).to.equal(0);
 
       const coreBefore = await coreSource.totalAssets();
