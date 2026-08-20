@@ -1,4 +1,4 @@
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { SnapshotRestorer, takeSnapshot, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
@@ -39,6 +39,7 @@ import vip658, {
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import FRV_SOURCE_ABI from "./abi/FRVSource.json";
+import HUB_ABI from "./abi/Hub.json";
 import POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
@@ -92,12 +93,22 @@ const VaultState = {
 
 const U_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
+const U_HUB = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
+const U_CORE_SOURCE = "0x8A680F77A5367FA7cD33a02f51896Cb1d55159c3";
+const HUB_OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
+const NO_RESOURCE = ethers.constants.AddressZero;
+
 const MANAGEMENT_SLOT = { whiteList: 0, restrictList: 1, blockList: 2, contractList: 3 };
 
 // hBNB's own layout, read off its verified BaseERC20 source: name 0, symbol 1, decimals 2,
 // _totalSupply 3, _balanceOf 4. Confirmed on chain — slot 3 holds 266.087295e18, matching
 // totalSupply(), and slot 2 holds 18.
 const HBNB_SLOT = { totalSupply: 3, balanceOf: 4 };
+
+// ERC4626 redemption with the virtual asset/share offset of 1 the vault inherits: an exact holding of
+// the whole supply redeems one wei short of totalAssets, and the dust stays in the vault.
+const previewRedeemAt = (shares: BigNumber, totalAssets: BigNumber, totalSupply: BigNumber): BigNumber =>
+  shares.mul(totalAssets.add(1)).div(totalSupply.add(1));
 
 const mappingSlot = (slotIndex: number, key: string): string =>
   ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [key, slotIndex]));
@@ -131,8 +142,11 @@ forking(FORK_BLOCK, async () => {
   const feed = new ethers.Contract(HBNB_FEED, FEED_ABI, ethers.provider);
   const positionToken = new ethers.Contract(POSITION_TOKEN, POSITION_TOKEN_ABI, ethers.provider);
   const frvSource = new ethers.Contract(U_FRV_SOURCE, FRV_SOURCE_ABI, ethers.provider);
+  const hub = new ethers.Contract(U_HUB, HUB_ABI, ethers.provider);
+  const coreSource = new ethers.Contract(U_CORE_SOURCE, FRV_SOURCE_ABI, ethers.provider);
 
   let vaultsBefore: BigNumber;
+  let fundraisingSnapshot: SnapshotRestorer;
   let positionTokenIdBefore: BigNumber;
   let predictedVault: string;
   let feedAsAtlas: Contract;
@@ -344,15 +358,19 @@ forking(FORK_BLOCK, async () => {
     let lenderAddress: string;
 
     const marginAmount = IDEAL_COLLATERAL_AMOUNT.mul(MARGIN_RATE).div(parseUnits("1", 18));
-    const LENDER_DEPOSIT = parseUnits("150000", 18); // the full max borrow cap
+    const LENDER_DEPOSIT = MAX_BORROW_CAP;
 
     // 150,000 U borrowed for 30 days at a 2.7% fixed APY (BaseVault: YEAR = 365 days):
     //   interest = 150,000e18 * 270 * 2,592,000 / (10,000 * 365 days) = 332.876712328767123287 U
-    // The lender receives the principal plus that interest net of the 20% reserve factor (2.16%
-    // net APY); the reserve cut itself goes to the ProtocolShareReserve at settlement.
+    // Suppliers share the principal plus that interest net of the 20% reserve factor (2.16% net APY),
+    // pro rata to shares; the reserve cut goes to the ProtocolShareReserve at settlement.
     const EXPECTED_INTEREST = BigNumber.from("332876712328767123287");
-    const EXPECTED_DEBT_AT_MATURITY = LENDER_DEPOSIT.add(EXPECTED_INTEREST);
-    const EXPECTED_LENDER_PROCEEDS = LENDER_DEPOSIT.add(EXPECTED_INTEREST.mul(8).div(10));
+    const EXPECTED_DEBT_AT_MATURITY = MAX_BORROW_CAP.add(EXPECTED_INTEREST);
+    // The reserve takes floor(interest x reserveFactor) and suppliers get the remainder, so the
+    // rounding dust stays with the suppliers rather than the reserve.
+    const EXPECTED_RESERVE_CUT = EXPECTED_INTEREST.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
+    const TOTAL_ASSETS_AT_MATURITY = MAX_BORROW_CAP.add(EXPECTED_INTEREST).sub(EXPECTED_RESERVE_CUT);
+    const EXPECTED_LENDER_PROCEEDS = previewRedeemAt(LENDER_DEPOSIT, TOTAL_ASSETS_AT_MATURITY, MAX_BORROW_CAP);
     const EXPECTED_PROTOCOL_FEE = EXPECTED_INTEREST.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
 
     before(async () => {
@@ -411,12 +429,13 @@ forking(FORK_BLOCK, async () => {
 
       const nav = await resilientOracle.getPrice(HBNB);
       expect(await vault.getCollateralValueUSD()).to.equal(IDEAL_COLLATERAL_AMOUNT.mul(nav).div(parseUnits("1", 18)));
+
+      fundraisingSnapshot = await takeSnapshot();
     });
 
     it("a lender funds the vault up to the max borrow cap -> shares minted 1:1", async () => {
       const whale = await initMainnetUser(U_WHALE, parseUnits("40"));
       await u.connect(whale).transfer(lenderAddress, LENDER_DEPOSIT);
-
       expect(await vault.maxDeposit(lenderAddress)).to.equal(MAX_BORROW_CAP);
       expect(await vault.previewDeposit(LENDER_DEPOSIT)).to.equal(LENDER_DEPOSIT);
 
@@ -424,9 +443,9 @@ forking(FORK_BLOCK, async () => {
       await vault.connect(lender).deposit(LENDER_DEPOSIT, lenderAddress);
 
       expect(await vault.balanceOf(lenderAddress)).to.equal(LENDER_DEPOSIT);
-      expect(await vault.totalSupply()).to.equal(LENDER_DEPOSIT);
-      expect((await vault.runtime()).totalRaised).to.equal(LENDER_DEPOSIT);
-      expect(await u.balanceOf(vault.address)).to.equal(LENDER_DEPOSIT);
+      expect(await vault.totalSupply()).to.equal(MAX_BORROW_CAP);
+      expect((await vault.runtime()).totalRaised).to.equal(MAX_BORROW_CAP);
+      expect(await u.balanceOf(vault.address)).to.equal(MAX_BORROW_CAP);
       expect(await vault.maxDeposit(lenderAddress)).to.equal(0);
     });
 
@@ -439,7 +458,7 @@ forking(FORK_BLOCK, async () => {
     it("the institution draws down the raised funds", async () => {
       const before = await u.balanceOf(INSTITUTION_OPERATOR);
       await vault.connect(operator).claimRaisedFunds();
-      expect(await u.balanceOf(INSTITUTION_OPERATOR)).to.equal(before.add(LENDER_DEPOSIT));
+      expect(await u.balanceOf(INSTITUTION_OPERATOR)).to.equal(before.add(MAX_BORROW_CAP));
       expect(await u.balanceOf(vault.address)).to.equal(0);
       expect(await vault.outstandingDebt()).to.equal(EXPECTED_DEBT_AT_MATURITY);
     });
@@ -463,7 +482,7 @@ forking(FORK_BLOCK, async () => {
       expect(owed).to.equal(EXPECTED_DEBT_AT_MATURITY);
 
       const whale = await initMainnetUser(U_WHALE, parseUnits("40"));
-      await u.connect(whale).transfer(INSTITUTION_OPERATOR, owed.sub(LENDER_DEPOSIT));
+      await u.connect(whale).transfer(INSTITUTION_OPERATOR, owed.sub(MAX_BORROW_CAP));
       await u.connect(operator).approve(vault.address, owed);
       const psrBefore = await u.balanceOf(PROTOCOL_SHARE_RESERVE);
       await vault.connect(operator).repay(owed);
@@ -491,6 +510,116 @@ forking(FORK_BLOCK, async () => {
       expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.equal(IDEAL_COLLATERAL_AMOUNT);
       expect(await hBNB.balanceOf(vault.address)).to.equal(0);
       expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(0);
+    });
+  });
+
+  describe("Post-VIP behavioral proof: Liquidity Hub routes into and out of the vault", () => {
+    let vault: Contract;
+    let operator: SignerWithAddress;
+    let hubUser: SignerWithAddress;
+    let hubUserAddress: string;
+    let hubOperator: SignerWithAddress;
+
+    const HUB_ALLOCATION = parseUnits("50000", 18);
+    // The FRV group's cap is 30% of Hub TVL, so the Hub must hold well over HUB_ALLOCATION / 0.3
+    // before the allocation leg fits under the cap.
+    const HUB_DEPOSIT = parseUnits("200000", 18);
+
+    // 50,000 U for 30 days at 2.7%, same arithmetic as the lifecycle suite. The Hub is the only
+    // supplier here, so it redeems the vault's entire assets at maturity.
+    const HUB_INTEREST = HUB_ALLOCATION.mul(FIXED_APY)
+      .mul(LOCK_DURATION)
+      .div(10000)
+      .div(365 * 24 * 60 * 60);
+    const HUB_RESERVE_CUT = HUB_INTEREST.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
+    const HUB_TOTAL_ASSETS_AT_MATURITY = HUB_ALLOCATION.add(HUB_INTEREST).sub(HUB_RESERVE_CUT);
+    const EXPECTED_HUB_PROCEEDS = previewRedeemAt(HUB_ALLOCATION, HUB_TOTAL_ASSETS_AT_MATURITY, HUB_ALLOCATION);
+
+    before(async () => {
+      await fundraisingSnapshot.restore();
+      const vaultAddress = await controller.allVaults(vaultsBefore);
+      vault = new ethers.Contract(vaultAddress, VAULT_ABI, ethers.provider);
+      operator = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
+      hubOperator = await initMainnetUser(HUB_OPERATOR, parseUnits("1"));
+      [, , hubUser] = await ethers.getSigners();
+      hubUserAddress = await hubUser.getAddress();
+    });
+
+    it("a Hub deposit lands in Core, never in FRV", async () => {
+      const whale = await initMainnetUser(U_WHALE, parseUnits("40"));
+      await u.connect(whale).transfer(hubUserAddress, HUB_DEPOSIT);
+      await u.connect(hubUser).approve(hub.address, HUB_DEPOSIT);
+
+      const coreBefore = await coreSource.totalAssets();
+      await hub.connect(hubUser).deposit(HUB_DEPOSIT, hubUserAddress);
+
+      expect(await frvSource.totalAssets()).to.equal(0);
+      expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(0);
+      // Core is a live vToken market accruing between blocks, so the deposit is a floor on its growth.
+      expect(await coreSource.totalAssets()).to.be.at.least(coreBefore.add(HUB_DEPOSIT));
+    });
+
+    it("the Operator reallocates Core -> the vault, and the FRV group takes a supplier position", async () => {
+      await hub
+        .connect(hubOperator)
+        .reallocate(
+          [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
+          [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
+        );
+
+      expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(HUB_ALLOCATION);
+      expect(await frvSource.totalAssets()).to.equal(HUB_ALLOCATION);
+      expect((await vault.runtime()).totalRaised).to.equal(HUB_ALLOCATION);
+    });
+
+    it("the FRV position is locked for the whole term - no early exit for the Hub", async () => {
+      await time.increase(OPEN_DURATION + 1);
+      await vault.connect(operator).updateVaultState();
+      expect(await vault.state()).to.equal(VaultState.Lock);
+
+      // The adapter reports 0 withdrawable from Fundraising through PendingSettlement, so even a
+      // targeted pull leg against the vault reverts.
+      await expect(
+        hub
+          .connect(hubOperator)
+          .reallocate(
+            [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
+            [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
+          ),
+      ).to.be.reverted;
+    });
+
+    it("the loan runs to maturity and is repaid", async () => {
+      await vault.connect(operator).claimRaisedFunds();
+      await time.increase(LOCK_DURATION + 1);
+      await vault.connect(operator).updateVaultState();
+
+      const owed = await vault.outstandingDebt();
+      expect(owed).to.equal(HUB_ALLOCATION.add(HUB_INTEREST));
+
+      const whale = await initMainnetUser(U_WHALE, parseUnits("40"));
+      await u.connect(whale).transfer(INSTITUTION_OPERATOR, owed.sub(HUB_ALLOCATION));
+      await u.connect(operator).approve(vault.address, owed);
+      await vault.connect(operator).repay(owed);
+      await vault.connect(operator).updateVaultState();
+      expect(await vault.state()).to.equal(VaultState.Matured);
+    });
+
+    it("the Operator pulls the matured position back into Core, principal plus interest", async () => {
+      expect(await vault.previewRedeem(HUB_ALLOCATION)).to.equal(EXPECTED_HUB_PROCEEDS);
+      expect(await frvSource.maxWithdraw()).to.equal(0);
+
+      const coreBefore = await coreSource.totalAssets();
+      await hub
+        .connect(hubOperator)
+        .reallocate(
+          [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: EXPECTED_HUB_PROCEEDS }],
+          [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: EXPECTED_HUB_PROCEEDS }],
+        );
+
+      expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(0);
+      expect(await frvSource.totalAssets()).to.equal(0);
+      expect(await coreSource.totalAssets()).to.be.at.least(coreBefore.add(EXPECTED_HUB_PROCEEDS));
     });
   });
 });
