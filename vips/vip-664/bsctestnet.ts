@@ -1,4 +1,4 @@
-import { BigNumber, constants } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -23,12 +23,14 @@ export const VSHARE = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61";
 // and deposits it into the vault rather than withdrawing the share token directly.
 export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 
-// TODO(deploy): fill after the capped ERC4626Oracle is deployed on bsctestnet
-// (VenusProtocol/oracle, tag vh-erc4626-oracles, deployment name vSHARE_ERC4626Oracle).
-export const VSHARE_ORACLE = constants.AddressZero;
+// vSHARE_ERC4626Oracle, deployed at block 126330850 from VenusProtocol/oracle, tag
+// vh-erc4626-oracles. Deployed with every cap argument zeroed; the commands below arm it.
+export const VSHARE_ORACLE = "0xB5A17EB6A135A61057bc2F4f102c633899256BFa";
 
-// TODO(deploy): fill after the vToken is deployed on bsctestnet.
-export const VVSHARE = constants.AddressZero;
+// Deployed at block 126330674. VBep20Delegator over vSHARE, admin set to the NormalTimelock in the
+// constructor, implementation 0x73fF75092Da265b87b25ffB943c47C90419a04A6 (the same VBep20Delegate
+// that backs vasBNB and vslisBNB on testnet).
+export const VVSHARE = "0xb846eEbaC8b014296709dc660Bfcb6ea182718e8";
 
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";

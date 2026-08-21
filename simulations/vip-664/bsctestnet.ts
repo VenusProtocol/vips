@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -39,12 +39,17 @@ import VTOKEN_ABI from "./abi/VToken.json";
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 const SECONDS_PER_YEAR = 31536000;
+
+// USDT is priced by the testnet ChainlinkOracle with a 24h stale period. The fork block is fixed, so
+// the feed goes stale as soon as the block is older than that and every getPrice call reverts.
+const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
+
 // Hub_USDT share decimals: testnet USDT is 6 decimals and the Hub adds a 6 decimal offset.
 const ONE_SHARE = parseUnits("1", 12);
 
-// TODO(deploy): bump to a block after the capped oracle and the vToken are deployed on testnet.
-// The VTreasury needs no vSHARE: the VIP mints the shares itself out of the Treasury's USDT.
-const FORK_BLOCK = 125980273;
+// After the vToken (126330674) and the capped oracle (126330850) were deployed. The VTreasury needs
+// no vSHARE: the VIP mints the shares itself out of the Treasury's USDT.
+const FORK_BLOCK = 126331000;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
@@ -55,6 +60,13 @@ forking(FORK_BLOCK, async () => {
   const treasuryAssetBalanceBefore: Record<string, BigNumber> = {};
 
   before(async () => {
+    await setMaxStalePeriodInChainlinkOracle(
+      CHAINLINK_ORACLE,
+      USDT,
+      ethers.constants.AddressZero,
+      bsctestnet.NORMAL_TIMELOCK,
+    );
+
     const asset = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
     for (const m of MARKETS) {
       treasuryAssetBalanceBefore[m.vToken.address] = await asset.balanceOf(bsctestnet.VTREASURY);
