@@ -1,99 +1,84 @@
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { Command, ProposalType } from "src/types";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 // ===================================================================================================
-// VIP-999 [BNB Chain] — Onboard the Centrifuge yield group (JTRSY) into the USDC Liquidity Hub
+// VIP-999 [BNB Chain] — Onboard the Centrifuge yield group (JTRSY + JAAA) into the USDT Liquidity Hub
 //
-// DRAFT. The Centrifuge family (AdapterCentrifuge, YieldGroupCentrifuge impl, CentrifugeBeacon, and
-// the per-Hub YieldGroupCentrifuge BeaconProxy) is NOT DEPLOYED YET, so every address in the
-// "PLACEHOLDERS" block below is a dummy. Swap them for the real deployment addresses (and re-verify
-// each one on-chain) before this proposal is created.
-//
-// What this does, in order — the ordering is load-bearing:
-//   1. ACM grants on the new yield group: the full 18-signature set to the Normal Timelock, the
-//      operator/containment subset to the Guardian, and the four claim functions to the keeper.
-//   2. addResource(cfVault, AdapterCentrifuge) — must precede the queue setters, which reject an
-//      unregistered resource.
-//   3/4. setInnerDepositQueue / setInnerWithdrawQueue on the group.
-//   5. setPriceGuard — arms the NAV staleness guard for the vault.
-//   6. hub.addYieldGroup — must precede the outer queue setters.
-//   7. setOuterWithdrawQueue on the Hub — must list EVERY registered group or the Hub rejects it, so
-//      the whole queue is rewritten. setOuterDepositQueue is deliberately COMMENTED OUT: Centrifuge
-//      settles asynchronously and is filled by the Operator's reallocate, not by the deposit cascade.
-//
-// Out of scope for this VIP (both must be done off-chain, before/after execution):
-//   - The group proxy must be memberlisted on the JTRSY share token by Centrifuge. Without it
-//     claimDeposit, claimCancelRedeem and requestRedeem all revert. Memberlist entries expire, so a
-//     validUntil has to be agreed with Centrifuge and renewal put on the monitoring rota.
-//   - CentrifugeBeacon ownership is handed to governance inside the deploy broadcast (OZ Ownable is
-//     single-step), so there is no acceptOwnership() here — only a post-deploy check that
-//     beacon.owner() == NORMAL_TIMELOCK.
+// DRAFT. Pending before this can be proposed:
+//   1. CENTRIFUGE_YIELD_GROUP — the YieldGroupCentrifuge BeaconProxy for the USDT Hub (not deployed).
+//   2. ADAPTER_CENTRIFUGE — the stateless per-chain adapter (not deployed).
+//   3. Centrifuge must memberlist the yield-group proxy on BOTH share tokens. Both use a
+//      FullRestrictions hook, so without an entry claimDeposit, claimCancelRedeem and requestRedeem
+//      revert. Entries expire — agree a validUntil and put renewal on the monitoring rota.
+// Every other address below is live on BNB Chain and was verified on-chain (see notes inline).
 // ===================================================================================================
 
-const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, CRITICAL_GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
 
 export const ACM = ACCESS_CONTROL_MANAGER;
-export { NORMAL_TIMELOCK, GUARDIAN };
+export { NORMAL_TIMELOCK, CRITICAL_GUARDIAN };
+
+// Live Liquidity Hub keeper/operator multisig; holds `reallocate` on every Hub.
+export const OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 
 // ---------------------------------------------------------------------------------------------------
-// USDC Hub stack — live on mainnet, from VIP-650's address book. USDC on BNB Chain is 18-decimal, so
-// the caps below are in 18-dec units.
+// USDT Hub stack — verified: hub.asset() == USDT, registeredYieldGroups() == [core, flux, frv],
+// outerDepositQueue() == [core, flux], outerWithdrawQueue() == [flux, core, frv].
 // ---------------------------------------------------------------------------------------------------
-export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-export const USDC_HUB = "0x9D2D9592cF8DFbf59107fAab703d08494BE14617";
-export const USDC_CORE_GROUP = "0x299D9Be7CEfff91c68F13F267d525CFC18e965ef";
-export const USDC_FLUX_GROUP = "0xA65bB4b20542268B64CF08871a98D75342AFE927";
-export const USDC_FRV_GROUP = "0x438388847eE16850Ab4f5b82dc7954c0d043B716";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const USDT_HUB = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
+export const USDT_CORE_YIELD_GROUP = "0xC9E6ceD9589363f8dC5695Be2C79AB4dDaECC94B";
+export const USDT_FLUX_YIELD_GROUP = "0xe3df38E12E37ED80E1b3ccf2bdf84F9e1527ce14";
+export const USDT_FRV_YIELD_GROUP = "0x621eF38cE0C4e7060fF0bF3D609E3D46EC144bE7";
 
 // ---------------------------------------------------------------------------------------------------
-// PLACEHOLDERS — replace all five before proposing.
+// PENDING DEPLOYMENT — placeholders. The group must satisfy asset() == USDT and hub() == USDT_HUB.
 // ---------------------------------------------------------------------------------------------------
-// YieldGroupCentrifuge BeaconProxy for the USDC Hub. Must satisfy asset() == USDC and hub() == USDC_HUB
-// (addYieldGroup reverts YieldGroupAssetMismatch otherwise); the hub/asset/acm binding has no setter.
-export const CENTRIFUGE_GROUP = "0x1111111111111111111111111111111111111111";
-// Stateless AdapterCentrifuge, one per chain, delegatecalled by every Centrifuge group.
+export const CENTRIFUGE_YIELD_GROUP = "0x1111111111111111111111111111111111111111";
 export const ADAPTER_CENTRIFUGE = "0x2222222222222222222222222222222222222222";
-// Centrifuge ERC-7540 JTRSY vault on BNB Chain. asset() must be USDC.
-export const JTRSY_VAULT = "0x3333333333333333333333333333333333333333";
-// Centrifuge Spoke on BNB Chain — read by the price guard for the share-price timestamp.
-export const CENTRIFUGE_SPOKE = "0x4444444444444444444444444444444444444444";
-// Keeper EOA/service that drives the four async claim functions.
-export const KEEPER = "0x5555555555555555555555555555555555555555";
-
-// JTRSY share class identifiers, supplied by Centrifuge. poolId is uint64, scId is bytes16.
-export const JTRSY_POOL_ID = "1";
-export const JTRSY_SHARE_CLASS_ID = "0x00000000000000000000000000000001";
 
 // ---------------------------------------------------------------------------------------------------
-// Configuration
+// Centrifuge v3 on BNB Chain — all live
 // ---------------------------------------------------------------------------------------------------
-// Price-guard staleness window, in seconds. Centrifuge publishes NAV discretely, so this must be
-// comfortably longer than the publication cadence: a guard that fires makes totalAssets() revert,
-// which halts every Hub operation.
-export const PRICE_GUARD_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
+export const CENTRIFUGE_SPOKE = "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB";
 
-export const CENTRIFUGE_ABSOLUTE_CAP = parseUnits("5000000", 18).toString(); // 5,000,000 USDC
+export const JTRSY_VAULT = "0x6e6B8498415083a4386BE83DD59Edd4366402FFa";
+export const JTRSY_SHARE = "0xa5d465251fBCc907f5Dd6bB2145488DFC6a2627b";
+export const JTRSY_POOL_ID = "281474976710662";
+export const JTRSY_SHARE_CLASS_ID = "0x00010000000000060000000000000001";
+
+export const JAAA_VAULT = "0xcbAfe61d84C6Fb88252a6Adf1C9CB0B9D029cb99";
+export const JAAA_SHARE = "0x58F93d6b1EF2F44eC379Cb975657C132CBeD3B6b";
+export const JAAA_POOL_ID = "281474976710663";
+export const JAAA_SHARE_CLASS_ID = "0x00010000000000070000000000000001";
+
+export const CENTRIFUGE_VAULTS = [JTRSY_VAULT, JAAA_VAULT];
+
+export const PRICE_GUARD_MAX_AGE = 5 * 24 * 60 * 60; // 5 days
+
+export const CENTRIFUGE_ABSOLUTE_CAP = parseUnits("5000000", 18).toString(); // 5,000,000 USDT
 export const CENTRIFUGE_PERCENTAGE_CAP_BPS = 2_000; // 20% of Hub TVL
 
-// The withdraw queue is rewritten in full: setOuterWithdrawQueue rejects a queue that omits a
-// registered group. Centrifuge goes LAST — a settled redeem is the slowest path out.
-export const OUTER_WITHDRAW_QUEUE = [USDC_FLUX_GROUP, USDC_CORE_GROUP, USDC_FRV_GROUP, CENTRIFUGE_GROUP];
+// The group joins the Hub's outer WITHDRAW queue (last) but its own inner withdraw queue is left
+// UNSET
+export const OUTER_WITHDRAW_QUEUE = [
+  USDT_FLUX_YIELD_GROUP,
+  USDT_CORE_YIELD_GROUP,
+  USDT_FRV_YIELD_GROUP,
+  CENTRIFUGE_YIELD_GROUP,
+];
 
-// The outer DEPOSIT queue is left untouched at its launch value, mirroring how FRV is handled: an
-// async group has no business absorbing a synchronous lender deposit, so Centrifuge is filled by the
-// Operator's `reallocate` instead. Kept here for whenever that decision is revisited.
-// export const OUTER_DEPOSIT_QUEUE = [USDC_CORE_GROUP, USDC_FLUX_GROUP, CENTRIFUGE_GROUP];
-export const OUTER_DEPOSIT_QUEUE_UNCHANGED = [USDC_CORE_GROUP, USDC_FLUX_GROUP];
+// Outer DEPOSIT queue unchanged
+export const OUTER_DEPOSIT_QUEUE_UNCHANGED = [USDT_CORE_YIELD_GROUP, USDT_FLUX_YIELD_GROUP];
 
 // ---------------------------------------------------------------------------------------------------
-// ACM role strings — copied verbatim from the _checkAccessAllowed(...) calls in
-// venus-liquidity-hub/contracts/YieldGroup/base/YieldGroupBase.sol (8) and
-// venus-liquidity-hub/contracts/YieldGroup/YieldGroupCentrifuge.sol (10). The role is
-// keccak256(target, string), so a string that merely looks right grants nothing.
+// ACM role strings — verbatim from the _checkAccessAllowed(...) calls in YieldGroupBase.sol (8) and
+// YieldGroupCentrifuge.sol (10). The role is keccak256(target, string).
 // ---------------------------------------------------------------------------------------------------
-const YIELD_GROUP_BASE = [
+export const CENTRIFUGE_GOVERNANCE = [
+  // YieldGroupBase (8)
   "addResource(address,address)",
   "removeResource(address)",
   "updateResourceAdapter(address,address)",
@@ -102,9 +87,7 @@ const YIELD_GROUP_BASE = [
   "pauseResource(address)",
   "unpauseResource(address)",
   "sweep(address,address)",
-];
-
-const CENTRIFUGE_ONLY = [
+  // YieldGroupCentrifuge (10)
   "requestRedeem(address,uint256)",
   "cancelDepositRequest(address)",
   "cancelRedeemRequest(address)",
@@ -117,11 +100,9 @@ const CENTRIFUGE_ONLY = [
   "forceRemoveResource(address)",
 ];
 
-export const CENTRIFUGE_GOVERNANCE = [...YIELD_GROUP_BASE, ...CENTRIFUGE_ONLY];
-
-// Guardian: containment and wind-down with no timelock delay — reorder the queues, pause a resource,
-// and open/cancel async requests. No unpause, no claims, no sweep, no price-guard control.
-export const CENTRIFUGE_GUARDIAN = [
+// Critical Guardian: containment and wind-down, no timelock delay. No unpause, claims, sweep or
+// price-guard control.
+export const CENTRIFUGE_CRITICAL_GUARDIAN = [
   "setInnerDepositQueue(address[])",
   "setInnerWithdrawQueue(address[])",
   "pauseResource(address)",
@@ -130,7 +111,7 @@ export const CENTRIFUGE_GUARDIAN = [
   "cancelRedeemRequest(address)",
 ];
 
-// Keeper: the four claim functions only. All are idempotent and value-preserving.
+// Keeper: the four claim functions only. All idempotent and value-preserving.
 export const CENTRIFUGE_KEEPER = [
   "claimDeposit(address)",
   "claimRedeem(address)",
@@ -138,68 +119,72 @@ export const CENTRIFUGE_KEEPER = [
   "claimCancelRedeem(address)",
 ];
 
-const grant = (contract: string, sig: string, account: string): Command => ({
-  target: ACM,
-  signature: "giveCallPermission(address,string,address)",
-  params: [contract, sig, account],
-});
-
 export const vip999 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] Onboard the Centrifuge yield group (JTRSY) into the USDC Liquidity Hub",
+    title: "VIP-999 [BNB Chain] Onboard the Centrifuge yield group (JTRSY + JAAA) into the USDT Liquidity Hub",
     description: `#### Summary
 
-Registers a new **Centrifuge** yield group on the **USDC** Liquidity Hub and wires the Centrifuge
-**JTRSY** ERC-7540 vault into it, so the Hub can allocate USDC into a tokenised T-bill fund alongside
-its existing Core, Flux and FRV groups.
+Registers a new **Centrifuge** yield group on the **USDT** Liquidity Hub and wires two Centrifuge v3
+ERC-7540 vaults into it — **JTRSY** (Janus Henderson Anemoy Treasury Fund) and **JAAA** (Janus
+Henderson Anemoy AAA CLO Fund) — so the Hub can allocate USDT into tokenised funds alongside its
+existing Core, Flux and FRV groups.
 
-Centrifuge settles asynchronously: a deposit becomes a *request* that Centrifuge fills later, and a
-redemption is a request plus a claim. The yield group therefore carries the extra lifecycle surface
-(\`requestRedeem\`, the two cancellations, four claim functions) plus an optional NAV price-staleness
-guard. Those permissions are split three ways in this proposal.
+Centrifuge settles asynchronously: a deposit becomes a request Centrifuge fills later, and a
+redemption is a request plus a claim. The yield group carries that extra lifecycle surface
+(\`requestRedeem\`, two cancellations, four claims) plus an optional NAV price-staleness guard, and
+those permissions are split three ways below.
 
 #### Actions (one atomic transaction, in order)
 
 1. **ACM grants** on the new yield group: the full 18-signature governance set to the **Normal
-   Timelock**; the operator/containment subset (both inner queues, \`pauseResource\`,
-   \`requestRedeem\`, both cancellations) to the **Guardian**; the four claim functions to the
-   **keeper**.
-2. \`addResource(JTRSY vault, AdapterCentrifuge)\` on the group — must precede the queue setters,
-   which reject an unregistered resource.
-3. \`setInnerDepositQueue([JTRSY vault])\`.
-4. \`setInnerWithdrawQueue([JTRSY vault])\`.
-5. \`setPriceGuard(JTRSY vault, Spoke, poolId, scId, ${PRICE_GUARD_MAX_AGE})\` — arms the NAV
-   staleness guard with a ${PRICE_GUARD_MAX_AGE / 86400}-day window.
-6. \`addYieldGroup(Centrifuge group, 5,000,000, 2000 bps)\` on the USDC Hub — must precede the outer
-   queue setters.
-7. \`setOuterWithdrawQueue([Flux, Core, FRV, Centrifuge])\`.
-
-The withdraw queue is rewritten in full because \`setOuterWithdrawQueue\` rejects a queue that omits
-a registered group; Centrifuge is placed last, since a settled Centrifuge redemption is the slowest
-path out.
-
-The Hub's outer **deposit** queue is deliberately **left unchanged**. Centrifuge settles
-asynchronously, so a lender deposit routed into it would sit in \`pendingDepositRequest\` until
-Centrifuge fills it and a keeper claims it. The group is instead filled by the Operator's
-\`reallocate\`, exactly as the FRV groups are.
+   Timelock**; the containment subset (both inner queues, \`pauseResource\`, \`requestRedeem\`, both
+   cancellations) to the **Critical Guardian**; the four claim functions to the **keeper**.
+2. \`addResource\` for the JTRSY and JAAA vaults behind the shared \`AdapterCentrifuge\` — must
+   precede the queue setters, which reject an unregistered resource.
+3. \`setInnerDepositQueue([JTRSY, JAAA])\`. The inner **withdraw** queue is deliberately left unset —
+   see the note below.
+4. \`setPriceGuard\` for each vault against the Centrifuge Spoke, with a **5-day** staleness window.
+5. \`addYieldGroup(Centrifuge group, 5,000,000, 2000 bps)\` on the USDT Hub.
+6. \`setOuterWithdrawQueue([Flux, Core, FRV, Centrifuge])\` — rewritten in full, because the Hub
+   rejects a queue that omits a registered group holding a balance.
 
 #### Caps
 
-Absolute **5,000,000** USDC and **20%** of Hub TVL. \`_effectiveCap\` takes the lower of the two, so
-the percentage dimension binds at current TVL.
+Absolute **5,000,000** USDT and **20%** of Hub TVL. \`_effectiveCap\` takes the lower of the two, so
+the percentage dimension binds at the Hub's current TVL.
 
 #### Notes
 
-- The group proxy must be **memberlisted** on the JTRSY share token by Centrifuge. Without that entry
-  \`claimDeposit\`, \`claimCancelRedeem\` and \`requestRedeem\` revert. Memberlist entries expire, so
-  the agreed \`validUntil\` and its renewal belong on the monitoring rota.
-- A firing price guard makes \`totalAssets()\` revert, which halts **every** Hub operation. The
-  ${PRICE_GUARD_MAX_AGE / 86400}-day window is set well above Centrifuge's publication cadence for
-  that reason; \`disablePriceGuard\` is the escape hatch.
+- **User withdrawals skip the invested Centrifuge position.** The group joins the Hub's outer
+  withdraw queue, but its own inner withdraw queue is left unset. \`maxWithdraw()\` sums the inner
+  withdraw queue plus idle balance, so it reports only idle USDT and returns **0** while the funds are
+  in Centrifuge. The Hub clamps each withdraw leg to that figure and skips a zero, so lenders are paid
+  from liquid groups such as Core and Flux while the position keeps counting in \`totalAssets()\`.
+  Once a redeem settles and is claimable, a follow-up VIP calls \`setInnerWithdrawQueue\` — no Hub
+  queue change is needed then.
+- The Hub's outer **deposit** queue is left unchanged. Centrifuge settles asynchronously, so a lender
+  deposit routed into it would sit in \`pendingDepositRequest\` until Centrifuge fills it and a keeper
+  claims it. The group is filled by the Operator's \`reallocate\` instead, as FRV is.
+- Both share tokens use a **FullRestrictions** hook, so Centrifuge must memberlist the yield-group
+  proxy before \`claimDeposit\`, \`claimCancelRedeem\` and \`requestRedeem\` can succeed. Memberlist
+  entries expire; renewal belongs on the monitoring rota.
+- A firing price guard makes \`totalAssets()\` revert, halting **every** Hub operation. The Spoke
+  reports an unbounded validity window for both share classes (\`maxAge\` = \`type(uint64).max\`), so
+  the 5-day figure is derived from the observed publication cadence instead: NAV is published on
+  business days, with 1-day gaps and 4 days worst observed over the last 60. That leaves one day of
+  headroom, so the marker should be monitored; \`disablePriceGuard\` is the escape hatch.
 - The CentrifugeBeacon receives governance ownership inside the deploy transaction (OpenZeppelin
   \`Ownable\` is single-step), so no \`acceptOwnership()\` appears here.
-- The USDT and U Hubs are untouched.`,
+- The USDC and U Hubs are untouched.
+
+#### Contracts
+
+- USDT Hub: ${USDT_HUB}
+- Centrifuge yield group: ${CENTRIFUGE_YIELD_GROUP} · AdapterCentrifuge: ${ADAPTER_CENTRIFUGE}
+- JTRSY vault: ${JTRSY_VAULT} (share ${JTRSY_SHARE})
+- JAAA vault: ${JAAA_VAULT} (share ${JAAA_SHARE})
+- Centrifuge Spoke: ${CENTRIFUGE_SPOKE}`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -207,54 +192,62 @@ the percentage dimension binds at current TVL.
 
   return makeProposal(
     [
-      // ────────────────────────────────────────────────────────────────
-      // 1. ACM permissions on the new yield group
-      // ────────────────────────────────────────────────────────────────
-      ...CENTRIFUGE_GOVERNANCE.map(sig => grant(CENTRIFUGE_GROUP, sig, NORMAL_TIMELOCK)),
-      ...CENTRIFUGE_GUARDIAN.map(sig => grant(CENTRIFUGE_GROUP, sig, GUARDIAN)),
-      ...CENTRIFUGE_KEEPER.map(sig => grant(CENTRIFUGE_GROUP, sig, KEEPER)),
+      // 1a. Governance: the full set to the Normal Timelock
+      ...CENTRIFUGE_GOVERNANCE.map(sig => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CENTRIFUGE_YIELD_GROUP, sig, NORMAL_TIMELOCK],
+      })),
 
-      // ────────────────────────────────────────────────────────────────
-      // 2. Register the JTRSY vault, then its inner queues and price guard
-      // ────────────────────────────────────────────────────────────────
+      // 1b. Containment: the wind-down subset to the Critical Guardian
+      ...CENTRIFUGE_CRITICAL_GUARDIAN.map(sig => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CENTRIFUGE_YIELD_GROUP, sig, CRITICAL_GUARDIAN],
+      })),
+
+      // 1c. Claims: the four claim functions to the keeper
+      ...CENTRIFUGE_KEEPER.map(sig => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CENTRIFUGE_YIELD_GROUP, sig, OPERATOR],
+      })),
+
+      // 2. Register both vaults, then the inner queues and price guards
       {
-        target: CENTRIFUGE_GROUP,
+        target: CENTRIFUGE_YIELD_GROUP,
         signature: "addResource(address,address)",
         params: [JTRSY_VAULT, ADAPTER_CENTRIFUGE],
       },
       {
-        target: CENTRIFUGE_GROUP,
+        target: CENTRIFUGE_YIELD_GROUP,
+        signature: "addResource(address,address)",
+        params: [JAAA_VAULT, ADAPTER_CENTRIFUGE],
+      },
+      {
+        target: CENTRIFUGE_YIELD_GROUP,
         signature: "setInnerDepositQueue(address[])",
-        params: [[JTRSY_VAULT]],
+        params: [CENTRIFUGE_VAULTS],
       },
       {
-        target: CENTRIFUGE_GROUP,
-        signature: "setInnerWithdrawQueue(address[])",
-        params: [[JTRSY_VAULT]],
-      },
-      {
-        target: CENTRIFUGE_GROUP,
+        target: CENTRIFUGE_YIELD_GROUP,
         signature: "setPriceGuard(address,address,uint64,bytes16,uint64)",
         params: [JTRSY_VAULT, CENTRIFUGE_SPOKE, JTRSY_POOL_ID, JTRSY_SHARE_CLASS_ID, PRICE_GUARD_MAX_AGE],
       },
-
-      // ────────────────────────────────────────────────────────────────
-      // 3. Register the group on the Hub, then rewrite both outer queues
-      // ────────────────────────────────────────────────────────────────
       {
-        target: USDC_HUB,
-        signature: "addYieldGroup(address,uint256,uint16)",
-        params: [CENTRIFUGE_GROUP, CENTRIFUGE_ABSOLUTE_CAP, CENTRIFUGE_PERCENTAGE_CAP_BPS],
+        target: CENTRIFUGE_YIELD_GROUP,
+        signature: "setPriceGuard(address,address,uint64,bytes16,uint64)",
+        params: [JAAA_VAULT, CENTRIFUGE_SPOKE, JAAA_POOL_ID, JAAA_SHARE_CLASS_ID, PRICE_GUARD_MAX_AGE],
       },
-      // Deliberately omitted — Centrifuge is filled by the Operator's `reallocate`, not the deposit
-      // cascade. Uncomment (and restore OUTER_DEPOSIT_QUEUE above) only if that changes.
-      // {
-      //   target: USDC_HUB,
-      //   signature: "setOuterDepositQueue(address[])",
-      //   params: [OUTER_DEPOSIT_QUEUE],
-      // },
+
+      // 3. Register the group on the Hub, then append it to the outer withdraw queue
       {
-        target: USDC_HUB,
+        target: USDT_HUB,
+        signature: "addYieldGroup(address,uint256,uint16)",
+        params: [CENTRIFUGE_YIELD_GROUP, CENTRIFUGE_ABSOLUTE_CAP, CENTRIFUGE_PERCENTAGE_CAP_BPS],
+      },
+      {
+        target: USDT_HUB,
         signature: "setOuterWithdrawQueue(address[])",
         params: [OUTER_WITHDRAW_QUEUE],
       },
