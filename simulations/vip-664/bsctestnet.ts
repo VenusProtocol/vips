@@ -38,10 +38,11 @@ import VTOKEN_ABI from "./abi/VToken.json";
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 const SECONDS_PER_YEAR = 31536000;
-const ONE_SHARE = parseUnits("1", 24);
+// Hub_USDT share decimals: testnet USDT is 6 decimals and the Hub adds a 6 decimal offset.
+const ONE_SHARE = parseUnits("1", 12);
 
-// TODO(deploy): bump to a block after the mock vaults, oracles and vTokens are deployed on testnet
-// and the VTreasury has been funded with the bootstrap vhTokens.
+// TODO(deploy): bump to a block after the capped oracle and the vToken are deployed on testnet and
+// the VTreasury has been funded with the bootstrap vSHARE.
 const FORK_BLOCK = 125980273;
 
 forking(FORK_BLOCK, async () => {
@@ -68,6 +69,15 @@ forking(FORK_BLOCK, async () => {
 
       it(`${m.vToken.underlying.symbol} has no price`, async () => {
         await expect(resilientOracle.getPrice(m.vToken.underlying.address)).to.be.reverted;
+      });
+
+      it("seeds the capped oracle with a timestamp that is already in the past", async () => {
+        // setSnapshot only rejects a future timestamp when snapshotInterval is already non-zero, and
+        // the VIP calls setSnapshot before setGrowthRate, so the oracle's own guard is bypassed. A
+        // future timestamp would underflow getMaxAllowedExchangeRate and break pricing, so assert it
+        // here instead.
+        const { timestamp } = await ethers.provider.getBlock("latest");
+        expect(CAPO_SEED_TIMESTAMP).to.be.lte(timestamp);
       });
 
       it(`VTreasury holds enough ${m.vToken.underlying.symbol} for the bootstrap`, async () => {
@@ -99,7 +109,7 @@ forking(FORK_BLOCK, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
         ],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       );
     },
   });

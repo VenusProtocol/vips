@@ -7,23 +7,24 @@ import { makeProposal } from "src/utils";
 
 // Testnet mirror of vips/vip-664/bscmainnet.ts. It runs the same capped ERC4626 oracle path rather
 // than a mocked direct price, so the growth cap is exercised before mainnet.
+//
+// Mainnet lists three markets. Testnet lists one: Hub_USDT is the only Venus Hub vault deployed on
+// bsctestnet (venus-liquidity-hub deploy/config/bsctestnet.json has assetCount: 1), there is no Hub
+// for USDC or U, and no U token exists on testnet at all. Its share token is named "Vault Share" /
+// vSHARE and has 12 decimals rather than mainnet's 24, because testnet USDT is 6 decimals and the
+// Hub adds a 6 decimal offset. Every amount below is therefore denominated in 12 decimals.
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-// TODO(deploy): mock 24-decimal ERC4626 vaults, deployed alongside the oracles on bsctestnet.
-export const VHUSDT = constants.AddressZero;
-export const VHUSDC = constants.AddressZero;
-export const VHU = constants.AddressZero;
+// Hub_USDT, the testnet stand-in for mainnet's vhUSDT. Live and funded, 12 decimals.
+export const VSHARE = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61";
 
-// TODO(deploy): fill after the capped ERC4626Oracle instances are deployed on bsctestnet.
-export const VHUSDT_ORACLE = constants.AddressZero;
-export const VHUSDC_ORACLE = constants.AddressZero;
-export const VHU_ORACLE = constants.AddressZero;
+// TODO(deploy): fill after the capped ERC4626Oracle is deployed on bsctestnet
+// (VenusProtocol/oracle, tag vh-erc4626-oracles, deployment name vSHARE_ERC4626Oracle).
+export const VSHARE_ORACLE = constants.AddressZero;
 
-// TODO(deploy): fill after the vTokens are deployed on bsctestnet.
-export const VVHUSDT = constants.AddressZero;
-export const VVHUSDC = constants.AddressZero;
-export const VVHU = constants.AddressZero;
+// TODO(deploy): fill after the vToken is deployed on bsctestnet.
+export const VVSHARE = constants.AddressZero;
 
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
@@ -34,13 +35,15 @@ export const { RESILIENT_ORACLE } = bsctestnet;
 // Already deployed; backs vasBNB and vslisBNB on testnet with these exact params.
 export const JUMP_RATE_MODEL = "0x8734dBD8Ba959BbC75f2701a022f8d1D47e0722d";
 
-// Same capped-oracle configuration as mainnet. A freshly deployed mock vault sits at an exchange
-// rate of exactly 1, so the seed is 1 plus the gap.
+// Same capped-oracle configuration as mainnet. Hub_USDT currently sits at an exchange rate of
+// exactly 1 (convertToAssets(1e12) returns 1e6), so the seed is 1 plus the gap.
 export const CAPO_GROWTH_RATE_PER_YEAR = parseUnits("0.05", 18);
 export const CAPO_SNAPSHOT_INTERVAL = 30 * 24 * 60 * 60;
 export const CAPO_SNAPSHOT_GAP_BPS = BigNumber.from(41);
 export const CAPO_SEED_TIMESTAMP = 1787137060;
-export const SEED_EXCHANGE_RATE = parseUnits("1", 18);
+// Denominated in the asset's decimals, not the vault's: the oracle compares this against
+// convertToAssets(...), which returns testnet USDT, a 6 decimal token.
+export const SEED_EXCHANGE_RATE = parseUnits("1", 6);
 
 export const snapshotGap = (exchangeRate: BigNumber) => exchangeRate.mul(CAPO_SNAPSHOT_GAP_BPS).div(10000);
 export const seededSnapshot = (exchangeRate: BigNumber) => exchangeRate.add(snapshotGap(exchangeRate));
@@ -89,12 +92,12 @@ export type MarketSpec = {
   };
 };
 
-// exchangeRate scale = 18 + underlyingDecimals(24) - vTokenDecimals(8) = 34.
-const EXCHANGE_RATE = parseUnits("1", 34);
-const SUPPLY_CAP = parseUnits("10000000", 24);
+// exchangeRate scale = 18 + underlyingDecimals(12) - vTokenDecimals(8) = 22.
+const EXCHANGE_RATE = parseUnits("1", 22);
+const SUPPLY_CAP = parseUnits("10000000", 12);
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
 const RESERVE_FACTOR = parseUnits("0.1", 18);
-const BOOTSTRAP_AMOUNT = parseUnits("100", 24);
+const BOOTSTRAP_AMOUNT = parseUnits("100", 12);
 const BOOTSTRAP_BURN = parseUnits("10", 8);
 
 const IRM = {
@@ -118,7 +121,7 @@ const market = (
     address: vToken,
     name,
     symbol,
-    underlying: { address: underlying, symbol: underlyingSymbol, decimals: 24 },
+    underlying: { address: underlying, symbol: underlyingSymbol, decimals: 12 },
     decimals: 8,
     exchangeRate: EXCHANGE_RATE,
     comptroller: bsctestnet.UNITROLLER,
@@ -133,7 +136,7 @@ const market = (
     liquidationIncentive: LIQUIDATION_INCENTIVE,
     reserveFactor: RESERVE_FACTOR,
     supplyCap: SUPPLY_CAP,
-    borrowCap: parseUnits("0", 24),
+    borrowCap: parseUnits("0", 12),
   },
   initialSupply: {
     amount: BOOTSTRAP_AMOUNT,
@@ -142,27 +145,19 @@ const market = (
   },
 });
 
-export const MARKET_VHUSDT = market(
-  VVHUSDT,
-  "Venus vhUSDT",
-  "vvhUSDT",
-  VHUSDT,
-  "vhUSDT",
-  VHUSDT_ORACLE,
+// underlyingSymbol must be vSHARE: checkVToken reads symbol() off the underlying contract and the
+// Hub vault reports "vSHARE". The collateral factor mirrors mainnet's vhUSDT market.
+export const MARKET_VSHARE = market(
+  VVSHARE,
+  "Venus vSHARE",
+  "vvSHARE",
+  VSHARE,
+  "vSHARE",
+  VSHARE_ORACLE,
   parseUnits("0.8", 18),
 );
-export const MARKET_VHUSDC = market(
-  VVHUSDC,
-  "Venus vhUSDC",
-  "vvhUSDC",
-  VHUSDC,
-  "vhUSDC",
-  VHUSDC_ORACLE,
-  parseUnits("0.825", 18),
-);
-export const MARKET_VHU = market(VVHU, "Venus vhU", "vvhU", VHU, "vhU", VHU_ORACLE, parseUnits("0.75", 18));
 
-export const MARKETS: MarketSpec[] = [MARKET_VHUSDT, MARKET_VHUSDC, MARKET_VHU];
+export const MARKETS: MarketSpec[] = [MARKET_VSHARE];
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -176,10 +171,10 @@ export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initia
 export const vip664 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain Testnet] List vhUSDT, vhUSDC and vhU markets in the Venus Core Pool",
+    title: "VIP-664 [BNB Chain Testnet] List the vSHARE market in the Venus Core Pool",
     description: `#### Summary
 
-If passed, this VIP will list three new non-borrowable collateral markets — Venus vhUSDT (vvhUSDT), Venus vhUSDC (vvhUSDC) and Venus vhU (vvhU), backed by Venus Hub receipt tokens (24-decimal ERC4626) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch.`,
+If passed, this VIP will list one new non-borrowable collateral market — Venus vSHARE (vvSHARE), backed by the Venus Hub USDT receipt token (12-decimal ERC4626) — in the Venus Core Pool on BNB Chain testnet, with borrowing paused at launch. Mainnet lists three markets; testnet lists one because Hub_USDT is the only Venus Hub vault deployed there.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
