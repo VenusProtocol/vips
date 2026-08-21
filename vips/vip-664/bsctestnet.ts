@@ -19,6 +19,10 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 // Hub_USDT, the testnet stand-in for mainnet's vhUSDT. Live and funded, 12 decimals.
 export const VSHARE = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61";
 
+// The vault's ERC4626 asset. The VTreasury holds this, not vSHARE, so the bootstrap withdraws USDT
+// and deposits it into the vault rather than withdrawing the share token directly.
+export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+
 // TODO(deploy): fill after the capped ERC4626Oracle is deployed on bsctestnet
 // (VenusProtocol/oracle, tag vh-erc4626-oracles, deployment name vSHARE_ERC4626Oracle).
 export const VSHARE_ORACLE = constants.AddressZero;
@@ -87,6 +91,7 @@ export type MarketSpec = {
   };
   initialSupply: {
     amount: BigNumber;
+    assetAmount: BigNumber;
     vTokenReceiver: string;
     vTokensToBurn: BigNumber;
   };
@@ -98,6 +103,11 @@ const SUPPLY_CAP = parseUnits("10000000", 12);
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const BOOTSTRAP_AMOUNT = parseUnits("100", 12);
+// USDT the vault charges for BOOTSTRAP_AMOUNT shares. previewMint(100e12) returns exactly 100e6 on
+// testnet, where the vault sits at a 1:1 rate and has accrued no yield. Using the vault's
+// mint(shares, receiver) rather than deposit(assets, receiver) pins the share count, so the
+// approve and mint that follow can never miss by a rounding step.
+const BOOTSTRAP_ASSET_AMOUNT = parseUnits("100", 6);
 const BOOTSTRAP_BURN = parseUnits("10", 8);
 
 const IRM = {
@@ -140,6 +150,7 @@ const market = (
   },
   initialSupply: {
     amount: BOOTSTRAP_AMOUNT,
+    assetAmount: BOOTSTRAP_ASSET_AMOUNT,
     vTokenReceiver: bsctestnet.VTREASURY,
     vTokensToBurn: BOOTSTRAP_BURN,
   },
@@ -273,10 +284,29 @@ If passed, this VIP will list one new non-borrowable collateral market — Venus
         params: [m.vToken.address, m.riskParameters.liquidationIncentive],
       },
 
+      // Bootstrap liquidity. The VTreasury holds USDT but no vSHARE, so the shares are minted here
+      // rather than withdrawn: pull USDT, mint exactly BOOTSTRAP_AMOUNT shares from the vault, then
+      // supply those shares to the new market. The timelock never hands the shares back to the
+      // VTreasury in between, since it would only have to withdraw them again.
       {
         target: bsctestnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [m.vToken.underlying.address, m.initialSupply.amount, bsctestnet.NORMAL_TIMELOCK],
+        params: [USDT, m.initialSupply.assetAmount, bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [m.vToken.underlying.address, m.initialSupply.assetAmount],
+      },
+      {
+        target: m.vToken.underlying.address,
+        signature: "mint(uint256,address)",
+        params: [m.initialSupply.amount, bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [m.vToken.underlying.address, 0],
       },
       {
         target: m.vToken.underlying.address,

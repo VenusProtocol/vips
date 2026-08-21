@@ -21,6 +21,7 @@ import {
   MARKETS,
   PROTOCOL_SHARE_RESERVE,
   REDUCE_RESERVES_BLOCK_DELTA,
+  USDT,
   convertAmountToVTokens,
   seededSnapshot,
   snapshotGap,
@@ -41,8 +42,8 @@ const SECONDS_PER_YEAR = 31536000;
 // Hub_USDT share decimals: testnet USDT is 6 decimals and the Hub adds a 6 decimal offset.
 const ONE_SHARE = parseUnits("1", 12);
 
-// TODO(deploy): bump to a block after the capped oracle and the vToken are deployed on testnet and
-// the VTreasury has been funded with the bootstrap vSHARE.
+// TODO(deploy): bump to a block after the capped oracle and the vToken are deployed on testnet.
+// The VTreasury needs no vSHARE: the VIP mints the shares itself out of the Treasury's USDT.
 const FORK_BLOCK = 125980273;
 
 forking(FORK_BLOCK, async () => {
@@ -50,13 +51,13 @@ forking(FORK_BLOCK, async () => {
   const resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
 
-  // The bootstrap must draw from the Treasury's real balance, so snapshot it before executing.
-  const treasuryBalanceBefore: Record<string, BigNumber> = {};
+  // The bootstrap draws USDT, not vSHARE, from the Treasury, so snapshot the asset balance.
+  const treasuryAssetBalanceBefore: Record<string, BigNumber> = {};
 
   before(async () => {
+    const asset = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
     for (const m of MARKETS) {
-      const underlying = new ethers.Contract(m.vToken.underlying.address, ERC20_ABI, ethers.provider);
-      treasuryBalanceBefore[m.vToken.address] = await underlying.balanceOf(bsctestnet.VTREASURY);
+      treasuryAssetBalanceBefore[m.vToken.address] = await asset.balanceOf(bsctestnet.VTREASURY);
     }
   });
 
@@ -80,9 +81,15 @@ forking(FORK_BLOCK, async () => {
         expect(CAPO_SEED_TIMESTAMP).to.be.lte(timestamp);
       });
 
-      it(`VTreasury holds enough ${m.vToken.underlying.symbol} for the bootstrap`, async () => {
-        const underlying = new ethers.Contract(m.vToken.underlying.address, ERC20_ABI, ethers.provider);
-        expect(await underlying.balanceOf(bsctestnet.VTREASURY)).to.be.gte(m.initialSupply.amount);
+      it("VTreasury holds enough USDT for the bootstrap", async () => {
+        const asset = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+        expect(await asset.balanceOf(bsctestnet.VTREASURY)).to.be.gte(m.initialSupply.assetAmount);
+      });
+
+      it(`the vault still charges ${m.initialSupply.assetAmount} USDT for the bootstrap shares`, async () => {
+        // The VIP hardcodes the asset amount, so a vault rate above 1 would leave the approve short.
+        const vault = new ethers.Contract(m.vToken.underlying.address, ERC4626_ABI, ethers.provider);
+        expect(await vault.previewMint(m.initialSupply.amount)).to.be.lte(m.initialSupply.assetAmount);
       });
     }
   });
@@ -238,9 +245,22 @@ forking(FORK_BLOCK, async () => {
           expect(await underlying.balanceOf(m.vToken.address)).to.equal(m.initialSupply.amount);
         });
 
-        it("bootstrap drew the initial supply from the VTreasury's real balance", async () => {
-          const balanceAfter = await underlying.balanceOf(bsctestnet.VTREASURY);
-          expect(treasuryBalanceBefore[m.vToken.address].sub(balanceAfter)).to.equal(m.initialSupply.amount);
+        it("bootstrap drew USDT from the VTreasury's real balance", async () => {
+          const asset = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+          const balanceAfter = await asset.balanceOf(bsctestnet.VTREASURY);
+          expect(treasuryAssetBalanceBefore[m.vToken.address].sub(balanceAfter)).to.equal(m.initialSupply.assetAmount);
+        });
+
+        it("minted the bootstrap shares out of that USDT", async () => {
+          // The timelock is a pass-through: it must keep neither the asset nor the shares.
+          const asset = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+          expect(await asset.balanceOf(bsctestnet.NORMAL_TIMELOCK)).to.equal(0);
+          expect(await underlying.balanceOf(bsctestnet.NORMAL_TIMELOCK)).to.equal(0);
+        });
+
+        it("should leave no USDT approval to the vault", async () => {
+          const asset = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+          expect(await asset.allowance(bsctestnet.NORMAL_TIMELOCK, m.vToken.underlying.address)).to.equal(0);
         });
 
         it("should not leave any vTokens in the timelock", async () => {
