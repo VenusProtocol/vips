@@ -93,7 +93,6 @@ forking(FORK_BLOCK, async () => {
           "MarketListed",
           "NewSupplyCap",
           "NewBorrowCap",
-          "NewMarketInterestRateModel",
           "ActionPausedMarket",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
@@ -103,7 +102,7 @@ forking(FORK_BLOCK, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
         ],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       );
     },
   });

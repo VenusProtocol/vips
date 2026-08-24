@@ -82,6 +82,7 @@ export type MarketSpec = {
   };
   // The vault's ERC4626 asset, held by the VTreasury and spent to mint the bootstrap shares.
   asset: { address: string; symbol: string; decimals: number };
+  // Set in each vToken's constructor, so the proposal never writes it; the simulation asserts it.
   rateModel: string;
   interestRateModel: {
     model: "jump";
@@ -286,7 +287,7 @@ For each new market this VIP will:
 - Arm the growth cap on the vhToken's capped **ERC4626Oracle** (seed the snapshot, set the growth rate and set the snapshot gap)
 - Register that oracle in the ResilientOracle as the single price source. It prices the vhToken as *underlying resilient price × capped vault exchange rate*, the same design as the live asBNB and slisBNB capped oracles.
 - Add the market to the Core Pool Comptroller
-- Set the supply cap, borrow cap (0), interest rate model, collateral factor, liquidation threshold, liquidation incentive and reserve factor
+- Set the supply cap, borrow cap (0), collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
 - Provide bootstrap liquidity (withdrawing the vault's ERC4626 asset from the VTreasury, minting vhToken shares from the vault, supplying them to the new market, burning 10% of the vTokens and sending the remainder to the VTreasury)
 - Pause borrowing for the market at launch (the markets are collateral-only)
@@ -325,7 +326,7 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 
 #### Notes on the risk parameters
 
-- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. No new model is deployed: [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0) already carries exactly these parameters at 70,080,000 blocks per year and already backs the vPT-clisBNB-25JUN2026 market. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
+- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. No new model is deployed: [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0) already carries exactly these parameters at 70,080,000 blocks per year and already backs the vPT-clisBNB-25JUN2026 market. It has no economic effect while borrowing is paused, and this VIP does not set it: each market was already deployed pointing at that address. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
 - **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
 - **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
 - **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
@@ -448,13 +449,6 @@ The withdrawal is 10.2 rather than the exact cost because the vault exchange rat
         target: m.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: [REDUCE_RESERVES_BLOCK_DELTA],
-      },
-      // Set here rather than trusted from the vToken constructor, since this reuses an already
-      // deployed model instead of deploying one per market.
-      {
-        target: m.vToken.address,
-        signature: "_setInterestRateModel(address)",
-        params: [m.rateModel],
       },
       {
         target: m.vToken.address,
