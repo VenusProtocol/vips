@@ -54,8 +54,8 @@ export const CAPO_SNAPSHOT_INTERVAL = 30 * 24 * 60 * 60;
 // One snapshot interval of growth, the ratio VIP-530 applied to every asset it armed:
 // 5% * 30/365 = 0.41%.
 export const CAPO_SNAPSHOT_GAP_BPS = BigNumber.from(41);
-// Vault exchange rates below were read at block 116836175 (2026-08-19T10:57:40Z).
-export const CAPO_SEED_TIMESTAMP = 1787137060;
+// Vault exchange rates below were read at block 117780230 (2026-08-24T09:00:19Z).
+export const CAPO_SEED_TIMESTAMP = 1787562019;
 
 export const snapshotGap = (exchangeRate: BigNumber) => exchangeRate.mul(CAPO_SNAPSHOT_GAP_BPS).div(10000);
 export const seededSnapshot = (exchangeRate: BigNumber) => exchangeRate.add(snapshotGap(exchangeRate));
@@ -155,7 +155,7 @@ export const MARKET_VHUSDT: MarketSpec = {
     jumpMultiplierPerYear: "2",
     kink: "0.5",
   },
-  oracle: { address: VHUSDT_ORACLE, seedExchangeRate: parseUnits("1.000650000021349262", 18) },
+  oracle: { address: VHUSDT_ORACLE, seedExchangeRate: parseUnits("1.000933217619977068", 18) },
   riskParameters: {
     collateralFactor: parseUnits("0.8", 18),
     liquidationThreshold: parseUnits("0.8", 18),
@@ -197,7 +197,7 @@ export const MARKET_VHUSDC: MarketSpec = {
     jumpMultiplierPerYear: "2",
     kink: "0.5",
   },
-  oracle: { address: VHUSDC_ORACLE, seedExchangeRate: parseUnits("1.000815629493107489", 18) },
+  oracle: { address: VHUSDC_ORACLE, seedExchangeRate: parseUnits("1.001087844692385500", 18) },
   riskParameters: {
     collateralFactor: parseUnits("0.825", 18),
     liquidationThreshold: parseUnits("0.825", 18),
@@ -239,7 +239,7 @@ export const MARKET_VHU: MarketSpec = {
     jumpMultiplierPerYear: "2",
     kink: "0.5",
   },
-  oracle: { address: VHU_ORACLE, seedExchangeRate: parseUnits("1.000544217035461378", 18) },
+  oracle: { address: VHU_ORACLE, seedExchangeRate: parseUnits("1.000817329117253330", 18) },
   riskParameters: {
     collateralFactor: parseUnits("0.75", 18),
     liquidationThreshold: parseUnits("0.75", 18),
@@ -338,13 +338,13 @@ The oracles are deployed with the cap zeroed, exactly as the asBNB oracle was, s
 
 | | Growth rate | Snapshot interval | Snapshot gap | Seeded exchange rate |
 |---|---|---|---|---|
-| vhUSDT | 5%/yr | 30 days | 41 bps (0.004102665000087531) | 1.004752665021436793 |
-| vhUSDC | 5%/yr | 30 days | 41 bps (0.004103344080921740) | 1.004918973574029229 |
-| vhU | 5%/yr | 30 days | 41 bps (0.004102231289845391) | 1.004646448325306769 |
+| vhUSDT | 5%/yr | 30 days | 41 bps (0.004103826192241905) | 1.005037043812218973 |
+| vhUSDC | 5%/yr | 30 days | 41 bps (0.004104460163238780) | 1.005192304855624280 |
+| vhU | 5%/yr | 30 days | 41 bps (0.004103351049380738) | 1.004920680166634068 |
 
-- **The 5%/yr growth rate leaves 2–3× headroom over observed yield.** The three vaults launched ~13 days before this was written, all from an exchange rate of exactly 1.0; measured growth annualises to 1.82% (vhUSDT), 2.29% (vhUSDC) and 1.52% (vhU). A 5% cap therefore does not bind in normal operation, and matches what asBNB and slisBNB run since VIP-605.
+- **5%/yr leaves ~2.5x headroom over observed yield.** Between blocks 116836175 and 117780230 (4.92 days) the exchange rates grew at an annualised 2.10% (vhUSDT), 2.02% (vhUSDC) and 2.03% (vhU). A 5% cap therefore does not bind in normal operation, and matches what asBNB and slisBNB run since VIP-605.
 - **The 41 bps gap is one snapshot interval of capped growth** (5% × 30/365 = 0.41%), the same ratio VIP-530 applied to every asset it armed — BNBx 7.53%/yr → 63 bps, ankrBNB 6.12%/yr → 51 bps, sUSDe 28.27%/yr → 236 bps, slisBNB 4.12%/yr → 34 bps.
-- Exchange rates were read at block 116836175 (\`2026-08-19T10:57:40Z\`), which is also the snapshot timestamp. Because the seed carries 41 bps of headroom on top of the growth allowance accruing from that timestamp, drift between authoring and execution does not cap the price at listing.
+- Exchange rates were read at block 117780230 (\`2026-08-24T09:00:19Z\`), which is also the snapshot timestamp. Because the seed carries 41 bps of headroom on top of the growth allowance accruing from that timestamp, drift between authoring and execution does not cap the price at listing.
 
 #### Underlying tokens
 
@@ -352,11 +352,11 @@ Each underlying was read directly from BNB Chain and matches the listing templat
 
 | Token | Address | Name | Decimals | ERC4626 asset | Resilient price of the asset |
 |---|---|---|---|---|---|
-| vhUSDT | [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226) | Venus Hub USDT | 24 | [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | $0.9991 |
-| vhUSDC | [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617) | Venus Hub USDC | 24 | [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | $0.9998 |
+| vhUSDT | [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226) | Venus Hub USDT | 24 | [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | $0.9998 |
+| vhUSDC | [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617) | Venus Hub USDC | 24 | [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | $0.9999 |
 | vhU | [0x0e5AA174d4F31b757a237eb1999DE151596788B0](https://bscscan.com/address/0x0e5AA174d4F31b757a237eb1999DE151596788B0) | Venus Hub U | 24 | [U](https://bscscan.com/address/0xcE24439F2D9C6a2289F741120FE202248B666666) | $0.9995 |
 
-All three vaults report a share price of ~1.0006 assets per share, so each 10,000,000-share supply cap is worth roughly $10M. U trades at ~$1, so the cap is comparable to the two USD stables.
+All three vaults report a share price of ~1.0009 assets per share, so each 10,000,000-share supply cap is worth roughly $10M. U trades at ~$1, so the cap is comparable to the two USD stables.
 
 #### Bootstrap liquidity
 
