@@ -109,9 +109,9 @@ const EXCHANGE_RATE = parseUnits("1", 34);
 const SUPPLY_CAP = parseUnits("10000000", 24); // _setMarketSupplyCaps takes an underlying amount, not USD
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10%
 const RESERVE_FACTOR = parseUnits("0.1", 18); // 10% (inert while borrow is paused)
-const BOOTSTRAP_AMOUNT = parseUnits("100", 24); // ~$100 of underlying (24 dec)
-// vTokensMinted = amount * 1e18 / exchangeRate = 100e24 * 1e18 / 1e34 = 100e8; burn 10%.
-const BOOTSTRAP_BURN = parseUnits("10", 8);
+const BOOTSTRAP_AMOUNT = parseUnits("10", 24); // ~$10 of underlying (24 dec)
+// vTokensMinted = amount * 1e18 / exchangeRate = 10e24 * 1e18 / 1e34 = 10e8; burn 10%.
+const BOOTSTRAP_BURN = parseUnits("1", 8);
 
 // Market — vhUSDT
 export const MARKET_VHUSDT: MarketSpec = {
@@ -306,7 +306,7 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 - **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
 - **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
 - **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
-- **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (100 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
+- **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (10 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
 - **Protocol seize share is not settable on the Core pool.** The legacy Core vToken exposes no \`protocolSeizeShare\` getter or setter at all — the share is a constant in the implementation — which is why no Core-pool listing VIP sets it. The listing checklist asks for the value; there is nothing to configure.
 
 #### Capped oracle
@@ -337,7 +337,7 @@ All three vaults report a share price of ~1.0006 assets per share, so each 10,00
 
 #### Prerequisite
 
-The bootstrap liquidity is withdrawn from the VTreasury, which currently holds **no** vhUSDT, vhUSDC or vhU. The Treasury must be funded with at least 100 of each vhToken before this VIP executes, otherwise \`withdrawTreasuryBEP20\` reverts. The Treasury does hold the underlying stables (USDT, USDC and U), so the funding can be done by depositing into each Venus Hub vault.`,
+The bootstrap liquidity is withdrawn from the VTreasury, which currently holds **no** vhUSDT, vhUSDC or vhU. The Treasury must be funded with at least 10 of each vhToken before this VIP executes, otherwise \`withdrawTreasuryBEP20\` reverts. The Treasury does hold the underlying stables (USDT, USDC and U), so the funding can be done by depositing into each Venus Hub vault.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
