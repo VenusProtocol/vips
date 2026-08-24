@@ -80,6 +80,8 @@ export type MarketSpec = {
     comptroller: string;
     isLegacyPool: boolean;
   };
+  // The vault's ERC4626 asset, held by the VTreasury and spent to mint the bootstrap shares.
+  asset: { address: string; symbol: string; decimals: number };
   rateModel: string;
   interestRateModel: {
     model: "jump";
@@ -103,7 +105,10 @@ export type MarketSpec = {
     borrowCap: BigNumber;
   };
   initialSupply: {
+    // vhToken shares minted from the vault and then supplied to the market.
     amount: BigNumber;
+    // Asset withdrawn from the VTreasury to pay for those shares.
+    assetAmount: BigNumber;
     vTokenReceiver: string;
     vTokensToBurn: BigNumber;
   };
@@ -116,7 +121,12 @@ const EXCHANGE_RATE = parseUnits("1", 34);
 const SUPPLY_CAP = parseUnits("10000000", 24); // _setMarketSupplyCaps takes an underlying amount, not USD
 const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10%
 const RESERVE_FACTOR = parseUnits("0.1", 18); // 10% (inert while borrow is paused)
-const BOOTSTRAP_AMOUNT = parseUnits("10", 24); // ~$10 of underlying (24 dec)
+const BOOTSTRAP_AMOUNT = parseUnits("10", 24); // 10 vhToken shares, ~$10 of collateral (24 dec)
+// Asset withdrawn from the VTreasury to mint those shares. At the authoring block previewMint(10e24)
+// costs 10.009332 USDT, 10.010878 USDC and 10.008173 U; 10.2 leaves ~1.9% of exchange-rate headroom
+// so the vault mint cannot under-fund if the vaults accrue between proposal and execution. The
+// unspent remainder, under 0.2 of each asset, stays with the Normal Timelock.
+const BOOTSTRAP_ASSET_AMOUNT = parseUnits("10.2", 18);
 // vTokensMinted = amount * 1e18 / exchangeRate = 10e24 * 1e18 / 1e34 = 10e8; burn 10%.
 const BOOTSTRAP_BURN = parseUnits("1", 8);
 
@@ -136,6 +146,7 @@ export const MARKET_VHUSDT: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
+  asset: { address: USDT, symbol: "USDT", decimals: 18 },
   rateModel: JUMP_RATE_MODEL,
   interestRateModel: {
     model: "jump",
@@ -155,6 +166,7 @@ export const MARKET_VHUSDT: MarketSpec = {
   },
   initialSupply: {
     amount: BOOTSTRAP_AMOUNT,
+    assetAmount: BOOTSTRAP_ASSET_AMOUNT,
     vTokenReceiver: bscmainnet.VTREASURY,
     vTokensToBurn: BOOTSTRAP_BURN,
   },
@@ -176,6 +188,7 @@ export const MARKET_VHUSDC: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
+  asset: { address: USDC, symbol: "USDC", decimals: 18 },
   rateModel: JUMP_RATE_MODEL,
   interestRateModel: {
     model: "jump",
@@ -195,6 +208,7 @@ export const MARKET_VHUSDC: MarketSpec = {
   },
   initialSupply: {
     amount: BOOTSTRAP_AMOUNT,
+    assetAmount: BOOTSTRAP_ASSET_AMOUNT,
     vTokenReceiver: bscmainnet.VTREASURY,
     vTokensToBurn: BOOTSTRAP_BURN,
   },
@@ -216,6 +230,7 @@ export const MARKET_VHU: MarketSpec = {
     comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
+  asset: { address: U, symbol: "U", decimals: 18 },
   rateModel: JUMP_RATE_MODEL,
   interestRateModel: {
     model: "jump",
@@ -235,6 +250,7 @@ export const MARKET_VHU: MarketSpec = {
   },
   initialSupply: {
     amount: BOOTSTRAP_AMOUNT,
+    assetAmount: BOOTSTRAP_ASSET_AMOUNT,
     vTokenReceiver: bscmainnet.VTREASURY,
     vTokensToBurn: BOOTSTRAP_BURN,
   },
@@ -272,7 +288,7 @@ For each new market this VIP will:
 - Add the market to the Core Pool Comptroller
 - Set the supply cap, borrow cap (0), interest rate model, collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
-- Provide bootstrap liquidity (minting an initial supply, burning 10% and sending the remainder to the VTreasury)
+- Provide bootstrap liquidity (withdrawing the vault's ERC4626 asset from the VTreasury, minting vhToken shares from the vault, supplying them to the new market, burning 10% of the vTokens and sending the remainder to the VTreasury)
 - Pause borrowing for the market at launch (the markets are collateral-only)
 - Enable Oracle Dynamic Protection Mode / "E-brake" (DeviationBoundedOracle, see VIP-617) for the vhToken, with a stable-appropriate 5% deviation trigger
 
@@ -342,9 +358,17 @@ Each underlying was read directly from BNB Chain and matches the listing templat
 
 All three vaults report a share price of ~1.0006 assets per share, so each 10,000,000-share supply cap is worth roughly $10M. U trades at ~$1, so the cap is comparable to the two USD stables.
 
-#### Prerequisite
+#### Bootstrap liquidity
 
-The bootstrap liquidity is withdrawn from the VTreasury, which currently holds **no** vhUSDT, vhUSDC or vhU. The Treasury must be funded with at least 10 of each vhToken before this VIP executes, otherwise \`withdrawTreasuryBEP20\` reverts. The Treasury does hold the underlying stables (USDT, USDC and U), so the funding can be done by depositing into each Venus Hub vault.`,
+The VTreasury holds the three ERC4626 assets but none of the vhTokens, so this VIP does not withdraw shares. Per market it withdraws the asset, mints exactly 10 vhToken shares from the Venus Hub vault, supplies them to the new market, burns 10% of the resulting vTokens and sends the remaining 9 to the VTreasury. Every approval it grants is reset to zero in the same proposal, no vTokens are left with the Timelock, and no prior funding of the VTreasury is required.
+
+| Market | Withdrawn from VTreasury | VTreasury balance | Shares minted | Cost at block 117780230 |
+|---|---|---|---|---|
+| vvhUSDT | 10.2 USDT | 698,092.13 USDT | 10 vhUSDT | 10.009332 USDT |
+| vvhUSDC | 10.2 USDC | 58,609.10 USDC | 10 vhUSDC | 10.010878 USDC |
+| vvhU | 10.2 U | 213,189.18 U | 10 vhU | 10.008173 U |
+
+The withdrawal is 10.2 rather than the exact cost because the vault exchange rate rises continuously; the extra ~1.9% keeps the mint funded if the vaults accrue between the proposal and its execution. The unspent remainder, under 0.2 of each asset, stays with the Normal Timelock.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -448,11 +472,32 @@ The bootstrap liquidity is withdrawn from the VTreasury, which currently holds *
         params: [m.vToken.address, m.riskParameters.liquidationIncentive],
       },
 
-      // Initial liquidity: pull underlying from the Treasury, mint, burn a slice, send the remainder to the receiver.
+      // Bootstrap liquidity. The VTreasury holds the ERC4626 assets (USDT, USDC, U) but no vhTokens,
+      // so the shares are minted here rather than withdrawn: pull the asset, mint exactly
+      // BOOTSTRAP_AMOUNT shares from the vault, then supply those shares to the new market. The
+      // timelock never hands the shares back to the VTreasury in between, since it would only have
+      // to withdraw them again. Every approval is reset to 0 afterwards.
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [m.vToken.underlying.address, m.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
+        params: [m.asset.address, m.initialSupply.assetAmount, bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: m.asset.address,
+        signature: "approve(address,uint256)",
+        params: [m.vToken.underlying.address, m.initialSupply.assetAmount],
+      },
+      // mint(shares, receiver) rather than deposit(assets, receiver): it pins the share count, so
+      // the fixed amounts in every command that follows can never miss by a rounding step.
+      {
+        target: m.vToken.underlying.address,
+        signature: "mint(uint256,address)",
+        params: [m.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: m.asset.address,
+        signature: "approve(address,uint256)",
+        params: [m.vToken.underlying.address, 0],
       },
       {
         target: m.vToken.underlying.address,
