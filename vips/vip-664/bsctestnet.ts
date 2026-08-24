@@ -38,7 +38,13 @@ export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = bsctestnet;
 
-// Already deployed; backs vasBNB and vslisBNB on testnet with these exact params.
+// The testnet CheckpointView wrapper. It forwards to the plain
+// JumpRateModel_base0bps_slope900bps_jump20000bps_kink5000bps_bpy70080000
+// (0x274362695401Bb1B0468BfcFE448AD7021D97562), so both return identical rates.
+//
+// Left as deployed: this testnet VIP has already executed on chain with this address, and the market
+// has borrowing paused so the model is inert either way. Mainnet uses the plain model directly and
+// avoids the wrapper, see the note in bscmainnet.ts.
 export const JUMP_RATE_MODEL = "0x8734dBD8Ba959BbC75f2701a022f8d1D47e0722d";
 
 // Same capped-oracle configuration as mainnet. Hub_USDT currently sits at an exchange rate of

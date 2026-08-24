@@ -27,9 +27,15 @@ export const BORROW_ACTION = 2; // Comptroller Action enum: BORROW
 
 export const { RESILIENT_ORACLE } = bscmainnet;
 
-// Already deployed; backs vasBNB and vslisBNB with these exact params (base 0, multiplier 9%,
-// jump 200%, kink 50%), so no new interest rate model is deployed for these markets.
-export const JUMP_RATE_MODEL = "0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5";
+// Already deployed: the plain JumpRateModel carrying exactly these params (base 0, multiplier 9%,
+// jump 200%, kink 50%) at 70,080,000 blocks per year, live on the vPT-clisBNB-25JUN2026 market. No
+// new interest rate model is deployed for these markets.
+//
+// Deliberately not 0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5, the address vasBNB and vslisBNB use.
+// That one is a CheckpointView: a fallback proxy that forwards every call to the pre- or
+// post-migration model depending on block.timestamp. It exists so markets that predate the
+// blocks-per-year change keep continuous historical rates, which a market listed now does not have.
+export const JUMP_RATE_MODEL = "0x6463ab803FF081616ac4daC31B9B66854cc28Bc0";
 
 // Capped ERC4626 oracle. Price = underlying resilient price x capped vault exchange rate, the
 // asBNB/slisBNB design. The instances are deployed with the cap zeroed, so this VIP arms it.
@@ -296,7 +302,7 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 
 #### Notes on the risk parameters
 
-- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. No new model is deployed: [0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5](https://bscscan.com/address/0x1Ef3b851CE40B663dBbF91B86A4EE51A4a0999C5) already carries exactly these parameters and already backs vasBNB and vslisBNB. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
+- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. No new model is deployed: [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0) already carries exactly these parameters at 70,080,000 blocks per year and already backs the vPT-clisBNB-25JUN2026 market. It has no economic effect while borrowing is paused. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
 - **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
 - **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
 - **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
