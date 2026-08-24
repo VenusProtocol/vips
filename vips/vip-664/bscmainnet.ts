@@ -268,74 +268,50 @@ export const vTokensMinted = (m: MarketSpec) => convertAmountToVTokens(m.initial
 
 export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initialSupply.vTokensToBurn);
 
+// Size limit, simulation only. hardhat-ethers pins every contract call to a 29,000,000 gas limit
+// and ethers adds the calldata cost on top, so the simulated propose() is rejected once this
+// proposal's own bytes cost more than 1,000,000 gas. Nothing like it applies on chain: propose()
+// really uses 9.8M against BNB Chain's 16,777,216 per-tx cap. Today the simulated figure is
+// 29,929,560, about 70,000 gas under the limit, which is room for roughly 1,000 more description
+// characters. Add many more commands or description text and the simulation stops proposing.
 export const vip664 = () => {
   const meta = {
     version: "v2",
     title: "VIP-664 [BNB Chain] List vhUSDT, vhUSDC and vhU markets in the Venus Core Pool",
     description: `#### Summary
 
-If passed, this VIP will list three new non-borrowable collateral markets in the Venus Core Pool on BNB Chain, backed by Venus Hub receipt tokens (vhTokens), with borrowing paused at launch:
-
-- **Venus vhUSDT (vvhUSDT)** — backed by vhUSDT (Venus Hub USDT, ERC4626, 24 decimals)
-- **Venus vhUSDC (vvhUSDC)** — backed by vhUSDC (Venus Hub USDC, ERC4626, 24 decimals)
-- **Venus vhU (vvhU)** — backed by vhU (Venus Hub U, ERC4626, 24 decimals)
+If passed, this VIP will list three non-borrowable collateral markets in the Venus Core Pool on BNB Chain, backed by Venus Hub receipt tokens (vhTokens, ERC4626, 24 decimals), with borrowing paused at launch: **Venus vhUSDT (vvhUSDT)**, **Venus vhUSDC (vvhUSDC)** and **Venus vhU (vvhU)**.
 
 #### Description
 
 For each new market this VIP will:
 
-- Arm the growth cap on the vhToken's capped **ERC4626Oracle** (seed the snapshot, set the growth rate and set the snapshot gap)
-- Register that oracle in the ResilientOracle as the single price source. It prices the vhToken as *underlying resilient price × capped vault exchange rate*, the same design as the live asBNB and slisBNB capped oracles.
-- Add the market to the Core Pool Comptroller
-- Set the supply cap, borrow cap (0), collateral factor, liquidation threshold, liquidation incentive and reserve factor
+- Arm the growth cap on the vhToken's capped **ERC4626Oracle** (snapshot, growth rate, snapshot gap) and register it in the ResilientOracle as the single price source. It prices the vhToken as *underlying resilient price × capped vault exchange rate*, the design the live asBNB and slisBNB oracles use.
+- Add the market to the Core Pool Comptroller and set the supply cap, borrow cap (0), collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
-- Provide bootstrap liquidity (withdrawing the vault's ERC4626 asset from the VTreasury, minting vhToken shares from the vault, supplying them to the new market, burning 10% of the vTokens and sending the remainder to the VTreasury)
-- Pause borrowing for the market at launch (the markets are collateral-only)
-- Enable Oracle Dynamic Protection Mode / "E-brake" (DeviationBoundedOracle, see VIP-617) for the vhToken, with a stable-appropriate 5% deviation trigger
+- Provide bootstrap liquidity (see below) and pause borrowing, since the markets are collateral-only
+- Enable Oracle Dynamic Protection Mode / "E-brake" (DeviationBoundedOracle, see VIP-617) with a stable-appropriate 5% deviation trigger
 
 #### Risk parameters
 
-All three markets share the same interest rate model (base 0%, multiplier 9%, jump multiplier 200%, kink 50%); rates are inert while borrowing is paused. Per-market parameters:
+All three markets share the same interest rate model (base 0%, multiplier 9%, jump multiplier 200%, kink 50%); rates are inert while borrowing is paused.
 
-**Venus vhUSDT (vvhUSDT)**
-- Collateral factor: 80%
-- Liquidation threshold: 80%
-- Liquidation incentive: 10%
-- Reserve factor: 10%
-- Supply cap: 10,000,000 vhUSDT
-- Borrow cap: 0 (borrowing disabled)
-- E-brake trigger / reset: 5% / 2%
+| Market | Collateral factor | Liquidation threshold | Liquidation incentive | Reserve factor | Supply cap | Borrow cap | E-brake trigger / reset |
+|---|---|---|---|---|---|---|---|
+| vvhUSDT | 80% | 80% | 10% | 10% | 10,000,000 vhUSDT | 0 | 5% / 2% |
+| vvhUSDC | 82.5% | 82.5% | 10% | 10% | 10,000,000 vhUSDC | 0 | 5% / 2% |
+| vvhU | 75% | 75% | 10% | 10% | 10,000,000 vhU | 0 | 5% / 2% |
 
-**Venus vhUSDC (vvhUSDC)**
-- Collateral factor: 82.5%
-- Liquidation threshold: 82.5%
-- Liquidation incentive: 10%
-- Reserve factor: 10%
-- Supply cap: 10,000,000 vhUSDC
-- Borrow cap: 0 (borrowing disabled)
-- E-brake trigger / reset: 5% / 2%
-
-**Venus vhU (vvhU)**
-- Collateral factor: 75%
-- Liquidation threshold: 75%
-- Liquidation incentive: 10%
-- Reserve factor: 10%
-- Supply cap: 10,000,000 vhU
-- Borrow cap: 0 (borrowing disabled)
-- E-brake trigger / reset: 5% / 2%
-
-#### Notes on the risk parameters
-
-- **Interest rate model.** Although these markets are non-borrowable, a vToken requires an interest rate model at construction, so a jump-rate IRM (base 0%, multiplier 9%, jump multiplier 200%, kink 50%) is wired to make the market well-formed. No new model is deployed: [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0) already carries exactly these parameters at 70,080,000 blocks per year and already backs the vPT-clisBNB-25JUN2026 market. It has no economic effect while borrowing is paused, and this VIP does not set it: each market was already deployed pointing at that address. The listing checklist noted "IRM not needed" precisely because the market is non-borrowable — that is consistent with this VIP: the IRM exists only to satisfy the constructor and is inert.
-- **Collateral factor equals liquidation threshold** on all three markets (80/80, 82.5/82.5, 75/75). This is intentional and matches the approved risk parameters from the listing template. The vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped ERC4626 oracle with the E-brake (DeviationBoundedOracle) protection mode enabled, so no CF↔LT buffer is applied; a position opened at the maximum LTV therefore sits at the liquidation boundary, which is the deliberate design for these tightly-pegged collaterals.
-- **The three collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU).** These are the approved per-asset values set by the risk manager in the listing template — not a single blanket figure — and are ordered by the relative maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid of the three, carries the most conservative factor.
-- **Supply cap is denominated in the underlying token amount, not USD.** \`_setMarketSupplyCaps\` takes an amount of the underlying, so each cap of 10,000,000 is 10,000,000 vhTokens (24 decimals). At the current ~$1 vault price this corresponds to roughly $10M of collateral exposure per market.
-- **Reserve factor (10%), vTokenReceiver (VTreasury) and bootstrap amount (10 vhToken per market)** were not specified in the listing template and follow the standard Core-pool listing convention. The reserve factor is inert while borrowing is paused.
-- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken exposes no \`protocolSeizeShare\` getter or setter at all — the share is a constant in the implementation — which is why no Core-pool listing VIP sets it. The listing checklist asks for the value; there is nothing to configure.
+- **Interest rate model.** A vToken requires an IRM at construction even though these markets are non-borrowable, so the three markets were deployed pointing at [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0), which already carries these exact parameters at 70,080,000 blocks per year and backs the vPT-clisBNB-25JUN2026 market. No new model is deployed and this VIP does not set one, since each market already holds the intended address. It is inert while borrowing is paused, which is what the listing checklist's "IRM not needed" refers to.
+- **Collateral factor equals liquidation threshold** on all three markets, as approved: the vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped oracle with the E-brake enabled, so no CF-to-LT buffer is applied and a position at the maximum LTV sits at the liquidation boundary by design.
+- **The collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU)** — approved per-asset values, ordered by the maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid, carries the most conservative factor.
+- **Supply caps are denominated in the underlying token amount, not USD.** Each cap is 10,000,000 vhTokens (24 decimals), roughly $10M of collateral exposure at the current ~$1 vault price.
+- **Reserve factor (10%), vTokenReceiver (VTreasury) and the bootstrap amount (10 vhToken shares, ~$10 per market)** were not in the listing template and follow the standard Core-pool convention.
+- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken has no \`protocolSeizeShare\` getter or setter; the share is a constant in the implementation, which is why no Core-pool listing VIP sets it.
 
 #### Capped oracle
 
-The oracles are deployed with the cap zeroed, exactly as the asBNB oracle was, so this VIP arms it per market with \`setSnapshot\`, \`setGrowthRate\` and \`setSnapshotGap\` — the same three commands in the same order as VIP-530. The permissions for all three already sit with the Normal, Fast-Track and Critical timelocks (granted repo-wide in VIP-517), so no new ACM grants are needed.
+The three oracles were deployed with every cap argument zeroed, as the asBNB oracle was, so this VIP arms each with \`setSnapshot\`, \`setGrowthRate\` and \`setSnapshotGap\` — the same commands in the same order as VIP-530. The timelocks already hold these permissions (VIP-517), so no new ACM grants are needed.
 
 | | Growth rate | Snapshot interval | Snapshot gap | Seeded exchange rate |
 |---|---|---|---|---|
@@ -343,21 +319,18 @@ The oracles are deployed with the cap zeroed, exactly as the asBNB oracle was, s
 | vhUSDC | 5%/yr | 30 days | 41 bps (0.004104460163238780) | 1.005192304855624280 |
 | vhU | 5%/yr | 30 days | 41 bps (0.004103351049380738) | 1.004920680166634068 |
 
-- **5%/yr leaves ~2.5x headroom over observed yield.** Between blocks 116836175 and 117780230 (4.92 days) the exchange rates grew at an annualised 2.10% (vhUSDT), 2.02% (vhUSDC) and 2.03% (vhU). A 5% cap therefore does not bind in normal operation, and matches what asBNB and slisBNB run since VIP-605.
-- **The 41 bps gap is one snapshot interval of capped growth** (5% × 30/365 = 0.41%), the same ratio VIP-530 applied to every asset it armed — BNBx 7.53%/yr → 63 bps, ankrBNB 6.12%/yr → 51 bps, sUSDe 28.27%/yr → 236 bps, slisBNB 4.12%/yr → 34 bps.
-- Exchange rates were read at block 117780230 (\`2026-08-24T09:00:19Z\`), which is also the snapshot timestamp. Because the seed carries 41 bps of headroom on top of the growth allowance accruing from that timestamp, drift between authoring and execution does not cap the price at listing.
+- **5%/yr leaves ~2.5x headroom over observed yield.** Between blocks 116836175 and 117780230 (4.92 days) the exchange rates grew at an annualised 2.10% (vhUSDT), 2.02% (vhUSDC) and 2.03% (vhU). The cap matches what asBNB and slisBNB have run since VIP-605.
+- **The 41 bps gap is one snapshot interval of capped growth** (5% x 30/365 = 0.41%), the ratio VIP-530 applied to every asset it armed. It sits on top of the growth allowance accruing from the snapshot timestamp, so drift between authoring and execution does not cap the price at listing.
 
 #### Underlying tokens
 
-Each underlying was read directly from BNB Chain and matches the listing template:
+Read from BNB Chain at block 117780230, which is also the oracle snapshot timestamp, and matching the listing template. All three vaults report ~1.0009 assets per share, so each 10,000,000-share supply cap is worth roughly $10M.
 
-| Token | Address | Name | Decimals | ERC4626 asset | Resilient price of the asset |
-|---|---|---|---|---|---|
-| vhUSDT | [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226) | Venus Hub USDT | 24 | [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | $0.9998 |
-| vhUSDC | [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617) | Venus Hub USDC | 24 | [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | $0.9999 |
-| vhU | [0x0e5AA174d4F31b757a237eb1999DE151596788B0](https://bscscan.com/address/0x0e5AA174d4F31b757a237eb1999DE151596788B0) | Venus Hub U | 24 | [U](https://bscscan.com/address/0xcE24439F2D9C6a2289F741120FE202248B666666) | $0.9995 |
-
-All three vaults report a share price of ~1.0009 assets per share, so each 10,000,000-share supply cap is worth roughly $10M. U trades at ~$1, so the cap is comparable to the two USD stables.
+| Token | Address | ERC4626 asset | Resilient price of the asset |
+|---|---|---|---|
+| Venus Hub USDT (vhUSDT) | [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226) | USDT | $0.9998 |
+| Venus Hub USDC (vhUSDC) | [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617) | USDC | $0.9999 |
+| Venus Hub U (vhU) | [0x0e5AA174d4F31b757a237eb1999DE151596788B0](https://bscscan.com/address/0x0e5AA174d4F31b757a237eb1999DE151596788B0) | U | $0.9995 |
 
 #### Bootstrap liquidity
 
@@ -376,170 +349,183 @@ The withdrawal is 10.2 rather than the exact cost because the vault exchange rat
   };
 
   return makeProposal(
-    MARKETS.flatMap(m => [
-      // Arm the growth cap before the price source goes live. Order is load-bearing (see above).
-      {
-        target: m.oracle.address,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [seededSnapshot(m.oracle.seedExchangeRate), CAPO_SEED_TIMESTAMP],
-      },
-      {
-        target: m.oracle.address,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [CAPO_GROWTH_RATE_PER_YEAR, CAPO_SNAPSHOT_INTERVAL],
-      },
-      {
-        target: m.oracle.address,
-        signature: "setSnapshotGap(uint256)",
-        params: [snapshotGap(m.oracle.seedExchangeRate)],
-      },
+    [
+      MARKETS.flatMap(m => [
+        // Arm the growth cap before the price source goes live. Order is load-bearing (see above).
+        {
+          target: m.oracle.address,
+          signature: "setSnapshot(uint256,uint256)",
+          params: [seededSnapshot(m.oracle.seedExchangeRate), CAPO_SEED_TIMESTAMP],
+        },
+        {
+          target: m.oracle.address,
+          signature: "setGrowthRate(uint256,uint256)",
+          params: [CAPO_GROWTH_RATE_PER_YEAR, CAPO_SNAPSHOT_INTERVAL],
+        },
+        {
+          target: m.oracle.address,
+          signature: "setSnapshotGap(uint256)",
+          params: [snapshotGap(m.oracle.seedExchangeRate)],
+        },
 
-      // Oracle configuration — single source: the capped ERC4626Oracle for the vhToken.
-      // The ERC4626Oracle reads the underlying (USDT/USDC/USD1) price from the ResilientOracle
-      // itself and applies the growth-rate cap on the vault exchange rate, so no extra feed
-      // configuration is required.
-      {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            m.vToken.underlying.address,
-            [m.oracle.address, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+        // Oracle configuration — single source: the capped ERC4626Oracle for the vhToken.
+        // The ERC4626Oracle reads the underlying (USDT/USDC/USD1) price from the ResilientOracle
+        // itself and applies the growth-rate cap on the vault exchange rate, so no extra feed
+        // configuration is required.
+        {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3],bool))",
+          params: [
+            [
+              m.vToken.underlying.address,
+              [m.oracle.address, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
           ],
-        ],
-      },
+        },
 
-      // Add market
-      {
-        target: m.vToken.comptroller,
-        signature: "_supportMarket(address)",
-        params: [m.vToken.address],
-      },
-      {
-        target: m.vToken.comptroller,
-        signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[m.vToken.address], [m.riskParameters.supplyCap]],
-      },
-      // Explicit, though a fresh market already defaults to 0: the borrow cap is a stated risk
-      // parameter, and relying on a default is what hid the unarmed price cap.
-      {
-        target: m.vToken.comptroller,
-        signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[m.vToken.address], [m.riskParameters.borrowCap]],
-      },
-      // Pause borrowing for the market at launch (collateral-only markets).
-      {
-        target: m.vToken.comptroller,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[m.vToken.address], [BORROW_ACTION], true],
-      },
-      {
-        target: m.vToken.address,
-        signature: "setAccessControlManager(address)",
-        params: [bscmainnet.ACCESS_CONTROL_MANAGER],
-      },
-      {
-        target: m.vToken.address,
-        signature: "setProtocolShareReserve(address)",
-        params: [PROTOCOL_SHARE_RESERVE],
-      },
-      {
-        target: m.vToken.address,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: [REDUCE_RESERVES_BLOCK_DELTA],
-      },
-      {
-        target: m.vToken.address,
-        signature: "_setReserveFactor(uint256)",
-        params: [m.riskParameters.reserveFactor],
-      },
-      {
-        target: m.vToken.comptroller,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [m.vToken.address, m.riskParameters.collateralFactor, m.riskParameters.liquidationThreshold],
-      },
-      {
-        target: m.vToken.comptroller,
-        signature: "setLiquidationIncentive(address,uint256)",
-        params: [m.vToken.address, m.riskParameters.liquidationIncentive],
-      },
+        // Add market
+        {
+          target: m.vToken.comptroller,
+          signature: "_supportMarket(address)",
+          params: [m.vToken.address],
+        },
+      ]),
 
-      // Bootstrap liquidity. The VTreasury holds the ERC4626 assets (USDT, USDC, U) but no vhTokens,
-      // so the shares are minted here rather than withdrawn: pull the asset, mint exactly
-      // BOOTSTRAP_AMOUNT shares from the vault, then supply those shares to the new market. The
-      // timelock never hands the shares back to the VTreasury in between, since it would only have
-      // to withdraw them again. Every approval is reset to 0 afterwards.
-      {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [m.asset.address, m.initialSupply.assetAmount, bscmainnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: m.asset.address,
-        signature: "approve(address,uint256)",
-        params: [m.vToken.underlying.address, m.initialSupply.assetAmount],
-      },
-      // mint(shares, receiver) rather than deposit(assets, receiver): it pins the share count, so
-      // the fixed amounts in every command that follows can never miss by a rounding step.
-      {
-        target: m.vToken.underlying.address,
-        signature: "mint(uint256,address)",
-        params: [m.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: m.asset.address,
-        signature: "approve(address,uint256)",
-        params: [m.vToken.underlying.address, 0],
-      },
-      {
-        target: m.vToken.underlying.address,
-        signature: "approve(address,uint256)",
-        params: [m.vToken.address, m.initialSupply.amount],
-      },
-      {
-        target: m.vToken.address,
-        signature: "mint(uint256)",
-        params: [m.initialSupply.amount],
-      },
-      {
-        target: m.vToken.underlying.address,
-        signature: "approve(address,uint256)",
-        params: [m.vToken.address, 0],
-      },
-      // Burn a slice of vTokens.
-      {
-        target: m.vToken.address,
-        signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, m.initialSupply.vTokensToBurn],
-      },
-      // Transfer remaining vTokens to the receiver (VTreasury).
-      {
-        target: m.vToken.address,
-        signature: "transfer(address,uint256)",
-        params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
-      },
+      // Caps and the borrow pause take market arrays, so all three markets go in one call each
+      // rather than three. The Comptroller loops over the array and still emits one event per
+      // market. They must follow every _supportMarket above (the Comptroller rejects an unlisted
+      // market) and precede the bootstrap mint below (a fresh market's supply cap is 0, which
+      // would make mint revert).
+      [
+        {
+          target: bscmainnet.UNITROLLER,
+          signature: "_setMarketSupplyCaps(address[],uint256[])",
+          params: [MARKETS.map(m => m.vToken.address), MARKETS.map(m => m.riskParameters.supplyCap)],
+        },
+        // Explicit, though a fresh market already defaults to 0: the borrow cap is a stated risk
+        // parameter, and relying on a default is what hid the unarmed price cap.
+        {
+          target: bscmainnet.UNITROLLER,
+          signature: "_setMarketBorrowCaps(address[],uint256[])",
+          params: [MARKETS.map(m => m.vToken.address), MARKETS.map(m => m.riskParameters.borrowCap)],
+        },
+        // Pause borrowing on all three markets at launch (collateral-only markets).
+        {
+          target: bscmainnet.UNITROLLER,
+          signature: "setActionsPaused(address[],uint8[],bool)",
+          params: [MARKETS.map(m => m.vToken.address), [BORROW_ACTION], true],
+        },
+      ],
 
-      // Enable Oracle Dynamic Protection Mode / "E-brake" (DBO) for the vhToken with a 5% deviation
-      // trigger. Must stay last: setTokenConfig seeds minPrice and maxPrice from
-      // RESILIENT_ORACLE.getPrice(asset), so it reverts unless the capped oracle is already
-      // registered above. The seeding is why no separate bounds command is needed.
-      {
-        target: DEVIATION_BOUNDED_ORACLE,
-        signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
-        params: [
-          [
-            m.vToken.underlying.address,
-            DBO_COOLDOWN_PERIOD,
-            DBO_TRIGGER_THRESHOLD,
-            DBO_RESET_THRESHOLD,
-            true, // enableBoundedPricing
-            false, // enableCaching
+      MARKETS.flatMap(m => [
+        {
+          target: m.vToken.address,
+          signature: "setAccessControlManager(address)",
+          params: [bscmainnet.ACCESS_CONTROL_MANAGER],
+        },
+        {
+          target: m.vToken.address,
+          signature: "setProtocolShareReserve(address)",
+          params: [PROTOCOL_SHARE_RESERVE],
+        },
+        {
+          target: m.vToken.address,
+          signature: "setReduceReservesBlockDelta(uint256)",
+          params: [REDUCE_RESERVES_BLOCK_DELTA],
+        },
+        {
+          target: m.vToken.address,
+          signature: "_setReserveFactor(uint256)",
+          params: [m.riskParameters.reserveFactor],
+        },
+        {
+          target: m.vToken.comptroller,
+          signature: "setCollateralFactor(address,uint256,uint256)",
+          params: [m.vToken.address, m.riskParameters.collateralFactor, m.riskParameters.liquidationThreshold],
+        },
+        {
+          target: m.vToken.comptroller,
+          signature: "setLiquidationIncentive(address,uint256)",
+          params: [m.vToken.address, m.riskParameters.liquidationIncentive],
+        },
+
+        // Bootstrap liquidity. The VTreasury holds the ERC4626 assets (USDT, USDC, U) but no vhTokens,
+        // so the shares are minted here rather than withdrawn: pull the asset, mint exactly
+        // BOOTSTRAP_AMOUNT shares from the vault, then supply those shares to the new market. The
+        // timelock never hands the shares back to the VTreasury in between, since it would only have
+        // to withdraw them again. Every approval is reset to 0 afterwards.
+        {
+          target: bscmainnet.VTREASURY,
+          signature: "withdrawTreasuryBEP20(address,uint256,address)",
+          params: [m.asset.address, m.initialSupply.assetAmount, bscmainnet.NORMAL_TIMELOCK],
+        },
+        {
+          target: m.asset.address,
+          signature: "approve(address,uint256)",
+          params: [m.vToken.underlying.address, m.initialSupply.assetAmount],
+        },
+        // mint(shares, receiver) rather than deposit(assets, receiver): it pins the share count, so
+        // the fixed amounts in every command that follows can never miss by a rounding step.
+        {
+          target: m.vToken.underlying.address,
+          signature: "mint(uint256,address)",
+          params: [m.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
+        },
+        {
+          target: m.asset.address,
+          signature: "approve(address,uint256)",
+          params: [m.vToken.underlying.address, 0],
+        },
+        {
+          target: m.vToken.underlying.address,
+          signature: "approve(address,uint256)",
+          params: [m.vToken.address, m.initialSupply.amount],
+        },
+        {
+          target: m.vToken.address,
+          signature: "mint(uint256)",
+          params: [m.initialSupply.amount],
+        },
+        {
+          target: m.vToken.underlying.address,
+          signature: "approve(address,uint256)",
+          params: [m.vToken.address, 0],
+        },
+        // Burn a slice of vTokens.
+        {
+          target: m.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [ethers.constants.AddressZero, m.initialSupply.vTokensToBurn],
+        },
+        // Transfer remaining vTokens to the receiver (VTreasury).
+        {
+          target: m.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [m.initialSupply.vTokenReceiver, vTokensRemaining(m)],
+        },
+
+        // Enable Oracle Dynamic Protection Mode / "E-brake" (DBO) for the vhToken with a 5% deviation
+        // trigger. Must stay last: setTokenConfig seeds minPrice and maxPrice from
+        // RESILIENT_ORACLE.getPrice(asset), so it reverts unless the capped oracle is already
+        // registered above. The seeding is why no separate bounds command is needed.
+        {
+          target: DEVIATION_BOUNDED_ORACLE,
+          signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
+          params: [
+            [
+              m.vToken.underlying.address,
+              DBO_COOLDOWN_PERIOD,
+              DBO_TRIGGER_THRESHOLD,
+              DBO_RESET_THRESHOLD,
+              true, // enableBoundedPricing
+              false, // enableCaching
+            ],
           ],
-        ],
-      },
-    ]),
+        },
+      ]),
+    ].flat(),
     meta,
     ProposalType.REGULAR,
   );
