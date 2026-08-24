@@ -44,9 +44,9 @@ const ONE_SHARE = parseUnits("1", 24);
 const MIN_SHARE_PRICE = parseUnits("0.95", 12);
 const MAX_SHARE_PRICE = parseUnits("1.05", 12);
 
-// TODO(deploy): bump to a block after the 3 capped ERC4626 oracles and 3 vTokens are deployed and
-// the VTreasury has been funded with the bootstrap vhTokens.
-const FORK_BLOCK = 116824477;
+// Block 117780230, 2026-08-24T09:00:19Z. The three oracles and the three vTokens are deployed and
+// unconfigured at this block, and it is the block the oracle snapshots are seeded from.
+const FORK_BLOCK = 117780230;
 
 forking(FORK_BLOCK, async () => {
   const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);

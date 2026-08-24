@@ -1,4 +1,4 @@
-import { BigNumber, constants } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -6,20 +6,27 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 // VIP-664 [BNB Chain] List vhUSDT, vhUSDC and vhU in the Venus Core Pool.
-// The oracle and vToken addresses below are filled once the deploy PRs land; until then the
-// simulation cannot execute. Remaining prerequisites are tracked in the PR description.
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// TODO(deploy): fill after the capped ERC4626Oracle instances are deployed on BNB Chain.
-export const VHUSDT_ORACLE = constants.AddressZero;
-export const VHUSDC_ORACLE = constants.AddressZero;
-export const VHU_ORACLE = constants.AddressZero;
+// Capped ERC4626 oracles, deployed from VenusProtocol/oracle under the vh-erc4626-oracles tag with
+// every cap argument zeroed. The first three commands per market arm them.
+export const VHUSDT_ORACLE = "0x50a998cf59Fe719129702125C9078b0B429DA6E7";
+export const VHUSDC_ORACLE = "0x85aa49526287F06cb36d57121BC7abAF58a8787a";
+export const VHU_ORACLE = "0x5b3735F362ed89b51FBe244509e398BFDDaC8da9";
 
-// TODO(deploy): fill after the vTokens are deployed on BNB Chain.
-export const VVHUSDT = constants.AddressZero;
-export const VVHUSDC = constants.AddressZero;
-export const VVHU = constants.AddressZero;
+// VBep20Delegator markets, deployed from VenusProtocol/venus-protocol. Each was constructed with
+// admin = NormalTimelock, an initial exchange rate of 1e34, the interest rate model below and the
+// VBep20Delegate implementation 0xCDfea50f7CECCB24Fe804657DB8E6c93b689941e already used by the pool.
+export const VVHUSDT = "0xc0768948e668B7BacFf8b4BD1BaBe0eD2b512d3c";
+export const VVHUSDC = "0xb1AB0399766997C5d66a30b2f2055277B7FA5D6C";
+export const VVHU = "0x80a5694441810d2b871BEeD644b6d16D113ce06E";
+
+// ERC4626 assets of the three vaults. The VTreasury holds these, not the vhTokens, so the bootstrap
+// withdraws the asset and mints the shares from the vault instead of withdrawing shares directly.
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
