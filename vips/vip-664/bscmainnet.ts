@@ -307,7 +307,7 @@ All three markets share the same interest rate model (base 0%, multiplier 9%, ju
 - **The collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU)** — approved per-asset values, ordered by the maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid, carries the most conservative factor.
 - **Supply caps are denominated in the underlying token amount, not USD.** Each cap is 10,000,000 vhTokens (24 decimals), roughly $10M of collateral exposure at the current ~$1 vault price.
 - **Reserve factor (10%), vTokenReceiver (VTreasury) and the bootstrap amount (10 vhToken shares, ~$10 per market)** were not in the listing template and follow the standard Core-pool convention.
-- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken has no \`protocolSeizeShare\` getter or setter; the share is a constant in the implementation, which is why no Core-pool listing VIP sets it.
+- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken has no \`protocolSeizeShare\` getter or setter, and its \`seize\` moves the whole seized amount to the liquidator. The protocol's cut is taken by the Liquidator contract's treasury percentage, which is pool wide rather than per market, so there is nothing for a listing VIP to set.
 
 #### Capped oracle
 
