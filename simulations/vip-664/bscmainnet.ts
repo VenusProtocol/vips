@@ -59,6 +59,11 @@ const USER_ASSET = parseUnits("1100", 18);
 // lowest of the three collateral factors (75%).
 const USER_BORROW = parseUnits("100", 18);
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+// Core routes every liquidation through this contract; the Comptroller rejects any other caller.
+const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
+const LIQUIDATOR_ABI = [
+  "function liquidateBorrow(address vToken, address borrower, uint256 repayAmount, address vTokenCollateral) payable",
+];
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
 // Block 117780230, 2026-08-24T09:00:19Z. The three oracles and the three vTokens are deployed and
@@ -493,9 +498,86 @@ forking(FORK_BLOCK, async () => {
           expect((await vault.balanceOf(user.address)).sub(sharesBefore)).to.equal(USER_SHARES);
         });
 
+        it("can be seized by a liquidator when the position goes underwater", async () => {
+          // The only reason to list a collateral-only market is to be seized when a borrow sours,
+          // and these are the protocol's first 24-decimal collaterals, so exercise the seize math
+          // rather than assume it. The position is pushed underwater by lowering the collateral
+          // factor, which is a normal governance action, instead of distorting the capped price.
+          const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("5", 18));
+          const holder = await initMainnetUser(ASSET_HOLDER, parseUnits("2", 18));
+          const vUsdt = new ethers.Contract(VUSDT, VTOKEN_ABI, ethers.provider);
+          const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+          const signers = await ethers.getSigners();
+          const borrower = signers[MARKETS.length + marketIndex];
+          const liquidator = signers[2 * MARKETS.length + marketIndex];
+
+          // Fresh borrower position: supply the new collateral, borrow USDT against it.
+          const assetAsHolder = new ethers.Contract(m.asset.address, ERC20_ABI, holder);
+          await assetAsHolder.transfer(borrower.address, USER_ASSET);
+          const assetAsBorrower = new ethers.Contract(m.asset.address, ERC20_ABI, borrower);
+          await assetAsBorrower.approve(m.vToken.underlying.address, USER_ASSET);
+          await vault.connect(borrower).mint(USER_SHARES, borrower.address);
+          await assetAsBorrower.approve(m.vToken.underlying.address, 0);
+          await vault.connect(borrower).approve(m.vToken.address, USER_SHARES);
+          await vToken.connect(borrower).mint(USER_SHARES);
+          await comptroller.connect(borrower).enterMarkets([m.vToken.address]);
+          await vUsdt.connect(borrower).borrow(USER_BORROW);
+
+          const originalCf = m.riskParameters.collateralFactor;
+          await comptroller.connect(timelock)["setCollateralFactor(address,uint256,uint256)"](m.vToken.address, 0, 0);
+          const [, liquidity, shortfall] = await comptroller.getAccountLiquidity(borrower.address);
+          expect(liquidity).to.equal(0);
+          expect(shortfall).to.be.gt(0);
+
+          // Repay what the close factor allows and seize the new collateral.
+          const closeFactor = await comptroller.closeFactorMantissa();
+          const debt = await vUsdt.callStatic.borrowBalanceCurrent(borrower.address);
+          const repay = debt.mul(closeFactor).div(parseUnits("1", 18));
+          const expectedSeize = (
+            await comptroller["liquidateCalculateSeizeTokens(address,address,uint256)"](VUSDT, m.vToken.address, repay)
+          )[1];
+          expect(expectedSeize).to.be.gt(0);
+
+          // Core rejects a direct vToken.liquidateBorrow: the Comptroller returns UNAUTHORIZED
+          // unless the caller is the configured Liquidator contract, and the legacy vToken reports
+          // that as a return code rather than a revert, so a direct call would fail silently.
+          expect(await comptroller.liquidatorContract()).to.equal(LIQUIDATOR);
+          const liquidatorContract = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, ethers.provider);
+          await usdt.connect(holder).transfer(liquidator.address, repay);
+          await usdt.connect(liquidator).approve(LIQUIDATOR, repay);
+          const borrowerBefore = await vToken.balanceOf(borrower.address);
+          const liquidatorBefore = await vToken.balanceOf(liquidator.address);
+          await liquidatorContract
+            .connect(liquidator)
+            .liquidateBorrow(VUSDT, borrower.address, repay, m.vToken.address);
+
+          // The borrower loses exactly what the Comptroller quoted. The vToken's seize moves all of
+          // it, and the Liquidator then keeps its treasury percentage, so the caller nets less.
+          const seized = borrowerBefore.sub(await vToken.balanceOf(borrower.address));
+          const received = (await vToken.balanceOf(liquidator.address)).sub(liquidatorBefore);
+          expect(seized).to.equal(expectedSeize);
+          expect(received).to.be.gt(0).and.to.be.lte(expectedSeize);
+
+          // The seize is worth the repaid debt plus the 10% incentive, which is the check that
+          // would fail on a decimals mistake between the 24-decimal underlying and the 8-decimal
+          // vToken. Allow a percent of slack for the two independent oracle prices.
+          const collateralValue = seized
+            .mul(m.vToken.exchangeRate)
+            .div(parseUnits("1", 18))
+            .mul(await resilientOracle.getUnderlyingPrice(m.vToken.address))
+            .div(parseUnits("1", 18));
+          const repaidValue = repay.mul(await resilientOracle.getUnderlyingPrice(VUSDT)).div(parseUnits("1", 18));
+          const incentive = collateralValue.mul(parseUnits("1", 18)).div(repaidValue);
+          expect(incentive).to.be.gt(parseUnits("1.09", 18)).and.lt(parseUnits("1.11", 18));
+
+          await comptroller
+            .connect(timelock)
+            ["setCollateralFactor(address,uint256,uint256)"](m.vToken.address, originalCf, originalCf);
+        });
+
         it("leaves the bootstrap liquidity untouched", async () => {
-          // Supplying, borrowing and redeeming must not touch the burned slice or the Treasury's
-          // share, and can never take the market below the bootstrap it launched on.
+          // Supplying, borrowing, redeeming and being liquidated must not touch the burned slice or
+          // the Treasury's share, and can never take the market below the bootstrap it launched on.
           expect(await vToken.balanceOf(ethers.constants.AddressZero)).to.equal(m.initialSupply.vTokensToBurn);
           expect(await vToken.balanceOf(m.initialSupply.vTokenReceiver)).to.equal(vTokensRemaining(m));
           expect(await vToken.totalSupply()).to.be.gte(
