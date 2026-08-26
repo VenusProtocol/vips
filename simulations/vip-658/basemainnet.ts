@@ -11,8 +11,8 @@ import {
   runPreVipAssertions,
 } from "./shared";
 
-// Recent Base block (node-supported, used by recent VIP sims). USDC / cbBTC / wstETH
-// all wired at 3% per the V2 doc's "current" column. No pool changes on Base.
+// Recent Base block (node-supported, used by recent VIP sims). USDC wired at 1%,
+// cbBTC / wstETH at 3% per the V2 doc's "current" column. No pool changes on Base.
 const FORK_BLOCK = 47410957;
 
 const a = NETWORK_ADDRESSES.basemainnet;
