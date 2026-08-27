@@ -30,7 +30,7 @@ const TEST_CONFIG: TestConfig = {
 
 forking(FORK_BLOCK, async () => {
   runConfigSanity(TEST_CONFIG);
-  runCommandCountAssertion("Ethereum", 26);
+  runCommandCountAssertion(ETHEREUM_CTX, 26);
   runPreVipAssertions(TEST_CONFIG);
 
   testForkedNetworkVipCommands("VIP-658 [Ethereum] DeviationSentinel 2026-08 Parameter Adjustment", await vip658(), {

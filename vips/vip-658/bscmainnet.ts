@@ -58,7 +58,7 @@ const assertNever = (x: never, message: string): never => {
   throw new Error(`${message}: ${JSON.stringify(x)}`);
 };
 
-const dexOracleFor = (ctx: ChainContext, m: MarketEntry): string => {
+export const dexOracleFor = (ctx: ChainContext, m: MarketEntry): string => {
   const t = m.oracleType ?? "uniswap";
   switch (t) {
     case "uniswap":
@@ -124,7 +124,6 @@ const commandsForMarket = (ctx: ChainContext, m: MarketEntry): Command[] => {
       return [];
     case "retune":
       return [buildSetTokenConfigCmd(ctx, m, m.targetPct, true)];
-    case "promote":
     case "poolSwap": {
       const cmds = [buildPoolConfigCmd(ctx, m)];
       if (!m.skipOracleRepoint) cmds.push(buildSentinelOracleCmd(ctx, m));
@@ -181,7 +180,7 @@ _Note: for crvUSD, sUSDS, WBTC, LBTC and WETH the SentinelOracle already routes 
 
 **Base — 3 commands**
 
-- Retune to **5%**: USDC (1% → 5%); cbBTC, wstETH (3% → 5%). No pool changes.
+- Retune to **5%**: USDC, cbBTC, wstETH (3% → 5%). No pool changes.
 
 #### Notes
 

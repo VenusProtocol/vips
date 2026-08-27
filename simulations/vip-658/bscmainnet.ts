@@ -32,7 +32,7 @@ const TEST_CONFIG: TestConfig = {
 
 forking(FORK_BLOCK, async () => {
   runConfigSanity(TEST_CONFIG);
-  runCommandCountAssertion("BSC", 14);
+  runCommandCountAssertion(BSC_CTX, 14);
   runPreVipAssertions(TEST_CONFIG);
 
   testVip("VIP-658 [BSC] DeviationSentinel 2026-08 Parameter Adjustment", await vip658(), {

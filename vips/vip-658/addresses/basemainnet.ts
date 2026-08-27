@@ -24,11 +24,12 @@ const POOL_WSTETH_WETH_AERO = "0x861a2922be165a5bd41b1e482b49216b465e1b5f";
 
 // ============================================================
 // Base market table (threshold-only retune → 5%; no pool changes per V2 doc).
-// currentPct verified on the fork's pre-VIP assertions (2026-08-26): USDC = 1%,
-// cbBTC / wstETH = 3%.
+// currentPct verified on-chain (tokenConfigs on DeviationSentinel 0x12D0…3076,
+// block 50503680, 2026-08-27): USDC / cbBTC / wstETH all = 3%. (USDC was retuned
+// 1% → 3% by the Base Guardian at block 50298851; the V2 doc's 5% target stands.)
 // ============================================================
 export const BASEMAINNET_MARKETS: MarketEntry[] = [
-  { symbol: "USDC", token: USDC, pool: POOL_WETH_USDC_UNIV3, currentPct: 1, targetPct: 5, action: "retune" },
+  { symbol: "USDC", token: USDC, pool: POOL_WETH_USDC_UNIV3, currentPct: 3, targetPct: 5, action: "retune" },
   {
     symbol: "cbBTC",
     token: CBBTC,

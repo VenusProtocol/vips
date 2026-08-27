@@ -27,7 +27,7 @@ const TEST_CONFIG: TestConfig = {
 
 forking(FORK_BLOCK, async () => {
   runConfigSanity(TEST_CONFIG);
-  runCommandCountAssertion("Arbitrum One", 7);
+  runCommandCountAssertion(ARBITRUMONE_CTX, 7);
   runPreVipAssertions(TEST_CONFIG);
 
   testForkedNetworkVipCommands(

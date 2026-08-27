@@ -1,10 +1,11 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 
-import { buildAllCommands } from "../../vips/vip-658/bscmainnet";
+import { buildAllCommands, dexOracleFor } from "../../vips/vip-658/bscmainnet";
 import type { ChainContext, MarketEntry } from "../../vips/vip-658/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import AERODROME_ORACLE_ABI from "./abi/AerodromeSlipstreamOracle.json";
@@ -12,7 +13,6 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import CURVE_ORACLE_ABI from "./abi/CurveOracle.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComptroller.json";
-import PANCAKESWAP_ORACLE_ABI from "./abi/PancakeSwapOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
 import UNISWAP_ORACLE_ABI from "./abi/UniswapOracle.json";
@@ -40,20 +40,15 @@ export interface TestConfig {
 // Internal helpers
 // ──────────────────────────────────────────────────────────────────────────
 
-const dexOracleAddress = (ctx: ChainContext, m: MarketEntry): string => {
-  const t = m.oracleType ?? "uniswap";
-  if (t === "uniswap") return ctx.uniswapOracle;
-  if (t === "curve") {
-    if (!ctx.curveOracle) throw new Error(`${ctx.name}: ${m.symbol} requires curveOracle`);
-    return ctx.curveOracle;
-  }
-  if (!ctx.aerodromeOracle) throw new Error(`${ctx.name}: ${m.symbol} requires aerodromeOracle`);
-  return ctx.aerodromeOracle;
-};
+// DEX-oracle address for a market — reuses the proposal builder's resolver so the
+// simulation checks against exactly the address the VIP targets.
+const dexOracleAddress = dexOracleFor;
 
-const dexOracleAbi = (ctx: ChainContext, m: MarketEntry) => {
+const dexOracleAbi = (m: MarketEntry) => {
+  // BSC's PancakeSwapOracle shares the UniswapOracle ABI (same setPoolConfig /
+  // PoolConfigUpdated shape), so one Uniswap ABI covers every "uniswap" market.
   const t = m.oracleType ?? "uniswap";
-  if (t === "uniswap") return ctx.name === "BSC" ? PANCAKESWAP_ORACLE_ABI : UNISWAP_ORACLE_ABI;
+  if (t === "uniswap") return UNISWAP_ORACLE_ABI;
   if (t === "curve") return CURVE_ORACLE_ABI;
   return AERODROME_ORACLE_ABI;
 };
@@ -63,7 +58,6 @@ const currentEnabled = (m: MarketEntry): boolean => m.currentEnabled ?? m.curren
 
 interface Partitioned {
   retunes: MarketEntry[]; // setTokenConfig only (threshold change)
-  promotes: MarketEntry[]; // pool + oracle + setTokenConfig (new wire)
   poolSwaps: MarketEntry[]; // pool + oracle + setTokenConfig (rebind + retune)
   poolOnly: MarketEntry[]; // pool + oracle (threshold left unchanged)
   disables: MarketEntry[]; // setTokenMonitoringEnabled(token, false)
@@ -72,7 +66,6 @@ interface Partitioned {
 
 const partition = (markets: MarketEntry[]): Partitioned => ({
   retunes: markets.filter(m => m.action === "retune"),
-  promotes: markets.filter(m => m.action === "promote"),
   poolSwaps: markets.filter(m => m.action === "poolSwap"),
   poolOnly: markets.filter(m => m.action === "poolOnly"),
   disables: markets.filter(m => m.action === "disable"),
@@ -80,11 +73,11 @@ const partition = (markets: MarketEntry[]): Partitioned => ({
 });
 
 // Markets that write a pool config (the pool always changes for these).
-const poolWriteMarkets = (p: Partitioned): MarketEntry[] => [...p.promotes, ...p.poolSwaps, ...p.poolOnly];
+const poolWriteMarkets = (p: Partitioned): MarketEntry[] => [...p.poolSwaps, ...p.poolOnly];
 // Markets that write a SentinelOracle repoint (all pool-writers except the verified no-ops).
 const oracleRepointMarkets = (p: Partitioned): MarketEntry[] => poolWriteMarkets(p).filter(m => !m.skipOracleRepoint);
 // Markets that write a DeviationSentinel threshold (setTokenConfig).
-const thresholdWriteMarkets = (p: Partitioned): MarketEntry[] => [...p.retunes, ...p.promotes, ...p.poolSwaps];
+const thresholdWriteMarkets = (p: Partitioned): MarketEntry[] => [...p.retunes, ...p.poolSwaps];
 
 interface ChainContracts {
   deviationSentinel: Contract;
@@ -133,6 +126,15 @@ const expectTokenConfig = async (
   expect(tc.enabled, `${ctx}: enabled`).to.equal(expectedEnabled);
 };
 
+// Assert SentinelOracle routes `token` to `expectedOracle` (tokenConfigs(token).oracle).
+const expectSentinelRoutesTo = async (sentinelOracle: Contract, token: string, expectedOracle: string, ctx: string) => {
+  const tc = await sentinelOracle.tokenConfigs(token);
+  const actual = tc.oracle ?? tc;
+  expect(ethers.utils.getAddress(actual), `${ctx}: sentinel oracle entry`).to.equal(
+    ethers.utils.getAddress(expectedOracle),
+  );
+};
+
 // ──────────────────────────────────────────────────────────────────────────
 // Config sanity — guards the hand-entered tables in addresses/<chain>.ts.
 // ──────────────────────────────────────────────────────────────────────────
@@ -157,7 +159,7 @@ export const runConfigSanity = (cfg: TestConfig) => {
     });
 
     it("threshold-write markets target 5% (unified tier)", () => {
-      // Every retune / poolSwap / promote in this VIP moves to the unified 5% tier.
+      // Every retune / poolSwap in this VIP moves to the unified 5% tier.
       for (const m of thresholdWriteMarkets(p)) {
         expect(m.targetPct, `${m.symbol}: targetPct`).to.equal(5);
       }
@@ -201,23 +203,6 @@ export const runPreVipAssertions = (cfg: TestConfig) => {
       });
     }
 
-    for (const m of p.promotes) {
-      it(`${m.symbol}: not yet wired (will promote)`, async () => {
-        await expectTokenConfig(c.deviationSentinel, m.token, 0, false, m.symbol);
-
-        const sentinelEntry = await c.sentinelOracle.tokenConfigs(m.token);
-        const sentinelOracleAddr = sentinelEntry.oracle ?? sentinelEntry;
-        expect(sentinelOracleAddr, `${m.symbol}: sentinel oracle entry`).to.equal(ZERO_ADDRESS);
-
-        const dexOracle = await ethers.getContractAt(dexOracleAbi(cfg.ctx, m), dexOracleAddress(cfg.ctx, m));
-        const dexPool =
-          (m.oracleType ?? "uniswap") === "curve"
-            ? (await dexOracle.poolConfigs(m.token)).pool
-            : await dexOracle.tokenPools(m.token);
-        expect(dexPool, `${m.symbol}: dex oracle pool entry`).to.equal(ZERO_ADDRESS);
-      });
-    }
-
     for (const m of [...p.poolSwaps, ...p.poolOnly]) {
       it(`${m.symbol}: currently wired at ${m.currentPct}% (oracle will repoint)`, async () => {
         await expectTokenConfig(c.deviationSentinel, m.token, m.currentPct, true, m.symbol);
@@ -227,11 +212,7 @@ export const runPreVipAssertions = (cfg: TestConfig) => {
       // already equals the target DEX oracle — otherwise the elision would leave it wrong.
       if (m.skipOracleRepoint) {
         it(`${m.symbol}: SentinelOracle already routes to the target DEX oracle (elided repoint)`, async () => {
-          const tc = await c.sentinelOracle.tokenConfigs(m.token);
-          const actual = tc.oracle ?? tc;
-          expect(ethers.utils.getAddress(actual), `${m.symbol}: sentinel oracle entry`).to.equal(
-            ethers.utils.getAddress(dexOracleAddress(cfg.ctx, m)),
-          );
+          await expectSentinelRoutesTo(c.sentinelOracle, m.token, dexOracleAddress(cfg.ctx, m), m.symbol);
         });
       }
     }
@@ -283,7 +264,7 @@ export const runPostVipAssertions = (cfg: TestConfig) => {
       const oracleType = m.oracleType ?? "uniswap";
 
       it(`${m.symbol}: pool registered on routed DEX oracle (${oracleType})`, async () => {
-        const oracle = await ethers.getContractAt(dexOracleAbi(cfg.ctx, m), dexOracleAddress(cfg.ctx, m));
+        const oracle = await ethers.getContractAt(dexOracleAbi(m), dexOracleAddress(cfg.ctx, m));
         if (oracleType === "curve") {
           const pc = await oracle.poolConfigs(m.token);
           expect(ethers.utils.getAddress(pc.pool), `${m.symbol}: pool`).to.equal(ethers.utils.getAddress(m.pool));
@@ -300,11 +281,7 @@ export const runPostVipAssertions = (cfg: TestConfig) => {
       });
 
       it(`${m.symbol}: SentinelOracle routes to the new DEX oracle`, async () => {
-        const tc = await c.sentinelOracle.tokenConfigs(m.token);
-        const actual = tc.oracle ?? tc;
-        expect(ethers.utils.getAddress(actual), `${m.symbol}: sentinel oracle entry`).to.equal(
-          ethers.utils.getAddress(dexOracleAddress(cfg.ctx, m)),
-        );
+        await expectSentinelRoutesTo(c.sentinelOracle, m.token, dexOracleAddress(cfg.ctx, m), m.symbol);
       });
 
       if (oracleType === "curve") {
@@ -322,8 +299,8 @@ export const runPostVipAssertions = (cfg: TestConfig) => {
       }
     }
 
-    // promote / poolSwap: threshold set to targetPct, enabled.
-    for (const m of [...p.promotes, ...p.poolSwaps]) {
+    // poolSwap: threshold set to targetPct, enabled.
+    for (const m of p.poolSwaps) {
       it(`${m.symbol}: DeviationSentinel threshold ${m.targetPct}%, enabled`, async () => {
         await expectTokenConfig(c.deviationSentinel, m.token, m.targetPct, true, m.symbol);
       });
@@ -413,43 +390,34 @@ export const buildPostExecutionEventChecks = (ctx: ChainContext) => {
   const tokenConfigWrites = thresholdWriteMarkets(p).length;
   const monitoringToggles = p.disables.length;
 
-  return async (txResponse: Awaited<ReturnType<Contract["functions"]["dummy"]>> | unknown) => {
+  return async (txResponse: TransactionResponse) => {
     if (uniswapPoolWrites + aerodromePoolWrites > 0) {
       // UniswapOracle and AerodromeSlipstreamOracle share the same setPoolConfig signature
       // and emit the same PoolConfigUpdated event signature, so the count is summed.
+      // (BSC's PancakeSwapOracle shares the UniswapOracle ABI as well.)
       await expectEvents(
-        txResponse as never,
-        [ctx.name === "BSC" ? PANCAKESWAP_ORACLE_ABI : UNISWAP_ORACLE_ABI],
+        txResponse,
+        [UNISWAP_ORACLE_ABI],
         ["PoolConfigUpdated"],
         [uniswapPoolWrites + aerodromePoolWrites],
       );
     }
     if (ctx.curveOracle && curvePoolWrites > 0) {
-      await expectEvents(txResponse as never, [CURVE_ORACLE_ABI], ["PoolConfigUpdated"], [curvePoolWrites]);
+      await expectEvents(txResponse, [CURVE_ORACLE_ABI], ["PoolConfigUpdated"], [curvePoolWrites]);
     }
     if (sentinelOracleWrites > 0) {
-      await expectEvents(
-        txResponse as never,
-        [SENTINEL_ORACLE_ABI],
-        ["TokenOracleConfigUpdated"],
-        [sentinelOracleWrites],
-      );
+      await expectEvents(txResponse, [SENTINEL_ORACLE_ABI], ["TokenOracleConfigUpdated"], [sentinelOracleWrites]);
     }
     if (tokenConfigWrites > 0) {
-      await expectEvents(txResponse as never, [DEVIATION_SENTINEL_ABI], ["TokenConfigUpdated"], [tokenConfigWrites]);
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenConfigUpdated"], [tokenConfigWrites]);
     }
     if (monitoringToggles > 0) {
-      await expectEvents(
-        txResponse as never,
-        [DEVIATION_SENTINEL_ABI],
-        ["TokenMonitoringStatusChanged"],
-        [monitoringToggles],
-      );
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenMonitoringStatusChanged"], [monitoringToggles]);
     }
 
     // Permission-neutrality: no ACM mutations expected.
-    await expectEvents(txResponse as never, [ACM_ABI], ["RoleGranted"], [0]);
-    await expectEvents(txResponse as never, [ACM_ABI], ["RoleRevoked"], [0]);
+    await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [0]);
+    await expectEvents(txResponse, [ACM_ABI], ["RoleRevoked"], [0]);
   };
 };
 
@@ -458,19 +426,12 @@ export const buildPostExecutionEventChecks = (ctx: ChainContext) => {
 // and the expected per-chain scope.
 // ──────────────────────────────────────────────────────────────────────────
 
-const EXPECTED_DST_CHAIN_ID: Record<string, number | undefined> = {
-  BSC: undefined,
-  Ethereum: 101,
-  "Arbitrum One": 110,
-  Base: 184,
-};
-
-export const runCommandCountAssertion = (chainName: string, expected: number) => {
-  describe(`VIP-658 [${chainName}] — Command count`, () => {
+export const runCommandCountAssertion = (ctx: ChainContext, expected: number) => {
+  describe(`VIP-658 [${ctx.name}] — Command count`, () => {
     it(`emits exactly ${expected} commands for this chain`, () => {
-      const expectedDst = EXPECTED_DST_CHAIN_ID[chainName];
-      const actual = buildAllCommands().filter(c => c.dstChainId === expectedDst).length;
-      expect(actual, `${chainName}: emitted command count`).to.equal(expected);
+      // BSC commands carry no dstChainId; remote chains route by ctx.dstChainId.
+      const actual = buildAllCommands().filter(c => c.dstChainId === ctx.dstChainId).length;
+      expect(actual, `${ctx.name}: emitted command count`).to.equal(expected);
     });
   });
 };

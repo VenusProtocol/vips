@@ -11,9 +11,10 @@ import {
   runPreVipAssertions,
 } from "./shared";
 
-// Recent Base block (node-supported, used by recent VIP sims). USDC wired at 1%,
-// cbBTC / wstETH at 3% per the V2 doc's "current" column. No pool changes on Base.
-const FORK_BLOCK = 47410957;
+// Recent Base block (post the Base Guardian's block-50298851 USDC retune, so the
+// pre-VIP assertions validate live state). USDC / cbBTC / wstETH all wired at 3%
+// on-chain here. No pool changes on Base.
+const FORK_BLOCK = 50503680;
 
 const a = NETWORK_ADDRESSES.basemainnet;
 
@@ -27,7 +28,7 @@ const TEST_CONFIG: TestConfig = {
 
 forking(FORK_BLOCK, async () => {
   runConfigSanity(TEST_CONFIG);
-  runCommandCountAssertion("Base", 3);
+  runCommandCountAssertion(BASEMAINNET_CTX, 3);
   runPreVipAssertions(TEST_CONFIG);
 
   testForkedNetworkVipCommands("VIP-658 [Base] DeviationSentinel 2026-08 Parameter Adjustment", await vip658(), {

@@ -11,13 +11,9 @@ import type { LzChainId } from "src/types";
 // Action semantics:
 //   retune    — market is already wired. Change threshold only.
 //               1 call: DeviationSentinel.setTokenConfig(token, (newPct, true))
-//   promote   — market not currently wired; full new wire.
-//               3 calls: <DexOracle>.setPoolConfig(...) → SentinelOracle.setTokenOracleConfig
-//                        → DeviationSentinel.setTokenConfig(token, (pct, true))
 //   poolSwap  — wired, but moving to a different pool (and possibly different DEX oracle),
 //               and also retuning the threshold.
-//               3 calls: same shape as promote — re-register pool, repoint SentinelOracle,
-//                        set new threshold.
+//               3 calls: re-register pool, repoint SentinelOracle, set new threshold.
 //   poolOnly  — wired, moving to a different pool WITHOUT changing the threshold. Used for
 //               markets that are not in the doc's threshold tables (ETH WETH, Arbitrum ARB).
 //               2 calls: <DexOracle>.setPoolConfig(...) → SentinelOracle.setTokenOracleConfig.
@@ -27,7 +23,7 @@ import type { LzChainId } from "src/types";
 //               (Config *clearing* would need a new contract function; see VIP-658 spec.)
 //   skip      — no on-chain action; entry exists for documentation only.
 
-export type MarketAction = "retune" | "promote" | "poolSwap" | "poolOnly" | "disable" | "skip";
+export type MarketAction = "retune" | "poolSwap" | "poolOnly" | "disable" | "skip";
 
 export type OracleType = "uniswap" | "curve" | "aerodrome";
 
@@ -43,7 +39,7 @@ export interface MarketEntry {
   // Pre-VIP `enabled` flag of tokenConfigs. Defaults to (currentPct > 0). Set explicitly for a
   // market that is wired (deviation != 0) yet disabled — e.g. BSC DAI, disabled by VIP-644.
   currentEnabled?: boolean;
-  // Required for promote / poolSwap / poolOnly.
+  // Required for poolSwap / poolOnly.
   oracleType?: OracleType;
   // When the SentinelOracle already routes this token to the target DEX oracle (the oracle
   // *type* is unchanged — e.g. curve→curve or uniswap→uniswap), the setTokenOracleConfig call
