@@ -162,7 +162,7 @@ Retunes **DeviationSentinel** thresholds to a unified **5%** across BNB Chain, E
 
 - Retune to **5%**: U, USD1, lisUSD (1% → 5%); SolvBTC, slisBNB, wBETH (3% → 5%); FDUSD (10% → 5%)
 - Pool move + retune to **5%**: USDC (1% → 5%) and USDT (3% → 5%) → PancakeSwap V3 USDT/USDC 0.05% (0x4f31Fa980a675570939B737Ebdde0471a4Be40Eb)
-- Configuration removals: **TUSD** — disable monitoring (setTokenMonitoringEnabled(TUSD, false)); **DAI** — already disabled on-chain (VIP-644), no command emitted
+- Disable monitoring: **TUSD** (setTokenMonitoringEnabled(TUSD, false)); **DAI** is already disabled on-chain (VIP-644), so no command is emitted for it
 
 **Ethereum — 26 commands**
 
@@ -170,7 +170,7 @@ Retunes **DeviationSentinel** thresholds to a unified **5%** across BNB Chain, E
 - Pool move + retune to **5%**: USDC / USDT / DAI → Curve 3pool (0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7); crvUSD → Curve USDT/crvUSD (0x390f3595bCa2Df7d23783dFd126427CCeb997BF4); sUSDe → Curve crvUSD/sUSDe (0x57064F49Ad7123C92560882a45518374ad982e85); sUSDS → Curve sUSDe/sUSDS (0x3CEf1AFC0E8324b57293a6E7cE663781bbEFBB79); WBTC → Uniswap V3 USDT/WBTC 0.30% (0x9Db9e0e53058C89e5B94e29621a205198648425B); LBTC → Uniswap V3 WBTC/LBTC 0.01% (0x0b599ebf4E05af48b56D38E2DDe520570C366460); tBTC → Curve WBTC/tBTC (0xB7ECB2AA52AA64a717180E030241bC75Cd946726)
 - Pool move only (threshold left at 10%): **WETH** → Uniswap V3 WETH/USDT 0.30% (0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36)
 
-_Note: for crvUSD, sUSDS, WBTC, LBTC and WETH the SentinelOracle already routes to the target DEX oracle (curve→curve / uniswap→uniswap), so only the pool binding (and, where applicable, the threshold) is updated — the redundant SentinelOracle repoint is elided, which also keeps the single cross-chain LayerZero message within its payload-size cap._
+Note: for crvUSD, sUSDS, WBTC, LBTC and WETH the SentinelOracle already routes to the target DEX oracle (curve→curve / uniswap→uniswap), so only the pool binding (and, where applicable, the threshold) is updated — the redundant SentinelOracle repoint is elided, which also keeps the single cross-chain LayerZero message within its payload-size cap.
 
 **Arbitrum One — 7 commands**
 
