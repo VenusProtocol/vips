@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-// VIP-664 [BNB Chain] List vhUSDT, vhUSDC and vhU in the Venus Core Pool.
+// VIP-659 [BNB Chain] List vhUSDT, vhUSDC and vhU in the Venus Core Pool.
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -274,10 +274,10 @@ export const vTokensRemaining = (m: MarketSpec) => vTokensMinted(m).sub(m.initia
 // really uses 9.8M against BNB Chain's 16,777,216 per-tx cap. Today the simulated figure is
 // 29,929,560, about 70,000 gas under the limit, which is room for roughly 1,000 more description
 // characters. Add many more commands or description text and the simulation stops proposing.
-export const vip664 = () => {
+export const vip659 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain] List vhUSDT, vhUSDC and vhU markets in the Venus Core Pool",
+    title: "VIP-659 [BNB Chain] List vhUSDT, vhUSDC and vhU markets in the Venus Core Pool",
     description: `#### Summary
 
 If passed, this VIP will list three non-borrowable collateral markets in the Venus Core Pool on BNB Chain, backed by Venus Hub receipt tokens (vhTokens, ERC4626, 24 decimals), with borrowing paused at launch: **Venus vhUSDT (vvhUSDT)**, **Venus vhUSDC (vvhUSDC)** and **Venus vhU (vvhU)**.
@@ -286,7 +286,7 @@ If passed, this VIP will list three non-borrowable collateral markets in the Ven
 
 For each new market this VIP will:
 
-- Arm the growth cap on the vhToken's capped **ERC4626Oracle** (snapshot, growth rate, snapshot gap) and register it in the ResilientOracle as the single price source. It prices the vhToken as *underlying resilient price × capped vault exchange rate*, the design the live asBNB and slisBNB oracles use.
+- Arm the growth cap on the vhToken's capped **ERC4626Oracle** (snapshot, growth rate, snapshot gap) and register it in the ResilientOracle as the single price source. It prices the vhToken as underlying resilient price × capped vault exchange rate, the design the live asBNB and slisBNB oracles use.
 - Add the market to the Core Pool Comptroller and set the supply cap, borrow cap (0), collateral factor, liquidation threshold, liquidation incentive and reserve factor
 - Set the AccessControlManager, ProtocolShareReserve and reduce-reserves block delta on the vToken
 - Provide bootstrap liquidity (see below) and pause borrowing, since the markets are collateral-only
@@ -294,53 +294,51 @@ For each new market this VIP will:
 
 #### Risk parameters
 
-All three markets share the same interest rate model (base 0%, multiplier 9%, jump multiplier 200%, kink 50%); rates are inert while borrowing is paused.
+The collateral factor, liquidation threshold, liquidation incentive and reserve factor of each market are an exact copy of the live Core-pool market of its underlying asset (vUSDT, vUSDC and vU). All three markets share: liquidation incentive 10%, reserve factor 10%, supply cap 10,000,000 vhTokens, borrow cap 0, E-brake trigger/reset 5%/2%, and the same interest rate model (base 0%, multiplier 9%, jump multiplier 200%, kink 50%; inert while borrowing is paused).
 
-| Market | Collateral factor | Liquidation threshold | Liquidation incentive | Reserve factor | Supply cap | Borrow cap | E-brake trigger / reset |
-|---|---|---|---|---|---|---|---|
-| vvhUSDT | 80% | 80% | 10% | 10% | 10,000,000 vhUSDT | 0 | 5% / 2% |
-| vvhUSDC | 82.5% | 82.5% | 10% | 10% | 10,000,000 vhUSDC | 0 | 5% / 2% |
-| vvhU | 75% | 75% | 10% | 10% | 10,000,000 vhU | 0 | 5% / 2% |
+- **vvhUSDT**: collateral factor 80%, liquidation threshold 80%
+- **vvhUSDC**: collateral factor 82.5%, liquidation threshold 82.5%
+- **vvhU**: collateral factor 75%, liquidation threshold 75%
 
-- **Interest rate model.** A vToken requires an IRM at construction even though these markets are non-borrowable, so the three markets were deployed pointing at [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0), which already carries these exact parameters at 70,080,000 blocks per year and backs the vPT-clisBNB-25JUN2026 market. No new model is deployed and this VIP does not set one, since each market already holds the intended address. It is inert while borrowing is paused, which is what the listing checklist's "IRM not needed" refers to.
-- **Collateral factor equals liquidation threshold** on all three markets, as approved: the vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped oracle with the E-brake enabled, so no CF-to-LT buffer is applied and a position at the maximum LTV sits at the liquidation boundary by design.
-- **The collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU)** — approved per-asset values, ordered by the maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid, carries the most conservative factor.
+Notes on these values:
+
+- **Interest rate model.** A vToken requires an IRM at construction even though these markets are non-borrowable, so the three markets were deployed pointing at [0x6463ab803FF081616ac4daC31B9B66854cc28Bc0](https://bscscan.com/address/0x6463ab803FF081616ac4daC31B9B66854cc28Bc0), which already carries these exact parameters at 70,080,000 blocks per year and backs the vPT-clisBNB-25JUN2026 market. No new model is deployed and this VIP does not set one, since each market already holds the intended address.
+- **Collateral factor equals liquidation threshold** on all three markets, mirroring the live vUSDT, vUSDC and vU markets: the vhTokens are ~$1 stablecoin-correlated assets priced through a growth-capped oracle with the E-brake enabled, so no CF-to-LT buffer is applied and a position at the maximum LTV sits at the liquidation boundary by design.
+- **The collateral factors differ (82.5% vhUSDC, 80% vhUSDT, 75% vhU)** — an exact copy of the live vUSDC, vUSDT and vU factors, ordered by the maturity and market depth of each underlying peg (USDC > USDT > USD1/U). vhU/USD1, the newest and least liquid, carries the most conservative factor.
 - **Supply caps are denominated in the underlying token amount, not USD.** Each cap is 10,000,000 vhTokens (24 decimals), roughly $10M of collateral exposure at the current ~$1 vault price.
-- **Reserve factor (10%), vTokenReceiver (VTreasury) and the bootstrap amount (10 vhToken shares, ~$10 per market)** were not in the listing template and follow the standard Core-pool convention.
-- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken has no \`protocolSeizeShare\` getter or setter, and its \`seize\` moves the whole seized amount to the liquidator. The protocol's cut is taken by the Liquidator contract's treasury percentage, which is pool wide rather than per market, so there is nothing for a listing VIP to set.
+- **Reserve factor (10%), vTokenReceiver (VTreasury) and the bootstrap amount (10 vhToken shares, ~$10 per market)** follow the standard Core-pool convention.
+- **Protocol seize share is not settable on the Core pool.** The legacy Core vToken has no protocolSeizeShare getter or setter, and its seize function moves the whole seized amount to the liquidator. The protocol's cut is taken by the Liquidator contract's treasury percentage, which is pool wide rather than per market, so there is nothing for a listing VIP to set.
 
 #### Capped oracle
 
-The three oracles were deployed with every cap argument zeroed, as the asBNB oracle was, so this VIP arms each with \`setSnapshot\`, \`setGrowthRate\` and \`setSnapshotGap\` — the same commands in the same order as VIP-530. The timelocks already hold these permissions (VIP-517), so no new ACM grants are needed.
+The three oracles were deployed with every cap argument zeroed, as the asBNB oracle was, so this VIP arms each with setSnapshot, setGrowthRate and setSnapshotGap — the same commands in the same order as VIP-530. The timelocks already hold these permissions (VIP-517), so no new ACM grants are needed.
 
-| | Growth rate | Snapshot interval | Snapshot gap | Seeded exchange rate |
-|---|---|---|---|---|
-| vhUSDT | 5%/yr | 30 days | 41 bps (0.004103826192241905) | 1.005037043812218973 |
-| vhUSDC | 5%/yr | 30 days | 41 bps (0.004104460163238780) | 1.005192304855624280 |
-| vhU | 5%/yr | 30 days | 41 bps (0.004103351049380738) | 1.004920680166634068 |
+Every cap is armed with a 5%/yr growth rate, a 30-day snapshot interval and a 41 bps snapshot gap. The seeded snapshots (live exchange rate at block 117780230 plus the gap):
+
+- **vhUSDT**: snapshot 1.005037043812218973, gap 0.004103826192241905
+- **vhUSDC**: snapshot 1.005192304855624280, gap 0.004104460163238780
+- **vhU**: snapshot 1.004920680166634068, gap 0.004103351049380738
 
 - **5%/yr leaves ~2.5x headroom over observed yield.** Between blocks 116836175 and 117780230 (4.92 days) the exchange rates grew at an annualised 2.10% (vhUSDT), 2.02% (vhUSDC) and 2.03% (vhU). The cap matches what asBNB and slisBNB have run since VIP-605.
 - **The 41 bps gap is one snapshot interval of capped growth** (5% x 30/365 = 0.41%), the ratio VIP-530 applied to every asset it armed. It sits on top of the growth allowance accruing from the snapshot timestamp, so drift between authoring and execution does not cap the price at listing.
 
 #### Underlying tokens
 
-Read from BNB Chain at block 117780230, which is also the oracle snapshot timestamp, and matching the listing template. All three vaults report ~1.0009 assets per share, so each 10,000,000-share supply cap is worth roughly $10M.
+Read from BNB Chain at block 117780230, which is also the oracle snapshot timestamp. All three vaults report ~1.0009 assets per share, so each 10,000,000-share supply cap is worth roughly $10M.
 
-| Token | Address | ERC4626 asset | Resilient price of the asset |
-|---|---|---|---|
-| Venus Hub USDT (vhUSDT) | [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226) | USDT | $0.9998 |
-| Venus Hub USDC (vhUSDC) | [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617) | USDC | $0.9999 |
-| Venus Hub U (vhU) | [0x0e5AA174d4F31b757a237eb1999DE151596788B0](https://bscscan.com/address/0x0e5AA174d4F31b757a237eb1999DE151596788B0) | U | $0.9995 |
+- **Venus Hub USDT (vhUSDT)**: [0x18AfDACF30F8671021dec4b78297E39d2FE87226](https://bscscan.com/address/0x18AfDACF30F8671021dec4b78297E39d2FE87226), ERC4626 asset USDT (resilient price $0.9998)
+- **Venus Hub USDC (vhUSDC)**: [0x9D2D9592cF8DFbf59107fAab703d08494BE14617](https://bscscan.com/address/0x9D2D9592cF8DFbf59107fAab703d08494BE14617), ERC4626 asset USDC (resilient price $0.9999)
+- **Venus Hub U (vhU)**: [0x0e5AA174d4F31b757a237eb1999DE151596788B0](https://bscscan.com/address/0x0e5AA174d4F31b757a237eb1999DE151596788B0), ERC4626 asset U (resilient price $0.9995)
 
 #### Bootstrap liquidity
 
-The VTreasury holds the three ERC4626 assets but none of the vhTokens, so this VIP does not withdraw shares. Per market it withdraws the asset, mints exactly 10 vhToken shares from the Venus Hub vault, supplies them to the new market, burns 10% of the resulting vTokens and sends the remaining 9 to the VTreasury. Every approval it grants is reset to zero in the same proposal, no vTokens are left with the Timelock, and no prior funding of the VTreasury is required.
+The VTreasury holds the three ERC4626 assets but none of the vhTokens, so this VIP does not withdraw shares. Per market it withdraws 10.2 of the asset, mints exactly 10 vhToken shares from the Venus Hub vault, supplies them to the new market, burns 10% of the resulting vTokens and sends the remaining 9 to the VTreasury. Every approval it grants is reset to zero in the same proposal, no vTokens are left with the Timelock, and no prior funding of the VTreasury is required.
 
-| Market | Withdrawn from VTreasury | VTreasury balance | Shares minted | Cost at block 117780230 |
-|---|---|---|---|---|
-| vvhUSDT | 10.2 USDT | 698,092.13 USDT | 10 vhUSDT | 10.009332 USDT |
-| vvhUSDC | 10.2 USDC | 58,609.10 USDC | 10 vhUSDC | 10.010878 USDC |
-| vvhU | 10.2 U | 213,189.18 U | 10 vhU | 10.008173 U |
+Cost of the 10 shares at block 117780230, with the VTreasury balance it is drawn from:
+
+- **vvhUSDT**: 10.009332 USDT (treasury holds 698,092.13 USDT)
+- **vvhUSDC**: 10.010878 USDC (treasury holds 58,609.10 USDC)
+- **vvhU**: 10.008173 U (treasury holds 213,189.18 U)
 
 The withdrawal is 10.2 rather than the exact cost because the vault exchange rate rises continuously; the extra ~1.9% keeps the mint funded if the vaults accrue between the proposal and its execution. The unspent remainder, under 0.2 of each asset, stays with the Normal Timelock.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -531,4 +529,4 @@ The withdrawal is 10.2 rather than the exact cost because the vault exchange rat
   );
 };
 
-export default vip664;
+export default vip659;

@@ -27,7 +27,7 @@ import {
   snapshotGap,
   vTokensRemaining,
   vip664,
-} from "../../vips/vip-664/bsctestnet";
+} from "../../vips/vip-659/bsctestnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";

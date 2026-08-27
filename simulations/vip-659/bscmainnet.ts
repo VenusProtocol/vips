@@ -26,8 +26,8 @@ import {
   seededSnapshot,
   snapshotGap,
   vTokensRemaining,
-  vip664,
-} from "../../vips/vip-664/bscmainnet";
+  vip659,
+} from "../../vips/vip-659/bscmainnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
@@ -188,7 +188,7 @@ forking(FORK_BLOCK, async () => {
     }
   });
 
-  testVip("VIP-664", await vip664(), {
+  testVip("VIP-659", await vip659(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
