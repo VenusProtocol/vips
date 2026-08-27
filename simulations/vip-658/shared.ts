@@ -1,6 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
@@ -79,6 +79,11 @@ const oracleRepointMarkets = (p: Partitioned): MarketEntry[] => poolWriteMarkets
 // Markets that write a DeviationSentinel threshold (setTokenConfig).
 const thresholdWriteMarkets = (p: Partitioned): MarketEntry[] => [...p.retunes, ...p.poolSwaps];
 
+const V3_POOL_ABI = ["function token0() view returns (address)", "function token1() view returns (address)"];
+const ERC20_DECIMALS_ABI = ["function decimals() view returns (uint8)"];
+const BPS_SCALE = 10_000;
+const MAX_BASELINE_DEVIATION_BPS = 100; // 1% — catches wrong sides/decimals without pinning exact spot prices
+
 interface ChainContracts {
   deviationSentinel: Contract;
   sentinelOracle: Contract;
@@ -133,6 +138,24 @@ const expectSentinelRoutesTo = async (sentinelOracle: Contract, token: string, e
   expect(ethers.utils.getAddress(actual), `${ctx}: sentinel oracle entry`).to.equal(
     ethers.utils.getAddress(expectedOracle),
   );
+};
+
+const absoluteDifference = (a: BigNumber, b: BigNumber): BigNumber => (a.gte(b) ? a.sub(b) : b.sub(a));
+
+const configureTargetPricePath = async (cfg: TestConfig, c: ChainContracts, m: MarketEntry) => {
+  const timelock = await initMainnetUser(cfg.timelock, ethers.utils.parseEther("1"));
+  const dexOracle = await ethers.getContractAt(dexOracleAbi(m), dexOracleAddress(cfg.ctx, m));
+
+  if (m.oracleType === "curve") {
+    await dexOracle
+      .connect(timelock)
+      .setPoolConfig(m.token, m.pool, m.coinIndex, m.refCoinIndex, m.referenceToken, m.assetDecimals);
+  } else {
+    await dexOracle.connect(timelock).setPoolConfig(m.token, m.pool);
+  }
+  await c.sentinelOracle.connect(timelock).setTokenOracleConfig(m.token, dexOracleAddress(cfg.ctx, m));
+
+  return dexOracle;
 };
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -192,9 +215,11 @@ export const runPreVipAssertions = (cfg: TestConfig) => {
 
   describe(`VIP-658 [${cfg.ctx.name}] — Pre-VIP state`, () => {
     let c: ChainContracts;
+    let vTokenByUnderlying: Map<string, string>;
 
     before(async () => {
       c = await buildContracts(cfg);
+      vTokenByUnderlying = await buildVTokenIndex(cfg);
     });
 
     for (const m of p.retunes) {
@@ -221,6 +246,46 @@ export const runPreVipAssertions = (cfg: TestConfig) => {
       it(`${m.symbol}: currently monitored at ${m.currentPct}% (will disable)`, async () => {
         await expectTokenConfig(c.deviationSentinel, m.token, m.currentPct, currentEnabled(m), m.symbol);
         expect(currentEnabled(m), `${m.symbol}: expected enabled pre-VIP`).to.equal(true);
+      });
+    }
+
+    // Configure each target pool and route inside a snapshot while oracle feeds are
+    // fresh, then roll the state back. The full VIP simulation below independently
+    // proves that the emitted governance commands produce the same stored config.
+    for (const m of poolWriteMarkets(p)) {
+      it(`${m.symbol}: target pool supports the full DeviationSentinel price path`, async () => {
+        const snapshot = await ethers.provider.send("evm_snapshot", []);
+
+        try {
+          const dexOracle = await configureTargetPricePath(cfg, c, m);
+          const directPrice = await c.sentinelOracle.directPrices(m.token);
+          expect(directPrice, `${m.symbol}: direct price bypasses the configured DEX oracle`).to.equal(0);
+
+          const dexPrice = await dexOracle.getPrice(m.token);
+          const sentinelPrice = await c.sentinelOracle.getPrice(m.token);
+          const resilientPrice = await c.resilientOracle.getPrice(m.token);
+
+          expect(dexPrice, `${m.symbol}: DEX oracle price`).to.be.gt(0);
+          expect(sentinelPrice, `${m.symbol}: SentinelOracle price`).to.equal(dexPrice);
+          expect(resilientPrice, `${m.symbol}: ResilientOracle price`).to.be.gt(0);
+
+          const deviationBps = absoluteDifference(sentinelPrice, resilientPrice).mul(BPS_SCALE).div(resilientPrice);
+          expect(deviationBps, `${m.symbol}: Sentinel/Resilient baseline deviation (bps)`).to.be.lt(
+            MAX_BASELINE_DEVIATION_BPS,
+          );
+
+          const vToken = vTokenByUnderlying.get(m.token.toLowerCase());
+          expect(vToken, `${m.symbol}: no listed Venus market found for the pool-write asset`).to.not.be.undefined;
+
+          const [hasDeviation, oraclePrice, checkedSentinelPrice, deviationPercent] =
+            await c.deviationSentinel.checkPriceDeviation(vToken);
+          expect(oraclePrice, `${m.symbol}: DeviationSentinel oraclePrice`).to.equal(resilientPrice);
+          expect(checkedSentinelPrice, `${m.symbol}: DeviationSentinel sentinelPrice`).to.equal(sentinelPrice);
+          expect(deviationPercent, `${m.symbol}: deviationPercent`).to.be.lt(m.currentPct);
+          expect(hasDeviation, `${m.symbol}: target pool would immediately trigger the sentinel`).to.equal(false);
+        } finally {
+          expect(await ethers.provider.send("evm_revert", [snapshot]), `${m.symbol}: snapshot revert`).to.equal(true);
+        }
       });
     }
   });
@@ -287,6 +352,7 @@ export const runPostVipAssertions = (cfg: TestConfig) => {
       if (oracleType === "curve") {
         it(`${m.symbol}: Curve pool.coins() matches stored coin indexes`, async () => {
           const pool = new ethers.Contract(m.pool, ["function coins(uint256) view returns (address)"], ethers.provider);
+          const token = new ethers.Contract(m.token, ERC20_DECIMALS_ABI, ethers.provider);
           const priced = await pool.coins(m.coinIndex as number);
           const ref = await pool.coins(m.refCoinIndex as number);
           expect(ethers.utils.getAddress(priced), `${m.symbol}: pool.coins(coinIndex)`).to.equal(
@@ -295,6 +361,13 @@ export const runPostVipAssertions = (cfg: TestConfig) => {
           expect(ethers.utils.getAddress(ref), `${m.symbol}: pool.coins(refCoinIndex)`).to.equal(
             ethers.utils.getAddress(m.referenceToken as string),
           );
+          expect(await token.decimals(), `${m.symbol}: assetDecimals`).to.equal(m.assetDecimals);
+        });
+      } else {
+        it(`${m.symbol}: target token is present in the V3-compatible pool`, async () => {
+          const pool = new ethers.Contract(m.pool, V3_POOL_ABI, ethers.provider);
+          const tokens = [await pool.token0(), await pool.token1()].map(token => token.toLowerCase());
+          expect(tokens, `${m.symbol}: target token is neither token0 nor token1`).to.include(m.token.toLowerCase());
         });
       }
     }
@@ -365,14 +438,10 @@ export const runDisableBehaviorTests = (cfg: TestConfig) => {
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// Threshold-trip mechanics (checkPriceDeviation with a perturbed SentinelOracle
-// price) are intentionally NOT re-tested here. That behavior is generic to the
-// unchanged DeviationSentinel contract and already covered by VIP-616 / VIP-624;
-// re-exercising it requires the ResilientOracle feeds to stay fresh across the
-// ~72h governance time-warp, which the fork cannot sustain at the blocks this
-// suite must use (an LZ-valid block on Ethereum; near head on BSC). This VIP's
-// per-market threshold VALUES are proven by the pre/post-VIP structural
-// assertions above, and the new disable path is behavior-tested below.
+// Threshold boundary mechanics with a deliberately perturbed direct price remain
+// covered by VIP-616 / VIP-624. This suite exercises every changed pool through the
+// natural adapter -> SentinelOracle -> DeviationSentinel path at the fork timestamp,
+// before the governance simulation advances time beyond external feed heartbeats.
 // ──────────────────────────────────────────────────────────────────────────
 
 // ──────────────────────────────────────────────────────────────────────────
