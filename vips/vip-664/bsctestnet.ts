@@ -1,105 +1,54 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import {
-  ABSOLUTE_CAP_UNBOUNDED,
-  ACM,
-  ADAPTER_CENTRIFUGE,
-  CENTRIFUGE_SOURCE_USDT,
-  CORE_SOURCE_USDT,
-  FLUX_SOURCE_USDT,
-  FRV_SOURCE_USDT,
-  GUARDIAN,
-  HUB_USDT,
-  KEEPER,
-  MOCK_CENTRIFUGE_VAULT_USDT,
-  NORMAL_TIMELOCK,
-  OPERATOR,
-  PERCENTAGE_CAP_DISABLED,
-} from "./addresses/bsctestnet";
-import {
-  CENTRIFUGE_GOVERNANCE,
-  CENTRIFUGE_GUARDIAN,
-  CENTRIFUGE_KEEPER,
-  CENTRIFUGE_OPERATOR,
-  PAUSE_HUB,
-  giveCallPermission,
-} from "./permissions";
+import { GUARDIAN_GRANTS, NORMAL_TIMELOCK_GRANTS, giveCallPermission } from "./permissions-bsctestnet";
 
-// ---------------------------------------------------------------------------------------------------
-// VIP-664 — BNB Chain Testnet. Onboard the Centrifuge YieldGroup to Liquidity Hub (USDT).
-//
-// One atomic proposal: grant the ACM roles on the new source, grant the source itself `pauseHub()` on
-// the Hub, then register the fund and wire the group.
-//
-// Ordering is load-bearing and must not be reshuffled:
-//   - every grant precedes every call that needs it (the Normal Timelock executes this proposal and
-//     is the caller of `addResource`, the queue setters and `addYieldGroup`);
-//   - `addResource` precedes the inner-queue setters, which reject unregistered resources;
-//   - `addYieldGroup` precedes the outer-queue setters, which reject unregistered groups.
-//
-// OUTER QUEUES. Centrifuge joins the WITHDRAW queue but NOT the deposit queue. Centrifuge settles
-// asynchronously — a subscription is filled by the fund manager, off-chain and cross-chain, over
-// days. Routing an ordinary user deposit there would park that user's capital in
-// `pendingDepositRequest`, unwithdrawable until the fund settles, for a product they never chose.
-// Capital enters this group only when an Operator reallocates into it with a resource-targeted leg.
-// It must still appear in the withdraw queue: `HubAdminLib._requireWithdrawQueueCoversFundedYieldGroups`
-// rejects a queue that omits a registered group holding a balance, and the group reports
-// `maxWithdraw() == 0` while invested, so the cascade probes it, sees no liquidity and moves on.
-//
-// PRICE GUARDS ARE NOT ARMED HERE. The growth cap, the drop floor and the age guard are opt-in per
-// resource and each needs a sizing decision against observed NAV behaviour; an over-tight value is a
-// self-inflicted halt. The roles are granted, so arming them later needs no further VIP. The
-// `pauseHub()` grant below is made now regardless, because it is the drop guard's only reaction and
-// is the single easiest thing to forget.
-//
-// THE REGISTERED FUND IS A TESTNET MOCK. Centrifuge has no BSC-testnet deployment, so there is no
-// real ERC-7540 fund on chain 97. See the note on MOCK_CENTRIFUGE_VAULT_USDT in ./addresses/bsctestnet.
-// ---------------------------------------------------------------------------------------------------
+const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bsctestnet;
+
+export const ACM = ACCESS_CONTROL_MANAGER;
+export { NORMAL_TIMELOCK, GUARDIAN };
+
+// Existing Hub stack. Only Hub_USDT is called; the rest are queue entries.
+export const HUB_USDT = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61";
+export const CORE_SOURCE_USDT = "0x11e39DC7b8b16BBDA8D9C2903dF741Ae9341Ec88";
+export const FRV_SOURCE_USDT = "0xA0Fb0fFeBdcB7F45A3Ec841cCE7F78B7CeBD0f82";
+export const FLUX_SOURCE_USDT = "0x044E572144bc08ed2D90E081EeEd7b5b6Cb01016";
+export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+
+export const ADAPTER_CENTRIFUGE = "0x78b5D33CB96546BEED3F2CeD7B95bc11bD330A35";
+export const CENTRIFUGE_SOURCE_USDT = "0x28e5E0ce9c15E3dE00855C2dda7cA260B470FCC2";
+
+// A Venus-controlled mock: Centrifuge has no BSC-testnet deployment.
+export const MOCK_CENTRIFUGE_VAULT_USDT = "0xbeF5909361D176a6E41C57134bAc071933B569D7";
+
+// Testnet policy: no caps on any group.
+const ABSOLUTE_CAP_UNBOUNDED = "340282366920938463463374607431768211455"; // type(uint128).max
+const PERCENTAGE_CAP_DISABLED = 10_000;
 
 const CENTRIFUGE_ONLY = [MOCK_CENTRIFUGE_VAULT_USDT];
 
-// Withdraw queue after Centrifuge joins. FRV -> Flux -> Centrifuge -> Core preserves VIP-650's order
-// and inserts Centrifuge ahead of Core, which stays at the tail as the unbounded liquid backstop.
-const OUTER_WITHDRAW_QUEUE = [FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT, CORE_SOURCE_USDT];
-
-// Deposit queue is UNCHANGED from VIP-650 — Centrifuge is deliberately absent (see header).
-const OUTER_DEPOSIT_QUEUE = [FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
-
-// On testnet the Guardian multisig plays Operator, Keeper AND Guardian, so those three role sets
-// overlap — `pauseResource(address)` appears in both the Operator and the Guardian set. Two grants of
-// the same (contract, signature, account) encode to byte-identical proposal actions, and
-// `GovernorBravo::queueOrRevertInternal` rejects the second with "identical proposal action already
-// queued at eta". Deduplicating by holder keeps the role sets themselves honest and separate; on
-// mainnet, where the three holders are distinct addresses, nothing is removed.
-const dedupeGrants = (grants: { account: string; sig: string }[]) => {
-  const seen = new Set<string>();
-  return grants.filter(({ account, sig }) => {
-    const key = `${account.toLowerCase()}:${sig}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
+// Drained front to back. Centrifuge first, so settled assets earning nothing are spent before a
+// productive position; Core last as the liquid backstop. It has to be listed at all because the Hub
+// rejects a withdraw queue omitting a group that holds a balance. The deposit queue is left alone —
+// Centrifuge settles over days, so a deposit routed there would be stuck in a pending request.
+const OUTER_WITHDRAW_QUEUE = [CENTRIFUGE_SOURCE_USDT, FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
 
 const grantsOnSource = () =>
-  dedupeGrants([
-    // Governance: the full gated surface of YieldGroupCentrifuge. Normal Timelock only, matching
-    // VIP-650's testnet proposal — granting all three timelocks tripled the ACM writes and pushed the
-    // whole proposal past the 30M block gas limit.
-    ...CENTRIFUGE_GOVERNANCE.map(sig => ({ account: NORMAL_TIMELOCK, sig })),
-    // Operator: queues, pause-down and the async wind-down surface.
-    ...CENTRIFUGE_OPERATOR.map(sig => ({ account: OPERATOR, sig })),
-    // Keeper: the four claim entry points.
-    ...CENTRIFUGE_KEEPER.map(sig => ({ account: KEEPER, sig })),
-    // Guardian: containment only.
-    ...CENTRIFUGE_GUARDIAN.map(sig => ({ account: GUARDIAN, sig })),
-  ]).map(({ account, sig }) => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, account));
+  [
+    // Both holders get the whole surface. The timelock is granted all of it, the Guardian only what
+    // its wildcards miss. See ./permissions-bsctestnet.
+    ...NORMAL_TIMELOCK_GRANTS.map(sig => ({ account: NORMAL_TIMELOCK, sig })),
+    ...GUARDIAN_GRANTS.map(sig => ({ account: GUARDIAN, sig })),
+  ].map(({ account, sig }) => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, account));
 
 export const vip664 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-664 [BNB Chain Testnet] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
+    // Placeholder number. The testnet governor is already past this, so it will be wrong on chain —
+    // it gets set for real once the mainnet proposal is finalized. Nothing in the description below
+    // cites a VIP number, so only this line has to change.
+    title: "VIP-666 [BNB Chain Testnet] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
     description: `#### Summary
 
 Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDT) on BNB Chain Testnet: grants the ACM
@@ -117,8 +66,10 @@ async lifecycle and the price defences testable on a live network.
 
 #### Actions (one atomic transaction, in order)
 
-1. Grant the **Normal Timelock** the full gated surface of **CentrifugeSource_USDT**, the Guardian the
-   containment subset, and the Operator/Keeper their respective subsets.
+1. Grant the full gated surface of **CentrifugeSource_USDT** to the **Normal Timelock** and to the
+   **Guardian** multisig, which stands in for the Operator and the Keeper on this network. Nobody else
+   is granted anything. The Guardian is an ACM admin that already holds the shared yield-group surface
+   against every contract, so only the Centrifuge-specific signatures are granted to it.
 2. Grant **CentrifugeSource_USDT** itself the \`pauseHub()\` role on **Hub_USDT**. The drop guard's only
    reaction is the group calling \`pauseHub()\`; without this role a genuine breach would make the
    permissionless \`enforceDropGuard\` revert instead of pausing.
@@ -126,11 +77,12 @@ async lifecycle and the price defences testable on a live network.
    source's inner deposit and withdraw queues.
 4. Register the source on **Hub_USDT** (\`addYieldGroup\`), uncapped, matching testnet policy for the
    existing three groups.
-5. Set the Hub's outer withdraw queue to **FRV → Flux → Centrifuge → Core**.
+5. Set the Hub's outer withdraw queue to **Centrifuge → FRV → Flux → Core**. The deposit queue is
+   not touched.
 
 #### Deposit routing
 
-The Centrifuge group joins the **withdraw** queue only; the deposit queue is unchanged. Because
+The Centrifuge group joins the **withdraw** queue only; the deposit queue is left as it is. Because
 Centrifuge settles over days, an ordinary user deposit routed there would sit unwithdrawable in a
 pending request for a product the user never chose. Capital enters this group only through an
 Operator reallocation targeted at the vault. It must still be listed in the withdraw queue, because the
@@ -149,19 +101,24 @@ further VIP.
 #### References
 
 - [Centrifuge YieldGroup pull request](https://github.com/VenusProtocol/venus-liquidity-hub/pull/21)
-- [VIP-650: Liquidity Hub onboarding](https://app.venus.io/#/governance/proposal/650)`,
+- The earlier BNB Chain Testnet proposal that deployed this Hub stack and wired Core, FRV and Flux`,
     forDescription: "I agree that Venus Protocol should proceed with onboarding the Centrifuge YieldGroup",
     againstDescription: "I do not think that Venus Protocol should proceed with onboarding the Centrifuge YieldGroup",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with onboarding the Centrifuge YieldGroup",
   };
 
+  // Order matters: grants first, addResource before the inner queues, addYieldGroup before the outer.
   return makeProposal(
     [
       // 1. ACM roles on the new source.
       ...grantsOnSource(),
 
-      // 2. The source's own `pauseHub()` role on the Hub — the drop guard's only reaction.
-      giveCallPermission(ACM, HUB_USDT, PAUSE_HUB, CENTRIFUGE_SOURCE_USDT),
+      // 2. The drop guard's only reaction: gated on the Hub, granted to the source itself.
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [HUB_USDT, "pauseHub()", CENTRIFUGE_SOURCE_USDT],
+      },
 
       // 3. Register the fund behind AdapterCentrifuge, then set the source's inner queues.
       {
@@ -187,8 +144,7 @@ further VIP.
         params: [CENTRIFUGE_SOURCE_USDT, ABSOLUTE_CAP_UNBOUNDED, PERCENTAGE_CAP_DISABLED],
       },
 
-      // 5. Outer queues: Centrifuge joins the withdraw cascade; the deposit queue is unchanged.
-      { target: HUB_USDT, signature: "setOuterDepositQueue(address[])", params: [OUTER_DEPOSIT_QUEUE] },
+      // 5. Centrifuge joins the withdraw cascade. The deposit queue is left alone.
       { target: HUB_USDT, signature: "setOuterWithdrawQueue(address[])", params: [OUTER_WITHDRAW_QUEUE] },
     ],
     meta,
