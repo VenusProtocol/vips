@@ -43,7 +43,10 @@ const { FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 const roleOf = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
 
-const OUTER_DEPOSIT_QUEUE = [FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
+// The earlier wiring proposal pointed both outer queues at the same order, so this is the pre-VIP
+// state of each, and stays the deposit queue afterwards.
+const QUEUE_BEFORE_VIP = [FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
+const OUTER_DEPOSIT_QUEUE = QUEUE_BEFORE_VIP;
 const OUTER_WITHDRAW_QUEUE = [CENTRIFUGE_SOURCE_USDT, FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
 
 forking(BLOCK_NUMBER, async () => {
@@ -98,11 +101,11 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("both outer queues are still [FRV, Flux, Core]", async () => {
-      // The VIP rewrites the deposit queue with a value it calls unchanged. Assert that here, so an
-      // operator reordering it since the Hub was wired shows up as a failure rather than a silent
-      // revert.
-      expect((await hub.outerDepositQueue()).map(addr)).to.deep.equal(OUTER_DEPOSIT_QUEUE.map(addr));
-      expect((await hub.outerWithdrawQueue()).map(addr)).to.deep.equal(OUTER_DEPOSIT_QUEUE.map(addr));
+      // Pins the starting point, so the post-VIP checks mean something: that the withdraw queue was
+      // reordered rather than already in that order, and that the deposit queue really went untouched
+      // rather than being rewritten to a value it happened to hold.
+      expect((await hub.outerDepositQueue()).map(addr)).to.deep.equal(QUEUE_BEFORE_VIP.map(addr));
+      expect((await hub.outerWithdrawQueue()).map(addr)).to.deep.equal(QUEUE_BEFORE_VIP.map(addr));
     });
 
     it("the source cannot pause the Hub yet — the drop guard's only reaction", async () => {

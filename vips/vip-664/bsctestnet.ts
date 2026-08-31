@@ -89,6 +89,15 @@ Operator reallocation targeted at the vault. It must still be listed in the with
 Hub rejects a withdraw queue that omits a registered group holding a balance; while invested the group
 reports zero withdrawable liquidity, so the cascade skips over it.
 
+#### Withdraw order
+
+The Hub drains the withdraw queue front to back, and Centrifuge goes **first**. The only liquidity this
+group ever advertises is what is no longer invested: assets from a settled redemption, and any idle
+balance sitting on the group. Both earn nothing, so spending them before touching a productive position
+is what the ordering buys. While the position is still invested the group reports zero, and the Hub's
+cascade skips a group that reports nothing — so first place costs one skipped probe per withdrawal and
+never blocks one. Core stays last as the always-liquid backstop.
+
 #### Price defences
 
 Centrifuge share prices are unbounded and published cross-chain by the pool manager, so the group ships

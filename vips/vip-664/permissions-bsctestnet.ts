@@ -51,12 +51,18 @@ export const CENTRIFUGE_FULL_SURFACE = [
 // Who holds what on testnet.
 //
 // Two accounts, and no split between them: the Normal Timelock, and the Guardian multisig, which
-// stands in for the Operator and the Keeper here as well. Both get the whole surface. Nobody else
-// needs anything, so the FastTrack and Critical timelocks are left out — granting all three pushed
-// the proposal past the 30M block gas limit anyway.
+// stands in for the Operator and the Keeper here as well. Both get the whole surface — the price
+// guards included, so the Guardian can arm a drop guard that pauses the Hub. That is not a decision
+// this file gets to make on testnet: the Guardian is an ACM admin here, so it could grant itself any
+// of this anyway, which is what makes the whole role split advisory rather than enforced.
 //
-// Mainnet is where the roles are actually separated: distinct Operator and Keeper addresses, a
-// containment-only Guardian, and the price guards kept with governance.
+// Granting these two and no one else is the intent, not a fallback: FastTrack and Critical are
+// deliberately left out, so the only governance route to this source is the Normal Timelock, and
+// anything faster goes through the Guardian multisig.
+//
+// Mainnet is where the roles are actually separated, and none of the above carries over: distinct
+// Operator and Keeper addresses, a containment-only Guardian that is not an ACM admin, and the price
+// guards kept with governance.
 // ---------------------------------------------------------------------------------------------------
 const notAlreadyHeld = (sigs: string[]) => sigs.filter(sig => !GUARDIAN_WILDCARDS.includes(sig));
 
