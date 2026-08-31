@@ -1,5 +1,6 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
@@ -29,9 +30,7 @@ import HUB_ABI from "./abi/Hub.json";
 import VAULT_ABI from "./abi/TestnetCentrifugeVault.json";
 import YIELD_GROUP_CENTRIFUGE_ABI from "./abi/YieldGroupCentrifuge.json";
 
-// bsctestnet block just after 08/09 deployed the Centrifuge family and CentrifugeSource_USDT
-// (source deployed at block 128,297,808).
-const BLOCK_NUMBER = 128298000;
+const BLOCK_NUMBER = 128313501;
 
 const addr = (a: string) => ethers.utils.getAddress(a);
 const ZERO_ADDRESS = ethers.constants.AddressZero;
@@ -43,23 +42,34 @@ const { FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 const roleOf = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
 
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function totalSupply() view returns (uint256)",
+];
+
 // The earlier wiring proposal pointed both outer queues at the same order, so this is the pre-VIP
 // state of each, and stays the deposit queue afterwards.
 const QUEUE_BEFORE_VIP = [FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
 const OUTER_DEPOSIT_QUEUE = QUEUE_BEFORE_VIP;
 const OUTER_WITHDRAW_QUEUE = [CENTRIFUGE_SOURCE_USDT, FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
 
+// Restated rather than imported from the VIP, so a change there has to be mirrored here to pass.
+const EXPECTED_ABSOLUTE_CAP = "340282366920938463463374607431768211455"; // type(uint128).max
+const EXPECTED_PERCENTAGE_CAP_BPS = 10_000; // cap disabled
+
 forking(BLOCK_NUMBER, async () => {
   let hub: Contract;
   let source: Contract;
   let acm: Contract;
   let vault: Contract;
+  let usdt: Contract;
 
   before(async () => {
     hub = await ethers.getContractAt(HUB_ABI, HUB_USDT);
     source = await ethers.getContractAt(YIELD_GROUP_CENTRIFUGE_ABI, CENTRIFUGE_SOURCE_USDT);
     acm = await ethers.getContractAt(ACM_ABI, ACM);
     vault = await ethers.getContractAt(VAULT_ABI, MOCK_CENTRIFUGE_VAULT_USDT);
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
   });
 
   describe("Pre-VIP state", () => {
@@ -147,9 +157,20 @@ forking(BLOCK_NUMBER, async () => {
       expect(addr(cfg.adapter)).to.equal(addr(ADAPTER_CENTRIFUGE));
     });
 
-    it("the group is registered on the Hub", async () => {
+    it("the group is registered on the Hub, uncapped", async () => {
       const groups = (await hub.registeredYieldGroups()).map(addr);
       expect(groups).to.include(addr(CENTRIFUGE_SOURCE_USDT));
+
+      const group = await hub.yieldGroupConfig(CENTRIFUGE_SOURCE_USDT);
+      expect(group.registered).to.equal(true);
+      expect(group.paused).to.equal(false);
+      expect(group.absoluteCap).to.equal(EXPECTED_ABSOLUTE_CAP);
+      expect(group.percentageCapBps).to.equal(EXPECTED_PERCENTAGE_CAP_BPS);
+    });
+
+    it("both inner queues route to the one registered fund", async () => {
+      expect((await source.innerDepositQueue()).map(addr)).to.deep.equal([addr(MOCK_CENTRIFUGE_VAULT_USDT)]);
+      expect((await source.innerWithdrawQueue()).map(addr)).to.deep.equal([addr(MOCK_CENTRIFUGE_VAULT_USDT)]);
     });
 
     it("Centrifuge is in the WITHDRAW queue, and the deposit queue is untouched", async () => {
@@ -193,11 +214,11 @@ forking(BLOCK_NUMBER, async () => {
       expect(await source.maxWithdraw()).to.equal(0);
     });
 
-    it("no price guard is armed — each needs its own sizing decision", async () => {
-      const growth = await source.growthGuard(MOCK_CENTRIFUGE_VAULT_USDT);
-      const drop = await source.dropGuard(MOCK_CENTRIFUGE_VAULT_USDT);
-      expect(growth.interval).to.equal(0);
-      expect(drop.interval).to.equal(0);
+    it("none of the three price guards is armed — each needs its own sizing decision", async () => {
+      // Growth and drop are off while `interval == 0`; the age guard carries its own flag.
+      expect((await source.growthGuard(MOCK_CENTRIFUGE_VAULT_USDT)).interval).to.equal(0);
+      expect((await source.dropGuard(MOCK_CENTRIFUGE_VAULT_USDT)).interval).to.equal(0);
+      expect((await source.priceAgeGuard(MOCK_CENTRIFUGE_VAULT_USDT)).enabled).to.equal(false);
     });
 
     it("the Hub still routes deposits normally, unaffected by the new group", async () => {
@@ -216,6 +237,99 @@ forking(BLOCK_NUMBER, async () => {
       // Unpause is wildcarded too. Restore the state so this test leaves nothing behind.
       await source.connect(guardian).unpauseResource(MOCK_CENTRIFUGE_VAULT_USDT);
       expect((await source.resourceConfig(MOCK_CENTRIFUGE_VAULT_USDT)).paused).to.equal(false);
+    });
+  });
+
+  // One pass through the async lifecycle the group exists for: capital in, shares held, redeemed,
+  // claimed, and back out. The steps share state and run in order.
+  //
+  // The mock fund has `autoFulfill` on, so each request lands in its claimable bucket in the same
+  // call instead of waiting on a fund manager. That collapses the waiting, not the steps — every
+  // claim the keeper would make on a real fund still has to be made here.
+  describe("Post-VIP end-to-end: fund the Centrifuge group, then redeem it back", () => {
+    // Testnet USDT is 6-decimal, and 10 is the Hub's `maxWithdrawalSize`. Sizing the round trip to
+    // that ceiling is what lets the last step be a single real Hub withdrawal.
+    const AMOUNT = ethers.utils.parseUnits("10", 6);
+
+    let operator: SignerWithAddress;
+    let shareToken: Contract;
+    let vusdt: string;
+    let shares: BigNumber;
+
+    before(async () => {
+      // The Guardian multisig is the Operator and the Keeper on this network, and already held
+      // `reallocate` on the Hub before this VIP.
+      operator = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      shareToken = await ethers.getContractAt(ERC20_ABI, await vault.share());
+      // Read Core's resource rather than hardcoding vUSDT: it is the only one registered there.
+      const core = await ethers.getContractAt(YIELD_GROUP_CENTRIFUGE_ABI, CORE_SOURCE_USDT);
+      vusdt = (await core.resources())[0];
+    });
+
+    const leg = (yieldGroup: string, resource: string, amount: BigNumber) => ({ yieldGroup, resource, amount });
+
+    it("an operator reallocation is what puts capital in — no user deposit can reach it", async () => {
+      // Centrifuge is absent from the outer deposit queue, so this targeted leg is the only route.
+      await hub
+        .connect(operator)
+        .reallocate(
+          [leg(CORE_SOURCE_USDT, vusdt, AMOUNT)],
+          [leg(CENTRIFUGE_SOURCE_USDT, MOCK_CENTRIFUGE_VAULT_USDT, AMOUNT)],
+        );
+
+      // Valued at the fund's NAV, which the mock holds at 1.00 while no drift is set.
+      expect(await source.totalAssets()).to.equal(AMOUNT);
+      // The assets left the Hub for the fund rather than sitting on the group.
+      expect(await usdt.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+    });
+
+    it("the group advertises nothing withdrawable while the position is invested", async () => {
+      // This is what makes first place in the withdraw queue free: the cascade probes and moves on.
+      expect(await source.maxWithdraw()).to.equal(0);
+      // Shares are issued but still sit in the fund's claimable bucket, uncollected.
+      expect(await shareToken.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+    });
+
+    it("the keeper claims the settled subscription, and the group takes custody of the shares", async () => {
+      await source.connect(operator).claimDeposit(MOCK_CENTRIFUGE_VAULT_USDT);
+
+      shares = await shareToken.balanceOf(CENTRIFUGE_SOURCE_USDT);
+      expect(shares).to.be.gt(0);
+      // Claiming moves shares, it does not change what they are worth.
+      expect(await source.totalAssets()).to.equal(AMOUNT);
+    });
+
+    it("a redeem request burns the shares and reserves the assets for the group", async () => {
+      await source.connect(operator).requestRedeem(MOCK_CENTRIFUGE_VAULT_USDT, shares);
+
+      expect(await shareToken.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+      // Settled proceeds count as withdrawable before anyone claims them, so the group starts
+      // advertising liquidity here rather than after the claim.
+      expect(await source.maxWithdraw()).to.equal(AMOUNT);
+      expect(await source.totalAssets()).to.equal(AMOUNT);
+    });
+
+    it("the keeper claims the redemption, leaving the assets idle on the group", async () => {
+      await source.connect(operator).claimRedeem(MOCK_CENTRIFUGE_VAULT_USDT);
+
+      expect(await usdt.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(AMOUNT);
+      // Still withdrawable, now because it is idle rather than because it is claimable.
+      expect(await source.maxWithdraw()).to.equal(AMOUNT);
+    });
+
+    it("a Hub withdrawal drains Centrifuge first, emptying the group", async () => {
+      // Idle assets sitting on the group are out of reach of a resource-targeted reallocate leg —
+      // they are no longer tied to the vault, so the resource reports no liquidity for them. The
+      // Hub's own cascade is what reaches them, and Centrifuge leads that queue: the whole
+      // withdrawal is routed to this group, and Core is never asked.
+      await expect(hub.connect(operator).withdraw(AMOUNT, GUARDIAN, GUARDIAN))
+        .to.emit(hub, "WithdrawRouted")
+        .withArgs(CENTRIFUGE_SOURCE_USDT, AMOUNT);
+
+      expect(await usdt.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+      expect(await shareToken.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+      expect(await source.totalAssets()).to.equal(0);
+      expect(await source.maxWithdraw()).to.equal(0);
     });
   });
 });
