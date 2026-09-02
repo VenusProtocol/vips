@@ -19,6 +19,10 @@ export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
+// Dev recipient for the off-chain U -> USDT conversion.
+export const DEV_RECIPIENT = "0x080f8A0fB70F8F0F1b83C6178225a96CbE2BE0DE";
+export const U_TO_SWEEP = parseUnits("12000", 18);
+
 // ===========================================================================
 // Enable the U market for Prime on the BORROW side. This is the first month U is
 // scored on borrows rather than supplies: supplyMultiplier = 0 (a pure vU supply
@@ -61,14 +65,15 @@ This VIP performs the following actions on BNB Chain:
 2. **USDT market** — set the Prime reward speed so ~$64K is distributed to USDT suppliers over September 2026.
 3. **U market** — set the Prime reward speed so ~$16K is distributed to U borrowers over September 2026.
 4. **wBNB market** — set the Prime reward speed to 0, ending wBNB Prime rewards.
+5. **Income-allocation rebalance** — transfer 12,000 U from the PrimeLiquidityProvider to the Venus dev recipient (${DEV_RECIPIENT}) for off-chain conversion to USDT and return to the PrimeLiquidityProvider. This aligns the reward inventory with this month's 80/20 reward distribution after revenue was allocated using the previous 50/50 ratio.
 
-Actions 2–4 are a single setTokensDistributionSpeed call on the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2). The Normal Timelock holds the PrimeV2 addMarket and PLP setTokensDistributionSpeed ACM permissions and owns the PrimeLiquidityProvider, so no ACM grants are needed. The Critical Timelock's privileges were removed in [VIP-645](https://app.venus.io/#/governance/proposal/645?chainId=56), so — as with the August allocation — this proposal is submitted as a Normal VIP.
+Actions 2–4 are a single setTokensDistributionSpeed call on the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2); action 5 is a sweepToken call on the same contract. The Normal Timelock holds the PrimeV2 addMarket and PLP setTokensDistributionSpeed ACM permissions and owns the PrimeLiquidityProvider, so no ACM grants are needed. The Critical Timelock's privileges were removed in [VIP-645](https://app.venus.io/#/governance/proposal/645?chainId=56), so — as with the August allocation — this proposal is submitted as a Normal VIP.
 
 The exact per-block distribution speeds, reward-token amounts, and the PrimeV2 / PrimeLiquidityProvider / market addresses are configured in the vips repo PR.
 
 #### Funding the reward legs
 
-This VIP only sets the Prime market multipliers and the reward distribution speeds; it does not move any funds. Funding of the PrimeLiquidityProvider's reward legs is managed operationally outside this proposal — through the Prime revenue buyback inflow and treasury operations — and is not a governance action here.
+This VIP sets the Prime market multipliers and reward distribution speeds and sweeps 12,000 U to the dev recipient. The U -> USDT conversion and subsequent USDT return to the PrimeLiquidityProvider are operational steps performed outside this proposal.
 
 U, USDT and wBNB are already configured reward tokens on the PLP (each with a max distribution speed of 1e18, unchanged here), so no initializeTokens or setMaxTokensDistributionSpeed call is needed.
 
@@ -99,6 +104,13 @@ U, USDT and wBNB are already configured reward tokens on the PLP (each with a ma
           [USDT, U, WBNB],
           [NEW_PRIME_SPEED_FOR_USDT, NEW_PRIME_SPEED_FOR_U, NEW_PRIME_SPEED_FOR_WBNB],
         ],
+      },
+      // 3. Rebalance the income allocation off-chain: sweep U to the dev recipient for conversion
+      //    to USDT and return to the PrimeLiquidityProvider.
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [U, DEV_RECIPIENT, U_TO_SWEEP],
       },
     ],
     meta,

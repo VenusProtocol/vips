@@ -1,12 +1,13 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
   BORROW_MULTIPLIER,
+  DEV_RECIPIENT,
   NEW_PRIME_SPEED_FOR_U,
   NEW_PRIME_SPEED_FOR_USDT,
   NEW_PRIME_SPEED_FOR_WBNB,
@@ -15,6 +16,7 @@ import {
   SUPPLY_MULTIPLIER,
   U,
   USDT,
+  U_TO_SWEEP,
   VU,
   WBNB,
   vip665,
@@ -30,13 +32,21 @@ const AUGUST_SPEED_FOR_WBNB = "6166906433170";
 // Prime market, and the August (VIP-652) speeds are still the live values.
 const FORK_BLOCK = 118190000;
 
+const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
+
 forking(FORK_BLOCK, async () => {
   let prime: Contract;
   let plp: Contract;
+  let u: Contract;
+  let plpUBefore: BigNumber;
+  let recipientUBefore: BigNumber;
 
   before(async () => {
     prime = await ethers.getContractAt(PRIME_V2_ABI, PRIME);
     plp = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+    u = await ethers.getContractAt(ERC20_ABI, U);
+    plpUBefore = await u.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    recipientUBefore = await u.balanceOf(DEV_RECIPIENT);
   });
 
   describe("Pre-VIP state", async () => {
@@ -62,6 +72,10 @@ forking(FORK_BLOCK, async () => {
       expect(await plp.maxTokenDistributionSpeeds(U)).to.equal(ethers.utils.parseUnits("1", 18));
       expect(await plp.maxTokenDistributionSpeeds(WBNB)).to.equal(ethers.utils.parseUnits("1", 18));
     });
+
+    it("PLP holds enough U for the income-allocation rebalance", async () => {
+      expect(plpUBefore).to.be.gte(U_TO_SWEEP);
+    });
   });
 
   testVip("VIP-665 September 2026 Prime Allocation", await vip665(), {
@@ -69,6 +83,7 @@ forking(FORK_BLOCK, async () => {
       // Exactly one MarketAdded (vU) and one speed update per token.
       await expectEvents(txResponse, [PRIME_V2_ABI], ["MarketAdded"], [1]);
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [3]);
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [1]);
 
       // Argument-level assertions: the vU market is added on the borrow side, and each token's
       // speed transitions from its August value to the September value.
@@ -80,6 +95,7 @@ forking(FORK_BLOCK, async () => {
       await expect(txResponse)
         .to.emit(plp, "TokenDistributionSpeedUpdated")
         .withArgs(WBNB, AUGUST_SPEED_FOR_WBNB, NEW_PRIME_SPEED_FOR_WBNB);
+      await expect(txResponse).to.emit(plp, "SweepToken").withArgs(U, DEV_RECIPIENT, U_TO_SWEEP);
     },
   });
 
@@ -103,6 +119,11 @@ forking(FORK_BLOCK, async () => {
     it("new speeds stay under the configured maximum", async () => {
       expect(await plp.tokenDistributionSpeeds(USDT)).to.be.lte(await plp.maxTokenDistributionSpeeds(USDT));
       expect(await plp.tokenDistributionSpeeds(U)).to.be.lte(await plp.maxTokenDistributionSpeeds(U));
+    });
+
+    it("sweeps 12,000 U from the PLP to the dev recipient", async () => {
+      expect(plpUBefore.sub(await u.balanceOf(PRIME_LIQUIDITY_PROVIDER))).to.equal(U_TO_SWEEP);
+      expect((await u.balanceOf(DEV_RECIPIENT)).sub(recipientUBefore)).to.equal(U_TO_SWEEP);
     });
   });
 });
