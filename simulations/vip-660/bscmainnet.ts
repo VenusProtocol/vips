@@ -19,8 +19,8 @@ import {
   U_TO_SWEEP,
   VU,
   WBNB,
-  vip665,
-} from "../../vips/vip-665/bscmainnet";
+  vip660,
+} from "../../vips/vip-660/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PRIME_V2_ABI from "./abi/PrimeV2.json";
 
@@ -78,7 +78,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-665 September 2026 Prime Allocation", await vip665(), {
+  testVip("VIP-660 September 2026 Prime Allocation", await vip660(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // Exactly one MarketAdded (vU) and one speed update per token.
       await expectEvents(txResponse, [PRIME_V2_ABI], ["MarketAdded"], [1]);
