@@ -22,8 +22,7 @@ import {
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PRIME_V2_ABI from "./abi/PrimeV2.json";
 
-// Live Prime distribution speeds set by VIP-652 (August 2026), read on-chain at the
-// fork block. Notion's "current" wBNB figure is stale; the real on-chain value is used.
+// August 2026 Prime distribution speeds set by VIP-652, live on-chain at the fork block.
 const AUGUST_SPEED_FOR_USDT = "8506944444444444";
 const AUGUST_SPEED_FOR_WBNB = "6166906433170";
 
@@ -67,8 +66,20 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-665 September 2026 Prime Allocation", await vip665(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      // Exactly one MarketAdded (vU) and one speed update per token.
       await expectEvents(txResponse, [PRIME_V2_ABI], ["MarketAdded"], [1]);
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [3]);
+
+      // Argument-level assertions: the vU market is added on the borrow side, and each token's
+      // speed transitions from its August value to the September value.
+      await expect(txResponse).to.emit(prime, "MarketAdded").withArgs(VU, SUPPLY_MULTIPLIER, BORROW_MULTIPLIER);
+      await expect(txResponse)
+        .to.emit(plp, "TokenDistributionSpeedUpdated")
+        .withArgs(USDT, AUGUST_SPEED_FOR_USDT, NEW_PRIME_SPEED_FOR_USDT);
+      await expect(txResponse).to.emit(plp, "TokenDistributionSpeedUpdated").withArgs(U, 0, NEW_PRIME_SPEED_FOR_U);
+      await expect(txResponse)
+        .to.emit(plp, "TokenDistributionSpeedUpdated")
+        .withArgs(WBNB, AUGUST_SPEED_FOR_WBNB, NEW_PRIME_SPEED_FOR_WBNB);
     },
   });
 
@@ -82,14 +93,11 @@ forking(FORK_BLOCK, async () => {
       expect(await prime.getAllMarkets()).to.include(VU);
     });
 
-    it("September 2026 prime reward distribution speeds applied", async () => {
+    it("September 2026 prime reward distribution speeds applied (wBNB rewards ended)", async () => {
       expect(await plp.tokenDistributionSpeeds(USDT)).to.equal(NEW_PRIME_SPEED_FOR_USDT);
       expect(await plp.tokenDistributionSpeeds(U)).to.equal(NEW_PRIME_SPEED_FOR_U);
       expect(await plp.tokenDistributionSpeeds(WBNB)).to.equal(NEW_PRIME_SPEED_FOR_WBNB);
-    });
-
-    it("wBNB Prime rewards are ended", async () => {
-      expect(await plp.tokenDistributionSpeeds(WBNB)).to.equal(0);
+      expect(NEW_PRIME_SPEED_FOR_WBNB).to.equal(0);
     });
 
     it("new speeds stay under the configured maximum", async () => {

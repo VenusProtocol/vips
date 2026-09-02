@@ -57,7 +57,7 @@ This proposal sets the September 2026 Prime reward allocation on BNB Chain — $
 
 This VIP performs the following actions on BNB Chain:
 
-1. **Enable the U market for Prime on the borrow side** — addMarket(vU, supplyMultiplier = 0, borrowMultiplier = 2e18) on [PrimeV2](https://bscscan.com/address/0x059EabA8676b03e4e8f009eFb7F587C28450F50f). With supplyMultiplier = 0 a pure vU supply position earns no Prime score; with borrowMultiplier = 2e18 Prime scores in this market derive from U borrowed. This mirrors the 2x factor applied to the existing supply-side markets (vUSDT / vWBNB), on the borrow leg instead.
+1. **Enable the U market for Prime on the borrow side** — addMarket(vU, supplyMultiplier = 0, borrowMultiplier = 2e18) on [PrimeV2](https://bscscan.com/address/0x059EabA8676b03e4e8f009eFb7F587C28450F50f). With supplyMultiplier = 0 a pure vU supply position earns no Prime score; with borrowMultiplier = 2e18 Prime scores in this market derive from U borrowed. This mirrors the 2x factor applied to the existing supply-side markets (vUSDT / vWBNB), on the borrow leg instead. Adding a market queues a one-time score-update round across all existing Prime holders: until that round finishes (via updateScores), claimPrime / issue / burn revert with ScoreUpdateInProgress and no vU Prime score accrues. This temporary freeze is inherent to any PrimeV2 market change and resolves once the score update completes.
 2. **USDT market** — set the Prime reward speed so ~$64K is distributed to USDT suppliers over September 2026.
 3. **U market** — set the Prime reward speed so ~$16K is distributed to U borrowers over September 2026.
 4. **wBNB market** — set the Prime reward speed to 0, ending wBNB Prime rewards.
