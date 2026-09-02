@@ -68,10 +68,7 @@ The exact per-block distribution speeds, reward-token amounts, and the PrimeV2 /
 
 #### Funding the reward legs
 
-No funding swap or token top-up is required this month. Both legs are covered by the PrimeLiquidityProvider's free balance (balance less already-accrued rewards) plus the monthly buyback inflow:
-
-- **USDT** — the ~$64K leg is covered by the PLP's free USDT balance (~36.7K USDT at proposal preparation) plus the monthly USDT buyback inflow.
-- **U** — the ~$16K leg is over-funded by the PLP's free U balance alone (~35.8K U at proposal preparation), so no U→USDT swap is needed this month.
+This VIP only sets the Prime market multipliers and the reward distribution speeds; it does not move any funds. Funding of the PrimeLiquidityProvider's reward legs is managed operationally outside this proposal — through the Prime revenue buyback inflow and treasury operations — and is not a governance action here.
 
 U, USDT and wBNB are already configured reward tokens on the PLP (each with a max distribution speed of 1e18, unchanged here), so no initializeTokens or setMaxTokensDistributionSpeed call is needed.
 
