@@ -126,15 +126,7 @@ const listMarket = (m: SpokeMarket): Command[] => [
     target: SPOKE_POOL_REGISTRY,
     signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
     params: [
-      [
-        m.vToken,
-        m.collateralFactor,
-        m.liquidationThreshold,
-        m.initialSupply,
-        VTREASURY,
-        m.supplyCap,
-        m.borrowCap,
-      ],
+      [m.vToken, m.collateralFactor, m.liquidationThreshold, m.initialSupply, VTREASURY, m.supplyCap, m.borrowCap],
     ],
   },
   {
@@ -342,13 +334,7 @@ Every market is capped, and the pool has its own Comptroller and its own registr
       {
         target: SPOKE_POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
-        params: [
-          POOL_NAME,
-          SPOKE_COMPTROLLER,
-          CLOSE_FACTOR,
-          POOL_LIQUIDATION_INCENTIVE,
-          MIN_LIQUIDATABLE_COLLATERAL,
-        ],
+        params: [POOL_NAME, SPOKE_COMPTROLLER, CLOSE_FACTOR, POOL_LIQUIDATION_INCENTIVE, MIN_LIQUIDATABLE_COLLATERAL],
       },
 
       // -------------------------------------------------------------------------------------------
