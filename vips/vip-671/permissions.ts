@@ -38,6 +38,22 @@
 //
 //   NOT COVERED for any timelock, and therefore granted by this VIP: everything below.
 //
+// ---------------------------------------------------------------------------------------------------
+// GRANTEES: THE NORMAL TIMELOCK ONLY.
+//
+//   The Fast-track and Critical timelocks receive nothing from this VIP, and neither does the
+//   Guardian. A grant is cheap to add later and awkward to take back, so the emergency timelocks stay
+//   off a pool that has not run yet.
+//
+//   Two things this does NOT change, both pre-existing wildcards that already reach any new
+//   comptroller and that this VIP leaves alone:
+//     - all three timelocks can already call `setActionsPaused(address[],uint256[],bool)`, so the
+//       emergency pause path on this pool is open from the first block;
+//     - the Guardian can already call `setMarketSupplyCaps`, `setMarketBorrowCaps` and
+//       `setCollateralFactor`. It holds no per-pool grant on any existing bsctestnet isolated pool
+//       either (checked against Comptroller_DeFi, _StableCoins and _GameFi), so this pool matches
+//       what the chain already does rather than inventing a new arrangement.
+//
 // NOTE on setActionsPaused. The role string is `setActionsPaused(address[],uint256[],bool)` while the
 // CALL signature is `setActionsPaused(address[],uint8[],bool)`, because `Action` is an enum. They are
 // different strings on purpose. Confirmed on chain: the `uint256[]` form is granted to all three

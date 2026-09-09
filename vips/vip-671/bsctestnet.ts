@@ -5,6 +5,7 @@ import {
   ACM,
   DEFAULT_PROXY_ADMIN,
   DEVIATION_BOUNDED_ORACLE,
+  NORMAL_TIMELOCK,
   PROTOCOL_SHARE_RESERVE,
   PROTOCOL_SHARE_RESERVE_IMPL,
   RESILIENT_ORACLE,
@@ -12,12 +13,17 @@ import {
   RISK_FUND_CONVERTER,
   SPOKE_COMPTROLLER,
   SPOKE_POOL_REGISTRY,
-  TIMELOCKS,
   VTREASURY,
-  VUSDT_SPOKE,
 } from "./addresses/bsctestnet";
 import {
   CLOSE_FACTOR,
+  COLLATERAL_MARKET,
+  DBO_COOLDOWN_PERIOD,
+  DBO_ENABLE_BOUNDED_PRICING,
+  DBO_ENABLE_CACHING,
+  DBO_RESET_THRESHOLD,
+  DBO_TRIGGER_THRESHOLD,
+  LIQUIDITY_MARKET,
   MARKETS,
   MIN_LIQUIDATABLE_COLLATERAL,
   POOL_LIQUIDATION_INCENTIVE,
@@ -40,10 +46,9 @@ import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES, giveCallPermission } fr
 //     outer queues, and `setAllowedSupplier` for the Hub's spoke source.
 //   - bStock liquidation (venus-protocol#707): BStockLiquidator is not deployed on this chain at all.
 //
-// FOUNDATION DRAFT. Nothing on the spoke side is deployed yet. Every placeholder is marked
-// TODO(deploy) in ./addresses/bsctestnet.ts, and this proposal cannot be simulated or proposed until
-// they are filled in. What IS settled is the shape: the command ORDER, the exact ACM role strings,
-// the exact call signatures, and which grants this chain already covers by wildcard.
+// STATUS. Address-complete. The whole spoke stack and the new ProtocolShareReserve implementation are
+// deployed on bsctestnet, and every address here was read back from the chain rather than taken from a
+// deployment record alone.
 //
 // ---------------------------------------------------------------------------------------------------
 // WHY THIS POOL HAS A REGISTRY OF ITS OWN
@@ -95,12 +100,14 @@ import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES, giveCallPermission } fr
 //   does not know has EVERY LIQUIDATION REVERT, after the collateral has already moved.
 //   protocol-reserve#168 fixes this by letting PSR resolve through more than one registry. This VIP
 //   carries the proxy upgrade and the `addPoolRegistry` call together, which that PR requires.
-//   TODO(deploy): the new implementation address.
 // ===================================================================================================
 
-/// Faucet the seed, list the market through the spoke registry, then drop the approval back to zero.
-/// The mocked underlyings on this chain all expose `faucet(uint256)`, which mints to `msg.sender`
-/// (the Timelock), so no treasury withdrawal is needed. Same pattern as VIP-633.
+/// Mint the seed to the Timelock, list the market through the spoke registry, then drop the approval
+/// back to zero.
+///
+/// The mocked USDT and USDC on this chain expose `allocateTo(address,uint256)`, NOT the
+/// `faucet(uint256)` the bStock mocks carry, so no treasury withdrawal is needed. Verified against the
+/// deployed bytecode: the `faucet` selector is absent from both. Same pattern as VIP-195 and VIP-198.
 const listMarket = (m: SpokeMarket): Command[] => [
   {
     target: m.vToken,
@@ -114,8 +121,8 @@ const listMarket = (m: SpokeMarket): Command[] => [
   },
   {
     target: m.underlying,
-    signature: "faucet(uint256)",
-    params: [m.initialSupply],
+    signature: "allocateTo(address,uint256)",
+    params: [NORMAL_TIMELOCK, m.initialSupply],
   },
   {
     target: m.underlying,
@@ -142,23 +149,25 @@ export const vip671 = () => {
     title: "VIP-671 [BNB Chain Testnet] Hub-Funded Spoke pool: list the pool and its markets",
     description: `#### Summary
 
-If passed, this VIP will register the first **Hub-Funded Spoke pool** on BNB Chain testnet, in a pool registry of its own, and list its four markets.
+If passed, this VIP will register the first **Hub-Funded Spoke pool** on BNB Chain testnet, in a pool registry of its own, and list its two markets.
 
-A Hub-Funded Spoke pool is one pool whose two sides are listed and controlled separately:
+A Hub-Funded Spoke pool is one pool whose two sides are controlled separately:
 
 - **Liquidity side (USDT)** — borrowable, but supply is restricted to a per-market allowlist. The protocol therefore meters exactly how much liquidity the pool holds and what its utilisation is.
-- **Collateral side (TSLAB, NVDAB, SPCXB)** — permissionless to supply, not borrowable in-market. Borrow power is shared across the pool, so a position can back a USDT borrow with any mix of the three.
+- **Collateral side (USDC)** — permissionless to supply, and usable as collateral against a USDT borrow.
 
-Every market is capped, and the pool has its own Comptroller and its own registry, so a depeg, an oracle problem or bad debt on exotic collateral is contained to that pool and cannot reach the Core pool or the existing isolated pools.
+Both markets are capped, and the pool has its own Comptroller and its own registry, so a depeg, an oracle problem or bad debt in this pool is contained to it and cannot reach the Core pool or the existing isolated pools.
+
+Risk parameters mirror the isolated pools' Stablecoins pool on this network. This pool restricts who may supply, borrow and liquidate; it does not take more risk per market.
 
 #### Proposed changes
 
 1. Accept ownership of the new spoke Comptroller and of the new spoke pool registry, and point the Comptroller at the **ResilientOracle** and the **DeviationBoundedOracle**. The second is required before the pool serves any borrow or redeem.
-2. Grant the spoke registry the six Comptroller setters it drives while registering a pool, and grant every governance timelock the roles that exist only on this pool: the supply allowlist, the liquidation allowlist, and the per-market liquidation incentive, plus forced liquidation.
+2. Grant the spoke registry the six Comptroller setters it drives while registering a pool, and grant the Normal Timelock the roles that exist only on this pool: the supply allowlist, the liquidation allowlist, and the per-market liquidation incentive, plus forced liquidation. No new permission is given to any other timelock, or to the Guardian.
 3. Upgrade the **ProtocolShareReserve** so it can resolve markets through more than one pool registry, and register the spoke registry alongside the existing one. Without this the pool cannot report income and its liquidations would revert. The existing isolated pools are unaffected: their registry stays the primary one and is still checked first.
 4. Move the risk fund's 20% share of protocol income from the legacy **RiskFundConverter** to **RiskFundBuyback**, on both income schemas. BNB Chain mainnet made this same move in VIP-618 and testnet was left behind, and the old contract is the one income destination that cannot resolve a pool outside its own registry. The share itself is unchanged, only the destination.
-5. Register the pool and list four markets: USDT on the liquidity side, and TSLAB, NVDAB and SPCXB on the collateral side, each with its own caps and risk parameters.
-6. Set the per-market liquidation discount on each collateral market, and restrict supply on the USDT market to its allowlist.
+5. Register the pool and list both markets, each seeded with 10,000 of its underlying, capped at 1,000,000 supply and 400,000 borrow, with an 80% collateral factor and an 88% liquidation threshold.
+6. Set the per-market liquidation discount on both markets, and restrict supply on the USDT market to its allowlist.
 
 #### Notes
 
@@ -167,7 +176,7 @@ Every market is capped, and the pool has its own Comptroller and its own registr
 - The USDT market's supply allowlist ships **enabled with no members**, so nobody can supply it until the second proposal authorises the Hub's spoke source. Redeeming is never restricted, and the seed supply minted at listing is unaffected.
 - Exit is never gated: repay, redeem, withdraw and transfer stay permissionless, and the pool keeps the usual market-level pause controls.
 - Liquidation stays permissionless. The optional liquidation allowlist ships disabled.
-- The reserve factor is zero on every market. The Hub is the pool's only lender on the liquidity side and absorbs any bad debt, so it keeps the interest.`,
+- Both markets keep the 10% reserve factor and 5% protocol seize share they were deployed with.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -202,25 +211,61 @@ Every market is capped, and the pool has its own Comptroller and its own registr
       //    2b. The roles that exist only on this fork, plus forced liquidation. Verified not granted
       //        to any timelock on this chain. Everything else the listing needs is already held by the
       //        timelocks as a wildcard, so it is not re-granted here. See ./permissions.ts.
-      ...SPOKE_COMPTROLLER_ROLES.flatMap(signature =>
-        TIMELOCKS.map(timelock => giveCallPermission(ACM, SPOKE_COMPTROLLER, signature, timelock)),
+      //
+      //        NORMAL TIMELOCK ONLY. The Fast-track and Critical timelocks get nothing from this VIP.
+      //        A grant is cheap to add later and awkward to take back, so the emergency timelocks stay
+      //        off a pool that has not run yet; if an incident needs one of them, it can be granted
+      //        then. Note this leaves the pool's pause path on the Normal Timelock as well, since the
+      //        Fast-track and Critical wildcards for `setActionsPaused(address[],uint256[],bool)` do
+      //        already reach this comptroller. Those are pre-existing and this VIP does not touch them.
+      ...SPOKE_COMPTROLLER_ROLES.map(signature =>
+        giveCallPermission(ACM, SPOKE_COMPTROLLER, signature, NORMAL_TIMELOCK),
       ),
 
       // -------------------------------------------------------------------------------------------
       // 3. Oracles. Both are onlyOwner, so they follow acceptOwnership; `setPriceOracle` also has to
       //    precede `addPool`, which rejects a zero oracle.
       //
-      //    No oracle CONFIGURATION command is needed. The DeviationBoundedOracle resolves
-      //    `vToken.underlying()` and keys its config on the underlying asset, and USDT, TSLAB, NVDAB
-      //    and SPCXB all already report bounded pricing enabled on this chain (checked while
-      //    drafting), so the new spoke vTokens inherit it. The ResilientOracle is underlying-keyed for
-      //    the same reason and already prices all four.
+      //    Both oracles key their config on the UNDERLYING (the bounded oracle resolves
+      //    `vToken.underlying()` first), so the new spoke vTokens inherit whatever USDT and USDC
+      //    already carry and the ResilientOracle, which prices both, needs no command.
       // -------------------------------------------------------------------------------------------
       { target: SPOKE_COMPTROLLER, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
       {
         target: SPOKE_COMPTROLLER,
         signature: "setDeviationBoundedOracle(address)",
         params: [DEVIATION_BOUNDED_ORACLE],
+      },
+
+      // -------------------------------------------------------------------------------------------
+      // 3b. Give USDC the price window USDT already has, so both sides of the pool are priced the same
+      //     way. Without this the collateral market prices at spot while the liquidity market prices
+      //     through a bounded window: not a revert, `_updateAndGetBoundedPrices` returns spot for an
+      //     asset with bounded pricing disabled, but an inconsistency inside one pool.
+      //
+      //     Every parameter is USDT's live configuration, read off the oracle rather than chosen here.
+      //     The oracle seeds the window itself, reading the current spot into both minPrice and
+      //     maxPrice, so no price is passed and there is nothing to time.
+      //
+      //     USDT is deliberately NOT re-configured: `_setTokenConfig` reverts `MarketAlreadyInitialized`
+      //     for an asset that already has a config, so this is the collateral market only.
+      //
+      //     No ACM grant needed, all three timelocks already hold this role against the oracle. The
+      //     role string is the EXPANDED tuple, not the struct name, unlike PoolRegistry's `addMarket`.
+      // -------------------------------------------------------------------------------------------
+      {
+        target: DEVIATION_BOUNDED_ORACLE,
+        signature: "setTokenConfig((address,uint64,uint256,uint256,bool,bool))",
+        params: [
+          [
+            COLLATERAL_MARKET.underlying,
+            DBO_COOLDOWN_PERIOD,
+            DBO_TRIGGER_THRESHOLD,
+            DBO_RESET_THRESHOLD,
+            DBO_ENABLE_BOUNDED_PRICING,
+            DBO_ENABLE_CACHING,
+          ],
+        ],
       },
 
       // -------------------------------------------------------------------------------------------
@@ -247,18 +292,8 @@ Every market is capped, and the pool has its own Comptroller and its own registr
       //    untouched, so there is no reinitializer and no migration. `maxLoopsLimit` is 20 on this
       //    chain, so the one additional registry clears the bound `addPoolRegistry` enforces.
       //
-      //    TODO(follow-up) — INCOME FROM THIS POOL CANNOT BE RELEASED YET, and this VIP does not fix
-      //    it. protocol-reserve#168 leaves `RiskFundConverter` untouched, and that contract keeps its
-      //    OWN single `poolRegistry`. `ProtocolShareReserve._releaseFund` transfers to each
-      //    distribution target and then calls `IIncomeDestination(dest).updateAssetsState(comptroller,
-      //    asset)` unguarded, and RiskFundConverter reverts `MarketNotExistInPool` for a comptroller
-      //    its registry does not know. On this chain RiskFundConverter (0x32Fb…09Bb) is a 20% target on
-      //    both schemas, so `releaseFunds(SPOKE_COMPTROLLER, ...)` reverts once this pool has any
-      //    income to release.
-      //    Contained, not protocol-wide: only calls naming the spoke comptroller revert, so core and
-      //    the existing isolated pools release exactly as before, and this pool's income simply sits
-      //    in PSR until it is addressed. Reserve factor is zero on every market here, so the only
-      //    income that accrues at all is the protocol seize share on liquidations.
+      //    This resolves PSR itself. The one income DESTINATION that still cannot resolve this pool is
+      //    handled separately in step 4b.
       // -------------------------------------------------------------------------------------------
       {
         target: DEFAULT_PROXY_ADMIN,
@@ -347,39 +382,23 @@ Every market is capped, and the pool has its own Comptroller and its own registr
       // 7. Per-market liquidation discounts, keyed on the COLLATERAL market: the discount prices the
       //    collateral being seized, not the debt being repaid (PRD FR-5). A market left unset inherits
       //    the pool-wide value; pinning it explicitly keeps it from moving if the pool default is
-      //    retuned later.
+      //    retuned later, and exercises the spoke-only setter on this chain.
       //
-      //    Floor: 1e18 + that market's `protocolSeizeShareMantissa`, so 1.05e18 at the 5% deploy
-      //    default. To go BELOW that, `VToken.setProtocolSeizeShare` has to be lowered FIRST: it reads
-      //    the incentive back through `liquidationIncentiveMantissa()`, which resolves per calling
-      //    market, and rejects `share + 1e18 > incentive`. The two setters bound each other.
+      //    Floor: 1e18 + that market's `protocolSeizeShareMantissa`. Both markets were deployed with
+      //    the 5% default, so the floor is 1.05e18 and the 1.1e18 set here clears it. To go BELOW that,
+      //    `VToken.setProtocolSeizeShare` has to be lowered FIRST: it reads the incentive back through
+      //    `liquidationIncentiveMantissa()`, which resolves per calling market, and rejects
+      //    `share + 1e18 > incentive`. The two setters bound each other.
       //
-      //    TODO(risk): no market sets `protocolSeizeShare`, so all four keep the 5% deploy default.
-      //    Other BNB Chain isolated markets run 1.5%. Confirm which applies here; if it changes, set
-      //    `protocolSeizeShare` in ./config.ts and the command is emitted after this block, so each
-      //    share is validated against that market's final discount.
+      //    `setProtocolSeizeShare` is deliberately not called: both markets keep the 5% they were
+      //    deployed with.
       // -------------------------------------------------------------------------------------------
-      ...MARKETS.flatMap((m): Command[] =>
-        m.liquidationIncentive === undefined
-          ? []
-          : [
-              {
-                target: SPOKE_COMPTROLLER,
-                signature: "setMarketLiquidationIncentive(address,uint256)",
-                params: [m.vToken, m.liquidationIncentive],
-              },
-            ],
-      ),
-      ...MARKETS.flatMap((m): Command[] =>
-        m.protocolSeizeShare === undefined
-          ? []
-          : [
-              {
-                target: m.vToken,
-                signature: "setProtocolSeizeShare(uint256)",
-                params: [m.protocolSeizeShare],
-              },
-            ],
+      ...MARKETS.map(
+        (m): Command => ({
+          target: SPOKE_COMPTROLLER,
+          signature: "setMarketLiquidationIncentive(address,uint256)",
+          params: [m.vToken, m.liquidationIncentive],
+        }),
       ),
 
       // -------------------------------------------------------------------------------------------
@@ -388,19 +407,19 @@ Every market is capped, and the pool has its own Comptroller and its own registr
       //    This is the Phase 1 boundary, and it is the safe side of it. The market is closed to supply
       //    from the moment it is listed, so it can never be supplied permissionlessly in the window
       //    before the Hub arrives. Phase 2 adds the Hub's spoke source with
-      //    `setAllowedSupplier(VUSDT_SPOKE, SPOKE_SOURCE_USDT, true)`.
+      //    `setAllowedSupplier(vUSDT_HubSpoke, <spoke source>, true)`.
       //
       //    The allowlist meters the account CREDITED with the vTokens, not the one paying, and it
       //    gates `preMintHook` only. Redeeming is never restricted, and the seed supply minted to the
       //    treasury during `addMarket` is unaffected.
       //
-      //    The collateral markets are left permissionless: PRD FR-4 makes the collateral-deposit
-      //    allowlist optional and off by default.
+      //    The USDC market is left permissionless: PRD FR-4 makes the collateral-deposit allowlist
+      //    optional and off by default.
       // -------------------------------------------------------------------------------------------
       {
         target: SPOKE_COMPTROLLER,
         signature: "setSupplyAllowlistEnabled(address,bool)",
-        params: [VUSDT_SPOKE, true],
+        params: [LIQUIDITY_MARKET.vToken, true],
       },
 
       // -------------------------------------------------------------------------------------------
@@ -414,15 +433,15 @@ Every market is capped, and the pool has its own Comptroller and its own registr
       //  - `addRewardsDistributor` — no rewards programme is defined for this pool.
       //  - Liquidity Hub wiring and the bStock liquidation leg — Phase 2, see the scope note above.
       //
-      // TODO before proposing:
-      //  - Fill in every TODO(deploy) address in ./addresses/bsctestnet.ts, and confirm on chain that
-      //    `SpokeComptroller.poolRegistry()` equals SPOKE_POOL_REGISTRY. It is a constructor immutable
-      //    with no setter, so a mismatch cannot be fixed by this or any VIP.
-      //  - Deploy the multi-registry ProtocolShareReserve implementation (protocol-reserve#168) and
-      //    fill in PROTOCOL_SHARE_RESERVE_IMPL. Keep the upgrade and `addPoolRegistry` in this same
-      //    proposal; splitting them leaves a window where this pool's liquidations revert.
-      //  - Resolve every TODO(risk) in ./config.ts.
-      //  - Write the simulation under simulations/vip-671/.
+      // STILL OPEN before proposing: protocol-reserve#168 has to MERGE. Its implementation is deployed
+      // and this VIP upgrades to it, but proposing against an unmerged branch would adopt code that can
+      // still change.
+      //
+      // Covered by simulations/vip-671/bsctestnet.ts, which asserts the pre-VIP deployment state, every
+      // command, and the post-VIP state. It also pins the two things most expensive to get wrong: that
+      // `SpokeComptroller.poolRegistry()` is the spoke registry, a constructor immutable no VIP can
+      // fix, and that the live isolated pools still resolve through ProtocolShareReserve after the
+      // upgrade.
       // -------------------------------------------------------------------------------------------
     ],
     meta,

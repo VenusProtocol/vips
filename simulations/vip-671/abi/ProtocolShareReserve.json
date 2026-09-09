@@ -1,0 +1,8 @@
+[
+  { "inputs": [], "name": "poolRegistry", "outputs": [{ "type": "address" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "type": "address" }], "name": "addPoolRegistry", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [], "name": "getPoolRegistries", "outputs": [{ "type": "address[]" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "type": "address" }, { "type": "address" }], "name": "isMarketRegistered", "outputs": [{ "type": "bool" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "totalDistributions", "outputs": [{ "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "type": "uint256" }], "name": "distributionTargets", "outputs": [{ "name": "schema", "type": "uint8" }, { "name": "percentage", "type": "uint16" }, { "name": "destination", "type": "address" }], "stateMutability": "view", "type": "function" }
+]

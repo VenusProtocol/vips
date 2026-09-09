@@ -3,48 +3,107 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 // ===================================================================================================
 // VIP-671 [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1 address book.
 //
-// Phase 1 covers the spoke-pool side only (isolated-pools#559). The Liquidity Hub wiring
+// Phase 1 covers the spoke pool side only (isolated-pools#559). The Liquidity Hub wiring
 // (venus-liquidity-hub#22) and the bStock liquidation leg (venus-protocol#707) are Phase 2 and have
 // no addresses here on purpose.
 //
-// Verified on bsctestnet (chainId 97) at block 129,788,112 while drafting:
-//   - DeviationBoundedOracle 0xE0dafC97895B3c98d3B96D3f8739AaC73166beB8 reports bounded pricing
-//     ENABLED for USDT, TSLAB, NVDAB and SPCXB. It resolves `vToken.underlying()` and keys its config
-//     on the UNDERLYING, so the new spoke vTokens inherit that configuration and this VIP needs no
-//     oracle command at all.
-//   - ResilientOracle 0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823 prices all four underlyings. Same
-//     underlying-keyed reasoning, so no `setTokenConfig` either.
-//   - ProtocolShareReserve owner() == NormalTimelock, poolRegistry() == the isolated-pools registry.
-//   - bsctestnet USDT has 6 DECIMALS (BSC mainnet USDT has 18). Every USDT amount is 6-decimal.
+// The spoke stack below is deployed and was read back from bsctestnet (chainId 97) while drafting:
+//   - SpokePoolRegistry and Comptroller_HubSpoke are both Ownable2Step with the deployer still the
+//     live owner and the Normal Timelock only nominated, so both need `acceptOwnership()`.
+//   - Comptroller_HubSpoke.poolRegistry() == SpokePoolRegistry. That is a constructor immutable with
+//     no setter, and `supportMarket` checks it, so this is the check that must never drift.
+//   - Both beacons are already owned by the Normal Timelock, so neither needs a command.
+//   - Both oracles on the comptroller are still the zero address, and the registry holds no pools.
+//   - Both markets carry the 10% reserve factor and the 5% protocol seize share their initializer
+//     set, and neither is listed yet.
+//
+// Underlying decimals: bsctestnet USDT and USDC both have 6 DECIMALS, so every amount in ../config.ts
+// is 6-decimal and both markets list at an initial exchange rate of 1e16, below 1e18.
 // ===================================================================================================
 
-const {
-  ACCESS_CONTROL_MANAGER,
-  NORMAL_TIMELOCK,
-  FAST_TRACK_TIMELOCK,
-  CRITICAL_TIMELOCK,
-  GUARDIAN,
-  RESILIENT_ORACLE,
-  VTREASURY,
-} = NETWORK_ADDRESSES.bsctestnet;
+// Only the Normal Timelock is pulled in. This VIP grants the spoke roles to that timelock alone, so
+// the Fast-track and Critical timelocks and the Guardian are deliberately absent from this file.
+// See ../permissions.ts.
+const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bsctestnet;
 
 export const ACM = ACCESS_CONTROL_MANAGER;
-export { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, RESILIENT_ORACLE, VTREASURY };
-
-/// Every governance timelock. Testnet convention (VIP-633) is to grant new pool roles to all three.
-export const TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
+export { NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY };
 
 // ---------------------------------------------------------------------------------------------------
-// Live infrastructure.
+// The spoke stack. isolated-pools deploy/024 through deploy/028, all live on bsctestnet.
 // ---------------------------------------------------------------------------------------------------
 
-/// Not carried by the pinned @venusprotocol/oracle deployment package; taken from
-/// oracle/deployments/bsctestnet_addresses.json (DeviationBoundedOracle_Proxy). Same address VIP-633 uses.
+/// `SpokePoolRegistry`, a second `PoolRegistry` instance behind the chain's DefaultProxyAdmin. The
+/// spoke pool is kept out of the isolated-pools directory that the indexer, the frontend pool list
+/// and the risk tooling all iterate. Ownable2Step, nominated only: `acceptOwnership()` comes first.
+export const SPOKE_POOL_REGISTRY = "0xeAA45288d804971e5a76f33559e629F5b2b1Cb8B";
+
+/// `Comptroller_HubSpoke`, a BeaconProxy over SpokeComptrollerBeacon. Ownable2Step, nominated only.
+export const SPOKE_COMPTROLLER = "0x11960c84d6c4F2a978a12372721C3A6A88C78f4c";
+
+/// Reference only. `UpgradeableBeacon` is plain `Ownable` and both were handed to the Normal Timelock
+/// inside their deploy transactions, so this VIP has no command for either.
+export const SPOKE_COMPTROLLER_BEACON = "0x076f3fb34C8937a62aD562c33249798367542d75";
+export const SPOKE_VTOKEN_BEACON = "0xB9c3b5A6f13FD5BEF51eE8B62ED3EA384a9d1B45";
+
+/// Reference only. The lens holds no state, has no owner and no AccessControlManager, takes the
+/// registry to read as a call argument, and nothing on chain stores its address, so it needs no
+/// command in this or any VIP.
+export const SPOKE_POOL_LENS = "0xfbCBFF4ca8b2fFe3231b0c0BBEa25C79F4B0597c";
+
+// ---------------------------------------------------------------------------------------------------
+// Markets and underlyings.
+// ---------------------------------------------------------------------------------------------------
+// Both are 6 decimals and both mint through `allocateTo(address,uint256)`, not the `faucet(uint256)`
+// the bStock mocks carry. Checked against the deployed bytecode.
+export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+export const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+
+export const VUSDT_SPOKE = "0xC88bAF0bA49a98F15A00182752f6d10bd3932F6a"; // vUSDT_HubSpoke
+export const VUSDC_SPOKE = "0xD05514217FD359659aE7da7740e79C11947eBB32"; // vUSDC_HubSpoke
+
+/// One shared `JumpRateModelV2` for both markets. Verified on chain: kink 0.8e18, 70,080,000 blocks
+/// per year. Constructed by deploy/028 from the curve in isolated-pools helpers/spokeDeploymentConfig.
+export const IRM_SPOKE = "0x6700020659b6100A92ac1817D5489d67ee8D8F32";
+
+// ---------------------------------------------------------------------------------------------------
+// Oracles — both live. The ResilientOracle needs no command; the bounded oracle takes one.
+// ---------------------------------------------------------------------------------------------------
+
+/// Taken from oracle/deployments/bsctestnet_addresses.json (DeviationBoundedOracle_Proxy), the same
+/// address VIP-633 uses. It resolves `vToken.underlying()` and keys its config on the UNDERLYING, so
+/// the new spoke vTokens inherit whatever the underlying already carries.
+///
+/// USDT already carries a price window here; USDC carried none, so this VIP gives USDC USDT's exact
+/// configuration and both sides of the pool end up priced the same way. See ../config.ts.
 export const DEVIATION_BOUNDED_ORACLE = "0xE0dafC97895B3c98d3B96D3f8739AaC73166beB8";
 
+// ---------------------------------------------------------------------------------------------------
+// ProtocolShareReserve.
+// ---------------------------------------------------------------------------------------------------
+
 /// @venusprotocol/protocol-reserve deployments/bsctestnet_addresses.json (ProtocolShareReserve_Proxy).
-/// Owned by the Normal Timelock, so the registry call in this VIP needs no ACM grant.
+/// Owned by the Normal Timelock, so the calls in this VIP need no ACM grant.
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+
+/// The multi-registry `ProtocolShareReserve` implementation from protocol-reserve#168, deployed but
+/// not yet adopted: the proxy above still points at 0x6eFa596c53E6A753DdA643e3e3FEcA1570879b7C, which
+/// carries `setPoolRegistry` but not `addPoolRegistry`. This VIP performs the upgrade.
+///
+/// Verified against the deployed bytecode: `addPoolRegistry`, `removePoolRegistry`,
+/// `getPoolRegistries` and `isMarketRegistered` are all present, and every constructor immutable
+/// matches the implementation in use today (CORE_POOL_COMPTROLLER 0x94d1…b77D, which is the
+/// bsctestnet Unitroller, plus WBNB and vBNB). An immutable that drifted here would silently break
+/// the core-pool bypass in `updateAssetsState`.
+///
+/// No reinitializer and no migration: PSR is a leaf contract, the new state is appended at slots
+/// 305/306 and slots 301-304 are untouched.
+export const PROTOCOL_SHARE_RESERVE_IMPL = "0x248Ea902F2f50cb232799196530bCDaDcF2659E9";
+
+/// The transparent-proxy admin both protocol-reserve and isolated-pools upgrade through on this chain.
+/// Verified: it is the admin of the ProtocolShareReserve proxy above, and it is owned by the Normal
+/// Timelock, so the upgrade in this VIP needs no ACM grant either.
+export const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
 
 /// ProtocolShareReserve income destinations, both live.
 ///
@@ -62,91 +121,7 @@ export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E
 export const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
 export const RISK_FUND_BUYBACK = "0x1a063a07853b9bC797E571E54B5Ce632195071fE";
 
-/// The transparent-proxy admin both protocol-reserve and isolated-pools upgrade through on this chain.
-/// Verified: it is the admin of the ProtocolShareReserve proxy above, and it is owned by the Normal
-/// Timelock, so the upgrade in this VIP needs no ACM grant either.
-export const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
-
 /// The isolated-pools registry. Referenced only to make the contrast explicit: this pool is NOT
 /// listed here, and the wildcard ACM grants this address holds name it as the account, so none of
 /// them carry over to the spoke registry.
 export const ISOLATED_POOL_REGISTRY = NETWORK_ADDRESSES.bsctestnet.POOL_REGISTRY;
-
-// ---------------------------------------------------------------------------------------------------
-// Underlying assets — live. All four are MockToken with a public `faucet(uint256)` on this chain.
-// ---------------------------------------------------------------------------------------------------
-export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c"; // 6 decimals
-export const TSLAB = "0x10d63B1203E5A0719AbbE927C8BFc87135b2F129"; // 18 decimals, MockTSLAB (VIP-633)
-export const NVDAB = "0x8A7d8589A597619A7842d3BC284b9a5a276FaE56"; // 18 decimals, MockNVDAB (VIP-633)
-export const SPCXB = "0x6D9e91cB766259af42619c14c994E694E57e6E85"; // 18 decimals, MockSPCXB (VIP-633)
-
-// ===================================================================================================
-// TODO(deploy) — NOT DEPLOYED YET. Every address below is a placeholder and MUST be replaced before
-// this VIP is simulated or proposed. Left as the zero address on purpose: an obviously empty value is
-// harder to miss in review than a plausible-looking literal.
-// ===================================================================================================
-
-/// TODO(deploy): the multi-registry `ProtocolShareReserve` implementation from protocol-reserve#168.
-/// The proxy above is upgraded to it in this VIP, in the same proposal as `addPoolRegistry` — the PR
-/// requires the two to ship together, per chain.
-/// The current implementation on this chain is 0x6eFa596c53E6A753DdA643e3e3FEcA1570879b7C, which has
-/// `setPoolRegistry` but not `addPoolRegistry` (checked against the deployed bytecode).
-/// No reinitializer and no migration: PSR is a leaf contract, the new state is appended at slots
-/// 305/306 and slots 301-304 are untouched.
-export const PROTOCOL_SHARE_RESERVE_IMPL = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): isolated-pools `deploy/024-deploy-spoke-pool-registry.ts` -> `SpokePoolRegistry`.
-/// A SECOND `PoolRegistry` instance, behind the chain's existing DefaultProxyAdmin. The spoke pool is
-/// deliberately kept out of the isolated-pools directory that the indexer, the frontend pool list and
-/// the risk tooling all iterate.
-/// `Ownable2Step`: the deploy script only NOMINATES the Normal Timelock, so this VIP must call
-/// `acceptOwnership()` before `addPool`.
-export const SPOKE_POOL_REGISTRY = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): isolated-pools `deploy/025-deploy-spoke-comptroller.ts` -> `Comptroller_HubSpoke`.
-/// BeaconProxy over SpokeComptrollerBeacon.
-/// `Ownable2Step`, nominated only, so `acceptOwnership()` is this VIP's first command.
-/// NOTE: the implementation takes the pool registry as a CONSTRUCTOR IMMUTABLE and `supportMarket`
-/// checks `msg.sender == poolRegistry`, so the implementation must have been constructed with
-/// SPOKE_POOL_REGISTRY above. There is no `setPoolRegistry` on this fork; a mismatch can only be
-/// fixed by redeploying the implementation and re-pointing the beacon.
-export const SPOKE_COMPTROLLER = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): isolated-pools `SpokeComptrollerBeacon`. Reference only. Plain `Ownable`, and the
-/// deploy script transfers it to the Normal Timelock inside the deploy transaction, so this VIP has
-/// no command for it.
-export const SPOKE_COMPTROLLER_BEACON = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): isolated-pools `deploy/027-deploy-spoke-vtoken-beacon.ts` -> `SpokeVTokenBeacon`.
-/// A VToken beacon of its own, so a VToken upgrade for this pool cannot move every isolated market on
-/// the chain, or the other way round. The implementation is the same `VToken` with the same
-/// constructor arguments the shared beacon points at, so the two behave identically until an upgrade
-/// deliberately separates them.
-/// Reference only: `UpgradeableBeacon` is plain `Ownable` and the script hands it to the Normal
-/// Timelock inside the deploy transaction, so this VIP has no command for it.
-export const SPOKE_VTOKEN_BEACON = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): isolated-pools `deploy/026-deploy-spoke-pool-lens.ts` -> `SpokePoolLens`.
-/// Deployed alongside `PoolLens` rather than replacing it: this one answers about spoke pools, that
-/// one about the pools in the shared registry. The spoke fields that were briefly added to `PoolLens`
-/// are reverted, so no network without a spoke pool needs a lens redeploy.
-/// Reference only: it holds no state, has no owner and no AccessControlManager, takes the registry to
-/// read as a call argument, and nothing on chain stores its address. It therefore needs NO command in
-/// this or any VIP. Listed here so the deployment is not forgotten.
-export const SPOKE_POOL_LENS = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): one `JumpRateModelV2` for the liquidity side and one for the collateral side, or a
-/// shared model. Must be constructed with `timeBased = false` and the chain's `blocksPerYear` to match
-/// the VToken implementation the beacon points at.
-/// TODO(risk): curve parameters (base / multiplier / jump / kink) are not specified in the PRD.
-export const IRM_USDT = "0x0000000000000000000000000000000000000000";
-export const IRM_BSTOCK = "0x0000000000000000000000000000000000000000";
-
-/// TODO(deploy): the spoke markets, BeaconProxy over SPOKE_VTOKEN_BEACON, comptroller =
-/// SPOKE_COMPTROLLER.
-/// vUSDT lists at initialExchangeRate 10 ** (18 + 6 - 8) = 1e16, BELOW 1e18, because the underlying
-/// has 6 decimals. The three bStock markets list at 1e28.
-export const VUSDT_SPOKE = "0x0000000000000000000000000000000000000000";
-export const VTSLAB_SPOKE = "0x0000000000000000000000000000000000000000";
-export const VNVDAB_SPOKE = "0x0000000000000000000000000000000000000000";
-export const VSPCXB_SPOKE = "0x0000000000000000000000000000000000000000";
