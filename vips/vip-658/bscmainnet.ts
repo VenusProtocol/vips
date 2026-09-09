@@ -1,176 +1,207 @@
-import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { ProposalType } from "src/types";
+import { Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-// ===================================================================================================
-// VIP-658 [BNB Chain] — Hash Global hBNB Fixed Rate Vault
-// ===================================================================================================
+import * as ARBITRUM from "./addresses/arbitrumone";
+import * as BASE from "./addresses/basemainnet";
+import * as BSC from "./addresses/bscmainnet";
+import * as ETHEREUM from "./addresses/ethereum";
+import { ChainContext, MarketEntry } from "./config";
 
-export const { RESILIENT_ORACLE, ATLAS_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
+// ──────────────────────────────────────────────────────────────────────────
+// Per-chain contexts
+// ──────────────────────────────────────────────────────────────────────────
 
-export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
-export const U_FRV_SOURCE = "0x30908eddB9E94add7AC9944a0adda66d80B89143";
-export const ADAPTER_FRV = "0x1FA0365bDd603452CE96BE3c0e12Db5515a35902";
+export const BSC_CTX: ChainContext = {
+  name: "BSC",
+  deviationSentinel: BSC.DEVIATION_SENTINEL,
+  sentinelOracle: BSC.SENTINEL_ORACLE,
+  uniswapOracle: BSC.PANCAKESWAP_ORACLE,
+  markets: BSC.BSC_MARKETS,
+};
 
-export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666"; // loan (supply) asset, 18 dec
-export const HBNB = "0xa1EceF1e53410202E9Eea1f8Fe4E7B1C0081f770"; // collateral, 18 dec
-export const HBNB_FEED = "0xb4D69981dcD5e73e459c0740e90e10D32A4Dcf67"; // "SingleFeed hBNB/USD", 18 dec
+export const ETHEREUM_CTX: ChainContext = {
+  name: "Ethereum",
+  deviationSentinel: ETHEREUM.DEVIATION_SENTINEL,
+  sentinelOracle: ETHEREUM.SENTINEL_ORACLE,
+  uniswapOracle: ETHEREUM.UNISWAP_ORACLE,
+  curveOracle: ETHEREUM.CURVE_ORACLE,
+  markets: ETHEREUM.ETHEREUM_MARKETS,
+  dstChainId: LzChainId.ethereum,
+};
 
-export const HBNB_MAX_STALE_PERIOD = 3900;
+export const ARBITRUMONE_CTX: ChainContext = {
+  name: "Arbitrum One",
+  deviationSentinel: ARBITRUM.DEVIATION_SENTINEL,
+  sentinelOracle: ARBITRUM.SENTINEL_ORACLE,
+  uniswapOracle: ARBITRUM.UNISWAP_ORACLE,
+  markets: ARBITRUM.ARBITRUMONE_MARKETS,
+  dstChainId: LzChainId.arbitrumone,
+};
 
-// ---------------------------------------------------------------------------------------------------
-// PLACEHOLDER — Hash Global has not supplied its operator address. Replace both constants together:
-// HASH_GLOBAL_VAULT is InstitutionalVaultController.predictVaultAddress(INSTITUTION_OPERATOR) at the
-// institution's current (zero) nonce, so it moves whenever the operator does. Re-derive with:
-//   cast call 0x6D9e91cB766259af42619c14c994E694E57e6E85 "predictVaultAddress(address)(address)" <op>
-// ---------------------------------------------------------------------------------------------------
-export const INSTITUTION_OPERATOR = "0x1111111111111111111111111111111111111111";
-export const HASH_GLOBAL_VAULT = "0xDAb58cD228e7889431608C05f9BEF99Fc3C210EC";
+export const BASEMAINNET_CTX: ChainContext = {
+  name: "Base",
+  deviationSentinel: BASE.DEVIATION_SENTINEL,
+  sentinelOracle: BASE.SENTINEL_ORACLE,
+  uniswapOracle: BASE.UNISWAP_ORACLE,
+  aerodromeOracle: BASE.AERODROME_ORACLE,
+  markets: BASE.BASEMAINNET_MARKETS,
+  dstChainId: LzChainId.basemainnet,
+};
 
-export const FIXED_APY = 270; // 2.7% (bps)
-export const RESERVE_FACTOR = parseUnits("0.2", 18); // 20% -> 2.16% supply APY
-export const MIN_BORROW_CAP = parseUnits("1000", 18);
-export const MAX_BORROW_CAP = parseUnits("150000", 18);
-export const MIN_SUPPLIER_DEPOSIT = 0;
-export const OPEN_DURATION = 604800; // 7 days
-export const LOCK_DURATION = 2592000; // 30 days
-export const SETTLEMENT_WINDOW = 259200; // 3 days
+const CHAINS: readonly ChainContext[] = [BSC_CTX, ETHEREUM_CTX, ARBITRUMONE_CTX, BASEMAINNET_CTX];
 
-export const IDEAL_COLLATERAL_AMOUNT = parseUnits("237.2", 18);
-export const MARGIN_RATE = parseUnits("0.01", 18); // 1%
-export const POSITION_TOKEN_ID = 0;
+// ──────────────────────────────────────────────────────────────────────────
+// Command builders
+// ──────────────────────────────────────────────────────────────────────────
 
-export const LIQUIDATION_THRESHOLD = parseUnits("0.75", 18);
-export const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10% bonus
-export const LATE_PENALTY_RATE = parseUnits("1.1", 18); // 10% late penalty
+const assertNever = (x: never, message: string): never => {
+  throw new Error(`${message}: ${JSON.stringify(x)}`);
+};
 
-export const VAULT_NAME = "FRV hashglobal hBNB 20AUG2026 30";
-export const VAULT_SYMBOL = "FRV-hg-20AUG2026-30";
-export const INSTITUTION_NAME = "Hash Global";
+export const dexOracleFor = (ctx: ChainContext, m: MarketEntry): string => {
+  const t = m.oracleType ?? "uniswap";
+  switch (t) {
+    case "uniswap":
+      return ctx.uniswapOracle;
+    case "curve":
+      if (!ctx.curveOracle) throw new Error(`${ctx.name}: ${m.symbol} requires CurveOracle but none configured`);
+      return ctx.curveOracle;
+    case "aerodrome":
+      if (!ctx.aerodromeOracle)
+        throw new Error(`${ctx.name}: ${m.symbol} requires AerodromeSlipstreamOracle but none configured`);
+      return ctx.aerodromeOracle;
+    default:
+      return assertNever(t, `${ctx.name}: ${m.symbol} has unknown oracleType`);
+  }
+};
 
-export const vaultConfig = [
-  U, // supplyAsset
-  FIXED_APY, // fixedAPY (bps)
-  RESERVE_FACTOR, // reserveFactor
-  MIN_BORROW_CAP, // minBorrowCap
-  MAX_BORROW_CAP, // maxBorrowCap
-  MIN_SUPPLIER_DEPOSIT, // minSupplierDeposit
-  OPEN_DURATION, // openDuration
-  LOCK_DURATION, // lockDuration
-  SETTLEMENT_WINDOW, // settlementWindow
-];
-export const instConfig = [
-  HBNB, // collateralAsset
-  IDEAL_COLLATERAL_AMOUNT, // idealCollateralAmount
-  MARGIN_RATE, // marginRate
-  INSTITUTION_OPERATOR, // institutionOperator
-  POSITION_TOKEN_ID, // positionTokenId (overwritten)
-];
-export const riskConfig = [
-  LIQUIDATION_THRESHOLD, // liquidationThreshold
-  LIQUIDATION_INCENTIVE, // liquidationIncentive
-  LATE_PENALTY_RATE, // latePenaltyRate
-];
+const buildPoolConfigCmd = (ctx: ChainContext, m: MarketEntry): Command => {
+  const target = dexOracleFor(ctx, m);
+  if (m.oracleType === "curve") {
+    if (m.coinIndex === undefined || m.refCoinIndex === undefined || !m.referenceToken || m.assetDecimals === undefined)
+      throw new Error(
+        `${ctx.name}: ${m.symbol} curve entry missing coinIndex/refCoinIndex/referenceToken/assetDecimals`,
+      );
+    return {
+      target,
+      signature: "setPoolConfig(address,address,uint8,uint8,address,uint8)",
+      params: [m.token, m.pool, m.coinIndex, m.refCoinIndex, m.referenceToken, m.assetDecimals],
+      dstChainId: ctx.dstChainId,
+    };
+  }
+  return {
+    target,
+    signature: "setPoolConfig(address,address)",
+    params: [m.token, m.pool],
+    dstChainId: ctx.dstChainId,
+  };
+};
+
+const buildSentinelOracleCmd = (ctx: ChainContext, m: MarketEntry): Command => ({
+  target: ctx.sentinelOracle,
+  signature: "setTokenOracleConfig(address,address)",
+  params: [m.token, dexOracleFor(ctx, m)],
+  dstChainId: ctx.dstChainId,
+});
+
+const buildSetTokenConfigCmd = (ctx: ChainContext, m: MarketEntry, pct: number, enabled: boolean): Command => ({
+  target: ctx.deviationSentinel,
+  signature: "setTokenConfig(address,(uint8,bool))",
+  params: [m.token, [pct, enabled]],
+  dstChainId: ctx.dstChainId,
+});
+
+const buildDisableCmd = (ctx: ChainContext, m: MarketEntry): Command => ({
+  target: ctx.deviationSentinel,
+  signature: "setTokenMonitoringEnabled(address,bool)",
+  params: [m.token, false],
+  dstChainId: ctx.dstChainId,
+});
+
+const commandsForMarket = (ctx: ChainContext, m: MarketEntry): Command[] => {
+  switch (m.action) {
+    case "skip":
+      return [];
+    case "retune":
+      return [buildSetTokenConfigCmd(ctx, m, m.targetPct, true)];
+    case "poolSwap": {
+      const cmds = [buildPoolConfigCmd(ctx, m)];
+      if (!m.skipOracleRepoint) cmds.push(buildSentinelOracleCmd(ctx, m));
+      cmds.push(buildSetTokenConfigCmd(ctx, m, m.targetPct, true));
+      return cmds;
+    }
+    case "poolOnly": {
+      // Re-register the pool + (optionally) repoint the SentinelOracle but leave the
+      // DeviationSentinel threshold untouched (these markets are not in the doc's threshold tables).
+      const cmds = [buildPoolConfigCmd(ctx, m)];
+      if (!m.skipOracleRepoint) cmds.push(buildSentinelOracleCmd(ctx, m));
+      return cmds;
+    }
+    case "disable":
+      return [buildDisableCmd(ctx, m)];
+    default:
+      return assertNever(m.action, `${ctx.name}: ${m.symbol} has unknown action`);
+  }
+};
+
+const buildChainCommands = (ctx: ChainContext): Command[] => ctx.markets.flatMap(m => commandsForMarket(ctx, m));
+
+export const buildAllCommands = (): Command[] => CHAINS.flatMap(buildChainCommands);
 
 export const vip658 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-658 [BNB Chain] List the Hash Global hBNB Fixed-Term Institutional Loan Vault",
+    title: "VIP-658 [BNB Chain, Ethereum, Arbitrum One, Base] DeviationSentinel 2026-08 Parameter Adjustment",
     description: `#### Summary
 
-This VIP lists a new fixed-term institutional loan vault (Hash Global) on the Venus Institutional Fixed Rate Vault system on BNB Chain. The institution borrows up to 150,000 U for a 30-day fixed term at a 2.7% fixed APY, collateralised by 237.2 hBNB — DigiFT's tokenized Hash Global BNB Yield Fund. The VIP first makes hBNB priceable, then creates the vault and registers it as an FRV resource on the U Liquidity Hub.
+Retunes **DeviationSentinel** thresholds to a unified **5%** across BNB Chain, Ethereum, Arbitrum One and Base, repoints several markets' price-source pools to deeper DEX pools, and disables monitoring for BSC TUSD. No new contracts are deployed and no ACM grants change — every setter used was permissioned in VIP-590 (BSC) / VIP-616 (remote chains), and the Curve/Uniswap targets are compatible with the already-deployed CurveOracle / UniswapOracle (as in VIP-624).
 
-#### Description
+#### Scope
 
-**Oracle.** hBNB has no price configuration today — getPrice(hBNB) currently reverts. It is priced from the "SingleFeed hBNB/USD" feed ([${HBNB_FEED}](https://bscscan.com/address/${HBNB_FEED})), an 18-decimal feed reporting the fund's net asset value in USD (999.737 at authoring). The feed is registered on the AtlasOracle and hBNB is wired into the ResilientOracle with that oracle as its single main source — no pivot, no fallback, and therefore no BoundValidator entry — mirroring how VIP-655 (CASH+) and VIP-596 (XAUM) price their RWA collateral. The maxStalePeriod is 65 minutes (3,900s) — the feed's contracted 1-hour heartbeat plus five minutes of tolerance.
+**BNB Chain — 14 commands**
 
-**Vault terms.**
+- Retune to **5%**: U, USD1, lisUSD (1% → 5%); SolvBTC, slisBNB, wBETH (3% → 5%); FDUSD (10% → 5%)
+- Pool move + retune to **5%**: USDC (1% → 5%) and USDT (3% → 5%) → PancakeSwap V3 USDT/USDC 0.05% (0x4f31Fa980a675570939B737Ebdde0471a4Be40Eb)
+- Disable monitoring: **TUSD** (setTokenMonitoringEnabled(TUSD, false)); **DAI** is already disabled on-chain (VIP-644), so no command is emitted for it
 
-- Loan (supply) asset: U (${U})
-- Collateral: hBNB (${HBNB})
-- Institution operator: ${INSTITUTION_OPERATOR}
-- Fixed APY: 2.7% · Reserve factor: 20% (2.16% supply APY)
-- Borrow cap: min 1,000 U / max 150,000 U
-- Open window: 7 days · Lock (loan term): 30 days · Settlement window: 3 days
-- Ideal collateral: 237.2 hBNB (≈ $237,138 at the authoring price) · Margin rate: 1%
-- Liquidation threshold: 75% · Liquidation incentive: 10% · Late-penalty rate: 10%
+**Ethereum — 26 commands**
 
-At the maximum 150,000 U drawdown the loan sits at ≈63% of the collateral's authoring value, inside the 75% liquidation threshold.
+- Retune to **5%**: USDe (1% → 5%); USDS (10% → 5%)
+- Pool move + retune to **5%**: USDC / USDT / DAI → Curve 3pool (0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7); crvUSD → Curve USDT/crvUSD (0x390f3595bCa2Df7d23783dFd126427CCeb997BF4); sUSDe → Curve crvUSD/sUSDe (0x57064F49Ad7123C92560882a45518374ad982e85); sUSDS → Curve sUSDe/sUSDS (0x3CEf1AFC0E8324b57293a6E7cE663781bbEFBB79); WBTC → Uniswap V3 USDT/WBTC 0.30% (0x9Db9e0e53058C89e5B94e29621a205198648425B); LBTC → Uniswap V3 WBTC/LBTC 0.01% (0x0b599ebf4E05af48b56D38E2DDe520570C366460); tBTC → Curve WBTC/tBTC (0xB7ECB2AA52AA64a717180E030241bC75Cd946726)
+- Pool move only (threshold left at 10%): **WETH** → Uniswap V3 WETH/USDT 0.30% (0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36)
 
-**Liquidity Hub.** The vault is registered as an FRV resource on the U Hub's FRV source (${U_FRV_SOURCE}) behind the shared AdapterFRV, so the Hub Operator can allocate U into it. The FRV yield-group cap itself is unchanged by this VIP — VIP-657 raises it to 50% of Hub TVL.
+Note: for crvUSD, sUSDS, WBTC, LBTC and WETH the SentinelOracle already routes to the target DEX oracle (curve→curve / uniswap→uniswap), so only the pool binding (and, where applicable, the threshold) is updated — the redundant SentinelOracle repoint is elided, which also keeps the single cross-chain LayerZero message within its payload-size cap.
 
-**Risk.**
+**Arbitrum One — 7 commands**
 
-- *hBNB is a permissioned security token, and that constrains liquidation.* hBNB is a DigiFT SecurityToken whose transfers are gated by a DigiFT-controlled Management contract, currently in its strictest mode (transferFlag == 1): only a whitelisted contract may initiate a transfer, and a recipient must be a whitelisted or restricted **investor** — being a whitelisted contract does not satisfy the recipient check. For the deal to function DigiFT must therefore whitelist, before the vault is opened: the vault clone (as a contract), the institution operator (as an investor), the LiquidationAdapter (as **both**, since it receives seized collateral and forwards it), and the Critical Guardian and the ProtocolShareReserve (as investors, since they receive collateral on the seize path). None of these are whitelisted at authoring time. If any is missing when it is needed, the corresponding transfer reverts — including the collateral-seizing leg of a liquidation.
-- *DigiFT can freeze or migrate the collateral unilaterally.* The token exposes setPause, setTransferFlag and an upgrade path, all controlled by DigiFT's contract managers. Pausing hBNB blocks every collateral movement — deposit, withdrawal, and seizure. Venus cannot override this; it is counterparty risk, not a protocol parameter.
-- *Liquidation is not fillable on the open market.* 237.2 hBNB is ≈89% of the entire hBNB supply (266.087), so the 10% incentive cannot realistically attract a third-party liquidator. Liquidation is expected to be a guardian/settler action. The Critical Guardian is already whitelisted on the adapter for both the HF-based and the deadline-based path.
-- *The collateral tracks a live NAV feed.* The ≈$237,138 collateral figure is a snapshot, not a fixed value. hBNB is a BNB yield fund, so its NAV moves with BNB — a decline lowers the collateral value in real time and is a live liquidation trigger without governance re-posting anything.
-- *Feed staleness affects only the price-gated paths.* If the feed exceeds its 65-minute window, getPrice(hBNB) reverts and the price-gated functions revert with it — most importantly claimRaisedFunds (the institution's drawdown), plus withdrawCollateral during Lock, liquidate / liquidateOverdueVault / repayBadDebt, and the liquidity views monitoring reads. Lender deposit/redeem/repay, depositCollateral and state advancement are unaffected. The window leaves only five minutes of tolerance over the contracted heartbeat, so a single late publication takes pricing offline until the next round; the feed has published one round so far, so its real cadence is still unproven against that SLA.
-- *The feed is not openly readable.* Its read functions sit behind an authorized-caller list with open-read disabled. The AtlasOracle is authorized, so protocol pricing works, but monitoring and front-ends that read the feed contract directly will be refused unless Atlas authorizes them too.
-- *Inverse shadow caveat.* AtlasOracle.prices(hBNB) must remain 0: a ChainlinkOracle returns a stored direct price whenever one is non-zero and never reads the feed config, so a future setDirectPrice(hBNB, …) would silently shadow this live feed until reset to 0.
+- Retune to **5%**: USDC, USD₮0 (1% → 5%)
+- Pool move + retune to **5%**: WBTC (3% → 5%) → Uniswap V3 WBTC/WETH 0.05% (0x2f5e87C9312fa29aed5c179E456625D79015299c)
+- Pool move only (threshold unchanged): **ARB** → Uniswap V3 ARB/WETH 0.05% (0xC6F780497A95e246EB9449f5e4770916DCd6396A)
 
-**Access control.** No new AccessControlManager permissions are required. The Normal Timelock already holds createVault on the controller, setTokenConfig on both oracles, and addResource on the U FRV source (granted in VIP-627 / VIP-640 / VIP-650).
+**Base — 3 commands**
 
-**Vault open date.** This VIP only creates the vault; it does not start it. The 7-day open window and the 30-day term begin when the Critical Guardian calls openVault, after the institution has posted its 1% margin. The 20AUG2026 label in the vault's name and symbol therefore reflects the intended term, not a settled maturity — both are fixed at createVault and cannot be changed afterwards.
+- Retune to **5%**: USDC, cbBTC, wstETH (3% → 5%). No pool changes.
 
-**Follow-up (out of scope).** Opening the vault (openVault) is a Critical Guardian multisig action, and the DigiFT-side whitelisting described above is a counterparty action. Neither is part of this VIP.
+#### Notes
 
-#### Actions
+- **Shared-pool co-trip:** moving BSC USDC + USDT onto the same PancakeSwap USDT/USDC pool, and Ethereum USDC / USDT / DAI onto the Curve 3pool, means those stables share a price source and can trip together (opposite directions) on a shared-pool deviation. This is the same design property documented in VIP-624 for pre-existing shared pools.
+- **FDUSD (BSC) and USDS (Ethereum)** were previously kept at 10% (thin-pool exceptions); this VIP retunes both to 5% per the recommendation.
+- **WETH (Ethereum) and ARB (Arbitrum One)** get a pool move but keep their existing thresholds — they are not in the recommendation's threshold tables.
+- **TUSD (BSC)** monitoring is disabled; its stored config is left intact (the DeviationSentinel has no removal function, and setTokenConfig rejects deviation = 0). A disabled market can neither be tripped nor report a deviation. **DAI (BSC)** was already disabled by VIP-644, so no command is emitted for it.
 
-1. Register the hBNB/USD feed on the AtlasOracle — setTokenConfig(hBNB, feed, 3,900s).
-2. Wire hBNB into the ResilientOracle with the AtlasOracle as its single main source.
-3. Create the Hash Global vault on the controller — createVault(...).
-4. Register the vault as an FRV resource on the U Hub's FRV source — addResource(vault, AdapterFRV).
+#### References
 
-#### Voting options
-
-- **For** — Execute the proposal
-- **Against** — Do not execute the proposal
-- **Abstain** — Indifferent to execution`,
+- [VIP-590 (BSC DeviationSentinel initial wire)](https://app.venus.io/#/governance/proposal/590?chainId=56)
+- [VIP-616 (Ethereum / Arbitrum / Base initial wire)](https://app.venus.io/#/governance/proposal/616?chainId=56)
+- [VIP-624 (DeviationSentinel Parameter Recommendation)](https://app.venus.io/#/governance/proposal/624?chainId=56)
+- [VIP-644 (BSC DAI monitoring disabled)](https://app.venus.io/#/governance/proposal/644?chainId=56)
+- [DeviationSentinel contract source](https://github.com/VenusProtocol/venus-periphery/tree/develop/contracts/DeviationSentinel)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
-  return makeProposal(
-    [
-      {
-        target: ATLAS_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[HBNB, HBNB_FEED, HBNB_MAX_STALE_PERIOD]],
-      },
-      {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            HBNB,
-            [ATLAS_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-      },
-
-      {
-        target: INSTITUTIONAL_VAULT_CONTROLLER,
-        signature:
-          "createVault((address,uint256,uint256,uint256,uint256,uint256,uint40,uint40,uint40)," +
-          "(address,uint256,uint256,address,uint256),(uint256,uint256,uint256),string,string,string)",
-        params: [vaultConfig, instConfig, riskConfig, VAULT_NAME, VAULT_SYMBOL, INSTITUTION_NAME],
-      },
-
-      {
-        target: U_FRV_SOURCE,
-        signature: "addResource(address,address)",
-        params: [HASH_GLOBAL_VAULT, ADAPTER_FRV],
-      },
-    ],
-    meta,
-    ProposalType.REGULAR,
-  );
+  return makeProposal(buildAllCommands(), meta, ProposalType.REGULAR);
 };
 
 export default vip658;

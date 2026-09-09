@@ -510,15 +510,30 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
 
     it("should be queued succesfully", async () => {
       await validateTargetAddresses(targets, signatures);
-      const impersonatedLibrary = await initMainnetUser(
-        NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY,
-        ethers.utils.parseEther("100"),
-      );
-      const endpoint = new ethers.Contract(
-        NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].ENDPOINT,
-        ENDPOINT_ABI,
-        provider,
-      );
+      const endpointAddress = NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].ENDPOINT;
+      // Resolve the endpoint's *current* default receive library at the fork block.
+      // LayerZero periodically migrates the default messaging library, so the hardcoded
+      // LZ_LIBRARY goes stale for forks taken after such a migration and delivery reverts
+      // with "invalid default library". For any fork block where the hardcoded value is
+      // still current this resolves to the same address (no behavior change); it only
+      // self-heals when the fork post-dates a migration. Falls back to the configured
+      // LZ_LIBRARY if the endpoint does not expose the getter (e.g. zkSync).
+      let receiveLibrary: string = NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY;
+      try {
+        const libResolver = new ethers.Contract(
+          endpointAddress,
+          ["function defaultReceiveLibraryAddress() view returns (address)"],
+          provider,
+        );
+        const resolvedLibrary: string = await libResolver.defaultReceiveLibraryAddress();
+        if (resolvedLibrary && resolvedLibrary !== ethers.constants.AddressZero) {
+          receiveLibrary = resolvedLibrary;
+        }
+      } catch {
+        // Endpoint variant without defaultReceiveLibraryAddress(); keep the configured LZ_LIBRARY.
+      }
+      const impersonatedLibrary = await initMainnetUser(receiveLibrary, ethers.utils.parseEther("100"));
+      const endpoint = new ethers.Contract(endpointAddress, ENDPOINT_ABI, provider);
 
       const srcAddress = ethers.utils.solidityPack(
         ["address", "address"],
