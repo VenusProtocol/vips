@@ -5,7 +5,7 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 // ===================================================================================================
-// VIP-658 [BNB Chain] — Hash Global hBNB Fixed Rate Vault
+// VIP-999 [BNB Chain] — Hash Global hBNB Fixed Rate Vault
 // ===================================================================================================
 
 export const { RESILIENT_ORACLE, ATLAS_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
@@ -20,17 +20,13 @@ export const HBNB_FEED = "0xb4D69981dcD5e73e459c0740e90e10D32A4Dcf67"; // "Singl
 
 export const HBNB_MAX_STALE_PERIOD = 3900;
 
-// ---------------------------------------------------------------------------------------------------
-// PLACEHOLDER — Hash Global has not supplied its operator address. Replace both constants together:
-// HASH_GLOBAL_VAULT is InstitutionalVaultController.predictVaultAddress(INSTITUTION_OPERATOR) at the
-// institution's current (zero) nonce, so it moves whenever the operator does. Re-derive with:
-//   cast call 0x6D9e91cB766259af42619c14c994E694E57e6E85 "predictVaultAddress(address)(address)" <op>
-// ---------------------------------------------------------------------------------------------------
-export const INSTITUTION_OPERATOR = "0x1111111111111111111111111111111111111111";
-export const HASH_GLOBAL_VAULT = "0xDAb58cD228e7889431608C05f9BEF99Fc3C210EC";
+// controller.predictVaultAddress(INSTITUTION_OPERATOR) at institutionNonce 0; re-derive if a vault is
+// created for this operator before execution.
+export const INSTITUTION_OPERATOR = "0xb1c92d2f514eeb0aFFd14962F840399625a85bd4";
+export const HASH_GLOBAL_VAULT = "0xfE419E150d63ff288b9802533f6Fe2f886DB6FED";
 
 export const FIXED_APY = 270; // 2.7% (bps)
-export const RESERVE_FACTOR = parseUnits("0.2", 18); // 20% -> 2.16% supply APY
+export const RESERVE_FACTOR = parseUnits("0.1", 18); // 10% -> 2.43% supply APY
 export const MIN_BORROW_CAP = parseUnits("1000", 18);
 export const MAX_BORROW_CAP = parseUnits("150000", 18);
 export const MIN_SUPPLIER_DEPOSIT = 0;
@@ -38,7 +34,7 @@ export const OPEN_DURATION = 604800; // 7 days
 export const LOCK_DURATION = 2592000; // 30 days
 export const SETTLEMENT_WINDOW = 259200; // 3 days
 
-export const IDEAL_COLLATERAL_AMOUNT = parseUnits("237.2", 18);
+export const IDEAL_COLLATERAL_AMOUNT = parseUnits("198", 18);
 export const MARGIN_RATE = parseUnits("0.01", 18); // 1%
 export const POSITION_TOKEN_ID = 0;
 
@@ -46,8 +42,8 @@ export const LIQUIDATION_THRESHOLD = parseUnits("0.75", 18);
 export const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10% bonus
 export const LATE_PENALTY_RATE = parseUnits("1.1", 18); // 10% late penalty
 
-export const VAULT_NAME = "FRV hashglobal hBNB 20AUG2026 30";
-export const VAULT_SYMBOL = "FRV-hg-20AUG2026-30";
+export const VAULT_NAME = "FRV hashglobal hBNB 10SEP2026 30";
+export const VAULT_SYMBOL = "FRV-hg-10SEP2026-30";
 export const INSTITUTION_NAME = "Hash Global";
 
 export const vaultConfig = [
@@ -74,48 +70,48 @@ export const riskConfig = [
   LATE_PENALTY_RATE, // latePenaltyRate
 ];
 
-export const vip658 = () => {
+export const vip999 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-658 [BNB Chain] List the Hash Global hBNB Fixed-Term Institutional Loan Vault",
+    title: "VIP-999 [BNB Chain] List the Hash Global hBNB Fixed-Term Institutional Loan Vault",
     description: `#### Summary
 
-This VIP lists a new fixed-term institutional loan vault (Hash Global) on the Venus Institutional Fixed Rate Vault system on BNB Chain. The institution borrows up to 150,000 U for a 30-day fixed term at a 2.7% fixed APY, collateralised by 237.2 hBNB — DigiFT's tokenized Hash Global BNB Yield Fund. The VIP first makes hBNB priceable, then creates the vault and registers it as an FRV resource on the U Liquidity Hub.
+This VIP lists a new fixed-term institutional loan vault (Hash Global) on the Venus Institutional Fixed Rate Vault system on BNB Chain. The institution borrows up to 150,000 U for a 30-day fixed term at a 2.7% fixed APY, collateralised by 198 hBNB — DigiFT's tokenized Hash Global BNB Yield Fund. The VIP first makes hBNB priceable, then creates the vault and registers it as an FRV resource on the U Liquidity Hub.
 
 #### Description
 
-**Oracle.** hBNB has no price configuration today — getPrice(hBNB) currently reverts. It is priced from the "SingleFeed hBNB/USD" feed ([${HBNB_FEED}](https://bscscan.com/address/${HBNB_FEED})), an 18-decimal feed reporting the fund's net asset value in USD (999.737 at authoring). The feed is registered on the AtlasOracle and hBNB is wired into the ResilientOracle with that oracle as its single main source — no pivot, no fallback, and therefore no BoundValidator entry — mirroring how VIP-655 (CASH+) and VIP-596 (XAUM) price their RWA collateral. The maxStalePeriod is 65 minutes (3,900s) — the feed's contracted 1-hour heartbeat plus five minutes of tolerance.
+**Oracle.** hBNB has no price configuration today — getPrice(hBNB) currently reverts. It is priced from the "SingleFeed hBNB/USD" feed ([${HBNB_FEED}](https://bscscan.com/address/${HBNB_FEED})), an 18-decimal feed reporting the fund's net asset value in USD ($1,170.57 at authoring). The feed is registered on the AtlasOracle and hBNB is wired into the ResilientOracle with that oracle as its single main source — no pivot, no fallback, and therefore no BoundValidator entry — mirroring how VIP-655 (CASH+) and VIP-596 (XAUM) price their RWA collateral. The maxStalePeriod is 65 minutes (3,900s) — the feed's 1-hour heartbeat plus five minutes of tolerance. Across its full history to date (515 rounds, 2026-08-18 to 2026-09-09) the feed has published every 60 minutes (±2s) with a single exception: a 15.4-hour outage on 2026-09-02/03. See the staleness risk below.
 
 **Vault terms.**
 
 - Loan (supply) asset: U (${U})
 - Collateral: hBNB (${HBNB})
 - Institution operator: ${INSTITUTION_OPERATOR}
-- Fixed APY: 2.7% · Reserve factor: 20% (2.16% supply APY)
+- Fixed APY: 2.7% · Reserve factor: 10% (2.43% supply APY)
 - Borrow cap: min 1,000 U / max 150,000 U
 - Open window: 7 days · Lock (loan term): 30 days · Settlement window: 3 days
-- Ideal collateral: 237.2 hBNB (≈ $237,138 at the authoring price) · Margin rate: 1%
+- Ideal collateral: 198 hBNB (≈ $231,774 at the authoring NAV) · Margin rate: 1% (1.98 hBNB)
 - Liquidation threshold: 75% · Liquidation incentive: 10% · Late-penalty rate: 10%
+- Minimum supplier deposit: none
 
-At the maximum 150,000 U drawdown the loan sits at ≈63% of the collateral's authoring value, inside the 75% liquidation threshold.
+At the maximum 150,000 U drawdown the loan sits at ≈65% of the collateral's authoring value, inside the 75% liquidation threshold.
 
-**Liquidity Hub.** The vault is registered as an FRV resource on the U Hub's FRV source (${U_FRV_SOURCE}) behind the shared AdapterFRV, so the Hub Operator can allocate U into it. The FRV yield-group cap itself is unchanged by this VIP — VIP-657 raises it to 50% of Hub TVL.
+**Liquidity Hub.** The vault is registered as an FRV resource on the U Hub's FRV source (${U_FRV_SOURCE}) behind the shared AdapterFRV, so the Hub Operator can allocate U into it. The FRV yield-group cap is not touched: VIP-657 already raised it to 50% of Hub TVL, and the source currently holds ≈200,000 U in the CASH+ vault.
 
 **Risk.**
 
-- *hBNB is a permissioned security token, and that constrains liquidation.* hBNB is a DigiFT SecurityToken whose transfers are gated by a DigiFT-controlled Management contract, currently in its strictest mode (transferFlag == 1): only a whitelisted contract may initiate a transfer, and a recipient must be a whitelisted or restricted **investor** — being a whitelisted contract does not satisfy the recipient check. For the deal to function DigiFT must therefore whitelist, before the vault is opened: the vault clone (as a contract), the institution operator (as an investor), the LiquidationAdapter (as **both**, since it receives seized collateral and forwards it), and the Critical Guardian and the ProtocolShareReserve (as investors, since they receive collateral on the seize path). None of these are whitelisted at authoring time. If any is missing when it is needed, the corresponding transfer reverts — including the collateral-seizing leg of a liquidation.
+- *hBNB is a permissioned security token, and that constrains liquidation.* hBNB is a DigiFT SecurityToken whose transfers are gated by a DigiFT-controlled Management contract, currently in its strictest mode (transferFlag == 1): only a whitelisted contract may initiate a transfer, and a recipient must be a whitelisted or restricted **investor** — being a whitelisted contract does not satisfy the recipient check. For the deal to function DigiFT must therefore whitelist, before the vault is opened: the vault clone (as a contract), the institution operator (as an investor), the LiquidationAdapter (as **both**, since it receives seized collateral and forwards it), and the Critical Guardian and the ProtocolShareReserve (as investors, since they receive collateral on the seize path). At authoring only the institution operator is whitelisted (as an investor); the vault (${HASH_GLOBAL_VAULT}), the LiquidationAdapter, the Critical Guardian and the ProtocolShareReserve are not. If any is missing when it is needed, the corresponding transfer reverts — including the collateral-seizing leg of a liquidation.
 - *DigiFT can freeze or migrate the collateral unilaterally.* The token exposes setPause, setTransferFlag and an upgrade path, all controlled by DigiFT's contract managers. Pausing hBNB blocks every collateral movement — deposit, withdrawal, and seizure. Venus cannot override this; it is counterparty risk, not a protocol parameter.
-- *Liquidation is not fillable on the open market.* 237.2 hBNB is ≈89% of the entire hBNB supply (266.087), so the 10% incentive cannot realistically attract a third-party liquidator. Liquidation is expected to be a guardian/settler action. The Critical Guardian is already whitelisted on the adapter for both the HF-based and the deadline-based path.
-- *The collateral tracks a live NAV feed.* The ≈$237,138 collateral figure is a snapshot, not a fixed value. hBNB is a BNB yield fund, so its NAV moves with BNB — a decline lowers the collateral value in real time and is a live liquidation trigger without governance re-posting anything.
-- *Feed staleness affects only the price-gated paths.* If the feed exceeds its 65-minute window, getPrice(hBNB) reverts and the price-gated functions revert with it — most importantly claimRaisedFunds (the institution's drawdown), plus withdrawCollateral during Lock, liquidate / liquidateOverdueVault / repayBadDebt, and the liquidity views monitoring reads. Lender deposit/redeem/repay, depositCollateral and state advancement are unaffected. The window leaves only five minutes of tolerance over the contracted heartbeat, so a single late publication takes pricing offline until the next round; the feed has published one round so far, so its real cadence is still unproven against that SLA.
-- *The feed is not openly readable.* Its read functions sit behind an authorized-caller list with open-read disabled. The AtlasOracle is authorized, so protocol pricing works, but monitoring and front-ends that read the feed contract directly will be refused unless Atlas authorizes them too.
+- *Liquidation is not fillable on the open market.* 198 hBNB is ≈74% of the entire hBNB supply (266.087, all of it currently held by the institution operator), so the 10% incentive cannot realistically attract a third-party liquidator. Liquidation is expected to be a guardian/settler action. The Critical Guardian is already whitelisted on the adapter for both the HF-based and the deadline-based path.
+- *The collateral tracks a live NAV feed.* The ≈$231,774 collateral figure is a snapshot, not a fixed value. hBNB is a BNB yield fund, so its NAV moves with BNB — a decline lowers the collateral value in real time and is a live liquidation trigger without governance re-posting anything.
+- *Feed staleness affects only the price-gated paths.* If the feed exceeds its 65-minute window, getPrice(hBNB) reverts and the price-gated functions revert with it — most importantly claimRaisedFunds (the institution's drawdown), plus withdrawCollateral during Lock, liquidate / liquidateOverdueVault / repayBadDebt, and the liquidity views monitoring reads. Lender deposit/redeem/repay, depositCollateral and state advancement are unaffected. The window leaves only five minutes of tolerance over the heartbeat, so a single late publication takes pricing offline until the next round. The feed's observed cadence is exactly hourly, but its one outage so far (15.4 hours, 2026-09-02/03) would have taken hBNB pricing offline for ≈14 hours under this configuration.
 - *Inverse shadow caveat.* AtlasOracle.prices(hBNB) must remain 0: a ChainlinkOracle returns a stored direct price whenever one is non-zero and never reads the feed config, so a future setDirectPrice(hBNB, …) would silently shadow this live feed until reset to 0.
 
 **Access control.** No new AccessControlManager permissions are required. The Normal Timelock already holds createVault on the controller, setTokenConfig on both oracles, and addResource on the U FRV source (granted in VIP-627 / VIP-640 / VIP-650).
 
-**Vault open date.** This VIP only creates the vault; it does not start it. The 7-day open window and the 30-day term begin when the Critical Guardian calls openVault, after the institution has posted its 1% margin. The 20AUG2026 label in the vault's name and symbol therefore reflects the intended term, not a settled maturity — both are fixed at createVault and cannot be changed afterwards.
+**Vault open date.** This VIP only creates the vault; it does not start it. The 7-day open window and the 30-day term begin when the Critical Guardian calls openVault, after the institution has posted its 1% margin. The 10SEP2026 label in the vault's name and symbol therefore reflects the intended term, not a settled maturity — both are fixed at createVault and cannot be changed afterwards.
 
-**Follow-up (out of scope).** Opening the vault (openVault) is a Critical Guardian multisig action, and the DigiFT-side whitelisting described above is a counterparty action. Neither is part of this VIP.
+**Follow-up (out of scope).** Opening the vault (openVault) is a Critical Guardian multisig action, and the remaining DigiFT-side whitelisting described above is a counterparty action. Neither is part of this VIP.
 
 #### Actions
 
@@ -173,4 +169,4 @@ At the maximum 150,000 U drawdown the loan sits at ≈63% of the collateral's au
   );
 };
 
-export default vip658;
+export default vip999;

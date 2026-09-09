@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip658, {
+import vip999, {
   ADAPTER_FRV,
   ATLAS_ORACLE,
   FIXED_APY,
@@ -35,7 +35,7 @@ import vip658, {
   U_FRV_SOURCE,
   VAULT_NAME,
   VAULT_SYMBOL,
-} from "../../vips/vip-658/bscmainnet";
+} from "../../vips/vip-999/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import FRV_SOURCE_ABI from "./abi/FRVSource.json";
@@ -50,12 +50,9 @@ import FEED_ABI from "./abi/SingleFeed.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 117020000;
+const FORK_BLOCK = 120834000;
 
-// Minimal price-oracle stub that always returns 1e18.
-//   contract StubOracle {
-//       function getPrice(address) external pure returns (uint256) { return 1e18; }
-//   }
+// contract StubOracle { function getPrice(address) external pure returns (uint256) { return 1e18; } }
 const STUB_ORACLE_BYTECODE =
   "0x6080604052348015600e575f80fd5b5061015e8061001c5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c806341976e091461002d575b5f80fd5b610047600480360381019061004291906100cc565b61005d565b604051610054919061010f565b60405180910390f35b5f670de0b6b3a76400009050919050565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61009b82610072565b9050919050565b6100ab81610091565b81146100b5575f80fd5b50565b5f813590506100c6816100a2565b92915050565b5f602082840312156100e1576100e061006e565b5b5f6100ee848285016100b8565b91505092915050565b5f819050919050565b610109816100f7565b82525050565b5f6020820190506101225f830184610100565b9291505056fea26469706673582212209282f7f2d85233912d0088d6dc45ce2459097d2866597e41f0a286059758c12c64736f6c63430008190033";
 
@@ -71,14 +68,13 @@ const deployStubOracle = async (): Promise<Contract> => {
   return stubOracle;
 };
 
-// DigiFT's compliance registry — hBNB reads every transfer permission from it.
+// DigiFT's compliance registry gating every hBNB transfer.
 const MANAGEMENT = "0x2b6d846B07D4DF426a297e4Fe152aca832d9b3B3";
 
-// Seize-path participants DigiFT must whitelist for a liquidation to complete.
+// Seize-path participants DigiFT must whitelist.
 const LIQUIDATION_ADAPTER = "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd";
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
-// One position NFT for the whole vault system (controller.positionToken()).
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
 
 // IVaultTypes.VaultState
@@ -95,23 +91,18 @@ const U_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
 const U_HUB = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
 const U_CORE_SOURCE = "0x8A680F77A5367FA7cD33a02f51896Cb1d55159c3";
+// The other resource on the U FRV source, in Lock and accruing every block.
+const CASH_PLUS_VAULT = "0x41179fc6ff878b7795B900888E0B61fd8029bceA";
 const HUB_OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 const NO_RESOURCE = ethers.constants.AddressZero;
 
 const MANAGEMENT_SLOT = { whiteList: 0, restrictList: 1, blockList: 2, contractList: 3 };
 
-// hBNB's own layout, read off its verified BaseERC20 source: name 0, symbol 1, decimals 2,
-// _totalSupply 3, _balanceOf 4. Confirmed on chain — slot 3 holds 266.087295e18, matching
-// totalSupply(), and slot 2 holds 18.
-const HBNB_SLOT = { totalSupply: 3, balanceOf: 4 };
-
-// ERC4626 redemption with the virtual asset/share offset of 1 the vault inherits: an exact holding of
-// the whole supply redeems one wei short of totalAssets, and the dust stays in the vault.
+// ERC4626 redemption with the vault's virtual asset/share offset of 1.
 const previewRedeemAt = (shares: BigNumber, totalAssets: BigNumber, totalSupply: BigNumber): BigNumber =>
   shares.mul(totalAssets.add(1)).div(totalSupply.add(1));
 
-// Mirrors BaseVault._computeTotalInterest: totalRaised * fixedAPY * lockDuration / (BPS * YEAR),
-// with YEAR = 365 days.
+// Mirrors BaseVault._computeTotalInterest.
 const BPS = 10_000;
 const YEAR = 365 * 24 * 60 * 60;
 const termInterest = (principal: BigNumber): BigNumber =>
@@ -132,15 +123,6 @@ const setStorage = async (target: string, slot: string, value: BigNumber | numbe
 const setManagementFlag = async (slotIndex: number, account: string, value: boolean) =>
   setStorage(MANAGEMENT, mappingSlot(slotIndex, account), value ? 1 : 0);
 
-// hBNB cannot be dealt by transferring from a holder: under transferFlag == 1 only a whitelisted
-// contract may move it, so any funding route is itself gated. Written straight into the balance and
-// supply slots instead, which is equivalent to DigiFT issuing the institution its subscription.
-const dealHBNB = async (account: string, amount: BigNumber) => {
-  const supply = await new ethers.Contract(HBNB, SECURITY_TOKEN_ABI, ethers.provider).totalSupply();
-  await setStorage(HBNB, mappingSlot(HBNB_SLOT.balanceOf, account), amount);
-  await setStorage(HBNB, ethers.utils.hexZeroPad(ethers.utils.hexlify(HBNB_SLOT.totalSupply), 32), supply.add(amount));
-};
-
 forking(FORK_BLOCK, async () => {
   const controller = new ethers.Contract(INSTITUTIONAL_VAULT_CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -152,16 +134,17 @@ forking(FORK_BLOCK, async () => {
   const positionToken = new ethers.Contract(POSITION_TOKEN, POSITION_TOKEN_ABI, ethers.provider);
   const frvSource = new ethers.Contract(U_FRV_SOURCE, FRV_SOURCE_ABI, ethers.provider);
   const hub = new ethers.Contract(U_HUB, HUB_ABI, ethers.provider);
-  // Core is a YieldGroupCore, not an FRV group — only the YieldGroupBase views are read from it.
   const coreSource = new ethers.Contract(
     U_CORE_SOURCE,
     ["function totalAssets() view returns (uint256)"],
     ethers.provider,
   );
-  // The shared FRV adapter's own view of the position: 0 outside the vault's terminal states.
   const adapterFrv = new ethers.Contract(
     ADAPTER_FRV,
-    ["function maxWithdraw(address resource, address holder) view returns (uint256)"],
+    [
+      "function maxWithdraw(address resource, address holder) view returns (uint256)",
+      "function totalAssets(address resource, address holder) view returns (uint256)",
+    ],
     ethers.provider,
   );
 
@@ -211,8 +194,6 @@ forking(FORK_BLOCK, async () => {
       await expect(resilientOracle.getPrice(HBNB)).to.be.revertedWith("invalid resilient oracle price");
     });
 
-    // The feed and the token the VIP wires together: identity plus the 18/18 decimal pairing the
-    // ChainlinkOracle scaling (and therefore the post-VIP price equality) depends on.
     it("the hBNB/USD feed and hBNB are the assets the VIP configures, both 18-decimal", async () => {
       expect(await feed.description()).to.equal("SingleFeed hBNB/USD");
       expect(await feed.decimals()).to.equal(18);
@@ -235,7 +216,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-658 List the Hash Global hBNB Fixed-Term Institutional Loan Vault", await vip658(), {
+  testVip("VIP-999 List the Hash Global hBNB Fixed-Term Institutional Loan Vault", await vip999(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
@@ -244,7 +225,7 @@ forking(FORK_BLOCK, async () => {
 
       await controller.connect(timelock).setOracle(originalControllerOracle);
 
-      // Check what the VIP actually wrote before widening the window for the post-VIP reads.
+      // Assert the VIP's maxStalePeriod before widening it for the post-VIP reads.
       const oracle = await atlasOracle.tokenConfigs(HBNB);
       expect(oracle.feed).to.equal(HBNB_FEED);
       expect(oracle.maxStalePeriod).to.equal(HBNB_MAX_STALE_PERIOD);
@@ -311,7 +292,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("prices hBNB from the live NAV feed", async () => {
-      // 18-dec feed on an 18-dec asset → getPrice returns the NAV verbatim, all the way through.
+      // 18-dec feed on an 18-dec asset: getPrice returns the NAV verbatim.
       const nav = (await feedAsAtlas.latestRoundData())[1];
       expect(nav).to.be.gt(0);
       expect(await atlasOracle.getPrice(HBNB)).to.equal(nav);
@@ -329,7 +310,6 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("registers the vault as an FRV resource on the U Hub's FRV source", async () => {
-      // Membership, not the exact array: VIP-657 registers the CASH+ vault on this same source.
       expect(await frvSource.resources()).to.include(vault.address);
       const resourceConfig = await frvSource.resourceConfig(vault.address);
       expect(resourceConfig.registered).to.equal(true);
@@ -362,11 +342,10 @@ forking(FORK_BLOCK, async () => {
       expect(await hBNB.allowance(INSTITUTION_OPERATOR, vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT);
     });
 
-    // transferFlag == 1 with nothing whitelisted, proven on the live token: nothing can start until
-    // DigiFT whitelists the vault clone (as a contract) and the operator (as an investor).
     it("depositCollateral reverts while the vault is not a DigiFT-whitelisted contract", async () => {
       expect(await management.isWhiteContract(vault.address)).to.equal(false);
-      expect(await management.isWhiteInvestor(INSTITUTION_OPERATOR)).to.equal(false);
+      expect(await management.isWhiteInvestor(INSTITUTION_OPERATOR)).to.equal(true);
+      expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.be.gte(marginAmount);
       await expect(vault.connect(operator).depositCollateral(marginAmount)).to.be.revertedWith("Forbid transferFrom");
     });
   });
@@ -376,13 +355,11 @@ forking(FORK_BLOCK, async () => {
     let operator: SignerWithAddress;
     let lender: SignerWithAddress;
     let lenderAddress: string;
+    let operatorHBNBBefore: BigNumber;
 
     const marginAmount = IDEAL_COLLATERAL_AMOUNT.mul(MARGIN_RATE).div(parseUnits("1", 18));
     const LENDER_DEPOSIT = MAX_BORROW_CAP;
 
-    // 150,000 U borrowed for 30 days at a 2.7% fixed APY = 332.876712328767123287 U of interest.
-    // Suppliers share the principal plus that interest net of the 20% reserve factor (2.16% net APY),
-    // pro rata to shares; the reserve cut goes to the ProtocolShareReserve at settlement.
     const EXPECTED_INTEREST = termInterest(MAX_BORROW_CAP);
     const EXPECTED_DEBT_AT_MATURITY = MAX_BORROW_CAP.add(EXPECTED_INTEREST);
     const EXPECTED_PROTOCOL_FEE = reserveCut(EXPECTED_INTEREST);
@@ -397,27 +374,31 @@ forking(FORK_BLOCK, async () => {
       lenderAddress = await lender.getAddress();
     });
 
-    it("[Test-Only] DigiFT whitelists the vault, the operator and the seize path", async () => {
+    it("the operator is already a DigiFT-whitelisted investor holding the 198 hBNB subscription", async () => {
+      expect(await management.isWhiteInvestor(INSTITUTION_OPERATOR)).to.equal(true);
+      operatorHBNBBefore = await hBNB.balanceOf(INSTITUTION_OPERATOR);
+      expect(operatorHBNBBefore).to.be.gte(IDEAL_COLLATERAL_AMOUNT);
+      expect(operatorHBNBBefore).to.equal(await hBNB.totalSupply());
+    });
+
+    it("[Test-Only] DigiFT whitelists the vault and the seize path", async () => {
+      expect(await management.isWhiteContract(vault.address)).to.equal(false);
+      expect(await management.isWhiteContract(LIQUIDATION_ADAPTER)).to.equal(false);
+      expect(await management.isWhiteInvestor(LIQUIDATION_ADAPTER)).to.equal(false);
+      expect(await management.isWhiteInvestor(PROTOCOL_SHARE_RESERVE)).to.equal(false);
+      expect(await management.isWhiteInvestor(bscmainnet.CRITICAL_GUARDIAN)).to.equal(false);
+
       await setManagementFlag(MANAGEMENT_SLOT.contractList, vault.address, true);
       await setManagementFlag(MANAGEMENT_SLOT.contractList, LIQUIDATION_ADAPTER, true);
-      await setManagementFlag(MANAGEMENT_SLOT.whiteList, INSTITUTION_OPERATOR, true);
       await setManagementFlag(MANAGEMENT_SLOT.whiteList, LIQUIDATION_ADAPTER, true);
       await setManagementFlag(MANAGEMENT_SLOT.whiteList, PROTOCOL_SHARE_RESERVE, true);
       await setManagementFlag(MANAGEMENT_SLOT.whiteList, bscmainnet.CRITICAL_GUARDIAN, true);
 
       expect(await management.isWhiteContract(vault.address)).to.equal(true);
       expect(await management.isWhiteContract(LIQUIDATION_ADAPTER)).to.equal(true);
-      expect(await management.isWhiteInvestor(INSTITUTION_OPERATOR)).to.equal(true);
       expect(await management.isWhiteInvestor(LIQUIDATION_ADAPTER)).to.equal(true);
       expect(await management.isWhiteInvestor(PROTOCOL_SHARE_RESERVE)).to.equal(true);
       expect(await management.isWhiteInvestor(bscmainnet.CRITICAL_GUARDIAN)).to.equal(true);
-    });
-
-    it("[Test-Only] the institution holds its 237.2 hBNB subscription", async () => {
-      const supplyBefore = await hBNB.totalSupply();
-      await dealHBNB(INSTITUTION_OPERATOR, IDEAL_COLLATERAL_AMOUNT);
-      expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.equal(IDEAL_COLLATERAL_AMOUNT);
-      expect(await hBNB.totalSupply()).to.equal(supplyBefore.add(IDEAL_COLLATERAL_AMOUNT));
     });
 
     it("institution posts its 1% margin -> MarginDeposited", async () => {
@@ -432,8 +413,6 @@ forking(FORK_BLOCK, async () => {
       expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(marginAmount);
     });
 
-    // openVault is a Critical Guardian action in production (it also holds the ACM role), so the
-    // lifecycle is driven through the same actor the VIP description promises.
     it("the Critical Guardian opens the vault -> Fundraising, and collateral tops up to the ideal amount", async () => {
       const criticalGuardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
       await controller.connect(criticalGuardian).openVault(vault.address);
@@ -441,7 +420,7 @@ forking(FORK_BLOCK, async () => {
 
       await vault.connect(operator).depositCollateral(IDEAL_COLLATERAL_AMOUNT.sub(marginAmount));
       expect(await hBNB.balanceOf(vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT);
-      expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.equal(0);
+      expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.equal(operatorHBNBBefore.sub(IDEAL_COLLATERAL_AMOUNT));
 
       const nav = await resilientOracle.getPrice(HBNB);
       expect(await vault.getCollateralValueUSD()).to.equal(IDEAL_COLLATERAL_AMOUNT.mul(nav).div(parseUnits("1", 18)));
@@ -493,7 +472,6 @@ forking(FORK_BLOCK, async () => {
       await vault.connect(operator).updateVaultState();
       expect(await vault.state()).to.equal(VaultState.PendingSettlement);
 
-      // 30 days of 2.7% fixed APY on 150,000 U.
       const owed = await vault.outstandingDebt();
       expect(owed).to.equal(EXPECTED_DEBT_AT_MATURITY);
 
@@ -509,7 +487,7 @@ forking(FORK_BLOCK, async () => {
       expect(await u.balanceOf(vault.address)).to.equal(EXPECTED_DEBT_AT_MATURITY.sub(EXPECTED_PROTOCOL_FEE));
     });
 
-    it("the lender redeems principal plus interest, net of the 20% reserve factor", async () => {
+    it("the lender redeems principal plus interest, net of the 10% reserve factor", async () => {
       const shares = await vault.balanceOf(lenderAddress);
       const assets = await vault.previewRedeem(shares);
       expect(assets).to.equal(EXPECTED_LENDER_PROCEEDS);
@@ -523,7 +501,7 @@ forking(FORK_BLOCK, async () => {
     it("the institution withdraws its collateral back out of the vault", async () => {
       expect(await hBNB.balanceOf(vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT);
       await vault.connect(operator).withdrawCollateral(IDEAL_COLLATERAL_AMOUNT);
-      expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.equal(IDEAL_COLLATERAL_AMOUNT);
+      expect(await hBNB.balanceOf(INSTITUTION_OPERATOR)).to.equal(operatorHBNBBefore);
       expect(await hBNB.balanceOf(vault.address)).to.equal(0);
       expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(0);
     });
@@ -537,12 +515,17 @@ forking(FORK_BLOCK, async () => {
     let hubOperator: SignerWithAddress;
 
     const HUB_ALLOCATION = parseUnits("50000", 18);
-    // The FRV group's cap is 30% of Hub TVL, so the Hub must hold well over HUB_ALLOCATION / 0.3
-    // before the allocation leg fits under the cap.
+    // Headroom under the FRV group's 50%-of-TVL cap, which the CASH+ position already consumes part of.
     const HUB_DEPOSIT = parseUnits("200000", 18);
 
-    // 50,000 U for 30 days at 2.7%, same arithmetic as the lifecycle suite. The Hub is the only
-    // supplier here, so it redeems the vault's entire assets at maturity.
+    // Source total == sum of adapter views; both reads land in the same block, so the CASH+ accrual cancels.
+    const expectFrvHolds = async (thisVaultAssets: BigNumber) => {
+      expect(await adapterFrv.totalAssets(vault.address, U_FRV_SOURCE)).to.equal(thisVaultAssets);
+      expect(await frvSource.totalAssets()).to.equal(
+        (await adapterFrv.totalAssets(CASH_PLUS_VAULT, U_FRV_SOURCE)).add(thisVaultAssets),
+      );
+    };
+
     const HUB_INTEREST = termInterest(HUB_ALLOCATION);
     const HUB_TOTAL_ASSETS_AT_MATURITY = HUB_ALLOCATION.add(HUB_INTEREST).sub(reserveCut(HUB_INTEREST));
     const EXPECTED_HUB_PROCEEDS = previewRedeemAt(HUB_ALLOCATION, HUB_TOTAL_ASSETS_AT_MATURITY, HUB_ALLOCATION);
@@ -563,11 +546,12 @@ forking(FORK_BLOCK, async () => {
       await u.connect(hubUser).approve(hub.address, HUB_DEPOSIT);
 
       const coreBefore = await coreSource.totalAssets();
+      expect(await frvSource.resources()).to.have.members([CASH_PLUS_VAULT, vault.address]);
       await hub.connect(hubUser).deposit(HUB_DEPOSIT, hubUserAddress);
 
-      expect(await frvSource.totalAssets()).to.equal(0);
+      await expectFrvHolds(BigNumber.from(0));
       expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(0);
-      // Core is a live vToken market accruing between blocks, so the deposit is a floor on its growth.
+      // Core is a live vToken market, so the deposit is a floor on its growth.
       expect(await coreSource.totalAssets()).to.be.at.least(coreBefore.add(HUB_DEPOSIT));
     });
 
@@ -580,7 +564,7 @@ forking(FORK_BLOCK, async () => {
         );
 
       expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(HUB_ALLOCATION);
-      expect(await frvSource.totalAssets()).to.equal(HUB_ALLOCATION);
+      await expectFrvHolds(HUB_ALLOCATION);
       expect((await vault.runtime()).totalRaised).to.equal(HUB_ALLOCATION);
     });
 
@@ -589,10 +573,8 @@ forking(FORK_BLOCK, async () => {
       await vault.connect(operator).updateVaultState();
       expect(await vault.state()).to.equal(VaultState.Lock);
 
-      // The mechanism, AdapterFRV.maxWithdraw delegates to the vault's own maxWithdraw,
-      // which is 0 outside the terminal states — the accrued coupon in totalAssets is not
-      // deliverable mid-lock. So even a targeted pull leg against the vault reverts.
-      expect(await frvSource.totalAssets()).to.be.gt(HUB_ALLOCATION); // coupon is accruing
+      // The coupon accrues but maxWithdraw is 0 outside terminal states, so nothing is deliverable mid-lock.
+      expect(await adapterFrv.totalAssets(vault.address, U_FRV_SOURCE)).to.be.gt(HUB_ALLOCATION);
       expect(await adapterFrv.maxWithdraw(vault.address, U_FRV_SOURCE)).to.equal(0);
 
       await expect(
@@ -628,6 +610,7 @@ forking(FORK_BLOCK, async () => {
       expect(await frvSource.maxWithdraw()).to.equal(0);
 
       const coreBefore = await coreSource.totalAssets();
+      await expectFrvHolds(EXPECTED_HUB_PROCEEDS);
       await hub
         .connect(hubOperator)
         .reallocate(
@@ -636,7 +619,7 @@ forking(FORK_BLOCK, async () => {
         );
 
       expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(0);
-      expect(await frvSource.totalAssets()).to.equal(0);
+      await expectFrvHolds(BigNumber.from(0));
       expect(await coreSource.totalAssets()).to.be.at.least(coreBefore.add(EXPECTED_HUB_PROCEEDS));
     });
   });
