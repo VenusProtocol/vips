@@ -21,13 +21,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 // is 6-decimal and both markets list at an initial exchange rate of 1e16, below 1e18.
 // ===================================================================================================
 
-// Only the Normal Timelock is pulled in. This VIP grants the spoke roles to that timelock alone, so
-// the Fast-track and Critical timelocks and the Guardian are deliberately absent from this file.
-// See ../permissions.ts.
-const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bsctestnet;
+// The Normal Timelock and the Guardian are the two grantees. The Fast-track and Critical timelocks are
+// deliberately absent from this file: they receive nothing from this VIP. The Guardian's grants are a
+// bsctestnet decision, made so QA can drive this pool without a proposal per test case, and they do not
+// carry to a mainnet listing. See ../permissions.ts.
+const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bsctestnet;
 
 export const ACM = ACCESS_CONTROL_MANAGER;
-export { NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY };
+export { GUARDIAN, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY };
 
 // ---------------------------------------------------------------------------------------------------
 // The spoke stack. isolated-pools deploy/024 through deploy/028, all live on bsctestnet.

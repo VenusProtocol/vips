@@ -5,6 +5,7 @@ import {
   ACM,
   DEFAULT_PROXY_ADMIN,
   DEVIATION_BOUNDED_ORACLE,
+  GUARDIAN,
   NORMAL_TIMELOCK,
   PROTOCOL_SHARE_RESERVE,
   PROTOCOL_SHARE_RESERVE_IMPL,
@@ -87,10 +88,15 @@ import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES, giveCallPermission } fr
 //
 // ---------------------------------------------------------------------------------------------------
 // PERMISSIONS ALREADY COVERED ON THIS CHAIN
-//   Verified against ACM 0x45f8…a9AA at block 129,788,112. The Normal Timelock holds wildcard
-//   (address(0)-keyed) grants for every shared Comptroller, VToken and PoolRegistry role this listing
-//   uses, and a wildcard reaches a brand-new contract, so the new comptroller and the new registry
-//   inherit them. Only what is in ./permissions.ts is missing. Full detail lives there.
+//   The Normal Timelock holds wildcard (address(0)-keyed) grants for every shared Comptroller, VToken
+//   and PoolRegistry role this listing uses, and a wildcard reaches a brand-new contract, so the new
+//   comptroller and the new registry inherit them. Only what is in ./permissions.ts is missing.
+//
+//   Those inherited grants are the assumption this VIP is most exposed to, because nothing in the
+//   proposal touches them and a revocation would only surface at execution. They are therefore listed
+//   as `ASSUMED_WILDCARD_ROLES` in ./permissions.ts rather than as prose, and asserted BEFORE the
+//   proposal runs in simulations/vip-671/bsctestnet.ts, together with the two ownership assumptions
+//   step 4 rests on. Re-running that simulation is what re-verifies them.
 //
 // ---------------------------------------------------------------------------------------------------
 // CROSS-REPO DEPENDENCY — see step 4.
@@ -163,7 +169,7 @@ Risk parameters mirror the isolated pools' Stablecoins pool on this network. Thi
 #### Proposed changes
 
 1. Accept ownership of the new spoke Comptroller and of the new spoke pool registry, and point the Comptroller at the **ResilientOracle** and the **DeviationBoundedOracle**. The second is required before the pool serves any borrow or redeem.
-2. Grant the spoke registry the six Comptroller setters it drives while registering a pool, and grant the Normal Timelock the roles that exist only on this pool: the supply allowlist, the liquidation allowlist, and the per-market liquidation incentive, plus forced liquidation. No new permission is given to any other timelock, or to the Guardian.
+2. Grant the spoke registry the six Comptroller setters it drives while registering a pool, and grant both the Normal Timelock and the Guardian the roles that exist only on this pool: the supply allowlist, the liquidation allowlist, and the per-market liquidation incentive, plus forced liquidation. Nothing is granted to the Fast-track or the Critical timelock.
 3. Upgrade the **ProtocolShareReserve** so it can resolve markets through more than one pool registry, and register the spoke registry alongside the existing one. Without this the pool cannot report income and its liquidations would revert. The existing isolated pools are unaffected: their registry stays the primary one and is still checked first.
 4. Move the risk fund's 20% share of protocol income from the legacy **RiskFundConverter** to **RiskFundBuyback**, on both income schemas. BNB Chain mainnet made this same move in VIP-618 and testnet was left behind, and the old contract is the one income destination that cannot resolve a pool outside its own registry. The share itself is unchanged, only the destination.
 5. Register the pool and list both markets, each seeded with 10,000 of its underlying, capped at 1,000,000 supply and 400,000 borrow, with an 80% collateral factor and an 88% liquidation threshold.
@@ -172,6 +178,7 @@ Risk parameters mirror the isolated pools' Stablecoins pool on this network. Thi
 #### Notes
 
 - Testnet only. No Hub-Funded Spoke pool is deployed on any mainnet.
+- The Guardian's grants are for testing this pool, so that adding a test supplier, lifting an allowlist or forcing a liquidation does not need a proposal each time. They apply to this pool on this network only, and a mainnet listing would keep these roles with the Normal Timelock. The Guardian already sets collateral factors and caps on this network, which are the parameters that decide when a position can be liquidated.
 - This is the first of two proposals. Connecting the pool's liquidity side to the Liquidity Hub is a separate proposal.
 - The USDT market's supply allowlist ships **enabled with no members**, so nobody can supply it until the second proposal authorises the Hub's spoke source. Redeeming is never restricted, and the seed supply minted at listing is unaffected.
 - Exit is never gated: repay, redeem, withdraw and transfer stay permissionless, and the pool keeps the usual market-level pause controls.
@@ -208,19 +215,34 @@ Risk parameters mirror the isolated pools' Stablecoins pool on this network. Thi
         giveCallPermission(ACM, SPOKE_COMPTROLLER, signature, SPOKE_POOL_REGISTRY),
       ),
 
-      //    2b. The roles that exist only on this fork, plus forced liquidation. Verified not granted
-      //        to any timelock on this chain. Everything else the listing needs is already held by the
-      //        timelocks as a wildcard, so it is not re-granted here. See ./permissions.ts.
+      //    2b. The roles that exist only on this fork, plus forced liquidation. Verified not granted to
+      //        any timelock or to the Guardian on this chain. Everything else the listing needs is
+      //        already held by the timelocks as a wildcard, so it is not re-granted. See
+      //        ./permissions.ts.
       //
-      //        NORMAL TIMELOCK ONLY. The Fast-track and Critical timelocks get nothing from this VIP.
-      //        A grant is cheap to add later and awkward to take back, so the emergency timelocks stay
-      //        off a pool that has not run yet; if an incident needs one of them, it can be granted
-      //        then. Note this leaves the pool's pause path on the Normal Timelock as well, since the
-      //        Fast-track and Critical wildcards for `setActionsPaused(address[],uint256[],bool)` do
-      //        already reach this comptroller. Those are pre-existing and this VIP does not touch them.
+      //        The Fast-track and Critical timelocks get nothing from this VIP. Their pre-existing
+      //        `setActionsPaused(address[],uint256[],bool)` wildcards already reach this comptroller,
+      //        so the emergency pause path is open from the first block without adding anything here.
       ...SPOKE_COMPTROLLER_ROLES.map(signature =>
         giveCallPermission(ACM, SPOKE_COMPTROLLER, signature, NORMAL_TIMELOCK),
       ),
+
+      //    2c. The same six to the Guardian multisig. TESTNET ONLY, and the reasoning belongs with the
+      //        grant: this pool exists to be tested, and these six are exactly the knobs a test has to
+      //        turn in both directions. Add and remove a supplier on the liquidity market, arm and lift
+      //        either allowlist, and force a liquidatable position instead of waiting for a depeg.
+      //        On the Normal Timelock alone, each of those is a governance proposal, which delays the
+      //        testing without restricting anything that matters.
+      //
+      //        Narrower than it reads: the Guardian already holds `setCollateralFactor`,
+      //        `setMarketSupplyCaps` and `setMarketBorrowCaps` as wildcards here, which are the
+      //        parameters that decide when an account is underwater, so it can already push a position
+      //        into shortfall on any pool on this chain. What it gains is who may supply and who may
+      //        liquidate on ONE testnet pool.
+      //
+      //        Do NOT carry this block into a mainnet listing. There these six stay with the Normal
+      //        Timelock.
+      ...SPOKE_COMPTROLLER_ROLES.map(signature => giveCallPermission(ACM, SPOKE_COMPTROLLER, signature, GUARDIAN)),
 
       // -------------------------------------------------------------------------------------------
       // 3. Oracles. Both are onlyOwner, so they follow acceptOwnership; `setPriceOracle` also has to
@@ -427,21 +449,19 @@ Risk parameters mirror the isolated pools' Stablecoins pool on this network. Thi
       //
       //  - `setLiquidationAllowlistEnabled(false)` — the pool-wide liquidation allowlist already
       //    defaults to disabled, so a command setting it to false would be a no-op. The role is
-      //    granted in step 2b so governance can turn it on without a follow-up VIP.
+      //    granted in steps 2b and 2c so it can be turned on and off during testing.
+      //  - `setAllowedSupplier` for any account — the liquidity market ships closed and the Guardian
+      //    can add a supplier once QA needs one, without a proposal. Phase 2 adds the Hub's source.
       //  - `enterMarketBehalf(address,address)` — granted only to a router that passes its own caller
       //    through as `account`, and no router is deployed on this chain. See ./permissions.ts.
       //  - `addRewardsDistributor` — no rewards programme is defined for this pool.
       //  - Liquidity Hub wiring and the bStock liquidation leg — Phase 2, see the scope note above.
       //
-      // STILL OPEN before proposing: protocol-reserve#168 has to MERGE. Its implementation is deployed
-      // and this VIP upgrades to it, but proposing against an unmerged branch would adopt code that can
-      // still change.
-      //
-      // Covered by simulations/vip-671/bsctestnet.ts, which asserts the pre-VIP deployment state, every
-      // command, and the post-VIP state. It also pins the two things most expensive to get wrong: that
-      // `SpokeComptroller.poolRegistry()` is the spoke registry, a constructor immutable no VIP can
-      // fix, and that the live isolated pools still resolve through ProtocolShareReserve after the
-      // upgrade.
+      // Covered by simulations/vip-671/bsctestnet.ts, which asserts the pre-VIP deployment state, the
+      // permissions this VIP assumes rather than grants, every command, and the post-VIP state. It also
+      // pins the two things most expensive to get wrong: that `SpokeComptroller.poolRegistry()` is the
+      // spoke registry, a constructor immutable no VIP can fix, and that the live isolated pools still
+      // resolve through ProtocolShareReserve after the upgrade.
       // -------------------------------------------------------------------------------------------
     ],
     meta,
