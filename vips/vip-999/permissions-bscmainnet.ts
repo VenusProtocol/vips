@@ -13,6 +13,9 @@ const YIELD_GROUP_BASE = [
   "sweep(address,address)",
 ];
 
+// Moves the share token, so the whole fund position. Normal Timelock only.
+const SWEEP = "sweep(address,address)";
+
 // Opening a redemption and cancelling either direction.
 const CENTRIFUGE_ASYNC_REQUESTS = [
   "requestRedeem(address,uint256)",
@@ -49,12 +52,21 @@ export const CENTRIFUGE_GOVERNANCE = [
   SET_SPOT_APY,
 ];
 
+// Everything the Normal Timelock holds, less `sweep`.
+export const CENTRIFUGE_FAST_TRACK = CENTRIFUGE_GOVERNANCE.filter(sig => sig !== SWEEP);
+
 export const CENTRIFUGE_OPERATOR = [
   "setInnerDepositQueue(address[])",
   "setInnerWithdrawQueue(address[])",
   "pauseResource(address)",
   ...CENTRIFUGE_ASYNC_REQUESTS,
   ...CENTRIFUGE_CLAIMS,
+  SET_SPOT_APY,
 ];
 
-export const CENTRIFUGE_GUARDIAN = ["pauseResource(address)", "forceRemoveResource(address)", ...CENTRIFUGE_NAV_GUARD];
+export const CENTRIFUGE_GUARDIAN = [
+  "pauseResource(address)",
+  "forceRemoveResource(address)",
+  ...CENTRIFUGE_NAV_GUARD,
+  SET_SPOT_APY,
+];

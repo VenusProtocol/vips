@@ -44,6 +44,7 @@ import vip999Mainnet, {
 } from "../../vips/vip-999/bscmainnet";
 import {
   CENTRIFUGE_CLAIMS,
+  CENTRIFUGE_FAST_TRACK,
   CENTRIFUGE_GOVERNANCE,
   CENTRIFUGE_GUARDIAN,
   CENTRIFUGE_NAV_GUARD,
@@ -219,7 +220,8 @@ forking(BLOCK_NUMBER, async () => {
 
     it("the aggregator slot holds exactly these grants", async () => {
       expect(permissions.length).to.equal(
-        2 * CENTRIFUGE_GOVERNANCE.length +
+        CENTRIFUGE_GOVERNANCE.length +
+          CENTRIFUGE_FAST_TRACK.length +
           CENTRIFUGE_OPERATOR.length +
           CENTRIFUGE_CLAIMS.length +
           CENTRIFUGE_GUARDIAN.length,
@@ -246,8 +248,9 @@ forking(BLOCK_NUMBER, async () => {
         [ACM_ABI],
         ["RoleGranted"],
         [
-          // The 59 replayed grants, plus DEFAULT_ADMIN_ROLE lent to the aggregator.
-          2 * CENTRIFUGE_GOVERNANCE.length +
+          // The 60 replayed grants, plus DEFAULT_ADMIN_ROLE lent to the aggregator.
+          CENTRIFUGE_GOVERNANCE.length +
+            CENTRIFUGE_FAST_TRACK.length +
             CENTRIFUGE_OPERATOR.length +
             CENTRIFUGE_CLAIMS.length +
             CENTRIFUGE_GUARDIAN.length +
@@ -329,7 +332,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.totalAssets()).to.be.gte(hubTotalBefore);
     });
 
-    it("the NAV band is configured with both sides off", async () => {
+    it("the NAV band is configured on each fund with both sides armed", async () => {
       for (const fund of FUNDS) {
         const band = await source.navGuard(fund.vault);
         expect(band.driftBps, fund.name).to.equal(fund.band.driftBps);
@@ -363,11 +366,14 @@ forking(BLOCK_NUMBER, async () => {
       expect(await source.spotAPYBps()).to.equal(0);
     });
 
-    it("both timelocks hold the whole surface", async () => {
-      for (const holder of [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK]) {
-        for (const sig of CENTRIFUGE_GOVERNANCE) {
-          expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), holder), `${holder} ${sig}`).to.equal(true);
-        }
+    it("the normal timelock holds the whole surface, the fast-track all but sweep", async () => {
+      // `sweep` is skipped rather than compared against CENTRIFUGE_FAST_TRACK, which is derived as
+      // "governance minus sweep" and so would restate its own definition. The sweep test below holds
+      // the negative.
+      for (const sig of CENTRIFUGE_GOVERNANCE) {
+        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), NORMAL_TIMELOCK), sig).to.equal(true);
+        if (sig === "sweep(address,address)") continue;
+        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), FAST_TRACK_TIMELOCK), sig).to.equal(true);
       }
     });
 
@@ -415,6 +421,34 @@ forking(BLOCK_NUMBER, async () => {
       for (const sig of CENTRIFUGE_GOVERNANCE) {
         expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), CRITICAL_TIMELOCK), sig).to.equal(false);
       }
+    });
+
+    it("only the normal timelock holds sweep, which could move a whole fund position out", async () => {
+      const sweep = "sweep(address,address)";
+      expect(CENTRIFUGE_FAST_TRACK).to.not.include(sweep);
+      expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sweep), NORMAL_TIMELOCK)).to.equal(true);
+      for (const holder of [FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, OPERATOR, KEEPER, GUARDIAN]) {
+        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sweep), holder), `${holder}`).to.equal(false);
+      }
+      // The share token is neither `asset()` nor a registered resource, so `sweep` would not refuse it.
+      for (const fund of FUNDS) {
+        expect(await source.asset(), fund.name).to.not.equal(fund.share);
+        expect((await source.resourceConfig(fund.share)).registered, fund.name).to.equal(false);
+      }
+    });
+
+    it("the operator and the guardian can publish the APY, the keeper cannot", async () => {
+      const sig = "setSpotAPYBps(address,uint64)";
+      for (const holder of [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, OPERATOR, GUARDIAN]) {
+        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), holder), `${holder}`).to.equal(true);
+      }
+      expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), KEEPER)).to.equal(false);
+
+      const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      await expect(source.connect(operator).setSpotAPYBps(JTRSY_VAULT, 340))
+        .to.emit(source, "SpotAPYBpsSet")
+        .withArgs(JTRSY_VAULT, 0, 340);
+      await source.connect(operator).setSpotAPYBps(JTRSY_VAULT, 0);
     });
 
     it("the source cannot pause the Hub", async () => {

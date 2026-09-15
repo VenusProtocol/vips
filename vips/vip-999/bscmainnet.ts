@@ -69,7 +69,7 @@ export const NAV_GUARDS = [
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT];
 
-// The 59 ACM grants are pre-loaded into the ACMCommandsAggregator by ./scripts/addGrantPermissions.ts.
+// The 60 ACM grants are pre-loaded into the ACMCommandsAggregator by ./scripts/addGrantPermissions.ts.
 //
 // The index is the aggregator's next free grant slot at the moment of loading — entries are
 // append-only, so a stale index replays whatever else occupies that slot.
@@ -109,26 +109,47 @@ handles by reading decimals off the vault rather than assuming them.
 | Holder | Signatures | Surface |
 | --- | --- | --- |
 | Normal Timelock | 20 | everything |
-| Fast-Track Timelock | 20 | everything |
-| Operator | 10 | queues, the async lifecycle, pausing one fund |
+| Fast-Track Timelock | 19 | everything but \`sweep\` |
+| Operator | 11 | queues, the async lifecycle, pausing one fund, the published APY |
 | Keeper | 4 | the four claim functions, nothing else |
-| Guardian | 5 | containment and the NAV band |
+| Guardian | 6 | containment, the NAV band, the published APY |
 
 Outside the two timelocks nobody is granted \`unpauseResource\`, so the Guardian can contain a fund but
 never undo a governance-ordered pause. The Operator is not granted the NAV band: the account that moves
 the capital is not the account that decides what its value may be reported as.
 
-The Guardian's five signatures are \`pauseResource\`, \`forceRemoveResource\` and the three band setters.
-Two of those write value directly: \`setNavGuardSnapshot\` sets the anchor to any figure, and
-\`setNavGuardEnabled\` decides whether the band binds — so with both, the Guardian can move what the Hub
-reports this position to be worth. That is a deliberate grant, not only a containment one.
+\`sweep\` is the **Normal Timelock's alone**, and the one signature the Fast-Track Timelock does not get.
+It refuses \`asset()\` and every registered resource, but here the resource is the vault while the token
+this contract actually holds is the vault's \`share()\` — which it would not refuse, so a sweep could move
+an entire fund position out. That belongs behind the full 48-hour delay, not a 6-hour one.
 
-The 59 grants are pre-loaded off chain into the **ACMCommandsAggregator**
+The Guardian's six signatures are \`pauseResource\`, \`forceRemoveResource\`, the three band setters and
+\`setSpotAPYBps\`. Two of the band setters write value directly: \`setNavGuardSnapshot\` sets the anchor to
+any figure, and \`setNavGuardEnabled\` decides whether the band binds — so with both, the Guardian can
+move what the Hub reports this position to be worth. That is a deliberate grant, not only a containment
+one.
+
+\`forceRemoveResource\` is the Guardian's other non-containment power, and it is held for a specific
+failure. \`AdapterCentrifuge\` refuses to value a share-holding position at a zero or unreadable price,
+and \`Hub.totalAssets()\` sums every group without catching, so a Centrifuge price outage stops every
+Hub flow — for depositors with no Centrifuge exposure too. Pausing does not clear it: neither
+\`pauseResource\` nor \`pauseYieldGroup\` drops the position out of that sum.
+
+Recovery needs a proposal on either route. \`Hub.removeYieldGroup\` skips the balance check on a group
+whose \`totalAssets()\` reverts and needs no pause, so a single Normal Timelock VIP clears the outage —
+but it evicts the whole group, both funds and all. The Guardian's route is \`pauseHub\` →
+\`forceRemoveResource\` → \`unpauseHub\`, which writes off only the fund whose price is missing and
+leaves the other registered. The Guardian holds the first two; \`unpauseHub\` is the Normal Timelock's
+alone, so the Hub stays paused until a proposal lifts it. What the grant buys is scope, not speed: one
+fund written off rather than the group, with the Hub held still while that happens.
+
+The 60 grants are pre-loaded off chain into the **ACMCommandsAggregator**
 (\`${ACM_AGGREGATOR}\`, grant batch index ${ACM_AGGREGATOR_INDEX}). Inline they do not fit:
 \`propose()\` stores the whole proposal in one transaction, and at that size it costs 16,583,328 gas
-through the proposer Safe — 98.8% of the 16,777,216 per-tx cap, with no room for state drift. The proposal lends the aggregator \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager,
-replays the batch, and revokes the role in the same transaction, so the aggregator never holds ACM
-admin outside this proposal.
+through the proposer Safe — 98.8% of the 16,777,216 per-tx cap, with no room for state drift. The
+proposal lends the aggregator \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager, replays the batch, and
+revokes the role in the same transaction, so the aggregator never holds ACM admin outside this
+proposal.
 
 #### Value defence
 
@@ -151,8 +172,11 @@ movement needs. It is meant to catch a fund reporting something absurd, not to t
 band tight enough to bind on normal movement would misreport a healthy position on every Hub read, and
 clamping at the floor would under-report a loss the fund had really taken.
 
-Centrifuge publishes no rate on chain, so the reported APY comes from \`setSpotAPYBps\`, which
-governance sets per fund. It is left at zero here.
+Centrifuge publishes no rate on chain, so the reported APY comes from \`setSpotAPYBps\`, set per fund.
+It is left at zero here, and the group reports zero until someone sets it — which drags the Hub's
+advertised APY down, because the Hub weights each group's rate by the value it holds. That is why
+\`setSpotAPYBps\` is held by the Operator and the Guardian as well as the two timelocks: it publishes a
+figure Centrifuge does not, and correcting a stale one should not wait days.
 
 #### Actions (one atomic transaction, in order)
 
