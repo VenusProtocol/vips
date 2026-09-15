@@ -18,6 +18,7 @@ import vip668, {
   BNBX_AMOUNT,
   CHAINLINK_ORACLE,
   COMPTROLLER,
+  DEV_RECIPIENT,
   LONG_TAIL_TOKENS,
   NEW_VAI_VAULT_RATE,
   NORMAL_TIMELOCK,
@@ -26,6 +27,8 @@ import vip668, {
   RESILIENT_ORACLE,
   RISK_FUND,
   RISK_FUND_BUYBACK,
+  SLISBNB,
+  SLISBNB_AMOUNT,
   STADER_STAKE_MANAGER,
   STKBNB,
   STKBNB_AMOUNT,
@@ -69,7 +72,6 @@ const OLD_VAI_ENABLE_FLAGS = [true, true, false];
 const BLOCKS_TO_MINE = 20_000;
 const DUMMY_USER = "0x0000000000000000000000000000000000000001";
 
-const SLISBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
 // stkBNB left in the RiskFund after rounding the swept amount down to a multiple of 1e12
 const STKBNB_DUST = BigNumber.from("201756396971");
 
@@ -98,7 +100,7 @@ forking(FORK_BLOCK, async () => {
   let treasuryVaiBefore: BigNumber;
   let treasuryUsdtBefore: BigNumber;
   let riskFundWbnbBefore: BigNumber;
-  let riskFundSlisBnbBefore: BigNumber;
+  let devRecipientSlisBnbBefore: BigNumber;
   let bnbPaidToTimelock: BigNumber;
   const buybackBalancesBefore: Record<string, BigNumber> = {};
 
@@ -149,7 +151,7 @@ forking(FORK_BLOCK, async () => {
     treasuryVaiBefore = await vai.balanceOf(VTREASURY);
     treasuryUsdtBefore = await usdt.balanceOf(VTREASURY);
     riskFundWbnbBefore = await wbnb.balanceOf(RISK_FUND);
-    riskFundSlisBnbBefore = await slisBnb.balanceOf(RISK_FUND);
+    devRecipientSlisBnbBefore = await slisBnb.balanceOf(DEV_RECIPIENT);
     for (const { address } of LONG_TAIL_TOKENS) {
       buybackBalancesBefore[address] = await token(address).balanceOf(RISK_FUND_BUYBACK);
     }
@@ -223,9 +225,10 @@ forking(FORK_BLOCK, async () => {
       });
     }
 
-    it("RiskFund holds exactly the ankrBNB and BNBx amounts, and the stkBNB amount plus dust", async () => {
+    it("RiskFund holds exactly the ankrBNB, BNBx and slisBNB amounts, and the stkBNB amount plus dust", async () => {
       expect(await token(ANKR_BNB).balanceOf(RISK_FUND)).to.equal(ANKR_BNB_AMOUNT);
       expect(await token(BNBX).balanceOf(RISK_FUND)).to.equal(BNBX_AMOUNT);
+      expect(await slisBnb.balanceOf(RISK_FUND)).to.equal(SLISBNB_AMOUNT);
       expect(await token(STKBNB).balanceOf(RISK_FUND)).to.equal(STKBNB_DUST.add(STKBNB_AMOUNT));
     });
 
@@ -243,7 +246,7 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVenusVAIVaultRate"], [1]);
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
       await expectEvents(txResponse, [DISTRIBUTOR_ABI], ["VaiConvertedViaPsm"], [1]);
-      await expectEvents(txResponse, [RISK_FUND_ABI], ["SweepToken"], [LONG_TAIL_TOKENS.length + 3]);
+      await expectEvents(txResponse, [RISK_FUND_ABI], ["SweepToken"], [LONG_TAIL_TOKENS.length + 4]);
       await expectEvents(txResponse, [ANKR_BINANCE_POOL_ABI], ["Unstaked"], [1]);
       await expectEvents(txResponse, [STAKE_MANAGER_V2_ABI], ["RedeemedBnbxForBnb"], [1]);
       await expectEvents(txResponse, [PSTAKE_STAKE_POOL_ABI], ["Withdraw", "Claim"], [1, 1]);
@@ -348,8 +351,9 @@ forking(FORK_BLOCK, async () => {
       expect(bnbPaidToTimelock).to.equal(WBNB_AMOUNT);
     });
 
-    it("RiskFund slisBNB is not touched", async () => {
-      expect(await slisBnb.balanceOf(RISK_FUND)).to.equal(riskFundSlisBnbBefore);
+    it("slisBNB is moved from the RiskFund to the dev recipient", async () => {
+      expect(await slisBnb.balanceOf(RISK_FUND)).to.equal(0);
+      expect((await slisBnb.balanceOf(DEV_RECIPIENT)).sub(devRecipientSlisBnbBefore)).to.equal(SLISBNB_AMOUNT);
     });
 
     describe("Prices", () => {

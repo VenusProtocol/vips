@@ -86,6 +86,12 @@ export const STKBNB_AMOUNT = "208460000000000000";
 // difference stays in, or is paid from, the Normal Timelock's own BNB.
 export const WBNB_AMOUNT = "4099455159026674445";
 
+// Lista slisBNB has no instant exit for the RiskFund (instantWithdraw is whitelist-only), so it goes to the
+// Venus dev recipient used in VIP-649 for off-chain unstaking. Exact RiskFund balance at block 122009038.
+export const SLISBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
+export const SLISBNB_AMOUNT = "634257472081931688";
+export const DEV_RECIPIENT = "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de";
+
 export const vip668 = () => {
   const meta = {
     version: "v2",
@@ -102,7 +108,7 @@ It also cleans up funds held by the Venus Treasury and the Risk Fund:
 
 4. Converts the VAI held by the Venus Treasury to USDT through the VAI Peg Stability Module (PSM).
 5. Sends the long-tail tokens held by the Risk Fund to the RiskFund buyback, which sells them for USDT.
-6. Exits the third-party liquid staking positions held by the Risk Fund and returns the BNB to the Risk Fund as WBNB.
+6. Exits the third-party liquid staking positions held by the Risk Fund. Three are unstaked in this proposal and their BNB is returned to the Risk Fund as WBNB, and slisBNB is sent to the Venus dev recipient for off-chain unstaking.
 
 #### Atlas as pivot oracle
 
@@ -148,7 +154,7 @@ The Risk Fund holds receipt tokens from three staking protocols that allow an in
 
 The exits pay about 4.0995 BNB to the Normal Timelock. The Risk Fund cannot receive BNB, so the BNB is wrapped to WBNB and sent to the Risk Fund.
 
-slisBNB (0.6343, about $473) is not moved. Lista has no instant exit for it.
+slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because Lista's instant withdrawal is limited to whitelisted accounts. It is sent to the Venus dev recipient (${DEV_RECIPIENT}, also used in VIP-649), which unstakes it off-chain.
 
 #### Actions
 
@@ -164,7 +170,8 @@ slisBNB (0.6343, about $473) is not moved. Lista has no instant exit for it.
 10. Calls redeemBnbxForBnb(uint256) on the Stader StakeManagerV2 (${STADER_STAKE_MANAGER}) for the BNBx.
 11. Calls send(address,uint256,bytes) on stkBNB (${STKBNB}) to the pStake StakePool (${PSTAKE_STAKE_POOL}).
 12. Calls deposit() on WBNB (${WBNB}) with ${WBNB_AMOUNT} wei of BNB.
-13. Calls transfer(address,uint256) on WBNB for the same amount, to the Risk Fund.`,
+13. Calls transfer(address,uint256) on WBNB for the same amount, to the Risk Fund.
+14. Calls sweepToken(address,address,uint256) on the Risk Fund for slisBNB (${SLISBNB}), to the Venus dev recipient.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -266,6 +273,13 @@ slisBNB (0.6343, about $473) is not moved. Lista has no instant exit for it.
         target: WBNB,
         signature: "transfer(address,uint256)",
         params: [RISK_FUND, WBNB_AMOUNT],
+      },
+
+      // slisBNB to the dev recipient for off-chain unstaking
+      {
+        target: RISK_FUND,
+        signature: "sweepToken(address,address,uint256)",
+        params: [SLISBNB, DEV_RECIPIENT, SLISBNB_AMOUNT],
       },
     ],
     meta,
