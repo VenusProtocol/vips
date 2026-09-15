@@ -17,6 +17,12 @@ import vip999Addendum, {
   HUB_USDT,
   MOCK_CENTRIFUGE_SHARE_USDT,
   MOCK_CENTRIFUGE_VAULT_USDT,
+  NAV_GUARD_CAP_ENABLED,
+  NAV_GUARD_DOWN_GAP_BPS,
+  NAV_GUARD_DRIFT_BPS,
+  NAV_GUARD_FLOOR_ENABLED,
+  NAV_GUARD_INTERVAL,
+  NAV_GUARD_UP_GAP_BPS,
   NORMAL_TIMELOCK,
   OLD_ADAPTER_CENTRIFUGE,
   OLD_CENTRIFUGE_BEACON,
@@ -284,8 +290,14 @@ forking(BLOCK_NUMBER, async () => {
         await expectEvents(
           txResponse,
           [SOURCE_ABI],
-          ["ResourceForceRemoved", "ResourceAdded", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
-          [1, 1, 1, 1],
+          [
+            "ResourceForceRemoved",
+            "ResourceAdded",
+            "NavGuardConfigured",
+            "InnerDepositQueueSet",
+            "InnerWithdrawQueueSet",
+          ],
+          [1, 1, 1, 1, 1],
         );
         await expectEvents(
           txResponse,
@@ -410,14 +422,20 @@ forking(BLOCK_NUMBER, async () => {
       expect(await acm.hasRole(roleOf(HUB_USDT, "pauseHub()"), CENTRIFUGE_SOURCE_USDT)).to.equal(false);
     });
 
-    it("no guard is armed and no APY is published", async () => {
+    it("the band is configured but neither side is armed, and no APY is published", async () => {
       const band = await source.navGuard(MOCK_CENTRIFUGE_VAULT_USDT);
+      expect(band.driftBps).to.equal(NAV_GUARD_DRIFT_BPS);
+      expect(band.upGapBps).to.equal(NAV_GUARD_UP_GAP_BPS);
+      expect(band.downGapBps).to.equal(NAV_GUARD_DOWN_GAP_BPS);
+      expect(band.interval).to.equal(NAV_GUARD_INTERVAL);
+      expect(band.capEnabled).to.equal(NAV_GUARD_CAP_ENABLED);
+      expect(band.floorEnabled).to.equal(NAV_GUARD_FLOOR_ENABLED);
+      expect(band.anchoredAt).to.be.gt(0);
+
+      // Configured on an empty position, so `setNavGuardRate` seeded both numbers from a zero read.
+      // The band only gains width once a deposit moves the centre and a re-anchor lifts the anchor.
       expect(band.anchor).to.equal(0);
       expect(band.centre).to.equal(0);
-      expect(band.interval).to.equal(0);
-      expect(band.driftBps).to.equal(0);
-      expect(band.capEnabled).to.equal(false);
-      expect(band.floorEnabled).to.equal(false);
 
       const status = await source.navGuardStatus(MOCK_CENTRIFUGE_VAULT_USDT);
       expect(status.isClamped).to.equal(false);

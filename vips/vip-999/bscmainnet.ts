@@ -3,14 +3,6 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import {
-  CENTRIFUGE_CLAIMS,
-  CENTRIFUGE_GOVERNANCE,
-  CENTRIFUGE_GUARDIAN,
-  CENTRIFUGE_OPERATOR,
-  giveCallPermission,
-} from "./permissions-bscmainnet";
-
 const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, GUARDIAN, CRITICAL_TIMELOCK, FAST_TRACK_TIMELOCK } =
   NETWORK_ADDRESSES.bscmainnet;
 
@@ -20,7 +12,7 @@ export { NORMAL_TIMELOCK, GUARDIAN, CRITICAL_TIMELOCK, FAST_TRACK_TIMELOCK };
 // The routine operator, same account vip-650 granted the Hub operator surface to.
 export const OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 
-// PLACEHOLDER — Set to the Critical Guardian until the real keeper address exists;
+// The bot that sweeps settled Centrifuge claims once a day.
 export const KEEPER = "0x7B1AE5Ea599bC56734624b95589e7E8E64C351c9";
 
 // ---------------------------------------------------------------------------------------------------
@@ -58,28 +50,48 @@ export const CENTRIFUGE_SOURCE_USDT = "0xDA5AFfeb43719f517676E031a727071c7D40098
 // ---------------------------------------------------------------------------------------------------
 // Caps for Hub.addYieldGroup(source, absoluteCap, percentageCapBps).
 // ---------------------------------------------------------------------------------------------------
-export const PERCENTAGE_CAP_DISABLED = 10_000;
 export const CENTRIFUGE_ABSOLUTE_CAP = parseUnits("5000000", 18).toString();
 export const CENTRIFUGE_PERCENTAGE_CAP_BPS = 2_000; // 20% of TVL
 
 export const CENTRIFUGE_RESOURCES = [JTRSY_VAULT, JAAA_VAULT];
 
+export const NAV_GUARD_INTERVAL = 86_400; // re-anchor at most once a day
+export const NAV_GUARD_CAP_ENABLED = false;
+export const NAV_GUARD_FLOOR_ENABLED = false;
+export const SET_NAV_GUARD_RATE = "setNavGuardRate(address,uint16,uint16,uint16,uint32,bool,bool)";
+
+// Drift is each fund's own realized rate since launch (JTRSY 3.40%, JAAA 4.31% a year). The 5% band
+// is a backstop against an absurd reading, not a tracking budget: neither fund has strayed past 0.4%.
+export const NAV_GUARDS = [
+  { resource: JTRSY_VAULT, driftBps: 350, upGapBps: 500, downGapBps: 500 },
+  { resource: JAAA_VAULT, driftBps: 450, upGapBps: 500, downGapBps: 500 },
+];
+
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT];
+
+// The 59 ACM grants are pre-loaded into the ACMCommandsAggregator by ./scripts/addGrantPermissions.ts.
+//
+// The index is the aggregator's next free grant slot at the moment of loading — entries are
+// append-only, so a stale index replays whatever else occupies that slot.
+export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+export const ACM_AGGREGATOR_INDEX = 5;
 
 export const vip999Mainnet = () => {
   const meta = {
     version: "v2",
-    // Placeholder number, set for real once the proposal is filed.
     title: "VIP-999 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
     description: `#### Summary
 
 Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDT) on BNB Chain: grants the ACM roles
 on the newly deployed source, registers Centrifuge's two live BNB Chain funds — **JTRSY** and **JAAA** —
-behind **AdapterCentrifuge**, and adds the group to the Hub.
+behind **AdapterCentrifuge**, configures a NAV band on each, and adds the group to the Hub.
 
 Centrifuge is the first **asynchronous** yield source on the Hub. Deposits and redemptions are escrowed
 and settled later by the fund manager at a published NAV, so the group adds request, cancel and claim
 operations that the synchronous \`IYieldGroupBase\` surface has no way to express.
+
+No capital moves in this proposal.
 
 #### The two funds
 
@@ -92,30 +104,88 @@ handles by reading decimals off the vault rather than assuming them.
 | JTRSY | \`${JTRSY_VAULT}\` | \`${JTRSY_SHARE}\` |
 | JAAA | \`${JAAA_VAULT}\` | \`${JAAA_SHARE}\` |
 
+#### Roles
+
+| Holder | Signatures | Surface |
+| --- | --- | --- |
+| Normal Timelock | 20 | everything |
+| Fast-Track Timelock | 20 | everything |
+| Operator | 10 | queues, the async lifecycle, pausing one fund |
+| Keeper | 4 | the four claim functions, nothing else |
+| Guardian | 5 | containment and the NAV band |
+
+Outside the two timelocks nobody is granted \`unpauseResource\`, so the Guardian can contain a fund but
+never undo a governance-ordered pause. The Operator is not granted the NAV band: the account that moves
+the capital is not the account that decides what its value may be reported as.
+
+The Guardian's five signatures are \`pauseResource\`, \`forceRemoveResource\` and the three band setters.
+Two of those write value directly: \`setNavGuardSnapshot\` sets the anchor to any figure, and
+\`setNavGuardEnabled\` decides whether the band binds — so with both, the Guardian can move what the Hub
+reports this position to be worth. That is a deliberate grant, not only a containment one.
+
+The 59 grants are pre-loaded off chain into the **ACMCommandsAggregator**
+(\`${ACM_AGGREGATOR}\`, grant batch index ${ACM_AGGREGATOR_INDEX}). Inline they do not fit:
+\`propose()\` stores the whole proposal in one transaction, and at that size it costs 16,583,328 gas
+through the proposer Safe — 98.8% of the 16,777,216 per-tx cap, with no room for state drift. The proposal lends the aggregator \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager,
+replays the batch, and revokes the role in the same transaction, so the aggregator never holds ACM
+admin outside this proposal.
+
 #### Value defence
 
-The group ships one opt-in defence: a **NAV guard**, a band around the value each fund reports, held
-to an anchor that drifts at a rate governance publishes. A value outside the band is reported at the
-edge of the band; it never reverts and never pauses the Hub. **It is not armed by this proposal** —
-each fund needs a sizing decision against observed NAV behaviour, and an over-tight band misreports
-the position on every Hub read. The roles are granted here so arming them later needs no further VIP.
+The group ships one defence: a **NAV guard**, a band around the value each fund reports, held to an
+anchor that drifts at a rate governance publishes. A reading outside the band is reported at the edge
+of it; it never reverts and never pauses the Hub.
+
+| Fund | Realized rate | Drift set | Band either side | Re-anchor |
+| --- | --- | --- | --- | --- |
+| JTRSY | 3.40% a year | 3.50% | 5% | daily |
+| JAAA | 4.31% a year | 4.50% | 5% | daily |
+
+Drift is what the band vouches for between readings, so each fund gets its own rather than one shared
+figure: JTRSY has returned 3.40% a year since launch and never printed a down day, while JAAA has
+returned 4.31% through a visibly rougher patch, including a negative month.
+
+The band around that is deliberately wide. The furthest either fund has strayed from its own drifting
+anchor over any two-week stretch is roughly 0.4%, so 5% leaves more than ten times the room ordinary
+movement needs. It is meant to catch a fund reporting something absurd, not to track it closely — a
+band tight enough to bind on normal movement would misreport a healthy position on every Hub read, and
+clamping at the floor would under-report a loss the fund had really taken.
+
+**Both sides ship switched off**, so today the value each fund reports passes through untouched. That
+is deliberate: the band is configured while the position is still empty, so its anchor starts at zero,
+and a deposit raises only the centre — switched on now it would have no width at all and would report
+a funded position at what was paid for it. Off, it still drifts and re-anchors in the background,
+converging on the real position, ready to bind the moment it is turned on. Switching it on is the
+Guardian's call, alongside governance.
 
 Centrifuge publishes no rate on chain, so the reported APY comes from \`setSpotAPYBps\`, which
 governance sets per fund. It is left at zero here.
 
 #### Actions (one atomic transaction, in order)
 
-1. Grant the gated surface of **CentrifugeSource_USDT**: the full set to the **Normal Timelock**, the
-   routine surface to the **Operator**, the four claim functions to the **Keeper** that sweeps settled
-   redemptions daily, and containment only to the **Guardian**. The Guardian gets no unpause, so it can
-   contain but never undo a governance-ordered pause.
-2. Register both funds on the source behind **AdapterCentrifuge** (\`addResource\`), then set the
-   source's inner deposit and withdraw queues.
-3. Register the group on the Hub with an absolute cap of 5,000,000 USDT and a 20% cap on TVL.
-4. Append Centrifuge to the **end** of the Hub's withdraw cascade, leaving the existing order and the
-   deposit queue untouched. Routine flow is Operator \`reallocate\` in, and back to Core once a redemption
-   has been claimed, so a multi-day settlement never sits in the path of a user withdrawal; the queue
-   entry is a backstop that can only ever pull an already-settled redemption.
+1. Grant \`DEFAULT_ADMIN_ROLE\` to the ACMCommandsAggregator, replay the grant batch, and revoke the
+   role.
+2. Register both funds on the source behind **AdapterCentrifuge** (\`addResource\`).
+3. Configure the NAV band on each fund, with both sides off.
+4. Register the group on the Hub with an absolute cap of 5,000,000 USDT and a 20% cap on TVL.
+5. Append Centrifuge to the **end** of the Hub's withdraw cascade, leaving the existing order and the
+   deposit queue untouched.
+
+The source's **inner queues are deliberately left unset**. Capital enters and leaves this group only
+through an Operator \`reallocate\` aimed at a named fund, which does not consult them; leaving them
+empty keeps ordinary Hub deposits and withdrawals out of a fund that settles over days. It is a
+starting configuration rather than a guarantee: the Operator holds both inner-queue setters and can
+change it without a further proposal. The group still has to appear in the withdraw cascade, because the Hub rejects a queue that omits
+a registered group holding a balance — it reports only its idle balance there, so the cascade can pull
+an already-claimed redemption and nothing else.
+
+#### Deployed contracts (BNB Chain)
+
+- AdapterCentrifuge: \`${ADAPTER_CENTRIFUGE}\`
+- YieldGroupCentrifuge (implementation): \`${YIELD_GROUP_CENTRIFUGE_IMPL}\`
+- CentrifugeBeacon: \`${CENTRIFUGE_BEACON}\` — owned by the Normal Timelock
+- CentrifugeSource_USDT: \`${CENTRIFUGE_SOURCE_USDT}\` — a BeaconProxy with no owner of its own, so
+  every gated call on it is ACM-controlled
 
 #### References
 
@@ -127,25 +197,29 @@ governance sets per fund. It is left at zero here.
   };
   return makeProposal(
     [
-      ...CENTRIFUGE_GOVERNANCE.map(sig => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, NORMAL_TIMELOCK)),
-      ...CENTRIFUGE_OPERATOR.map(sig => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, OPERATOR)),
-      ...CENTRIFUGE_CLAIMS.map(sig => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, KEEPER)),
-      ...CENTRIFUGE_GUARDIAN.map(sig => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, GUARDIAN)),
+      { target: ACM, signature: "grantRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR] },
+      { target: ACM_AGGREGATOR, signature: "executeGrantPermissions(uint256)", params: [ACM_AGGREGATOR_INDEX] },
+      { target: ACM, signature: "revokeRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR] },
+
       ...CENTRIFUGE_RESOURCES.map(resource => ({
         target: CENTRIFUGE_SOURCE_USDT,
         signature: "addResource(address,address)",
         params: [resource, ADAPTER_CENTRIFUGE],
       })),
-      {
+
+      ...NAV_GUARDS.map(band => ({
         target: CENTRIFUGE_SOURCE_USDT,
-        signature: "setInnerDepositQueue(address[])",
-        params: [CENTRIFUGE_RESOURCES],
-      },
-      {
-        target: CENTRIFUGE_SOURCE_USDT,
-        signature: "setInnerWithdrawQueue(address[])",
-        params: [CENTRIFUGE_RESOURCES],
-      },
+        signature: SET_NAV_GUARD_RATE,
+        params: [
+          band.resource,
+          band.driftBps,
+          band.upGapBps,
+          band.downGapBps,
+          NAV_GUARD_INTERVAL,
+          NAV_GUARD_CAP_ENABLED,
+          NAV_GUARD_FLOOR_ENABLED,
+        ],
+      })),
       {
         target: HUB_USDT,
         signature: "addYieldGroup(address,uint256,uint16)",

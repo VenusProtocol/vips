@@ -38,6 +38,15 @@ export const PERCENTAGE_CAP_DISABLED = 10_000;
 
 export const CENTRIFUGE_ONLY = [MOCK_CENTRIFUGE_VAULT_USDT];
 
+// The band the mainnet proposal configures. The mock's price is set by hand rather than accrued, so
+// only the wiring is under test here; the drift is JAAA's, the higher of the two mainnet funds.
+export const NAV_GUARD_DRIFT_BPS = 450;
+export const NAV_GUARD_UP_GAP_BPS = 500;
+export const NAV_GUARD_DOWN_GAP_BPS = 500;
+export const NAV_GUARD_INTERVAL = 86_400;
+export const NAV_GUARD_CAP_ENABLED = false;
+export const NAV_GUARD_FLOOR_ENABLED = false;
+
 // `removeYieldGroup` cascade-strips the retired source, leaving [FRV, Flux, Core]. This puts the
 // replacement back at the front, the position the original proposal set and argued for.
 export const OUTER_WITHDRAW_QUEUE = [CENTRIFUGE_SOURCE_USDT, FRV_SOURCE_USDT, FLUX_SOURCE_USDT, CORE_SOURCE_USDT];
@@ -51,7 +60,6 @@ const revokeCallPermission = (contract: string, sig: string, account: string) =>
 export const vip999Addendum = () => {
   const meta = {
     version: "v2",
-    // Placeholder number, set for real once the proposal is filed.
     title: "VIP-999 [BNB Chain Testnet] Liquidity Hub (USDT) — replace the Centrifuge YieldGroup with the new release",
     description: `#### Summary
 
@@ -86,7 +94,9 @@ another resource is added. A new source removes the question instead of answerin
   fast the fund's share price could move. They are replaced by a single **NAV guard**: a band around
   the value the position reports, held to an anchor that drifts at a rate governance publishes. A
   value outside the band is reported at the edge of the band. It never reverts, and it never pauses
-  the Hub, so the source no longer needs the \`pauseHub()\` permission.
+  the Hub, so the source no longer needs the \`pauseHub()\` permission. This proposal configures that
+  band on the fund with the same numbers the BNB Chain proposal uses — a 5% gap either side, a one-day
+  re-anchor — and leaves **both sides switched off**, so the value the fund reports passes through.
 - **The price age guard is gone entirely.** Venus no longer keeps its own staleness check on
   Centrifuge's price markers. A missing or unreadable price still stops a valuation, because the
   adapter refuses to value a share-holding position without one.
@@ -176,6 +186,19 @@ are granted now so that setting them later needs no further proposal.
         target: CENTRIFUGE_SOURCE_USDT,
         signature: "addResource(address,address)",
         params: [MOCK_CENTRIFUGE_VAULT_USDT, ADAPTER_CENTRIFUGE],
+      },
+      {
+        target: CENTRIFUGE_SOURCE_USDT,
+        signature: "setNavGuardRate(address,uint16,uint16,uint16,uint32,bool,bool)",
+        params: [
+          MOCK_CENTRIFUGE_VAULT_USDT,
+          NAV_GUARD_DRIFT_BPS,
+          NAV_GUARD_UP_GAP_BPS,
+          NAV_GUARD_DOWN_GAP_BPS,
+          NAV_GUARD_INTERVAL,
+          NAV_GUARD_CAP_ENABLED,
+          NAV_GUARD_FLOOR_ENABLED,
+        ],
       },
       { target: CENTRIFUGE_SOURCE_USDT, signature: "setInnerDepositQueue(address[])", params: [CENTRIFUGE_ONLY] },
       { target: CENTRIFUGE_SOURCE_USDT, signature: "setInnerWithdrawQueue(address[])", params: [CENTRIFUGE_ONLY] },
