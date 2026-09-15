@@ -78,19 +78,6 @@
   },
   {
     "type": "function",
-    "name": "checkPriceAge",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "claimCancelDeposit",
     "inputs": [
       {
@@ -206,19 +193,6 @@
         "internalType": "uint256"
       }
     ],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "disablePriceAgeGuard",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
     "stateMutability": "nonpayable"
   },
   {
@@ -402,12 +376,22 @@
         "internalType": "struct INavGuard.NavBand",
         "components": [
           {
-            "name": "snapshot",
+            "name": "anchor",
             "type": "uint128",
             "internalType": "uint128"
           },
           {
-            "name": "timestamp",
+            "name": "centre",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "anchoredAt",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "driftFrom",
             "type": "uint64",
             "internalType": "uint64"
           },
@@ -476,6 +460,11 @@
         "name": "isClamped",
         "type": "bool",
         "internalType": "bool"
+      },
+      {
+        "name": "clampedValue",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -492,57 +481,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "priceAgeGuard",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct IYieldGroupCentrifuge.PriceAgeGuard",
-        "components": [
-          {
-            "name": "shareLegEnabled",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "assetLegEnabled",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "spoke",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "poolId",
-            "type": "uint64",
-            "internalType": "uint64"
-          },
-          {
-            "name": "scId",
-            "type": "bytes16",
-            "internalType": "bytes16"
-          },
-          {
-            "name": "assetId",
-            "type": "uint128",
-            "internalType": "uint128"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -600,6 +538,25 @@
         "name": "adapter",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "resourceSpotAPYBps",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
       }
     ],
     "stateMutability": "view"
@@ -694,6 +651,16 @@
         "name": "interval",
         "type": "uint32",
         "internalType": "uint32"
+      },
+      {
+        "name": "capEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "floorEnabled",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "outputs": [],
@@ -724,7 +691,7 @@
   },
   {
     "type": "function",
-    "name": "setPriceAgeGuard",
+    "name": "setSpotAPYBps",
     "inputs": [
       {
         "name": "resource",
@@ -732,19 +699,9 @@
         "internalType": "address"
       },
       {
-        "name": "spoke",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "shareLeg",
-        "type": "bool",
-        "internalType": "bool"
-      },
-      {
-        "name": "assetLeg",
-        "type": "bool",
-        "internalType": "bool"
+        "name": "apyBps",
+        "type": "uint64",
+        "internalType": "uint64"
       }
     ],
     "outputs": [],
@@ -977,6 +934,81 @@
   },
   {
     "type": "event",
+    "name": "NavGuardCentreMoved",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "anchor",
+        "type": "uint128",
+        "indexed": false,
+        "internalType": "uint128"
+      },
+      {
+        "name": "centre",
+        "type": "uint128",
+        "indexed": false,
+        "internalType": "uint128"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NavGuardClamped",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "observedValue",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "clampedValue",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NavGuardClosed",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "centre",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "NavGuardConfigured",
     "inputs": [
       {
@@ -986,7 +1018,7 @@
         "internalType": "address"
       },
       {
-        "name": "snapshot",
+        "name": "anchor",
         "type": "uint128",
         "indexed": false,
         "internalType": "uint128"
@@ -1014,6 +1046,18 @@
         "type": "uint32",
         "indexed": false,
         "internalType": "uint32"
+      },
+      {
+        "name": "capEnabled",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "floorEnabled",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
       }
     ],
     "anonymous": false
@@ -1054,84 +1098,16 @@
         "internalType": "address"
       },
       {
-        "name": "snapshot",
+        "name": "anchor",
         "type": "uint128",
         "indexed": false,
         "internalType": "uint128"
       },
       {
-        "name": "timestamp",
+        "name": "anchoredAt",
         "type": "uint64",
         "indexed": false,
         "internalType": "uint64"
-      },
-      {
-        "name": "contributed",
-        "type": "bool",
-        "indexed": false,
-        "internalType": "bool"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "PriceAgeGuardDisabled",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "PriceAgeGuardSet",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "spoke",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "poolId",
-        "type": "uint64",
-        "indexed": false,
-        "internalType": "uint64"
-      },
-      {
-        "name": "scId",
-        "type": "bytes16",
-        "indexed": false,
-        "internalType": "bytes16"
-      },
-      {
-        "name": "assetId",
-        "type": "uint128",
-        "indexed": false,
-        "internalType": "uint128"
-      },
-      {
-        "name": "shareLeg",
-        "type": "bool",
-        "indexed": false,
-        "internalType": "bool"
-      },
-      {
-        "name": "assetLeg",
-        "type": "bool",
-        "indexed": false,
-        "internalType": "bool"
       }
     ],
     "anonymous": false
@@ -1347,6 +1323,31 @@
   },
   {
     "type": "event",
+    "name": "SpotAPYBpsSet",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "oldApyBps",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "newApyBps",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "Swept",
     "inputs": [
       {
@@ -1454,17 +1455,39 @@
   },
   {
     "type": "error",
-    "name": "InvalidPriceAgeGuard",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "InvalidQueue",
     "inputs": []
   },
   {
     "type": "error",
+    "name": "NavGuardCentreOverflow",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "centre",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "NavGuardNotConfigured",
+    "inputs": [
+      {
+        "name": "resource",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NavGuardUnreadable",
     "inputs": [
       {
         "name": "resource",
@@ -1488,43 +1511,6 @@
     "type": "error",
     "name": "OnlySelf",
     "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "PriceExpired",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "leg",
-        "type": "uint8",
-        "internalType": "enum IYieldGroupCentrifuge.PriceLeg"
-      },
-      {
-        "name": "validUntil",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "PriceNeverPublished",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "leg",
-        "type": "uint8",
-        "internalType": "enum IYieldGroupCentrifuge.PriceLeg"
-      }
-    ]
   },
   {
     "type": "error",

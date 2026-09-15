@@ -231,40 +231,6 @@
   },
   {
     "type": "function",
-    "name": "priceConfigIds",
-    "inputs": [
-      {
-        "name": "resource",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "poolId",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "scId",
-        "type": "bytes16",
-        "internalType": "bytes16"
-      },
-      {
-        "name": "assetId",
-        "type": "uint128",
-        "internalType": "uint128"
-      },
-      {
-        "name": "assetToken",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "pricePerShare",
     "inputs": [
       {
@@ -278,55 +244,6 @@
         "name": "price",
         "type": "uint256",
         "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "priceTimestamps",
-    "inputs": [
-      {
-        "name": "spoke",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "poolId",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "scId",
-        "type": "bytes16",
-        "internalType": "bytes16"
-      },
-      {
-        "name": "assetId",
-        "type": "uint128",
-        "internalType": "uint128"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "shareComputedAt",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "shareValidUntil",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "assetComputedAt",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "assetValidUntil",
-        "type": "uint64",
-        "internalType": "uint64"
       }
     ],
     "stateMutability": "view"
@@ -395,7 +312,7 @@
         "internalType": "uint64"
       }
     ],
-    "stateMutability": "pure"
+    "stateMutability": "view"
   },
   {
     "type": "function",

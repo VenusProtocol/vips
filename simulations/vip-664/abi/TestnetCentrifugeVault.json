@@ -721,6 +721,19 @@
   },
   {
     "type": "function",
+    "name": "priceLastUpdated",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "pricePerShare",
     "inputs": [],
     "outputs": [
@@ -939,47 +952,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "vaultDetails",
-    "inputs": [
-      {
-        "name": "vault_",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "details",
-        "type": "tuple",
-        "internalType": "struct ICentrifugeVaultRegistry.VaultDetails",
-        "components": [
-          {
-            "name": "assetId",
-            "type": "uint128",
-            "internalType": "uint128"
-          },
-          {
-            "name": "asset",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "tokenId",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "isLinked",
-            "type": "bool",
-            "internalType": "bool"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1296,11 +1268,6 @@
   {
     "type": "error",
     "name": "TransferNotAllowed",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "UnknownVault",
     "inputs": []
   },
   {
