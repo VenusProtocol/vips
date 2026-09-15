@@ -491,28 +491,33 @@ forking(BLOCK_NUMBER, async () => {
         .withArgs(JTRSY_VAULT, TRANCHE);
     });
 
-    it("the band records the deposit but does not bind it", async () => {
-      // Configured on an empty position, so the anchor is still zero and a deposit raises only the
-      // centre — `_currentBand` gives minAllowed == maxAllowed == centre. Both sides are off, so
-      // `_guardedNav` ignores those bounds entirely and returns what the fund reports.
+    it("armed on an empty position, the band pins the deposit to cost", async () => {
+      // `setNavGuardRate` seeded anchor and centre from `_observedNav`, which was zero on an empty
+      // position. The gaps are sized to the anchor, so `_currentBand` returns floor == cap == centre:
+      // a band with no width at all.
       const band = await source.navGuard(JTRSY_VAULT);
       expect(band.anchor).to.equal(0);
       expect(band.centre).to.equal(TRANCHE);
-      expect(band.capEnabled).to.equal(false);
-      expect(band.floorEnabled).to.equal(false);
+      expect(band.capEnabled).to.equal(true);
+      expect(band.floorEnabled).to.equal(true);
 
-      // Zero width, because both bounds are the same drifted centre: the gaps are sized to the
-      // anchor and the anchor is zero. `_currentBand` grows the centre by `driftBps` over the seconds
-      // since the deposit, so the pair sits a hair above cost rather than exactly on it.
       const status = await source.navGuardStatus(JTRSY_VAULT);
       expect(status.minAllowedValue).to.equal(status.maxAllowedValue);
       expect(status.minAllowedValue).to.be.gte(TRANCHE);
       expect(status.minAllowedValue).to.be.lt(TRANCHE.mul(10_001).div(10_000));
+      expect(await source.totalAssets()).to.be.gte(TRANCHE);
 
-      // And none of that binds: both sides are off, so the fund's own value is what gets reported.
-      expect(status.isClamped).to.equal(false);
-      expect(status.clampedValue).to.equal(0);
-      expect(await source.totalAssets()).to.equal(TRANCHE);
+      // Armed against a zero-width band, anything Centrifuge reports is replaced by the drifted cost
+      // basis — including a real loss. Until the second re-anchor gives the band width, the Hub is
+      // told this position is worth what was paid for it whatever happens to the fund.
+      await setCentrifugeReportedValue(TRANCHE.div(2));
+      const halved = await source.navGuardStatus(JTRSY_VAULT);
+      expect(halved.observedValue).to.equal(TRANCHE.div(2));
+      expect(halved.isClamped).to.equal(true);
+      expect(halved.clampedValue).to.equal(halved.minAllowedValue);
+      expect(await source.totalAssets()).to.be.gte(TRANCHE);
+
+      await setCentrifugeReportedValue(TRANCHE);
     });
 
     it("one interval later the band re-anchors and gains width", async () => {
@@ -550,6 +555,7 @@ forking(BLOCK_NUMBER, async () => {
       );
 
       const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
       await expect(source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, true, true))
         .to.emit(source, "NavGuardEnabledSet")
         .withArgs(JTRSY_VAULT, true, true);
@@ -567,6 +573,118 @@ forking(BLOCK_NUMBER, async () => {
       // And the Guardian can take it back off without a proposal.
       await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
       expect((await source.navGuard(JTRSY_VAULT)).capEnabled).to.equal(false);
+    });
+
+    it("an armed cap clamps a reading above the band and under-reports it", async () => {
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      const observed = (await source.navGuardStatus(JTRSY_VAULT)).observedValue;
+      const now = (await ethers.provider.getBlock("latest")).timestamp;
+
+      // Anchor at half the position, so the fund's reading sits far above the cap.
+      await source.connect(guardian).setNavGuardSnapshot(JTRSY_VAULT, observed.div(2), now);
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, true, false);
+
+      const status = await source.navGuardStatus(JTRSY_VAULT);
+      expect(status.observedValue).to.equal(observed);
+      expect(status.observedValue).to.be.gt(status.maxAllowedValue);
+      expect(status.isClamped).to.equal(true);
+      expect(status.clampedValue).to.equal(status.maxAllowedValue);
+
+      // The Hub is told the bound, not the fund's number. A cap clamp under-reports — the safe side.
+      expect(await source.totalAssets()).to.equal(status.maxAllowedValue);
+      expect(await source.totalAssets()).to.be.lt(observed);
+    });
+
+    it("an armed floor clamps a reading below the band and over-reports it into the Hub's NAV", async () => {
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      const observed = (await source.navGuardStatus(JTRSY_VAULT)).observedValue;
+      const hubTotal = await hub.totalAssets();
+      const now = (await ethers.provider.getBlock("latest")).timestamp;
+
+      // Anchor at twice the position, so the fund's reading sits below the floor.
+      await source.connect(guardian).setNavGuardSnapshot(JTRSY_VAULT, observed.mul(2), now);
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, true);
+
+      const status = await source.navGuardStatus(JTRSY_VAULT);
+      expect(status.observedValue).to.be.lt(status.minAllowedValue);
+      expect(status.isClamped).to.equal(true);
+      expect(status.clampedValue).to.equal(status.minAllowedValue);
+
+      // A floor clamp reports the position above what the fund says it is worth, and that number is
+      // the Hub's NAV. Two Guardian calls, no timelock, move what a Hub share is worth.
+      expect(await source.totalAssets()).to.equal(status.minAllowedValue);
+      expect(await source.totalAssets()).to.be.gt(observed);
+      expect(await hub.totalAssets()).to.be.gt(hubTotal);
+
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
+      expect(await source.totalAssets()).to.equal(observed);
+    });
+
+    const setCentrifugeReportedValue = async (value: BigNumber) => {
+      // `mapping(address vault => mapping(address controller => AsyncInvestmentState))`. Two uint128
+      // fields per slot puts `pendingDepositRequest` in the low half of the struct's third slot.
+      // The mapping's own slot is found by scanning rather than hardcoded, so a Centrifuge layout
+      // change fails loudly here instead of silently writing the wrong field.
+      for (let i = 0; i < 40; i++) {
+        const inner = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [JTRSY_VAULT, i]),
+        );
+        const base = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [CENTRIFUGE_SOURCE_USDT, inner]),
+        );
+        const slot = BigNumber.from(base).add(2);
+        const word = await ethers.provider.getStorageAt(CENTRIFUGE_BASE_MANAGER, slot);
+        const low = BigNumber.from("0x" + word.slice(34));
+        if (!low.eq((await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).pendingDepositRequest)) continue;
+
+        // Keep `pendingRedeemRequest`, the high half of the same word, untouched.
+        const packed = word.slice(0, 34) + ethers.utils.hexZeroPad(value.toHexString(), 16).slice(2);
+        await ethers.provider.send("hardhat_setStorageAt", [CENTRIFUGE_BASE_MANAGER, slot.toHexString(), packed]);
+        expect((await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).pendingDepositRequest).to.equal(value);
+        return;
+      }
+      throw new Error("pendingDepositRequest slot not found — Centrifuge storage layout changed");
+    };
+
+    it("clamps a value Centrifuge reports far outside the band, either way", async () => {
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      const real = (await source.navGuardStatus(JTRSY_VAULT)).observedValue;
+      const { upGapBps, downGapBps } = bandFor(JTRSY_VAULT);
+
+      // Anchor the band on the position as it really stands, and arm both sides.
+      const now = (await ethers.provider.getBlock("latest")).timestamp;
+      await source.connect(guardian).setNavGuardSnapshot(JTRSY_VAULT, real, now);
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, true, true);
+      expect((await source.navGuardStatus(JTRSY_VAULT)).isClamped).to.equal(false);
+      expect(await source.totalAssets()).to.equal(real);
+
+      // Centrifuge now claims the position is worth ten times what was put in.
+      await setCentrifugeReportedValue(real.mul(10));
+      expect(await adapter.totalAssets(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).to.equal(real.mul(10));
+
+      let status = await source.navGuardStatus(JTRSY_VAULT);
+      expect(status.observedValue).to.equal(real.mul(10));
+      expect(status.isClamped).to.equal(true);
+      expect(status.clampedValue).to.equal(status.maxAllowedValue);
+      // The Hub is told the top of the band, roughly one gap over the real position — not 10x it.
+      expect(await source.totalAssets()).to.equal(status.maxAllowedValue);
+      expect(await source.totalAssets()).to.be.closeTo(real.add(real.mul(upGapBps).div(10_000)), real.div(1000));
+
+      // And the other way: Centrifuge claims the position has all but evaporated.
+      await setCentrifugeReportedValue(real.div(10));
+      status = await source.navGuardStatus(JTRSY_VAULT);
+      expect(status.observedValue).to.equal(real.div(10));
+      expect(status.isClamped).to.equal(true);
+      expect(status.clampedValue).to.equal(status.minAllowedValue);
+      expect(await source.totalAssets()).to.equal(status.minAllowedValue);
+      expect(await source.totalAssets()).to.be.closeTo(real.sub(real.mul(downGapBps).div(10_000)), real.div(1000));
+
+      // A reading back inside the band passes through untouched.
+      await setCentrifugeReportedValue(real);
+      expect((await source.navGuardStatus(JTRSY_VAULT)).isClamped).to.equal(false);
+      expect(await source.totalAssets()).to.equal(real);
+
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
     });
 
     it("the guardian can pause a fund, but not unpause it", async () => {

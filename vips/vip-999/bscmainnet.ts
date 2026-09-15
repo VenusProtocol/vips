@@ -56,8 +56,8 @@ export const CENTRIFUGE_PERCENTAGE_CAP_BPS = 2_000; // 20% of TVL
 export const CENTRIFUGE_RESOURCES = [JTRSY_VAULT, JAAA_VAULT];
 
 export const NAV_GUARD_INTERVAL = 86_400; // re-anchor at most once a day
-export const NAV_GUARD_CAP_ENABLED = false;
-export const NAV_GUARD_FLOOR_ENABLED = false;
+export const NAV_GUARD_CAP_ENABLED = true;
+export const NAV_GUARD_FLOOR_ENABLED = true;
 export const SET_NAV_GUARD_RATE = "setNavGuardRate(address,uint16,uint16,uint16,uint32,bool,bool)";
 
 // Drift is each fund's own realized rate since launch (JTRSY 3.40%, JAAA 4.31% a year). The 5% band
@@ -151,13 +151,6 @@ movement needs. It is meant to catch a fund reporting something absurd, not to t
 band tight enough to bind on normal movement would misreport a healthy position on every Hub read, and
 clamping at the floor would under-report a loss the fund had really taken.
 
-**Both sides ship switched off**, so today the value each fund reports passes through untouched. That
-is deliberate: the band is configured while the position is still empty, so its anchor starts at zero,
-and a deposit raises only the centre — switched on now it would have no width at all and would report
-a funded position at what was paid for it. Off, it still drifts and re-anchors in the background,
-converging on the real position, ready to bind the moment it is turned on. Switching it on is the
-Guardian's call, alongside governance.
-
 Centrifuge publishes no rate on chain, so the reported APY comes from \`setSpotAPYBps\`, which
 governance sets per fund. It is left at zero here.
 
@@ -166,7 +159,7 @@ governance sets per fund. It is left at zero here.
 1. Grant \`DEFAULT_ADMIN_ROLE\` to the ACMCommandsAggregator, replay the grant batch, and revoke the
    role.
 2. Register both funds on the source behind **AdapterCentrifuge** (\`addResource\`).
-3. Configure the NAV band on each fund, with both sides off.
+3. Configure the NAV band on each fund.
 4. Register the group on the Hub with an absolute cap of 5,000,000 USDT and a 20% cap on TVL.
 5. Append Centrifuge to the **end** of the Hub's withdraw cascade, leaving the existing order and the
    deposit queue untouched.
