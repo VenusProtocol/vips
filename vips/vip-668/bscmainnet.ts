@@ -35,10 +35,61 @@ export const ATLAS_PIVOT_ENABLE_FLAGS = [true, true, true];
 export const VAI_ORACLES = [ATLAS_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero];
 export const VAI_ENABLE_FLAGS = [true, false, false];
 
+export const VTREASURY = bscmainnet.VTREASURY;
+export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+
+// TreasuryTokenBuybackDistributor from VIP-646. convertVaiViaPsm() swaps the distributor's whole VAI
+// balance for USDT at the VAI PSM and sends the USDT to VTreasury. The PSM fee is paid in VAI and also
+// goes to VTreasury.
+export const TREASURY_TOKEN_BUYBACK_DISTRIBUTOR = "0xc594053D4b2FaA311b55dDbFAb2338f7c90D6632";
+export const VAI_PSM = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
+
+export const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
+// Sells the tokens it holds for USDT and sends the USDT to the RiskFund
+export const RISK_FUND_BUYBACK = "0x0c71EFabD00329E839745ef23aB946d3ed24A805";
+
+// RiskFund.sweepToken reverts when the amount is above the balance, so every amount below is the exact
+// RiskFund balance at block 122009038. BSW and TWT (under $1 each) and WIN stay in the RiskFund.
+export const LONG_TAIL_TOKENS = [
+  { symbol: "FLOKI", address: "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E", amount: "177082682555785184" },
+  { symbol: "TRX", address: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3", amount: "1833688639" },
+  { symbol: "BTT", address: "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B", amount: "1392507212379014539551354602" },
+  { symbol: "USDD (old)", address: "0xd17479997F34dd9156Deef8F95A52D81D265be9c", amount: "392463934353680646351" },
+  { symbol: "lisUSD", address: "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5", amount: "113920863202075023885" },
+  { symbol: "TRXOLD", address: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B", amount: "15619663448654146823" },
+  { symbol: "RACA", address: "0x12BB890508c125661E03b09EC06E404bc9289040", amount: "316724376165504616820380" },
+];
+
+// Ankr flash unstake: swap(shares, receiver) burns the caller's ankrBNB and pays BNB, minus a 0.25% fee,
+// in the same call
+export const ANKR_BNB = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
+export const ANKR_BINANCE_POOL = "0x9e347Af362059bf2E55839002c699F7A5BaFE86E";
+export const ANKR_BNB_AMOUNT = "2905734451637837137";
+
+// Stader: redeemBnbxForBnb burns the caller's BNBx and pays BNB in the same call (same exit as VIP-649)
+export const BNBX = "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275";
+export const STADER_STAKE_MANAGER = "0x3b961e83400D51e6E1AF5c450d3C7d7b80588d28";
+export const BNBX_AMOUNT = "601110316592232264";
+
+// pStake: sending stkBNB to the StakePool (ERC777 send) opens a withdrawal and pays the BNB in the same
+// call. The pool rejects amounts that are not a multiple of 1e12, so the amount is rounded down and
+// 201756396971 wei of stkBNB stays in the RiskFund.
+export const STKBNB = "0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16";
+export const PSTAKE_STAKE_POOL = "0xC228CefDF841dEfDbD5B3a18dFD414cC0dbfa0D8";
+export const STKBNB_AMOUNT = "208460000000000000";
+
+// BNB paid to the Normal Timelock by the three exits above at block 122009038: 3.213060502738973371
+// (Ankr) + 0.667202434159934361 (Stader) + 0.219192222127766713 (pStake). The RiskFund cannot receive
+// BNB, so this amount is wrapped and sent as WBNB. If the exchange rates move before execution, the
+// difference stays in, or is paid from, the Normal Timelock's own BNB.
+export const WBNB_AMOUNT = "4099455159026674445";
+
 export const vip668 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-668 [BNB Chain] Oracle Adjustments and VAI Vault Rewards Stop",
+    title: "VIP-668 [BNB Chain] Oracle Adjustments, VAI Vault Rewards Stop, and Treasury and Risk Fund Cleanup",
     description: `#### Summary
 
 This proposal makes three operational changes on the BNB Chain Core Pool:
@@ -46,6 +97,12 @@ This proposal makes three operational changes on the BNB Chain Core Pool:
 1. Promotes the Atlas oracle to the pivot role for every Core Pool market where it is currently the fallback oracle.
 2. Makes Atlas the only price source for VAI.
 3. Stops the XVS rewards distributed to the VAI Vault.
+
+It also cleans up funds held by the Venus Treasury and the Risk Fund:
+
+4. Converts the VAI held by the Venus Treasury to USDT through the VAI Peg Stability Module (PSM).
+5. Sends the long-tail tokens held by the Risk Fund to the RiskFund buyback, which sells them for USDT.
+6. Exits the third-party liquid staking positions held by the Risk Fund and returns the BNB to the Risk Fund as WBNB.
 
 #### Atlas as pivot oracle
 
@@ -63,12 +120,51 @@ The Atlas oracle has no VAI configuration today, so it is first configured with 
 
 The XVS distribution rate to the VAI Vault is set to 0. The current rate is 341,157,958,083,832 wei of XVS per block (about 65.47 XVS per day). XVS accrued up to the execution block is still released to the VAI Vault by this call, and VAI Vault stakers keep access to rewards already accrued.
 
+#### Treasury VAI
+
+The Venus Treasury holds about 2,343.39 VAI. The whole balance is withdrawn to the TreasuryTokenBuybackDistributor (${TREASURY_TOKEN_BUYBACK_DISTRIBUTOR}, used in VIP-646), and convertVaiViaPsm() swaps it for USDT at the VAI PSM (${VAI_PSM}). The USDT goes back to the Venus Treasury. The PSM charges a 0.1% fee, paid in VAI, which also goes to the Venus Treasury. At the time of writing the swap returns about 2,341.05 USDT.
+
+#### Risk Fund long-tail tokens
+
+The Risk Fund (${RISK_FUND}) holds these tokens outside its base assets. Each one is sent to the RiskFund buyback (${RISK_FUND_BUYBACK}), which sells it for USDT and sends the USDT to the Risk Fund:
+
+- FLOKI: 177,082,682.56 (about $4,298)
+- TRX: 1,833.69 (about $619)
+- BTT: 1,392,507,212.38 (about $460)
+- USDD (old): 392.46 (about $391)
+- lisUSD: 113.92 (about $114)
+- TRXOLD: 15.62 (about $5)
+- RACA: 316,724.38 (about $4)
+
+BSW and TWT are worth less than $1 each and are not moved. WIN is not moved either.
+
+#### Risk Fund staking positions
+
+The Risk Fund holds receipt tokens from three staking protocols that allow an instant exit. Each token is moved to the Normal Timelock and exited in the same proposal:
+
+- ankrBNB: 2.9057 (about $2,311), exited through the Ankr flash unstake with a 0.25% fee
+- BNBx: 0.6011 (about $479), exited through the Stader instant redemption, as in VIP-649
+- stkBNB: 0.2085 (about $157), exited through the pStake StakePool. The pool only accepts multiples of 1e12 wei, so 201,756,396,971 wei of stkBNB stays in the Risk Fund.
+
+The exits pay about 4.0995 BNB to the Normal Timelock. The Risk Fund cannot receive BNB, so the BNB is wrapped to WBNB and sent to the Risk Fund.
+
+slisBNB (0.6343, about $473) is not moved. Lista has no instant exit for it.
+
 #### Actions
 
 1. Calls setTokenConfig((address,address,uint256)) on AtlasOracle (${ATLAS_ORACLE}) for VAI (${VAI}) with the feed and stale period above.
 2. Calls setTokenConfig((address,address[3],bool[3],bool)) on ResilientOracle (${RESILIENT_ORACLE}) once per market listed above, setting the oracles to [Chainlink (${CHAINLINK_ORACLE}), Atlas (${ATLAS_ORACLE}), RedStone (${REDSTONE_ORACLE})] with all oracles enabled and caching disabled.
 3. Calls setTokenConfig((address,address[3],bool[3],bool)) on ResilientOracle for VAI, setting the oracles to [Atlas, none, none] with only the main oracle enabled and caching disabled.
-4. Calls _setVenusVAIVaultRate(uint256) on the Core Pool Comptroller (${COMPTROLLER}) with a rate of 0.`,
+4. Calls _setVenusVAIVaultRate(uint256) on the Core Pool Comptroller (${COMPTROLLER}) with a rate of 0.
+5. Calls withdrawTreasuryBEP20(address,uint256,address) on VTreasury (${VTREASURY}) for the whole VAI balance, to the TreasuryTokenBuybackDistributor.
+6. Calls convertVaiViaPsm() on the TreasuryTokenBuybackDistributor.
+7. Calls sweepToken(address,address,uint256) on the Risk Fund once per long-tail token listed above, to the RiskFund buyback.
+8. Calls sweepToken(address,address,uint256) on the Risk Fund for ankrBNB, BNBx and stkBNB, to the Normal Timelock (${NORMAL_TIMELOCK}).
+9. Calls swap(uint256,address) on the Ankr BinancePool (${ANKR_BINANCE_POOL}) for the ankrBNB, paying the BNB to the Normal Timelock.
+10. Calls redeemBnbxForBnb(uint256) on the Stader StakeManagerV2 (${STADER_STAKE_MANAGER}) for the BNBx.
+11. Calls send(address,uint256,bytes) on stkBNB (${STKBNB}) to the pStake StakePool (${PSTAKE_STAKE_POOL}).
+12. Calls deposit() on WBNB (${WBNB}) with ${WBNB_AMOUNT} wei of BNB.
+13. Calls transfer(address,uint256) on WBNB for the same amount, to the Risk Fund.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -102,6 +198,74 @@ The XVS distribution rate to the VAI Vault is set to 0. The current rate is 341,
         target: COMPTROLLER,
         signature: "_setVenusVAIVaultRate(uint256)",
         params: [NEW_VAI_VAULT_RATE],
+      },
+
+      // Treasury VAI to USDT through the PSM, USDT goes back to VTreasury
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [VAI, ethers.constants.MaxUint256, TREASURY_TOKEN_BUYBACK_DISTRIBUTOR],
+      },
+      {
+        target: TREASURY_TOKEN_BUYBACK_DISTRIBUTOR,
+        signature: "convertVaiViaPsm()",
+        params: [],
+      },
+
+      // Long-tail tokens to the RiskFund buyback, sold for USDT
+      ...LONG_TAIL_TOKENS.map(({ address, amount }) => ({
+        target: RISK_FUND,
+        signature: "sweepToken(address,address,uint256)",
+        params: [address, RISK_FUND_BUYBACK, amount],
+      })),
+
+      // ankrBNB to BNB through the Ankr flash unstake
+      {
+        target: RISK_FUND,
+        signature: "sweepToken(address,address,uint256)",
+        params: [ANKR_BNB, NORMAL_TIMELOCK, ANKR_BNB_AMOUNT],
+      },
+      {
+        target: ANKR_BINANCE_POOL,
+        signature: "swap(uint256,address)",
+        params: [ANKR_BNB_AMOUNT, NORMAL_TIMELOCK],
+      },
+
+      // BNBx to BNB through the Stader instant redemption
+      {
+        target: RISK_FUND,
+        signature: "sweepToken(address,address,uint256)",
+        params: [BNBX, NORMAL_TIMELOCK, BNBX_AMOUNT],
+      },
+      {
+        target: STADER_STAKE_MANAGER,
+        signature: "redeemBnbxForBnb(uint256)",
+        params: [BNBX_AMOUNT],
+      },
+
+      // stkBNB to BNB through the pStake StakePool
+      {
+        target: RISK_FUND,
+        signature: "sweepToken(address,address,uint256)",
+        params: [STKBNB, NORMAL_TIMELOCK, STKBNB_AMOUNT],
+      },
+      {
+        target: STKBNB,
+        signature: "send(address,uint256,bytes)",
+        params: [PSTAKE_STAKE_POOL, STKBNB_AMOUNT, "0x"],
+      },
+
+      // The RiskFund cannot receive BNB, so the BNB goes back as WBNB
+      {
+        target: WBNB,
+        signature: "deposit()",
+        params: [],
+        value: WBNB_AMOUNT,
+      },
+      {
+        target: WBNB,
+        signature: "transfer(address,uint256)",
+        params: [RISK_FUND, WBNB_AMOUNT],
       },
     ],
     meta,

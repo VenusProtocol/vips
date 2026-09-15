@@ -1,0 +1,1564 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "ArgumentsLengthMismatch",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "BNBTransferToUserFailed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "CantBeMoreThan1e18",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "CantClaimBeforeDeadline",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "CantSetMoreThan30PercentFee",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ClaimAllFailed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "CooldownPeriodOutOfRange",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "DepositsDelegationFailed",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "DustNotAllowed",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "dust",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "IndexOutOfBounds",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "InsufficientClaimReserve",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "InsufficientFundsToSatisfyClaim",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "InvalidParam",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "tag",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "param",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "InvalidRestakeAmount",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "restakes",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "LessThanMinimum",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "tag",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "expected",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "got",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "MustBeGreaterThanZero",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "NoRewardsAccured",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "tag",
+        "type": "string",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "name": "PausableNotPaused",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "PausablePaused",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "SelfRedelegationNotAllowed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ToIndexMustBeGreaterThanFromIndex",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "from",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "to",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "name": "TokenMintingToSelfNotAllowed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "TokenTransferToSelfNotAllowed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "UnexpectedlyReceivedTokensForSomeoneElse",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "name": "UnknownSender",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ValidatorAlreadyActive",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ValidatorAlreadyExists",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "validator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "name": "ValidatorCreationFailed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ValidatorDoesNotExist",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ValidatorInactive",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "name": "ZeroAddress",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "ZeroAddress",
+    "type": "error",
+    "inputs": [
+      {
+        "name": "tag",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "name": "rateSyncNotAllowed",
+    "type": "error",
+    "inputs": []
+  },
+  {
+    "name": "BNBWithdrawn",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Claim",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "req",
+        "type": "tuple",
+        "indexed": true,
+        "components": [
+          {
+            "name": "weiToReturn",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "createdAt",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "internalType": "struct StakePool.ClaimRequest"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "ConfigUpdated",
+    "type": "event",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "name": "Deposit",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "bnbAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "poolTokenAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "EpochUpdate",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "tag",
+        "type": "string",
+        "indexed": true,
+        "internalType": "string"
+      },
+      {
+        "name": "bnbEarnings",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "feeTokens",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Initialized",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "version",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "uint8"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "InitiateDelegation_ShortCircuit",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "shortCircuitAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "InitiateDelegation_Success",
+    "type": "event",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "name": "InitiateDelegation_Transfered",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "transferAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Paused",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Rebalancing_Success",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "rebalancedAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Redelegation_Success",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "srcValidator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "dstValidator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "restakes",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "RoleAdminChanged",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "previousAdminRole",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newAdminRole",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "RoleGranted",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "RoleRevoked",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "UnbondingFinished",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "unbondedAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "UnbondingInitiated",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "bnbUnbonding",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Unpaused",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "ValidatorCreated",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "position",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "Withdraw",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "poolTokenAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "bnbAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "name": "BOT_ROLE",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "DEFAULT_ADMIN_ROLE",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "addressStore",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IAddressStore"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "bnbToUnbond",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "int256",
+        "internalType": "int256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "bnbUnbonding",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "claim",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "claimAll",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "claimReqs",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "weiToReturn",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "createdAt",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "claimReserve",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "config",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "bcStakingWallet_deprecated",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "minDelegationAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "transferOutTimeout_deprecated",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minBNBDeposit",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minTokenWithdrawal",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "cooldownPeriod",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "fee",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "reward",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "deposit",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "withdraw",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "internalType": "struct FeeDistribution.Data"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "createValidator",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "operator_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "deposit",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "name": "disableValidator",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "operator_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "status_",
+        "type": "uint8",
+        "internalType": "enum ValidatorSet.Status"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "enableValidator",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "operator_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "epochUpdate",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "exchangeRate",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "totalWei",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "poolTokenSupply",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getClaimRequestCount",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getDeposits",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getPaginatedClaimRequests",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "from",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "to",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "weiToReturn",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "createdAt",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "internalType": "struct StakePool.ClaimRequest[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getRoleAdmin",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getRoleMember",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "index",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getRoleMemberCount",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getTotalValidators",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getValidator",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "operator",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "stCred",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum ValidatorSet.Status"
+          },
+          {
+            "name": "__reservedSlots",
+            "type": "uint256[5]",
+            "internalType": "uint256[5]"
+          },
+          {
+            "name": "delegation",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "stakes",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "__reservedSlots",
+                "type": "uint256[5]",
+                "internalType": "uint256[5]"
+              }
+            ],
+            "internalType": "struct ValidatorSet.DelegationInfo"
+          }
+        ],
+        "internalType": "struct ValidatorSet.Info"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "getValidators",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple[]",
+        "components": [
+          {
+            "name": "operator",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "stCred",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum ValidatorSet.Status"
+          },
+          {
+            "name": "__reservedSlots",
+            "type": "uint256[5]",
+            "internalType": "uint256[5]"
+          },
+          {
+            "name": "delegation",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "stakes",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "__reservedSlots",
+                "type": "uint256[5]",
+                "internalType": "uint256[5]"
+              }
+            ],
+            "internalType": "struct ValidatorSet.DelegationInfo"
+          }
+        ],
+        "internalType": "struct ValidatorSet.Info[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "grantRole",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "hasRole",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "initialize",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "addressStore_",
+        "type": "address",
+        "internalType": "contract IAddressStore"
+      },
+      {
+        "name": "config_",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "bcStakingWallet_deprecated",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "minDelegationAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "transferOutTimeout_deprecated",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minBNBDeposit",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minTokenWithdrawal",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "cooldownPeriod",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "fee",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "reward",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deposit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "withdraw",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ],
+            "internalType": "struct FeeDistribution.Data"
+          }
+        ],
+        "internalType": "struct Config.Data"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "initiateDelegation",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "operators_",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "bnbAmounts_",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "initiateRedelegation",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "srcOperator_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "dstOperator_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "srcRestakes_",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "pause",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "paused",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "renounceRole",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "revokeRole",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "supportsInterface",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "interfaceId",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "name": "tokensReceived",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "from",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "triggerRebalance",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "unbondingFinished",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "unbondingInitiated",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "operators_",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "bnbUnbondValues_",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "unpause",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "updateConfig",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "config_",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "bcStakingWallet_deprecated",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "minDelegationAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "transferOutTimeout_deprecated",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minBNBDeposit",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minTokenWithdrawal",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "cooldownPeriod",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "fee",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "reward",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deposit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "withdraw",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ],
+            "internalType": "struct FeeDistribution.Data"
+          }
+        ],
+        "internalType": "struct Config.Data"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "withdrawBNB",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address payable"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "receive",
+    "stateMutability": "payable"
+  }
+]
