@@ -48,13 +48,12 @@ export const JAAA_POOL_ID = "281474976710663";
 export const JAAA_SHARE_CLASS_ID = "0x00010000000000070000000000000001";
 
 // ---------------------------------------------------------------------------------------------------
-// PLACEHOLDERS — not deployed yet. Replace all four before this proposal is filed, then re-run the
-// simulation: it cannot pass against these.
+// The Centrifuge YieldGroup family, deployed on BNB Chain.
 // ---------------------------------------------------------------------------------------------------
-export const ADAPTER_CENTRIFUGE = "0x000000000000000000000000000000000000ca01";
-export const CENTRIFUGE_BEACON = "0x000000000000000000000000000000000000ca02";
-export const YIELD_GROUP_CENTRIFUGE_IMPL = "0x000000000000000000000000000000000000ca03";
-export const CENTRIFUGE_SOURCE_USDT = "0x000000000000000000000000000000000000ca04";
+export const ADAPTER_CENTRIFUGE = "0x680cE4422264ecDAd3590cB50FE254D4c153f427";
+export const CENTRIFUGE_BEACON = "0xAe90Cfb3E2Bc97508F58E7e076Acf38f3bfC820f";
+export const YIELD_GROUP_CENTRIFUGE_IMPL = "0x4996aa488f5269B5C544Dab1C2d1126F6bBdFF24";
+export const CENTRIFUGE_SOURCE_USDT = "0xDA5AFfeb43719f517676E031a727071c7D400983";
 
 // ---------------------------------------------------------------------------------------------------
 // Caps for Hub.addYieldGroup(source, absoluteCap, percentageCapBps).

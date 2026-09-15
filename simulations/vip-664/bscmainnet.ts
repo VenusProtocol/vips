@@ -1,7 +1,8 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
-import { expectEvents } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip664Mainnet, {
@@ -43,13 +44,16 @@ import {
 } from "../../vips/vip-664/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
+import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
 import VAULT_ABI from "./abi/CentrifugeAsyncVault.json";
+import HOOK_ABI from "./abi/CentrifugeFullRestrictions.json";
+import SHARE_ABI from "./abi/CentrifugeShare.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import HUB_ABI from "./abi/Hub.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import SOURCE_ABI from "./abi/YieldGroupCentrifugeLatest.json";
 
-const BLOCK_NUMBER = 121990800;
+const BLOCK_NUMBER = 122007400;
 
 const roleOf = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
@@ -61,6 +65,14 @@ const FUNDS = [
 
 // The three groups already on Hub_USDT, and the queues as they stand.
 const EXISTING_GROUPS = [CORE_SOURCE_USDT, FLUX_SOURCE_USDT, FRV_SOURCE_USDT];
+
+// Centrifuge's Spoke, a ward of both share-class hooks and so the account that onboards a holder.
+const CENTRIFUGE_SPOKE = "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB";
+// The vToken behind the Core group, the leg a reallocation pulls from.
+const CORE_VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+// 100,000 USDT: comfortably inside the group cap, which the percentage dimension binds at ~850,000.
+const TRANCHE = ethers.utils.parseUnits("100000", 18);
+const NEVER_EXPIRES = "18446744073709551615"; // type(uint64).max
 
 forking(BLOCK_NUMBER, async () => {
   let hub: Contract;
@@ -104,6 +116,21 @@ forking(BLOCK_NUMBER, async () => {
         expect((await vault.poolId()).toString(), fund.name).to.equal(fund.poolId);
         expect(await vault.scId(), fund.name).to.equal(fund.scId);
         expect(await vault.pricePerShare(), fund.name).to.be.gt(0);
+      }
+    });
+
+    it("Centrifuge has not onboarded the source to either share class yet", async () => {
+      // Both share classes run a `FullRestrictions` hook, which only lets a member hold the share.
+      // The source is on neither memberlist, so the first reallocation into a fund
+      // cannot settle until Centrifuge adds it. That is an operational prerequisite this proposal
+      // cannot satisfy — it grants roles and registers funds; it does not make Venus a member.
+      for (const fund of FUNDS) {
+        const share = await ethers.getContractAt(SHARE_ABI, fund.share);
+        const hook = await ethers.getContractAt(HOOK_ABI, await share.hook());
+        const [isMember] = await hook.isMember(fund.share, CENTRIFUGE_SOURCE_USDT);
+        expect(isMember, fund.name).to.equal(false);
+        // The Spoke is the ward that can change that.
+        expect(await hook.wards(CENTRIFUGE_SPOKE), fund.name).to.equal(1);
       }
     });
 
@@ -216,11 +243,25 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.outerDepositQueue()).to.not.include(CENTRIFUGE_SOURCE_USDT);
     });
 
-    it("onboarding moves no capital", async () => {
+    it("onboarding moves no capital into the new group", async () => {
       expect(await source.totalAssets()).to.equal(0);
       expect(await source.maxWithdraw()).to.equal(0);
       expect(await usdt.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
-      expect(await hub.totalAssets()).to.equal(hubTotalBefore);
+      for (const fund of FUNDS) {
+        expect(await adapter.receiptBalance(fund.vault, CENTRIFUGE_SOURCE_USDT), fund.name).to.equal(0);
+        const share = await ethers.getContractAt(ERC20_ABI, fund.share);
+        expect(await share.balanceOf(CENTRIFUGE_SOURCE_USDT), fund.name).to.equal(0);
+      }
+    });
+
+    it("the Hub's total is unchanged but for what Core, Flux and FRV accrued meanwhile", async () => {
+      let sum = BigNumber.from(0);
+      for (const group of await hub.registeredYieldGroups()) {
+        sum = sum.add(await (await ethers.getContractAt(SOURCE_ABI, group)).totalAssets());
+      }
+      expect(await hub.totalAssets()).to.equal(sum.add(await usdt.balanceOf(HUB_USDT)));
+      expect(await source.totalAssets()).to.equal(0);
+      expect(await hub.totalAssets()).to.be.gte(hubTotalBefore);
     });
 
     it("no NAV guard is armed and no APY is published, for either fund", async () => {
@@ -290,6 +331,119 @@ forking(BLOCK_NUMBER, async () => {
 
     it("the source was never granted the right to pause the Hub", async () => {
       expect(await acm.hasRole(roleOf(HUB_USDT, "pauseHub()"), CENTRIFUGE_SOURCE_USDT)).to.equal(false);
+    });
+  });
+  describe("Post-VIP end-to-end: the Operator routes capital into Centrifuge", () => {
+    let operator: SignerWithAddress;
+    let manager: Contract;
+
+    const leg = (yieldGroup: string, resource: string, amount: BigNumber) => ({ yieldGroup, resource, amount });
+
+    before(async () => {
+      operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      manager = await ethers.getContractAt(MANAGER_ABI, CENTRIFUGE_BASE_MANAGER);
+
+      // Centrifuge onboards the Venus source to both share classes. Modelled by impersonating the
+      // Spoke, the ward of both hooks, because it is Centrifuge's action and not the proposal's.
+      const spoke = await initMainnetUser(CENTRIFUGE_SPOKE, ethers.utils.parseEther("1"));
+      for (const fund of FUNDS) {
+        const share = await ethers.getContractAt(SHARE_ABI, fund.share);
+        const hook = await ethers.getContractAt(HOOK_ABI, await share.hook());
+        await hook.connect(spoke).updateMember(fund.share, CENTRIFUGE_SOURCE_USDT, NEVER_EXPIRES);
+      }
+    });
+
+    it("the source is a member of both share classes once Centrifuge adds it", async () => {
+      for (const fund of FUNDS) {
+        const share = await ethers.getContractAt(SHARE_ABI, fund.share);
+        const hook = await ethers.getContractAt(HOOK_ABI, await share.hook());
+        const [isMember] = await hook.isMember(fund.share, CENTRIFUGE_SOURCE_USDT);
+        expect(isMember, fund.name).to.equal(true);
+      }
+    });
+
+    it("an operator reallocation moves capital out of Core and into JTRSY", async () => {
+      const hubTotalBeforeMove = await hub.totalAssets();
+      const coreBefore = await (await ethers.getContractAt(SOURCE_ABI, CORE_SOURCE_USDT)).totalAssets();
+
+      await hub
+        .connect(operator)
+        .reallocate([leg(CORE_SOURCE_USDT, CORE_VUSDT, TRANCHE)], [leg(CENTRIFUGE_SOURCE_USDT, JTRSY_VAULT, TRANCHE)]);
+
+      // The request is pending, so the position is valued at cost and none of it is liquid.
+      expect(await source.totalAssets()).to.equal(TRANCHE);
+      expect(await source.maxWithdraw()).to.equal(0);
+      expect(await usdt.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+
+      // Capital moved rather than appeared. Core is down by the tranche less the interest it books
+      // in the same transaction — the reallocation accrues it, catching up every block skipped over
+      // the timelock delay — so the net drop is slightly under the tranche and never over it.
+      const coreAfter = await (await ethers.getContractAt(SOURCE_ABI, CORE_SOURCE_USDT)).totalAssets();
+      const coreDrop = coreBefore.sub(coreAfter);
+      expect(coreDrop).to.be.lte(TRANCHE);
+      expect(coreDrop).to.be.gte(TRANCHE.mul(99).div(100));
+      expect(await hub.totalAssets()).to.be.gte(hubTotalBeforeMove);
+    });
+
+    it("Centrifuge records it as a pending deposit request, with nothing issued", async () => {
+      const state = await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT);
+      expect(state.pendingDepositRequest).to.equal(TRANCHE);
+      expect(state.maxMint).to.equal(0);
+      expect(state.maxWithdraw).to.equal(0);
+      expect(state.pendingCancelDepositRequest).to.equal(false);
+
+      // No shares yet, but the position is not empty: `receiptBalance` counts the pending request,
+      // which is exactly what stops `removeResource` from dropping a fund with capital in flight.
+      const share = await ethers.getContractAt(SHARE_ABI, JTRSY_SHARE);
+      expect(await share.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+      expect(await adapter.receiptBalance(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).to.equal(TRANCHE);
+      await expect(source.connect(operator).removeResource(JTRSY_VAULT)).to.be.reverted;
+    });
+
+    it("claiming before Centrifuge settles is a no-op rather than a revert", async () => {
+      await source.connect(operator).claimDeposit(JTRSY_VAULT);
+      const share = await ethers.getContractAt(SHARE_ABI, JTRSY_SHARE);
+      expect(await share.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
+      expect(await source.totalAssets()).to.equal(TRANCHE);
+    });
+
+    it("the keeper can claim, holding nothing beyond the four claim functions", async () => {
+      const keeper = await initMainnetUser(KEEPER, ethers.utils.parseEther("1"));
+      await source.connect(keeper).claimDeposit(JTRSY_VAULT);
+      await source.connect(keeper).claimRedeem(JTRSY_VAULT);
+      // ...but it cannot open or cancel a request.
+      await expect(source.connect(keeper).requestRedeem(JTRSY_VAULT, 1)).to.be.revertedWithCustomError(
+        source,
+        "Unauthorized",
+      );
+      await expect(source.connect(keeper).cancelDepositRequest(JTRSY_VAULT)).to.be.revertedWithCustomError(
+        source,
+        "Unauthorized",
+      );
+    });
+
+    it("the operator can cancel a request Centrifuge has not filled", async () => {
+      await source.connect(operator).cancelDepositRequest(JTRSY_VAULT);
+      const state = await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT);
+      expect(state.pendingCancelDepositRequest).to.equal(true);
+    });
+
+    it("the guardian can pause a fund, and a paused fund takes no more capital", async () => {
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      await source.connect(guardian).pauseResource(JAAA_VAULT);
+      expect((await source.resourceConfig(JAAA_VAULT)).paused).to.equal(true);
+
+      await expect(
+        hub
+          .connect(operator)
+          .reallocate([leg(CORE_SOURCE_USDT, CORE_VUSDT, TRANCHE)], [leg(CENTRIFUGE_SOURCE_USDT, JAAA_VAULT, TRANCHE)]),
+      ).to.be.reverted;
+
+      // And the guardian cannot undo its own pause: only governance can.
+      await expect(source.connect(guardian).unpauseResource(JAAA_VAULT)).to.be.revertedWithCustomError(
+        source,
+        "Unauthorized",
+      );
     });
   });
 });
