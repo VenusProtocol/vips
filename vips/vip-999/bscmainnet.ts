@@ -69,7 +69,7 @@ export const NAV_GUARDS = [
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT];
 
-// The 60 ACM grants are pre-loaded into the ACMCommandsAggregator by ./scripts/addGrantPermissions.ts.
+// The 41 ACM grants are pre-loaded into the ACMCommandsAggregator by ./scripts/addGrantPermissions.ts.
 //
 // The index is the aggregator's next free grant slot at the moment of loading — entries are
 // append-only, so a stale index replays whatever else occupies that slot.
@@ -109,19 +109,20 @@ handles by reading decimals off the vault rather than assuming them.
 | Holder | Signatures | Surface |
 | --- | --- | --- |
 | Normal Timelock | 20 | everything |
-| Fast-Track Timelock | 19 | everything but \`sweep\` |
 | Operator | 11 | queues, the async lifecycle, pausing one fund, the published APY |
 | Keeper | 4 | the four claim functions, nothing else |
 | Guardian | 6 | containment, the NAV band, the published APY |
 
-Outside the two timelocks nobody is granted \`unpauseResource\`, so the Guardian can contain a fund but
-never undo a governance-ordered pause. The Operator is not granted the NAV band: the account that moves
-the capital is not the account that decides what its value may be reported as.
+The Fast-Track and Critical timelocks are granted nothing, which is how the rest of the Liquidity Hub
+already stands: neither holds a signature on any Hub, source or the registry today, and the Centrifuge
+source stays on that footing. Outside the Normal Timelock nobody is granted \`unpauseResource\`, so the
+Guardian can contain a fund but never undo a governance-ordered pause. The Operator is not granted the
+NAV band: the account that moves the capital is not the account that decides what its value may be
+reported as.
 
-\`sweep\` is the **Normal Timelock's alone**, and the one signature the Fast-Track Timelock does not get.
-It refuses \`asset()\` and every registered resource, but here the resource is the vault while the token
-this contract actually holds is the vault's \`share()\` — which it would not refuse, so a sweep could move
-an entire fund position out. That belongs behind the full 48-hour delay, not a 6-hour one.
+\`sweep\` refuses \`asset()\` and every registered resource, but here the resource is the vault while the
+token this contract actually holds is the vault's \`share()\` — which it would not refuse, so a sweep
+could move an entire fund position out. The Normal Timelock alone holds it.
 
 The Guardian's six signatures are \`pauseResource\`, \`forceRemoveResource\`, the three band setters and
 \`setSpotAPYBps\`. Two of the band setters write value directly: \`setNavGuardSnapshot\` sets the anchor to
@@ -143,7 +144,7 @@ leaves the other registered. The Guardian holds the first two; \`unpauseHub\` is
 alone, so the Hub stays paused until a proposal lifts it. What the grant buys is scope, not speed: one
 fund written off rather than the group, with the Hub held still while that happens.
 
-The 60 grants are pre-loaded off chain into the **ACMCommandsAggregator**
+The 41 grants are pre-loaded off chain into the **ACMCommandsAggregator**
 (\`${ACM_AGGREGATOR}\`, grant batch index ${ACM_AGGREGATOR_INDEX}). Inline they do not fit:
 \`propose()\` stores the whole proposal in one transaction, and at that size it costs 16,583,328 gas
 through the proposer Safe — 98.8% of the 16,777,216 per-tx cap, with no room for state drift. The
@@ -175,7 +176,7 @@ clamping at the floor would under-report a loss the fund had really taken.
 Centrifuge publishes no rate on chain, so the reported APY comes from \`setSpotAPYBps\`, set per fund.
 It is left at zero here, and the group reports zero until someone sets it — which drags the Hub's
 advertised APY down, because the Hub weights each group's rate by the value it holds. That is why
-\`setSpotAPYBps\` is held by the Operator and the Guardian as well as the two timelocks: it publishes a
+\`setSpotAPYBps\` is held by the Operator and the Guardian as well as the Normal Timelock: it publishes a
 figure Centrifuge does not, and correcting a stale one should not wait days.
 
 #### Actions (one atomic transaction, in order)
