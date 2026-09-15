@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664Mainnet, {
+import vip999Mainnet, {
   ACM,
   ADAPTER_CENTRIFUGE,
   CENTRIFUGE_ABSOLUTE_CAP,
@@ -35,13 +35,13 @@ import vip664Mainnet, {
   OUTER_WITHDRAW_QUEUE,
   USDT,
   YIELD_GROUP_CENTRIFUGE_IMPL,
-} from "../../vips/vip-664/bscmainnet";
+} from "../../vips/vip-999/bscmainnet";
 import {
   CENTRIFUGE_CLAIMS,
   CENTRIFUGE_GOVERNANCE,
   CENTRIFUGE_GUARDIAN,
   CENTRIFUGE_OPERATOR,
-} from "../../vips/vip-664/permissions-bscmainnet";
+} from "../../vips/vip-999/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
 import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
@@ -181,7 +181,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-668 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup", await vip664Mainnet(), {
+  testVip("VIP-999 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup", await vip999Mainnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

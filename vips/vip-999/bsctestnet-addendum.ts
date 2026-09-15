@@ -48,11 +48,11 @@ const revokeCallPermission = (contract: string, sig: string, account: string) =>
   params: [contract, sig, account],
 });
 
-export const vip664Addendum = () => {
+export const vip999Addendum = () => {
   const meta = {
     version: "v2",
     // Placeholder number, set for real once the proposal is filed.
-    title: "VIP-667 [BNB Chain Testnet] Liquidity Hub (USDT) — replace the Centrifuge YieldGroup with the new release",
+    title: "VIP-999 [BNB Chain Testnet] Liquidity Hub (USDT) — replace the Centrifuge YieldGroup with the new release",
     description: `#### Summary
 
 Replaces the Centrifuge YieldGroup of the Liquidity Hub (USDT) on BNB Chain Testnet with a freshly
@@ -195,4 +195,4 @@ are granted now so that setting them later needs no further proposal.
   );
 };
 
-export default vip664Addendum;
+export default vip999Addendum;

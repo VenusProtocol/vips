@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664Addendum, {
+import vip999Addendum, {
   ABSOLUTE_CAP_UNBOUNDED,
   ACM,
   ADAPTER_CENTRIFUGE,
@@ -26,13 +26,13 @@ import vip664Addendum, {
   PERCENTAGE_CAP_DISABLED,
   USDT,
   YIELD_GROUP_CENTRIFUGE_IMPL,
-} from "../../vips/vip-664/bsctestnet-addendum";
+} from "../../vips/vip-999/bsctestnet-addendum";
 import {
   CENTRIFUGE_NEW_SURFACE,
   GUARDIAN_WILDCARDS,
   NEW_GUARDIAN_GRANTS,
   NEW_TIMELOCK_GRANTS,
-} from "../../vips/vip-664/permissions-bsctestnet-addendum";
+} from "../../vips/vip-999/permissions-bsctestnet-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -268,8 +268,8 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   testVip(
-    "VIP-667 [BNB Testnet] Liquidity Hub (USDT) — replace the Centrifuge YieldGroup with the new release",
-    await vip664Addendum(),
+    "VIP-999 [BNB Testnet] Liquidity Hub (USDT) — replace the Centrifuge YieldGroup with the new release",
+    await vip999Addendum(),
     {
       callbackAfterExecution: async txResponse => {
         // Paused for the write-off, unpaused at the end. No `Upgraded`: no beacon is retargeted.

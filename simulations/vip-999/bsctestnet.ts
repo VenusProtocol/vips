@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip664, {
+import vip999, {
   ACM,
   ADAPTER_CENTRIFUGE,
   CENTRIFUGE_SOURCE_USDT,
@@ -18,13 +18,13 @@ import vip664, {
   MOCK_CENTRIFUGE_VAULT_USDT,
   NORMAL_TIMELOCK,
   USDT,
-} from "../../vips/vip-664/bsctestnet";
+} from "../../vips/vip-999/bsctestnet";
 import {
   CENTRIFUGE_FULL_SURFACE,
   GUARDIAN_GRANTS,
   GUARDIAN_WILDCARDS,
   NORMAL_TIMELOCK_GRANTS,
-} from "../../vips/vip-664/permissions-bsctestnet";
+} from "../../vips/vip-999/permissions-bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
 import VAULT_ABI from "./abi/TestnetCentrifugeVault.json";
@@ -129,7 +129,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-666 [BNB Testnet] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup", await vip664(), {
+  testVip("VIP-999 [BNB Testnet] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup", await vip999(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

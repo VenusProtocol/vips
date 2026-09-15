@@ -42,13 +42,13 @@ const grantsOnSource = () =>
     ...GUARDIAN_GRANTS.map(sig => ({ account: GUARDIAN, sig })),
   ].map(({ account, sig }) => giveCallPermission(ACM, CENTRIFUGE_SOURCE_USDT, sig, account));
 
-export const vip664 = () => {
+export const vip999 = () => {
   const meta = {
     version: "v2",
     // Placeholder number. The testnet governor is already past this, so it will be wrong on chain —
     // it gets set for real once the mainnet proposal is finalized. Nothing in the description below
     // cites a VIP number, so only this line has to change.
-    title: "VIP-666 [BNB Chain Testnet] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
+    title: "VIP-999 [BNB Chain Testnet] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
     description: `#### Summary
 
 Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDT) on BNB Chain Testnet: grants the ACM
@@ -161,4 +161,4 @@ further VIP.
   );
 };
 
-export default vip664;
+export default vip999;

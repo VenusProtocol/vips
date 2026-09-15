@@ -66,11 +66,11 @@ export const CENTRIFUGE_RESOURCES = [JTRSY_VAULT, JAAA_VAULT];
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT];
 
-export const vip664Mainnet = () => {
+export const vip999Mainnet = () => {
   const meta = {
     version: "v2",
     // Placeholder number, set for real once the proposal is filed.
-    title: "VIP-668 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
+    title: "VIP-999 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
     description: `#### Summary
 
 Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDT) on BNB Chain: grants the ACM roles
@@ -158,4 +158,4 @@ governance sets per fund. It is left at zero here.
   );
 };
 
-export default vip664Mainnet;
+export default vip999Mainnet;
