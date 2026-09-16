@@ -158,7 +158,7 @@ The Risk Fund holds receipt tokens from three staking protocols that allow an in
 
 The exits pay about 4.0995 BNB to the Normal Timelock. The Risk Fund cannot receive BNB, so the BNB is wrapped to WBNB and sent to the Risk Fund.
 
-slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because Lista's instant withdrawal is limited to whitelisted accounts. It is sent to the Venus dev recipient (${DEV_RECIPIENT}, also used in VIP-649), which unstakes it off-chain.
+slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because Lista's instant withdrawal is limited to whitelisted accounts. It is sent to the Venus dev recipient (${DEV_RECIPIENT}, also used in VIP-649), which unstakes it off-chain, with the proceeds returned to the Risk Fund as USDT in a later step.
 
 #### Actions
 
@@ -169,13 +169,15 @@ slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because List
 5. Calls withdrawTreasuryBEP20(address,uint256,address) on VTreasury (${VTREASURY}) for the whole VAI balance, to the TreasuryTokenBuybackDistributor.
 6. Calls convertVaiViaPsm() on the TreasuryTokenBuybackDistributor.
 7. Calls sweepToken(address,address,uint256) on the Risk Fund once per long-tail token listed above, to the RiskFund buyback.
-8. Calls sweepToken(address,address,uint256) on the Risk Fund for ankrBNB, BNBx and stkBNB, to the Normal Timelock (${NORMAL_TIMELOCK}).
+8. Calls sweepToken(address,address,uint256) on the Risk Fund for ankrBNB (${ANKR_BNB}), to the Normal Timelock (${NORMAL_TIMELOCK}).
 9. Calls swap(uint256,address) on the Ankr BinancePool (${ANKR_BINANCE_POOL}) for the ankrBNB, paying the BNB to the Normal Timelock.
-10. Calls redeemBnbxForBnb(uint256) on the Stader StakeManagerV2 (${STADER_STAKE_MANAGER}) for the BNBx.
-11. Calls send(address,uint256,bytes) on stkBNB (${STKBNB}) to the pStake StakePool (${PSTAKE_STAKE_POOL}).
-12. Calls deposit() on WBNB (${WBNB}) with ${WBNB_AMOUNT} wei of BNB.
-13. Calls transfer(address,uint256) on WBNB for the same amount, to the Risk Fund.
-14. Calls sweepToken(address,address,uint256) on the Risk Fund for slisBNB (${SLISBNB}), to the Venus dev recipient.`,
+10. Calls sweepToken(address,address,uint256) on the Risk Fund for BNBx (${BNBX}), to the Normal Timelock.
+11. Calls redeemBnbxForBnb(uint256) on the Stader StakeManagerV2 (${STADER_STAKE_MANAGER}) for the BNBx.
+12. Calls sweepToken(address,address,uint256) on the Risk Fund for stkBNB (${STKBNB}), to the Normal Timelock.
+13. Calls send(address,uint256,bytes) on stkBNB to the pStake StakePool (${PSTAKE_STAKE_POOL}).
+14. Calls deposit() on WBNB (${WBNB}) with ${WBNB_AMOUNT} wei of BNB.
+15. Calls transfer(address,uint256) on WBNB for the same amount, to the Risk Fund.
+16. Calls sweepToken(address,address,uint256) on the Risk Fund for slisBNB (${SLISBNB}), to the Venus dev recipient.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
