@@ -24,7 +24,6 @@ import vip999Mainnet, {
   FRV_SOURCE_USDT,
   GUARDIAN,
   HUB_USDT,
-  INNER_WITHDRAW_QUEUE,
   JAAA_POOL_ID,
   JAAA_SHARE,
   JAAA_SHARE_CLASS_ID,
@@ -35,8 +34,6 @@ import vip999Mainnet, {
   JTRSY_VAULT,
   KEEPER,
   NAV_GUARDS,
-  NAV_GUARD_CAP_ENABLED,
-  NAV_GUARD_FLOOR_ENABLED,
   NAV_GUARD_INTERVAL,
   NORMAL_TIMELOCK,
   OPERATOR,
@@ -68,14 +65,11 @@ import SOURCE_ABI from "./abi/YieldGroupCentrifugeLatest.json";
 
 const BLOCK_NUMBER = 122007400;
 
+// ACM role hashing.
 const roleOf = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
 
-// A wildcard grant on the BSC ACM lives under `keccak(DEFAULT_ADMIN_ROLE, sig)` — a 32-byte zero
-// prefix. The 20-byte address form is a different hash entirely and never matches one.
-const wildcardOf = (sig: string) =>
-  ethers.utils.solidityKeccak256(["bytes32", "string"], [ethers.constants.HashZero, sig]);
-
+// The two funds, each paired with the band the VIP configures for it.
 const bandFor = (vault: string) => {
   const band = NAV_GUARDS.find(b => b.resource === vault);
   if (!band) throw new Error(`no NAV band configured for ${vault}`);
@@ -110,7 +104,6 @@ const CENTRIFUGE_SPOKE = "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB";
 const CORE_VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 // 100,000 USDT: comfortably inside the group cap, which the percentage dimension binds near 1,060,000.
 const TRANCHE = ethers.utils.parseUnits("100000", 18);
-const NEVER_EXPIRES = "18446744073709551615"; // type(uint64).max
 
 forking(BLOCK_NUMBER, async () => {
   let hub: Contract;
@@ -123,7 +116,8 @@ forking(BLOCK_NUMBER, async () => {
   let aggregator: Contract;
   let permissions: ReturnType<typeof buildPermissions>;
 
-  let outerQueuesBefore: string[][];
+  let depositQueueBefore: string[];
+  let withdrawQueueBefore: string[];
   let hubTotalBefore: BigNumber;
   let liveSourceRolesBefore: Record<string, boolean>;
 
@@ -135,7 +129,8 @@ forking(BLOCK_NUMBER, async () => {
     acm = await ethers.getContractAt(ACM_ABI, ACM);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
 
-    outerQueuesBefore = [await hub.outerDepositQueue(), await hub.outerWithdrawQueue()];
+    depositQueueBefore = await hub.outerDepositQueue();
+    withdrawQueueBefore = await hub.outerWithdrawQueue();
     hubTotalBefore = await hub.totalAssets();
 
     // Who held what on every live source before the proposal, so the post-VIP check can prove the
@@ -232,7 +227,8 @@ forking(BLOCK_NUMBER, async () => {
       for (const holder of [NORMAL_TIMELOCK, OPERATOR, KEEPER, GUARDIAN, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK]) {
         for (const sig of CENTRIFUGE_GOVERNANCE) {
           expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), holder), `${holder} ${sig}`).to.equal(false);
-          expect(await acm.hasRole(wildcardOf(sig), holder), `wildcard ${holder} ${sig}`).to.equal(false);
+          const wildcard = ethers.utils.solidityKeccak256(["bytes32", "string"], [ethers.constants.HashZero, sig]);
+          expect(await acm.hasRole(wildcard, holder), `wildcard ${holder} ${sig}`).to.equal(false);
         }
       }
     });
@@ -308,7 +304,8 @@ forking(BLOCK_NUMBER, async () => {
     },
   });
 
-  describe("Post-VIP state", () => {
+  // Actions 2-7: what the proposal writes on the source and the Hub.
+  describe("Post-VIP: configuration", () => {
     it("both funds are registered and unpaused", async () => {
       expect(await source.resources()).to.deep.equal(CENTRIFUGE_RESOURCES);
       for (const fund of FUNDS) {
@@ -320,7 +317,6 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("the inner withdraw queue is both funds, JTRSY first, and the deposit side is unset", async () => {
-      expect(await source.innerWithdrawQueue()).to.deep.equal(INNER_WITHDRAW_QUEUE);
       expect(await source.innerWithdrawQueue()).to.deep.equal([JTRSY_VAULT, JAAA_VAULT]);
       // It names every registered fund, which is what stops a later `setInnerWithdrawQueue` or a
       // funded position from tripping `WithdrawQueueOmitsFundedResource`.
@@ -346,11 +342,11 @@ forking(BLOCK_NUMBER, async () => {
       expect(withdrawQueue).to.deep.equal(OUTER_WITHDRAW_QUEUE);
       expect(withdrawQueue[withdrawQueue.length - 1]).to.equal(CENTRIFUGE_SOURCE_USDT);
       // The pre-existing order is preserved ahead of it, not reshuffled.
-      expect(withdrawQueue.slice(0, -1)).to.deep.equal(outerQueuesBefore[1]);
+      expect(withdrawQueue.slice(0, -1)).to.deep.equal(withdrawQueueBefore);
     });
 
     it("the deposit queue is untouched", async () => {
-      expect(await hub.outerDepositQueue()).to.deep.equal(outerQueuesBefore[0]);
+      expect(await hub.outerDepositQueue()).to.deep.equal(depositQueueBefore);
       expect(await hub.outerDepositQueue()).to.not.include(CENTRIFUGE_SOURCE_USDT);
     });
 
@@ -385,8 +381,8 @@ forking(BLOCK_NUMBER, async () => {
         expect(band.upGapBps, fund.name).to.equal(fund.band.upGapBps);
         expect(band.downGapBps, fund.name).to.equal(fund.band.downGapBps);
         expect(band.interval, fund.name).to.equal(NAV_GUARD_INTERVAL);
-        expect(band.capEnabled, fund.name).to.equal(NAV_GUARD_CAP_ENABLED);
-        expect(band.floorEnabled, fund.name).to.equal(NAV_GUARD_FLOOR_ENABLED);
+        expect(band.capEnabled, fund.name).to.equal(true);
+        expect(band.floorEnabled, fund.name).to.equal(true);
         expect(band.anchoredAt, fund.name).to.be.gt(0);
       }
     });
@@ -413,7 +409,10 @@ forking(BLOCK_NUMBER, async () => {
       // The group's own figure weights each fund by the value it holds, and it holds nothing yet.
       expect(await source.spotAPYBps()).to.equal(0);
     });
+  });
 
+  // Action 1: the grant batch replayed through the ACMCommandsAggregator.
+  describe("Post-VIP: permissions", () => {
     it("every grant this VIP makes has landed", async () => {
       for (const p of permissions) {
         const where = `${p.contractAddress} ${p.functionSig} -> ${p.account}`;
@@ -541,6 +540,32 @@ forking(BLOCK_NUMBER, async () => {
 
     const leg = (yieldGroup: string, resource: string, amount: BigNumber) => ({ yieldGroup, resource, amount });
 
+    const setCentrifugeReportedValue = async (value: BigNumber) => {
+      // `mapping(address vault => mapping(address controller => AsyncInvestmentState))`. Two uint128
+      // fields per slot puts `pendingDepositRequest` in the low half of the struct's third slot.
+      // The mapping's own slot is found by scanning rather than hardcoded, so a Centrifuge layout
+      // change fails loudly here instead of silently writing the wrong field.
+      for (let i = 0; i < 40; i++) {
+        const inner = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [JTRSY_VAULT, i]),
+        );
+        const base = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [CENTRIFUGE_SOURCE_USDT, inner]),
+        );
+        const slot = BigNumber.from(base).add(2);
+        const word = await ethers.provider.getStorageAt(CENTRIFUGE_BASE_MANAGER, slot);
+        const low = BigNumber.from("0x" + word.slice(34));
+        if (!low.eq((await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).pendingDepositRequest)) continue;
+
+        // Keep `pendingRedeemRequest`, the high half of the same word, untouched.
+        const packed = word.slice(0, 34) + ethers.utils.hexZeroPad(value.toHexString(), 16).slice(2);
+        await ethers.provider.send("hardhat_setStorageAt", [CENTRIFUGE_BASE_MANAGER, slot.toHexString(), packed]);
+        expect((await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).pendingDepositRequest).to.equal(value);
+        return;
+      }
+      throw new Error("pendingDepositRequest slot not found — Centrifuge storage layout changed");
+    };
+
     before(async () => {
       operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
       manager = await ethers.getContractAt(MANAGER_ABI, CENTRIFUGE_BASE_MANAGER);
@@ -551,7 +576,8 @@ forking(BLOCK_NUMBER, async () => {
       for (const fund of FUNDS) {
         const share = await ethers.getContractAt(SHARE_ABI, fund.share);
         const hook = await ethers.getContractAt(HOOK_ABI, await share.hook());
-        await hook.connect(spoke).updateMember(fund.share, CENTRIFUGE_SOURCE_USDT, NEVER_EXPIRES);
+        // type(uint64).max: a membership that never lapses.
+        await hook.connect(spoke).updateMember(fund.share, CENTRIFUGE_SOURCE_USDT, "18446744073709551615");
       }
     });
 
@@ -612,7 +638,7 @@ forking(BLOCK_NUMBER, async () => {
       await expect(source.connect(operator).setInnerWithdrawQueue([JAAA_VAULT]))
         .to.be.revertedWithCustomError(source, "WithdrawQueueOmitsFundedResource")
         .withArgs(JTRSY_VAULT);
-      expect(await source.innerWithdrawQueue()).to.deep.equal(INNER_WITHDRAW_QUEUE);
+      expect(await source.innerWithdrawQueue()).to.deep.equal(CENTRIFUGE_RESOURCES);
 
       // And the queue is not a redemption path: the request is still in flight, so walking it
       // withdraws nothing and a Hub withdraw routed here reverts rather than forcing an exit.
@@ -747,32 +773,6 @@ forking(BLOCK_NUMBER, async () => {
       await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
       expect(await source.totalAssets()).to.equal(observed);
     });
-
-    const setCentrifugeReportedValue = async (value: BigNumber) => {
-      // `mapping(address vault => mapping(address controller => AsyncInvestmentState))`. Two uint128
-      // fields per slot puts `pendingDepositRequest` in the low half of the struct's third slot.
-      // The mapping's own slot is found by scanning rather than hardcoded, so a Centrifuge layout
-      // change fails loudly here instead of silently writing the wrong field.
-      for (let i = 0; i < 40; i++) {
-        const inner = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [JTRSY_VAULT, i]),
-        );
-        const base = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [CENTRIFUGE_SOURCE_USDT, inner]),
-        );
-        const slot = BigNumber.from(base).add(2);
-        const word = await ethers.provider.getStorageAt(CENTRIFUGE_BASE_MANAGER, slot);
-        const low = BigNumber.from("0x" + word.slice(34));
-        if (!low.eq((await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).pendingDepositRequest)) continue;
-
-        // Keep `pendingRedeemRequest`, the high half of the same word, untouched.
-        const packed = word.slice(0, 34) + ethers.utils.hexZeroPad(value.toHexString(), 16).slice(2);
-        await ethers.provider.send("hardhat_setStorageAt", [CENTRIFUGE_BASE_MANAGER, slot.toHexString(), packed]);
-        expect((await manager.investments(JTRSY_VAULT, CENTRIFUGE_SOURCE_USDT)).pendingDepositRequest).to.equal(value);
-        return;
-      }
-      throw new Error("pendingDepositRequest slot not found — Centrifuge storage layout changed");
-    };
 
     it("clamps a value Centrifuge reports far outside the band, either way", async () => {
       const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
