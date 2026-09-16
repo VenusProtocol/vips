@@ -122,13 +122,17 @@ Atlas is currently the fallback oracle for ${ATLAS_PIVOT_MARKETS.length} Core Po
 
 The Atlas oracle has no VAI configuration today, so it is first configured with the Atlas VAI/USD feed (${VAI_ATLAS_FEED}) and a maximum stale period of ${VAI_ATLAS_MAX_STALE_PERIOD} seconds (24 hour heartbeat plus a 5 minute buffer). The ResilientOracle configuration for VAI is then set to Atlas as the main oracle, with no pivot and no fallback oracle. Chainlink and Binance are removed from the VAI price path.
 
+After this change VAI has a single price source. There is no pivot oracle to cross validate the Atlas price and no fallback oracle to take over. If Atlas stops pushing the VAI price for more than ${VAI_ATLAS_MAX_STALE_PERIOD} seconds, getPrice reverts for VAI, and every operation that prices VAI, including minting, repaying and liquidating VAI, reverts with it until a new price is pushed.
+
 #### VAI Vault rewards
 
-The XVS distribution rate to the VAI Vault is set to 0. The current rate is 341,157,958,083,832 wei of XVS per block (about 65.47 XVS per day). XVS accrued up to the execution block is still released to the VAI Vault by this call, and VAI Vault stakers keep access to rewards already accrued.
+The XVS distribution rate to the VAI Vault is set to 0. The current rate is 341,157,958,083,832 wei of XVS per block (about 65.47 XVS per day). Before the rate is updated, the Comptroller releases the XVS accrued since the last release to the VAI Vault, provided that amount reaches the Comptroller's minimum release amount of 4 XVS; a smaller amount stays in the Comptroller. VAI Vault stakers keep access to rewards already accrued.
 
 #### Treasury VAI
 
 The Venus Treasury holds about 2,343.39 VAI. The whole balance is withdrawn to the TreasuryTokenBuybackDistributor (${TREASURY_TOKEN_BUYBACK_DISTRIBUTOR}, used in VIP-646), and convertVaiViaPsm() swaps it for USDT at the VAI PSM (${VAI_PSM}). The USDT goes back to the Venus Treasury. The PSM charges a 0.1% fee, paid in VAI, which also goes to the Venus Treasury. At the time of writing the swap returns about 2,341.05 USDT.
+
+convertVaiViaPsm() is best effort. It wraps the PSM swap in a try/catch, so if the PSM cannot serve the swap at execution time, for example while it is paused or while its USDT price is stale, the call does not revert and the rest of the proposal still executes. In that case the VAI stays in the TreasuryTokenBuybackDistributor instead of returning to the Venus Treasury as USDT. A successful conversion emits one VaiConvertedViaPsm event, which should be checked in the execution receipt.
 
 #### Risk Fund long-tail tokens
 
@@ -142,7 +146,7 @@ The Risk Fund (${RISK_FUND}) holds these tokens outside its base assets. Each on
 - TRXOLD: 15.62 (about $5)
 - RACA: 316,724.38 (about $4)
 
-BSW and TWT are worth less than $1 each and are not moved. WIN is not moved either.
+BSW and TWT are worth less than $1 each and are not moved. WIN (1,412,410.53, about $53) is not moved either, even though it is worth more than TRXOLD and RACA. The RiskFund buyback prices every token it sells through the Resilient Oracle, and the only oracle configured for WIN is Chainlink, whose WIN feed no longer responds. getPrice therefore reverts for WIN and the buyback cannot value it.
 
 #### Risk Fund staking positions
 
