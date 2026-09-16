@@ -10,7 +10,7 @@ export const ACM = ACCESS_CONTROL_MANAGER;
 export { NORMAL_TIMELOCK, GUARDIAN, CRITICAL_TIMELOCK, FAST_TRACK_TIMELOCK };
 
 export const OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
-export const KEEPER = "0x7B1AE5Ea599bC56734624b95589e7E8E64C351c9";
+export const KEEPER = "0x194b1F6c57d023Fa59497ee5A7976dB47f183929";
 
 // ---------------------------------------------------------------------------------------------------
 // Live Hub stack (deployed, verified on chain).
@@ -66,8 +66,8 @@ export const NAV_GUARDS = [
 ];
 
 export const SPOT_APY_BPS = [
-  { resource: JTRSY_VAULT, apyBps: 340 },
-  { resource: JAAA_VAULT, apyBps: 431 },
+  { resource: JTRSY_VAULT, apyBps: 337 },
+  { resource: JAAA_VAULT, apyBps: 529 },
 ];
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT];
@@ -134,8 +134,8 @@ and re-anchors daily. A reading outside the band is reported at the edge of it; 
 
 | Fund | Drift | Band up | Band down | Re-anchor | Published APY |
 | --- | --- | --- | --- | --- | --- |
-| JTRSY | 5.00% | 2% | 5% | daily | 3.40% |
-| JAAA | 5.50% | 2% | 5% | daily | 4.31% |
+| JTRSY | 5.00% | 2% | 5% | daily | 3.37% |
+| JAAA | 5.50% | 2% | 5% | daily | 5.29% |
 
 Centrifuge publishes no rate on chain, so the APY each fund reports is set by \`setSpotAPYBps\`. Left
 unset the group would report zero and drag the Hub's advertised APY down.
