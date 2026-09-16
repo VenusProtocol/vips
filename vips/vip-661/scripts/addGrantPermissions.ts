@@ -6,7 +6,7 @@ import { ACM_AGGREGATOR_ABI, buildPermissions } from "./acmPermissions";
 // ---------------------------------------------------------------------------------------------------
 // Pre-loads this proposal's ACM grants into the bscmainnet ACMCommandsAggregator:
 //
-//   npx hardhat run vips/vip-999/scripts/addGrantPermissions.ts --network bscmainnet
+//   npx hardhat run vips/vip-661/scripts/addGrantPermissions.ts --network bscmainnet
 //
 // Run once, by hand, and only once the proposal is final. Entries are append-only: anything stored
 // early is dead weight and shifts every index that follows. The proposal replays the batch by index,
@@ -31,7 +31,7 @@ async function main() {
   if (taken) {
     throw new Error(
       `addGrantPermissions: index ${ACM_AGGREGATOR_INDEX} is already occupied. Find the next free slot, ` +
-        "set ACM_AGGREGATOR_INDEX in vips/vip-999/bscmainnet.ts, re-run the simulation, then re-run this.",
+        "set ACM_AGGREGATOR_INDEX in vips/vip-661/bscmainnet.ts, re-run the simulation, then re-run this.",
     );
   }
 
@@ -56,7 +56,7 @@ async function main() {
   }
 
   console.log(`\nIndex ${index} stored and verified: all ${permissions.length} grants match.`);
-  console.log(`Pin simulations/vip-999/bscmainnet.ts at a block after ${receipt.blockNumber}.`);
+  console.log(`Pin simulations/vip-661/bscmainnet.ts at a block after ${receipt.blockNumber}.`);
 }
 
 main()

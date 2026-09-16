@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999Mainnet, {
+import vip661, {
   ACM,
   ACM_AGGREGATOR,
   ACM_AGGREGATOR_INDEX,
@@ -41,7 +41,7 @@ import vip999Mainnet, {
   SPOT_APY_BPS,
   USDT,
   YIELD_GROUP_CENTRIFUGE_IMPL,
-} from "../../vips/vip-999/bscmainnet";
+} from "../../vips/vip-661/bscmainnet";
 import {
   CENTRIFUGE_CLAIMS,
   CENTRIFUGE_GOVERNANCE,
@@ -50,18 +50,18 @@ import {
   CENTRIFUGE_OPERATOR,
   EMERGENCY,
   YIELD_GROUP_BASE,
-} from "../../vips/vip-999/permissions-bscmainnet";
-import { ACM_AGGREGATOR_ABI, LIVE_SOURCES, buildPermissions } from "../../vips/vip-999/scripts/acmPermissions";
-import ACM_ABI from "./abi/AccessControlManager.json";
-import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
-import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
-import VAULT_ABI from "./abi/CentrifugeAsyncVault.json";
-import HOOK_ABI from "./abi/CentrifugeFullRestrictions.json";
-import SHARE_ABI from "./abi/CentrifugeShare.json";
-import ERC20_ABI from "./abi/ERC20.json";
-import HUB_ABI from "./abi/Hub.json";
-import BEACON_ABI from "./abi/UpgradeableBeacon.json";
-import SOURCE_ABI from "./abi/YieldGroupCentrifugeLatest.json";
+} from "../../vips/vip-661/permissions-bscmainnet";
+import { ACM_AGGREGATOR_ABI, LIVE_SOURCES, buildPermissions } from "../../vips/vip-661/scripts/acmPermissions";
+import ACM_ABI from "../vip-999/abi/AccessControlManager.json";
+import ADAPTER_ABI from "../vip-999/abi/AdapterCentrifuge.json";
+import MANAGER_ABI from "../vip-999/abi/CentrifugeAsyncRequestManager.json";
+import VAULT_ABI from "../vip-999/abi/CentrifugeAsyncVault.json";
+import HOOK_ABI from "../vip-999/abi/CentrifugeFullRestrictions.json";
+import SHARE_ABI from "../vip-999/abi/CentrifugeShare.json";
+import ERC20_ABI from "../vip-999/abi/ERC20.json";
+import HUB_ABI from "../vip-999/abi/Hub.json";
+import BEACON_ABI from "../vip-999/abi/UpgradeableBeacon.json";
+import SOURCE_ABI from "../vip-999/abi/YieldGroupCentrifugeLatest.json";
 
 const BLOCK_NUMBER = 122188386;
 
@@ -276,7 +276,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-999 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup", await vip999Mainnet(), {
+  testVip("VIP-661 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup", await vip661(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

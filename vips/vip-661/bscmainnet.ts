@@ -79,10 +79,10 @@ export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const ACM_AGGREGATOR_INDEX = 5;
 
-export const vip999Mainnet = () => {
+export const vip661 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
+    title: "VIP-661 [BNB Chain] Liquidity Hub (USDT) — onboard the Centrifuge YieldGroup",
     description: `#### Summary
 
 Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDT) on BNB Chain: grants the ACM roles
@@ -93,62 +93,56 @@ publishes a starting APY on each fund, and adds the group to the Hub.
 Centrifuge is the first **asynchronous** yield source on the Hub: deposits and redemptions are escrowed
 and settled later by the fund manager at a published NAV.
 
-No capital moves in this proposal.
+No capital moves in this proposal. Before capital can be allocated, Centrifuge must add the source to both share-class memberlists; this proposal does not grant that membership.
 
 #### The two funds
 
 Live ERC-7540 vaults on BNB Chain denominated in USDT, sharing one Centrifuge AsyncRequestManager.
 
-| Fund | Vault | Share |
-| --- | --- | --- |
-| JTRSY | \`${JTRSY_VAULT}\` | \`${JTRSY_SHARE}\` |
-| JAAA | \`${JAAA_VAULT}\` | \`${JAAA_SHARE}\` |
+- **JTRSY**: Vault: ${JTRSY_VAULT}; Share: ${JTRSY_SHARE}.
+- **JAAA**: Vault: ${JAAA_VAULT}; Share: ${JAAA_SHARE}.
 
 #### Roles
 
 84 grants, **already seeded on chain** into the **ACMCommandsAggregator**
-(\`${ACM_AGGREGATOR}\`) at grant batch index ${ACM_AGGREGATOR_INDEX}, because they do not fit inline in
-a single \`propose()\` transaction. Seeded by
-\`0xf4a2c8411e83488ea28a6fab507d1d8c0ee82f84b0498d19411203fe3a128111\` in block 122188221, and readable
-with \`grantPermissions(${ACM_AGGREGATOR_INDEX}, i)\` for i in 0..83.
+(${ACM_AGGREGATOR}) at grant batch index ${ACM_AGGREGATOR_INDEX}, because they do not fit inline in
+a single propose() transaction. Seeded by
+0xf4a2c8411e83488ea28a6fab507d1d8c0ee82f84b0498d19411203fe3a128111 in block 122188221, and readable
+with grantPermissions(${ACM_AGGREGATOR_INDEX}, i) for i in 0..83.
 
-The proposal lends the aggregator \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager, replays that
+The proposal lends the aggregator DEFAULT_ADMIN_ROLE on the AccessControlManager, replays that
 batch, and revokes the role in the same transaction, so the aggregator holds ACM admin only inside
 this proposal.
 
 On the new Centrifuge source:
 
-| Holder | Signatures | Surface |
-| --- | --- | --- |
-| Normal Timelock | 20 | everything, including \`sweep\` which it alone holds |
-| Operator | 16 | both inner queues, the async lifecycle, the four claims, \`pauseResource\`, \`unpauseResource\`, \`updateResourceAdapter\`, the NAV band, \`setSpotAPYBps\` |
-| Keeper | 4 | the four claim functions, nothing else |
-| Guardian | 8 | \`pauseResource\`, \`unpauseResource\`, \`updateResourceAdapter\`, \`forceRemoveResource\`, the NAV band, \`setSpotAPYBps\` |
+- **Normal Timelock**: Signatures: 20; Surface: everything, including sweep which it alone holds.
+- **Operator**: Signatures: 16; Surface: both inner queues, the async lifecycle, the four claims, pauseResource, unpauseResource, updateResourceAdapter, the NAV band, setSpotAPYBps.
+- **Keeper**: Signatures: 4; Surface: the four claim functions, nothing else.
+- **Guardian**: Signatures: 8; Surface: pauseResource, unpauseResource, updateResourceAdapter, forceRemoveResource, the NAV band, setSpotAPYBps.
 
 The Fast-Track and Critical timelocks are granted nothing, matching the rest of the Liquidity Hub.
 
-The batch also grants \`updateResourceAdapter\` and \`unpauseResource\` to the Operator and the Guardian
+The batch also grants updateResourceAdapter and unpauseResource to the Operator and the Guardian
 on the nine sources already live under the USDT, USDC and U hubs, where both are Normal-Timelock-only
-today. Both accounts already hold \`pauseResource\` on those sources.
+today. Both accounts already hold pauseResource on those sources.
 
 #### NAV band
 
 Each fund gets a band around the value it reports, held to an anchor that drifts at a published rate
 and re-anchors daily. A reading outside the band is reported at the edge of it; it never reverts.
 
-| Fund | Drift | Band up | Band down | Re-anchor | Published APY |
-| --- | --- | --- | --- | --- | --- |
-| JTRSY | 5.00% | 2% | 5% | daily | 3.37% |
-| JAAA | 5.50% | 2% | 5% | daily | 5.29% |
+- **JTRSY**: Drift: 5.00%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 3.37%.
+- **JAAA**: Drift: 5.50%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 5.29%.
 
-Centrifuge publishes no rate on chain, so the APY each fund reports is set by \`setSpotAPYBps\`. Left
+Centrifuge publishes no rate on chain, so the APY each fund reports is set by setSpotAPYBps. Left
 unset the group would report zero and drag the Hub's advertised APY down.
 
-#### Actions (one atomic transaction, in order)
+#### Actions (12 commands, executed atomically in order)
 
-1. Grant \`DEFAULT_ADMIN_ROLE\` to the ACMCommandsAggregator, replay the grant batch, and revoke the
+1. Grant DEFAULT_ADMIN_ROLE to the ACMCommandsAggregator, replay the grant batch, and revoke the
    role.
-2. Register both funds on the source behind **AdapterCentrifuge** (\`addResource\`).
+2. Register both funds on the source behind **AdapterCentrifuge** (addResource).
 3. Set the source's inner withdraw queue to both funds, JTRSY first. The inner deposit queue is left
    unset, so an ordinary Hub deposit never routes into a fund that settles over days.
 4. Configure the NAV band on each fund, both sides armed.
@@ -159,10 +153,10 @@ unset the group would report zero and drag the Hub's advertised APY down.
 
 #### Deployed contracts (BNB Chain)
 
-- AdapterCentrifuge: \`${ADAPTER_CENTRIFUGE}\`
-- YieldGroupCentrifuge (implementation): \`${YIELD_GROUP_CENTRIFUGE_IMPL}\`
-- CentrifugeBeacon: \`${CENTRIFUGE_BEACON}\` — owned by the Normal Timelock
-- CentrifugeSource_USDT: \`${CENTRIFUGE_SOURCE_USDT}\` — a BeaconProxy with no owner of its own, so
+- AdapterCentrifuge: ${ADAPTER_CENTRIFUGE}
+- YieldGroupCentrifuge (implementation): ${YIELD_GROUP_CENTRIFUGE_IMPL}
+- CentrifugeBeacon: ${CENTRIFUGE_BEACON} — owned by the Normal Timelock
+- CentrifugeSource_USDT: ${CENTRIFUGE_SOURCE_USDT} — a BeaconProxy with no owner of its own, so
   every gated call on it is ACM-controlled
 
 #### References
@@ -213,4 +207,4 @@ unset the group would report zero and drag the Hub's advertised APY down.
   );
 };
 
-export default vip999Mainnet;
+export default vip661;
