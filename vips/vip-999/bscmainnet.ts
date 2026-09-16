@@ -72,10 +72,9 @@ export const SPOT_APY_BPS = [
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT];
 
-// The 84 ACM grants are pre-loaded into the ACMCommandsAggregator by ./scripts/addGrantPermissions.ts.
-//
-// The index is the aggregator's next free grant slot at the moment of loading — entries are
-// append-only, so a stale index replays whatever else occupies that slot.
+// The 84 ACM grants are already loaded on chain at ACM_AGGREGATOR_INDEX, in block 122188221, by
+// ./scripts/addGrantPermissions.ts. Entries are append-only, so changing the grant surface means
+// re-seeding at the next free slot and bumping the index below.
 export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const ACM_AGGREGATOR_INDEX = 5;
@@ -107,10 +106,15 @@ Live ERC-7540 vaults on BNB Chain denominated in USDT, sharing one Centrifuge As
 
 #### Roles
 
-84 grants, pre-loaded off chain into the **ACMCommandsAggregator** (\`${ACM_AGGREGATOR}\`, grant batch
-index ${ACM_AGGREGATOR_INDEX}) because they do not fit inline in a single \`propose()\` transaction. The
-proposal lends the aggregator \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager, replays the batch, and
-revokes the role in the same transaction.
+84 grants, **already seeded on chain** into the **ACMCommandsAggregator**
+(\`${ACM_AGGREGATOR}\`) at grant batch index ${ACM_AGGREGATOR_INDEX}, because they do not fit inline in
+a single \`propose()\` transaction. Seeded by
+\`0xf4a2c8411e83488ea28a6fab507d1d8c0ee82f84b0498d19411203fe3a128111\` in block 122188221, and readable
+with \`grantPermissions(${ACM_AGGREGATOR_INDEX}, i)\` for i in 0..83.
+
+The proposal lends the aggregator \`DEFAULT_ADMIN_ROLE\` on the AccessControlManager, replays that
+batch, and revokes the role in the same transaction, so the aggregator holds ACM admin only inside
+this proposal.
 
 On the new Centrifuge source:
 

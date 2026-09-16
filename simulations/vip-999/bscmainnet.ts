@@ -63,7 +63,7 @@ import HUB_ABI from "./abi/Hub.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import SOURCE_ABI from "./abi/YieldGroupCentrifugeLatest.json";
 
-const BLOCK_NUMBER = 122007400;
+const BLOCK_NUMBER = 122188386;
 
 // ACM role hashing.
 const roleOf = (contract: string, sig: string) =>
@@ -146,10 +146,6 @@ forking(BLOCK_NUMBER, async () => {
 
     aggregator = await ethers.getContractAt(ACM_AGGREGATOR_ABI, ACM_AGGREGATOR);
     permissions = buildPermissions();
-    // The VIP replays a fixed slot, so the batch has to land in exactly that one.
-    await expect(aggregator.addGrantPermissions(permissions))
-      .to.emit(aggregator, "GrantPermissionsAdded")
-      .withArgs(ACM_AGGREGATOR_INDEX);
   });
 
   describe("Pre-VIP state", () => {
