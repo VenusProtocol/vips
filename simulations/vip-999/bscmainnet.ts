@@ -18,11 +18,13 @@ import vip999Mainnet, {
   CENTRIFUGE_SOURCE_USDT,
   CORE_SOURCE_USDT,
   CRITICAL_TIMELOCK,
+  DEFAULT_ADMIN_ROLE,
   FAST_TRACK_TIMELOCK,
   FLUX_SOURCE_USDT,
   FRV_SOURCE_USDT,
   GUARDIAN,
   HUB_USDT,
+  INNER_WITHDRAW_QUEUE,
   JAAA_POOL_ID,
   JAAA_SHARE,
   JAAA_SHARE_CLASS_ID,
@@ -39,6 +41,7 @@ import vip999Mainnet, {
   NORMAL_TIMELOCK,
   OPERATOR,
   OUTER_WITHDRAW_QUEUE,
+  SPOT_APY_BPS,
   USDT,
   YIELD_GROUP_CENTRIFUGE_IMPL,
 } from "../../vips/vip-999/bscmainnet";
@@ -48,8 +51,10 @@ import {
   CENTRIFUGE_GUARDIAN,
   CENTRIFUGE_NAV_GUARD,
   CENTRIFUGE_OPERATOR,
+  EMERGENCY,
+  YIELD_GROUP_BASE,
 } from "../../vips/vip-999/permissions-bscmainnet";
-import { ACM_AGGREGATOR_ABI, buildPermissions } from "../../vips/vip-999/scripts/acmPermissions";
+import { ACM_AGGREGATOR_ABI, LIVE_SOURCES, buildPermissions } from "../../vips/vip-999/scripts/acmPermissions";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
 import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
@@ -103,7 +108,7 @@ const EXISTING_GROUPS = [CORE_SOURCE_USDT, FLUX_SOURCE_USDT, FRV_SOURCE_USDT];
 const CENTRIFUGE_SPOKE = "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB";
 // The vToken behind the Core group, the leg a reallocation pulls from.
 const CORE_VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-// 100,000 USDT: comfortably inside the group cap, which the percentage dimension binds at ~850,000.
+// 100,000 USDT: comfortably inside the group cap, which the percentage dimension binds near 1,060,000.
 const TRANCHE = ethers.utils.parseUnits("100000", 18);
 const NEVER_EXPIRES = "18446744073709551615"; // type(uint64).max
 
@@ -120,6 +125,7 @@ forking(BLOCK_NUMBER, async () => {
 
   let outerQueuesBefore: string[][];
   let hubTotalBefore: BigNumber;
+  let liveSourceRolesBefore: Record<string, boolean>;
 
   before(async () => {
     hub = await ethers.getContractAt(HUB_ABI, HUB_USDT);
@@ -132,9 +138,23 @@ forking(BLOCK_NUMBER, async () => {
     outerQueuesBefore = [await hub.outerDepositQueue(), await hub.outerWithdrawQueue()];
     hubTotalBefore = await hub.totalAssets();
 
+    // Who held what on every live source before the proposal, so the post-VIP check can prove the
+    // delta is exactly the emergency pair.
+    liveSourceRolesBefore = {};
+    for (const group of LIVE_SOURCES) {
+      for (const sig of YIELD_GROUP_BASE) {
+        for (const holder of [NORMAL_TIMELOCK, OPERATOR, GUARDIAN, KEEPER]) {
+          liveSourceRolesBefore[`${group}|${sig}|${holder}`] = await acm.hasRole(roleOf(group, sig), holder);
+        }
+      }
+    }
+
     aggregator = await ethers.getContractAt(ACM_AGGREGATOR_ABI, ACM_AGGREGATOR);
     permissions = buildPermissions();
-    await aggregator.addGrantPermissions(permissions);
+    // The VIP replays a fixed slot, so the batch has to land in exactly that one.
+    await expect(aggregator.addGrantPermissions(permissions))
+      .to.emit(aggregator, "GrantPermissionsAdded")
+      .withArgs(ACM_AGGREGATOR_INDEX);
   });
 
   describe("Pre-VIP state", () => {
@@ -217,12 +237,34 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
+    it("the emergency pair is timelock-only on every live source", async () => {
+      for (const group of LIVE_SOURCES) {
+        for (const sig of EMERGENCY) {
+          expect(await acm.hasRole(roleOf(group, sig), NORMAL_TIMELOCK), `NT ${group} ${sig}`).to.equal(true);
+          for (const holder of [OPERATOR, GUARDIAN, KEEPER]) {
+            expect(await acm.hasRole(roleOf(group, sig), holder), `${holder} ${group} ${sig}`).to.equal(false);
+          }
+        }
+      }
+    });
+
+    it("not one of the grants this VIP makes is held yet", async () => {
+      for (const p of permissions) {
+        const where = `${p.contractAddress} ${p.functionSig} -> ${p.account}`;
+        expect(await acm.hasRole(roleOf(p.contractAddress, p.functionSig), p.account), where).to.equal(false);
+      }
+      // And the aggregator has no ACM admin going in — the VIP lends it, it does not already hold it.
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.equal(false);
+    });
+
     it("the aggregator slot holds exactly these grants", async () => {
+      expect(permissions.length, "the description's grant count").to.equal(84);
       expect(permissions.length).to.equal(
         CENTRIFUGE_GOVERNANCE.length +
           CENTRIFUGE_OPERATOR.length +
           CENTRIFUGE_CLAIMS.length +
-          CENTRIFUGE_GUARDIAN.length,
+          CENTRIFUGE_GUARDIAN.length +
+          LIVE_SOURCES.length * EMERGENCY.length * 2,
       );
 
       for (const [i, expected] of permissions.entries()) {
@@ -236,6 +278,9 @@ forking(BLOCK_NUMBER, async () => {
           ethers.utils.getAddress(expected.account),
         );
       }
+
+      // Nothing past the last one: the slot is these grants and no more.
+      await expect(aggregator.grantPermissions(ACM_AGGREGATOR_INDEX, permissions.length)).to.be.reverted;
     });
   });
 
@@ -246,12 +291,8 @@ forking(BLOCK_NUMBER, async () => {
         [ACM_ABI],
         ["RoleGranted"],
         [
-          // The 41 replayed grants, plus DEFAULT_ADMIN_ROLE lent to the aggregator.
-          CENTRIFUGE_GOVERNANCE.length +
-            CENTRIFUGE_OPERATOR.length +
-            CENTRIFUGE_CLAIMS.length +
-            CENTRIFUGE_GUARDIAN.length +
-            1,
+          // Every replayed grant, plus DEFAULT_ADMIN_ROLE lent to the aggregator.
+          permissions.length + 1,
         ],
       );
       // The admin role is handed back in the same transaction.
@@ -259,8 +300,8 @@ forking(BLOCK_NUMBER, async () => {
       await expectEvents(
         txResponse,
         [SOURCE_ABI],
-        ["ResourceAdded", "NavGuardConfigured", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
-        [FUNDS.length, FUNDS.length, 0, 0],
+        ["ResourceAdded", "NavGuardConfigured", "SpotAPYBpsSet", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
+        [FUNDS.length, FUNDS.length, FUNDS.length, 0, 1],
       );
       await expectEvents(txResponse, [HUB_ABI], ["YieldGroupAdded", "OuterWithdrawQueueSet"], [1, 1]);
       await expectEvents(txResponse, [HUB_ABI], ["OuterDepositQueueSet"], [0]);
@@ -278,10 +319,15 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("both inner queues are empty", async () => {
+    it("the inner withdraw queue is both funds, JTRSY first, and the deposit side is unset", async () => {
+      expect(await source.innerWithdrawQueue()).to.deep.equal(INNER_WITHDRAW_QUEUE);
+      expect(await source.innerWithdrawQueue()).to.deep.equal([JTRSY_VAULT, JAAA_VAULT]);
+      // It names every registered fund, which is what stops a later `setInnerWithdrawQueue` or a
+      // funded position from tripping `WithdrawQueueOmitsFundedResource`.
+      expect(await source.innerWithdrawQueue()).to.deep.equal(await source.resources());
       expect(await source.innerDepositQueue()).to.deep.equal([]);
-      expect(await source.innerWithdrawQueue()).to.deep.equal([]);
-      // With no queue to walk, `withdraw` can only ever spend idle, and there is none.
+      // A queue does not create liquidity: a Hub withdraw can still only spend settled idle, and
+      // there is none.
       expect(await source.maxWithdraw()).to.equal(0);
       expect(await usdt.balanceOf(CENTRIFUGE_SOURCE_USDT)).to.equal(0);
     });
@@ -326,7 +372,10 @@ forking(BLOCK_NUMBER, async () => {
       }
       expect(await hub.totalAssets()).to.equal(sum.add(await usdt.balanceOf(HUB_USDT)));
       expect(await source.totalAssets()).to.equal(0);
+      // The only movement across the whole proposal is what the three existing groups accrued over
+      // the voting and timelock delay — the new group contributed nothing.
       expect(await hub.totalAssets()).to.be.gte(hubTotalBefore);
+      expect(await hub.totalAssets()).to.be.closeTo(hubTotalBefore, hubTotalBefore.div(1000));
     });
 
     it("the NAV band is configured on each fund with both sides armed", async () => {
@@ -356,11 +405,22 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("no APY is published", async () => {
+    it("each fund publishes its realized rate", async () => {
       for (const fund of FUNDS) {
-        expect(await source.resourceSpotAPYBps(fund.vault), fund.name).to.equal(0);
+        const published = SPOT_APY_BPS.find(a => a.resource === fund.vault);
+        expect(await source.resourceSpotAPYBps(fund.vault), fund.name).to.equal(published?.apyBps);
       }
+      // The group's own figure weights each fund by the value it holds, and it holds nothing yet.
       expect(await source.spotAPYBps()).to.equal(0);
+    });
+
+    it("every grant this VIP makes has landed", async () => {
+      for (const p of permissions) {
+        const where = `${p.contractAddress} ${p.functionSig} -> ${p.account}`;
+        expect(await acm.hasRole(roleOf(p.contractAddress, p.functionSig), p.account), where).to.equal(true);
+      }
+      // And the borrowed ACM admin is gone in the same transaction.
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.equal(false);
     });
 
     it("the normal timelock holds the whole surface", async () => {
@@ -389,23 +449,48 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the guardian holds containment and the band, but cannot unpause", async () => {
+    it("the guardian holds containment, the emergency pair and the band", async () => {
       for (const sig of CENTRIFUGE_GOVERNANCE) {
         expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), GUARDIAN), sig).to.equal(
           CENTRIFUGE_GUARDIAN.includes(sig),
         );
       }
-      expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, "unpauseResource(address)"), GUARDIAN)).to.equal(false);
+      // Still no `sweep` and no `removeResource`: containment must not become a way out with value.
+      for (const sig of ["sweep(address,address)", "removeResource(address)", "addResource(address,address)"]) {
+        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), GUARDIAN), sig).to.equal(false);
+      }
     });
 
-    it("the NAV band never reaches the operator or keeper", async () => {
+    it("the NAV band reaches the timelock, the guardian and the operator, never the keeper", async () => {
       for (const sig of CENTRIFUGE_NAV_GUARD) {
-        for (const holder of [NORMAL_TIMELOCK, GUARDIAN]) {
+        for (const holder of [NORMAL_TIMELOCK, GUARDIAN, OPERATOR]) {
           expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), holder), `${holder} ${sig}`).to.equal(true);
         }
-        // The account that moves the capital does not decide what its value may be reported as.
-        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), OPERATOR), sig).to.equal(false);
         expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), KEEPER), sig).to.equal(false);
+      }
+    });
+
+    it("the operator and the guardian hold the emergency pair on every source", async () => {
+      for (const group of [...LIVE_SOURCES, CENTRIFUGE_SOURCE_USDT]) {
+        for (const sig of EMERGENCY) {
+          for (const holder of [NORMAL_TIMELOCK, OPERATOR, GUARDIAN]) {
+            expect(await acm.hasRole(roleOf(group, sig), holder), `${holder} ${group} ${sig}`).to.equal(true);
+          }
+          expect(await acm.hasRole(roleOf(group, sig), KEEPER), `keeper ${group} ${sig}`).to.equal(false);
+        }
+      }
+    });
+
+    it("the emergency pair is the only change to the sources already live", async () => {
+      for (const group of LIVE_SOURCES) {
+        for (const sig of YIELD_GROUP_BASE) {
+          for (const holder of [NORMAL_TIMELOCK, OPERATOR, GUARDIAN, KEEPER]) {
+            const granted = EMERGENCY.includes(sig) && (holder === OPERATOR || holder === GUARDIAN);
+            expect(await acm.hasRole(roleOf(group, sig), holder), `${holder} ${group} ${sig}`).to.equal(
+              liveSourceRolesBefore[`${group}|${sig}|${holder}`] || granted,
+            );
+          }
+        }
       }
     });
 
@@ -431,18 +516,19 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the operator and the guardian can publish the APY, the keeper cannot", async () => {
+    it("the operator and the guardian can republish the APY, the keeper cannot", async () => {
       const sig = "setSpotAPYBps(address,uint64)";
       for (const holder of [NORMAL_TIMELOCK, OPERATOR, GUARDIAN]) {
         expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), holder), `${holder}`).to.equal(true);
       }
       expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, sig), KEEPER)).to.equal(false);
 
+      const published = SPOT_APY_BPS.find(a => a.resource === JTRSY_VAULT)?.apyBps;
       const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
-      await expect(source.connect(operator).setSpotAPYBps(JTRSY_VAULT, 340))
+      await expect(source.connect(operator).setSpotAPYBps(JTRSY_VAULT, 500))
         .to.emit(source, "SpotAPYBpsSet")
-        .withArgs(JTRSY_VAULT, 0, 340);
-      await source.connect(operator).setSpotAPYBps(JTRSY_VAULT, 0);
+        .withArgs(JTRSY_VAULT, published, 500);
+      await source.connect(operator).setSpotAPYBps(JTRSY_VAULT, published);
     });
 
     it("the source cannot pause the Hub", async () => {
@@ -499,6 +585,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(coreDrop).to.be.lte(TRANCHE);
       expect(coreDrop).to.be.gte(TRANCHE.mul(99).div(100));
       expect(await hub.totalAssets()).to.be.gte(hubTotalBeforeMove);
+      expect(await hub.totalAssets()).to.be.lte(hubTotalBeforeMove.add(TRANCHE.div(100)));
     });
 
     it("Centrifuge records a pending deposit request", async () => {
@@ -517,6 +604,20 @@ forking(BLOCK_NUMBER, async () => {
       await expect(source.connect(timelock).removeResource(JTRSY_VAULT))
         .to.be.revertedWithCustomError(source, "ResourceHasBalance")
         .withArgs(JTRSY_VAULT, TRANCHE);
+    });
+
+    it("the queue must keep naming the funded fund, and still yields nothing withdrawable", async () => {
+      // JTRSY now holds the tranche, so the source refuses a queue that drops it — the reason the
+      // VIP sets this queue up front rather than leaving it for a later proposal.
+      await expect(source.connect(operator).setInnerWithdrawQueue([JAAA_VAULT]))
+        .to.be.revertedWithCustomError(source, "WithdrawQueueOmitsFundedResource")
+        .withArgs(JTRSY_VAULT);
+      expect(await source.innerWithdrawQueue()).to.deep.equal(INNER_WITHDRAW_QUEUE);
+
+      // And the queue is not a redemption path: the request is still in flight, so walking it
+      // withdraws nothing and a Hub withdraw routed here reverts rather than forcing an exit.
+      expect(await source.maxWithdraw()).to.equal(0);
+      expect(await source.totalAssets()).to.be.gte(TRANCHE);
     });
 
     it("armed on an empty position, the band pins the deposit to cost", async () => {
@@ -563,7 +664,7 @@ forking(BLOCK_NUMBER, async () => {
       const status = await source.navGuardStatus(JTRSY_VAULT);
       expect(band.anchor).to.be.gt(status.observedValue);
       expect(band.anchor).to.be.gte(before.maxAllowedValue);
-      // A day of drift at 350 bps a year and nothing more: the fund's own number had no say.
+      // A day of drift at 500 bps a year and nothing more: the fund's own number had no say.
       expect(band.anchor).to.be.lt(TRANCHE.mul(10_002).div(10_000));
 
       // Gaps are sized to the anchor, so the bounds are now genuinely two-sided. They are reported
@@ -576,13 +677,12 @@ forking(BLOCK_NUMBER, async () => {
       expect(status.isClamped).to.equal(false);
     });
 
-    it("the guardian can arm the band, the operator cannot", async () => {
-      await expect(source.connect(operator).setNavGuardEnabled(JTRSY_VAULT, true, true)).to.be.revertedWithCustomError(
-        source,
-        "Unauthorized",
-      );
-
+    it("the guardian and the operator can both arm the band", async () => {
       const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
+      await expect(source.connect(operator).setNavGuardEnabled(JTRSY_VAULT, true, true))
+        .to.emit(source, "NavGuardEnabledSet")
+        .withArgs(JTRSY_VAULT, true, true);
       await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
       await expect(source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, true, true))
         .to.emit(source, "NavGuardEnabledSet")
@@ -715,7 +815,7 @@ forking(BLOCK_NUMBER, async () => {
       await source.connect(guardian).setNavGuardEnabled(JTRSY_VAULT, false, false);
     });
 
-    it("the guardian can pause a fund, but not unpause it", async () => {
+    it("the guardian can pause a fund and lift it again", async () => {
       const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
       await source.connect(guardian).pauseResource(JAAA_VAULT);
       expect((await source.resourceConfig(JAAA_VAULT)).paused).to.equal(true);
@@ -728,8 +828,17 @@ forking(BLOCK_NUMBER, async () => {
         .to.be.revertedWithCustomError(source, "ResourceIsPaused")
         .withArgs(JAAA_VAULT);
 
-      // And the guardian cannot undo its own pause: only governance can.
-      await expect(source.connect(guardian).unpauseResource(JAAA_VAULT)).to.be.revertedWithCustomError(
+      // And it can undo its own pause without a proposal, which is what the quick-fix grant buys.
+      await source.connect(guardian).unpauseResource(JAAA_VAULT);
+      expect((await source.resourceConfig(JAAA_VAULT)).paused).to.equal(false);
+
+      // The operator holds the same pair, and can repoint a resource at the adapter it already uses.
+      await source.connect(operator).updateResourceAdapter(JAAA_VAULT, ADAPTER_CENTRIFUGE);
+      expect((await source.resourceConfig(JAAA_VAULT)).adapter).to.equal(ADAPTER_CENTRIFUGE);
+
+      // The keeper holds neither.
+      const keeper = await initMainnetUser(KEEPER, ethers.utils.parseEther("1"));
+      await expect(source.connect(keeper).pauseResource(JAAA_VAULT)).to.be.revertedWithCustomError(
         source,
         "Unauthorized",
       );

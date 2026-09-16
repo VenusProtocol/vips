@@ -2,7 +2,7 @@
 // Centrifuge YieldGroup ACM role strings for BNB Chain mainnet.
 // ===================================================================================================
 
-const YIELD_GROUP_BASE = [
+export const YIELD_GROUP_BASE = [
   "addResource(address,address)",
   "removeResource(address)",
   "updateResourceAdapter(address,address)",
@@ -12,6 +12,8 @@ const YIELD_GROUP_BASE = [
   "unpauseResource(address)",
   "sweep(address,address)",
 ];
+
+export const EMERGENCY = ["updateResourceAdapter(address,address)", "unpauseResource(address)"];
 
 // Opening a redemption and cancelling either direction.
 const CENTRIFUGE_ASYNC_REQUESTS = [
@@ -56,14 +58,17 @@ export const CENTRIFUGE_OPERATOR = [
   "setInnerDepositQueue(address[])",
   "setInnerWithdrawQueue(address[])",
   "pauseResource(address)",
+  ...EMERGENCY,
   ...CENTRIFUGE_ASYNC_REQUESTS,
   ...CENTRIFUGE_CLAIMS,
+  ...CENTRIFUGE_NAV_GUARD,
   SET_SPOT_APY,
 ];
 
 export const CENTRIFUGE_GUARDIAN = [
   "pauseResource(address)",
   "forceRemoveResource(address)",
+  ...EMERGENCY,
   ...CENTRIFUGE_NAV_GUARD,
   SET_SPOT_APY,
 ];
