@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents, setMaxStalePeriod } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip668, {
+import vip662, {
   ATLAS_ORACLE,
   ATLAS_PIVOT_ENABLE_FLAGS,
   ATLAS_PIVOT_MARKETS,
@@ -30,8 +30,8 @@ import vip668, {
   VAI_ORACLES,
   VAI_PSM,
   VTREASURY,
-} from "../../vips/vip-668/bscmainnet";
-import coreMarketOracles from "../../vips/vip-668/data/coreMarketOracles.json";
+} from "../../vips/vip-662/bscmainnet";
+import coreMarketOracles from "../../vips/vip-662/data/coreMarketOracles.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -200,7 +200,7 @@ forking(FORK_BLOCK, async () => {
     }
   });
 
-  testVip("VIP-668 Oracle adjustments and VAI Vault rewards stop", await vip668(), {
+  testVip("VIP-662 Oracle adjustments and VAI Vault rewards stop", await vip662(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [ATLAS_PIVOT_MARKETS.length + 1]);
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);

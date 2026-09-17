@@ -1,12 +1,12 @@
 /**
- * Generates vips/vip-668/data/coreMarketOracles.json.
+ * Generates vips/vip-662/data/coreMarketOracles.json.
  *
  * The file has two arrays:
  *   - coreMarketOracles: every market returned by the Core Pool Comptroller's getAllMarkets(), with
  *     its current ResilientOracle main, pivot and fallback oracles, enable flags and caching flag.
  *     Known oracles are shown by name (see oracleAddresses), any other oracle by address, and an
  *     empty slot as null. This is the on-chain state the VIP starts from.
- *   - atlasPivotMarkets: the markets where Atlas is the fallback oracle. vips/vip-668/bscmainnet.ts
+ *   - atlasPivotMarkets: the markets where Atlas is the fallback oracle. vips/vip-662/bscmainnet.ts
  *     moves Atlas to the pivot slot for exactly these markets.
  *
  * Each atlasPivotMarkets entry must match what the VIP assumes, otherwise the script fails and
@@ -16,7 +16,7 @@
  *     which is the check ResilientOracle runs once Atlas becomes the pivot
  *
  * Run:
- *   npx hardhat run vips/vip-668/scripts/fetchCoreMarketOracles.ts --network bscmainnet
+ *   npx hardhat run vips/vip-662/scripts/fetchCoreMarketOracles.ts --network bscmainnet
  */
 import fs from "fs";
 import { ethers } from "hardhat";
