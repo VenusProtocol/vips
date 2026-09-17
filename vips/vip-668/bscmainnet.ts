@@ -36,9 +36,7 @@ export const VAI_ORACLES = [ATLAS_ORACLE, ethers.constants.AddressZero, ethers.c
 export const VAI_ENABLE_FLAGS = [true, false, false];
 
 export const VTREASURY = bscmainnet.VTREASURY;
-export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
-export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
 // TreasuryTokenBuybackDistributor from VIP-646. convertVaiViaPsm() swaps the distributor's whole VAI
 // balance for USDT at the VAI PSM and sends the USDT to VTreasury. The PSM fee is paid in VAI and also
@@ -50,8 +48,8 @@ export const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 // Sells the tokens it holds for USDT and sends the USDT to the RiskFund
 export const RISK_FUND_BUYBACK = "0x0c71EFabD00329E839745ef23aB946d3ed24A805";
 
-// RiskFund.sweepToken reverts when the amount is above the balance, so every amount below is the exact
-// RiskFund balance at block 122009038. BSW and TWT (under $1 each) and WIN stay in the RiskFund.
+// RiskFund.sweepToken reverts when the amount is above the balance, so every amount in the three lists
+// below is the exact RiskFund balance at block 122009038. BSW and TWT (under $1 each) stay in the RiskFund.
 export const LONG_TAIL_TOKENS = [
   { symbol: "FLOKI", address: "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E", amount: "177082682555785184" },
   { symbol: "TRX", address: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3", amount: "1833688639" },
@@ -62,35 +60,31 @@ export const LONG_TAIL_TOKENS = [
   { symbol: "RACA", address: "0x12BB890508c125661E03b09EC06E404bc9289040", amount: "316724376165504616820380" },
 ];
 
-// Ankr flash unstake: swap(shares, receiver) burns the caller's ankrBNB and pays BNB, minus a 0.25% fee,
-// in the same call
-export const ANKR_BNB = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
-export const ANKR_BINANCE_POOL = "0x9e347Af362059bf2E55839002c699F7A5BaFE86E";
-export const ANKR_BNB_AMOUNT = "2905734451637837137";
-
-// Stader: redeemBnbxForBnb burns the caller's BNBx and pays BNB in the same call (same exit as VIP-649)
-export const BNBX = "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275";
-export const STADER_STAKE_MANAGER = "0x3b961e83400D51e6E1AF5c450d3C7d7b80588d28";
-export const BNBX_AMOUNT = "601110316592232264";
-
-// pStake: sending stkBNB to the StakePool (ERC777 send) opens a withdrawal and pays the BNB in the same
-// call. The pool rejects amounts that are not a multiple of 1e12, so the amount is rounded down and
-// 201756396971 wei of stkBNB stays in the RiskFund.
-export const STKBNB = "0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16";
-export const PSTAKE_STAKE_POOL = "0xC228CefDF841dEfDbD5B3a18dFD414cC0dbfa0D8";
-export const STKBNB_AMOUNT = "208460000000000000";
-
-// BNB paid to the Normal Timelock by the three exits above at block 122009038: 3.213060502738973371
-// (Ankr) + 0.667202434159934361 (Stader) + 0.219192222127766713 (pStake). The RiskFund cannot receive
-// BNB, so this amount is wrapped and sent as WBNB. If the exchange rates move before execution, the
-// difference stays in, or is paid from, the Normal Timelock's own BNB.
-export const WBNB_AMOUNT = "4099455159026674445";
-
-// Lista slisBNB has no instant exit for the RiskFund (instantWithdraw is whitelist-only), so it goes to the
-// Venus dev recipient used in VIP-649 for off-chain unstaking. Exact RiskFund balance at block 122009038.
-export const SLISBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
-export const SLISBNB_AMOUNT = "634257472081931688";
+// Venus dev recipient used in VIP-628, VIP-641 and VIP-649: receives tokens the proposal cannot convert
+// on-chain and works them out off-chain, returning the proceeds to the RiskFund as USDT in a later step.
 export const DEV_RECIPIENT = "0x080f8a0fb70f8f0f1b83c6178225a96cbe2be0de";
+
+// The RiskFund buyback prices every token it sells through the ResilientOracle, and getPrice reverts for
+// these four: WIN's only oracle is a Chainlink feed that no longer answers, the other three have no oracle
+// configuration at all. They go to the dev recipient instead.
+export const UNPRICED_TOKENS = [
+  { symbol: "WIN", address: "0xaeF0d72a118ce24feE3cD1d43d383897D05B4e99", amount: "1412410526598519969216500" },
+  { symbol: "CAT", address: "0x6894CDe390a3f51155ea41Ed24a33A4827d3063D", amount: "12652875825153018355850633" },
+  { symbol: "小大力神杯", address: "0x285D6aCC01F38f1Ea4666FA49Ac5f8268d127777", amount: "2020000000000000000000" },
+  { symbol: "BRAD", address: "0x3dB1B406a4d50A841948765685ed42ed1f174444", amount: "50000000000000000000000" },
+];
+
+// Liquid staking receipt tokens held by the RiskFund, moved whole to the dev recipient for off-chain
+// unstaking rather than exited on-chain: the instant exits charge a fee, pay a non-fixed amount of BNB the
+// RiskFund cannot receive directly, and the pStake one leaves dust behind.
+export const STAKING_RECEIPTS = [
+  { symbol: "ankrBNB", address: "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827", amount: "2905734451637837137" },
+  { symbol: "BNBx", address: "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275", amount: "601110316592232264" },
+  { symbol: "stkBNB", address: "0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16", amount: "208460201756396971" },
+  { symbol: "slisBNB", address: "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B", amount: "634257472081931688" },
+];
+
+export const DEV_RECIPIENT_TOKENS = [...UNPRICED_TOKENS, ...STAKING_RECEIPTS];
 
 export const vip668 = () => {
   const meta = {
@@ -108,7 +102,7 @@ It also cleans up funds held by the Venus Treasury and the Risk Fund:
 
 4. Converts the VAI held by the Venus Treasury to USDT through the VAI Peg Stability Module (PSM).
 5. Sends the long-tail tokens held by the Risk Fund to the RiskFund buyback, which sells them for USDT.
-6. Exits the third-party liquid staking positions held by the Risk Fund. Three are unstaked in this proposal and their BNB is returned to the Risk Fund as WBNB, and slisBNB is sent to the Venus dev recipient for off-chain unstaking.
+6. Sends the Risk Fund's remaining tokens that the buyback cannot price, and its liquid staking receipt tokens, to the Venus dev recipient for off-chain conversion, with the proceeds returned to the Risk Fund as USDT in a later step.
 
 #### Atlas as pivot oracle
 
@@ -146,19 +140,27 @@ The Risk Fund (${RISK_FUND}) holds these tokens outside its base assets. Each on
 - TRXOLD: 15.62 (about $5)
 - RACA: 316,724.38 (about $4)
 
-BSW and TWT are worth less than $1 each and are not moved. WIN (1,412,410.53, about $53) is not moved either, even though it is worth more than TRXOLD and RACA. The RiskFund buyback prices every token it sells through the Resilient Oracle, and the only oracle configured for WIN is Chainlink, whose WIN feed no longer responds. getPrice therefore reverts for WIN and the buyback cannot value it.
+BSW and TWT are worth less than $1 each and are not moved.
+
+#### Risk Fund tokens the buyback cannot price
+
+The RiskFund buyback prices every token it sells through the Resilient Oracle. getPrice reverts for the four tokens below, so the buyback cannot value them: the only oracle configured for WIN is Chainlink, whose WIN feed no longer responds, and the other three have no oracle configuration. Each one is sent whole to the Venus dev recipient (${DEV_RECIPIENT}, also used in VIP-628, VIP-641 and VIP-649), which converts it off-chain and returns the proceeds to the Risk Fund as USDT in a later step:
+
+- WIN: 1,412,410.53 (about $53)
+- CAT: 12,652,875.83 (about $25)
+- 小大力神杯: 2,020 (about $6)
+- BRAD: 50,000 (about $3)
 
 #### Risk Fund staking positions
 
-The Risk Fund holds receipt tokens from three staking protocols that allow an instant exit. Each token is moved to the Normal Timelock and exited in the same proposal:
+The Risk Fund holds receipt tokens from four liquid staking protocols. Each one is sent whole to the same Venus dev recipient, which unstakes it off-chain and returns the proceeds to the Risk Fund as USDT in a later step:
 
-- ankrBNB: 2.9057 (about $2,311), exited through the Ankr flash unstake with a 0.25% fee
-- BNBx: 0.6011 (about $479), exited through the Stader instant redemption, as in VIP-649
-- stkBNB: 0.2085 (about $157), exited through the pStake StakePool. The pool only accepts multiples of 1e12 wei, so 201,756,396,971 wei of stkBNB stays in the Risk Fund.
+- ankrBNB: 2.9057 (about $2,311)
+- BNBx: 0.6011 (about $479)
+- stkBNB: 0.2085 (about $157)
+- slisBNB: 0.6343 (about $473)
 
-The exits pay about 4.0995 BNB to the Normal Timelock. The Risk Fund cannot receive BNB, so the BNB is wrapped to WBNB and sent to the Risk Fund.
-
-slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because Lista's instant withdrawal is limited to whitelisted accounts. It is sent to the Venus dev recipient (${DEV_RECIPIENT}, also used in VIP-649), which unstakes it off-chain, with the proceeds returned to the Risk Fund as USDT in a later step.
+The positions are not exited on-chain in this proposal. The instant exits charge a fee (0.25% on Ankr), pay an amount of BNB that is only known at execution and that the Risk Fund cannot receive directly, the pStake pool only accepts multiples of 1e12 wei and would leave dust behind, and Lista's instant withdrawal is limited to whitelisted accounts. Moving the receipt tokens whole avoids all of that and keeps the proposal independent of the state of those protocols at execution.
 
 #### Actions
 
@@ -169,15 +171,8 @@ slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because List
 5. Calls withdrawTreasuryBEP20(address,uint256,address) on VTreasury (${VTREASURY}) for the whole VAI balance, to the TreasuryTokenBuybackDistributor.
 6. Calls convertVaiViaPsm() on the TreasuryTokenBuybackDistributor.
 7. Calls sweepToken(address,address,uint256) on the Risk Fund once per long-tail token listed above, to the RiskFund buyback.
-8. Calls sweepToken(address,address,uint256) on the Risk Fund for ankrBNB (${ANKR_BNB}), to the Normal Timelock (${NORMAL_TIMELOCK}).
-9. Calls swap(uint256,address) on the Ankr BinancePool (${ANKR_BINANCE_POOL}) for the ankrBNB, paying the BNB to the Normal Timelock.
-10. Calls sweepToken(address,address,uint256) on the Risk Fund for BNBx (${BNBX}), to the Normal Timelock.
-11. Calls redeemBnbxForBnb(uint256) on the Stader StakeManagerV2 (${STADER_STAKE_MANAGER}) for the BNBx.
-12. Calls sweepToken(address,address,uint256) on the Risk Fund for stkBNB (${STKBNB}), to the Normal Timelock.
-13. Calls send(address,uint256,bytes) on stkBNB to the pStake StakePool (${PSTAKE_STAKE_POOL}).
-14. Calls deposit() on WBNB (${WBNB}) with ${WBNB_AMOUNT} wei of BNB.
-15. Calls transfer(address,uint256) on WBNB for the same amount, to the Risk Fund.
-16. Calls sweepToken(address,address,uint256) on the Risk Fund for slisBNB (${SLISBNB}), to the Venus dev recipient.`,
+8. Calls sweepToken(address,address,uint256) on the Risk Fund once per token the buyback cannot price (WIN, CAT, 小大力神杯, BRAD), to the Venus dev recipient.
+9. Calls sweepToken(address,address,uint256) on the Risk Fund once per staking receipt token (ankrBNB, BNBx, stkBNB, slisBNB), to the Venus dev recipient.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -232,61 +227,13 @@ slisBNB (0.6343, about $473) has no instant exit for the Risk Fund, because List
         params: [address, RISK_FUND_BUYBACK, amount],
       })),
 
-      // ankrBNB to BNB through the Ankr flash unstake
-      {
+      // Tokens the buyback cannot price and the staking receipt tokens, whole to the dev recipient for
+      // off-chain conversion
+      ...DEV_RECIPIENT_TOKENS.map(({ address, amount }) => ({
         target: RISK_FUND,
         signature: "sweepToken(address,address,uint256)",
-        params: [ANKR_BNB, NORMAL_TIMELOCK, ANKR_BNB_AMOUNT],
-      },
-      {
-        target: ANKR_BINANCE_POOL,
-        signature: "swap(uint256,address)",
-        params: [ANKR_BNB_AMOUNT, NORMAL_TIMELOCK],
-      },
-
-      // BNBx to BNB through the Stader instant redemption
-      {
-        target: RISK_FUND,
-        signature: "sweepToken(address,address,uint256)",
-        params: [BNBX, NORMAL_TIMELOCK, BNBX_AMOUNT],
-      },
-      {
-        target: STADER_STAKE_MANAGER,
-        signature: "redeemBnbxForBnb(uint256)",
-        params: [BNBX_AMOUNT],
-      },
-
-      // stkBNB to BNB through the pStake StakePool
-      {
-        target: RISK_FUND,
-        signature: "sweepToken(address,address,uint256)",
-        params: [STKBNB, NORMAL_TIMELOCK, STKBNB_AMOUNT],
-      },
-      {
-        target: STKBNB,
-        signature: "send(address,uint256,bytes)",
-        params: [PSTAKE_STAKE_POOL, STKBNB_AMOUNT, "0x"],
-      },
-
-      // The RiskFund cannot receive BNB, so the BNB goes back as WBNB
-      {
-        target: WBNB,
-        signature: "deposit()",
-        params: [],
-        value: WBNB_AMOUNT,
-      },
-      {
-        target: WBNB,
-        signature: "transfer(address,uint256)",
-        params: [RISK_FUND, WBNB_AMOUNT],
-      },
-
-      // slisBNB to the dev recipient for off-chain unstaking
-      {
-        target: RISK_FUND,
-        signature: "sweepToken(address,address,uint256)",
-        params: [SLISBNB, DEV_RECIPIENT, SLISBNB_AMOUNT],
-      },
+        params: [address, DEV_RECIPIENT, amount],
+      })),
     ],
     meta,
     ProposalType.REGULAR,
