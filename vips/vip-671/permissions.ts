@@ -1,6 +1,12 @@
 // ===================================================================================================
 // VIP-671 — ACM role strings for the Hub-Funded Spoke pool (Phase 1).
 //
+// SHARED BY BOTH LISTINGS. The role-string arrays below are properties of the contracts, so ./bsctestnet.ts
+// and ./bscmainnet.ts both import them. THE ON-CHAIN VERIFICATION RECORDED IN THIS FILE IS BSCTESTNET'S.
+// bscmainnet's is recorded separately in ./addresses/bscmainnet.ts, and the two chains differ: on
+// bscmainnet the Guardian receives none of these grants, and the Fast-track Timelock holds more
+// pre-existing wildcards than it does on bsctestnet.
+//
 // Every string is the literal argument passed to `_checkAccessAllowed(...)` in the contract, copied
 // verbatim from isolated-pools/contracts/Spoke/SpokeComptroller.sol. The ACM hashes
 // `keccak256(targetContract, roleString)`, so a string that merely looks right grants a role that
