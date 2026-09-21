@@ -9,7 +9,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 // deployment artifact. This is the adapter the dApp drove until the frontend was repointed at the
 // VIP-606 adapter.
 export const PENDLE_PT_VAULT_ADAPTER = "0x179bD219c2a20a49406C9AdA39634eDac1C7F656";
-export const PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN = "0xae560a5E368ea72D4090533b245bf163c9DC6dC2";
+export const PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN = "0xaE560a5e368Ea72D4090533B245bF163c9Dc6dc2";
 
 // Implementation currently behind the proxy above. Its verified source is identical to the
 // implementation below except that _checkAccessAllowed is absent from addMarket(), pause() and
@@ -30,7 +30,7 @@ const vip672 = () => {
     title: "VIP-672 [BNB Chain] Pendle PT Adapter Governance Handover",
     description: `This VIP completes the governance handover of the second PendlePTVaultAdapter proxy on BNB Chain (${PENDLE_PT_VAULT_ADAPTER}) and restores the access-control checks on it.
 
-Two PendlePTVaultAdapter proxies exist on BNB Chain mainnet. The first (0x60Db419d8ea13C5827072Cf693D13cA1Ec6E0B4a) was activated by VIP-606, is recorded in the venus-periphery deployment artifacts, and is owned by the Normal Timelock under the shared ProxyAdmin 0x6beb6d2695b67feb73ad4f172e8e2975497187e4. The second (${PENDLE_PT_VAULT_ADAPTER}) was deployed on 2026-03-23 and never went through the same handover: it and its own ProxyAdmin (${PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN}) remained owned by the deployer address ${DEPLOYER}, and its implementation ${UNGUARDED_IMPLEMENTATION} was never recorded in a deployment artifact.
+Two PendlePTVaultAdapter proxies exist on BNB Chain mainnet. The first (0x60Db419d8ea13C5827072Cf693D13cA1Ec6E0B4a) was activated by VIP-606, is recorded in the venus-periphery deployment artifacts, and is owned by the Normal Timelock under the shared ProxyAdmin 0x6beb6D2695B67FEb73ad4f172E8E2975497187e4. The second (${PENDLE_PT_VAULT_ADAPTER}) was deployed on 2026-03-23 and never went through the same handover: it and its own ProxyAdmin (${PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN}) remained owned by the deployer address ${DEPLOYER}, and its implementation ${UNGUARDED_IMPLEMENTATION} was never recorded in a deployment artifact.
 
 The two implementations are byte-identical in source except for three lines: the \`_checkAccessAllowed\` call is absent from \`addMarket(address,address)\`, \`pause()\` and \`unpause()\` on ${UNGUARDED_IMPLEMENTATION}. As a result those three functions are callable by any address on this proxy today, while the equivalent calls on the VIP-606 adapter revert with the ACM \`Unauthorized\` error. Because \`withdraw\` and \`redeemAtMaturity\` carry the \`whenNotPaused\` modifier, any address can suspend this adapter's deposit and exit paths — and any address can lift the pause again, since \`unpause()\` is equally open.
 

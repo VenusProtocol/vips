@@ -16,16 +16,16 @@ import vip672, {
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Fork after the frontend was repointed at the VIP-606 adapter and before the deployer starts the
-// handover, so the pre-VIP state below is the live state.
-const FORK_BLOCK = 123100000;
+// Fork after the deployer's two handover transactions, both mined 2026-09-21:
+//   adapter.transferOwnership(NORMAL_TIMELOCK)    block 123125269
+//   proxyAdmin.transferOwnership(NORMAL_TIMELOCK) block 123125372
+const FORK_BLOCK = 123125400;
 
 const ADAPTER_ABI = [
   "function owner() view returns (address)",
   "function pendingOwner() view returns (address)",
   "function paused() view returns (bool)",
   "function accessControlManager() view returns (address)",
-  "function transferOwnership(address newOwner)",
   "function pause()",
   "function unpause()",
   "function addMarket(address pendleMarket, address vToken)",
@@ -34,7 +34,6 @@ const ADAPTER_ABI = [
 
 const PROXY_ADMIN_ABI = [
   "function owner() view returns (address)",
-  "function transferOwnership(address newOwner)",
   "function getProxyImplementation(address proxy) view returns (address)",
 ];
 
@@ -42,15 +41,12 @@ const ACM_ABI = ["function hasRole(bytes32 role, address account) view returns (
 
 // The ACM role for a contract-scoped permission is keccak256(abi.encodePacked(contract, functionSig)).
 const roleFor = (contractAddress: string, functionSig: string) =>
-  ethers.utils.keccak256(
-    ethers.utils.solidityPack(["address", "string"], [contractAddress, functionSig]),
-  );
+  ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [contractAddress, functionSig]));
 
 forking(FORK_BLOCK, async () => {
   let adapter: Contract;
   let proxyAdmin: Contract;
   let acm: Contract;
-  let deployer: SignerWithAddress;
   let rando: SignerWithAddress;
 
   before(async () => {
@@ -58,14 +54,16 @@ forking(FORK_BLOCK, async () => {
     proxyAdmin = await ethers.getContractAt(PROXY_ADMIN_ABI, PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN);
     acm = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
 
-    deployer = await initMainnetUser(DEPLOYER, ethers.utils.parseEther("1"));
     rando = await initMainnetUser("0x00000000000000000000000000000000DeaDBeef", ethers.utils.parseEther("1"));
   });
 
   describe("Pre-VIP state", async () => {
-    it("adapter and its ProxyAdmin are owned by the deployer EOA, not the Normal Timelock", async () => {
+    it("the deployer's handover transactions have landed", async () => {
+      // Ownable2Step: the adapter records the Normal Timelock as pending owner only.
       expect(await adapter.owner()).to.equal(DEPLOYER);
-      expect(await proxyAdmin.owner()).to.equal(DEPLOYER);
+      expect(await adapter.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+      // Single-step Ownable: the ProxyAdmin is already under governance.
+      expect(await proxyAdmin.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("proxy runs the implementation that is missing the access-control checks", async () => {
@@ -82,19 +80,6 @@ forking(FORK_BLOCK, async () => {
       for (const sig of ["pause()", "unpause()", "addMarket(address,address)"]) {
         expect(await acm.hasRole(roleFor(PENDLE_PT_VAULT_ADAPTER, sig), bscmainnet.NORMAL_TIMELOCK)).to.equal(false);
       }
-    });
-  });
-
-  describe("Prerequisite transactions from the deployer", async () => {
-    it("deployer starts the adapter handover and hands over the ProxyAdmin outright", async () => {
-      await adapter.connect(deployer).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
-      await proxyAdmin.connect(deployer).transferOwnership(bscmainnet.NORMAL_TIMELOCK);
-
-      // Ownable2Step: the adapter only records a pending owner until acceptOwnership() runs.
-      expect(await adapter.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
-      expect(await adapter.owner()).to.equal(DEPLOYER);
-      // Single-step Ownable: the ProxyAdmin is already under governance.
-      expect(await proxyAdmin.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
   });
 
