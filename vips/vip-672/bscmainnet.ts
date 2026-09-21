@@ -1,8 +1,5 @@
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-
-const { bscmainnet } = NETWORK_ADDRESSES;
 
 // Second PendlePTVaultAdapter proxy, deployed 2026-03-23. Its proxy and its own ProxyAdmin were
 // left with the deployer EOA and its implementation was never recorded in a venus-periphery
@@ -21,7 +18,7 @@ export const UNGUARDED_IMPLEMENTATION = "0x79276267b23B611ee9Aa8D8D50CB134334e87
 // same ABI, same storage layout, with the three access-control checks in place.
 export const GUARDED_IMPLEMENTATION = "0x70B093Df30B62105e1aCb91Feeb1E9a916d7d899";
 
-// Deployer EOA that currently owns both the proxy and its ProxyAdmin.
+// Original deployer; the ProxyAdmin has already been transferred to the Normal Timelock.
 export const DEPLOYER = "0x24c30C9C84b8a3C71A521ad30007ED47372331b3";
 
 const vip672 = () => {
@@ -34,7 +31,7 @@ Two PendlePTVaultAdapter proxies exist on BNB Chain mainnet. The first (0x60Db41
 
 The two implementations are byte-identical in source except for three lines: the \`_checkAccessAllowed\` call is absent from \`addMarket(address,address)\`, \`pause()\` and \`unpause()\` on ${UNGUARDED_IMPLEMENTATION}. As a result those three functions are callable by any address on this proxy today, while the equivalent calls on the VIP-606 adapter revert with the ACM \`Unauthorized\` error. Because \`withdraw\` and \`redeemAtMaturity\` carry the \`whenNotPaused\` modifier, any address can suspend this adapter's deposit and exit paths — and any address can lift the pause again, since \`unpause()\` is equally open.
 
-No funds are held by the adapter itself: it is a router and custodies no vTokens, PT or native balance. Accounts that used it hold their vTokens directly and can always redeem through the vToken contract independently of the adapter.
+Users hold their vTokens directly, but existing delegate approvals remain effective until revoked. This VIP places the legacy adapter under governance and repairs its access checks; it does not revoke those approvals or disable user redemption. Users can also authorize the VIP-606 adapter or redeem directly through the vToken, subject to normal market liquidity, collateral and pause restrictions.
 
 #### Prerequisites
 
@@ -62,29 +59,19 @@ If either transaction has not landed, this VIP reverts.
 
 ---
 
-**3. Grant ACM permission — addMarket to Normal Timelock**
-- Contract: AccessControlManager
-- Function: \`giveCallPermission(address,string,address)\`
-- Parameters: contractAddress ${PENDLE_PT_VAULT_ADAPTER}, functionSig \`addMarket(address,address)\`, accountToPermit Normal Timelock
+#### Legacy adapter permissions
 
----
+No ACM permissions are granted: the production integration uses the VIP-606 adapter, so this legacy adapter does not need ongoing market or pause administration. After the upgrade, \`addMarket\`, \`pause\` and \`unpause\` require ACM authorization, which has not been granted on this adapter to the timelocks or guardians. Ownership alone does not authorize these functions. Governance retains the ability to upgrade the contract or grant permissions later if necessary.
 
-**4. Grant ACM permissions — pause and unpause to all timelocks and the Guardian**
-- Contract: AccessControlManager
-- Function: \`giveCallPermission(address,string,address)\` — called 8 times (pause + unpause x Normal, Fast Track, Critical Timelocks + Guardian)
-- Effect: After command 2 the three functions are permissioned, so these grants are what makes the adapter operable under governance. They mirror the grants VIP-606 made for the other adapter.
-
-Total ACM permission grants in this VIP: 9 (addMarket x 1 + pause x 4 + unpause x 4).
+The upgrade preserves the existing pause state. If the legacy adapter is paused before execution, it remains paused and cannot be unpaused without a subsequent permission grant or other governance action. Users can instead authorize and redeem through the VIP-606 adapter; the two adapters have independent pause states.
 
 #### Summary
 
 If approved, this VIP will:
 - Accept ownership of PendlePTVaultAdapter ${PENDLE_PT_VAULT_ADAPTER} into the Normal Timelock
 - Upgrade that proxy to the guarded implementation ${GUARDED_IMPLEMENTATION}, closing the permissionless \`pause()\`, \`unpause()\` and \`addMarket()\` entry points
-- Grant \`addMarket(address,address)\` on the adapter to the Normal Timelock
-- Grant \`pause()\` and \`unpause()\` on the adapter to the Normal Timelock, Fast Track Timelock, Critical Timelock and Guardian
 
-After execution, both Pendle PT adapters on BNB Chain are owned by the Normal Timelock and carry the same access-control configuration.`,
+After execution, both Pendle PT adapters on BNB Chain are owned by the Normal Timelock, but this legacy adapter receives no ACM permission grants.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -104,29 +91,6 @@ After execution, both Pendle PT adapters on BNB Chain are owned by the Normal Ti
         signature: "upgrade(address,address)",
         params: [PENDLE_PT_VAULT_ADAPTER, GUARDED_IMPLEMENTATION],
       },
-      // 3-4. Mirror the ACM configuration VIP-606 applied to the governed adapter.
-      {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [PENDLE_PT_VAULT_ADAPTER, "addMarket(address,address)", bscmainnet.NORMAL_TIMELOCK],
-      },
-      ...[
-        bscmainnet.NORMAL_TIMELOCK,
-        bscmainnet.FAST_TRACK_TIMELOCK,
-        bscmainnet.CRITICAL_TIMELOCK,
-        bscmainnet.GUARDIAN,
-      ].flatMap(timelock => [
-        {
-          target: bscmainnet.ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [PENDLE_PT_VAULT_ADAPTER, "pause()", timelock],
-        },
-        {
-          target: bscmainnet.ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [PENDLE_PT_VAULT_ADAPTER, "unpause()", timelock],
-        },
-      ]),
     ],
     meta,
     ProposalType.REGULAR,
