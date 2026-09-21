@@ -287,6 +287,7 @@ forking(85953737, async () => {
    * Increase Venus oracle maxStalePeriod on ChainlinkOracle/BinanceOracle
    * for BNB and slisBNB so stale feeds are accepted after time travel.
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
   const increaseVenusOracleMaxStalePeriod = async () => {
     const comptrollerContract = new ethers.Contract(UNITROLLER, ["function oracle() view returns (address)"], provider);
     const venusOracleAddr = await comptrollerContract.oracle();
