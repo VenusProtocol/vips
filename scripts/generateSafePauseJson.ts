@@ -377,6 +377,7 @@ const getCriticalGuardianAddress = (networkName: string): string => {
 
 // ─── Phase 1: Gather Input ──────────────────────────────────────────────────
 
+// eslint-disable-next-line complexity, sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 export const gatherInput = async (): Promise<PauseInput> => {
   const networkName = network.name;
   const chainId = network.config.chainId;
@@ -521,6 +522,7 @@ export const generateCommands = async (
     fetchEmodeRange,
     fetchEmodePoolsForMarket,
   },
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 ): Promise<Command[]> => {
   const { comptroller, comptrollerAbi, marketAddresses, symbols, pauseActions, includeEmode } = input;
   const commands: Command[] = [];
@@ -650,6 +652,7 @@ export const exportJson = async (
 
 // ─── Phase 4: Orchestration (pure, testable) ──────────────────────────────────
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 export const orchestrate = async (input: PauseInput, deps: OrchestrateDeps): Promise<ExportResult[]> => {
   const results: ExportResult[] = [];
   const guardianAddress = getGuardianAddress(input.network);
