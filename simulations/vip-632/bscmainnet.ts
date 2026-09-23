@@ -50,6 +50,7 @@ forking(BLOCK_NUMBER, async () => {
   let vUsdc: Contract;
   let usdc: Contract;
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
   before(async () => {
     oracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
