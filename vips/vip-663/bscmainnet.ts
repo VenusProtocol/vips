@@ -59,57 +59,57 @@ export const Actions = {
   ENTER_MARKET: 7,
 };
 
-const vip672 = () => {
+export const vip663 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-672 [BNB Chain] Pendle PT Adapter Governance Handover, THE Oracle Update and TRX & lisUSD Deprecation",
+    title: "VIP-663 [BNB Chain] Pendle PT Adapter Governance Handover, THE Oracle Update and TRX & lisUSD Deprecation",
     description: `This VIP has three parts on BNB Chain:
 
 1. Completes the governance handover of the second PendlePTVaultAdapter proxy (${PENDLE_PT_VAULT_ADAPTER}) and restores the access-control checks on it.
 2. Removes the RedStone fallback oracle from THE, whose feed RedStone is discontinuing.
 3. Moves the TRX and lisUSD Core Pool markets to the next deprecation stage.
 
-### Part 1: Pendle PT adapter governance handover
+#### Part 1: Pendle PT adapter governance handover
 
 Two PendlePTVaultAdapter proxies exist on BNB Chain mainnet. The first (0x60Db419d8ea13C5827072Cf693D13cA1Ec6E0B4a) was activated by VIP-606, is recorded in the venus-periphery deployment artifacts, and is owned by the Normal Timelock under the shared ProxyAdmin 0x6beb6D2695B67FEb73ad4f172E8E2975497187e4. The second (${PENDLE_PT_VAULT_ADAPTER}) was deployed on 2026-03-23 and never went through the same handover: it and its own ProxyAdmin (${PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN}) remained owned by the deployer address ${DEPLOYER}, and its implementation ${UNGUARDED_IMPLEMENTATION} was never recorded in a deployment artifact.
 
-The two implementations are byte-identical in source except for three lines: the \`_checkAccessAllowed\` call is absent from \`addMarket(address,address)\`, \`pause()\` and \`unpause()\` on ${UNGUARDED_IMPLEMENTATION}. As a result those three functions are callable by any address on this proxy today, while the equivalent calls on the VIP-606 adapter revert with the ACM \`Unauthorized\` error. Because \`withdraw\` and \`redeemAtMaturity\` carry the \`whenNotPaused\` modifier, any address can suspend this adapter's deposit and exit paths — and any address can lift the pause again, since \`unpause()\` is equally open.
+The two implementations are byte-identical in source except for three lines: the _checkAccessAllowed call is absent from addMarket(address,address), pause() and unpause() on ${UNGUARDED_IMPLEMENTATION}. As a result those three functions are callable by any address on this proxy today, while the equivalent calls on the VIP-606 adapter revert with the ACM Unauthorized error. Because withdraw and redeemAtMaturity carry the whenNotPaused modifier, any address can suspend this adapter's deposit and exit paths — and any address can lift the pause again, since unpause() is equally open.
 
 Users hold their vTokens directly, but existing delegate approvals remain effective until revoked. This VIP places the legacy adapter under governance and repairs its access checks; it does not revoke those approvals or disable user redemption. Users can also authorize the VIP-606 adapter or redeem directly through the vToken, subject to normal market liquidity, collateral and pause restrictions.
 
 #### Prerequisites
 
-This VIP assumes that, before execution, the deployer address ${DEPLOYER} has submitted two transactions:
+The deployer address ${DEPLOYER} has completed the two prerequisite transactions:
 
-1. \`PendlePTVaultAdapter(${PENDLE_PT_VAULT_ADAPTER}).transferOwnership(NORMAL_TIMELOCK)\` — the adapter is \`Ownable2Step\`, so this only sets the pending owner and must be completed by the \`acceptOwnership()\` command below.
-2. \`ProxyAdmin(${PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN}).transferOwnership(NORMAL_TIMELOCK)\` — this ProxyAdmin is single-step \`Ownable\`, so ownership transfers immediately and needs no command in this VIP.
+1. PendlePTVaultAdapter(${PENDLE_PT_VAULT_ADAPTER}).transferOwnership(NORMAL_TIMELOCK) — mined at block 123125269. The adapter is Ownable2Step, so this only sets the pending owner and must be completed by the acceptOwnership() command below.
+2. ProxyAdmin(${PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN}).transferOwnership(NORMAL_TIMELOCK) — mined at block 123125372. This ProxyAdmin is single-step Ownable, so ownership transfers immediately and needs no command in this VIP.
 
-If either transaction has not landed, this VIP reverts.
+Execution requires the Normal Timelock to remain the adapter’s pending owner and the ProxyAdmin’s owner.
 
 #### Changes
 
 **1. Accept ownership of the adapter**
 - Contract: PendlePTVaultAdapter (${PENDLE_PT_VAULT_ADAPTER})
-- Function: \`acceptOwnership()\`
+- Function: acceptOwnership()
 - Effect: Completes the two-step ownership handoff, placing the adapter under Normal Timelock control.
 
 ---
 
 **2. Restore the guarded implementation**
 - Contract: ProxyAdmin (${PENDLE_PT_VAULT_ADAPTER_PROXY_ADMIN})
-- Function: \`upgrade(address proxy, address implementation)\`
+- Function: upgrade(address proxy, address implementation)
 - Parameters: proxy ${PENDLE_PT_VAULT_ADAPTER}, implementation ${GUARDED_IMPLEMENTATION}
-- Effect: Points the proxy at the implementation already in use by the VIP-606 adapter, which restores the \`_checkAccessAllowed\` checks on \`addMarket\`, \`pause\` and \`unpause\`. The two implementations share an ABI and storage layout, so no state migration is involved and no initializer is re-run.
+- Effect: Points the proxy at the implementation already in use by the VIP-606 adapter, which restores the _checkAccessAllowed checks on addMarket, pause and unpause. The two implementations share an ABI and storage layout, so no state migration is involved and no initializer is re-run.
 
 ---
 
 #### Legacy adapter permissions
 
-No ACM permissions are granted: the production integration uses the VIP-606 adapter, so this legacy adapter does not need ongoing market or pause administration. After the upgrade, \`addMarket\`, \`pause\` and \`unpause\` require ACM authorization, which has not been granted on this adapter to the timelocks or guardians. Ownership alone does not authorize these functions. Governance retains the ability to upgrade the contract or grant permissions later if necessary.
+No ACM permissions are granted: the production integration uses the VIP-606 adapter, so this legacy adapter does not need ongoing market or pause administration. After the upgrade, addMarket, pause and unpause require ACM authorization, which has not been granted on this adapter to the timelocks or guardians. Ownership alone does not authorize these functions. Governance retains the ability to upgrade the contract or grant permissions later if necessary.
 
 The upgrade preserves the existing pause state. If the legacy adapter is paused before execution, it remains paused and cannot be unpaused without a subsequent permission grant or other governance action. Users can instead authorize and redeem through the VIP-606 adapter; the two adapters have independent pause states.
 
-### Part 2: THE oracle update
+#### Part 2: THE oracle update
 
 RedStone is discontinuing its THE price feed (${THE_REDSTONE_FEED}). On Venus the feed is read through the RedStoneOracle (${REDSTONE_ORACLE}), which sits in the FALLBACK slot of THE's ResilientOracle configuration. The current configuration is:
 
@@ -119,50 +119,57 @@ RedStone is discontinuing its THE price feed (${THE_REDSTONE_FEED}). On Venus th
 
 **3. Clear THE's fallback oracle**
 - Contract: ResilientOracle (${RESILIENT_ORACLE})
-- Function: \`setTokenConfig((address,address[3],bool[3],bool))\`
+- Function: setTokenConfig((address,address[3],bool[3],bool))
 - Parameters: asset ${THE}, oracles [ChainlinkOracle, AtlasOracle, zero address], enable flags [true, true, false], caching disabled
-- Effect: THE is priced by Chainlink, validated against Atlas. The MAIN and PIVOT oracles and the caching flag are unchanged.
+- Effect: THE is priced by Chainlink, validated against Atlas. The MAIN and PIVOT oracles and the caching flag are unchanged. The unused THE configuration remains on the RedStoneOracle adapter. With no fallback, THE pricing reverts if Chainlink or Atlas is unavailable or their prices fail validation.
 
-### Part 3: TRX and lisUSD deprecation
+#### Part 3: TRX and lisUSD deprecation
 
 The next deprecation stage for two BNB Chain Core Pool markets, vTRX (${vTRX}) and vlisUSD (${vlisUSD}):
 
-| Parameter | vTRX | vlisUSD |
-| --- | --- | --- |
-| Supply cap | 3,000,000 TRX → 0 | 2,100,000 lisUSD → 0 |
-| Borrow cap | 1,000,000 TRX → 0 | 4,000,000 lisUSD → 0 |
-| Collateral factor | 0 (unchanged) | 50% → 0 |
-| Liquidation threshold | 52.5% (unchanged) | 55% (unchanged) |
-| Reserve factor | 25% → 100% | 10% → 100% |
-| Paused actions | MINT (already), + BORROW, ENTER_MARKET | BORROW (already), + MINT, ENTER_MARKET |
+**vTRX**
+- Supply cap: 3,000,000 TRX → 0
+- Borrow cap: 1,000,000 TRX → 0
+- Collateral factor: 0 (unchanged)
+- Liquidation threshold: 52.5% (unchanged)
+- Reserve factor: 25% → 100%
+- Paused actions: MINT (already paused), BORROW and ENTER_MARKET
+
+**vlisUSD**
+- Supply cap: 2,100,000 lisUSD → 0
+- Borrow cap: 4,000,000 lisUSD → 0
+- Collateral factor: 50% → 0
+- Liquidation threshold: 55% (unchanged)
+- Reserve factor: 10% → 100%
+- Paused actions: BORROW (already paused), MINT and ENTER_MARKET
 
 Both markets move to the deprecation interest rate model ${DEPRECATION_IRM}, the one already used by the deprecated Core Pool markets: a 300% base rate, rising to about 500% APR at full utilisation.
 
 **4. Pause actions**
 - Contract: Comptroller (${COMPTROLLER})
-- Function: \`_setActionsPaused(address[],uint8[],bool)\`
+- Function: _setActionsPaused(address[],uint8[],bool)
 - Parameters: vTRX — BORROW, ENTER_MARKET; vlisUSD — MINT, ENTER_MARKET
-- Effect: No new supply, borrow or collateral enablement on either market. Redeem, repay, liquidation and exitMarket remain available.
+- Effect: No new supply, borrow or collateral enablement on either market. Redeem, repay, liquidation and exitMarket remain unpaused, subject to the existing market checks.
 
 **5. Set supply and borrow caps to zero**
 - Contract: Comptroller (${COMPTROLLER})
-- Functions: \`_setMarketSupplyCaps(address[],uint256[])\`, \`_setMarketBorrowCaps(address[],uint256[])\`
+- Functions: _setMarketSupplyCaps(address[],uint256[]), _setMarketBorrowCaps(address[],uint256[])
 
 **6. Set the vlisUSD collateral factor to zero**
 - Contract: Comptroller (${COMPTROLLER})
-- Function: \`setCollateralFactor(address,uint256,uint256)\`
+- Function: setCollateralFactor(address,uint256,uint256)
 - Parameters: vlisUSD, collateral factor 0, liquidation threshold 55% (unchanged)
-- Effect: lisUSD no longer adds borrowing power. The liquidation threshold is kept, so existing positions do not become liquidatable because of this change.
+- Effect: lisUSD no longer adds borrowing power. The liquidation threshold is kept, so this collateral-factor change does not itself change liquidation eligibility. The higher borrow rate still increases debt over time.
 
-**7. Set the reserve factor to 100%** on vTRX and vlisUSD via \`_setReserveFactor(uint256)\`.
+**7. Set the reserve factor to 100%** on vTRX and vlisUSD via _setReserveFactor(uint256).
 
-**8. Switch to the deprecation interest rate model** on vTRX and vlisUSD via \`_setInterestRateModel(address)\`.
+**8. Switch to the deprecation interest rate model** on vTRX and vlisUSD via _setInterestRateModel(address).
 
 #### Summary
 
 If approved, this VIP will:
 - Accept ownership of PendlePTVaultAdapter ${PENDLE_PT_VAULT_ADAPTER} into the Normal Timelock
-- Upgrade that proxy to the guarded implementation ${GUARDED_IMPLEMENTATION}, closing the permissionless \`pause()\`, \`unpause()\` and \`addMarket()\` entry points
+- Upgrade that proxy to the guarded implementation ${GUARDED_IMPLEMENTATION}, closing the permissionless pause(), unpause() and addMarket() entry points
 - Remove the RedStone fallback oracle from THE
 - Zero the caps of vTRX and vlisUSD, zero the vlisUSD collateral factor, pause new activity on both, and move both to a 100% reserve factor and the deprecation interest rate model
 
@@ -250,4 +257,4 @@ After execution, both Pendle PT adapters on BNB Chain are owned by the Normal Ti
   );
 };
 
-export default vip672;
+export default vip663;

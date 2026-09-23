@@ -7,7 +7,7 @@ import { NETWORK_ADDRESSES, ORACLE_BNB } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip672, {
+import vip663, {
   ATLAS_ORACLE,
   Actions,
   CHAINLINK_ORACLE,
@@ -25,7 +25,7 @@ import vip672, {
   UNGUARDED_IMPLEMENTATION,
   vTRX,
   vlisUSD,
-} from "../../vips/vip-672/bscmainnet";
+} from "../../vips/vip-663/bscmainnet";
 import VTOKEN_ABI from "../vip-567/abi/VToken.json";
 import COMPTROLLER_ABI from "../vip-662/abi/Comptroller.json";
 import RESILIENT_ORACLE_ABI from "../vip-662/abi/ResilientOracle.json";
@@ -268,8 +268,8 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip(
-    "VIP-672 Pendle PT Adapter Governance Handover, THE Oracle Update and TRX & lisUSD Deprecation",
-    await vip672(),
+    "VIP-663 Pendle PT Adapter Governance Handover, THE Oracle Update and TRX & lisUSD Deprecation",
+    await vip663(),
     {
       callbackAfterExecution: async txResponse => {
         await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
