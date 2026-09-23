@@ -64,6 +64,8 @@
 //   `setActionsPaused(address[],uint256[],bool)` through a pre-existing wildcard that reaches any new
 //   comptroller, so the emergency pause path on this pool is open from the first block. The Guardian
 //   does NOT hold that wildcard (verified false) and this VIP does not add it.
+//   (./bsctestnet-addendum.ts grants the Guardian that role afterwards, against this comptroller
+//   rather than as a wildcard, so pausing a testnet action no longer needs a proposal.)
 //
 // NOTE on setActionsPaused. The role string is `setActionsPaused(address[],uint256[],bool)` while the
 // CALL signature is `setActionsPaused(address[],uint8[],bool)`, because `Action` is an enum. They are
@@ -115,14 +117,38 @@ export const REGISTRY_DRIVEN_ROLES = [
 ];
 
 /**
- * TODO(deploy): `enterMarketBehalf(address,address)` lets an approved router enter a market for the
- * supplier it is minting on behalf of, so a first-time supplier needs one transaction instead of two.
- * It is NOT granted here. The contract's own guidance is to grant it only to a router that passes its
- * own caller through as `account`, and no such router is deployed on this chain. Granting it to a
- * timelock would be meaningless and would widen the surface for nothing. Add the grant in the VIP that
- * ships the router.
+ * Shared with the pooled `Comptroller` and wildcard-granted to all three timelocks on both chains, so
+ * neither listing grants them. They are named here because the bsctestnet addendum grants both to the
+ * Guardian and a mainnet listing will have the same decision to make, and because an ACM string that
+ * exists in two places is the failure this file's header is about.
+ *
+ * NOTE on PAUSE_ROLE. The role string carries `uint256[]` while the CALL signature is
+ * `setActionsPaused(address[],uint8[],bool)`, because `Action` is an enum. They hash to different
+ * roles. The `uint256[]` form is the one the contract checks. Do not "fix" either to match the other.
+ *   SpokeComptroller.sol:1067  setActionsPaused(address[],uint256[],bool)
+ *   SpokeComptroller.sol:161   unlistMarket(address)
  */
-export const ROUTER_ROLES = ["enterMarketBehalf(address,address)"];
+export const PAUSE_ROLE = "setActionsPaused(address[],uint256[],bool)";
+export const UNLIST_ROLE = "unlistMarket(address)";
+
+/**
+ * `enterMarketForAccount(address,address)` lets an approved caller enter a market for the supplier it
+ * is minting on behalf of, so a first-time supplier needs one transaction instead of two.
+ *
+ * It is NOT granted by either listing. The contract's own guidance is to grant it only to a caller
+ * that passes its own caller through as `account`, which on mainnet is the CollateralGateway from
+ * venus-periphery#74, and that ships with Phase 2. Granting it to a timelock would be meaningless and
+ * would widen the surface for nothing. Add the grant in the VIP that ships the gateway.
+ *
+ * On bsctestnet ./bsctestnet-addendum.ts grants it to the Guardian as a stand-in, so the
+ * one-transaction supply path is testable before the gateway exists. That grant is testnet-only and
+ * should be revoked when the gateway lands.
+ *
+ * NOTE: the role string was `enterMarketBehalf(address,address)` until the implementation deployed in
+ * that addendum renamed it. The old string was never granted to anyone on bsctestnet, verified for
+ * both the Guardian and the Normal Timelock, so the rename left nothing to revoke.
+ */
+export const ROUTER_ROLES = ["enterMarketForAccount(address,address)"];
 
 /**
  * The permissions this VIP RELIES ON but does not grant, because bsctestnet already holds them as
@@ -150,7 +176,7 @@ export const ASSUMED_WILDCARD_ROLES = {
     "setCollateralFactor(address,uint256,uint256)",
     "setMarketSupplyCaps(address[],uint256[])",
     "setMarketBorrowCaps(address[],uint256[])",
-    "unlistMarket(address)",
+    UNLIST_ROLE,
   ],
 
   /// Held by the Normal Timelock, on each spoke vToken. The VIP calls the first two directly.
@@ -182,7 +208,7 @@ export const ASSUMED_WILDCARD_ROLES = {
   /// Held by all three timelocks, on the comptroller. Not called by this VIP: asserted because the
   /// decision to grant nothing to the Fast-track and Critical timelocks rests on the pause path
   /// already reaching this pool without them.
-  pause: ["setActionsPaused(address[],uint256[],bool)"],
+  pause: [PAUSE_ROLE],
 };
 
 /**

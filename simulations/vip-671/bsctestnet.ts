@@ -43,6 +43,7 @@ import {
 import {
   ASSUMED_GUARDIAN_ROLES,
   ASSUMED_WILDCARD_ROLES,
+  PAUSE_ROLE,
   REGISTRY_DRIVEN_ROLES,
   SPOKE_COMPTROLLER_ROLES,
 } from "../../vips/vip-671/permissions";
@@ -469,12 +470,9 @@ forking(FORK_BLOCK, async () => {
 
       // Deliberately not granted, and not inherited: the pause path stays with the timelocks. The role
       // string carries uint256[] while the call signature carries uint8[], because Action is an enum.
-      expect(await mayCall(SPOKE_COMPTROLLER, GUARDIAN, "setActionsPaused(address[],uint256[],bool)")).to.be.false;
+      expect(await mayCall(SPOKE_COMPTROLLER, GUARDIAN, PAUSE_ROLE)).to.be.false;
       for (const timelock of [NORMAL_TIMELOCK, bsctestnet.FAST_TRACK_TIMELOCK, bsctestnet.CRITICAL_TIMELOCK]) {
-        expect(
-          await mayCall(SPOKE_COMPTROLLER, timelock, "setActionsPaused(address[],uint256[],bool)"),
-          `${timelock} may pause`,
-        ).to.be.true;
+        expect(await mayCall(SPOKE_COMPTROLLER, timelock, PAUSE_ROLE), `${timelock} may pause`).to.be.true;
       }
     });
 

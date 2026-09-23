@@ -42,15 +42,29 @@ export const SPOKE_POOL_REGISTRY = "0xeAA45288d804971e5a76f33559e629F5b2b1Cb8B";
 /// `Comptroller_HubSpoke`, a BeaconProxy over SpokeComptrollerBeacon. Ownable2Step, nominated only.
 export const SPOKE_COMPTROLLER = "0x11960c84d6c4F2a978a12372721C3A6A88C78f4c";
 
-/// Reference only. `UpgradeableBeacon` is plain `Ownable` and both were handed to the Normal Timelock
-/// inside their deploy transactions, so this VIP has no command for either.
+/// `UpgradeableBeacon` is plain `Ownable` and both were handed to the Normal Timelock inside their
+/// deploy transactions, so the listing VIP has no command for either. Verified on chain: both owners
+/// are the Normal Timelock, so `upgradeTo` is reachable by proposal without an ACM grant.
+///
+/// The comptroller beacon is no longer reference-only. ./bsctestnet-addendum.ts upgrades it.
 export const SPOKE_COMPTROLLER_BEACON = "0x076f3fb34C8937a62aD562c33249798367542d75";
 export const SPOKE_VTOKEN_BEACON = "0xB9c3b5A6f13FD5BEF51eE8B62ED3EA384a9d1B45";
+
+/// The `SpokeComptroller` implementation the comptroller beacon should point at, from
+/// isolated-pools deployments/bsctestnet_addresses.json (SpokeComptrollerImpl).
+///
+/// Used only by ./bsctestnet-addendum.ts. The listing VIP ran against the previous implementation,
+/// 0x7F81dC61F3D75569A67155fb188171Aef173a52b, which the beacon still serves.
+export const SPOKE_COMPTROLLER_IMPL = "0xf4b98889F07909c9326100b74AfBcE49813473C6";
 
 /// Reference only. The lens holds no state, has no owner and no AccessControlManager, takes the
 /// registry to read as a call argument, and nothing on chain stores its address, so it needs no
 /// command in this or any VIP.
-export const SPOKE_POOL_LENS = "0xfbCBFF4ca8b2fFe3231b0c0BBEa25C79F4B0597c";
+///
+/// Redeployed after the listing VIP executed. The address the listing VIP was written against,
+/// 0xfbCBFF4ca8b2fFe3231b0c0BBEa25C79F4B0597c, still carries code but is no longer the one the
+/// isolated-pools deployment record names.
+export const SPOKE_POOL_LENS = "0x372978251378CCE54cf9Ca3D3f4cFA58e84e5da8";
 
 // ---------------------------------------------------------------------------------------------------
 // Markets and underlyings.

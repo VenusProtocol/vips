@@ -2,6 +2,8 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
+import { PAUSE_ROLE, UNLIST_ROLE } from "../permissions";
+
 // ===================================================================================================
 // VIP-671 [BNB Chain] — Hub-Funded Spoke pool, PHASE 1 address book and market table.
 //
@@ -325,7 +327,7 @@ export const ASSUMED_WILDCARD_ROLES = {
     "setCollateralFactor(address,uint256,uint256)",
     "setMarketSupplyCaps(address[],uint256[])",
     "setMarketBorrowCaps(address[],uint256[])",
-    "unlistMarket(address)",
+    UNLIST_ROLE,
   ],
 
   /// Held by the Normal Timelock, on each spoke vToken. The VIP calls the first two directly, and the
@@ -352,7 +354,7 @@ export const ASSUMED_WILDCARD_ROLES = {
   /// The role string carries `uint256[]` while the CALL signature carries `uint8[]`, because `Action`
   /// is an enum. Confirmed on chain: the `uint256[]` form is the granted one and the `uint8[]` form is
   /// held by nobody. Do not "fix" either to match the other.
-  pause: ["setActionsPaused(address[],uint256[],bool)"],
+  pause: [PAUSE_ROLE],
 };
 
 /// Not wildcards. These two are granted against ONE specific contract, so they are asserted with
@@ -369,4 +371,4 @@ export const ASSUMED_PER_CONTRACT_ROLES = {
 /// Held by the Guardian as wildcards on the comptroller, before this VIP and without any grant from
 /// it. Asserted because the decision to grant the Guardian nothing rests on them: the emergency pause
 /// path reaches this pool from its first block regardless.
-export const ASSUMED_GUARDIAN_ROLES = ["unlistMarket(address)", "setActionsPaused(address[],uint256[],bool)"];
+export const ASSUMED_GUARDIAN_ROLES = [UNLIST_ROLE, PAUSE_ROLE];
