@@ -1,0 +1,237 @@
+import { ethers } from "hardhat";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+import { cutParams as params } from "../../simulations/vip-567/utils/bsctestnet-cut-params.json";
+
+export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+export const NEW_VBEP20_DELEGATE_IMPL = "0xb941C5D148c65Ce49115D12B5148247AaCeFF375";
+export const NEW_DIAMOND_IMPLEMENTATION = "0xd25200C9CE964329d20389E328F1Ca0e2B0e91BC";
+export const NEW_COMPTROLLER_LENS = "0x31fd5a3Fdbe9972373e9373Eb59519c60d30EE00";
+export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+
+export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+export const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+export const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+
+export const CORE_MARKETS = [
+  {
+    name: "vTRX",
+    address: "0x6AF3Fdb3282c5bb6926269Db10837fa8Aec67C04",
+  },
+  {
+    name: "vUST",
+    address: "0xF206af85BC2761c4F876d27Bd474681CfB335EfA",
+  },
+  {
+    name: "vLUNA",
+    address: "0x9C3015191d39cF1930F92EB7e7BCbd020bCA286a",
+  },
+  {
+    name: "vAAVE",
+    address: "0x714db6c38A17883964B68a07d56cE331501d9eb6",
+  },
+  {
+    name: "vADA",
+    address: "0x37C28DE42bA3d22217995D146FC684B2326Ede64",
+  },
+  {
+    name: "vBTC",
+    address: "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe",
+  },
+  {
+    name: "vBUSD",
+    address: "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4",
+  },
+  {
+    name: "vCAKE",
+    address: "0xeDaC03D29ff74b5fDc0CC936F6288312e1459BC6",
+  },
+  {
+    name: "vDOGE",
+    address: "0xF912d3001CAf6DC4ADD366A62Cc9115B4303c9A9",
+  },
+  {
+    name: "vETH",
+    address: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab",
+  },
+  {
+    name: "vFDUSD",
+    address: "0xF06e662a00796c122AaAE935EC4F0Be3F74f5636",
+  },
+  {
+    name: "vLTC",
+    address: "0xAfc13BC065ABeE838540823431055D2ea52eBA52",
+  },
+  {
+    name: "vMATIC",
+    address: "0x3619bdDc61189F33365CC572DF3a68FB3b316516",
+  },
+  {
+    name: "vSXP",
+    address: "0x74469281310195A04840Daf6EdF576F559a3dE80",
+  },
+  {
+    name: "vTRXOLD",
+    address: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
+  },
+  {
+    name: "vTUSD",
+    address: "0xEFAACF73CE2D38ED40991f29E72B12C74bd4cf23",
+  },
+  {
+    name: "vTUSDOLD",
+    address: "0x3A00d9B02781f47d033BAd62edc55fBF8D083Fb0",
+  },
+  {
+    name: "vUNI",
+    address: "0x171B468b52d7027F12cEF90cd065d6776a25E24e",
+  },
+  {
+    name: "vUSDC",
+    address: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
+  },
+  {
+    name: "vUSDT",
+    address: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
+  },
+  {
+    name: "vWBETH",
+    address: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
+  },
+  {
+    name: "vXRP",
+    address: "0x488aB2826a154da01CC4CC16A8C83d4720D3cA2C",
+  },
+  {
+    name: "vXVS",
+    address: "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E",
+  },
+  {
+    name: "vasBNB",
+    address: "0x73F506Aefd5e169D48Ea21A373B9B0a200E37585",
+  },
+  {
+    name: "vlisUSD",
+    address: "0x9447b1D4Bd192f25416B6aCc3B7f06be2f7D6309",
+  },
+  {
+    name: "vPT-sUSDE-26JUN2025",
+    address: "0x90535B06ddB00453a5e5f2bC094d498F1cc86032",
+  },
+  {
+    name: "vPT-USDe-30OCT2025",
+    address: "0x86a94290f2B8295daA3e53bA1286f2Ff21199143",
+  },
+  {
+    name: "vslisBNB",
+    address: "0xaB5504A3cde0d8253E8F981D663c7Ff7128B3e56",
+  },
+  {
+    name: "vSOL",
+    address: "0xbd9EB061444665Df7282Ec0888b72D60aC41Eb8C",
+  },
+  {
+    name: "vSolvBTC",
+    address: "0xA38110ae4451A86ab754695057d5B5a9BEAd0387",
+  },
+  {
+    name: "vsUSDe",
+    address: "0x8c8A1a0b6e1cb8058037F7bF24de6b79Aca5B7B0",
+  },
+  {
+    name: "vTHE",
+    address: "0x39A239F5117BFaC7a1b0b3A517c454113323451d",
+  },
+  {
+    name: "vTWT",
+    address: "0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF",
+  },
+  {
+    name: "vUSD1",
+    address: "0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf",
+  },
+  {
+    name: "vUSDe",
+    address: "0x86f8DfB7CA84455174EE9C3edd94867b51Da46BD",
+  },
+  {
+    name: "vUSDF",
+    address: "0x140d5Da2cE9fb9A8725cabdDB2Fe8ea831342C78",
+  },
+  {
+    name: "vWBNB",
+    address: "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C",
+  },
+  {
+    name: "vxSolvBTC",
+    address: "0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e",
+  },
+];
+
+export const vip566Testnet = () => {
+  const meta = {
+    version: "v2",
+    title: "VIP-566: Flash loan feature for all markets on BSC Testnet",
+    description: "Upgrade contracts and enable flash loans on BSC Testnet.",
+    forDescription: "Execute",
+    againstDescription: "Do not execute",
+    abstainDescription: "Abstain",
+  };
+  return makeProposal(
+    [
+      {
+        target: UNITROLLER,
+        signature: "_setPendingImplementation(address)",
+        params: [NEW_DIAMOND_IMPLEMENTATION],
+      },
+      {
+        target: NEW_DIAMOND_IMPLEMENTATION,
+        signature: "_become(address)",
+        params: [UNITROLLER],
+      },
+      {
+        target: UNITROLLER,
+        signature: "diamondCut((address,uint8,bytes4[])[])",
+        params: [params],
+      },
+      ...CORE_MARKETS.map(vToken => {
+        return {
+          target: vToken.address,
+          signature: "_setImplementation(address,bool,bytes)",
+          params: [NEW_VBEP20_DELEGATE_IMPL, false, "0x"],
+        };
+      }),
+      ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "setWhiteListFlashLoanAccount(address,bool)", timelock],
+      })),
+      ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setFlashLoanEnabled(bool)", timelock],
+      })),
+      ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setFlashLoanFeeMantissa(uint256,uint256)", timelock],
+      })),
+      {
+        target: UNITROLLER,
+        signature: "_setComptrollerLens(address)",
+        params: [NEW_COMPTROLLER_LENS],
+      },
+      // Enable flash loans for all core markets
+      ...CORE_MARKETS.map(vToken => ({
+        target: vToken.address,
+        signature: "setFlashLoanEnabled(bool)",
+        params: [true],
+      })),
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
+};
+
+export default vip566Testnet;

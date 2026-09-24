@@ -1,0 +1,57 @@
+{
+  "pools": [
+    {
+      "name": "LiquidStakedETH",
+      "comptroller": "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16",
+      "rewardDistributor": [
+        {
+          "address": "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D",
+          "rewardToken": "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52",
+          "balance": "278527416955914399830",
+          "marketsWithNonZeroSpeeds": []
+        }
+      ],
+      "markets": [
+        {
+          "name": "vwstETH_LiquidStakedETH",
+          "address": "0x9df6B5132135f14719696bBAe3C54BAb272fDb16",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "8000000000000000000000",
+          "borrowCap": "800000000000000000000",
+          "collateralFactor": "930000000000000000",
+          "liquidationThreshold": "950000000000000000"
+        },
+        {
+          "name": "vweETH_LiquidStakedETH",
+          "address": "0x246a35E79a3a0618535A469aDaF5091cAA9f7E88",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "4600000000000000000000",
+          "borrowCap": "2300000000000000000000",
+          "collateralFactor": "930000000000000000",
+          "liquidationThreshold": "950000000000000000"
+        },
+        {
+          "name": "vWETH_LiquidStakedETH",
+          "address": "0x39D6d13Ea59548637104E40e729E4aABE27FE106",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "14000000000000000000000",
+          "borrowCap": "12500000000000000000000",
+          "collateralFactor": "0",
+          "liquidationThreshold": "0"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "totalMintPaused": 3,
+    "totalBorrowPaused": 3,
+    "totalSupplyCap": 3,
+    "totalBorrowCap": 3,
+    "totalCollateralFactor": 2,
+    "totalSupplySpeed": 0,
+    "totalBorrowSpeed": 0
+  }
+}

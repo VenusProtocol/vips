@@ -1,0 +1,31 @@
+[
+  {
+    "inputs": [{ "internalType": "address", "name": "vToken", "type": "address" }],
+    "name": "markets",
+    "outputs": [
+      { "internalType": "bool", "name": "isListed", "type": "bool" },
+      { "internalType": "uint256", "name": "collateralFactorMantissa", "type": "uint256" },
+      { "internalType": "bool", "name": "isVenus", "type": "bool" },
+      { "internalType": "uint256", "name": "liquidationThresholdMantissa", "type": "uint256" },
+      { "internalType": "uint256", "name": "liquidationIncentiveMantissa", "type": "uint256" },
+      { "internalType": "uint96", "name": "marketPoolId", "type": "uint96" },
+      { "internalType": "bool", "name": "isBorrowAllowed", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "borrowCaps",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "supplyCaps",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

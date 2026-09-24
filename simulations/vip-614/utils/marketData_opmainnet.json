@@ -1,0 +1,73 @@
+{
+  "pools": [
+    {
+      "name": "Core",
+      "comptroller": "0x5593FF68bE84C966821eEf5F0a988C285D5B7CeC",
+      "markets": [
+        {
+          "name": "vWBTC_Core",
+          "address": "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "10000000000",
+          "borrowCap": "5000000000",
+          "collateralFactor": "680000000000000000",
+          "liquidationThreshold": "730000000000000000"
+        },
+        {
+          "name": "vWETH_Core",
+          "address": "0x66d5AE25731Ce99D46770745385e662C8e0B4025",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "3000000000000000000000",
+          "borrowCap": "2700000000000000000000",
+          "collateralFactor": "750000000000000000",
+          "liquidationThreshold": "800000000000000000"
+        },
+        {
+          "name": "vUSDT_Core",
+          "address": "0x37ac9731B0B02df54975cd0c7240e0977a051721",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "4000000000000",
+          "borrowCap": "3600000000000",
+          "collateralFactor": "750000000000000000",
+          "liquidationThreshold": "780000000000000000"
+        },
+        {
+          "name": "vOP_Core",
+          "address": "0x6b846E3418455804C1920fA4CC7a31A51C659A2D",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "3000000000000000000000000",
+          "borrowCap": "1500000000000000000000000",
+          "collateralFactor": "580000000000000000",
+          "liquidationThreshold": "630000000000000000"
+        },
+        {
+          "name": "vUSDC_Core",
+          "address": "0x1C9406ee95B7af55F005996947b19F91B6D55b15",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "isEnterMarketActionPaused": false,
+          "supplyCap": "10000000000000",
+          "borrowCap": "9000000000000",
+          "collateralFactor": "750000000000000000",
+          "liquidationThreshold": "780000000000000000"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "totalMintPaused": 5,
+    "totalBorrowPaused": 0,
+    "totalEnterMarketPaused": 5,
+    "totalSupplyCap": 5,
+    "totalBorrowCap": 5,
+    "totalCollateralFactor": 5
+  }
+}

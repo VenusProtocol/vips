@@ -13,6 +13,11 @@ import "./type-extensions";
 
 dotenv.config();
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+// Well-known public hardhat/anvil test key (account #0) used as the zksynctestnode fallback signer.
+// That network is a LOCAL fork node only — the vip-framework impersonates and funds the signer, so any
+// key works. Without a fallback an empty accounts array crashes the framework at getSigners()[0] with an
+// unrelated-looking TypeError. NEVER use this key (or send funds to it) on a real network.
+const LOCAL_TEST_NODE_KEY = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -172,8 +177,8 @@ const config: HardhatUserConfig = {
     },
     zksynctestnode: {
       url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
-      chainId: 300, // change it to 324 for zksyncmainnet
-      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      chainId: 324, // change it to 300 for zksyncsepolia
+      accounts: [`0x${DEPLOYER_PRIVATE_KEY || LOCAL_TEST_NODE_KEY}`],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
       timeout: 2000000000,
       zksync: true,
