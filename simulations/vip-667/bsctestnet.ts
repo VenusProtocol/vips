@@ -5,26 +5,25 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { EMODE_POOL, vip557 } from "../../vips/vip-557/bsctestnet";
+import { EMODE_POOL, vip667 } from "../../vips/vip-667/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(68657159, async () => {
+forking(132849860, async () => {
   let comptroller: Contract;
   before(async () => {
-    const provider = ethers.provider;
-    comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, provider);
-    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "WBETH", 315360000);
+    comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
+    await setMaxStalePeriodInBinanceOracle(bsctestnet.BINANCE_ORACLE, "WBETH", 315360000);
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("check new ETH Emode PoolId does not exist", async () => {
-      expect(await comptroller.lastPoolId()).to.be.lessThan(EMODE_POOL.id);
+    it("new ETH emode pool gets the expected id", async () => {
+      expect(await comptroller.lastPoolId()).to.equal(EMODE_POOL.id - 1);
     });
   });
 
-  testVip("VIP-557", await vip557(), {
+  testVip("VIP-667", await vip667(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -36,9 +35,8 @@ forking(68657159, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
-          "PoolFallbackStatusUpdated",
         ],
-        [1, 2, 1, 1, 2, 1, 1],
+        [1, 2, 1, 1, 2, 1],
       );
     },
   });

@@ -1,62 +1,40 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { expectEvents, setMaxStalePeriod } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { vip554 } from "../../vips/vip-554/bscmainnet";
-import { EMODE_POOL, vip557 } from "../../vips/vip-557/bscmainnet";
+import ERC20_ABI from "../../src/vip-framework/abi/erc20.json";
+import RESILIENT_ORACLE_ABI from "../../src/vip-framework/abi/resilientOracle.json";
+import { EMODE_POOL, vip667 } from "../../vips/vip-667/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const WBETH = "0xa2E3356610840701BDf5611a53974510Ae27E2e1";
 
-const setStalePeriod = async (resilientOracle: Contract, redstoneOracle: Contract) => {
-  const asBNB = "0x77734e70b6E88b4d82fE632a168EDf6e700912b6";
-  const slisbnb = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
-  const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-  await resilientOracle
-    .connect(impersonatedTimelock)
-    .setTokenConfig([
-      asBNB,
-      [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      [true, false, false],
-      false,
-    ]);
-  await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(asBNB, parseUnits("1", 18));
-  await resilientOracle
-    .connect(impersonatedTimelock)
-    .setTokenConfig([
-      slisbnb,
-      [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      [true, false, false],
-      false,
-    ]);
-  await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(slisbnb, parseUnits("1", 18));
-};
-
-forking(64453350, async () => {
+forking(123704678, async () => {
   let comptroller: Contract;
   before(async () => {
-    const provider = ethers.provider;
-    comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
+    comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
     const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
-    const redstoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ORACLE_ABI, ethers.provider);
-    await setStalePeriod(resilientOracle, redstoneOracle);
-    await pretendExecutingVip(await vip554(), bscmainnet.NORMAL_TIMELOCK); // remove once vip-554 is exicuted
-    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bscmainnet.BINANCE_ORACLE, "WBETH", 315360000);
+    // WBETH is priced off ETH; keep both fresh past the voting + timelock warp
+    for (const asset of [ETH, WBETH]) {
+      await setMaxStalePeriod(resilientOracle, new ethers.Contract(asset, ERC20_ABI, ethers.provider));
+    }
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("check new ETH Emode PoolId does not exist", async () => {
-      expect(await comptroller.lastPoolId()).to.be.lessThan(EMODE_POOL.id);
+    it("new ETH emode pool gets the expected id", async () => {
+      expect(await comptroller.lastPoolId()).to.equal(EMODE_POOL.id - 1);
     });
   });
 
-  testVip("VIP-557", await vip557(), {
+  // default proposer Safe (0x3422…) has proposal 663 live at this block
+  testVip("VIP-667", await vip667(), {
+    proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
+    supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -68,9 +46,8 @@ forking(64453350, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
-          "PoolFallbackStatusUpdated",
         ],
-        [1, 2, 1, 1, 2, 1, 1],
+        [1, 2, 1, 1, 2, 1],
       );
     },
   });

@@ -8,9 +8,9 @@ export const vETH = "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab";
 export const vWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
 export const EMODE_POOL = {
   label: "ETH",
-  id: 5,
+  id: 13,
   markets: [vETH, vWBETH],
-  allowCorePoolFallback: true,
+  allowCorePoolFallback: false,
   marketsConfig: {
     vETH: {
       address: vETH,
@@ -29,11 +29,11 @@ export const EMODE_POOL = {
   },
 };
 
-export const vip557 = () => {
+export const vip667 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-557 [BNB Chain] ETH emode group",
-    description: "VIP-554 [BNB Chain] ETH emode group",
+    title: "VIP-667 [BNB Chain] ETH emode group",
+    description: "VIP-667 [BNB Chain] ETH emode group",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -84,15 +84,10 @@ export const vip557 = () => {
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [EMODE_POOL.id, EMODE_POOL.marketsConfig.vETH.address, EMODE_POOL.marketsConfig.vETH.borrowAllowed],
       },
-      {
-        target: bsctestnet.UNITROLLER,
-        signature: "setAllowCorePoolFallback(uint96,bool)",
-        params: [EMODE_POOL.id, EMODE_POOL.allowCorePoolFallback],
-      },
     ],
     meta,
     ProposalType.REGULAR,
   );
 };
 
-export default vip557;
+export default vip667;
