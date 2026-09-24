@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
@@ -6,6 +7,9 @@ import { makeProposal } from "src/utils";
 const { bsctestnet } = NETWORK_ADDRESSES;
 export const vETH = "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab";
 export const vWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
+export const WBETH = "0x9c37E59Ba22c4320547F00D4f1857AF1abd1Dd6f";
+// mainnet ResilientOracle WBETH price on 2026-09-24; testnet Binance feed stopped updating on 2026-01-26
+export const WBETH_DIRECT_PRICE = parseUnits("2969.043895498651789101", 18);
 export const EMODE_POOL = {
   label: "ETH",
   id: 13,
@@ -78,6 +82,23 @@ We applied the following security procedures for this upgrade:
 
   return makeProposal(
     [
+      {
+        target: bsctestnet.CHAINLINK_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [WBETH, WBETH_DIRECT_PRICE],
+      },
+      {
+        target: bsctestnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            WBETH,
+            [bsctestnet.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+      },
       {
         target: bsctestnet.UNITROLLER,
         signature: "createPool(string)",
