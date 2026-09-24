@@ -39,7 +39,7 @@ export const vip667 = () => {
     title: "VIP-667 [BNB Chain] Enable ETH E-Mode group",
     description: `#### Summary
 
-If passed, this VIP will add the following markets to the new "ETH" E-Mode group on the BNB Chain Core pool, following [TODO: community proposal](TODO) and the [TODO: Chaos Labs recommendations](TODO):
+If passed, this VIP will add the following markets to the new "ETH" E-Mode group on the BNB Chain Core pool, following [TODO: community proposal](TODO):
 
 - [ETH](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8?chainId=56&tab=supply)
 - [WBETH](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0?chainId=56&tab=supply)
