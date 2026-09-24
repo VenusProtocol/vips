@@ -41,8 +41,9 @@ forking(132849860, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
+          "PoolFallbackStatusUpdated",
         ],
-        [1, 2, 1, 1, 2, 1],
+        [1, 2, 1, 1, 2, 1, 1],
       );
     },
   });

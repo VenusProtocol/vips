@@ -14,7 +14,7 @@ export const EMODE_POOL = {
   label: "ETH",
   id: 13,
   markets: [vETH, vWBETH],
-  allowCorePoolFallback: false,
+  allowCorePoolFallback: true,
   marketsConfig: {
     vETH: {
       address: vETH,
@@ -59,7 +59,7 @@ The risk parameters of the markets added to the "ETH" E-Mode group, in that grou
     - Liquidation Incentive: 2%
     - It cannot be borrowed but it can be used as collateral
 
-Core pool fallback is disabled for this group: users who enter the "ETH" E-Mode group can only use ETH and WBETH while they are in it.
+Core pool fallback is enabled for this group: users in it can still use markets outside the group as collateral, with their Core pool risk parameters.
 
 #### Security and additional considerations
 
@@ -141,6 +141,11 @@ We applied the following security procedures for this upgrade:
         target: bsctestnet.UNITROLLER,
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [EMODE_POOL.id, EMODE_POOL.marketsConfig.vETH.address, EMODE_POOL.marketsConfig.vETH.borrowAllowed],
+      },
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "setAllowCorePoolFallback(uint96,bool)",
+        params: [EMODE_POOL.id, EMODE_POOL.allowCorePoolFallback],
       },
     ],
     meta,

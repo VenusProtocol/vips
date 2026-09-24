@@ -54,8 +54,9 @@ forking(123704678, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
+          "PoolFallbackStatusUpdated",
         ],
-        [1, 2, 1, 1, 2, 1],
+        [1, 2, 1, 1, 2, 1, 1],
       );
     },
   });
@@ -138,15 +139,24 @@ forking(123704678, async () => {
         );
       });
 
-      it("gives no borrowing power to ETH or non-pool collateral (fallback off)", async () => {
+      it("values non-pool collateral at its core CF and ETH at 0 (fallback on)", async () => {
         const user = await initMainnetUser(NON_POOL_USER, parseUnits("1", 18));
         await supply(user, vETH, ETH, "1");
         await supply(user, vUSDT, USDT, "1000");
         await comptroller.connect(user).enterMarkets([vETH, vUSDT]);
         await comptroller.connect(user).enterPool(EMODE_POOL.id);
 
+        const supplied = await vToken(vUSDT).callStatic.balanceOfUnderlying(NON_POOL_USER);
+        const price = await resilientOracle.getUnderlyingPrice(vUSDT);
+        const { collateralFactorMantissa } = await comptroller.markets(vUSDT);
+        const expected = supplied
+          .mul(price)
+          .div(parseUnits("1", 18))
+          .mul(collateralFactorMantissa)
+          .div(parseUnits("1", 18));
         const [, liquidity] = await comptroller.getBorrowingPower(NON_POOL_USER);
-        expect(liquidity).to.equal(0);
+        expect(expected).to.be.gt(0);
+        expect(liquidity).to.be.closeTo(expected, expected.div(1_000_000));
       });
     });
   });
