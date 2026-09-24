@@ -9,8 +9,8 @@ import { forking, testVip } from "src/vip-framework";
 import ERC20_ABI from "../../src/vip-framework/abi/erc20.json";
 import RESILIENT_ORACLE_ABI from "../../src/vip-framework/abi/resilientOracle.json";
 import { EMODE_POOL, vETH, vWBETH, vip667 } from "../../vips/vip-667/bscmainnet";
-import VTOKEN_ABI from "../vip-587/abi/VToken.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
