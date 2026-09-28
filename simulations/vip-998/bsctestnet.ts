@@ -14,10 +14,10 @@ import vip998, {
   DEFAULT_PROXY_ADMIN,
   EBRAKE,
   EBRAKE_NEW_IMPL,
+  EBRAKE_PAUSE_SIGS,
   GUARDIAN,
   HUB_NAV_SENTINEL,
   HUB_REGISTRY,
-  HUB_SIGS_FOR_EBRAKE,
   HUB_USDT,
   KEEPER,
   MOCK_CENTRIFUGE_VAULT_USDT,
@@ -25,7 +25,6 @@ import vip998, {
   PAUSE_DOWN_BPS,
   PAUSE_UP_BPS,
   SENTINEL_CONFIG_SIGS,
-  YIELD_GROUP_SIGS_FOR_EBRAKE,
 } from "../../vips/vip-998/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
@@ -87,8 +86,7 @@ const GRANTS: [contract: string, sig: string, account: string][] = [
     SENTINEL_CONFIG_SIGS.map(sig => [HUB_NAV_SENTINEL, sig, account] as [string, string, string]),
   ),
   [EBRAKE, "pauseHub(address)", HUB_NAV_SENTINEL],
-  ...HUB_SIGS_FOR_EBRAKE.map(sig => [HUB_USDT, sig, EBRAKE] as [string, string, string]),
-  ...YIELD_GROUP_SIGS_FOR_EBRAKE.map(sig => [CENTRIFUGE_SOURCE_USDT, sig, EBRAKE] as [string, string, string]),
+  ...EBRAKE_PAUSE_SIGS.map(sig => [ethers.constants.AddressZero, sig, EBRAKE] as [string, string, string]),
 ];
 
 // Each transaction lands one second after the last block. Left to the wall clock, a slow fork could let the
@@ -107,6 +105,15 @@ forking(BLOCK_NUMBER, async () => {
   // ACM's own view, asked from the target the way the target asks it, so a wildcard grant counts too.
   const isAllowed = (contract: string, sig: string, account: string): Promise<boolean> =>
     acm.connect(ethers.provider).isAllowedToCall(account, sig, { from: contract });
+
+  // What EBrake's pause wildcards should reach: the Hub itself and every YieldGroup registered on it.
+  const eBrakePauseTargets = async (): Promise<[string, string][]> => [
+    [HUB_USDT, "pauseHub()"],
+    [HUB_USDT, "pauseYieldGroup(address)"],
+    ...((await hub.registeredYieldGroups()) as string[]).map(
+      group => [group, "pauseResource(address)"] as [string, string],
+    ),
+  ];
 
   const expectCheck = async (
     status: number,
@@ -172,6 +179,14 @@ forking(BLOCK_NUMBER, async () => {
       for (const [contract, sig, account] of GRANTS) {
         expect(await acm.hasRole(roleOf(contract, sig), account), `${sig} -> ${account}`).to.equal(false);
         expect(await isAllowed(contract, sig, account), `${sig} -> ${account}`).to.equal(false);
+      }
+    });
+
+    it("EBrake cannot pause the Hub or any YieldGroup registered on it", async () => {
+      const targets = await eBrakePauseTargets();
+      expect(targets.map(([contract]) => contract)).to.include.members([CENTRIFUGE_SOURCE_USDT, CORE_SOURCE_USDT]);
+      for (const [contract, sig] of targets) {
+        expect(await isAllowed(contract, sig, EBRAKE), `${sig} on ${contract}`).to.equal(false);
       }
     });
 
@@ -284,6 +299,12 @@ forking(BLOCK_NUMBER, async () => {
       for (const [contract, sig, account] of GRANTS) {
         expect(await acm.hasRole(roleOf(contract, sig), account), `${sig} -> ${account}`).to.equal(true);
         expect(await isAllowed(contract, sig, account), `${sig} -> ${account}`).to.equal(true);
+      }
+    });
+
+    it("EBrake's pause wildcards reach the Hub and every YieldGroup registered on it", async () => {
+      for (const [contract, sig] of await eBrakePauseTargets()) {
+        expect(await isAllowed(contract, sig, EBRAKE), `${sig} on ${contract}`).to.equal(true);
       }
     });
 
@@ -513,7 +534,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the Hub-side grants land once a lever holder exists", async () => {
+    it("the Hub-side wildcards land once a lever holder exists, on any YieldGroup", async () => {
       // Not granted by this proposal. Granted here only to drive EBrake's Hub-side roles end to end.
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("1"));
       for (const sig of ["pauseHubYieldGroup(address)", "pauseHubResource(address,address)"]) {
@@ -535,6 +556,13 @@ forking(BLOCK_NUMBER, async () => {
         .withArgs(operator.address, CENTRIFUGE_SOURCE_USDT, MOCK_CENTRIFUGE_VAULT_USDT);
       await expect(pauseResource).to.emit(source, "ResourcePauseToggled").withArgs(MOCK_CENTRIFUGE_VAULT_USDT, true);
       expect((await source.resourceConfig(MOCK_CENTRIFUGE_VAULT_USDT)).paused).to.equal(true);
+
+      // A YieldGroup this proposal never names is reached too.
+      const coreSource = await ethers.getContractAt(YIELD_GROUP_ABI, CORE_SOURCE_USDT);
+      await expect(eBrake.connect(operator).pauseHubResource(CORE_SOURCE_USDT, VUSDT_CORE))
+        .to.emit(coreSource, "ResourcePauseToggled")
+        .withArgs(VUSDT_CORE, true);
+      expect((await coreSource.resourceConfig(VUSDT_CORE)).paused).to.equal(true);
       expect(await hub.hubPaused()).to.equal(false);
     });
 

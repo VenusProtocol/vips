@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -35,9 +36,9 @@ export const SENTINEL_CONFIG_SIGS = [
   "setNavMonitoringEnabled(address,address,bool)",
 ];
 
-// What EBrake must hold on the Hub side for its Hub levers to land.
-export const HUB_SIGS_FOR_EBRAKE = ["pauseHub()", "pauseYieldGroup(address)"];
-export const YIELD_GROUP_SIGS_FOR_EBRAKE = ["pauseResource(address)"];
+// What EBrake must hold on the Hub side for its Hub levers to land. Granted as wildcards, so they cover every
+// Hub and YieldGroup on this network, including ones onboarded later.
+export const EBRAKE_PAUSE_SIGS = ["pauseHub()", "pauseYieldGroup(address)", "pauseResource(address)"];
 
 const giveCallPermission = (contract: string, sig: string, account: string) => ({
   target: ACM,
@@ -70,8 +71,8 @@ The EBrake upgrade adds three tighten-only levers, \`pauseHub\`, \`pauseHubYield
    \`setNavMonitoringEnabled\`) to the **Normal Timelock** and the **Guardian**.
 4. Grant the sentinel \`pauseHub(address)\` on EBrake. No account is granted the other two levers; the
    Guardian can already pause the Hub directly.
-5. Grant EBrake \`pauseHub()\` and \`pauseYieldGroup(address)\` on **Hub_USDT**, and \`pauseResource(address)\`
-   on the **Centrifuge YieldGroup**.
+5. Grant EBrake \`pauseHub()\`, \`pauseYieldGroup(address)\` and \`pauseResource(address)\` as wildcards, so it
+   can pause every Hub and YieldGroup on this network, including ones onboarded later.
 6. Trust the Guardian as the sentinel's keeper, the same keeper the testnet DeviationSentinel uses, and drop
    the sentinel's minimum Hub NAV gap from 1% to 0 so a small test position can trip it.
 7. Watch the Centrifuge mock vault's band with a 10% threshold on each side, twice the Hub's own 5% gaps,
@@ -96,8 +97,7 @@ The EBrake upgrade adds three tighten-only levers, \`pauseHub\`, \`pauseHubYield
         SENTINEL_CONFIG_SIGS.map(sig => giveCallPermission(HUB_NAV_SENTINEL, sig, account)),
       ),
       giveCallPermission(EBRAKE, "pauseHub(address)", HUB_NAV_SENTINEL),
-      ...HUB_SIGS_FOR_EBRAKE.map(sig => giveCallPermission(HUB_USDT, sig, EBRAKE)),
-      ...YIELD_GROUP_SIGS_FOR_EBRAKE.map(sig => giveCallPermission(CENTRIFUGE_SOURCE_USDT, sig, EBRAKE)),
+      ...EBRAKE_PAUSE_SIGS.map(sig => giveCallPermission(ethers.constants.AddressZero, sig, EBRAKE)),
 
       // ────────────────────────────────────────────────────────────────
       // 3. Sentinel configuration
