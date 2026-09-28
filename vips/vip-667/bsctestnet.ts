@@ -25,9 +25,9 @@ export const EMODE_POOL = {
     },
     vWBETH: {
       address: vWBETH,
-      collateralFactor: parseUnits("0.93", 18),
-      liquidationThreshold: parseUnits("0.95", 18),
-      liquidationIncentive: parseUnits("1.02", 18),
+      collateralFactor: parseUnits("0.90", 18),
+      liquidationThreshold: parseUnits("0.93", 18),
+      liquidationIncentive: parseUnits("1.04", 18),
       borrowAllowed: false,
     },
   },
@@ -54,12 +54,14 @@ The risk parameters of the markets added to the "ETH" E-Mode group, in that grou
     - Liquidation Incentive: 0%
     - It can be borrowed but it cannot be used as collateral
 - WBETH
-    - Collateral Factor: 93%
-    - Liquidation Threshold: 95%
-    - Liquidation Incentive: 2%
+    - Collateral Factor: 90%
+    - Liquidation Threshold: 93%
+    - Liquidation Incentive: 4%
     - It cannot be borrowed but it can be used as collateral
 
 Core pool fallback is enabled for this group: users in it can still use markets outside the group as collateral, with their Core pool risk parameters.
+
+Entering the group is opt-in. This VIP does not change Core pool risk parameters or supply caps; the recommended WBETH supply cap remains 13,000 WBETH on BNB Chain mainnet. The recommended reduction of the WBETH Core collateral factor from 80% to 75%, with its liquidation threshold unchanged, is intended for a separate VIP approximately one week after the group is enabled.
 
 #### Security and additional considerations
 
