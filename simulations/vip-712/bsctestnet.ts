@@ -13,6 +13,7 @@ import vip712, {
   OLD_MARKET_FACET,
   PRIME,
   PRIME_NEW_IMPLEMENTATION,
+  SPOKE_COMPTROLLER,
 } from "../../vips/vip-712/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -67,6 +68,11 @@ forking(133605000, async () => {
       expect(await acm.hasRole(role, COLLATERAL_GATEWAY)).to.equal(false);
     });
 
+    it("gateway cannot call enterMarketForAccount on the spoke pool", async () => {
+      const role = callPermissionRole(SPOKE_COMPTROLLER, ENTER_MARKET_FOR_ACCOUNT_SIGNATURE);
+      expect(await acm.hasRole(role, COLLATERAL_GATEWAY)).to.equal(false);
+    });
+
     it("gateway is not a whitelisted flash loan account", async () => {
       expect(await unitroller.authorizedFlashLoan(COLLATERAL_GATEWAY)).to.equal(false);
     });
@@ -80,7 +86,7 @@ forking(133605000, async () => {
   testVip("vip-712 testnet", await vip712(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [1]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [2]);
     },
   });
 
@@ -101,6 +107,11 @@ forking(133605000, async () => {
 
     it("gateway can call enterMarketForAccount", async () => {
       const role = callPermissionRole(bsctestnet.UNITROLLER, ENTER_MARKET_FOR_ACCOUNT_SIGNATURE);
+      expect(await acm.hasRole(role, COLLATERAL_GATEWAY)).to.equal(true);
+    });
+
+    it("gateway can call enterMarketForAccount on the spoke pool", async () => {
+      const role = callPermissionRole(SPOKE_COMPTROLLER, ENTER_MARKET_FOR_ACCOUNT_SIGNATURE);
       expect(await acm.hasRole(role, COLLATERAL_GATEWAY)).to.equal(true);
     });
 

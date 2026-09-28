@@ -22,9 +22,13 @@ export const PRIME_NEW_IMPLEMENTATION = "0x0191Bb3CD28A96691F5EC5066ad42A0373ae1
 
 export const NEW_MARKET_FACET = "0x52f4c550a310340284e07B4A8A2722c20C71D39B";
 
-export const COLLATERAL_GATEWAY = "0x5DBEed23013f3B325e8fa44b0570152F7F25DD9A";
+export const COLLATERAL_GATEWAY = "0xbB3304B6a1eB1d48E1d2EE78eadDadD4024DF358";
 export const OLD_MARKET_FACET = "0x3372D6aeb32aa6AB0933127ac9194E8915172752";
 export const PRIME_LENS = "0x71B429fCE1b2449a9EAE9c7Fc8896BE918F0D12D";
+
+// Spoke pool Comptroller, listed by VIP-671. It keeps a PoolRegistry of its own, which is the one
+// the CollateralGateway was deployed against.
+export const SPOKE_COMPTROLLER = "0x11960c84d6c4F2a978a12372721C3A6A88C78f4c";
 
 export const ENTER_MARKET_FOR_ACCOUNT_SIGNATURE = "enterMarketForAccount(address,address)";
 
@@ -45,6 +49,8 @@ If passed, this VIP will upgrade the PrimeV2 implementation on BNB Chain Testnet
 3. **Grant the CollateralGateway permission to enter markets for a user** — Calls \`giveCallPermission\` on the AccessControlManager ([${ACM}](https://testnet.bscscan.com/address/${ACM})) for \`${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE}\` on the Comptroller.
 
 4. **Whitelist the CollateralGateway as a flash loan account** — Calls \`setWhiteListFlashLoanAccount(gateway, true)\` on the Comptroller.
+
+5. **Grant the same permission on the spoke pool Comptroller** — Calls \`giveCallPermission\` on the AccessControlManager for \`${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE}\` on the spoke pool Comptroller ([${SPOKE_COMPTROLLER}](https://testnet.bscscan.com/address/${SPOKE_COMPTROLLER})). The role is hashed together with the contract it is checked on, so the grant in step 3 does not reach the spoke pool.
 
 #### Deployed contracts
 
@@ -88,6 +94,12 @@ If passed, this VIP will upgrade the PrimeV2 implementation on BNB Chain Testnet
         target: UNITROLLER,
         signature: "setWhiteListFlashLoanAccount(address,bool)",
         params: [COLLATERAL_GATEWAY, true],
+      },
+      // 5. Same permission on the spoke pool Comptroller, which hashes its own address into the role.
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SPOKE_COMPTROLLER, ENTER_MARKET_FOR_ACCOUNT_SIGNATURE, COLLATERAL_GATEWAY],
       },
     ],
     meta,
