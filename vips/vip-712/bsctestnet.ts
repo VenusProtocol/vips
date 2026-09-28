@@ -55,7 +55,7 @@ If passed, this VIP will upgrade the PrimeV2 implementation on BNB Chain Testnet
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/XXX)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/764)
 - [Prime and Comptroller changes](https://github.com/VenusProtocol/venus-protocol/pull/710)
 - [CollateralGateway](https://github.com/VenusProtocol/venus-periphery/pull/74)`,
     forDescription: "Execute this proposal",
