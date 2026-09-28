@@ -18,15 +18,11 @@ export const UNITROLLER = bsctestnet.UNITROLLER;
 export const PRIME = "0xeC22366d2572e52BCB29B50C905b945BA421B9b2";
 export const PRIME_PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 
-// TODO: replace with the deployed PrimeV2 implementation address
-export const PRIME_NEW_IMPLEMENTATION = "0x0000000000000000000000000000000000000000";
+export const PRIME_NEW_IMPLEMENTATION = "0x0191Bb3CD28A96691F5EC5066ad42A0373ae11C6";
 
-// TODO: replace with the deployed MarketFacet address, here and in
-// simulations/vip-712/utils/cut-params-bsctestnet.json
-export const NEW_MARKET_FACET = "0x0000000000000000000000000000000000000000";
+export const NEW_MARKET_FACET = "0x52f4c550a310340284e07B4A8A2722c20C71D39B";
 
-// TODO: replace with the deployed CollateralGateway address
-export const COLLATERAL_GATEWAY = "0x0000000000000000000000000000000000000000";
+export const COLLATERAL_GATEWAY = "0x5DBEed23013f3B325e8fa44b0570152F7F25DD9A";
 
 export const ENTER_MARKET_FOR_ACCOUNT_SIGNATURE = "enterMarketForAccount(address,address)";
 
