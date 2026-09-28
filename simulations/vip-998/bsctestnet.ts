@@ -263,7 +263,7 @@ forking(BLOCK_NUMBER, async () => {
       );
       await expect(txResponse).to.emit(sentinel, "OwnershipTransferred").withArgs(DEPLOYER, NORMAL_TIMELOCK);
       await expect(txResponse).to.emit(sentinel, "TrustedKeeperUpdated").withArgs(KEEPER, true);
-      await expect(txResponse).to.emit(sentinel, "MinHubNavGapUpdated").withArgs(100, 0);
+      await expect(txResponse).to.emit(sentinel, "MinHubNavGapUpdated").withArgs(100, 1);
       // The thresholds land disarmed; only `setNavMonitoringEnabled` arms them.
       await expect(txResponse)
         .to.emit(sentinel, "NavGuardConfigUpdated")
@@ -316,9 +316,9 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the keeper is trusted, the Hub NAV floor is off and the Centrifuge vault's band is armed", async () => {
+    it("the keeper is trusted, the Hub NAV floor is at 1 bps and the Centrifuge vault's band is armed", async () => {
       expect(await sentinel.trustedKeepers(KEEPER)).to.equal(true);
-      expect(await sentinel.minHubNavGapBps()).to.equal(0);
+      expect(await sentinel.minHubNavGapBps()).to.equal(1);
       const config = await sentinel.navGuardConfigs(CENTRIFUGE_SOURCE_USDT, MOCK_CENTRIFUGE_VAULT_USDT);
       expect(config.hub).to.equal(HUB_USDT);
       expect(config.pauseUpBps).to.equal(PAUSE_UP_BPS);
@@ -345,6 +345,8 @@ forking(BLOCK_NUMBER, async () => {
     const downEdge = PAR.mul(10_000 - PAUSE_DOWN_BPS).div(10_000);
     const upEdge = PAR.mul(10_000 + PAUSE_UP_BPS).div(10_000);
     const breachPrice = PAR.mul(10_000 - PAUSE_DOWN_BPS - 100).div(10_000);
+    // A share price of 1e12 USDT, so the 10 USDT position reports 1e13 USDT: past a 1 bps floor on ~9.5e16.
+    const clearsFloorPrice = PAR.mul(1e12);
     const observedAt = (price: BigNumber) => TRANCHE.mul(price).div(PAR);
 
     const setPrice = async (price: BigNumber) => {
@@ -386,6 +388,32 @@ forking(BLOCK_NUMBER, async () => {
       await expectCheck(Status.WithinThreshold, HUB_USDT, TRANCHE, TRANCHE, TRANCHE, TRANCHE);
     });
 
+    it("at the proposal's 1 bps floor, a threshold breach on this small position is screened out", async () => {
+      await setPrice(breachPrice);
+      // A 1.1 USDT gap against a floor of 1 bps of the Hub's ~9.5e16 USDT.
+      expect(TRANCHE.sub(observedAt(breachPrice))).to.be.lte((await hub.totalAssets()).div(10_000));
+      await expectCheck(Status.WithinThreshold, HUB_USDT, observedAt(breachPrice), TRANCHE, TRANCHE, TRANCHE);
+      await expect(handle(keeper))
+        .to.be.revertedWithCustomError(sentinel, "DeviationWithinThreshold")
+        .withArgs(MOCK_CENTRIFUGE_VAULT_USDT, observedAt(breachPrice));
+    });
+
+    it("a gap big enough to clear the floor still reads as a breach", async () => {
+      await setPrice(clearsFloorPrice);
+      expect(observedAt(clearsFloorPrice).sub(TRANCHE)).to.be.gt((await hub.totalAssets()).div(10_000));
+      await expectCheck(Status.Breached, HUB_USDT, observedAt(clearsFloorPrice), TRANCHE, TRANCHE, TRANCHE);
+    });
+
+    it("with the floor at 0, the thresholds alone decide", async () => {
+      // Not part of this proposal. Lowered here so the tests below exercise the thresholds on their own.
+      await nextSecond();
+      await expect(sentinel.connect(timelock).setMinHubNavGapBps(0))
+        .to.emit(sentinel, "MinHubNavGapUpdated")
+        .withArgs(1, 0);
+      await setPrice(breachPrice);
+      await expectCheck(Status.Breached, HUB_USDT, observedAt(breachPrice), TRANCHE, TRANCHE, TRANCHE);
+    });
+
     it("a move landing exactly on either trip point is left alone", async () => {
       for (const price of [downEdge, upEdge]) {
         await setPrice(price);
@@ -401,24 +429,6 @@ forking(BLOCK_NUMBER, async () => {
         await setPrice(price);
         await expectCheck(Status.Breached, HUB_USDT, observedAt(price), TRANCHE, TRANCHE, TRANCHE);
       }
-    });
-
-    it("a Hub NAV floor screens out a breach whose gap is a small share of the Hub", async () => {
-      await setPrice(breachPrice);
-      await expectCheck(Status.Breached, HUB_USDT, observedAt(breachPrice), TRANCHE, TRANCHE, TRANCHE);
-
-      await nextSecond();
-      await expect(sentinel.connect(timelock).setMinHubNavGapBps(100))
-        .to.emit(sentinel, "MinHubNavGapUpdated")
-        .withArgs(0, 100);
-      await expectCheck(Status.WithinThreshold, HUB_USDT, observedAt(breachPrice), TRANCHE, TRANCHE, TRANCHE);
-      await expect(handle(keeper))
-        .to.be.revertedWithCustomError(sentinel, "DeviationWithinThreshold")
-        .withArgs(MOCK_CENTRIFUGE_VAULT_USDT, observedAt(breachPrice));
-
-      await nextSecond();
-      await sentinel.connect(timelock).setMinHubNavGapBps(0);
-      await expectCheck(Status.Breached, HUB_USDT, observedAt(breachPrice), TRANCHE, TRANCHE, TRANCHE);
     });
 
     it("only a trusted keeper can act on a breach", async () => {

@@ -74,7 +74,7 @@ The EBrake upgrade adds three tighten-only levers, \`pauseHub\`, \`pauseHubYield
 5. Grant EBrake \`pauseHub()\`, \`pauseYieldGroup(address)\` and \`pauseResource(address)\` as wildcards, so it
    can pause every Hub and YieldGroup on this network, including ones onboarded later.
 6. Trust the Guardian as the sentinel's keeper, the same keeper the testnet DeviationSentinel uses, and drop
-   the sentinel's minimum Hub NAV gap from 1% to 0 so a small test position can trip it.
+   the sentinel's minimum Hub NAV gap from 1% to 1 bps, the smallest non-zero floor.
 7. Watch the Centrifuge mock vault's band with a 10% threshold on each side, twice the Hub's own 5% gaps,
    and arm it.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -103,8 +103,7 @@ The EBrake upgrade adds three tighten-only levers, \`pauseHub\`, \`pauseHubYield
       // 3. Sentinel configuration
       // ────────────────────────────────────────────────────────────────
       { target: HUB_NAV_SENTINEL, signature: "setTrustedKeeper(address,bool)", params: [KEEPER, true] },
-      // Testnet Hub NAV reads ~9.5e16 USDT, so the default 1% floor would screen out every breach.
-      { target: HUB_NAV_SENTINEL, signature: "setMinHubNavGapBps(uint16)", params: [0] },
+      { target: HUB_NAV_SENTINEL, signature: "setMinHubNavGapBps(uint16)", params: [1] },
       {
         target: HUB_NAV_SENTINEL,
         signature: "setHubNavConfig(address,address,uint16,uint16)",
