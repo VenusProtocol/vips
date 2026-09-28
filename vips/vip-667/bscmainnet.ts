@@ -3,6 +3,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { FRV_ABSOLUTE_CAP } from "../vip-650/addresses/bscmainnet";
+import { U_FRV_SOURCE, U_HUB } from "../vip-657/bscmainnet";
+import { treasuryMigrationCommands } from "./treasury";
+
+export const U_FRV_PERCENTAGE_CAP_BPS = 9_000;
+
 const { bscmainnet } = NETWORK_ADDRESSES;
 export const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 export const vWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
@@ -32,7 +38,7 @@ export const EMODE_POOL = {
 export const vip667 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-667 [BNB Chain] Enable ETH E-Mode group",
+    title: "VIP-667 [BNB Chain] ETH E-Mode, Treasury Hub deposits and U FRV cap",
     description: `#### Summary
 
 If passed, this VIP will add the following markets to the new "ETH" E-Mode group on the BNB Chain Core pool, following [TODO: community proposal](TODO):
@@ -59,13 +65,31 @@ Core pool fallback is enabled for this group: users in it can still use markets 
 
 Entering the group is opt-in. This VIP does not change Core pool risk parameters or supply caps; the recommended WBETH supply cap remains 13,000 WBETH on BNB Chain mainnet. The recommended reduction of the WBETH Core collateral factor from 80% to 75%, with its liquidation threshold unchanged, is intended for a separate VIP approximately one week after the group is enabled.
 
+#### Treasury deposits into Liquidity Hub
+
+This VIP also deposits the Treasury's USDT, USDC and U balances and migrates its vUSDT, vUSDC and vU positions into their corresponding Liquidity Hubs. All resulting vhUSDT, vhUSDC and vhU shares are minted directly to the original Treasury (${bscmainnet.VTREASURY}). No swaps or new contract deployments are involved.
+
+Amounts are the full balances at BNB Chain block 124482582 (18 decimals for assets, 8 for vTokens):
+
+| Asset | Liquid balance | vToken balance |
+| --- | --- | --- |
+| USDT | 738,684.512559003748986493 | 137,795.78716278 vUSDT |
+| USDC | 91,884.384017371969374252 | 30,500,264.58872009 vUSDC |
+| U | 288,921.382312112220008143 | 90 vU |
+
+The Normal Timelock withdraws each fixed amount, deposits the liquid asset, then uses the existing Migrator to redeem the vToken position and deposit its full actual proceeds, including interest accrued before execution. Each migration enforces a minimum share output equal to 99.5% of the snapshot estimate. Approvals are cleared in the same atomic proposal. Treasury income received after the snapshot remains in Treasury; this is not an execution-time balance sweep. Treasury balances, redemption liquidity and share floors should be checked again before execution.
+
+#### U Hub Fixed-Rate Vault cap
+
+Raise the U Hub FRV percentage cap from 50% to 90% (5000 to 9000 bps), keeping the absolute cap at 5,000,000 U. The effective ceiling is the lower of 5,000,000 U and 90% of Hub TVL. The existing deposit queues are unchanged: this raises allocation headroom and does not itself reallocate funds into FRV. USDT and USDC FRV caps are unchanged.
+
 #### Security and additional considerations
 
 We applied the following security procedures for this upgrade:
 
 - No changes in the deployed codebase.
 - **VIP execution simulation**: in a simulation environment, validating that the expected markets are added to the ETH E-Mode pool with the expected risk parameters, and that users in the group can borrow ETH against WBETH but cannot borrow other markets
-- **Deployment on testnet**: the same changes have been performed on BNB Chain testnet, and used in the Venus Protocol testnet deployment
+- **Testnet scope**: the testnet proposal covers the ETH E-Mode configuration only. Treasury migration and the U Hub cap change are mainnet-only.
 
 #### References
 
@@ -80,6 +104,12 @@ We applied the following security procedures for this upgrade:
 
   return makeProposal(
     [
+      ...treasuryMigrationCommands(),
+      {
+        target: U_HUB,
+        signature: "raiseYieldGroupCap(address,uint256,uint16)",
+        params: [U_FRV_SOURCE, FRV_ABSOLUTE_CAP, U_FRV_PERCENTAGE_CAP_BPS],
+      },
       {
         target: bscmainnet.UNITROLLER,
         signature: "createPool(string)",
