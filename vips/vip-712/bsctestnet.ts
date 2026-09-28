@@ -23,6 +23,8 @@ export const PRIME_NEW_IMPLEMENTATION = "0x0191Bb3CD28A96691F5EC5066ad42A0373ae1
 export const NEW_MARKET_FACET = "0x52f4c550a310340284e07B4A8A2722c20C71D39B";
 
 export const COLLATERAL_GATEWAY = "0x5DBEed23013f3B325e8fa44b0570152F7F25DD9A";
+export const OLD_MARKET_FACET = "0x3372D6aeb32aa6AB0933127ac9194E8915172752";
+export const PRIME_LENS = "0x71B429fCE1b2449a9EAE9c7Fc8896BE918F0D12D";
 
 export const ENTER_MARKET_FOR_ACCOUNT_SIGNATURE = "enterMarketForAccount(address,address)";
 
@@ -43,6 +45,13 @@ If passed, this VIP will upgrade the PrimeV2 implementation on BNB Chain Testnet
 3. **Grant the CollateralGateway permission to enter markets for a user** — Calls \`giveCallPermission\` on the AccessControlManager ([${ACM}](https://testnet.bscscan.com/address/${ACM})) for \`${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE}\` on the Comptroller.
 
 4. **Whitelist the CollateralGateway as a flash loan account** — Calls \`setWhiteListFlashLoanAccount(gateway, true)\` on the Comptroller.
+
+#### Deployed contracts
+
+- **PrimeV2 implementation**: [${PRIME_NEW_IMPLEMENTATION}](https://testnet.bscscan.com/address/${PRIME_NEW_IMPLEMENTATION})
+- **MarketFacet** (replaces [${OLD_MARKET_FACET}](https://testnet.bscscan.com/address/${OLD_MARKET_FACET})): [${NEW_MARKET_FACET}](https://testnet.bscscan.com/address/${NEW_MARKET_FACET})
+- **CollateralGateway**: [${COLLATERAL_GATEWAY}](https://testnet.bscscan.com/address/${COLLATERAL_GATEWAY})
+- **PrimeLens** (no governance action, reads the upgraded PrimeV2): [${PRIME_LENS}](https://testnet.bscscan.com/address/${PRIME_LENS})
 
 #### References
 

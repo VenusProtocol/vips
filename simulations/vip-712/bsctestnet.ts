@@ -10,6 +10,7 @@ import vip712, {
   COLLATERAL_GATEWAY,
   ENTER_MARKET_FOR_ACCOUNT_SIGNATURE,
   NEW_MARKET_FACET,
+  OLD_MARKET_FACET,
   PRIME,
   PRIME_NEW_IMPLEMENTATION,
 } from "../../vips/vip-712/bsctestnet";
@@ -18,8 +19,6 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-
-const OLD_MARKET_FACET = "0x3372D6aeb32aa6AB0933127ac9194E8915172752";
 
 const ENTER_MARKET_FOR_ACCOUNT_SELECTOR = "0x2e30a93c";
 
