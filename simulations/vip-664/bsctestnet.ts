@@ -6,7 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import RESILIENT_ORACLE_ABI from "../../src/vip-framework/abi/resilientOracle.json";
-import { EMODE_POOL, WBETH, WBETH_DIRECT_PRICE, vip667 } from "../../vips/vip-667/bsctestnet";
+import { EMODE_POOL, WBETH, WBETH_DIRECT_PRICE, vip667 } from "../../vips/vip-664/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;

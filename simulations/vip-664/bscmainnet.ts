@@ -8,8 +8,8 @@ import { forking, testVip } from "src/vip-framework";
 
 import ERC20_ABI from "../../src/vip-framework/abi/erc20.json";
 import RESILIENT_ORACLE_ABI from "../../src/vip-framework/abi/resilientOracle.json";
-import { EMODE_POOL, U_FRV_PERCENTAGE_CAP_BPS, vETH, vWBETH, vip667 } from "../../vips/vip-667/bscmainnet";
-import { MIGRATOR, TREASURY_MIGRATIONS, TREASURY_SNAPSHOT_BLOCK } from "../../vips/vip-667/treasury";
+import { EMODE_POOL, U_FRV_PERCENTAGE_CAP_BPS, vETH, vWBETH, vip664 } from "../../vips/vip-664/bscmainnet";
+import { MIGRATOR, TREASURY_MIGRATIONS, TREASURY_SNAPSHOT_BLOCK } from "../../vips/vip-664/treasury";
 import HUB_ABI from "../vip-657/abi/Hub.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -91,7 +91,7 @@ forking(TREASURY_SNAPSHOT_BLOCK, async () => {
   });
 
   // Explicit proposer and supporters known to satisfy the governance thresholds.
-  testVip("VIP-667", await vip667(), {
+  testVip("VIP-664", await vip664(), {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
     callbackAfterExecution: async txResponse => {

@@ -35,13 +35,15 @@ export const EMODE_POOL = {
   },
 };
 
-export const vip667 = () => {
+export const vip664 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-667 [BNB Chain] ETH E-Mode, Treasury Hub deposits and U FRV cap",
+    title: "VIP-664 [BNB Chain] ETH E-Mode, Treasury Hub migration and U FRV cap",
     description: `#### Summary
 
-If passed, this VIP will add the following markets to the new "ETH" E-Mode group on the BNB Chain Core pool, following [TODO: community proposal](TODO):
+If passed, this VIP will enable an opt-in "ETH" E-Mode group in the BNB Chain Core pool, migrate the Treasury stablecoin positions specified below into Liquidity Hub, and raise the U Hub Fixed-Rate Vault (FRV) allocation cap.
+
+The new E-Mode group includes:
 
 - [ETH](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8?chainId=56&tab=supply)
 - [WBETH](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0?chainId=56&tab=supply)
@@ -53,17 +55,17 @@ The risk parameters of the markets added to the "ETH" E-Mode group, in that grou
 - ETH
     - Collateral Factor: 0%
     - Liquidation Threshold: 0%
-    - Liquidation Incentive: 0%
+    - Liquidation Incentive: 1.00 (0% bonus)
     - It can be borrowed but it cannot be used as collateral
 - WBETH
     - Collateral Factor: 90%
     - Liquidation Threshold: 93%
-    - Liquidation Incentive: 4%
+    - Liquidation Incentive: 1.04 (4% bonus)
     - It cannot be borrowed but it can be used as collateral
 
 Core pool fallback is enabled for this group: users in it can still use markets outside the group as collateral, with their Core pool risk parameters.
 
-Entering the group is opt-in. This VIP does not change Core pool risk parameters or supply caps; the recommended WBETH supply cap remains 13,000 WBETH on BNB Chain mainnet. The recommended reduction of the WBETH Core collateral factor from 80% to 75%, with its liquidation threshold unchanged, is intended for a separate VIP approximately one week after the group is enabled.
+Entering the group is opt-in. This VIP does not change Core pool risk parameters or supply caps. The recommended reduction of the WBETH Core collateral factor from 80% to 75%, with its liquidation threshold unchanged, is intended for a separate VIP approximately one week after the group is enabled.
 
 #### Treasury deposits into Liquidity Hub
 
@@ -71,11 +73,9 @@ This VIP also deposits the Treasury's USDT, USDC and U balances and migrates its
 
 Amounts are the full balances at BNB Chain block 124482582 (18 decimals for assets, 8 for vTokens):
 
-| Asset | Liquid balance | vToken balance |
-| --- | --- | --- |
-| USDT | 738,684.512559003748986493 | 137,795.78716278 vUSDT |
-| USDC | 91,884.384017371969374252 | 30,500,264.58872009 vUSDC |
-| U | 288,921.382312112220008143 | 90 vU |
+- USDT: 738,684.512559003748986493 USDT and 137,795.78716278 vUSDT
+- USDC: 91,884.384017371969374252 USDC and 30,500,264.58872009 vUSDC
+- U: 288,921.382312112220008143 U and 90 vU
 
 The Normal Timelock withdraws each fixed amount, deposits the liquid asset, then uses the existing Migrator to redeem the vToken position and deposit its full actual proceeds, including interest accrued before execution. Each migration enforces a minimum share output equal to 99.5% of the snapshot estimate. Approvals are cleared in the same atomic proposal. Treasury income received after the snapshot remains in Treasury; this is not an execution-time balance sweep. Treasury balances, redemption liquidity and share floors should be checked again before execution.
 
@@ -85,17 +85,16 @@ Raise the U Hub FRV percentage cap from 50% to 90% (5000 to 9000 bps), keeping t
 
 #### Security and additional considerations
 
-We applied the following security procedures for this upgrade:
+The proposal includes the following security checks and considerations:
 
 - No changes in the deployed codebase.
-- **VIP execution simulation**: in a simulation environment, validating that the expected markets are added to the ETH E-Mode pool with the expected risk parameters, and that users in the group can borrow ETH against WBETH but cannot borrow other markets
+- **VIP execution simulation**: in a simulation environment, validating that the expected markets are added to the ETH E-Mode pool with the expected risk parameters, and that users in the group can borrow ETH against WBETH but cannot borrow other markets. The simulation also checks that Hub shares return to the Treasury, the full vToken redemption proceeds are deposited, migration balances and approvals are cleared, and deposit queues and unrelated FRV caps remain unchanged.
 - **Testnet scope**: the testnet proposal covers the ETH E-Mode configuration only. Treasury migration and the U Hub cap change are mainnet-only.
 
 #### References
 
 - [E-Mode feature](https://github.com/VenusProtocol/venus-protocol/pull/614)
-- [VIP simulation](TODO)
-- [Upgrade on BNB Chain testnet](TODO)
+- [VIP proposal and simulation](https://github.com/VenusProtocol/vips/pull/625)
 - [Technical article about E-Mode](https://docs-v4.venus.io/technical-reference/reference-technical-articles/emode)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -164,4 +163,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vip667;
+export default vip664;
