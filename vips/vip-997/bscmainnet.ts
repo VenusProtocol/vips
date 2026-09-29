@@ -66,8 +66,8 @@ export const NAV_GUARDS = [
 ];
 
 export const SPOT_APY_BPS = [
-  { resource: JTRSY_VAULT, apyBps: 337 },
-  { resource: JAAA_VAULT, apyBps: 529 },
+  { resource: JTRSY_VAULT, apyBps: 316 },
+  { resource: JAAA_VAULT, apyBps: 478 },
 ];
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDC, CORE_SOURCE_USDC, FRV_SOURCE_USDC, CENTRIFUGE_SOURCE_USDC];
@@ -126,11 +126,11 @@ Each fund gets the same band as on the USDT Hub: a band around the value it repo
 anchor that drifts at a published rate and re-anchors daily. A reading outside the band is reported
 at the edge of it; it never reverts.
 
-- **JTRSY**: Drift: 5.00%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 3.37%.
-- **JAAA**: Drift: 5.50%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 5.29%.
+- **JTRSY**: Drift: 5.00%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 3.16%.
+- **JAAA**: Drift: 5.50%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 4.78%.
 
-Centrifuge publishes no rate on chain, so the APY each fund reports is set by setSpotAPYBps, matching
-what the USDT Hub publishes for the same funds.
+Centrifuge publishes no rate on chain, so the APY each fund reports is set by setSpotAPYBps, at the
+rate Centrifuge currently reports for each fund.
 
 #### Actions (57 commands, executed atomically in order)
 

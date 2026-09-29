@@ -245,7 +245,6 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("the operator and the guardian already hold the emergency pair on the live USDC sources", async () => {
-      // Why the batch grants nothing on the Core, Flux and FRV sources.
       for (const group of EXISTING_GROUPS) {
         for (const sig of EMERGENCY) {
           for (const holder of [NORMAL_TIMELOCK, OPERATOR, GUARDIAN]) {
