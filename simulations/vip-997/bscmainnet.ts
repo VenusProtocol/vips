@@ -386,7 +386,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("each fund publishes the same rate as on the USDT Hub", async () => {
+    it("each fund publishes its starting APY, and the empty group reports zero", async () => {
       for (const fund of FUNDS) {
         const published = SPOT_APY_BPS.find(a => a.resource === fund.vault);
         expect(await source.resourceSpotAPYBps(fund.vault), fund.name).to.equal(published?.apyBps);
