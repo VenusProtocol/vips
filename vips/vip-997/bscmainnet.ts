@@ -3,6 +3,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import {
+  CENTRIFUGE_CLAIMS,
+  CENTRIFUGE_GOVERNANCE,
+  CENTRIFUGE_GUARDIAN,
+  CENTRIFUGE_OPERATOR,
+} from "./permissions-bscmainnet";
+
 const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, GUARDIAN, CRITICAL_TIMELOCK, FAST_TRACK_TIMELOCK } =
   NETWORK_ADDRESSES.bscmainnet;
 
@@ -65,9 +72,13 @@ export const SPOT_APY_BPS = [
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDC, CORE_SOURCE_USDC, FRV_SOURCE_USDC, CENTRIFUGE_SOURCE_USDC];
 
-export const ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
-export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR_INDEX = 6;
+// Who gets which slice of the source's surface: 20 + 16 + 4 + 8 = 48 grants, all on the new source.
+export const GRANTS: [string[], string][] = [
+  [CENTRIFUGE_GOVERNANCE, NORMAL_TIMELOCK],
+  [CENTRIFUGE_OPERATOR, OPERATOR],
+  [CENTRIFUGE_CLAIMS, KEEPER],
+  [CENTRIFUGE_GUARDIAN, GUARDIAN],
+];
 
 export const vip997 = () => {
   const meta = {
@@ -99,16 +110,8 @@ per-holder request state, so the two Hubs' positions are accounted separately.
 
 #### Roles
 
-48 grants on the new source, **seeded on chain** into the **ACMCommandsAggregator**
-(${ACM_AGGREGATOR}) at grant batch index ${ACM_AGGREGATOR_INDEX}, because they do not fit inline in
-a single propose() transaction. Readable with grantPermissions(${ACM_AGGREGATOR_INDEX}, i) for i in
-0..47.
-
-The proposal lends the aggregator DEFAULT_ADMIN_ROLE on the AccessControlManager, replays that
-batch, and revokes the role in the same transaction, so the aggregator holds ACM admin only inside
-this proposal.
-
-The same role layout as the USDT source:
+48 grants on the new source, each a giveCallPermission on the AccessControlManager, in the same
+role layout as the USDT source:
 
 - **Normal Timelock**: Signatures: 20; Surface: everything, including sweep which it alone holds.
 - **Operator**: Signatures: 16; Surface: both inner queues, the async lifecycle, the four claims, pauseResource, unpauseResource, updateResourceAdapter, the NAV band, setSpotAPYBps.
@@ -129,10 +132,9 @@ at the edge of it; it never reverts.
 Centrifuge publishes no rate on chain, so the APY each fund reports is set by setSpotAPYBps, matching
 what the USDT Hub publishes for the same funds.
 
-#### Actions (12 commands, executed atomically in order)
+#### Actions (57 commands, executed atomically in order)
 
-1. Grant DEFAULT_ADMIN_ROLE to the ACMCommandsAggregator, replay the grant batch, and revoke the
-   role.
+1. Grant the 48 roles above on the source (giveCallPermission).
 2. Register both USDC vaults on the source behind **AdapterCentrifuge** (addResource).
 3. Set the source's inner withdraw queue to both funds, JTRSY first. The inner deposit queue is left
    unset, so an ordinary Hub deposit never routes into a fund that settles over days.
@@ -160,9 +162,13 @@ what the USDT Hub publishes for the same funds.
   };
   return makeProposal(
     [
-      { target: ACM, signature: "grantRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR] },
-      { target: ACM_AGGREGATOR, signature: "executeGrantPermissions(uint256)", params: [ACM_AGGREGATOR_INDEX] },
-      { target: ACM, signature: "revokeRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR] },
+      ...GRANTS.flatMap(([sigs, account]) =>
+        sigs.map(sig => ({
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [CENTRIFUGE_SOURCE_USDC, sig, account],
+        })),
+      ),
 
       ...CENTRIFUGE_RESOURCES.map(resource => ({
         target: CENTRIFUGE_SOURCE_USDC,

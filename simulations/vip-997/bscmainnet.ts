@@ -7,8 +7,6 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip997, {
   ACM,
-  ACM_AGGREGATOR,
-  ACM_AGGREGATOR_INDEX,
   ADAPTER_CENTRIFUGE,
   CENTRIFUGE_ABSOLUTE_CAP,
   CENTRIFUGE_BASE_MANAGER,
@@ -18,10 +16,10 @@ import vip997, {
   CENTRIFUGE_SOURCE_USDC,
   CORE_SOURCE_USDC,
   CRITICAL_TIMELOCK,
-  DEFAULT_ADMIN_ROLE,
   FAST_TRACK_TIMELOCK,
   FLUX_SOURCE_USDC,
   FRV_SOURCE_USDC,
+  GRANTS,
   GUARDIAN,
   HUB_USDC,
   JAAA_POOL_ID,
@@ -50,7 +48,6 @@ import {
   CENTRIFUGE_OPERATOR,
   EMERGENCY,
 } from "../../vips/vip-997/permissions-bscmainnet";
-import { ACM_AGGREGATOR_ABI, buildPermissions } from "../../vips/vip-997/scripts/acmPermissions";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
 import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
@@ -68,6 +65,8 @@ const BLOCK_NUMBER = 124693000;
 // ACM role hashing.
 const roleOf = (contract: string, sig: string) =>
   ethers.utils.solidityKeccak256(["address", "string"], [contract, sig]);
+
+const GRANTS_EXPANDED = GRANTS.flatMap(([sigs, account]) => sigs.map(sig => ({ sig, account })));
 
 // The two funds, each paired with the band the VIP configures for it and its USDT twin — the vault of
 // the same share class already on the USDT Hub.
@@ -126,9 +125,6 @@ forking(BLOCK_NUMBER, async () => {
   let acm: Contract;
   let usdc: Contract;
 
-  let aggregator: Contract;
-  let permissions: ReturnType<typeof buildPermissions>;
-
   let depositQueueBefore: string[];
   let withdrawQueueBefore: string[];
   let hubTotalBefore: BigNumber;
@@ -144,20 +140,6 @@ forking(BLOCK_NUMBER, async () => {
     depositQueueBefore = await hub.outerDepositQueue();
     withdrawQueueBefore = await hub.outerWithdrawQueue();
     hubTotalBefore = await hub.totalAssets();
-
-    aggregator = await ethers.getContractAt(ACM_AGGREGATOR_ABI, ACM_AGGREGATOR);
-    permissions = buildPermissions();
-    // Until the batch is seeded on chain, seed it here. The VIP replays a fixed slot, so it has to
-    // land in exactly that one; the pre-VIP check below asserts the slot's contents either way.
-    const seeded = await aggregator.grantPermissions(ACM_AGGREGATOR_INDEX, 0).then(
-      () => true,
-      () => false,
-    );
-    if (!seeded) {
-      await expect(aggregator.addGrantPermissions(permissions))
-        .to.emit(aggregator, "GrantPermissionsAdded")
-        .withArgs(ACM_AGGREGATOR_INDEX);
-    }
   });
 
   describe("Pre-VIP state", () => {
@@ -273,34 +255,21 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the aggregator slot holds exactly these grants", async () => {
-      expect(permissions.length, "the description's grant count").to.equal(48);
-      expect(permissions.length).to.equal(
-        CENTRIFUGE_GOVERNANCE.length +
-          CENTRIFUGE_OPERATOR.length +
-          CENTRIFUGE_CLAIMS.length +
-          CENTRIFUGE_GUARDIAN.length,
-      );
-
-      for (const [i, expected] of permissions.entries()) {
-        const [contractAddress, functionSig, account] = await aggregator.grantPermissions(ACM_AGGREGATOR_INDEX, i);
-        const where = `entry ${i} (${expected.functionSig} -> ${expected.account})`;
-        expect(ethers.utils.getAddress(contractAddress), `${where} contract`).to.equal(
-          ethers.utils.getAddress(expected.contractAddress),
-        );
-        expect(functionSig, `${where} signature`).to.equal(expected.functionSig);
-        expect(ethers.utils.getAddress(account), `${where} account`).to.equal(
-          ethers.utils.getAddress(expected.account),
-        );
+    it("the proposal grants exactly the 48 roles of the role layout", async () => {
+      expect(GRANTS_EXPANDED.length, "the description's grant count").to.equal(48);
+      const proposal = await vip997();
+      const grants = proposal.signatures
+        .map((signature, i) => ({ signature, target: proposal.targets[i], params: proposal.params[i] }))
+        .filter(c => c.signature === "giveCallPermission(address,string,address)");
+      expect(grants.length).to.equal(GRANTS_EXPANDED.length);
+      for (const [i, c] of grants.entries()) {
+        expect(c.target, `grant ${i} target`).to.equal(ACM);
+        expect(c.params, `grant ${i}`).to.deep.equal([
+          CENTRIFUGE_SOURCE_USDC,
+          GRANTS_EXPANDED[i].sig,
+          GRANTS_EXPANDED[i].account,
+        ]);
       }
-      // Nothing past the last one: the slot is these grants and no more.
-      await expect(aggregator.grantPermissions(ACM_AGGREGATOR_INDEX, permissions.length)).to.be.reverted;
-
-      for (const p of permissions) {
-        const where = `${p.contractAddress} ${p.functionSig} -> ${p.account}`;
-        expect(await acm.hasRole(roleOf(p.contractAddress, p.functionSig), p.account), where).to.equal(false);
-      }
-      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.equal(false);
     });
   });
 
@@ -309,8 +278,7 @@ forking(BLOCK_NUMBER, async () => {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
     callbackAfterExecution: async txResponse => {
-      // Every replayed grant, plus DEFAULT_ADMIN_ROLE lent to the aggregator and handed back.
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [permissions.length + 1, 1]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [GRANTS_EXPANDED.length, 0]);
       await expectEvents(
         txResponse,
         [SOURCE_ABI],
@@ -396,12 +364,10 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Post-VIP: permissions", () => {
-    it("every grant this VIP makes has landed and the borrowed ACM admin is gone", async () => {
-      for (const p of permissions) {
-        const where = `${p.contractAddress} ${p.functionSig} -> ${p.account}`;
-        expect(await acm.hasRole(roleOf(p.contractAddress, p.functionSig), p.account), where).to.equal(true);
+    it("every grant this VIP makes has landed", async () => {
+      for (const { sig, account } of GRANTS_EXPANDED) {
+        expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDC, sig), account), `${sig} -> ${account}`).to.equal(true);
       }
-      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.equal(false);
     });
 
     it("each account holds exactly its surface", async () => {
