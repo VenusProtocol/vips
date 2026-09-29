@@ -20,24 +20,22 @@ const GOVERNANCE_WARP = 7 * 24 * 3600;
 
 type OracleFeedHandler = (oracle: Contract, asset: string, feed: string) => Promise<void>;
 
-// Calls as the Normal Timelock. If the ACM refuses (e.g. a new oracle), grants `signature` for this call only.
+// Calls as the Normal Timelock. If it lacks the permission (e.g. a new oracle), grants `signature` for this call only.
 const callAsTimelock = async (
   target: string,
   signature: string,
   call: (timelock: SignerWithAddress) => Promise<unknown>,
 ) => {
   const timelock = await initMainnetUser(getForkedNetworkAddress("NORMAL_TIMELOCK"), ethers.utils.parseEther("1"));
+  const acmAddress = await new ethers.Contract(target, CHAINLINK_ORACLE.abi, ethers.provider).accessControlManager();
+  const acm = new ethers.Contract(acmAddress, ACCESS_CONTROL_MANAGER.abi, ethers.provider);
+  // isAllowedToCall treats msg.sender as the contract being called.
+  if (await acm.isAllowedToCall(timelock.address, signature, { from: target })) return call(timelock);
+  await acm.connect(timelock).giveCallPermission(target, signature, timelock.address);
   try {
     await call(timelock);
-  } catch {
-    const acmAddress = await new ethers.Contract(target, CHAINLINK_ORACLE.abi, ethers.provider).accessControlManager();
-    const acm = new ethers.Contract(acmAddress, ACCESS_CONTROL_MANAGER.abi, timelock);
-    await acm.giveCallPermission(target, signature, timelock.address);
-    try {
-      await call(timelock);
-    } finally {
-      await acm.revokeCallPermission(target, signature, timelock.address);
-    }
+  } finally {
+    await acm.connect(timelock).revokeCallPermission(target, signature, timelock.address);
   }
 };
 
