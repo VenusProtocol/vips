@@ -1,0 +1,1845 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITokenFactory",
+        "name": "tokenFactory_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "deployer",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadyLinkedVault",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadyUnlinkedVault",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AssetMissingDecimals",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CannotSetOlderPrice",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CrossChainTransferNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FileUnrecognizedParam",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFactory",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidHook",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidManager",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPool",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPrice",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidRequestManager",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVault",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LocalTransferNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MalformedVaultUpdateMessage",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoCode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotAuthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OldHook",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OldMetadata",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PoolAlreadyAdded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "PrefixNotZero",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RequestManagerNotSet",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SafeTransferEthFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ShareClassAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ShareTokenDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ShareTokenTransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TooFewDecimals",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TooManyDecimals",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TransferFromFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnauthorizedSender",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnknownAsset",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnknownVault",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "target",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes4",
+        "name": "selector",
+        "type": "bytes4"
+      },
+      {
+        "internalType": "bytes",
+        "name": "reason",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "details",
+        "type": "bytes"
+      }
+    ],
+    "name": "WrappedError",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      }
+    ],
+    "name": "AddPool",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IShareToken",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "AddShareClass",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "Deny",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IVaultFactory",
+        "name": "factory",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IVault",
+        "name": "vault",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum VaultKind",
+        "name": "kind",
+        "type": "uint8"
+      }
+    ],
+    "name": "DeployVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      }
+    ],
+    "name": "ExecuteTransferShares",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "what",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "data",
+        "type": "address"
+      }
+    ],
+    "name": "File",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "centrifugeId",
+        "type": "uint16"
+      },
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "destinationAddress",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      }
+    ],
+    "name": "InitiateTransferShares",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IVault",
+        "name": "vault",
+        "type": "address"
+      }
+    ],
+    "name": "LinkVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "centrifugeId",
+        "type": "uint16"
+      },
+      {
+        "indexed": true,
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isInitialization",
+        "type": "bool"
+      }
+    ],
+    "name": "RegisterAsset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "Rely",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IRequestManager",
+        "name": "manager",
+        "type": "address"
+      }
+    ],
+    "name": "SetRequestManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IVault",
+        "name": "vault",
+        "type": "address"
+      }
+    ],
+    "name": "UnlinkVault",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint16",
+        "name": "centrifugeId",
+        "type": "uint16"
+      },
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "target",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "UntrustedContractUpdate",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "D18",
+        "name": "price",
+        "type": "uint128"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "computedAt",
+        "type": "uint64"
+      }
+    ],
+    "name": "UpdateAssetPrice",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "maxPriceAge",
+        "type": "uint64"
+      }
+    ],
+    "name": "UpdateMaxAssetPriceAge",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "maxPriceAge",
+        "type": "uint64"
+      }
+    ],
+    "name": "UpdateMaxSharePriceAge",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "indexed": true,
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "indexed": false,
+        "internalType": "D18",
+        "name": "price",
+        "type": "uint128"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "computedAt",
+        "type": "uint64"
+      }
+    ],
+    "name": "UpdateSharePrice",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      }
+    ],
+    "name": "addPool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "salt",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "hook",
+        "type": "address"
+      }
+    ],
+    "name": "addShareClass",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "assetToId",
+    "outputs": [
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "centrifugeId",
+        "type": "uint16"
+      },
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "receiver",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "remoteExtraGasLimit",
+        "type": "uint128"
+      }
+    ],
+    "name": "crosschainTransferShares",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "centrifugeId",
+        "type": "uint16"
+      },
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "receiver",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "extraGasLimit",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "remoteExtraGasLimit",
+        "type": "uint128"
+      },
+      {
+        "internalType": "address",
+        "name": "refund",
+        "type": "address"
+      }
+    ],
+    "name": "crosschainTransferShares",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "deny",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "receiver",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint128",
+        "name": "amount",
+        "type": "uint128"
+      }
+    ],
+    "name": "executeTransferShares",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "what",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "data",
+        "type": "address"
+      }
+    ],
+    "name": "file",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "gateway",
+    "outputs": [
+      {
+        "internalType": "contract IGateway",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      }
+    ],
+    "name": "idToAsset",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      }
+    ],
+    "name": "isPoolActive",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "contract IShareToken",
+        "name": "shareToken_",
+        "type": "address"
+      }
+    ],
+    "name": "linkToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      }
+    ],
+    "name": "markersPricePoolPerAsset",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "computedAt",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "maxAge",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "validUntil",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      }
+    ],
+    "name": "markersPricePoolPerShare",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "computedAt",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "maxAge",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "validUntil",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "pool",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "createdAt",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "poolEscrowFactory",
+    "outputs": [
+      {
+        "internalType": "contract IPoolEscrowFactory",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "bool",
+        "name": "checkValidity",
+        "type": "bool"
+      }
+    ],
+    "name": "pricePoolPerAsset",
+    "outputs": [
+      {
+        "internalType": "D18",
+        "name": "price",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "bool",
+        "name": "checkValidity",
+        "type": "bool"
+      }
+    ],
+    "name": "pricePoolPerShare",
+    "outputs": [
+      {
+        "internalType": "D18",
+        "name": "price",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "bool",
+        "name": "checkValidity",
+        "type": "bool"
+      }
+    ],
+    "name": "pricesPoolPer",
+    "outputs": [
+      {
+        "internalType": "D18",
+        "name": "pricePoolPerAsset_",
+        "type": "uint128"
+      },
+      {
+        "internalType": "D18",
+        "name": "pricePoolPerShare_",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "recoverTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "recoverTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "centrifugeId",
+        "type": "uint16"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "refund",
+        "type": "address"
+      }
+    ],
+    "name": "registerAsset",
+    "outputs": [
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "rely",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint128",
+        "name": "extraGasLimit",
+        "type": "uint128"
+      },
+      {
+        "internalType": "bool",
+        "name": "unpaid",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "refund",
+        "type": "address"
+      }
+    ],
+    "name": "request",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      }
+    ],
+    "name": "requestCallback",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "requestManager",
+    "outputs": [
+      {
+        "internalType": "contract IRequestManager",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "sender",
+    "outputs": [
+      {
+        "internalType": "contract ISpokeMessageSender",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint64",
+        "name": "maxPriceAge",
+        "type": "uint64"
+      }
+    ],
+    "name": "setMaxAssetPriceAge",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "uint64",
+        "name": "maxPriceAge",
+        "type": "uint64"
+      }
+    ],
+    "name": "setMaxSharePriceAge",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "contract IRequestManager",
+        "name": "manager",
+        "type": "address"
+      }
+    ],
+    "name": "setRequestManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
+      }
+    ],
+    "name": "setShareTokenVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "",
+        "type": "bytes16"
+      }
+    ],
+    "name": "shareClass",
+    "outputs": [
+      {
+        "internalType": "contract IShareToken",
+        "name": "shareToken",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "D18",
+            "name": "price",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint64",
+            "name": "computedAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "maxAge",
+            "type": "uint64"
+          }
+        ],
+        "internalType": "struct Price",
+        "name": "pricePoolPerShare",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      }
+    ],
+    "name": "shareToken",
+    "outputs": [
+      {
+        "internalType": "contract IShareToken",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "shareToken_",
+        "type": "address"
+      }
+    ],
+    "name": "shareTokenDetails",
+    "outputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tokenFactory",
+    "outputs": [
+      {
+        "internalType": "contract ITokenFactory",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "target",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint128",
+        "name": "extraGasLimit",
+        "type": "uint128"
+      },
+      {
+        "internalType": "address",
+        "name": "refund",
+        "type": "address"
+      }
+    ],
+    "name": "updateContract",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "AssetId",
+        "name": "assetId",
+        "type": "uint128"
+      },
+      {
+        "internalType": "D18",
+        "name": "price",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint64",
+        "name": "computedAt",
+        "type": "uint64"
+      }
+    ],
+    "name": "updatePricePoolPerAsset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "D18",
+        "name": "price",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint64",
+        "name": "computedAt",
+        "type": "uint64"
+      }
+    ],
+    "name": "updatePricePoolPerShare",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "bytes",
+        "name": "update",
+        "type": "bytes"
+      }
+    ],
+    "name": "updateRestriction",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "address",
+        "name": "hook",
+        "type": "address"
+      }
+    ],
+    "name": "updateShareHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "PoolId",
+        "name": "poolId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "ShareClassId",
+        "name": "scId",
+        "type": "bytes16"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      }
+    ],
+    "name": "updateShareMetadata",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "wards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
