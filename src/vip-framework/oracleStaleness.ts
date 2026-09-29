@@ -15,8 +15,8 @@ import { TokenConfig } from "../types";
 import { getForkedNetworkAddress, initMainnetUser } from "../utils";
 
 const ONE_YEAR = 365 * 24 * 3600;
-// Longer than any governance lifecycle the framework warps through (~4.2 days for a BSC Normal VIP).
-const GOVERNANCE_WARP = 5 * 24 * 3600;
+// A BSC Normal VIP warps ~4.2 days; a feed still fresh after 7 days is assumed to stay fresh for the whole sim.
+const GOVERNANCE_WARP = 7 * 24 * 3600;
 
 type OracleFeedHandler = (oracle: Contract, asset: string, feed: string) => Promise<void>;
 
@@ -30,11 +30,8 @@ const callAsTimelock = async (
   try {
     await call(timelock);
   } catch {
-    const acm = new ethers.Contract(
-      getForkedNetworkAddress("ACCESS_CONTROL_MANAGER"),
-      ACCESS_CONTROL_MANAGER.abi,
-      timelock,
-    );
+    const acmAddress = await new ethers.Contract(target, CHAINLINK_ORACLE.abi, ethers.provider).accessControlManager();
+    const acm = new ethers.Contract(acmAddress, ACCESS_CONTROL_MANAGER.abi, timelock);
     await acm.giveCallPermission(target, signature, timelock.address);
     try {
       await call(timelock);
@@ -122,7 +119,12 @@ const forEachOracleFeed = (
     }
     const correlated = new ethers.Contract(oracleAddress, CORRELATED_ORACLE.abi, ethers.provider);
     const underlying = await correlated.UNDERLYING_TOKEN().catch(() => undefined);
-    if (!underlying) return;
+    if (!underlying) {
+      if (!(await canStillPriceDaysLater(chainlinkLike, asset))) {
+        console.warn(`Unhandled oracle ${oracleAddress} can't price ${asset} after the warp; fix it explicitly`);
+      }
+      return;
+    }
     await walkAsset(underlying);
     const intermediate = await correlated.INTERMEDIATE_ORACLE().catch(() => undefined);
     if (intermediate) await walkOracle(intermediate, await correlated.CORRELATED_TOKEN());
@@ -145,13 +147,15 @@ const ensurePriceableDaysLater = async (resilientOracle: Contract, asset: string
   if (await canStillPriceDaysLater(resilientOracle, asset)) return;
   await forEachOracleFeed(resilientOracle, asset, fixOracleFeed);
   if (!(await canStillPriceDaysLater(resilientOracle, asset))) {
-    throw new Error(`${asset} can't be priced after the governance warp; for a feed the VIP adds, use pinNewFeedPrice`);
+    throw new Error(
+      `${asset} can't be priced after the governance warp; for a feed the VIP adds, use pinOracleFeedPrice`,
+    );
   }
 };
 
-// Call once in the sim's before(). Keeps each asset priceable across the governance warp.
-// `assets` get their stale windows widened. `pinOnly` assets keep their window so the sim can assert it;
-// their stale oracle feeds get a pinned live price instead.
+// Call once in before() with every asset the sim prices, so none goes stale over the VIP's ~4-day warp.
+// `assets` get a 1-year stale window; `pinOnly` assets keep theirs (for sims asserting it) and get a pinned price.
+// Only covers oracles enabled now; for an oracle or feed the VIP adds or changes, use pinOracleFeedPrice.
 export const bypassStalePrices = async (assets: string[], { pinOnly = [] }: { pinOnly?: string[] } = {}) => {
   const resilientOracle = new ethers.Contract(
     getForkedNetworkAddress("RESILIENT_ORACLE"),
@@ -167,13 +171,21 @@ export const bypassStalePrices = async (assets: string[], { pinOnly = [] }: { pi
   for (const asset of pinOnly) await ensurePriceableDaysLater(resilientOracle, asset, pinIfStale);
 };
 
-// Call in before() for a feed the VIP adds. Pins the price that feed returns now if it would go stale over the
-// warp. The VIP's own setTokenConfig keeps the pin, so the sim can assert the real maxStalePeriod.
-export const pinNewFeedPrice = async (
+// Call in before() for a feed the VIP makes an asset read: new feed or oracle, changed config, re-enabled oracle.
+// Pass the VIP's `feed`/`maxStalePeriod`, or only `asset` to use the oracle's current config.
+// Pins the feed's current price if it would go stale; the pin survives the VIP's setTokenConfig.
+export const pinOracleFeedPrice = async (
   oracleAddress: string,
-  { asset, feed, maxStalePeriod }: { asset: string; feed: string; maxStalePeriod: number },
+  vipConfig: { asset: string; feed?: string; maxStalePeriod?: number },
 ) => {
+  const { asset } = vipConfig;
   const oracle = new ethers.Contract(oracleAddress, CHAINLINK_ORACLE.abi, ethers.provider);
+  const current = await oracle.tokenConfigs(asset);
+  const feed: string = vipConfig.feed ?? current.feed;
+  const maxStalePeriod: number = vipConfig.maxStalePeriod ?? current.maxStalePeriod.toNumber();
+  if (feed === ethers.constants.AddressZero) {
+    throw new Error(`${oracleAddress} has no feed for ${asset}; pass \`feed\``);
+  }
   const price = await dryRun(async () => {
     await setFeed(oracle, asset, feed, maxStalePeriod);
     if (!(await canPrice(oracle, asset))) {
