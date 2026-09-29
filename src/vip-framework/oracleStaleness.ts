@@ -102,13 +102,14 @@ const raiseStalePeriodOrPin =
   };
 
 // Calls `onOracleFeed` once for every enabled Chainlink-interface oracle feed behind `asset`.
-// Correlated oracles are followed into their underlying asset and intermediate oracle.
+// Correlated oracles are followed into their underlying asset and intermediate oracle. `skip` assets are left alone.
 const forEachOracleFeed = (
   resilientOracle: Contract,
   asset: string,
   onOracleFeed: OracleFeedHandler,
+  skip: Set<string>,
 ): Promise<void> => {
-  const visited = new Set<string>();
+  const visited = new Set(skip);
 
   const walkOracle = async (oracleAddress: string, asset: string): Promise<void> => {
     const chainlinkLike = new ethers.Contract(oracleAddress, CHAINLINK_ORACLE.abi, ethers.provider);
@@ -143,9 +144,14 @@ const forEachOracleFeed = (
 };
 
 // Runs `fixOracleFeed` on every oracle feed behind `asset`, unless it can still be priced days later.
-const ensurePriceableDaysLater = async (resilientOracle: Contract, asset: string, fixOracleFeed: OracleFeedHandler) => {
+const ensurePriceableDaysLater = async (
+  resilientOracle: Contract,
+  asset: string,
+  fixOracleFeed: OracleFeedHandler,
+  skip = new Set<string>(),
+) => {
   if (await canStillPriceDaysLater(resilientOracle, asset)) return;
-  await forEachOracleFeed(resilientOracle, asset, fixOracleFeed);
+  await forEachOracleFeed(resilientOracle, asset, fixOracleFeed, skip);
   if (!(await canStillPriceDaysLater(resilientOracle, asset))) {
     throw new Error(
       `${asset} can't be priced after the governance warp; for a feed the VIP adds, use pinOracleFeedPrice`,
@@ -164,11 +170,11 @@ export const bypassStalePrices = async (assets: string[], { pinOnly = [] }: { pi
   );
   const pinned = new Set(pinOnly.map(asset => asset.toLowerCase()));
 
-  for (const asset of assets) {
-    if (!pinned.has(asset.toLowerCase()))
-      await ensurePriceableDaysLater(resilientOracle, asset, raiseStalePeriodOrPin(ONE_YEAR));
-  }
   for (const asset of pinOnly) await ensurePriceableDaysLater(resilientOracle, asset, pinIfStale);
+  // Skips pinOnly assets, which another asset can reach through a correlated oracle (e.g. slisBNB -> BNB).
+  for (const asset of assets) {
+    await ensurePriceableDaysLater(resilientOracle, asset, raiseStalePeriodOrPin(ONE_YEAR), pinned);
+  }
 };
 
 // Call in before() for a feed the VIP makes an asset read: new feed or oracle, changed config, re-enabled oracle.
