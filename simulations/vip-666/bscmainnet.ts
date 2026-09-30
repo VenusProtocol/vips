@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip997, {
+import vip666, {
   ACM,
   ADAPTER_CENTRIFUGE,
   CENTRIFUGE_ABSOLUTE_CAP,
@@ -14,6 +14,7 @@ import vip997, {
   CENTRIFUGE_PERCENTAGE_CAP_BPS,
   CENTRIFUGE_RESOURCES,
   CENTRIFUGE_SOURCE_USDC,
+  CENTRIFUGE_SOURCE_USDT,
   CORE_SOURCE_USDC,
   CRITICAL_TIMELOCK,
   FAST_TRACK_TIMELOCK,
@@ -26,10 +27,12 @@ import vip997, {
   JAAA_SHARE,
   JAAA_SHARE_CLASS_ID,
   JAAA_VAULT,
+  JAAA_VAULT_USDT,
   JTRSY_POOL_ID,
   JTRSY_SHARE,
   JTRSY_SHARE_CLASS_ID,
   JTRSY_VAULT,
+  JTRSY_VAULT_USDT,
   KEEPER,
   NAV_GUARDS,
   NAV_GUARD_INTERVAL,
@@ -37,9 +40,10 @@ import vip997, {
   OPERATOR,
   OUTER_WITHDRAW_QUEUE,
   SPOT_APY_BPS,
+  SPOT_APY_BPS_USDT,
   USDC,
   YIELD_GROUP_CENTRIFUGE_IMPL,
-} from "../../vips/vip-997/bscmainnet";
+} from "../../vips/vip-666/bscmainnet";
 import {
   CENTRIFUGE_CLAIMS,
   CENTRIFUGE_GOVERNANCE,
@@ -47,7 +51,7 @@ import {
   CENTRIFUGE_NAV_GUARD,
   CENTRIFUGE_OPERATOR,
   EMERGENCY,
-} from "../../vips/vip-997/permissions-bscmainnet";
+} from "../../vips/vip-666/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
 import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
@@ -80,7 +84,7 @@ const FUNDS = [
   {
     name: "JTRSY",
     vault: JTRSY_VAULT,
-    usdtVault: "0x6e6B8498415083a4386BE83DD59Edd4366402FFa",
+    usdtVault: JTRSY_VAULT_USDT,
     share: JTRSY_SHARE,
     poolId: JTRSY_POOL_ID,
     scId: JTRSY_SHARE_CLASS_ID,
@@ -91,7 +95,7 @@ const FUNDS = [
   {
     name: "JAAA",
     vault: JAAA_VAULT,
-    usdtVault: "0xcbAfe61d84C6Fb88252a6Adf1C9CB0B9D029cb99",
+    usdtVault: JAAA_VAULT_USDT,
     share: JAAA_SHARE,
     poolId: JAAA_POOL_ID,
     scId: JAAA_SHARE_CLASS_ID,
@@ -115,12 +119,18 @@ const CORE_VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const TRANCHE = ethers.utils.parseUnits("30000", 18);
 // One whole share, in the 6-decimal share token's units.
 const ONE_SHARE = BigNumber.from(10).pow(6);
+// The APYs VIP-661 published on the USDT source, which this VIP refreshes.
+const USDT_SPOT_APY_BEFORE = [
+  { resource: JTRSY_VAULT_USDT, apyBps: 337 },
+  { resource: JAAA_VAULT_USDT, apyBps: 529 },
+];
 const EIP1967_BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50";
 
 forking(BLOCK_NUMBER, async () => {
   let hub: Contract;
   let beacon: Contract;
   let source: Contract;
+  let usdtSource: Contract;
   let adapter: Contract;
   let acm: Contract;
   let usdc: Contract;
@@ -133,6 +143,7 @@ forking(BLOCK_NUMBER, async () => {
     hub = await ethers.getContractAt(HUB_ABI, HUB_USDC);
     beacon = await ethers.getContractAt(BEACON_ABI, CENTRIFUGE_BEACON);
     source = await ethers.getContractAt(SOURCE_ABI, CENTRIFUGE_SOURCE_USDC);
+    usdtSource = await ethers.getContractAt(SOURCE_ABI, CENTRIFUGE_SOURCE_USDT);
     adapter = await ethers.getContractAt(ADAPTER_ABI, ADAPTER_CENTRIFUGE);
     acm = await ethers.getContractAt(ACM_ABI, ACM);
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
@@ -254,9 +265,19 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
+    it("the USDT source still publishes VIP-661's starting APYs, and the timelock can refresh them", async () => {
+      expect(await usdtSource.resources()).to.deep.equal([JTRSY_VAULT_USDT, JAAA_VAULT_USDT]);
+      for (const { resource, apyBps } of USDT_SPOT_APY_BEFORE) {
+        expect(await usdtSource.resourceSpotAPYBps(resource), resource).to.equal(apyBps);
+      }
+      expect(
+        await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDT, "setSpotAPYBps(address,uint64)"), NORMAL_TIMELOCK),
+      ).to.equal(true);
+    });
+
     it("the proposal grants exactly the 48 roles of the role layout", async () => {
       expect(GRANTS_EXPANDED.length, "the description's grant count").to.equal(48);
-      const proposal = await vip997();
+      const proposal = await vip666();
       const grants = proposal.signatures
         .map((signature, i) => ({ signature, target: proposal.targets[i], params: proposal.params[i] }))
         .filter(c => c.signature === "giveCallPermission(address,string,address)");
@@ -273,7 +294,7 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   // Explicit proposer and supporters known to satisfy the governance thresholds.
-  testVip("VIP-997 [BNB Chain] Liquidity Hub (USDC) — onboard the Centrifuge YieldGroup", await vip997(), {
+  testVip("VIP-666 [BNB Chain] Liquidity Hub (USDC) — onboard the Centrifuge YieldGroup", await vip666(), {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
     callbackAfterExecution: async txResponse => {
@@ -282,7 +303,7 @@ forking(BLOCK_NUMBER, async () => {
         txResponse,
         [SOURCE_ABI],
         ["ResourceAdded", "NavGuardConfigured", "SpotAPYBpsSet", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
-        [FUNDS.length, FUNDS.length, FUNDS.length, 0, 1],
+        [FUNDS.length, FUNDS.length, FUNDS.length + SPOT_APY_BPS_USDT.length, 0, 1],
       );
       await expectEvents(
         txResponse,
@@ -359,6 +380,16 @@ forking(BLOCK_NUMBER, async () => {
         expect(await source.resourceSpotAPYBps(fund.vault), fund.name).to.equal(published?.apyBps);
       }
       expect(await source.spotAPYBps()).to.equal(0);
+    });
+
+    it("the USDT source now publishes the same APY as each fund's USDC vault", async () => {
+      for (const fund of FUNDS) {
+        const published = SPOT_APY_BPS_USDT.find(a => a.resource === fund.usdtVault);
+        expect(await usdtSource.resourceSpotAPYBps(fund.usdtVault), fund.name).to.equal(published?.apyBps);
+        expect(await usdtSource.resourceSpotAPYBps(fund.usdtVault), fund.name).to.equal(
+          await source.resourceSpotAPYBps(fund.vault),
+        );
+      }
     });
   });
 

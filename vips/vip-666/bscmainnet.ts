@@ -70,6 +70,19 @@ export const SPOT_APY_BPS = [
   { resource: JAAA_VAULT, apyBps: 478 },
 ];
 
+// ---------------------------------------------------------------------------------------------------
+// The live Centrifuge source behind the USDT Hub (VIP-661) still publishes the starting APYs set then
+// (JTRSY 337 bps, JAAA 529 bps); refresh them to the same current rates as the USDC vaults.
+// ---------------------------------------------------------------------------------------------------
+export const CENTRIFUGE_SOURCE_USDT = "0xDA5AFfeb43719f517676E031a727071c7D400983";
+export const JTRSY_VAULT_USDT = "0x6e6B8498415083a4386BE83DD59Edd4366402FFa";
+export const JAAA_VAULT_USDT = "0xcbAfe61d84C6Fb88252a6Adf1C9CB0B9D029cb99";
+
+export const SPOT_APY_BPS_USDT = [
+  { resource: JTRSY_VAULT_USDT, apyBps: 316 },
+  { resource: JAAA_VAULT_USDT, apyBps: 478 },
+];
+
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDC, CORE_SOURCE_USDC, FRV_SOURCE_USDC, CENTRIFUGE_SOURCE_USDC];
 
 // Who gets which slice of the source's surface: 20 + 16 + 4 + 8 = 48 grants, all on the new source.
@@ -80,17 +93,18 @@ export const GRANTS: [string[], string][] = [
   [CENTRIFUGE_GUARDIAN, GUARDIAN],
 ];
 
-export const vip997 = () => {
+export const vip666 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-997 [BNB Chain] Liquidity Hub (USDC) — onboard the Centrifuge YieldGroup",
+    title: "VIP-666 [BNB Chain] Liquidity Hub (USDC) — onboard the Centrifuge YieldGroup",
     description: `#### Summary
 
 Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDC) on BNB Chain, on the same terms as
 the USDT Hub: grants the ACM roles on the newly deployed USDC source, registers the USDC
 vaults of Centrifuge's two BNB Chain funds — **JTRSY** and **JAAA** — behind the existing
 **AdapterCentrifuge**, sets the source's inner withdraw queue, configures a NAV band and publishes a
-starting APY on each fund, and adds the group to the Hub.
+starting APY on each fund, and adds the group to the Hub. It also refreshes the APY the USDT Hub's
+Centrifuge source publishes for the same two funds to the same current rates.
 
 Today the USDC Hub can only allocate to Venus Core, Fluid and the Fixed-Rate Vaults. Centrifuge
 settles USDC subscriptions and redemptions with no on/off-ramp fee, unlike USDT, so USDC is the
@@ -132,7 +146,11 @@ at the edge of it; it never reverts.
 Centrifuge publishes no rate on chain, so the APY each fund reports is set by setSpotAPYBps, at the
 rate Centrifuge currently reports for each fund.
 
-#### Actions (57 commands, executed atomically in order)
+The USDT Hub's Centrifuge source still publishes the starting rates set by VIP-661 (JTRSY 3.37%,
+JAAA 5.29%). This proposal refreshes them to 3.16% and 4.78%, so both Hubs report the same APY for
+the same fund. The Normal Timelock already holds setSpotAPYBps on that source.
+
+#### Actions (59 commands, executed atomically in order)
 
 1. Grant the 48 roles above on the source (giveCallPermission).
 2. Register both USDC vaults on the source behind **AdapterCentrifuge** (addResource).
@@ -143,18 +161,24 @@ rate Centrifuge currently reports for each fund.
 6. Register the group on the Hub with an absolute cap of 5,000,000 USDC and a 25% cap on TVL.
 7. Append Centrifuge to the **end** of the Hub's withdraw cascade, leaving the existing order and the
    deposit queue untouched.
+8. Refresh the published APY of both funds on the USDT Hub's Centrifuge source (setSpotAPYBps), to
+   the same rates as step 5.
 
 #### Deployed contracts (BNB Chain)
 
 - CentrifugeSource_USDC: ${CENTRIFUGE_SOURCE_USDC} — a BeaconProxy over the existing
   CentrifugeBeacon, bound to the USDC Hub, with no owner of its own, so every gated call on it is
   ACM-controlled
+- CentrifugeSource_USDT: ${CENTRIFUGE_SOURCE_USDT} — the live source behind the USDT Hub; only its
+  published APYs change
 - Reused from the USDT Hub's Centrifuge onboarding, unchanged: AdapterCentrifuge (${ADAPTER_CENTRIFUGE}), CentrifugeBeacon
   (${CENTRIFUGE_BEACON}, owned by the Normal Timelock) and YieldGroupCentrifuge implementation
   (${YIELD_GROUP_CENTRIFUGE_IMPL})
 
 #### References
 
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/769)
+- [VIP-661](https://app.venus.io/#/governance/proposal/661?chainId=56) — onboarded the Centrifuge YieldGroup to the Liquidity Hub (USDT)
 - HashDit audit of the Centrifuge YieldGroup`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -198,10 +222,16 @@ rate Centrifuge currently reports for each fund.
         params: [CENTRIFUGE_SOURCE_USDC, CENTRIFUGE_ABSOLUTE_CAP, CENTRIFUGE_PERCENTAGE_CAP_BPS],
       },
       { target: HUB_USDC, signature: "setOuterWithdrawQueue(address[])", params: [OUTER_WITHDRAW_QUEUE] },
+
+      ...SPOT_APY_BPS_USDT.map(fund => ({
+        target: CENTRIFUGE_SOURCE_USDT,
+        signature: "setSpotAPYBps(address,uint64)",
+        params: [fund.resource, fund.apyBps],
+      })),
     ],
     meta,
     ProposalType.REGULAR,
   );
 };
 
-export default vip997;
+export default vip666;
