@@ -37,7 +37,7 @@ export const vip665 = () => {
     title: "VIP-665 [BNB Chain] Prime Rewards Allocation — October 2026",
     description: `#### Summary
 
-This proposal sets the Venus Prime reward allocation on BNB Chain for October 2026, distributing $50,000 to USDT suppliers and U borrowers. The reward markets and rewarded sides are unchanged from September. Refer to the community post for the full background and rationale.
+This proposal sets the Venus Prime reward allocation on BNB Chain for October 2026, distributing $50,000 in total: $40,000 to USDT suppliers and $10,000 to U borrowers. The reward markets and rewarded sides are unchanged from September. Refer to the [community post](https://community.venus.io/t/venus-tokenomics-phase-ii-prime-rewards-redesign/5774) for the full background and rationale.
 
 #### Actions
 
@@ -64,6 +64,7 @@ No market is added to or removed from Prime, and no market's interest rate model
 #### References
 
 - [VIP simulation](https://github.com/VenusProtocol/vips/pull/771)
+- [Venus Tokenomics Phase II — Prime Rewards Redesign](https://community.venus.io/t/venus-tokenomics-phase-ii-prime-rewards-redesign/5774)
 - [VIP-660](https://app.venus.io/#/governance/proposal/660?chainId=56) — September 2026 Prime Allocation (current speeds)
 
 #### Voting options
