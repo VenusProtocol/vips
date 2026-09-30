@@ -51,6 +51,7 @@ No market is added to or removed from Prime, and no market's interest rate model
 
 #### References
 
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/771)
 - [VIP-660](https://app.venus.io/#/governance/proposal/660?chainId=56) — September 2026 Prime Allocation (current speeds)
 
 #### Voting options
