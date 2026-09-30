@@ -1,16 +1,18 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
+  DEV_RECIPIENT,
   NEW_PRIME_SPEED_FOR_U,
   NEW_PRIME_SPEED_FOR_USDT,
   PRIME_LIQUIDITY_PROVIDER,
   U,
   USDT,
+  U_TO_SWEEP,
   vip665,
 } from "../../vips/vip-665/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -38,15 +40,23 @@ const SUPPORTERS = [
   "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
 ];
 
+const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
+
 forking(FORK_BLOCK, async () => {
   let prime: Contract;
   let plp: Contract;
+  let u: Contract;
   let marketsBefore: string[];
+  let plpUBefore: BigNumber;
+  let recipientUBefore: BigNumber;
 
   before(async () => {
     prime = await ethers.getContractAt(PRIME_V2_ABI, PRIME);
     plp = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+    u = await ethers.getContractAt(ERC20_ABI, U);
     marketsBefore = await prime.getAllMarkets();
+    plpUBefore = await u.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    recipientUBefore = await u.balanceOf(DEV_RECIPIENT);
   });
 
   describe("Pre-VIP state", async () => {
@@ -64,16 +74,23 @@ forking(FORK_BLOCK, async () => {
       expect(await plp.maxTokenDistributionSpeeds(USDT)).to.equal(ethers.utils.parseUnits("1", 18));
       expect(await plp.maxTokenDistributionSpeeds(U)).to.equal(ethers.utils.parseUnits("1", 18));
     });
+
+    it("PLP holds enough unaccrued U for the sweep plus the October U leg", async () => {
+      const accrued = await plp.tokenAmountAccrued(U);
+      const octoberULeg = NEW_PRIME_SPEED_FOR_U.mul(192000 * 30);
+      expect(plpUBefore.sub(accrued)).to.be.gte(U_TO_SWEEP.add(octoberULeg));
+    });
   });
 
   testVip("VIP-665 Prime Rewards Allocation — October 2026", await vip665(), {
     proposer: PROPOSER,
     supporters: SUPPORTERS,
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      // Exactly one speed update per token, and no market or sweep change.
+      // Exactly one speed update per token, one sweep, and no market change.
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
-      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [0]);
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [1]);
       await expectEvents(txResponse, [PRIME_V2_ABI], ["MarketAdded"], [0]);
+      await expect(txResponse).to.emit(plp, "SweepToken").withArgs(U, DEV_RECIPIENT, U_TO_SWEEP);
 
       await expect(txResponse)
         .to.emit(plp, "TokenDistributionSpeedUpdated")
@@ -99,6 +116,15 @@ forking(FORK_BLOCK, async () => {
     it("new speeds stay under the configured maximum", async () => {
       expect(await plp.tokenDistributionSpeeds(USDT)).to.be.lte(await plp.maxTokenDistributionSpeeds(USDT));
       expect(await plp.tokenDistributionSpeeds(U)).to.be.lte(await plp.maxTokenDistributionSpeeds(U));
+    });
+
+    it("sweeps 20,000 U from the PLP to the dev recipient", async () => {
+      expect(plpUBefore.sub(await u.balanceOf(PRIME_LIQUIDITY_PROVIDER))).to.equal(U_TO_SWEEP);
+      expect((await u.balanceOf(DEV_RECIPIENT)).sub(recipientUBefore)).to.equal(U_TO_SWEEP);
+    });
+
+    it("the sweep leaves every U already accrued to Prime in the PLP", async () => {
+      expect(await u.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.be.gte(await plp.tokenAmountAccrued(U));
     });
 
     it("the Prime market set is unchanged", async () => {
