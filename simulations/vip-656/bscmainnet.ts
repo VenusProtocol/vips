@@ -5,8 +5,9 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
+import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
+import { bypassStalePrices, pinOracleFeedPrice } from "src/vip-framework/oracleStaleness";
 
 import vip656, {
   ATLAS_ORACLE,
@@ -64,27 +65,6 @@ const label = (address: string): string =>
 const notAuthorizedTo = (authorized: string[]): string[] =>
   Object.values(GOVERNANCE_ACCOUNTS).filter(a => !authorized.includes(a));
 
-// Minimal price-oracle stub that always returns 1e18 — swapped in so getPrice-probing calls
-// succeed against feeds that are stale on the fork or not configured yet.
-// Source (compiled with solc 0.8.25, optimizer off):
-//   contract StubOracle {
-//       function getPrice(address) external pure returns (uint256) { return 1e18; }
-//   }
-const STUB_ORACLE_BYTECODE =
-  "0x6080604052348015600e575f80fd5b5061015e8061001c5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c806341976e091461002d575b5f80fd5b610047600480360381019061004291906100cc565b61005d565b604051610054919061010f565b60405180910390f35b5f670de0b6b3a76400009050919050565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61009b82610072565b9050919050565b6100ab81610091565b81146100b5575f80fd5b50565b5f813590506100c6816100a2565b92915050565b5f602082840312156100e1576100e061006e565b5b5f6100ee848285016100b8565b91505092915050565b5f819050919050565b610109816100f7565b82525050565b5f6020820190506101225f830184610100565b9291505056fea26469706673582212209282f7f2d85233912d0088d6dc45ce2459097d2866597e41f0a286059758c12c64736f6c63430008190033";
-
-const deployStubOracle = async (): Promise<Contract> => {
-  const [deployer] = await ethers.getSigners();
-  const factory = new ethers.ContractFactory(
-    ["function getPrice(address) external pure returns (uint256)"],
-    STUB_ORACLE_BYTECODE,
-    deployer,
-  );
-  const stubOracle = await factory.deploy();
-  await stubOracle.deployed();
-  return stubOracle;
-};
-
 // IVaultTypes.VaultState
 const VaultState = {
   WaitingForMargin: 0,
@@ -100,19 +80,16 @@ forking(FORK_BLOCK, async () => {
   let acm: Contract;
   let controller: Contract;
   let vceBTC: Contract;
-  let btcb: Contract;
   let usdt: Contract;
   let timelock: any;
   let vaultsBefore: any;
   let btcbPriceAtFork: any;
-  let originalControllerOracle: string;
   const vceBtcConfigsAfterVip: Record<string, any> = {};
 
   before(async () => {
     oracle = await ethers.getContractAt(ORACLE_ABI, bscmainnet.RESILIENT_ORACLE);
     acm = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
     controller = await ethers.getContractAt(CONTROLLER_ABI, FIXED_RATE_VAULT_CONTROLLER);
-    btcb = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, BTCB);
     usdt = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, SUPPLY_ASSET);
     timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
@@ -121,6 +98,13 @@ forking(FORK_BLOCK, async () => {
     btcbPriceAtFork = await oracle.getPrice(BTCB);
 
     vceBTC = await ethers.getContractAt(CUSTODY_RECEIPT_TOKEN_ABI, VCEBTC);
+
+    // The VIP clones BTCB's feeds onto vceBTC, and createVault prices both vault assets.
+    for (const { address, feed, maxStalePeriod } of BTCB_ORACLE_CONFIGS) {
+      await pinOracleFeedPrice(address, { asset: VCEBTC, feed, maxStalePeriod });
+    }
+    // BTCB's windows are asserted below, so they're pinned rather than widened.
+    await bypassStalePrices([SUPPLY_ASSET], { pinOnly: [BTCB] });
   });
 
   describe("Pre-VIP behavior", () => {
@@ -162,29 +146,16 @@ forking(FORK_BLOCK, async () => {
         expect(config.maxStalePeriod, name).to.equal(maxStalePeriod);
       }
     });
-
-    // createVault probes getPrice() for both vault assets, but on the fork the feeds are stale by
-    // execution time (testVip advances days) and vceBTC's config doesn't exist until the VIP runs.
-    // Swap the controller's oracle for an always-1e18 stub; callbackAfterExecution restores it.
-    it("[Test-Only] swaps the controller's oracle for a stub so createVault's price probe passes during execution", async () => {
-      originalControllerOracle = await controller.oracle();
-      expect(originalControllerOracle).to.equal(bscmainnet.RESILIENT_ORACLE);
-      const stubOracle = await deployStubOracle();
-      await controller.connect(timelock).setOracle(stubOracle.address);
-      expect(await controller.oracle()).to.equal(stubOracle.address);
-    });
   });
 
   testVip("VIP-656 Create Ceffu Custody BTC Fixed Rate Vault", await vip656(), {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
     callbackAfterExecution: async () => {
-      await controller.connect(timelock).setOracle(originalControllerOracle);
       for (const { name, address } of BTCB_ORACLE_CONFIGS) {
         const subOracle = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, address);
         vceBtcConfigsAfterVip[name] = await subOracle.tokenConfigs(VCEBTC);
       }
-      await setMaxStalePeriodForAllAssets(oracle, [btcb, usdt, vceBTC]);
     },
   });
 

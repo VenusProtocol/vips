@@ -109,6 +109,8 @@ forking(BLOCK_NUMBER, async () => {
 
 For remote (non-BSC) chain simulations, use `testForkedNetworkVipCommands` instead of `testVip`.
 
+Before writing a sim that prices assets or asserts ACM permissions, read [src/vip-framework/workarounds.md](src/vip-framework/workarounds.md). It covers `bypassStalePrices` / `pinOracleFeedPrice` (keeping oracle prices valid across the governance warp; don't use the deprecated helpers in `src/legacyOracleStaleness.ts`) and ACM asserts (`isAllowedToCall` + `RoleGranted` work on every chain; BSC mainnet's older ACM has no `hasPermission` / `PermissionGranted` and a different wildcard hash).
+
 ### Multisig Proposals
 
 Located in `multisig/proposals/<network>/vip-NNN/index.ts`. Same `makeProposal` pattern but executed through Gnosis Safe rather than governance. Simulations in `multisig/simulations/<network>/vip-NNN/index.ts`.
