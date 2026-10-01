@@ -1,4 +1,4 @@
-import { TransactionRequest, TransactionResponse } from "@ethersproject/providers";
+import { TransactionReceipt, TransactionRequest, TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
@@ -25,6 +25,7 @@ import {
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
+import { expectForkedBatchesRan, explainBatchFailure, forkedBatches } from "./aggregatorBatches";
 
 // XVS Vault stakes erode over time and governance has raised the bar (1,000,000 XVS proposal
 // threshold, 1,500,000 XVS quorum as of block ~111,098,000), so a single default supporter no
@@ -388,7 +389,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
     proposal.signatures.map((signature, i) => {
       it(`executes ${signature} successfully`, async () => {
-        await executeCommand(impersonatedTimelock, proposal, i);
+        await executeCommand(impersonatedTimelock, proposal, i).catch(error => explainBatchFailure(proposal, i, error));
       });
     });
   });
@@ -399,6 +400,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     let proposalId: number;
+    let executionReceipt: TransactionReceipt;
 
     it("can be proposed", async () => {
       const { targets, signatures, values, meta } = proposal;
@@ -474,13 +476,19 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
         populated.gasLimit = BigNumber.from(cap);
       }
       const tx = await proposer.sendTransaction(populated);
-      const receipt = await tx.wait();
-      await reportTxGas(description, "execute(proposalId)", receipt.gasUsed);
+      executionReceipt = await tx.wait();
+      await reportTxGas(description, "execute(proposalId)", executionReceipt.gasUsed);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
       }
     });
+
+    if (forkedBatches(proposal).length) {
+      it("runs every aggregator batch and leaves the aggregator without its permissions", async () => {
+        await expectForkedBatchesRan(proposal, executionReceipt);
+      });
+    }
   });
 };
 
@@ -491,6 +499,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
   let targets: string[];
   let signatures: string[];
   let proposalType: ProposalType;
+  let executionReceipt: TransactionReceipt;
   const provider = ethers.provider;
 
   describe(`${description} execution`, () => {
@@ -594,11 +603,11 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       }
 
       const tx = await executor.execute(proposalId, txnParams);
-      const receipt = await tx.wait();
+      executionReceipt = await tx.wait();
 
-      const gasUsed = receipt.gasUsed.toString();
+      const gasUsed = executionReceipt.gasUsed.toString();
       const capSuffix = Number.isFinite(cap)
-        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+        ? ` (${executionReceipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
         : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
       console.log(`[gas] ${description} executor.execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
 
@@ -606,5 +615,11 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         await options.callbackAfterExecution(tx);
       }
     });
+
+    if (forkedBatches(proposal).length) {
+      it("runs every aggregator batch and leaves the aggregator without its permissions", async () => {
+        await expectForkedBatchesRan(proposal, executionReceipt);
+      });
+    }
   });
 };

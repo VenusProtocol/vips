@@ -8,10 +8,11 @@ import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { aggregateCommands } from "./auxiliaryCommandsAggregator";
+import { aggregateCommands, isSimulation, seedBatches } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
+  AggregatorBatch,
   Command,
   LzChainId,
   Proposal,
@@ -249,6 +250,20 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   return fee;
 };
 
+// Sims store the forked chain's unpinned batches while the proposal is built, so every later build on the same fork takes
+// the indices after them. The Normal Timelock is an authorized batcher on every aggregator; its balance is restored.
+const seedForkedBatches = async (batches: AggregatorBatch[]) => {
+  const pending = batches.filter(batch => batch.network === FORKED_NETWORK && !batch.seeded);
+  if (!isSimulation() || pending.length === 0) return;
+  const timelock = NETWORK_ADDRESSES[FORKED_NETWORK as "bscmainnet"].NORMAL_TIMELOCK;
+  const balance = await ethers.provider.getBalance(timelock);
+  const batcher = await initMainnetUser(timelock, balance.add(parseUnits("10", 18)));
+  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+  await seedBatches(batcher, pending, Number.isFinite(cap) ? { gasLimit: cap } : {});
+  await initMainnetUser(timelock, balance);
+  for (const batch of pending) batch.seeded = true;
+};
+
 export const makeProposal = async (
   commands: Command[],
   meta?: ProposalMeta,
@@ -268,6 +283,7 @@ export const makeProposal = async (
   };
   if (options.aggregate?.length) {
     const aggregation = await aggregateCommands(commands, options.aggregate, type);
+    await seedForkedBatches(aggregation.batches);
     commands = aggregation.commands;
     proposal.aggregatorBatches = aggregation.batches;
   }

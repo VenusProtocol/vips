@@ -1,4 +1,4 @@
-import { BigNumber, Contract, constants, providers, utils } from "ethers";
+import { BigNumber, Contract, Overrides, Signer, constants, providers, utils } from "ethers";
 import { FORKED_NETWORK, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
@@ -31,7 +31,7 @@ interface BatchedCommand {
   group?: BatchOptions;
 }
 
-const isSimulation = () => ["hardhat", "zksynctestnode"].includes(network.name);
+export const isSimulation = () => ["hardhat", "zksynctestnode"].includes(network.name);
 
 const toCall = (target: string, signature: string, params: unknown[]): AggregatorCall => {
   const fragment = utils.FunctionFragment.from(signature);
@@ -247,3 +247,19 @@ export const aggregateCommands = async (
   };
 };
 
+// `batches` must all be on the batcher's chain.
+export const seedBatches = async (batcher: Signer, batches: AggregatorBatch[], overrides: Overrides = {}) => {
+  for (const { network: chain, aggregator: address, index, seeded, calls } of batches) {
+    if (seeded || !index) continue;
+    const aggregator = new Contract(address, AGGREGATOR_ABI, batcher);
+    const tx = await aggregator["addBatch((address,bytes)[],uint256)"](
+      calls.map(({ target, data }) => ({ target, data })),
+      index,
+      overrides,
+    );
+    const receipt = await tx.wait();
+    console.log(
+      `[aggregate] ${chain}: seeded batch ${index} (${calls.length} calls, ${receipt.gasUsed} gas) in ${receipt.transactionHash}`,
+    );
+  }
+};
