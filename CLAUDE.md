@@ -34,6 +34,7 @@ yarn tsc --noEmit
 
 ```bash
 npx hardhat propose <path-relative-to-vips/> --network bscmainnet
+npx hardhat seedAggregatorBatches <path-relative-to-vips/> --network bscmainnet
 npx hardhat proposeOnTestnet <path-relative-to-vips/> --network bsctestnet
 npx hardhat createProposal --network <networkName>
 npx hardhat multisig <path-relative-to-multisig/proposals/> --network <network>
@@ -50,7 +51,7 @@ npx hardhat safeTxData <path-relative-to-multisig/proposals/> --network <network
 
 ### Core Types (src/types.ts)
 
-- **`Command`**: Single contract call — `{ target, signature, params, value?, dstChainId? }`
+- **`Command`**: Single contract call — `{ target, signature, params, value?, dstChainId?, inline?, aclSignature? }`
 - **`Proposal`**: Array of targets/signatures/params/values built from Commands
 - **`ProposalType`**: `REGULAR` (0), `FAST_TRACK` (1), `CRITICAL` (2) — different timelock delays
 - **`LzChainId`**: LayerZero chain IDs for cross-chain proposals
@@ -58,6 +59,8 @@ npx hardhat safeTxData <path-relative-to-multisig/proposals/> --network <network
 ### Key Utility: `makeProposal()` (src/utils.ts)
 
 Converts an array of `Command` objects into a `Proposal`. Automatically handles cross-chain routing: commands with `dstChainId` are bundled into LayerZero omnichain execution calls via `OmnichainProposalSender`.
+
+A REGULAR proposal that hits the propose gas cap, the 100-operation cap or the LayerZero payload cap can pass `{ aggregate: [LzChainId.bscmainnet, LzChainId.ethereum, ...] }` as the fourth argument, for any chain with an `AUXILIARY_COMMANDS_AGGREGATOR` in `NETWORK_ADDRESSES`. Each listed chain's commands are grouped into AuxiliaryCommandsAggregator batches (`src/auxiliaryCommandsAggregator.ts`) and replaced by `grantRole(DEFAULT_ADMIN_ROLE, aggregator)` → `executeBatch(i)` per batch → `revokeRole`. Each run of commands between inline commands is one batch; `batch([...])` starts a new batch for the commands it wraps, and an inline command inside it still runs inline and ends that batch. A batch must fit one `addBatch` transaction: an oversized one reverts when the sim seeds it (the sim logs the revert and runs no tests) or when `seedAggregatorBatches` sends it, so split its commands across `batch()` calls, or mark a single oversized command `inline`. A batch grants the aggregator each call permission it needs and revokes it at the end; `aclSignature` overrides the granted string when the target's ACM check differs from `signature`. Batched calls run as the aggregator, so mark `inline: true` on owner-only calls and on calls acting on the caller's own balance, allowance or votes; commands with `value > 0` and `acceptOwnership()` stay inline anyway. Every batch gets its own stored index: `batch(commands, { actualIndex })` pins a batch already stored at that index and checks the stored calls whenever its chain is read; `batch(commands, { expectedIndex })` stores it at that index, which must be the chain's next free index unless the batch is already stored there; any other batch takes the chain's next free index. A `batch()` that sets an index must hold one chain's commands and stay one batch. Sims store the forked chain's unpinned batches while the proposal is built (a pinned batch must already exist at the fork block) and check after execution that they ran and left the aggregator without permissions; other chains' batches are not read. A failing BNB Chain batch is replayed call by call to name the failing call. `propose`, `createProposal` and `verifyProposal` refuse batches not yet stored at their index with `BATCH_NOT_SEEDED`. After final review, store them with `npx hardhat seedAggregatorBatches` (it uses `AGGREGATOR_BATCHER_PRIVATE_KEY` over `ARCHIVE_NODE_<network>` and prints and returns each chain's batch indices in order, e.g. `{"bscmainnet":[5,6]}`), then pin each with `actualIndex` and move the sims' fork blocks past the seeding. A run stores every batch without an index again, so pin what a run stored before running it again.
 
 ### VIP File Pattern
 
