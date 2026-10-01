@@ -268,8 +268,6 @@ export const makeProposal = async (
   commands: Command[],
   meta?: ProposalMeta,
   type?: ProposalType,
-  // chains whose commands run through their AuxiliaryCommandsAggregator; LzChainId.bscmainnet selects local commands
-  options: { aggregate?: LzChainId[] } = {},
 ): Promise<Proposal> => {
   const proposal: Proposal = {
     signatures: [],
@@ -281,8 +279,8 @@ export const makeProposal = async (
     meta,
     type,
   };
-  if (options.aggregate?.length) {
-    const aggregation = await aggregateCommands(commands, options.aggregate, type);
+  if (commands.some(cmd => cmd.batchGroup)) {
+    const aggregation = await aggregateCommands(commands, type);
     await seedForkedBatches(aggregation.batches);
     commands = aggregation.commands;
     proposal.aggregatorBatches = aggregation.batches;

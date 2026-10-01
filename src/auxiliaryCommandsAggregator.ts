@@ -28,14 +28,14 @@ interface BatchedCommand {
   call: AggregatorCall;
   // undefined for ACM calls: the aggregator holds DEFAULT_ADMIN_ROLE while its batches run
   grant?: { key: string; permission: CallPermission; give: AggregatorCall; revoke: AggregatorCall };
-  group?: BatchOptions;
+  group: BatchOptions;
 }
 
 export const isSimulation = () => ["hardhat", "zksynctestnode"].includes(network.name);
 
 const toCall = (target: string, signature: string, params: unknown[]): AggregatorCall => {
   const fragment = utils.FunctionFragment.from(signature);
-  // A timelock derives the selector from the signature string, so batched and inline calls must agree on it.
+  // A timelock derives the selector from the signature string as written; a batched call must get the same selector.
   if (fragment.format() !== signature) {
     throw new Error(`aggregate: signature "${signature}" should be in the canonical form "${fragment.format()}"`);
   }
@@ -49,20 +49,21 @@ const sameCalls = (a: StoredCall[], b: StoredCall[]) =>
       call.target.toLowerCase() === b[i].target.toLowerCase() && call.data.toLowerCase() === b[i].data.toLowerCase(),
   );
 
-// Starts a new batch for the commands it wraps; an inline command among them still runs inline and ends that batch. A
-// batch too large for one addBatch runs out of gas when it is stored, so split its commands across batch() calls.
+// Turns the commands into one aggregator batch on their chain. Batched calls run as the aggregator, so calls that must
+// come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is stored, so
+// split its commands across batch() calls.
 export const batch = (commands: Command[], options: BatchOptions = {}): Command[] => {
   const { expectedIndex, actualIndex } = options;
   if (expectedIndex !== undefined && actualIndex !== undefined) {
     throw new Error("batch: set expectedIndex or actualIndex, not both");
   }
   const index = expectedIndex ?? actualIndex;
-  if (index !== undefined) {
-    if (!Number.isInteger(index) || index < 0) throw new Error(`batch: ${index} is not an index`);
-    // Each chain's aggregator numbers its own batches.
-    if (new Set(commands.map(cmd => cmd.dstChainId ?? LzChainId.bscmainnet)).size > 1) {
-      throw new Error("batch: a batch() that sets an index must hold one chain's commands");
-    }
+  if (index !== undefined && (!Number.isInteger(index) || index < 0)) {
+    throw new Error(`batch: ${index} is not an index`);
+  }
+  // Each chain's aggregator holds its own batches.
+  if (new Set(commands.map(cmd => cmd.dstChainId ?? LzChainId.bscmainnet)).size > 1) {
+    throw new Error("batch: a batch() must hold one chain's commands");
   }
   const batchGroup = { ...options };
   return commands.map(cmd => ({ ...cmd, batchGroup }));
@@ -84,14 +85,18 @@ const planChain = (commands: Command[], chain: SUPPORTED_NETWORKS) => {
   const acm = addresses?.ACCESS_CONTROL_MANAGER;
   if (!aggregator || !acm) throw new Error(`aggregate: no AuxiliaryCommandsAggregator on ${chain}`);
 
-  const toBatchedCommand = (cmd: Command): BatchedCommand => {
+  const toBatchedCommand = (cmd: Command, group: BatchOptions): BatchedCommand => {
+    // A stored call carries no value, so the aggregator could not forward it.
+    if (BigNumber.from(cmd.value ?? 0).gt(0)) {
+      throw new Error(`aggregate: ${cmd.signature} on ${cmd.target} sends value and can't be batched`);
+    }
     const call = toCall(cmd.target, cmd.signature, cmd.params);
-    if (cmd.target.toLowerCase() === acm.toLowerCase()) return { call, group: cmd.batchGroup };
+    if (cmd.target.toLowerCase() === acm.toLowerCase()) return { call, group };
     const permission = { target: cmd.target, signature: cmd.aclSignature ?? cmd.signature };
     const permissionArgs = [cmd.target, permission.signature, aggregator];
     return {
       call,
-      group: cmd.batchGroup,
+      group,
       grant: {
         key: `${cmd.target.toLowerCase()} ${permission.signature}`,
         permission,
@@ -104,10 +109,10 @@ const planChain = (commands: Command[], chain: SUPPORTED_NETWORKS) => {
   const segments: (Command | BatchedCommand[])[] = [];
   for (const cmd of commands) {
     const last = segments[segments.length - 1];
-    // The aggregator can't forward value, and acceptOwnership() must come from the pending owner.
-    if (cmd.inline || cmd.signature === "acceptOwnership()" || BigNumber.from(cmd.value ?? 0).gt(0)) segments.push(cmd);
-    else if (Array.isArray(last) && last[0].group === cmd.batchGroup) last.push(toBatchedCommand(cmd));
-    else segments.push([toBatchedCommand(cmd)]);
+    const group = cmd.batchGroup;
+    if (!group) segments.push(cmd);
+    else if (Array.isArray(last) && last[0].group === group) last.push(toBatchedCommand(cmd, group));
+    else segments.push([toBatchedCommand(cmd, group)]);
   }
   return { aggregator, acm, segments };
 };
@@ -122,7 +127,7 @@ const resolveIndices = async (
   let next = stored.count;
   const batches: AggregatorBatch[] = [];
   for (const run of runs) {
-    const { expectedIndex, actualIndex } = run[0].group ?? {};
+    const { expectedIndex, actualIndex } = run[0].group;
     const plan = toBatch(run);
     const pin = actualIndex ?? expectedIndex;
     if (pin === undefined) {
@@ -168,14 +173,9 @@ const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatch
   const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
   const { aggregator, acm, segments } = planChain(commands, chain);
   const runs = segments.filter((s): s is BatchedCommand[] => Array.isArray(s));
-  if (runs.length === 0) throw new Error(`aggregate: ${chain} has no commands to batch`);
-  const pinned = runs
-    .map(run => run[0].group)
-    .filter(g => g?.expectedIndex !== undefined || g?.actualIndex !== undefined);
-  if (new Set(pinned).size < pinned.length) {
-    throw new Error(
-      `aggregate: a ${chain} batch() that sets an index splits into several batches; move inline commands out`,
-    );
+  const groups = runs.map(run => run[0].group);
+  if (new Set(groups).size < groups.length) {
+    throw new Error(`aggregate: other commands split a ${chain} batch(); keep its commands together`);
   }
 
   const stored = await readBatches(chain, aggregator);
@@ -211,18 +211,19 @@ const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatch
   };
 };
 
+// Aggregates every chain that has a batch().
 export const aggregateCommands = async (
   commands: Command[],
-  chainIds: LzChainId[],
   type: ProposalType | undefined,
   readBatches: ReadBatches = readStoredBatches,
 ): Promise<{ commands: Command[]; batches: AggregatorBatch[] }> => {
   // Only the Normal Timelock holds the ACM DEFAULT_ADMIN_ROLE that each chain lends its aggregator.
   if (type !== ProposalType.REGULAR) throw new Error("aggregate: only ProposalType.REGULAR proposals are supported");
 
+  const chainIds = new Set(commands.flatMap(cmd => (cmd.batchGroup ? [cmd.dstChainId ?? LzChainId.bscmainnet] : [])));
   const rewritten = new Map<LzChainId, Command[]>();
   const batches: AggregatorBatch[] = [];
-  for (const chainId of new Set(chainIds)) {
+  for (const chainId of chainIds) {
     const aggregated = await aggregateChain(
       commands.filter(cmd => (cmd.dstChainId ?? LzChainId.bscmainnet) === chainId),
       chainId,

@@ -78,12 +78,9 @@ export interface Command {
   gasFeeMultiplicationFactor?: number;
   // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
   gasLimitMultiplicationFactor?: number;
-  // keeps the command out of AuxiliaryCommandsAggregator batches when its chain is aggregated. Batched calls run as the
-  // aggregator, so owner-only calls and calls acting on the caller's own balance, allowance or votes must be inline
-  inline?: boolean;
   // function string the aggregator is granted for this command when the target's ACM check differs from `signature`
   aclSignature?: string;
-  // set by batch(): adjacent batched commands from one batch() call share one aggregator batch
+  // set by batch(): the commands of one batch() call form one aggregator batch
   batchGroup?: BatchOptions;
 }
 
