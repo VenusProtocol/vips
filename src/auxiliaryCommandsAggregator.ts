@@ -43,13 +43,6 @@ const toCall = (target: string, signature: string, params: unknown[]): Aggregato
   return { target, signature, data: new utils.Interface([fragment]).encodeFunctionData(fragment, params) };
 };
 
-const sameCalls = (a: StoredCall[], b: StoredCall[]) =>
-  a.length === b.length &&
-  a.every(
-    (call, i) =>
-      call.target.toLowerCase() === b[i].target.toLowerCase() && call.data.toLowerCase() === b[i].data.toLowerCase(),
-  );
-
 // Turns the commands into one aggregator batch on their chain. Batched calls run as the aggregator, so calls that must
 // come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is stored, so
 // split its commands across batch() calls.
@@ -63,7 +56,7 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Command[
     throw new Error(`batch: ${index} is not an index`);
   }
   // Each chain's aggregator holds its own batches.
-  if (new Set(commands.map(cmd => cmd.dstChainId ?? LzChainId.bscmainnet)).size > 1) {
+  if (new Set(commands.map(cmd => cmd.dstChainId)).size > 1) {
     throw new Error("batch: a batch() must hold one chain's commands");
   }
   const batchGroup = { ...options };
@@ -138,7 +131,10 @@ const resolveIndices = async (
       continue;
     }
     const index = BigNumber.from(pin);
-    const seeded = index.lt(stored.count) && sameCalls(await stored.get(index), plan.calls);
+    const seeded =
+      index.lt(stored.count) &&
+      (await stored.get(index)).map(c => (c.target + c.data).toLowerCase()).join() ===
+        plan.calls.map(c => (c.target + c.data).toLowerCase()).join();
     if (!seeded && actualIndex !== undefined) {
       throw new Error(
         `aggregate: ${chain} batch ${index} does not hold these calls; check actualIndex, or fork after it was stored`,
@@ -260,8 +256,7 @@ export const aggregateCommands = async (
 
 // `batches` must all be on the batcher's chain.
 export const seedBatches = async (batcher: Signer, batches: AggregatorBatch[], overrides: Overrides = {}) => {
-  for (const { network: chain, aggregator: address, index, seeded, calls } of batches) {
-    if (seeded || !index) continue;
+  for (const { network: chain, aggregator: address, index, calls } of batches) {
     const aggregator = new Contract(address, AGGREGATOR_ABI, batcher);
     const tx = await aggregator["addBatch((address,bytes)[],uint256)"](
       calls.map(({ target, data }) => ({ target, data })),
