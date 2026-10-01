@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { Proposal } from "./types";
 import { getCalldatas } from "./utils";
@@ -16,8 +16,9 @@ export const assertBatchesSeeded = ({ aggregatorBatches = [] }: Proposal, path: 
   if (unseeded.length === 0) return;
   const list = unseeded.map(batch => `${batch.network} batch ${batch.index} (${batch.calls.length} calls)`).join(", ");
   throw new Error(
-    `BATCH_NOT_SEEDED: ${list}; seed them with \`npx hardhat seedAggregatorBatches ${path} --network bscmainnet\`, ` +
-      "then pin each with batch(commands, { actualIndex })",
+    `BATCH_NOT_SEEDED: ${list}; seed them with \`npx hardhat seedAggregatorBatches ${path} --network ${
+      FORKED_NETWORK ?? "bscmainnet"
+    }\`, ` + "then pin each with batch(commands, { actualIndex })",
   );
 };
 

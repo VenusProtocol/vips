@@ -10,6 +10,7 @@ import {
   Command,
   LzChainId,
   ProposalType,
+  REMOTE_TESTNET_NETWORKS,
   SUPPORTED_NETWORKS,
 } from "./types";
 import AGGREGATOR_ABI from "./vip-framework/abi/AuxiliaryCommandsAggregator.json";
@@ -117,7 +118,8 @@ const planChain = (commands: Command[], chain: SUPPORTED_NETWORKS) => {
   return { aggregator, acm, segments };
 };
 
-// Every batch gets its own index, since the upgraded AuxiliaryCommandsAggregator runs a batch only once.
+// Every batch gets its own index and no stored batch is reused, as the planned aggregator upgrade runs each batch only
+// once.
 const resolveIndices = async (
   chain: SUPPORTED_NETWORKS,
   aggregator: string,
@@ -169,6 +171,12 @@ const readStoredBatches: ReadBatches = async (chain, aggregator) => {
   return storedBatches(new Contract(aggregator, AGGREGATOR_ABI, new providers.JsonRpcProvider(url)));
 };
 
+// Commands without a dstChainId run on BNB Chain, or on its testnet when the proposal is built for testnets.
+const homeChain = () =>
+  FORKED_NETWORK === "bsctestnet" || REMOTE_TESTNET_NETWORKS.includes(FORKED_NETWORK as string)
+    ? LzChainId.bsctestnet
+    : LzChainId.bscmainnet;
+
 const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatches: ReadBatches) => {
   const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
   const { aggregator, acm, segments } = planChain(commands, chain);
@@ -187,7 +195,7 @@ const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatch
     throw new Error(`aggregate: ${chain} has two batches at one index; check their expectedIndex and actualIndex`);
   }
 
-  const dstChainId = chainId === LzChainId.bscmainnet ? undefined : chainId;
+  const dstChainId = chainId === homeChain() ? undefined : chainId;
   const chainCommand = (target: string, signature: string, params: unknown[]): Command => ({
     target,
     signature,
@@ -220,12 +228,14 @@ export const aggregateCommands = async (
   // Only the Normal Timelock holds the ACM DEFAULT_ADMIN_ROLE that each chain lends its aggregator.
   if (type !== ProposalType.REGULAR) throw new Error("aggregate: only ProposalType.REGULAR proposals are supported");
 
-  const chainIds = new Set(commands.flatMap(cmd => (cmd.batchGroup ? [cmd.dstChainId ?? LzChainId.bscmainnet] : [])));
+  const home = homeChain();
+  const chainOf = (cmd: Command) => cmd.dstChainId ?? home;
+  const chainIds = new Set(commands.flatMap(cmd => (cmd.batchGroup ? [chainOf(cmd)] : [])));
   const rewritten = new Map<LzChainId, Command[]>();
   const batches: AggregatorBatch[] = [];
   for (const chainId of chainIds) {
     const aggregated = await aggregateChain(
-      commands.filter(cmd => (cmd.dstChainId ?? LzChainId.bscmainnet) === chainId),
+      commands.filter(cmd => chainOf(cmd) === chainId),
       chainId,
       readBatches,
     );
@@ -237,7 +247,7 @@ export const aggregateCommands = async (
   const emitted = new Set<LzChainId>();
   return {
     commands: commands.flatMap(cmd => {
-      const chainId = cmd.dstChainId ?? LzChainId.bscmainnet;
+      const chainId = chainOf(cmd);
       const chainCommands = rewritten.get(chainId);
       if (!chainCommands) return [cmd];
       if (emitted.has(chainId)) return [];

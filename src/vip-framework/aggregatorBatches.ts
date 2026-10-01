@@ -14,11 +14,15 @@ export const forkedBatches = (proposal: Proposal) =>
 export const expectForkedBatchesRan = async (proposal: Proposal, receipt: TransactionReceipt) => {
   const batches = forkedBatches(proposal);
   const aggregatorInterface = new ethers.utils.Interface(AGGREGATOR_ABI);
+  // The aggregator is a proxy, so its logs can include proxy events its ABI can't parse.
+  const batchExecuted = aggregatorInterface.getEventTopic("BatchExecuted");
   const executed = receipt.logs
-    .filter(log => batches.some(batch => batch.aggregator.toLowerCase() === log.address.toLowerCase()))
-    .map(log => aggregatorInterface.parseLog(log))
-    .filter(event => event.name === "BatchExecuted")
-    .map(event => String(event.args.index));
+    .filter(
+      log =>
+        log.topics[0] === batchExecuted &&
+        batches.some(batch => batch.aggregator.toLowerCase() === log.address.toLowerCase()),
+    )
+    .map(log => String(aggregatorInterface.parseLog(log).args.index));
   const acm = new ethers.Contract(
     NETWORK_ADDRESSES[FORKED_NETWORK as "bscmainnet"].ACCESS_CONTROL_MANAGER,
     ["function hasRole(bytes32,address) view returns (bool)"],

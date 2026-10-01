@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { ReadBatches, aggregateCommands, batch } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { Command, LzChainId, ProposalType } from "src/types";
@@ -169,6 +169,18 @@ describe("aggregateCommands", () => {
     expect(await rejection(aggregate(batch([setValue(1, { dstChainId: LzChainId.opmainnet })])))).to.include(
       "no AuxiliaryCommandsAggregator on opmainnet",
     );
+  });
+
+  it("puts local commands on BNB Chain testnet when the proposal is built for testnets", async () => {
+    const forked = hre.FORKED_NETWORK;
+    hre.FORKED_NETWORK = "sepolia";
+    try {
+      expect(await rejection(aggregate(batch([setValue(1)])))).to.include(
+        "no AuxiliaryCommandsAggregator on bsctestnet",
+      );
+    } finally {
+      hre.FORKED_NETWORK = forked;
+    }
   });
 
   it("rewrites a remote chain in place of its first command and leaves other chains alone", async () => {
