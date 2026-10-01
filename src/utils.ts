@@ -8,6 +8,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
+import { aggregateCommands } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
@@ -252,6 +253,8 @@ export const makeProposal = async (
   commands: Command[],
   meta?: ProposalMeta,
   type?: ProposalType,
+  // chains whose commands run through their AuxiliaryCommandsAggregator; LzChainId.bscmainnet selects local commands
+  options: { aggregate?: LzChainId[] } = {},
 ): Promise<Proposal> => {
   const proposal: Proposal = {
     signatures: [],
@@ -263,6 +266,11 @@ export const makeProposal = async (
     meta,
     type,
   };
+  if (options.aggregate?.length) {
+    const aggregation = await aggregateCommands(commands, options.aggregate, type);
+    commands = aggregation.commands;
+    proposal.aggregatorBatches = aggregation.batches;
+  }
 
   const map = new Map<number, Command[]>();
   const _commands = [];
