@@ -51,7 +51,7 @@ import FEED_ABI from "./abi/SingleFeed.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 125812256;
+const FORK_BLOCK = 125826372;
 
 // contract StubOracle { function getPrice(address) external pure returns (uint256) { return 1e18; } }
 const STUB_ORACLE_BYTECODE =
@@ -86,6 +86,7 @@ const VaultState = {
   PendingSettlement: 5,
   SettlementDeadlineExceeded: 6,
   Matured: 7,
+  Failed: 8,
 };
 
 const U_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
@@ -128,6 +129,8 @@ forking(FORK_BLOCK, async () => {
   );
 
   let vaultsBefore: BigNumber;
+  let waitingSnapshot: SnapshotRestorer;
+  let openSnapshot: SnapshotRestorer;
   let fundraisingSnapshot: SnapshotRestorer;
   let positionTokenIdBefore: BigNumber;
   let predictedVault: string;
@@ -191,12 +194,20 @@ forking(FORK_BLOCK, async () => {
       expect(await frvSource.resources()).to.not.include(predictedVault);
     });
 
-    // Under transferFlag 2 a whitelisted investor can both send and receive hBNB, which covers collateral in
-    // and out. Liquidation is handled off-chain, so no other address needs whitelisting.
-    it("DigiFT whitelists the operator and the vault as investors", async () => {
+    // Under transferFlag 2 a whitelisted investor can both send and receive hBNB. The operator and the vault
+    // cover collateral in and out; the adapter and the Guardian cover the on-chain liquidation fallback.
+    it("DigiFT whitelists the operator, vault, adapter and Guardian as investors", async () => {
       expect(await hBNB.transferFlag()).to.equal(2);
       expect(await management.isWhiteInvestor(INSTITUTION_OPERATOR)).to.equal(true);
       expect(await management.isWhiteInvestor(predictedVault)).to.equal(true);
+      expect(await management.isWhiteInvestor(LIQUIDATION_ADAPTER)).to.equal(true);
+      expect(await management.isWhiteInvestor(bscmainnet.CRITICAL_GUARDIAN)).to.equal(true);
+    });
+
+    // Neither ever receives hBNB on the normal path; see the PSR sweep and institution-default tests below.
+    it("DigiFT has not whitelisted the PSR or the U Hub", async () => {
+      expect(await management.isWhiteInvestor(PROTOCOL_SHARE_RESERVE)).to.equal(false);
+      expect(await management.isWhiteInvestor(U_HUB)).to.equal(false);
     });
 
     it("[Test-Only] stubs the controller oracle for createVault's price check", async () => {
@@ -342,6 +353,7 @@ forking(FORK_BLOCK, async () => {
 
     it("operator deposits the 1% margin", async () => {
       expect(await vault.state()).to.equal(VaultState.WaitingForMargin);
+      waitingSnapshot = await takeSnapshot();
       expect(operatorHBNBBefore).to.be.gte(IDEAL_COLLATERAL_AMOUNT);
       await hBNB.connect(operator).approve(vault.address, IDEAL_COLLATERAL_AMOUNT);
 
@@ -357,6 +369,7 @@ forking(FORK_BLOCK, async () => {
       const criticalGuardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
       await controller.connect(criticalGuardian).openVault(vault.address);
       expect(await vault.state()).to.equal(VaultState.Fundraising);
+      openSnapshot = await takeSnapshot();
 
       await vault.connect(operator).depositCollateral(IDEAL_COLLATERAL_AMOUNT.sub(marginAmount));
       expect(await hBNB.balanceOf(vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT);
@@ -631,6 +644,79 @@ forking(FORK_BLOCK, async () => {
 
     it("protocol share cannot be swept to the PSR, which is not whitelisted for hBNB", async () => {
       await expect(adapter.connect(timelock).sweepProtocolShareToReserve(HBNB)).to.be.revertedWith("Forbid transfer");
+    });
+  });
+
+  // If fundraising closes with the minimum raised but less than 198 hBNB posted, the vault confiscates the margin and
+  // pays it out in hBNB to whoever redeems. For the Hub that recipient is the Hub itself, which is not whitelisted.
+  describe("Post-VIP institution default", () => {
+    let vault: Contract;
+    let hubOperator: SignerWithAddress;
+    const HUB_ALLOCATION = parseUnits("50000", 18);
+    const marginAmount = IDEAL_COLLATERAL_AMOUNT.mul(MARGIN_RATE).div(parseUnits("1", 18));
+
+    before(async () => {
+      await openSnapshot.restore();
+      const vaultAddress = await controller.allVaults(vaultsBefore);
+      vault = new ethers.Contract(vaultAddress, VAULT_ABI, ethers.provider);
+      hubOperator = await initMainnetUser(HUB_OPERATOR, parseUnits("1"));
+    });
+
+    it("Hub operator moves 50k U into the vault while only the margin is posted", async () => {
+      await hub
+        .connect(hubOperator)
+        .reallocate(
+          [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
+          [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
+        );
+      expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(HUB_ALLOCATION);
+      expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(marginAmount);
+    });
+
+    it("vault fails and confiscates the margin when the operator never tops up", async () => {
+      await time.increase(OPEN_DURATION + 1);
+      await vault.connect(hubOperator).updateVaultState();
+      expect(await vault.state()).to.equal(VaultState.Failed);
+      const runtime = await vault.institutionalRuntime();
+      expect(runtime.institutionDefaulted).to.equal(true);
+      expect(runtime.confiscatedMarginRemaining).to.equal(marginAmount);
+    });
+
+    it("Hub cannot pull its U back until DigiFT whitelists the Hub", async () => {
+      const refund = await adapterFrv.maxWithdraw(vault.address, U_FRV_SOURCE);
+      expect(refund).to.equal(HUB_ALLOCATION);
+      await expect(
+        hub
+          .connect(hubOperator)
+          .reallocate(
+            [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: refund }],
+            [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: refund }],
+          ),
+      ).to.be.revertedWith("Forbid transfer");
+    });
+
+    it("posting all 198 hBNB before openVault rules the default out", async () => {
+      await waitingSnapshot.restore(); // also undoes the gas funding from before()
+      hubOperator = await initMainnetUser(HUB_OPERATOR, parseUnits("1"));
+      const operator = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
+      await hBNB.connect(operator).approve(vault.address, IDEAL_COLLATERAL_AMOUNT);
+      await vault.connect(operator).depositCollateral(IDEAL_COLLATERAL_AMOUNT);
+      expect(await vault.state()).to.equal(VaultState.MarginDeposited);
+      expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(IDEAL_COLLATERAL_AMOUNT);
+
+      const guardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
+      await controller.connect(guardian).openVault(vault.address);
+      await hub
+        .connect(hubOperator)
+        .reallocate(
+          [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
+          [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
+        );
+      await time.increase(OPEN_DURATION + 1);
+      await vault.connect(hubOperator).updateVaultState();
+
+      expect(await vault.state()).to.equal(VaultState.Lock);
+      expect((await vault.institutionalRuntime()).institutionDefaulted).to.equal(false);
     });
   });
 });
