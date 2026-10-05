@@ -97,3 +97,6 @@ describe("assertBatchesSeeded", () => {
     expect(() => transaction.assertBatchesSeeded(withBatches(), "vip-1/bsc")).to.not.throw();
   });
 });
+
+// delay: true in mocha config requires run() to be deferred until after mocha finishes loading
+setTimeout(run, 100);

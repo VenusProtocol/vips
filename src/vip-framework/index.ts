@@ -485,7 +485,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     if (forkedBatches(proposal).length) {
-      it("runs every aggregator batch and leaves the aggregator without its permissions", async () => {
+      it("runs every aggregator batch and leaves the aggregator without its permissions", async function () {
+        // the execution test above failed and already reported why
+        if (!executionReceipt) this.skip();
         await expectForkedBatchesRan(proposal, executionReceipt);
       });
     }
@@ -617,7 +619,9 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
     });
 
     if (forkedBatches(proposal).length) {
-      it("runs every aggregator batch and leaves the aggregator without its permissions", async () => {
+      it("runs every aggregator batch and leaves the aggregator without its permissions", async function () {
+        // the execution test above failed and already reported why
+        if (!executionReceipt) this.skip();
         await expectForkedBatchesRan(proposal, executionReceipt);
       });
     }

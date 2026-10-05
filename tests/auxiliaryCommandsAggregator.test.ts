@@ -294,3 +294,6 @@ describe("makeProposal with batch()", () => {
     expect(proposal).to.not.have.property("aggregatorBatches");
   });
 });
+
+// delay: true in mocha config requires run() to be deferred until after mocha finishes loading
+setTimeout(run, 100);
