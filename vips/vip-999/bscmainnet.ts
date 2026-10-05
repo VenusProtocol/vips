@@ -42,8 +42,8 @@ export const LIQUIDATION_THRESHOLD = parseUnits("0.75", 18);
 export const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10% bonus
 export const LATE_PENALTY_RATE = parseUnits("1.1", 18); // 10% late penalty
 
-export const VAULT_NAME = "FRV hashglobal hBNB 10SEP2026 30";
-export const VAULT_SYMBOL = "FRV-hg-10SEP2026-30";
+export const VAULT_NAME = "FRV hashglobal hBNB 05OCT2026 30";
+export const VAULT_SYMBOL = "FRV-hg-05OCT2026-30";
 export const INSTITUTION_NAME = "Hash Global";
 
 export const vaultConfig = [
@@ -110,7 +110,7 @@ At the maximum 150,000 U drawdown the loan sits at ≈65% of the collateral's de
 
 **Access control.** No new AccessControlManager permissions are required. The Normal Timelock already holds createVault on the controller, setTokenConfig on both oracles, and addResource on the U FRV source (granted by earlier proposals).
 
-**Vault open date.** This VIP only creates the vault; it does not start it. The 7-day open window and the 30-day term begin when the Critical Guardian calls openVault, after the institution has posted its 1% margin. The 10SEP2026 label in the vault's name and symbol therefore reflects the intended term, not a settled maturity — both are fixed at createVault and cannot be changed afterwards.
+**Vault open date.** This VIP only creates the vault; it does not start it. The 7-day open window and the 30-day term begin when the Critical Guardian calls openVault, after the institution has posted its 1% margin. The 05OCT2026 label in the vault's name and symbol therefore reflects the intended term, not a settled maturity — both are fixed at createVault and cannot be changed afterwards.
 
 **Follow-up (out of scope).** Opening the vault (openVault) is a Critical Guardian multisig action, and the remaining DigiFT-side whitelisting described above is a counterparty action. Neither is part of this VIP.
 
