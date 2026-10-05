@@ -12,6 +12,7 @@ import vip999, {
   ADAPTER_FRV,
   ATLAS_ORACLE,
   FIXED_APY,
+  HASH_GLOBAL_VAULT,
   HBNB,
   HBNB_FEED,
   HBNB_MAX_STALE_PERIOD,
@@ -178,6 +179,11 @@ forking(FORK_BLOCK, async () => {
       expect(await hBNB.name()).to.equal("DigiFT Hash Global BNB Yield Fund Token");
       expect(await hBNB.symbol()).to.equal("hBNB");
       expect(await hBNB.decimals()).to.equal(18);
+    });
+
+    it("HASH_GLOBAL_VAULT is the controller's predicted vault for the operator", async () => {
+      expect(predictedVault).to.equal(HASH_GLOBAL_VAULT);
+      expect(await ethers.provider.getCode(HASH_GLOBAL_VAULT)).to.equal("0x");
     });
 
     it("U FRV source does not list the vault yet", async () => {
