@@ -141,6 +141,7 @@ describe("aggregateCommands", () => {
     expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.ethereum })])).to.throw(
       "batch: a batch() must hold one chain's commands",
     );
+    expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.bscmainnet })])).to.not.throw();
 
     expect(await rejection(aggregate(batch([setValue(1, { value: "1" })])))).to.include(
       `aggregate: ${SET} on ${TARGET} sends value and can't be batched`,

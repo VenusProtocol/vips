@@ -56,7 +56,7 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Command[
     throw new Error(`batch: ${index} is not an index`);
   }
   // Each chain's aggregator holds its own batches.
-  if (new Set(commands.map(cmd => cmd.dstChainId)).size > 1) {
+  if (new Set(commands.map(cmd => cmd.dstChainId ?? homeChain())).size > 1) {
     throw new Error("batch: a batch() must hold one chain's commands");
   }
   const batchGroup = { ...options };
