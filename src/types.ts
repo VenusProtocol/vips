@@ -85,16 +85,16 @@ export interface Command {
 }
 
 export interface BatchOptions {
-  // stores the batch at this index, which must be the chain's next free index unless the batch is already stored there
+  // seeds the batch at this index, which must be the chain's next free index unless the batch is already seeded there
   expectedIndex?: number;
-  // the index the batch is already stored at: the stored calls must match, and the batch is never stored again
+  // the index the batch is already seeded at: the seeded calls must match, and the batch is never seeded again
   actualIndex?: number;
 }
 
 export interface AggregatorCall {
   target: string;
   data: string;
-  // not stored on-chain; names the call in simulation failures
+  // not seeded on-chain; names the call in simulation failures
   signature: string;
 }
 
@@ -108,7 +108,7 @@ export interface AggregatorBatch {
   aggregator: string;
   // actualIndex, else expectedIndex, else the chain's next free index; undefined when the chain was not read
   index?: BigNumber;
-  // whether `calls` are stored at `index` on the chain the proposal was built against
+  // whether `calls` are seeded at `index` on the chain the proposal was built against
   seeded: boolean;
   calls: AggregatorCall[];
   // granted to the aggregator at the start of the batch and revoked at its end

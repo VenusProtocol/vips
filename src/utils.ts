@@ -250,7 +250,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   return fee;
 };
 
-// Sims store the forked chain's unpinned batches while the proposal is built, so every later build on the same fork takes
+// Sims seed the forked chain's unpinned batches while the proposal is built, so every later build on the same fork takes
 // the indices after them. The Normal Timelock is an authorized batcher on every aggregator; its balance is restored.
 const seedForkedBatches = async (batches: AggregatorBatch[]) => {
   const pending = batches.filter(batch => batch.network === FORKED_NETWORK && !batch.seeded);

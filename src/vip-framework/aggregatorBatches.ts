@@ -14,12 +14,11 @@ export const forkedBatches = (proposal: Proposal) =>
 export const expectForkedBatchesRan = async (proposal: Proposal, receipt: TransactionReceipt) => {
   const batches = forkedBatches(proposal);
   const aggregatorInterface = new ethers.utils.Interface(AGGREGATOR_ABI);
-  // The aggregator is a proxy, so its logs can include proxy events its ABI can't parse.
-  const batchExecuted = aggregatorInterface.getEventTopic("BatchExecuted");
   const executed = receipt.logs
     .filter(
       log =>
-        log.topics[0] === batchExecuted &&
+        // The aggregator is a proxy, so its logs can include proxy events its ABI can't parse.
+        log.topics[0] === aggregatorInterface.getEventTopic("BatchExecuted") &&
         batches.some(batch => batch.aggregator.toLowerCase() === log.address.toLowerCase()),
     )
     .map(log => String(aggregatorInterface.parseLog(log).args.index));

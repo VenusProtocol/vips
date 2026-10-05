@@ -87,7 +87,7 @@ describe("assertBatchesSeeded", () => {
   it("refuses a proposal built without reading a chain's batches", () => {
     expect(() =>
       transaction.assertBatchesSeeded(withBatches(batch("ethereum", undefined, false)), "vip-1/bsc"),
-    ).to.throw("aggregate: ethereum batches were not read");
+    ).to.throw("batch: ethereum batches were not read");
   });
 
   it("accepts a proposal whose batches are all seeded, or that has none", () => {

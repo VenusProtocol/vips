@@ -144,7 +144,7 @@ describe("aggregateCommands", () => {
     expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.bscmainnet })])).to.not.throw();
 
     expect(await rejection(aggregate(batch([setValue(1, { value: "1" })])))).to.include(
-      `aggregate: ${SET} on ${TARGET} sends value and can't be batched`,
+      `batch: ${SET} on ${TARGET} sends value and can't be batched`,
     );
     const [first, second] = batch([setValue(1), setValue(2)]);
     expect(await rejection(aggregate([first, setValue(9), second]))).to.include(
@@ -205,18 +205,18 @@ describe("aggregateCommands", () => {
 });
 
 describe("aggregator batch indices", () => {
-  const storedAt =
+  const seededAt =
     (count: number, batches: Record<number, { target: string; data: string }[]> = {}): ReadBatches =>
     async () => ({ count: BigNumber.from(count), get: async index => batches[index.toNumber()] });
-  const storedCalls = async (commands: Command[]) =>
+  const seededCalls = async (commands: Command[]) =>
     (await aggregate(batch(commands))).batches[0].calls.map(({ target, data }) => ({
       target: ethers.utils.getAddress(target),
       data,
     }));
 
-  it("stores every unpinned batch at a new index, even when identical calls are already stored", async () => {
+  it("seeds every unpinned batch at a new index, even when identical calls are already seeded", async () => {
     const commands = [...batch([setValue(1)]), ...batch([setValue(2)], { expectedIndex: 4 }), ...batch([setValue(1)])];
-    const read = storedAt(3, { 0: await storedCalls([setValue(1)]) });
+    const read = seededAt(3, { 0: await seededCalls([setValue(1)]) });
     const { commands: rewritten, batches } = await aggregate(commands, read);
 
     expect(batches.map(b => [b.index?.toNumber(), b.seeded])).to.deep.equal([
@@ -229,8 +229,8 @@ describe("aggregator batch indices", () => {
     ).to.deep.equal([3, 4, 5]);
   });
 
-  it("requires an expectedIndex to be the next free index unless its batch is already stored there", async () => {
-    const read = storedAt(3, { 1: await storedCalls([setValue(2)]) });
+  it("requires an expectedIndex to be the next free index unless its batch is already seeded there", async () => {
+    const read = seededAt(3, { 1: await seededCalls([setValue(2)]) });
     const { batches } = await aggregate([...batch([setValue(2)], { expectedIndex: 1 }), ...batch([setValue(3)])], read);
 
     expect(batches.map(b => [b.index?.toNumber(), b.seeded])).to.deep.equal([
@@ -242,9 +242,9 @@ describe("aggregator batch indices", () => {
     );
   });
 
-  it("pins an actualIndex batch, checking its calls against the stored ones", async () => {
+  it("pins an actualIndex batch, checking its calls against the seeded ones", async () => {
     const pinned = batch([setValue(1)], { actualIndex: 1 });
-    const read = storedAt(2, { 1: await storedCalls([setValue(1)]) });
+    const read = seededAt(2, { 1: await seededCalls([setValue(1)]) });
 
     expect((await aggregate(pinned, read)).batches.map(b => [b.index?.toNumber(), b.seeded])).to.deep.equal([
       [1, true],
@@ -252,7 +252,7 @@ describe("aggregator batch indices", () => {
     expect(await rejection(aggregate(batch([setValue(2)], { actualIndex: 1 }), read))).to.include(
       "bscmainnet batch 1 does not hold these calls",
     );
-    expect(await rejection(aggregate(pinned, storedAt(1)))).to.include("bscmainnet batch 1 does not hold these calls");
+    expect(await rejection(aggregate(pinned, seededAt(1)))).to.include("bscmainnet batch 1 does not hold these calls");
   });
 
   it("leaves every batch of an unread chain without an index, pinned or not", async () => {
@@ -264,12 +264,12 @@ describe("aggregator batch indices", () => {
     ]);
   });
 
-  it("rejects indices that can't name one stored batch", async () => {
+  it("rejects indices that can't name one seeded batch", async () => {
     expect(() => batch([setValue(1)], { expectedIndex: 1, actualIndex: 1 })).to.throw("not both");
     expect(() => batch([setValue(1)], { expectedIndex: -1 })).to.throw("batch: -1 is not an index");
     expect(() => batch([setValue(1)], { actualIndex: 1.5 })).to.throw("batch: 1.5 is not an index");
 
-    const read = storedAt(2, { 1: await storedCalls([setValue(1)]) });
+    const read = seededAt(2, { 1: await seededCalls([setValue(1)]) });
     const twice = [...batch([setValue(1)], { actualIndex: 1 }), ...batch([setValue(1)], { actualIndex: 1 })];
     expect(await rejection(aggregate(twice, read))).to.include("bscmainnet has two batches at one index");
   });

@@ -9,14 +9,15 @@ export const assertBatchesSeeded = ({ aggregatorBatches = [] }: Proposal, path: 
   const unread = [...new Set(aggregatorBatches.filter(batch => !batch.index).map(batch => batch.network))];
   if (unread.length) {
     throw new Error(
-      `aggregate: ${unread.join(", ")} batches were not read; build against a live network, e.g. --network bscmainnet`,
+      `batch: ${unread.join(", ")} batches were not read; build against a live network, e.g. --network bscmainnet`,
     );
   }
   const unseeded = aggregatorBatches.filter(batch => !batch.seeded);
   if (unseeded.length === 0) return;
-  const list = unseeded.map(batch => `${batch.network} batch ${batch.index} (${batch.calls.length} calls)`).join(", ");
   throw new Error(
-    `BATCH_NOT_SEEDED: ${list}; seed them with \`npx hardhat seedAggregatorBatches ${path} --network ${
+    `BATCH_NOT_SEEDED: ${unseeded
+      .map(batch => `${batch.network} batch ${batch.index} (${batch.calls.length} calls)`)
+      .join(", ")}; seed them with \`npx hardhat seedAggregatorBatches ${path} --network ${
       FORKED_NETWORK ?? "bscmainnet"
     }\`, ` + "then pin each with batch(commands, { actualIndex })",
   );

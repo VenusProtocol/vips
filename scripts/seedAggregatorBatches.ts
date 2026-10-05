@@ -39,8 +39,11 @@ const seedAggregatorBatches = async (vipPath: string) => {
   const indices: Partial<Record<SUPPORTED_NETWORKS, number[]>> = {};
   for (const { network, index, calls, seeded } of aggregatorBatches) {
     indices[network] = [...(indices[network] ?? []), Number(index)];
-    const state = seeded ? "already stored" : "will be stored";
-    console.log(`${network} batch ${indices[network]?.length} (${calls.length} calls) ${state} at index ${index}`);
+    console.log(
+      `${network} batch ${indices[network]?.length} (${calls.length} calls) ${
+        seeded ? "already seeded" : "will be seeded"
+      } at index ${index}`,
+    );
   }
   await seed(aggregatorBatches.filter(batch => !batch.seeded));
   console.log(`Pin each batch() in order with { actualIndex }: ${JSON.stringify(indices)}`);

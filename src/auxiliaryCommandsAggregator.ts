@@ -15,15 +15,13 @@ import {
 } from "./types";
 import AGGREGATOR_ABI from "./vip-framework/abi/AuxiliaryCommandsAggregator.json";
 
-type StoredCall = Pick<AggregatorCall, "target" | "data">;
-
-interface StoredBatches {
+interface SeededBatches {
   count: BigNumber;
-  get: (index: BigNumber) => Promise<StoredCall[]>;
+  get: (index: BigNumber) => Promise<Pick<AggregatorCall, "target" | "data">[]>;
 }
 
-// An aggregator's stored batches, or undefined when its chain is not read in this context.
-export type ReadBatches = (chain: SUPPORTED_NETWORKS, aggregator: string) => Promise<StoredBatches | undefined>;
+// An aggregator's seeded batches, or undefined when its chain is not read in this context.
+export type ReadBatches = (chain: SUPPORTED_NETWORKS, aggregator: string) => Promise<SeededBatches | undefined>;
 
 interface BatchedCommand {
   call: AggregatorCall;
@@ -38,13 +36,13 @@ const toCall = (target: string, signature: string, params: unknown[]): Aggregato
   const fragment = utils.FunctionFragment.from(signature);
   // A timelock derives the selector from the signature string as written; a batched call must get the same selector.
   if (fragment.format() !== signature) {
-    throw new Error(`aggregate: signature "${signature}" should be in the canonical form "${fragment.format()}"`);
+    throw new Error(`batch: signature "${signature}" should be in the canonical form "${fragment.format()}"`);
   }
   return { target, signature, data: new utils.Interface([fragment]).encodeFunctionData(fragment, params) };
 };
 
 // Turns the commands into one aggregator batch on their chain. Batched calls run as the aggregator, so calls that must
-// come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is stored, so
+// come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is seeded, so
 // split its commands across batch() calls.
 export const batch = (commands: Command[], options: BatchOptions = {}): Command[] => {
   const { expectedIndex, actualIndex } = options;
@@ -66,8 +64,12 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Command[
 const toBatch = (batched: BatchedCommand[]) => {
   const grants = [...new Map(batched.flatMap(({ grant }) => (grant ? [[grant.key, grant] as const] : []))).values()];
   return {
-    calls: [...grants.map(g => g.give), ...batched.map(b => b.call), ...grants.map(g => g.revoke)],
-    permissions: grants.map(g => g.permission),
+    calls: [
+      ...grants.map(grant => grant.give),
+      ...batched.map(({ call }) => call),
+      ...grants.map(grant => grant.revoke),
+    ],
+    permissions: grants.map(grant => grant.permission),
   };
 };
 
@@ -77,12 +79,12 @@ const planChain = (commands: Command[], chain: SUPPORTED_NETWORKS) => {
     | undefined;
   const aggregator = addresses?.AUXILIARY_COMMANDS_AGGREGATOR;
   const acm = addresses?.ACCESS_CONTROL_MANAGER;
-  if (!aggregator || !acm) throw new Error(`aggregate: no AuxiliaryCommandsAggregator on ${chain}`);
+  if (!aggregator || !acm) throw new Error(`batch: no AuxiliaryCommandsAggregator on ${chain}`);
 
   const toBatchedCommand = (cmd: Command, group: BatchOptions): BatchedCommand => {
-    // A stored call carries no value, so the aggregator could not forward it.
+    // A seeded call carries no value, so the aggregator could not forward it.
     if (BigNumber.from(cmd.value ?? 0).gt(0)) {
-      throw new Error(`aggregate: ${cmd.signature} on ${cmd.target} sends value and can't be batched`);
+      throw new Error(`batch: ${cmd.signature} on ${cmd.target} sends value and can't be batched`);
     }
     const call = toCall(cmd.target, cmd.signature, cmd.params);
     if (cmd.target.toLowerCase() === acm.toLowerCase()) return { call, group };
@@ -111,15 +113,15 @@ const planChain = (commands: Command[], chain: SUPPORTED_NETWORKS) => {
   return { aggregator, acm, segments };
 };
 
-// Every batch gets its own index and no stored batch is reused, as the planned aggregator upgrade runs each batch only
+// Every batch gets its own index and no seeded batch is reused, as the planned aggregator upgrade runs each batch only
 // once.
 const resolveIndices = async (
   chain: SUPPORTED_NETWORKS,
   aggregator: string,
   runs: BatchedCommand[][],
-  stored: StoredBatches,
+  onChain: SeededBatches,
 ) => {
-  let next = stored.count;
+  let next = onChain.count;
   const batches: AggregatorBatch[] = [];
   for (const run of runs) {
     const { expectedIndex, actualIndex } = run[0].group;
@@ -132,17 +134,17 @@ const resolveIndices = async (
     }
     const index = BigNumber.from(pin);
     const seeded =
-      index.lt(stored.count) &&
-      (await stored.get(index)).map(c => (c.target + c.data).toLowerCase()).join() ===
-        plan.calls.map(c => (c.target + c.data).toLowerCase()).join();
+      index.lt(onChain.count) &&
+      (await onChain.get(index)).map(call => (call.target + call.data).toLowerCase()).join() ===
+        plan.calls.map(call => (call.target + call.data).toLowerCase()).join();
     if (!seeded && actualIndex !== undefined) {
       throw new Error(
-        `aggregate: ${chain} batch ${index} does not hold these calls; check actualIndex, or fork after it was stored`,
+        `batch: ${chain} batch ${index} does not hold these calls; check actualIndex, or fork after it was seeded`,
       );
     }
-    // addBatch stores only at the current batch count.
+    // addBatch only appends at the current batch count.
     if (!seeded && !index.eq(next)) {
-      throw new Error(`aggregate: ${chain} expectedIndex ${index} is not the next free index ${next}`);
+      throw new Error(`batch: ${chain} expectedIndex ${index} is not the next free index ${next}`);
     }
     if (!seeded) next = next.add(1);
     batches.push({ network: chain, aggregator, index, seeded, ...plan });
@@ -150,21 +152,17 @@ const resolveIndices = async (
   return batches;
 };
 
-const storedBatches = async (aggregator: Contract): Promise<StoredBatches> => ({
-  count: await aggregator.batchCount(),
-  get: index => aggregator.getBatch(index),
-});
-
 // Sims read only the forked chain: every other chain resolves its batches in its own simulation.
-const readStoredBatches: ReadBatches = async (chain, aggregator) => {
-  if (isSimulation()) {
-    return chain === FORKED_NETWORK
-      ? storedBatches(new Contract(aggregator, AGGREGATOR_ABI, ethers.provider))
-      : undefined;
-  }
+const readSeededBatches: ReadBatches = async (chain, aggregator) => {
+  if (isSimulation() && chain !== FORKED_NETWORK) return undefined;
   const url = process.env[`ARCHIVE_NODE_${chain}`];
-  if (!url) throw new Error(`aggregate: set ARCHIVE_NODE_${chain} to look up its batches`);
-  return storedBatches(new Contract(aggregator, AGGREGATOR_ABI, new providers.JsonRpcProvider(url)));
+  if (!isSimulation() && !url) throw new Error(`batch: set ARCHIVE_NODE_${chain} to look up its batches`);
+  const contract = new Contract(
+    aggregator,
+    AGGREGATOR_ABI,
+    isSimulation() ? ethers.provider : new providers.JsonRpcProvider(url),
+  );
+  return { count: await contract.batchCount(), get: index => contract.getBatch(index) };
 };
 
 // Commands without a dstChainId run on BNB Chain, or on its testnet when the proposal is built for testnets.
@@ -176,19 +174,19 @@ const homeChain = () =>
 const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatches: ReadBatches) => {
   const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
   const { aggregator, acm, segments } = planChain(commands, chain);
-  const runs = segments.filter((s): s is BatchedCommand[] => Array.isArray(s));
+  const runs = segments.filter((segment): segment is BatchedCommand[] => Array.isArray(segment));
   const groups = runs.map(run => run[0].group);
   if (new Set(groups).size < groups.length) {
-    throw new Error(`aggregate: other commands split a ${chain} batch(); keep its commands together`);
+    throw new Error(`batch: other commands split a ${chain} batch(); keep its commands together`);
   }
 
-  const stored = await readBatches(chain, aggregator);
-  const batches = stored
-    ? await resolveIndices(chain, aggregator, runs, stored)
+  const onChain = await readBatches(chain, aggregator);
+  const batches = onChain
+    ? await resolveIndices(chain, aggregator, runs, onChain)
     : runs.map(run => ({ network: chain, aggregator, index: undefined, seeded: false, ...toBatch(run) }));
   const indices = batches.flatMap(({ index }) => (index ? [index.toString()] : []));
   if (new Set(indices).size < indices.length) {
-    throw new Error(`aggregate: ${chain} has two batches at one index; check their expectedIndex and actualIndex`);
+    throw new Error(`batch: ${chain} has two batches at one index; check their expectedIndex and actualIndex`);
   }
 
   const dstChainId = chainId === homeChain() ? undefined : chainId;
@@ -205,10 +203,10 @@ const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatch
       // bytes32(0) is DEFAULT_ADMIN_ROLE
       chainCommand(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]),
       // MaxUint256 reverts BatchNotFound if a proposal built without reading the chain ever runs
-      ...segments.map(s =>
-        Array.isArray(s)
+      ...segments.map(segment =>
+        Array.isArray(segment)
           ? chainCommand(aggregator, "executeBatch(uint256)", [batches[next++].index ?? constants.MaxUint256])
-          : s,
+          : segment,
       ),
       chainCommand(acm, "revokeRole(bytes32,address)", [constants.HashZero, aggregator]),
     ],
@@ -219,10 +217,10 @@ const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatch
 export const aggregateCommands = async (
   commands: Command[],
   type: ProposalType | undefined,
-  readBatches: ReadBatches = readStoredBatches,
+  readBatches: ReadBatches = readSeededBatches,
 ): Promise<{ commands: Command[]; batches: AggregatorBatch[] }> => {
   // Only the Normal Timelock holds the ACM DEFAULT_ADMIN_ROLE that each chain lends its aggregator.
-  if (type !== ProposalType.REGULAR) throw new Error("aggregate: only ProposalType.REGULAR proposals are supported");
+  if (type !== ProposalType.REGULAR) throw new Error("batch: only ProposalType.REGULAR proposals are supported");
 
   const home = homeChain();
   const chainOf = (cmd: Command) => cmd.dstChainId ?? home;
@@ -265,7 +263,7 @@ export const seedBatches = async (batcher: Signer, batches: AggregatorBatch[], o
     );
     const receipt = await tx.wait();
     console.log(
-      `[aggregate] ${chain}: seeded batch ${index} (${calls.length} calls, ${receipt.gasUsed} gas) in ${receipt.transactionHash}`,
+      `[batch] ${chain}: seeded batch ${index} (${calls.length} calls, ${receipt.gasUsed} gas) in ${receipt.transactionHash}`,
     );
   }
 };
