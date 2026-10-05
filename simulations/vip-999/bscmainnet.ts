@@ -72,6 +72,7 @@ const deployStubOracle = async (): Promise<Contract> => {
 const MANAGEMENT = "0x2b6d846B07D4DF426a297e4Fe152aca832d9b3B3";
 
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+const LIQUIDATION_ADAPTER = "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd";
 
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
 
@@ -82,6 +83,7 @@ const VaultState = {
   Fundraising: 2,
   Lock: 4,
   PendingSettlement: 5,
+  SettlementDeadlineExceeded: 6,
   Matured: 7,
 };
 
@@ -514,6 +516,115 @@ forking(FORK_BLOCK, async () => {
 
       expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(0);
       expect(await adapterFrv.totalAssets(vault.address, U_FRV_SOURCE)).to.equal(0);
+    });
+  });
+
+  // Liquidation is handled off-chain, but under transferFlag 2 the Guardian can still liquidate on-chain as a
+  // fallback, through the LiquidationAdapter: the vault, the adapter and the Guardian are all whitelisted investors.
+  describe("Post-VIP Guardian liquidation fallback", () => {
+    let vault: Contract;
+    let guardian: SignerWithAddress;
+    let lockSnapshot: SnapshotRestorer;
+    const adapter = new ethers.Contract(
+      LIQUIDATION_ADAPTER,
+      [
+        "function liquidate(address vault, uint256 repayAmount)",
+        "function liquidateOverdueVault(address vault, uint256 repayAmount)",
+        "function isWhitelistedLiquidator(address) view returns (bool)",
+        "function isWhitelistedSettler(address) view returns (bool)",
+        "function protocolLiquidationShare() view returns (uint256)",
+        "function protocolShareAccrued(address collateral) view returns (uint256)",
+        "function sweepProtocolShareToReserve(address collateral)",
+      ],
+      ethers.provider,
+    );
+    const REPAY = parseUnits("10000", 18);
+
+    // Runs one adapter liquidation and checks every leg against the vault's seize math:
+    // seize = repay x U price x incentive / hBNB price; the adapter keeps its share of the bonus.
+    const expectGuardianLiquidation = async (liquidate: () => Promise<unknown>, incentive: BigNumber) => {
+      const seize = REPAY.mul(await resilientOracle.getPrice(U))
+        .div(parseUnits("1", 18))
+        .mul(incentive)
+        .div(await resilientOracle.getPrice(HBNB));
+      const bonus = seize.sub(seize.mul(parseUnits("1", 18)).div(incentive));
+      const protocolShare = bonus.mul(await adapter.protocolLiquidationShare()).div(parseUnits("1", 18));
+      const debtBefore = await vault.outstandingDebt();
+
+      await liquidate();
+
+      expect(await hBNB.balanceOf(guardian.address)).to.equal(seize.sub(protocolShare));
+      expect(await hBNB.balanceOf(vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT.sub(seize));
+      expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(
+        IDEAL_COLLATERAL_AMOUNT.sub(seize),
+      );
+      expect(await adapter.protocolShareAccrued(HBNB)).to.equal(protocolShare);
+      expect(await hBNB.balanceOf(adapter.address)).to.equal(protocolShare);
+      expect(await vault.outstandingDebt()).to.equal(debtBefore.sub(REPAY));
+      expect(await u.balanceOf(guardian.address)).to.equal(0);
+    };
+
+    before(async () => {
+      await fundraisingSnapshot.restore();
+      const vaultAddress = await controller.allVaults(vaultsBefore);
+      vault = new ethers.Contract(vaultAddress, VAULT_ABI, ethers.provider);
+      guardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
+      const operator = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
+      const [, lender] = await ethers.getSigners();
+
+      const whale = await initMainnetUser(U_WHALE, parseUnits("40"));
+      await u.connect(whale).transfer(lender.address, MAX_BORROW_CAP);
+      await u.connect(lender).approve(vault.address, MAX_BORROW_CAP);
+      await vault.connect(lender).deposit(MAX_BORROW_CAP, lender.address);
+      await time.increase(OPEN_DURATION + 1);
+      await vault.connect(operator).updateVaultState();
+      await vault.connect(operator).claimRaisedFunds();
+
+      await u.connect(whale).transfer(guardian.address, REPAY);
+      await u.connect(guardian).approve(adapter.address, REPAY);
+      lockSnapshot = await takeSnapshot();
+    });
+
+    it("guardian is whitelisted on the adapter for both HF and overdue liquidations", async () => {
+      expect(await adapter.isWhitelistedLiquidator(guardian.address)).to.equal(true);
+      expect(await adapter.isWhitelistedSettler(guardian.address)).to.equal(true);
+    });
+
+    it("guardian cannot liquidate the vault directly, only through the adapter", async () => {
+      await expect(vault.connect(guardian).liquidate(REPAY)).to.be.revertedWithCustomError(vault, "Unauthorized");
+    });
+
+    it("guardian liquidates an underwater vault during Lock (HF)", async () => {
+      // hBNB at $1,000 puts 198 hBNB x 75% below the ~150.3k U debt.
+      const atlas = new ethers.Contract(
+        ATLAS_ORACLE,
+        ["function setDirectPrice(address asset, uint256 price)"],
+        timelock,
+      );
+      await atlas.setDirectPrice(HBNB, parseUnits("1000", 18));
+      expect(await vault.state()).to.equal(VaultState.Lock);
+      expect((await vault.getVaultLiquidity())[1]).to.be.gt(0);
+
+      await expectGuardianLiquidation(
+        () => adapter.connect(guardian).liquidate(vault.address, REPAY),
+        LIQUIDATION_INCENTIVE,
+      );
+    });
+
+    it("guardian liquidates the vault once the settlement deadline passes (overdue)", async () => {
+      await lockSnapshot.restore(); // back to the healthy, locked vault at the live NAV
+      await time.increase(LOCK_DURATION + SETTLEMENT_WINDOW + 2);
+      await vault.connect(guardian).updateVaultState();
+      expect(await vault.state()).to.equal(VaultState.SettlementDeadlineExceeded);
+
+      await expectGuardianLiquidation(
+        () => adapter.connect(guardian).liquidateOverdueVault(vault.address, REPAY),
+        LATE_PENALTY_RATE,
+      );
+    });
+
+    it("protocol share cannot be swept to the PSR, which is not whitelisted for hBNB", async () => {
+      await expect(adapter.connect(timelock).sweepProtocolShareToReserve(HBNB)).to.be.revertedWith("Forbid transfer");
     });
   });
 });
