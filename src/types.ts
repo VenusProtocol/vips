@@ -91,11 +91,11 @@ export interface BatchOptions {
   actualIndex?: number;
 }
 
+// A call as the aggregator stores it: `data` holds the ABI-encoded arguments, or the full calldata when `signature` is empty
 export interface AggregatorCall {
   target: string;
-  data: string;
-  // not seeded on-chain; names the call in simulation failures
   signature: string;
+  data: string;
 }
 
 export interface CallPermission {

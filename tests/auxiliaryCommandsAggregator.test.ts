@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import hre, { ethers } from "hardhat";
 import { ReadBatches, aggregateCommands, batch } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { Command, LzChainId, ProposalType } from "src/types";
+import { AggregatorCall, Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bscmainnet, ethereum } = NETWORK_ADDRESSES;
@@ -13,7 +13,9 @@ const REVOKE = "revokeCallPermission(address,string,address)";
 
 const TARGET = "0x1111111111111111111111111111111111111111";
 const ACCOUNT = "0x2222222222222222222222222222222222222222";
-const PERMISSIONS = new ethers.utils.Interface([`function ${GIVE}`, `function ${REVOKE}`]);
+const permissionArgs = (data: string) => [
+  ...ethers.utils.defaultAbiCoder.decode(["address", "string", "address"], data),
+];
 
 const setValue = (value: number, overrides: Partial<Command> = {}): Command => ({
   target: TARGET,
@@ -91,12 +93,12 @@ describe("aggregateCommands", () => {
       REVOKE,
       REVOKE,
     ]);
-    expect([...PERMISSIONS.decodeFunctionData("giveCallPermission", planned.calls[1].data)]).to.deep.equal([
+    expect(permissionArgs(planned.calls[1].data)).to.deep.equal([
       TARGET,
       "setConfig(Config)",
       bscmainnet.AUXILIARY_COMMANDS_AGGREGATOR,
     ]);
-    expect([...PERMISSIONS.decodeFunctionData("revokeCallPermission", planned.calls[6].data)]).to.deep.equal([
+    expect(permissionArgs(planned.calls[6].data)).to.deep.equal([
       TARGET,
       SET,
       bscmainnet.AUXILIARY_COMMANDS_AGGREGATOR,
@@ -206,12 +208,16 @@ describe("aggregateCommands", () => {
 
 describe("aggregator batch indices", () => {
   const seededAt =
-    (count: number, batches: Record<number, { target: string; data: string }[]> = {}): ReadBatches =>
-    async () => ({ count: BigNumber.from(count), get: async index => batches[index.toNumber()] });
+    (count: number, batches: Record<number, AggregatorCall[]> = {}, executed: number[] = []): ReadBatches =>
+    async () => ({
+      count: BigNumber.from(count),
+      get: async index => batches[index.toNumber()],
+      executed: async index => executed.includes(index.toNumber()),
+    });
   const seededCalls = async (commands: Command[]) =>
-    (await aggregate(batch(commands))).batches[0].calls.map(({ target, data }) => ({
-      target: ethers.utils.getAddress(target),
-      data,
+    (await aggregate(batch(commands))).batches[0].calls.map(call => ({
+      ...call,
+      target: ethers.utils.getAddress(call.target),
     }));
 
   it("seeds every unpinned batch at a new index, even when identical calls are already seeded", async () => {
@@ -253,6 +259,16 @@ describe("aggregator batch indices", () => {
       "bscmainnet batch 1 does not hold these calls",
     );
     expect(await rejection(aggregate(pinned, seededAt(1)))).to.include("bscmainnet batch 1 does not hold these calls");
+  });
+
+  it("refuses a seeded batch that already ran, pinned either way", async () => {
+    const read = seededAt(2, { 1: await seededCalls([setValue(1)]) }, [1]);
+
+    for (const options of [{ actualIndex: 1 }, { expectedIndex: 1 }]) {
+      expect(await rejection(aggregate(batch([setValue(1)], options), read))).to.include(
+        "bscmainnet batch 1 already ran",
+      );
+    }
   });
 
   it("leaves every batch of an unread chain without an index, pinned or not", async () => {

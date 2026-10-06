@@ -17,7 +17,8 @@ import AGGREGATOR_ABI from "./vip-framework/abi/AuxiliaryCommandsAggregator.json
 
 interface SeededBatches {
   count: BigNumber;
-  get: (index: BigNumber) => Promise<Pick<AggregatorCall, "target" | "data">[]>;
+  get: (index: BigNumber) => Promise<AggregatorCall[]>;
+  executed: (index: BigNumber) => Promise<boolean>;
 }
 
 // An aggregator's seeded batches, or undefined when its chain is not read in this context.
@@ -38,7 +39,7 @@ const toCall = (target: string, signature: string, params: unknown[]): Aggregato
   if (fragment.format() !== signature) {
     throw new Error(`batch: signature "${signature}" should be in the canonical form "${fragment.format()}"`);
   }
-  return { target, signature, data: new utils.Interface([fragment]).encodeFunctionData(fragment, params) };
+  return { target, signature, data: utils.defaultAbiCoder.encode(fragment.inputs, params) };
 };
 
 // Turns the commands into one aggregator batch on their chain. Batched calls run as the aggregator, so calls that must
@@ -113,8 +114,7 @@ const planChain = (commands: Command[], chain: SUPPORTED_NETWORKS) => {
   return { aggregator, acm, segments };
 };
 
-// Every batch gets its own index and no seeded batch is reused, as the planned aggregator upgrade runs each batch only
-// once.
+// Every batch gets its own index and no seeded batch is reused, since the aggregator runs each batch only once.
 const resolveIndices = async (
   chain: SUPPORTED_NETWORKS,
   aggregator: string,
@@ -126,17 +126,18 @@ const resolveIndices = async (
   for (const run of runs) {
     const { expectedIndex, actualIndex } = run[0].group;
     const plan = toBatch(run);
-    const pin = actualIndex ?? expectedIndex;
-    if (pin === undefined) {
-      batches.push({ network: chain, aggregator, index: next, seeded: false, ...plan });
-      next = next.add(1);
-      continue;
+    // An unpinned batch takes the next free index, past every seeded batch.
+    const index = BigNumber.from(actualIndex ?? expectedIndex ?? next);
+    const [seededCalls, plannedCalls] = [index.lt(onChain.count) ? await onChain.get(index) : [], plan.calls].map(
+      calls =>
+        JSON.stringify(
+          calls.map(({ target, signature, data }) => [target.toLowerCase(), signature, data.toLowerCase()]),
+        ),
+    );
+    const seeded = seededCalls === plannedCalls;
+    if (seeded && (await onChain.executed(index))) {
+      throw new Error(`batch: ${chain} batch ${index} already ran; drop its index to seed these calls again`);
     }
-    const index = BigNumber.from(pin);
-    const seeded =
-      index.lt(onChain.count) &&
-      (await onChain.get(index)).map(call => (call.target + call.data).toLowerCase()).join() ===
-        plan.calls.map(call => (call.target + call.data).toLowerCase()).join();
     if (!seeded && actualIndex !== undefined) {
       throw new Error(
         `batch: ${chain} batch ${index} does not hold these calls; check actualIndex, or fork after it was seeded`,
@@ -162,7 +163,11 @@ const readSeededBatches: ReadBatches = async (chain, aggregator) => {
     AGGREGATOR_ABI,
     isSimulation() ? ethers.provider : new providers.JsonRpcProvider(url),
   );
-  return { count: await contract.batchCount(), get: index => contract.getBatch(index) };
+  return {
+    count: await contract.getBatchCount(),
+    get: index => contract.getBatch(index),
+    executed: index => contract.batchExecuted(index),
+  };
 };
 
 // Commands without a dstChainId run on BNB Chain, or on its testnet when the proposal is built for testnets.
@@ -256,11 +261,7 @@ export const aggregateCommands = async (
 export const seedBatches = async (batcher: Signer, batches: AggregatorBatch[], overrides: Overrides = {}) => {
   for (const { network: chain, aggregator: address, index, calls } of batches) {
     const aggregator = new Contract(address, AGGREGATOR_ABI, batcher);
-    const tx = await aggregator["addBatch((address,bytes)[],uint256)"](
-      calls.map(({ target, data }) => ({ target, data })),
-      index,
-      overrides,
-    );
+    const tx = await aggregator["addBatch((address,string,bytes)[],uint256)"](calls, index, overrides);
     const receipt = await tx.wait();
     console.log(
       `[batch] ${chain}: seeded batch ${index} (${calls.length} calls, ${receipt.gasUsed} gas) in ${receipt.transactionHash}`,

@@ -41,7 +41,9 @@ export const expectForkedBatchesRan = async (proposal: Proposal, receipt: Transa
   }
 };
 
-// executeBatch drops the failing call's revert reason, so replaying the batch from the aggregator recovers it.
+// executeBatch reports a failure as CallFailed with only the call's index and raw revert data, so replaying the batch
+// from the aggregator names the call (by its signature, or its selector for a raw call) and lets the node decode its
+// revert reason.
 export const explainBatchFailure = async (proposal: Proposal, commandIdx: number, error: unknown) => {
   const batch = forkedBatches(proposal).find(
     candidate =>
@@ -54,10 +56,12 @@ export const explainBatchFailure = async (proposal: Proposal, commandIdx: number
   const snapshot = await takeSnapshot();
   const aggregator = await initMainnetUser(batch.aggregator, ethers.utils.parseEther("1"));
   try {
-    for (const [i, { target, data, signature }] of batch.calls.entries()) {
-      await aggregator.sendTransaction({ to: target, data }).catch((failure: { reason?: string }) => {
+    for (const [i, { target, signature, data }] of batch.calls.entries()) {
+      const calldata = signature ? ethers.utils.id(signature).slice(0, 10) + data.slice(2) : data;
+      await aggregator.sendTransaction({ to: target, data: calldata }).catch((failure: { reason?: string }) => {
         const reason = failure.reason ?? failure;
-        throw new Error(`aggregator batch ${batch.index} call ${i} (${signature} on ${target}) reverted: ${reason}`);
+        const name = signature || calldata.slice(0, 10);
+        throw new Error(`aggregator batch ${batch.index} call ${i} (${name} on ${target}) reverted: ${reason}`);
       });
     }
   } finally {
