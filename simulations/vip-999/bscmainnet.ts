@@ -51,7 +51,7 @@ import FEED_ABI from "./abi/SingleFeed.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 125826372;
+const FORK_BLOCK = 125992901;
 
 // contract StubOracle { function getPrice(address) external pure returns (uint256) { return 1e18; } }
 const STUB_ORACLE_BYTECODE =
@@ -182,6 +182,12 @@ forking(FORK_BLOCK, async () => {
       expect(await hBNB.name()).to.equal("DigiFT Hash Global BNB Yield Fund Token");
       expect(await hBNB.symbol()).to.equal("hBNB");
       expect(await hBNB.decimals()).to.equal(18);
+    });
+
+    it("hBNB feed updated within maxStalePeriod", async () => {
+      const updatedAt = (await feedAsAtlas.latestRoundData())[3];
+      const now = (await ethers.provider.getBlock("latest")).timestamp;
+      expect(now - updatedAt.toNumber()).to.be.lte(HBNB_MAX_STALE_PERIOD);
     });
 
     it("HASH_GLOBAL_VAULT is the controller's predicted vault for the operator", async () => {
@@ -648,11 +654,13 @@ forking(FORK_BLOCK, async () => {
   });
 
   // If fundraising closes with the minimum raised but less than 198 hBNB posted, the vault confiscates the margin and
-  // pays it out in hBNB to whoever redeems. For the Hub that recipient is the Hub itself, which is not whitelisted.
+  // pays it out in hBNB to whoever redeems. Neither the Hub nor a plain lender is a DigiFT investor.
   describe("Post-VIP institution default", () => {
     let vault: Contract;
     let hubOperator: SignerWithAddress;
+    let lender: SignerWithAddress;
     const HUB_ALLOCATION = parseUnits("50000", 18);
+    const LENDER_DEPOSIT = parseUnits("10000", 18);
     const marginAmount = IDEAL_COLLATERAL_AMOUNT.mul(MARGIN_RATE).div(parseUnits("1", 18));
 
     before(async () => {
@@ -660,16 +668,23 @@ forking(FORK_BLOCK, async () => {
       const vaultAddress = await controller.allVaults(vaultsBefore);
       vault = new ethers.Contract(vaultAddress, VAULT_ABI, ethers.provider);
       hubOperator = await initMainnetUser(HUB_OPERATOR, parseUnits("1"));
+      [, lender] = await ethers.getSigners();
     });
 
-    it("Hub operator moves 50k U into the vault while only the margin is posted", async () => {
+    it("Hub operator and a lender supply 60k U while only the margin is posted", async () => {
       await hub
         .connect(hubOperator)
         .reallocate(
           [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
           [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
         );
+      const whale = await initMainnetUser(U_WHALE, parseUnits("40"));
+      await u.connect(whale).transfer(lender.address, LENDER_DEPOSIT);
+      await u.connect(lender).approve(vault.address, LENDER_DEPOSIT);
+      await vault.connect(lender).deposit(LENDER_DEPOSIT, lender.address);
+
       expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(HUB_ALLOCATION);
+      expect(await vault.balanceOf(lender.address)).to.equal(LENDER_DEPOSIT);
       expect((await vault.institutionalRuntime()).totalCollateralDeposited).to.equal(marginAmount);
     });
 
@@ -693,6 +708,13 @@ forking(FORK_BLOCK, async () => {
             [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: refund }],
           ),
       ).to.be.revertedWith("Forbid transfer");
+    });
+
+    it("a lender that is not a DigiFT investor cannot redeem either", async () => {
+      expect(await management.isWhiteInvestor(lender.address)).to.equal(false);
+      await expect(vault.connect(lender).redeem(LENDER_DEPOSIT, lender.address, lender.address)).to.be.revertedWith(
+        "Forbid transfer",
+      );
     });
 
     it("posting all 198 hBNB before openVault rules the default out", async () => {
