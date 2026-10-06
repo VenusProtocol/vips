@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import hre, { ethers } from "hardhat";
 import { ReadBatches, aggregateCommands, batch } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { AggregatorCall, Command, LzChainId, ProposalType } from "src/types";
+import { AggregatorCall, BatchOptions, Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bscmainnet, ethereum } = NETWORK_ADDRESSES;
@@ -154,6 +154,30 @@ describe("aggregateCommands", () => {
     );
   });
 
+  it("seeds signature and arguments by default, and full calldata with an empty signature when raw", async () => {
+    const pause: Command = { target: TARGET, signature: "pause()", params: [] };
+    const commands = [setValue(1), pause, acmGrant("a()")];
+    const [signed, raw] = (await aggregate([...batch(commands), ...batch(commands, { raw: true })])).batches;
+    const args = ethers.utils.defaultAbiCoder.encode(["uint256"], [1]);
+    const selector = (signature: string) => ethers.utils.id(signature).slice(0, 10);
+
+    // calls 0-1 grant setValue and pause; 2-4 are the commands
+    expect(signed.calls.slice(2, 4)).to.deep.equal([
+      { target: TARGET, signature: SET, data: args },
+      { target: TARGET, signature: "pause()", data: "0x" },
+    ]);
+    expect(raw.calls.slice(2, 4)).to.deep.equal([
+      { target: TARGET, signature: "", data: selector(SET) + args.slice(2) },
+      { target: TARGET, signature: "", data: selector("pause()") },
+    ]);
+    expect(raw.calls.map(c => c.data)).to.deep.equal(
+      signed.calls.map(c => selector(c.signature) + c.data.slice(2)),
+      "raw calls, grants and revokes included, are the signed calls' full calldata",
+    );
+    expect(raw.calls.every(c => c.signature === "")).to.equal(true);
+    expect(raw.permissions).to.deep.equal(signed.permissions);
+  });
+
   it("rejects non-canonical signatures", async () => {
     expect(await rejection(aggregate(batch([setValue(1, { signature: "setValue(uint)" })])))).to.include(
       'canonical form "setValue(uint256)"',
@@ -214,8 +238,8 @@ describe("aggregator batch indices", () => {
       get: async index => batches[index.toNumber()],
       executed: async index => executed.includes(index.toNumber()),
     });
-  const seededCalls = async (commands: Command[]) =>
-    (await aggregate(batch(commands))).batches[0].calls.map(call => ({
+  const seededCalls = async (commands: Command[], options: BatchOptions = {}) =>
+    (await aggregate(batch(commands, options))).batches[0].calls.map(call => ({
       ...call,
       target: ethers.utils.getAddress(call.target),
     }));
@@ -259,6 +283,28 @@ describe("aggregator batch indices", () => {
       "bscmainnet batch 1 does not hold these calls",
     );
     expect(await rejection(aggregate(pinned, seededAt(1)))).to.include("bscmainnet batch 1 does not hold these calls");
+  });
+
+  it("matches a pin only against a batch seeded in the same mode", async () => {
+    const read = seededAt(2, {
+      0: await seededCalls([setValue(1)]),
+      1: await seededCalls([setValue(1)], { raw: true }),
+    });
+    const resolved = await aggregate(
+      [...batch([setValue(1)], { actualIndex: 0 }), ...batch([setValue(1)], { raw: true, actualIndex: 1 })],
+      read,
+    );
+
+    expect(resolved.batches.map(b => [b.index?.toNumber(), b.seeded])).to.deep.equal([
+      [0, true],
+      [1, true],
+    ]);
+    expect(await rejection(aggregate(batch([setValue(1)], { actualIndex: 1 }), read))).to.include(
+      "bscmainnet batch 1 does not hold these calls",
+    );
+    expect(await rejection(aggregate(batch([setValue(1)], { raw: true, actualIndex: 0 }), read))).to.include(
+      "bscmainnet batch 0 does not hold these calls",
+    );
   });
 
   it("refuses a seeded batch that already ran, pinned either way", async () => {

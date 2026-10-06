@@ -88,10 +88,14 @@ export interface BatchOptions {
   // seeds the batch at this index, which must be the chain's next free index unless the batch is already seeded there
   expectedIndex?: number;
   // the index the batch is already seeded at: the seeded calls must match, and the batch is never seeded again
-  actualIndex?: number;
+  storedIndex?: number;
+  // seeds every call of the batch as full calldata with an empty signature, which stores fewer bytes than the default
+  // signature plus arguments but shows no function name on chain
+  raw?: boolean;
 }
 
-// A call as the aggregator stores it: `data` holds the ABI-encoded arguments, or the full calldata when `signature` is empty
+// A call as the aggregator stores it: `data` holds the ABI-encoded arguments, or the full calldata when `signature` is
+// empty
 export interface AggregatorCall {
   target: string;
   signature: string;
@@ -106,7 +110,7 @@ export interface CallPermission {
 export interface AggregatorBatch {
   network: SUPPORTED_NETWORKS;
   aggregator: string;
-  // actualIndex, else expectedIndex, else the chain's next free index; undefined when the chain was not read
+  // storedIndex, else expectedIndex, else the chain's next free index; undefined when the chain was not read
   index?: BigNumber;
   // whether `calls` are seeded at `index` on the chain the proposal was built against
   seeded: boolean;

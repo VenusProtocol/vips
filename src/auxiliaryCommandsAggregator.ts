@@ -44,13 +44,13 @@ const toCall = (target: string, signature: string, params: unknown[]): Aggregato
 
 // Turns the commands into one aggregator batch on their chain. Batched calls run as the aggregator, so calls that must
 // come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is seeded, so
-// split its commands across batch() calls.
+// split its commands across batch() calls or seed it with { raw: true }.
 export const batch = (commands: Command[], options: BatchOptions = {}): Command[] => {
-  const { expectedIndex, actualIndex } = options;
-  if (expectedIndex !== undefined && actualIndex !== undefined) {
-    throw new Error("batch: set expectedIndex or actualIndex, not both");
+  const { expectedIndex, storedIndex } = options;
+  if (expectedIndex !== undefined && storedIndex !== undefined) {
+    throw new Error("batch: set expectedIndex or storedIndex, not both");
   }
-  const index = expectedIndex ?? actualIndex;
+  const index = expectedIndex ?? storedIndex;
   if (index !== undefined && (!Number.isInteger(index) || index < 0)) {
     throw new Error(`batch: ${index} is not an index`);
   }
@@ -64,12 +64,20 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Command[
 
 const toBatch = (batched: BatchedCommand[]) => {
   const grants = [...new Map(batched.flatMap(({ grant }) => (grant ? [[grant.key, grant] as const] : []))).values()];
+  const calls = [
+    ...grants.map(grant => grant.give),
+    ...batched.map(({ call }) => call),
+    ...grants.map(grant => grant.revoke),
+  ];
   return {
-    calls: [
-      ...grants.map(grant => grant.give),
-      ...batched.map(({ call }) => call),
-      ...grants.map(grant => grant.revoke),
-    ],
+    // A raw call carries its selector in the data and an empty signature, as in the Timelock.
+    calls: batched[0].group.raw
+      ? calls.map(({ target, signature, data }) => ({
+          target,
+          signature: "",
+          data: utils.id(signature).slice(0, 10) + data.slice(2),
+        }))
+      : calls,
     permissions: grants.map(grant => grant.permission),
   };
 };
@@ -124,23 +132,24 @@ const resolveIndices = async (
   let next = onChain.count;
   const batches: AggregatorBatch[] = [];
   for (const run of runs) {
-    const { expectedIndex, actualIndex } = run[0].group;
+    const { expectedIndex, storedIndex } = run[0].group;
     const plan = toBatch(run);
     // An unpinned batch takes the next free index, past every seeded batch.
-    const index = BigNumber.from(actualIndex ?? expectedIndex ?? next);
-    const [seededCalls, plannedCalls] = [index.lt(onChain.count) ? await onChain.get(index) : [], plan.calls].map(
-      calls =>
-        JSON.stringify(
-          calls.map(({ target, signature, data }) => [target.toLowerCase(), signature, data.toLowerCase()]),
-        ),
-    );
-    const seeded = seededCalls === plannedCalls;
+    const index = BigNumber.from(storedIndex ?? expectedIndex ?? next);
+    const seededCalls = index.lt(onChain.count) ? await onChain.get(index) : [];
+    const seeded =
+      JSON.stringify(seededCalls.map(call => [call.target.toLowerCase(), call.signature, call.data.toLowerCase()])) ===
+      JSON.stringify(plan.calls.map(call => [call.target.toLowerCase(), call.signature, call.data.toLowerCase()]));
     if (seeded && (await onChain.executed(index))) {
-      throw new Error(`batch: ${chain} batch ${index} already ran; drop its index to seed these calls again`);
-    }
-    if (!seeded && actualIndex !== undefined) {
       throw new Error(
-        `batch: ${chain} batch ${index} does not hold these calls; check actualIndex, or fork after it was seeded`,
+        `batch: ${chain} batch ${index} already ran, and a batch runs only once; if this VIP already executed, build ` +
+          "it at a block before its execution, and only drop the index to seed the calls again for a new proposal",
+      );
+    }
+    if (!seeded && storedIndex !== undefined) {
+      throw new Error(
+        `batch: ${chain} batch ${index} does not hold these calls; check storedIndex, keep raw: true when pinning a ` +
+          "raw batch, or fork after it was seeded",
       );
     }
     // addBatch only appends at the current batch count.
@@ -164,7 +173,14 @@ const readSeededBatches: ReadBatches = async (chain, aggregator) => {
     isSimulation() ? ethers.provider : new providers.JsonRpcProvider(url),
   );
   return {
-    count: await contract.getBatchCount(),
+    // ethers reports any failed eth_call as CALL_EXCEPTION, node errors included, so the original message is kept.
+    count: await contract.getBatchCount().catch((error: { code?: string; message?: string }) => {
+      if (error.code !== "CALL_EXCEPTION") throw error;
+      throw new Error(
+        `batch: reading getBatchCount() from the ${chain} aggregator at ${aggregator} failed; batch() needs an ` +
+          `aggregator with getBatchCount(), and a failing node gives the same error: ${error.message}`,
+      );
+    }),
     get: index => contract.getBatch(index),
     executed: index => contract.batchExecuted(index),
   };
@@ -191,7 +207,7 @@ const aggregateChain = async (commands: Command[], chainId: LzChainId, readBatch
     : runs.map(run => ({ network: chain, aggregator, index: undefined, seeded: false, ...toBatch(run) }));
   const indices = batches.flatMap(({ index }) => (index ? [index.toString()] : []));
   if (new Set(indices).size < indices.length) {
-    throw new Error(`batch: ${chain} has two batches at one index; check their expectedIndex and actualIndex`);
+    throw new Error(`batch: ${chain} has two batches at one index; check their expectedIndex and storedIndex`);
   }
 
   const dstChainId = chainId === homeChain() ? undefined : chainId;
