@@ -8,7 +8,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { aggregateCommands, isSimulation, seedBatches } from "./auxiliaryCommandsAggregator";
+import { buildAggregatorCommands, isSimulation, seedBatches } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
@@ -250,8 +250,8 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   return fee;
 };
 
-// Sims seed the forked chain's unpinned batches while the proposal is built, so every later build on the same fork takes
-// the indices after them. The Normal Timelock is an authorized batcher on every aggregator; its balance is restored.
+// In a sim, seeds the forked chain's not yet seeded batches as the Normal Timelock, an authorized batcher on every
+// aggregator, then restores its balance. Seeding moves the fork's batch count, so a later build takes later indices.
 const seedForkedBatches = async (batches: AggregatorBatch[]) => {
   const pending = batches.filter(batch => batch.network === FORKED_NETWORK && !batch.seeded);
   if (!isSimulation() || pending.length === 0) return;
@@ -280,10 +280,10 @@ export const makeProposal = async (
     type,
   };
   if (commands.some(cmd => cmd.batchGroup)) {
-    const aggregation = await aggregateCommands(commands, type);
-    await seedForkedBatches(aggregation.batches);
-    commands = aggregation.commands;
-    proposal.aggregatorBatches = aggregation.batches;
+    const { commands: aggregatorCommands, batches } = await buildAggregatorCommands(commands, type);
+    await seedForkedBatches(batches);
+    commands = aggregatorCommands;
+    proposal.aggregatorBatches = batches;
   }
 
   const map = new Map<number, Command[]>();

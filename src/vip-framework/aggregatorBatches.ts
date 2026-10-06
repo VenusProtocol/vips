@@ -14,7 +14,7 @@ export const forkedBatches = (proposal: Proposal) =>
 export const expectForkedBatchesRan = async (proposal: Proposal, receipt: TransactionReceipt) => {
   const batches = forkedBatches(proposal);
   const aggregatorInterface = new ethers.utils.Interface(AGGREGATOR_ABI);
-  const executed = receipt.logs
+  const executedIndices = receipt.logs
     .filter(
       log =>
         // The aggregator is a proxy, so its logs can include proxy events its ABI can't parse.
@@ -29,7 +29,7 @@ export const expectForkedBatchesRan = async (proposal: Proposal, receipt: Transa
   );
 
   for (const batch of batches) {
-    expect(executed, `batch ${batch.index} did not run`).to.include(String(batch.index));
+    expect(executedIndices, `batch ${batch.index} did not run`).to.include(String(batch.index));
     expect(
       await acm.hasRole(ethers.constants.HashZero, batch.aggregator),
       "aggregator kept DEFAULT_ADMIN_ROLE",

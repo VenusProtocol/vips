@@ -80,7 +80,7 @@ export interface Command {
   gasLimitMultiplicationFactor?: number;
   // function string the aggregator is granted for this command when the target's ACM check differs from `signature`
   aclSignature?: string;
-  // set by batch(): the commands of one batch() call form one aggregator batch
+  // set by batch(): one shared object per batch() call, whose identity marks the commands of that batch
   batchGroup?: BatchOptions;
 }
 
@@ -88,7 +88,7 @@ export interface BatchOptions {
   // seeds the batch at this index, which must be the chain's next free index unless the batch is already seeded there
   expectedIndex?: number;
   // the index the batch is already seeded at: the seeded calls must match, and the batch is never seeded again
-  storedIndex?: number;
+  seededIndex?: number;
   // seeds every call of the batch as full calldata with an empty signature, which stores fewer bytes than the default
   // signature plus arguments but shows no function name on chain
   raw?: boolean;
@@ -110,7 +110,7 @@ export interface CallPermission {
 export interface AggregatorBatch {
   network: SUPPORTED_NETWORKS;
   aggregator: string;
-  // storedIndex, else expectedIndex, else the chain's next free index; undefined when the chain was not read
+  // seededIndex, else expectedIndex, else the chain's next free index; undefined when the chain was not read
   index?: BigNumber;
   // whether `calls` are seeded at `index` on the chain the proposal was built against
   seeded: boolean;
