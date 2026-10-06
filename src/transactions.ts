@@ -19,7 +19,7 @@ export const assertBatchesSeeded = ({ aggregatorBatches = [] }: Proposal, path: 
       .map(batch => `${batch.network} batch ${batch.index} (${batch.calls.length} calls)`)
       .join(", ")}; seed them with \`npx hardhat seedAggregatorBatches ${path} --network ${
       FORKED_NETWORK ?? "bscmainnet"
-    }\`, ` + "then pin each with batch(commands, { actualIndex })",
+    }\`, ` + "then pin each with batch(commands, { storedIndex }), keeping raw: true on raw batches",
   );
 };
 

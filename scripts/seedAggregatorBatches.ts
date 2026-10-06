@@ -30,7 +30,7 @@ const seed = async (pending: AggregatorBatch[]) => {
   }
 };
 
-// Returns each chain's batch indices in the VIP's order, ready to pin as actualIndex.
+// Returns each chain's batch indices in the VIP's order, ready to pin as storedIndex.
 const seedAggregatorBatches = async (vipPath: string) => {
   const { aggregatorBatches = [] }: Proposal = await (await import(`../vips/${vipPath}`)).default();
   if (aggregatorBatches.some(batch => !batch.index)) {
@@ -46,7 +46,9 @@ const seedAggregatorBatches = async (vipPath: string) => {
     );
   }
   await seed(aggregatorBatches.filter(batch => !batch.seeded));
-  console.log(`Pin each batch() in order with { actualIndex }: ${JSON.stringify(indices)}`);
+  console.log(
+    `Pin each batch() in order with { storedIndex }, keeping raw: true on raw batches: ${JSON.stringify(indices)}`,
+  );
   return indices;
 };
 

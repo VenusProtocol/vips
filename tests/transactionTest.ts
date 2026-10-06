@@ -80,7 +80,7 @@ describe("assertBatchesSeeded", () => {
         "vip-1/bsc",
       ),
     ).to.throw(
-      "BATCH_NOT_SEEDED: ethereum batch 2 (1 calls); seed them with `npx hardhat seedAggregatorBatches vip-1/bsc --network bscmainnet`, then pin each with batch(commands, { actualIndex })",
+      "BATCH_NOT_SEEDED: ethereum batch 2 (1 calls); seed them with `npx hardhat seedAggregatorBatches vip-1/bsc --network bscmainnet`, then pin each with batch(commands, { storedIndex }), keeping raw: true on raw batches",
     );
   });
 
