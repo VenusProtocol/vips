@@ -8,11 +8,12 @@ import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { buildAggregatorCommands, isSimulation, seedBatches } from "./auxiliaryCommandsAggregator";
+import { buildAggregatorCommands, isBatch, isSimulation, seedBatches } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
   AggregatorBatch,
+  Batch,
   Command,
   LzChainId,
   Proposal,
@@ -265,7 +266,7 @@ const seedForkedBatches = async (batches: AggregatorBatch[]) => {
 };
 
 export const makeProposal = async (
-  commands: Command[],
+  entries: (Command | Batch)[],
   meta?: ProposalMeta,
   type?: ProposalType,
 ): Promise<Proposal> => {
@@ -279,8 +280,11 @@ export const makeProposal = async (
     meta,
     type,
   };
-  if (commands.some(cmd => cmd.batchGroup)) {
-    const { commands: aggregatorCommands, batches } = await buildAggregatorCommands(commands, type);
+  let commands: Command[];
+  if (entries.every((entry): entry is Command => !isBatch(entry))) {
+    commands = entries;
+  } else {
+    const { commands: aggregatorCommands, batches } = await buildAggregatorCommands(entries, type);
     await seedForkedBatches(batches);
     commands = aggregatorCommands;
     proposal.aggregatorBatches = batches;

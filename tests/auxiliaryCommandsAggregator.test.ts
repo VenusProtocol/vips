@@ -4,7 +4,7 @@ import { Contract } from "ethers";
 import hre, { ethers } from "hardhat";
 import { batch, buildAggregatorCommands } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { AggregatorCall, BatchOptions, Command, LzChainId, ProposalType } from "src/types";
+import { AggregatorCall, Batch, BatchOptions, Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 import AGGREGATOR_ABI from "src/vip-framework/abi/AuxiliaryCommandsAggregator.json";
 
@@ -42,12 +42,12 @@ const rejection = async (promise: Promise<unknown>) => {
   throw new Error("expected a rejection");
 };
 
-const build = (commands: Command[]) => buildAggregatorCommands(commands, ProposalType.REGULAR);
+const build = (entries: (Command | Batch)[]) => buildAggregatorCommands(entries, ProposalType.REGULAR);
 
 // Without a fork no chain is read, so every batch comes out without an index.
 describe("buildAggregatorCommands", () => {
   it("wraps a chain's batch in a DEFAULT_ADMIN_ROLE grant and revoke", async () => {
-    const { commands, batches } = await build(batch([setValue(1), acmGrant("a()")]));
+    const { commands, batches } = await build([batch([setValue(1), acmGrant("a()")])]);
 
     expect(commands.map(c => [c.target, c.signature, c.params])).to.deep.equal([
       [
@@ -79,7 +79,7 @@ describe("buildAggregatorCommands", () => {
       params: [[1, ACCOUNT]],
       aclSignature: "setConfig(Config)",
     };
-    const [planned] = (await build(batch([setValue(1), setValue(2), acmGrant("a()"), struct]))).batches;
+    const [planned] = (await build([batch([setValue(1), setValue(2), acmGrant("a()"), struct])])).batches;
 
     expect(planned.permissions).to.deep.equal([
       { target: TARGET, signature: SET },
@@ -111,9 +111,9 @@ describe("buildAggregatorCommands", () => {
     const accept: Command = { target: TARGET, signature: "acceptOwnership()", params: [] };
     const { commands, batches } = await build([
       plain,
-      ...batch([setValue(2), setValue(3)]),
+      batch([setValue(2), setValue(3)]),
       accept,
-      ...batch([setValue(4), accept]),
+      batch([setValue(4), accept]),
     ]);
 
     expect(commands.map(c => c.signature)).to.deep.equal([
@@ -131,30 +131,28 @@ describe("buildAggregatorCommands", () => {
     ]);
   });
 
-  it("keeps the outer group when batch() calls nest", async () => {
-    const { batches } = await build(batch([setValue(1), ...batch([setValue(2)])]));
-
-    expect(batches.map(b => b.calls.map(c => c.signature))).to.deep.equal([[GIVE, SET, SET, REVOKE]]);
+  it("rejects nested batches instead of overwriting their options", () => {
+    const inner = batch([setValue(2)], { seededIndex: 5, raw: true });
+    expect(() =>
+      // @ts-expect-error A batch can contain commands only; check the runtime error too.
+      batch([setValue(1), inner]),
+    ).to.throw("batch: nested batches are not supported");
   });
 
-  it("rejects a batch() spanning chains, sending value, or split by other commands", async () => {
+  it("rejects a batch() spanning chains or sending value", async () => {
     expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.ethereum })])).to.throw(
       "batch: a batch() must hold one chain's commands",
     );
     expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.bscmainnet })])).to.not.throw();
 
-    expect(await rejection(build(batch([setValue(1, { value: "1" })])))).to.include(
+    expect(await rejection(build([batch([setValue(1, { value: "1" })])]))).to.include(
       `batch: ${SET} on ${TARGET} sends value and can't be batched`,
-    );
-    const [first, second] = batch([setValue(1), setValue(2)]);
-    expect(await rejection(build([first, setValue(9), second]))).to.include(
-      "other commands split a bscmainnet batch()",
     );
   });
 
   it("seeds signature and arguments by default, and full calldata with an empty signature when raw", async () => {
     const commands = [setValue(1), { target: TARGET, signature: "pause()", params: [] }, acmGrant("a()")];
-    const [signed, raw] = (await build([...batch(commands), ...batch(commands, { raw: true })])).batches;
+    const [signed, raw] = (await build([batch(commands), batch(commands, { raw: true })])).batches;
     const args = ethers.utils.defaultAbiCoder.encode(["uint256"], [1]);
     const selector = (signature: string) => ethers.utils.id(signature).slice(0, 10);
 
@@ -176,21 +174,21 @@ describe("buildAggregatorCommands", () => {
   });
 
   it("rejects non-canonical signatures", async () => {
-    expect(await rejection(build(batch([setValue(1, { signature: "setValue(uint)" })])))).to.include(
+    expect(await rejection(build([batch([setValue(1, { signature: "setValue(uint)" })])]))).to.include(
       'canonical form "setValue(uint256)"',
     );
   });
 
   it("rejects non-regular proposals", async () => {
     for (const type of [ProposalType.FAST_TRACK, ProposalType.CRITICAL, undefined]) {
-      expect(await rejection(buildAggregatorCommands(batch([setValue(1)]), type))).to.include(
+      expect(await rejection(buildAggregatorCommands([batch([setValue(1)])], type))).to.include(
         "only ProposalType.REGULAR",
       );
     }
   });
 
   it("rejects a batch() on a chain without an aggregator", async () => {
-    expect(await rejection(build(batch([setValue(1, { dstChainId: LzChainId.opmainnet })])))).to.include(
+    expect(await rejection(build([batch([setValue(1, { dstChainId: LzChainId.opmainnet })])]))).to.include(
       "no AuxiliaryCommandsAggregator on opmainnet",
     );
   });
@@ -199,7 +197,7 @@ describe("buildAggregatorCommands", () => {
     const forked = hre.FORKED_NETWORK;
     hre.FORKED_NETWORK = "sepolia";
     try {
-      expect(await rejection(build(batch([setValue(1)])))).to.include("no AuxiliaryCommandsAggregator on bsctestnet");
+      expect(await rejection(build([batch([setValue(1)])]))).to.include("no AuxiliaryCommandsAggregator on bsctestnet");
     } finally {
       hre.FORKED_NETWORK = forked;
     }
@@ -207,11 +205,7 @@ describe("buildAggregatorCommands", () => {
 
   it("builds a remote chain in place of its first command and leaves other chains alone", async () => {
     const remote = setValue(5, { dstChainId: LzChainId.ethereum });
-    const { commands, batches } = await build([
-      setValue(1),
-      ...batch([remote, { ...remote, params: [6] }]),
-      setValue(2),
-    ]);
+    const { commands, batches } = await build([setValue(1), batch([remote, { ...remote, params: [6] }]), setValue(2)]);
 
     expect(commands.map(c => [c.target, c.signature, c.dstChainId])).to.deep.equal([
       [TARGET, SET, undefined],
@@ -224,8 +218,55 @@ describe("buildAggregatorCommands", () => {
     expect(batches[0].network).to.equal("ethereum");
   });
 
+  it("builds local commands and a remote payload in order from mixed commands and batches", async () => {
+    const remote = (value: number) => setValue(value, { dstChainId: LzChainId.ethereum });
+    const proposal = await makeProposal(
+      [remote(10), setValue(1), batch([setValue(2)]), batch([remote(20)]), setValue(3), remote(30)],
+      undefined,
+      ProposalType.REGULAR,
+    );
+
+    expect(proposal.targets.slice(0, 5)).to.deep.equal([
+      bscmainnet.ACCESS_CONTROL_MANAGER,
+      TARGET,
+      bscmainnet.AUXILIARY_COMMANDS_AGGREGATOR,
+      TARGET,
+      bscmainnet.ACCESS_CONTROL_MANAGER,
+    ]);
+    expect(proposal.signatures).to.deep.equal([
+      "grantRole(bytes32,address)",
+      SET,
+      "executeBatch(uint256)",
+      SET,
+      "revokeRole(bytes32,address)",
+      "execute(uint16,bytes,bytes,address)",
+    ]);
+    expect(proposal.params[1]).to.deep.equal([1]);
+    expect(proposal.params[3]).to.deep.equal([3]);
+    expect(proposal.params[5][0]).to.equal(LzChainId.ethereum);
+
+    const [targets, values, signatures, calldatas, type] = ethers.utils.defaultAbiCoder.decode(
+      ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+      proposal.params[5][1],
+    );
+    expect(targets).to.deep.equal([
+      ethereum.ACCESS_CONTROL_MANAGER,
+      TARGET,
+      ethereum.AUXILIARY_COMMANDS_AGGREGATOR,
+      TARGET,
+      ethereum.ACCESS_CONTROL_MANAGER,
+    ]);
+    expect(signatures).to.deep.equal(proposal.signatures.slice(0, 5));
+    expect(values.map(String)).to.deep.equal(["0", "0", "0", "0", "0"]);
+    expect(calldatas[1]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [10]));
+    expect(calldatas[2]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [ethers.constants.MaxUint256]));
+    expect(calldatas[3]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [30]));
+    expect(type).to.equal(ProposalType.REGULAR);
+    expect(proposal.aggregatorBatches?.map(b => b.network)).to.deep.equal(["bscmainnet", "ethereum"]);
+  });
+
   it("leaves every batch of an unread chain without an index, pinned or not", async () => {
-    const { batches } = await build([...batch([setValue(1)], { seededIndex: 1 }), ...batch([setValue(2)])]);
+    const { batches } = await build([batch([setValue(1)], { seededIndex: 1 }), batch([setValue(2)])]);
 
     expect(batches.map(b => [b.index, b.seeded])).to.deep.equal([
       [undefined, false],
@@ -244,7 +285,7 @@ describe("buildAggregatorCommands", () => {
     const forked = hre.FORKED_NETWORK;
     hre.FORKED_NETWORK = "bscmainnet";
     try {
-      expect(await rejection(makeProposal(batch([setValue(1)]), undefined, ProposalType.REGULAR))).to.include(
+      expect(await rejection(makeProposal([batch([setValue(1)])], undefined, ProposalType.REGULAR))).to.include(
         "reading getBatchCount() from the bscmainnet aggregator at 0x528A428748dfE73DFcc844176B401475D1831057 failed",
       );
     } finally {
@@ -271,7 +312,7 @@ describe("on a local aggregator", () => {
     batches.map(b => [b.index?.toNumber(), b.seeded]);
   // The calls a batch() stores, to seed them by hand.
   const callsOf = async (commands: Command[], options: BatchOptions = {}) =>
-    (await build(batch(commands, options))).batches[0].calls;
+    (await build([batch(commands, options)])).batches[0].calls;
   const seed = async (...batches: AggregatorCall[][]) => {
     for (const calls of batches) await aggregator["addBatch((address,string,bytes)[])"](calls);
   };
@@ -303,9 +344,9 @@ describe("on a local aggregator", () => {
   it("seeds every unpinned batch at a new index, even when identical calls are already seeded", async () => {
     await seed(await callsOf([setValue(1)]), await callsOf([setValue(7)]), await callsOf([setValue(8)]));
     const result = await build([
-      ...batch([setValue(1)]),
-      ...batch([setValue(2)], { expectedIndex: 4 }),
-      ...batch([setValue(1)]),
+      batch([setValue(1)]),
+      batch([setValue(2)], { expectedIndex: 4 }),
+      batch([setValue(1)]),
     ]);
 
     expect(indices(result)).to.deep.equal([
@@ -318,19 +359,34 @@ describe("on a local aggregator", () => {
     ).to.deep.equal([3, 4, 5]);
   });
 
+  it("assigns separate indices to each occurrence of the same batch object", async () => {
+    const entry = batch([setValue(1), setValue(2)]);
+    const result = await build([entry, entry]);
+
+    expect(indices(result)).to.deep.equal([
+      [0, false],
+      [1, false],
+    ]);
+    expect(result.batches.map(b => b.calls.map(c => c.signature))).to.deep.equal([
+      [GIVE, SET, SET, REVOKE],
+      [GIVE, SET, SET, REVOKE],
+    ]);
+    expect(
+      result.commands.filter(c => c.signature === "executeBatch(uint256)").map(c => c.params[0].toNumber()),
+    ).to.deep.equal([0, 1]);
+  });
+
   it("requires an expectedIndex to be the next free index unless its batch is already seeded there", async () => {
     await seed(await callsOf([setValue(7)]), await callsOf([setValue(2)]), await callsOf([setValue(8)]));
 
-    expect(
-      indices(await build([...batch([setValue(2)], { expectedIndex: 1 }), ...batch([setValue(3)])])),
-    ).to.deep.equal([
+    expect(indices(await build([batch([setValue(2)], { expectedIndex: 1 }), batch([setValue(3)])]))).to.deep.equal([
       [1, true],
       [3, false],
     ]);
-    expect(await rejection(build(batch([setValue(4)], { expectedIndex: 7 })))).to.include(
+    expect(await rejection(build([batch([setValue(4)], { expectedIndex: 7 })]))).to.include(
       "bscmainnet expectedIndex 7 is not the next free index 3",
     );
-    expect(await rejection(build(batch([setValue(4)], { expectedIndex: 1 })))).to.include(
+    expect(await rejection(build([batch([setValue(4)], { expectedIndex: 1 })]))).to.include(
       "bscmainnet batch 1 does not hold these calls",
     );
   });
@@ -338,11 +394,11 @@ describe("on a local aggregator", () => {
   it("pins a seededIndex batch, checking its calls against the seeded ones", async () => {
     const pinned = batch([setValue(1)], { seededIndex: 1 });
     await seed(await callsOf([setValue(7)]));
-    expect(await rejection(build(pinned))).to.include("bscmainnet batch 1 does not hold these calls");
+    expect(await rejection(build([pinned]))).to.include("bscmainnet batch 1 does not hold these calls");
 
     await seed(await callsOf([setValue(1)]));
-    expect(indices(await build(pinned))).to.deep.equal([[1, true]]);
-    expect(await rejection(build(batch([setValue(2)], { seededIndex: 1 })))).to.include(
+    expect(indices(await build([pinned]))).to.deep.equal([[1, true]]);
+    expect(await rejection(build([batch([setValue(2)], { seededIndex: 1 })]))).to.include(
       "bscmainnet batch 1 does not hold these calls",
     );
   });
@@ -352,19 +408,16 @@ describe("on a local aggregator", () => {
 
     expect(
       indices(
-        await build([
-          ...batch([setValue(1)], { seededIndex: 0 }),
-          ...batch([setValue(1)], { raw: true, seededIndex: 1 }),
-        ]),
+        await build([batch([setValue(1)], { seededIndex: 0 }), batch([setValue(1)], { raw: true, seededIndex: 1 })]),
       ),
     ).to.deep.equal([
       [0, true],
       [1, true],
     ]);
-    expect(await rejection(build(batch([setValue(1)], { seededIndex: 1 })))).to.include(
+    expect(await rejection(build([batch([setValue(1)], { seededIndex: 1 })]))).to.include(
       "bscmainnet batch 1 does not hold these calls; check its index, keep raw: true when pinning a raw batch",
     );
-    expect(await rejection(build(batch([setValue(1)], { raw: true, seededIndex: 0 })))).to.include(
+    expect(await rejection(build([batch([setValue(1)], { raw: true, seededIndex: 0 })]))).to.include(
       "bscmainnet batch 0 does not hold these calls",
     );
   });
@@ -374,13 +427,13 @@ describe("on a local aggregator", () => {
     await aggregator.executeBatch(1);
 
     for (const options of [{ seededIndex: 1 }, { expectedIndex: 1 }]) {
-      expect(await rejection(build(batch([setValue(1)], options)))).to.include("bscmainnet batch 1 already ran");
+      expect(await rejection(build([batch([setValue(1)], options)]))).to.include("bscmainnet batch 1 already ran");
     }
   });
 
   it("rejects two batches pinned to one index", async () => {
     await seed(await callsOf([setValue(7)]), await callsOf([setValue(1)]));
-    const twice = [...batch([setValue(1)], { seededIndex: 1 }), ...batch([setValue(1)], { seededIndex: 1 })];
+    const twice = [batch([setValue(1)], { seededIndex: 1 }), batch([setValue(1)], { seededIndex: 1 })];
 
     expect(await rejection(build(twice))).to.include("bscmainnet has two batches at one index");
   });
@@ -401,7 +454,7 @@ describe("on a local aggregator", () => {
       );
     const propose = (signed: BatchOptions = {}, raw: BatchOptions = {}) =>
       makeProposal(
-        [...authorize(ACCOUNT, signed), ...authorize(RAW_BATCHER, { ...raw, raw: true })],
+        [authorize(ACCOUNT, signed), authorize(RAW_BATCHER, { ...raw, raw: true })],
         undefined,
         ProposalType.REGULAR,
       );

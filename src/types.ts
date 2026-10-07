@@ -80,8 +80,13 @@ export interface Command {
   gasLimitMultiplicationFactor?: number;
   // function string the aggregator is granted for this command when the target's ACM check differs from `signature`
   aclSignature?: string;
-  // set by batch(): one shared object per batch() call, whose identity marks the commands of that batch
-  batchGroup?: BatchOptions;
+}
+
+// One proposal entry whose commands execute together through the aggregator.
+export interface Batch {
+  kind: "batch";
+  commands: Command[];
+  options: BatchOptions;
 }
 
 export interface BatchOptions {
