@@ -468,18 +468,19 @@ describe("on a local aggregator", () => {
     ]);
   });
 
-  it("restores the timelock balance when explicit seeding fails", async () => {
+  it("keeps the batches seeded before a failure marked and restores the timelock balance", async () => {
     const balanceBefore = await ethers.provider.getBalance(bscmainnet.NORMAL_TIMELOCK);
     const proposal = await makeProposal(
-      [batch([setValue(1, { target: ACCOUNT })])], // ACCOUNT has no code, so addBatch rejects it.
+      // ACCOUNT has no code, so addBatch rejects the second batch.
+      [batch([setValue(1)]), batch([setValue(1, { target: ACCOUNT })])],
       undefined,
       ProposalType.REGULAR,
     );
 
     expect(await rejection(seedProposalBatchesOnFork(proposal))).to.not.equal("");
     expect(await ethers.provider.getBalance(bscmainnet.NORMAL_TIMELOCK)).to.equal(balanceBefore);
-    expect(await aggregator.getBatchCount()).to.equal(0);
-    expect(proposal.aggregatorBatches?.[0].seeded).to.equal(false);
+    expect(await aggregator.getBatchCount()).to.equal(1);
+    expect(proposal.aggregatorBatches?.map(b => b.seeded)).to.deep.equal([true, false]);
   });
 
   it("allows testVip automatic seeding to be disabled", async () => {

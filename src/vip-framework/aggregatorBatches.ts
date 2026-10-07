@@ -29,7 +29,6 @@ export const seedProposalBatchesOnFork = async (proposal: Proposal) => {
   try {
     const cap = await resolvePerTxGasCap(FORKED_NETWORK);
     await seedBatches(batcher, pending, Number.isFinite(cap) ? { gasLimit: cap } : {});
-    for (const batch of pending) batch.seeded = true;
   } finally {
     await initMainnetUser(timelock, balance);
   }

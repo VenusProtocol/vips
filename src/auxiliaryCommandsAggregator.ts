@@ -80,7 +80,8 @@ export const buildAggregatorCommands = async (
   const aggregatorCommands = entries.flatMap(entry => {
     const chainId = chainIdOf(entry);
     const chainCommands = commandsByChain.get(chainId);
-    if (!chainCommands) return isBatch(entry) ? [] : [entry];
+    // Every batch's chain is in commandsByChain, so an entry on any other chain is a plain command.
+    if (!chainCommands) return [entry as Command];
     if (placed.has(chainId)) return [];
     placed.add(chainId);
     return chainCommands;
@@ -270,12 +271,15 @@ const readOnChainBatches = async (
   };
 };
 
-// `batches` must all be on the batcher's chain and have their index, which both callers guarantee.
+// `batches` must all be on the batcher's chain and have their index, which both callers guarantee. Each batch is
+// marked seeded once its transaction lands, so a failure partway leaves the earlier ones marked.
 export const seedBatches = async (batcher: Signer, batches: AggregatorBatch[], overrides: Overrides = {}) => {
-  for (const { network: chain, aggregator, index, calls } of batches) {
+  for (const batch of batches) {
+    const { network: chain, aggregator, index, calls } = batch;
     const contract = new Contract(aggregator, AGGREGATOR_ABI, batcher);
     const tx = await contract["addBatch((address,string,bytes)[],uint256)"](calls, index, overrides);
     const receipt = await tx.wait();
+    batch.seeded = true;
     console.log(
       `[batch] ${chain}: seeded batch ${index} (${calls.length} calls, ${receipt.gasUsed} gas) in ${receipt.transactionHash}`,
     );
