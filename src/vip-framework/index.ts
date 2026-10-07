@@ -25,7 +25,14 @@ import {
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
-import { expectForkedBatchesRan, explainBatchFailure, forkedBatches } from "./aggregatorBatches";
+import {
+  expectForkedBatchesRan,
+  explainBatchFailure,
+  forkedBatches,
+  seedProposalBatchesOnFork,
+} from "./aggregatorBatches";
+
+export { seedProposalBatchesOnFork };
 
 // XVS Vault stakes erode over time and governance has raised the bar (1,000,000 XVS proposal
 // threshold, 1,500,000 XVS quorum as of block ~111,098,000), so a single default supporter no
@@ -83,6 +90,8 @@ export const forking = (blockNumber: number, fn: () => Promise<void>) => {
 };
 
 export interface TestingOptions {
+  // Defaults to seeding when the proposal has unseeded batches on this fork. Set false for manual setup.
+  seedProposalBatches?: boolean;
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
@@ -348,6 +357,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   let supporters: SignerWithAddress[];
 
   const governanceFixture = async (): Promise<void> => {
+    // loadFixture snapshots the seeded batches so command tests and full execution can each run them once.
+    if (options.seedProposalBatches !== false) await seedProposalBatchesOnFork(proposal);
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
       [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
@@ -506,6 +517,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
 
   describe(`${description} execution`, () => {
     before(async () => {
+      if (options.seedProposalBatches !== false) await seedProposalBatchesOnFork(proposal);
       executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();

@@ -2,11 +2,13 @@ import { SnapshotRestorer, setCode, takeSnapshot } from "@nomicfoundation/hardha
 import { expect } from "chai";
 import { Contract } from "ethers";
 import hre, { ethers } from "hardhat";
+import sinon from "sinon";
 import { batch, buildAggregatorCommands } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { AggregatorCall, Batch, BatchOptions, Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 import AGGREGATOR_ABI from "src/vip-framework/abi/AuxiliaryCommandsAggregator.json";
+import { seedProposalBatchesOnFork } from "src/vip-framework/aggregatorBatches";
 
 import AGGREGATOR_FIXTURE from "./fixtures/AuxiliaryCommandsAggregator.json";
 
@@ -43,6 +45,21 @@ const rejection = async (promise: Promise<unknown>) => {
 };
 
 const build = (entries: (Command | Batch)[]) => buildAggregatorCommands(entries, ProposalType.REGULAR);
+
+// Capture a test runner's setup hooks so we can exercise its fixture on the local aggregator without running
+// the governor lifecycle, which requires a fork.
+const captureSetupHooks = (register: () => void): (() => Promise<void>)[] => {
+  const sandbox = sinon.createSandbox();
+  try {
+    sandbox.stub(global, "describe").callsArg(1);
+    sandbox.stub(global, "it");
+    const setup = sandbox.stub(global, "before");
+    register();
+    return setup.getCalls().map(call => call.args[0] as unknown as () => Promise<void>);
+  } finally {
+    sandbox.restore();
+  }
+};
 
 // Without a fork no chain is read, so every batch comes out without an index.
 describe("buildAggregatorCommands", () => {
@@ -438,7 +455,82 @@ describe("on a local aggregator", () => {
     expect(await rejection(build(twice))).to.include("bscmainnet has two batches at one index");
   });
 
-  it("seeds a signature batch and a raw batch through makeProposal, resolves pins to them, and runs each once", async () => {
+  it("seeds only the current fork's batches, leaving unread chains alone", async () => {
+    const { batches } = await build([batch([setValue(1)]), batch([setValue(2, { dstChainId: LzChainId.ethereum })])]);
+    const proposal = { ...(await makeProposal([])), aggregatorBatches: batches };
+
+    await seedProposalBatchesOnFork(proposal);
+
+    expect(await aggregator.getBatchCount()).to.equal(1);
+    expect(batches.map(b => [b.network, b.seeded])).to.deep.equal([
+      ["bscmainnet", true],
+      ["ethereum", false],
+    ]);
+  });
+
+  it("restores the timelock balance when explicit seeding fails", async () => {
+    const balanceBefore = await ethers.provider.getBalance(bscmainnet.NORMAL_TIMELOCK);
+    const proposal = await makeProposal(
+      [batch([setValue(1, { target: ACCOUNT })])], // ACCOUNT has no code, so addBatch rejects it.
+      undefined,
+      ProposalType.REGULAR,
+    );
+
+    expect(await rejection(seedProposalBatchesOnFork(proposal))).to.not.equal("");
+    expect(await ethers.provider.getBalance(bscmainnet.NORMAL_TIMELOCK)).to.equal(balanceBefore);
+    expect(await aggregator.getBatchCount()).to.equal(0);
+    expect(proposal.aggregatorBatches?.[0].seeded).to.equal(false);
+  });
+
+  it("allows testVip automatic seeding to be disabled", async () => {
+    // Import after selecting the fork; the framework reads network addresses at module load.
+    const { testVip } = await import("src/vip-framework");
+    const proposal = await makeProposal([batch([setValue(1)])], undefined, ProposalType.REGULAR);
+    const [setup] = captureSetupHooks(() =>
+      testVip("batch", proposal, { proposer: ACCOUNT, supporters: [], seedProposalBatches: false }),
+    );
+
+    await setup();
+
+    expect(await aggregator.getBatchCount()).to.equal(0);
+    expect(proposal.aggregatorBatches?.[0].seeded).to.equal(false);
+  });
+
+  it("automatically seeds from proposal metadata so both execution paths can run the same batch once", async () => {
+    const { testVip } = await import("src/vip-framework");
+    const proposal = await makeProposal([batch([setValue(1)])], undefined, ProposalType.REGULAR);
+    const [commandSetup, executionSetup] = captureSetupHooks(() =>
+      testVip("batch", proposal, { proposer: ACCOUNT, supporters: [] }),
+    );
+    expect(await aggregator.getBatchCount()).to.equal(0);
+
+    await commandSetup();
+    expect(await aggregator.getBatchCount()).to.equal(1);
+    expect(proposal.aggregatorBatches?.[0].seeded).to.equal(true);
+    await aggregator.executeBatch(0);
+    expect(await aggregator.batchExecuted(0)).to.equal(true);
+
+    await executionSetup();
+    expect(await aggregator.getBatchCount()).to.equal(1);
+    expect(await aggregator.batchExecuted(0)).to.equal(false);
+    await aggregator.executeBatch(0);
+    expect(await aggregator.batchExecuted(0)).to.equal(true);
+  });
+
+  it("does not seed again when manual preparation happens before testVip setup", async () => {
+    const { testVip } = await import("src/vip-framework");
+    const proposal = await makeProposal([batch([setValue(1)])], undefined, ProposalType.REGULAR);
+    const [setup] = captureSetupHooks(() => testVip("batch", proposal, { proposer: ACCOUNT, supporters: [] }));
+
+    await seedProposalBatchesOnFork(proposal);
+    const blockAfterSeeding = await ethers.provider.getBlockNumber();
+    await setup();
+
+    expect(await aggregator.getBatchCount()).to.equal(1);
+    expect(await ethers.provider.getBlockNumber()).to.equal(blockAfterSeeding);
+  });
+
+  it("builds without seeding, seeds explicitly, resolves pins, and runs signature and raw batches once", async () => {
     const RAW_BATCHER = "0x3333333333333333333333333333333333333333";
     // Each batch makes the aggregator authorize one more batcher on itself, which shows the batch ran as seeded.
     const authorize = (batcher: string, options: BatchOptions) =>
@@ -459,7 +551,19 @@ describe("on a local aggregator", () => {
         ProposalType.REGULAR,
       );
 
-    const { aggregatorBatches = [] } = await propose();
+    const balanceBefore = await ethers.provider.getBalance(bscmainnet.NORMAL_TIMELOCK);
+    const blockBefore = await ethers.provider.getBlockNumber();
+    const proposal = await propose();
+    const { aggregatorBatches = [] } = proposal;
+    expect(aggregatorBatches.map(b => [b.index?.toNumber(), b.seeded])).to.deep.equal([
+      [0, false],
+      [1, false],
+    ]);
+    expect((await propose()).params).to.deep.equal(proposal.params);
+    expect(await aggregator.getBatchCount()).to.equal(0);
+    expect(await ethers.provider.getBlockNumber()).to.equal(blockBefore);
+
+    await seedProposalBatchesOnFork(proposal);
     expect(aggregatorBatches.map(b => [b.index?.toNumber(), b.seeded])).to.deep.equal([
       [0, true],
       [1, true],
@@ -480,7 +584,10 @@ describe("on a local aggregator", () => {
       [0, true],
       [1, true],
     ]);
+    await seedProposalBatchesOnFork(proposal);
+    await seedProposalBatchesOnFork(pinned);
     expect(await aggregator.getBatchCount()).to.equal(2);
+    expect(await ethers.provider.getBalance(bscmainnet.NORMAL_TIMELOCK)).to.equal(balanceBefore);
 
     for (const index of [0, 1]) await aggregator.executeBatch(index);
     expect(await aggregator.authorizedBatchers(ACCOUNT)).to.equal(true);

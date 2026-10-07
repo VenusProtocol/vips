@@ -8,11 +8,10 @@ import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { buildAggregatorCommands, isBatch, isSimulation, seedBatches } from "./auxiliaryCommandsAggregator";
+import { buildAggregatorCommands, isBatch } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
-  AggregatorBatch,
   Batch,
   Command,
   LzChainId,
@@ -251,20 +250,6 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   return fee;
 };
 
-// In a sim, seeds the forked chain's not yet seeded batches as the Normal Timelock, an authorized batcher on every
-// aggregator, then restores its balance. Seeding moves the fork's batch count, so a later build takes later indices.
-const seedForkedBatches = async (batches: AggregatorBatch[]) => {
-  const pending = batches.filter(batch => batch.network === FORKED_NETWORK && !batch.seeded);
-  if (!isSimulation() || pending.length === 0) return;
-  const timelock = NETWORK_ADDRESSES[FORKED_NETWORK as "bscmainnet"].NORMAL_TIMELOCK;
-  const balance = await ethers.provider.getBalance(timelock);
-  const batcher = await initMainnetUser(timelock, balance.add(parseUnits("10", 18)));
-  const cap = await resolvePerTxGasCap(FORKED_NETWORK);
-  await seedBatches(batcher, pending, Number.isFinite(cap) ? { gasLimit: cap } : {});
-  await initMainnetUser(timelock, balance);
-  for (const batch of pending) batch.seeded = true;
-};
-
 export const makeProposal = async (
   entries: (Command | Batch)[],
   meta?: ProposalMeta,
@@ -285,7 +270,6 @@ export const makeProposal = async (
     commands = entries;
   } else {
     const { commands: aggregatorCommands, batches } = await buildAggregatorCommands(entries, type);
-    await seedForkedBatches(batches);
     commands = aggregatorCommands;
     proposal.aggregatorBatches = batches;
   }

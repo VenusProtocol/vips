@@ -3,13 +3,37 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
+import { isSimulation, seedBatches } from "../auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { Proposal } from "../types";
-import { initMainnetUser } from "../utils";
+import { initMainnetUser, resolvePerTxGasCap } from "../utils";
 import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
 
 export const forkedBatches = (proposal: Proposal) =>
   (proposal.aggregatorBatches ?? []).filter(batch => batch.network === FORKED_NETWORK);
+
+// Seeds only the current fork's unseeded batches. Test runners call this automatically during setup unless
+// seedProposalBatches is false. It is also available for manual setup. Building a proposal never seeds batches.
+export const seedProposalBatchesOnFork = async (proposal: Proposal) => {
+  const pending = forkedBatches(proposal).filter(batch => !batch.seeded);
+  if (pending.length === 0) return;
+  if (!isSimulation() || !FORKED_NETWORK) {
+    throw new Error("batch: seedProposalBatchesOnFork requires a local simulation with a forked network");
+  }
+  if (pending.some(batch => batch.index === undefined)) {
+    throw new Error("batch: build the proposal against the current fork before seeding its batches");
+  }
+  const timelock = NETWORK_ADDRESSES[FORKED_NETWORK as "bscmainnet"].NORMAL_TIMELOCK;
+  const balance = await ethers.provider.getBalance(timelock);
+  const batcher = await initMainnetUser(timelock, balance.add(ethers.utils.parseEther("10")));
+  try {
+    const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+    await seedBatches(batcher, pending, Number.isFinite(cap) ? { gasLimit: cap } : {});
+    for (const batch of pending) batch.seeded = true;
+  } finally {
+    await initMainnetUser(timelock, balance);
+  }
+};
 
 export const expectForkedBatchesRan = async (proposal: Proposal, receipt: TransactionReceipt) => {
   const batches = forkedBatches(proposal);
