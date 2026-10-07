@@ -93,13 +93,16 @@ const buildChainCommandsWithBatches = async (entries: (Command | Batch)[], chain
     params,
     dstChainId,
   });
-  // Each batch() becomes executeBatch(index); every other command stays as written.
+  // Each batch() becomes executeBatch(index); every other command stays as written, minus a home-chain dstChainId.
+  const local = ({ dstChainId: _home, ...rest }: Command): Command => rest;
   let nextBatch = 0;
   const chainCommands = chainEntries.map(entry =>
     isBatch(entry)
       ? // Unread chain: MaxUint256 is never a seeded index, so it reverts BatchNotFound, not a wrong batch.
         command(aggregator, "executeBatch(uint256)", [batches[nextBatch++].index ?? constants.MaxUint256])
-      : entry,
+      : dstChainId
+      ? entry
+      : local(entry),
   );
   // bytes32(0) is DEFAULT_ADMIN_ROLE; the aggregator holds it while the chain's commands run.
   const grant = command(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]);

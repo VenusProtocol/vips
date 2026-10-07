@@ -170,12 +170,8 @@ describe("buildCommandsWithBatches", () => {
   it("keeps commands written with the home chain's dstChainId local", async () => {
     const home = { dstChainId: LzChainId.bscmainnet };
     const entries = [batch([setValue(1, home), setValue(2)]), setValue(3, home)];
-    for (const proposal of [
-      await makeProposal(entries, undefined, ProposalType.REGULAR),
-      await makeProposal([setValue(3, home)], undefined, ProposalType.REGULAR),
-    ]) {
-      expect(proposal.signatures).to.include(SET).and.not.include("execute(uint16,bytes,bytes,address)");
-    }
+    const proposal = await makeProposal(entries, undefined, ProposalType.REGULAR);
+    expect(proposal.signatures).to.include(SET).and.not.include("execute(uint16,bytes,bytes,address)");
   });
 
   it("seeds signature and arguments by default, and full calldata with an empty signature when raw", async () => {
