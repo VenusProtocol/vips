@@ -131,6 +131,7 @@ describe("buildCommandsWithBatches", () => {
       batch([setValue(2), setValue(3)]),
       accept,
       batch([setValue(4), accept]),
+      plain,
     ]);
 
     expect(commands.map(c => c.signature)).to.deep.equal([
@@ -139,9 +140,10 @@ describe("buildCommandsWithBatches", () => {
       "executeBatch(uint256)",
       "acceptOwnership()",
       "executeBatch(uint256)",
+      SET,
       "revokeRole(bytes32,address)",
     ]);
-    expect([commands[1], commands[3]]).to.deep.equal([plain, accept]);
+    expect([commands[1], commands[3], commands[5]]).to.deep.equal([plain, accept, plain]);
     expect(batches.map(b => b.calls.map(c => c.signature))).to.deep.equal([
       [GIVE, SET, SET, REVOKE],
       [GIVE, GIVE, SET, "acceptOwnership()", REVOKE, REVOKE],
@@ -160,11 +162,20 @@ describe("buildCommandsWithBatches", () => {
     expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.ethereum })])).to.throw(
       "batch: a batch() must hold one chain's commands",
     );
-    expect(() => batch([setValue(1), setValue(2, { dstChainId: LzChainId.bscmainnet })])).to.not.throw();
-
     expect(await rejection(build([batch([setValue(1, { value: "1" })])]))).to.include(
       `batch: ${SET} on ${TARGET} sends value and can't be batched`,
     );
+  });
+
+  it("keeps commands written with the home chain's dstChainId local", async () => {
+    const home = { dstChainId: LzChainId.bscmainnet };
+    const entries = [batch([setValue(1, home), setValue(2)]), setValue(3, home)];
+    for (const proposal of [
+      await makeProposal(entries, undefined, ProposalType.REGULAR),
+      await makeProposal([setValue(3, home)], undefined, ProposalType.REGULAR),
+    ]) {
+      expect(proposal.signatures).to.include(SET).and.not.include("execute(uint16,bytes,bytes,address)");
+    }
   });
 
   it("seeds signature and arguments by default, and full calldata with an empty signature when raw", async () => {

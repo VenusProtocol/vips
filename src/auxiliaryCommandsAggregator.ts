@@ -16,20 +16,6 @@ import {
 } from "./types";
 import AGGREGATOR_ABI from "./vip-framework/abi/AuxiliaryCommandsAggregator.json";
 
-// What an aggregator already holds on chain.
-interface OnChainBatches {
-  count: BigNumber;
-  callsAt: (index: BigNumber) => Promise<AggregatorCall[]>;
-  executed: (index: BigNumber) => Promise<boolean>;
-}
-
-// One batch() encoded for its aggregator, before the chain is read for its index.
-interface EncodedBatch {
-  options: BatchOptions;
-  calls: AggregatorCall[];
-  permissions: CallPermission[];
-}
-
 export const isBatch = (entry: Command | Batch): entry is Batch => "kind" in entry && entry.kind === "batch";
 
 // Groups commands into one proposal entry. Batched calls run as the aggregator, so calls that must
@@ -93,13 +79,11 @@ const buildChainCommandsWithBatches = async (entries: (Command | Batch)[], chain
   const chainEntries = entries.filter(entry => chainIdOf(entry) === chainId);
   const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
   const { aggregator, acm } = aggregatorAddresses(chain);
-  const encoded = chainEntries.filter(isBatch).map(batched => encodeBatch(batched, aggregator, acm));
-
-  const onChain = await readOnChainBatches(chain, aggregator);
+  const batched = chainEntries.filter(isBatch);
   // `batches` keeps entry order, so the nth batch entry runs batches[n].
-  const batches = onChain
-    ? await assignIndices(encoded, onChain, chain, aggregator)
-    : encoded.map(encodedBatch => toAggregatorBatch(encodedBatch, chain, aggregator));
+  const batches = batched.map(entry => encodeBatch(entry, chain, aggregator, acm));
+  const onChainBatches = await readOnChainBatches(chain, aggregator);
+  if (onChainBatches) await assignIndices(batches, batched, onChainBatches, chain);
 
   // BNB Chain commands stay local; every other chain keeps its dstChainId.
   const dstChainId = chainId === bscChainId() ? undefined : chainId;
@@ -109,23 +93,18 @@ const buildChainCommandsWithBatches = async (entries: (Command | Batch)[], chain
     params,
     dstChainId,
   });
+  // Each batch() becomes executeBatch(index); every other command stays as written.
   let nextBatch = 0;
-  return {
-    batches,
-    commands: [
-      // bytes32(0) is DEFAULT_ADMIN_ROLE
-      command(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]),
-      ...chainEntries.map(entry =>
-        isBatch(entry)
-          ? command(aggregator, "executeBatch(uint256)", [
-              // An unread chain has no index: MaxUint256 reverts BatchNotFound if this proposal ever runs.
-              batches[nextBatch++].index ?? constants.MaxUint256,
-            ])
-          : entry,
-      ),
-      command(acm, "revokeRole(bytes32,address)", [constants.HashZero, aggregator]),
-    ],
-  };
+  const chainCommands = chainEntries.map(entry =>
+    isBatch(entry)
+      ? // Unread chain: MaxUint256 is never a seeded index, so it reverts BatchNotFound, not a wrong batch.
+        command(aggregator, "executeBatch(uint256)", [batches[nextBatch++].index ?? constants.MaxUint256])
+      : entry,
+  );
+  // bytes32(0) is DEFAULT_ADMIN_ROLE; the aggregator holds it while the chain's commands run.
+  const grant = command(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]);
+  const revoke = command(acm, "revokeRole(bytes32,address)", [constants.HashZero, aggregator]);
+  return { batches, commands: [grant, ...chainCommands, revoke] };
 };
 
 const aggregatorAddresses = (chain: SUPPORTED_NETWORKS) => {
@@ -140,8 +119,13 @@ const aggregatorAddresses = (chain: SUPPORTED_NETWORKS) => {
 
 // Encodes one batch() as its aggregator stores it: a giveCallPermission for each distinct permission the calls need,
 // the calls, then the matching revokeCallPermission calls. Calls on the ACM need no grant, since the aggregator holds
-// DEFAULT_ADMIN_ROLE while its batches run.
-const encodeBatch = ({ commands, options }: Batch, aggregator: string, acm: string): EncodedBatch => {
+// DEFAULT_ADMIN_ROLE while its batches run. The index and seeded flag are set once the chain is read.
+const encodeBatch = (
+  { commands, options }: Batch,
+  network: SUPPORTED_NETWORKS,
+  aggregator: string,
+  acm: string,
+): AggregatorBatch => {
   const commandCalls = commands.map(cmd => {
     // A seeded call carries no value, so the aggregator could not forward it.
     if (BigNumber.from(cmd.value ?? 0).gt(0)) {
@@ -164,7 +148,14 @@ const encodeBatch = ({ commands, options }: Batch, aggregator: string, acm: stri
     ...commandCalls,
     ...permissions.map(permission => acmCall("revokeCallPermission(address,string,address)", permission)),
   ];
-  return { options, permissions, calls: options.raw ? calls.map(toRawCall) : calls };
+  return {
+    network,
+    aggregator,
+    index: undefined,
+    seeded: false,
+    permissions,
+    calls: options.raw ? calls.map(toRawCall) : calls,
+  };
 };
 
 // A call as the aggregator stores it by default: the signature, and the ABI-encoded arguments as data.
@@ -178,35 +169,34 @@ const encodeCall = (target: string, signature: string, params: unknown[]): Aggre
 };
 
 // A raw call carries its selector in the data and an empty signature, as in the Timelock.
-const toRawCall = ({ target, signature, data }: AggregatorCall): AggregatorCall => ({
+export const toRawCall = ({ target, signature, data }: AggregatorCall): AggregatorCall => ({
   target,
   signature: "",
   data: utils.id(signature).slice(0, 10) + data.slice(2),
 });
 
-// Gives every encoded batch its index on the chain. A seededIndex batch must already be seeded with these calls. An
+// Gives every batch its index on the chain. A seededIndex batch must already be seeded with these calls. An
 // expectedIndex batch is either seeded there or next in line. Any other batch takes the next free index, so no seeded
 // batch is reused, since the aggregator runs each batch only once. No two batches may share an index.
 const assignIndices = async (
-  encoded: EncodedBatch[],
-  onChain: OnChainBatches,
+  batches: AggregatorBatch[],
+  batched: Batch[],
+  { contract, count }: { contract: Contract; count: BigNumber },
   chain: SUPPORTED_NETWORKS,
-  aggregator: string,
-): Promise<AggregatorBatch[]> => {
-  let nextFree = onChain.count;
-  const batches: AggregatorBatch[] = [];
-  for (const encodedBatch of encoded) {
-    const { expectedIndex, seededIndex } = encodedBatch.options;
+) => {
+  let nextFree = count;
+  for (const [i, batch] of batches.entries()) {
+    const { expectedIndex, seededIndex } = batched[i].options;
     const index = BigNumber.from(seededIndex ?? expectedIndex ?? nextFree);
-    const seeded = index.lt(onChain.count) && sameCalls(await onChain.callsAt(index), encodedBatch.calls);
+    const seeded = index.lt(count) && sameCalls(await contract.getBatch(index), batch.calls);
     if (seeded) {
-      if (await onChain.executed(index)) {
+      if (await contract.batchExecuted(index)) {
         throw new Error(
           `batch: ${chain} batch ${index} already ran, and a batch runs only once; if this VIP already executed, ` +
             "build it at a block before its execution, and only drop the index to seed the calls again for a new proposal",
         );
       }
-    } else if (seededIndex !== undefined || index.lt(onChain.count)) {
+    } else if (seededIndex !== undefined || index.lt(count)) {
       throw new Error(
         `batch: ${chain} batch ${index} does not hold these calls; check its index, keep raw: true when pinning a ` +
           "raw batch, or fork after it was seeded",
@@ -217,13 +207,12 @@ const assignIndices = async (
     } else {
       nextFree = nextFree.add(1);
     }
-    batches.push(toAggregatorBatch(encodedBatch, chain, aggregator, index, seeded));
+    Object.assign(batch, { index, seeded });
   }
   const indices = batches.map(({ index }) => String(index));
   if (new Set(indices).size < indices.length) {
     throw new Error(`batch: ${chain} has two batches at one index; check their expectedIndex and seededIndex`);
   }
-  return batches;
 };
 
 // Nodes return addresses and hex data in mixed case, so both sides are lowercased before comparing.
@@ -233,21 +222,10 @@ const sameCalls = (a: AggregatorCall[], b: AggregatorCall[]) => {
   return key(a) === key(b);
 };
 
-const toAggregatorBatch = (
-  { calls, permissions }: EncodedBatch,
-  chain: SUPPORTED_NETWORKS,
-  aggregator: string,
-  index?: BigNumber,
-  seeded = false,
-): AggregatorBatch => ({ network: chain, aggregator, index, seeded, calls, permissions });
-
-// Reads what the chain's aggregator holds, or returns undefined when the chain is not read in this context. Sims read
-// only the forked chain: every other chain resolves its batches in its own simulation. Live builds read every chain
-// over its archive node.
-const readOnChainBatches = async (
-  chain: SUPPORTED_NETWORKS,
-  aggregator: string,
-): Promise<OnChainBatches | undefined> => {
+// Reads the chain's aggregator and its batch count, or returns undefined when the chain is not read in this context.
+// Sims read only the forked chain: every other chain resolves its batches in its own simulation. Live builds read every
+// chain over its archive node.
+const readOnChainBatches = async (chain: SUPPORTED_NETWORKS, aggregator: string) => {
   const simulation = isSimulation();
   if (simulation && chain !== FORKED_NETWORK) return undefined;
   const url = process.env[`ARCHIVE_NODE_${chain}`];
@@ -257,18 +235,15 @@ const readOnChainBatches = async (
     AGGREGATOR_ABI,
     simulation ? ethers.provider : new providers.JsonRpcProvider(url),
   );
-  return {
-    // ethers reports any failed eth_call as CALL_EXCEPTION, node errors included, so the original message is kept.
-    count: await contract.getBatchCount().catch((error: { code?: string; message?: string }) => {
-      if (error.code !== "CALL_EXCEPTION") throw error;
-      throw new Error(
-        `batch: reading getBatchCount() from the ${chain} aggregator at ${aggregator} failed; batch() needs an ` +
-          `aggregator with getBatchCount(), and a failing node gives the same error: ${error.message}`,
-      );
-    }),
-    callsAt: index => contract.getBatch(index),
-    executed: index => contract.batchExecuted(index),
-  };
+  // ethers reports any failed eth_call as CALL_EXCEPTION, node errors included, so the original message is kept.
+  const count: BigNumber = await contract.getBatchCount().catch((error: { code?: string; message?: string }) => {
+    if (error.code !== "CALL_EXCEPTION") throw error;
+    throw new Error(
+      `batch: reading getBatchCount() from the ${chain} aggregator at ${aggregator} failed; batch() needs an ` +
+        `aggregator with getBatchCount(), and a failing node gives the same error: ${error.message}`,
+    );
+  });
+  return { contract, count };
 };
 
 // `batches` must all be on the batcher's chain and have their index, which both callers guarantee. Each batch is
@@ -287,7 +262,7 @@ export const seedBatches = async (batcher: Signer, batches: AggregatorBatch[], o
 };
 
 // Commands without a dstChainId run on BNB Chain, or on its testnet when the proposal is built for testnets.
-const bscChainId = () =>
+export const bscChainId = () =>
   FORKED_NETWORK === "bsctestnet" || REMOTE_TESTNET_NETWORKS.includes(FORKED_NETWORK as string)
     ? LzChainId.bsctestnet
     : LzChainId.bscmainnet;

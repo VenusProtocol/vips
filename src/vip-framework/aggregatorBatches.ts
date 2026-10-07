@@ -3,7 +3,7 @@ import { takeSnapshot } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
-import { isSimulation, seedBatches } from "../auxiliaryCommandsAggregator";
+import { isSimulation, seedBatches, toRawCall } from "../auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { Proposal } from "../types";
 import { initMainnetUser, resolvePerTxGasCap } from "../utils";
@@ -79,8 +79,9 @@ export const explainBatchFailure = async (proposal: Proposal, commandIdx: number
   const snapshot = await takeSnapshot();
   const aggregator = await initMainnetUser(batch.aggregator, ethers.utils.parseEther("1"));
   try {
-    for (const [i, { target, signature, data }] of batch.calls.entries()) {
-      const calldata = signature ? ethers.utils.id(signature).slice(0, 10) + data.slice(2) : data;
+    for (const [i, call] of batch.calls.entries()) {
+      const { target, signature } = call;
+      const { data: calldata } = signature ? toRawCall(call) : call;
       await aggregator.sendTransaction({ to: target, data: calldata }).catch((failure: { reason?: string }) => {
         const reason = failure.reason ?? failure;
         const name = signature || calldata.slice(0, 10);
