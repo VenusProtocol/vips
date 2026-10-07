@@ -85,6 +85,8 @@ export const forking = (blockNumber: number, fn: () => Promise<void>) => {
       run();
     } catch (e) {
       console.error(e);
+      // Mocha never runs, so without this a failed setup exits 0.
+      process.exitCode = 1;
     }
   })();
 };
