@@ -22,9 +22,6 @@ interface OnChainBatches {
   executed: (index: BigNumber) => Promise<boolean>;
 }
 
-// Reads an aggregator's on-chain batches, or returns undefined when its chain is not read in this context.
-export type ReadBatches = (chain: SUPPORTED_NETWORKS, aggregator: string) => Promise<OnChainBatches | undefined>;
-
 // One batch() encoded for its aggregator, before the chain is read for its index.
 interface EncodedBatch {
   options: BatchOptions;
@@ -64,7 +61,6 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Command[
 export const buildAggregatorCommands = async (
   commands: Command[],
   type: ProposalType | undefined,
-  readBatches: ReadBatches = readOnChainBatches,
 ): Promise<{ commands: Command[]; batches: AggregatorBatch[] }> => {
   // Only the Normal Timelock holds the ACM DEFAULT_ADMIN_ROLE that each chain lends its aggregator.
   if (type !== ProposalType.REGULAR) throw new Error("batch: only ProposalType.REGULAR proposals are supported");
@@ -76,7 +72,6 @@ export const buildAggregatorCommands = async (
     const chain = await buildChainAggregatorCommands(
       commands.filter(cmd => chainIdOf(cmd) === chainId),
       chainId,
-      readBatches,
     );
     commandsByChain.set(chainId, chain.commands);
     batches.push(...chain.batches);
@@ -96,13 +91,13 @@ export const buildAggregatorCommands = async (
 };
 
 // Builds one chain's commands, batched and plain, and returns the batches its executeBatch calls run.
-const buildChainAggregatorCommands = async (commands: Command[], chainId: LzChainId, readBatches: ReadBatches) => {
+const buildChainAggregatorCommands = async (commands: Command[], chainId: LzChainId) => {
   const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
   const { aggregator, acm } = aggregatorAddresses(chain);
   const segments = segmentCommands(commands, chain);
   const encoded = segments.filter(isBatch).map(batched => encodeBatch(batched, aggregator, acm));
 
-  const onChain = await readBatches(chain, aggregator);
+  const onChain = await readOnChainBatches(chain, aggregator);
   // `batches` keeps segment order, so the nth batch segment runs batches[n].
   const batches = onChain
     ? await assignIndices(encoded, onChain, chain, aggregator)
@@ -265,9 +260,13 @@ const toAggregatorBatch = (
   seeded = false,
 ): AggregatorBatch => ({ network: chain, aggregator, index, seeded, calls, permissions });
 
-// Sims read only the forked chain: every other chain resolves its batches in its own simulation. Live builds read
-// every chain over its archive node.
-const readOnChainBatches: ReadBatches = async (chain, aggregator) => {
+// Reads what the chain's aggregator holds, or returns undefined when the chain is not read in this context. Sims read
+// only the forked chain: every other chain resolves its batches in its own simulation. Live builds read every chain
+// over its archive node.
+const readOnChainBatches = async (
+  chain: SUPPORTED_NETWORKS,
+  aggregator: string,
+): Promise<OnChainBatches | undefined> => {
   const simulation = isSimulation();
   if (simulation && chain !== FORKED_NETWORK) return undefined;
   const url = process.env[`ARCHIVE_NODE_${chain}`];
