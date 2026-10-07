@@ -38,6 +38,7 @@ const isBatch = (segment: Segment): segment is Command[] => Array.isArray(segmen
 // split its commands across batch() calls or seed it with { raw: true }.
 export const batch = (commands: Command[], options: BatchOptions = {}): Command[] => {
   const { expectedIndex, seededIndex } = options;
+  if (commands.length === 0) throw new Error("batch: a batch() needs at least one command");
   if (expectedIndex !== undefined && seededIndex !== undefined) {
     throw new Error("batch: set expectedIndex or seededIndex, not both");
   }
@@ -219,23 +220,24 @@ const assignIndices = async (
     const { expectedIndex, seededIndex } = encodedBatch.options;
     const index = BigNumber.from(seededIndex ?? expectedIndex ?? nextFree);
     const seeded = index.lt(onChain.count) && sameCalls(await onChain.callsAt(index), encodedBatch.calls);
-    if (seeded && (await onChain.executed(index))) {
+    if (seeded) {
+      if (await onChain.executed(index)) {
+        throw new Error(
+          `batch: ${chain} batch ${index} already ran, and a batch runs only once; if this VIP already executed, ` +
+            "build it at a block before its execution, and only drop the index to seed the calls again for a new proposal",
+        );
+      }
+    } else if (seededIndex !== undefined || index.lt(onChain.count)) {
       throw new Error(
-        `batch: ${chain} batch ${index} already ran, and a batch runs only once; if this VIP already executed, build ` +
-          "it at a block before its execution, and only drop the index to seed the calls again for a new proposal",
-      );
-    }
-    if (!seeded && seededIndex !== undefined) {
-      throw new Error(
-        `batch: ${chain} batch ${index} does not hold these calls; check seededIndex, keep raw: true when pinning a ` +
+        `batch: ${chain} batch ${index} does not hold these calls; check its index, keep raw: true when pinning a ` +
           "raw batch, or fork after it was seeded",
       );
-    }
-    // addBatch only appends at the current batch count.
-    if (!seeded && !index.eq(nextFree)) {
+    } else if (!index.eq(nextFree)) {
+      // addBatch only appends at the current batch count.
       throw new Error(`batch: ${chain} expectedIndex ${index} is not the next free index ${nextFree}`);
+    } else {
+      nextFree = nextFree.add(1);
     }
-    if (!seeded) nextFree = nextFree.add(1);
     batches.push(toAggregatorBatch(encodedBatch, chain, aggregator, index, seeded));
   }
   const indices = batches.map(({ index }) => String(index));

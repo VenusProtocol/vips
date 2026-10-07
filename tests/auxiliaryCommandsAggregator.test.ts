@@ -233,7 +233,8 @@ describe("buildAggregatorCommands", () => {
     ]);
   });
 
-  it("rejects an index that is not a non-negative integer, or both indices at once", () => {
+  it("rejects an empty batch(), an index that is not a non-negative integer, or both indices at once", () => {
+    expect(() => batch([])).to.throw("batch: a batch() needs at least one command");
     expect(() => batch([setValue(1)], { expectedIndex: 1, seededIndex: 1 })).to.throw("not both");
     expect(() => batch([setValue(1)], { expectedIndex: -1 })).to.throw("batch: -1 is not an index");
     expect(() => batch([setValue(1)], { seededIndex: 1.5 })).to.throw("batch: 1.5 is not an index");
@@ -329,6 +330,9 @@ describe("on a local aggregator", () => {
     expect(await rejection(build(batch([setValue(4)], { expectedIndex: 7 })))).to.include(
       "bscmainnet expectedIndex 7 is not the next free index 3",
     );
+    expect(await rejection(build(batch([setValue(4)], { expectedIndex: 1 })))).to.include(
+      "bscmainnet batch 1 does not hold these calls",
+    );
   });
 
   it("pins a seededIndex batch, checking its calls against the seeded ones", async () => {
@@ -358,7 +362,7 @@ describe("on a local aggregator", () => {
       [1, true],
     ]);
     expect(await rejection(build(batch([setValue(1)], { seededIndex: 1 })))).to.include(
-      "bscmainnet batch 1 does not hold these calls; check seededIndex, keep raw: true when pinning a raw batch",
+      "bscmainnet batch 1 does not hold these calls; check its index, keep raw: true when pinning a raw batch",
     );
     expect(await rejection(build(batch([setValue(1)], { raw: true, seededIndex: 0 })))).to.include(
       "bscmainnet batch 0 does not hold these calls",
