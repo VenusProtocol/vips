@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import hre, { ethers } from "hardhat";
 import sinon from "sinon";
-import { batch, buildAggregatorCommands } from "src/auxiliaryCommandsAggregator";
+import { batch, buildCommandsWithBatches } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { AggregatorCall, Batch, BatchOptions, Command, LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -44,7 +44,7 @@ const rejection = async (promise: Promise<unknown>) => {
   throw new Error("expected a rejection");
 };
 
-const build = (entries: (Command | Batch)[]) => buildAggregatorCommands(entries, ProposalType.REGULAR);
+const build = (entries: (Command | Batch)[]) => buildCommandsWithBatches(entries, ProposalType.REGULAR);
 
 // Capture a test runner's setup hooks so we can exercise its fixture on the local aggregator without running
 // the governor lifecycle, which requires a fork.
@@ -62,7 +62,7 @@ const captureSetupHooks = (register: () => void): (() => Promise<void>)[] => {
 };
 
 // Without a fork no chain is read, so every batch comes out without an index.
-describe("buildAggregatorCommands", () => {
+describe("buildCommandsWithBatches", () => {
   it("wraps a chain's batch in a DEFAULT_ADMIN_ROLE grant and revoke", async () => {
     const { commands, batches } = await build([batch([setValue(1), acmGrant("a()")])]);
 
@@ -198,7 +198,7 @@ describe("buildAggregatorCommands", () => {
 
   it("rejects non-regular proposals", async () => {
     for (const type of [ProposalType.FAST_TRACK, ProposalType.CRITICAL, undefined]) {
-      expect(await rejection(buildAggregatorCommands([batch([setValue(1)])], type))).to.include(
+      expect(await rejection(buildCommandsWithBatches([batch([setValue(1)])], type))).to.include(
         "only ProposalType.REGULAR",
       );
     }

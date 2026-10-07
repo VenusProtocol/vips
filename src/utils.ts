@@ -8,7 +8,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { buildAggregatorCommands, isBatch } from "./auxiliaryCommandsAggregator";
+import { buildCommandsWithBatches, isBatch } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
@@ -269,8 +269,8 @@ export const makeProposal = async (
   if (entries.every((entry): entry is Command => !isBatch(entry))) {
     commands = entries;
   } else {
-    const { commands: aggregatorCommands, batches } = await buildAggregatorCommands(entries, type);
-    commands = aggregatorCommands;
+    const { commands: proposalCommands, batches } = await buildCommandsWithBatches(entries, type);
+    commands = proposalCommands;
     proposal.aggregatorBatches = batches;
   }
 

@@ -53,10 +53,10 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Batch =>
   return { kind: "batch", commands, options };
 };
 
-// Builds the commands that run the proposal through the aggregators. Each chain with a batch() comes out as
+// Builds every command of the proposal, plain and batched. Each chain with a batch() comes out as
 // grantRole(DEFAULT_ADMIN_ROLE), its commands with each batch() replaced by executeBatch(index), revokeRole, in place
 // of its first command. Chains without a batch() are left alone.
-export const buildAggregatorCommands = async (
+export const buildCommandsWithBatches = async (
   entries: (Command | Batch)[],
   type: ProposalType | undefined,
 ): Promise<{ commands: Command[]; batches: AggregatorBatch[] }> => {
@@ -67,33 +67,33 @@ export const buildAggregatorCommands = async (
   const commandsByChain = new Map<LzChainId, Command[]>();
   const batches: AggregatorBatch[] = [];
   for (const chainId of batchedChainIds) {
-    const chain = await buildChainAggregatorCommands(
-      entries.filter(entry => chainIdOf(entry) === chainId),
-      chainId,
-    );
+    const chain = await buildChainCommandsWithBatches(entries, chainId);
     commandsByChain.set(chainId, chain.commands);
     batches.push(...chain.batches);
   }
 
-  // A chain's aggregator commands take the place of its first command; its other commands are already inside them.
+  // A batched chain's commands take the place of its first command; its other commands are already inside them.
   const placed = new Set<LzChainId>();
-  const aggregatorCommands = entries.flatMap(entry => {
+  const commands = entries.flatMap(entry => {
     const chainId = chainIdOf(entry);
     const chainCommands = commandsByChain.get(chainId);
     // Every batch's chain is in commandsByChain, so an entry on any other chain is a plain command.
     if (!chainCommands) return [entry as Command];
+    // Already inside its chain's block, placed at the chain's first entry.
     if (placed.has(chainId)) return [];
     placed.add(chainId);
     return chainCommands;
   });
-  return { commands: aggregatorCommands, batches };
+  // The proposal keeps batches as aggregatorBatches, for seeding (sims, seedAggregatorBatches) and propose checks.
+  return { commands, batches };
 };
 
 // Builds one chain's commands, batched and plain, and returns the batches its executeBatch calls run.
-const buildChainAggregatorCommands = async (entries: (Command | Batch)[], chainId: LzChainId) => {
+const buildChainCommandsWithBatches = async (entries: (Command | Batch)[], chainId: LzChainId) => {
+  const chainEntries = entries.filter(entry => chainIdOf(entry) === chainId);
   const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
   const { aggregator, acm } = aggregatorAddresses(chain);
-  const encoded = entries.filter(isBatch).map(batched => encodeBatch(batched, aggregator, acm));
+  const encoded = chainEntries.filter(isBatch).map(batched => encodeBatch(batched, aggregator, acm));
 
   const onChain = await readOnChainBatches(chain, aggregator);
   // `batches` keeps entry order, so the nth batch entry runs batches[n].
@@ -115,7 +115,7 @@ const buildChainAggregatorCommands = async (entries: (Command | Batch)[], chainI
     commands: [
       // bytes32(0) is DEFAULT_ADMIN_ROLE
       command(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]),
-      ...entries.map(entry =>
+      ...chainEntries.map(entry =>
         isBatch(entry)
           ? command(aggregator, "executeBatch(uint256)", [
               // An unread chain has no index: MaxUint256 reverts BatchNotFound if this proposal ever runs.
