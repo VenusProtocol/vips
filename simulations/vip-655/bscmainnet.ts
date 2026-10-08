@@ -3,12 +3,14 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
+import { bypassStalePrices, pinOracleFeedPrice } from "src/vip-framework/oracleStaleness";
 
 import vip655, {
   CASH_PLUS,
   CASH_PLUS_NAV_FEED,
+  CHAINLINK_MAX_STALE_PERIOD,
   CHAINLINK_ORACLE,
   FIXED_APY,
   IDEAL_COLLATERAL_AMOUNT,
@@ -25,7 +27,6 @@ import vip655, {
   MAX_BORROW_CAP,
   MIN_BORROW_CAP,
   MIN_SUPPLIER_DEPOSIT,
-  ONE_YEAR,
   OPEN_DURATION,
   RESERVE_FACTOR,
   RESILIENT_ORACLE,
@@ -72,27 +73,22 @@ forking(FORK_BLOCK, async () => {
   let timelock: any;
   let vaultsBefore: BigNumber;
   let predictedVault: string;
+  let cashPlusDirectPriceOnChain: BigNumber;
 
   before(async () => {
     timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("40"));
     vaultsBefore = await controller.allVaultsLength();
     predictedVault = await controller.predictVaultAddress(INSTITUTION_OPERATOR);
+    // Read before the pin below sets it.
+    cashPlusDirectPriceOnChain = await chainlinkOracle.prices(CASH_PLUS);
 
-    // createVault reverts unless the ResilientOracle prices both U and CASH+. The VIP handles CASH+
-    // (ONE_YEAR when simulations=true); U it does not touch, and U's 86,700s windows lapse once the
-    // governance lifecycle warps block.timestamp ~2 days forward. Widen every enabled oracle in U's
-    // config, not just the main one — a stale pivot (Atlas) invalidates the main price too.
-    const uOracleConfig = await resilientOracle.getTokenConfig(U);
-    for (const [i, oracle] of uOracleConfig.oracles.entries()) {
-      if (!uOracleConfig.enableFlagsForOracles[i] || oracle === ethers.constants.AddressZero) continue;
-      await setMaxStalePeriodInChainlinkOracle(
-        oracle,
-        U,
-        ethers.constants.AddressZero, // reuse the feed already registered for U
-        bscmainnet.NORMAL_TIMELOCK,
-        ONE_YEAR,
-      );
-    }
+    // createVault prices CASH+ from the feed the VIP adds, and U from its existing feeds.
+    await pinOracleFeedPrice(CHAINLINK_ORACLE, {
+      asset: CASH_PLUS,
+      feed: CASH_PLUS_NAV_FEED,
+      maxStalePeriod: CHAINLINK_MAX_STALE_PERIOD,
+    });
+    await bypassStalePrices([U]);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -100,8 +96,8 @@ forking(FORK_BLOCK, async () => {
       expect(vaultsBefore).to.equal(1);
     });
 
-    it("CASH+ has no direct price shadowing the feed (prices == 0)", async () => {
-      expect(await chainlinkOracle.prices(CASH_PLUS)).to.equal(0);
+    it("CASH+ has no direct price shadowing the feed on chain (prices == 0)", async () => {
+      expect(cashPlusDirectPriceOnChain).to.equal(0);
     });
 
     it("CASH+ has no ChainlinkOracle feed configured", async () => {
@@ -119,7 +115,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-655 List the Asseto CASH+ Fixed-Term Institutional Loan Vault", await vip655(true), {
+  testVip("VIP-655 List the Asseto CASH+ Fixed-Term Institutional Loan Vault", await vip655(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
@@ -185,6 +181,7 @@ forking(FORK_BLOCK, async () => {
       const chainlinkPrice = await chainlinkOracle.getPrice(CASH_PLUS);
       expect(chainlinkPrice).to.equal(feedAnswer);
       expect(await chainlinkOracle.tokenConfigs(CASH_PLUS)).to.have.property("feed", CASH_PLUS_NAV_FEED);
+      expect((await chainlinkOracle.tokenConfigs(CASH_PLUS)).maxStalePeriod).to.equal(CHAINLINK_MAX_STALE_PERIOD);
 
       const resilientPrice = await resilientOracle.getPrice(CASH_PLUS);
       expect(resilientPrice).to.be.gt(0);
