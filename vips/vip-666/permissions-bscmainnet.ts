@@ -1,6 +1,6 @@
 // ===================================================================================================
-// Centrifuge YieldGroup ACM role strings for BNB Chain mainnet — the same surface the USDT Hub's
-// Centrifuge source carries.
+// Centrifuge YieldGroup ACM role strings for BNB Chain mainnet. Adapter replacement is reserved
+// for the Guardian and governance; the Operator retains pause and unpause.
 // ===================================================================================================
 
 export const YIELD_GROUP_BASE = [
@@ -14,7 +14,7 @@ export const YIELD_GROUP_BASE = [
   "sweep(address,address)",
 ];
 
-export const EMERGENCY = ["updateResourceAdapter(address,address)", "unpauseResource(address)"];
+export const EMERGENCY = ["unpauseResource(address)"];
 
 // Opening a redemption and cancelling either direction.
 const CENTRIFUGE_ASYNC_REQUESTS = [
@@ -67,6 +67,7 @@ export const CENTRIFUGE_OPERATOR = [
 export const CENTRIFUGE_GUARDIAN = [
   "pauseResource(address)",
   "forceRemoveResource(address)",
+  "updateResourceAdapter(address,address)",
   ...EMERGENCY,
   ...CENTRIFUGE_NAV_GUARD,
   SET_SPOT_APY,
