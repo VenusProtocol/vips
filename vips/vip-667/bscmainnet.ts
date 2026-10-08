@@ -5,7 +5,7 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 // ===================================================================================================
-// VIP-999 [BNB Chain] — Hash Global hBNB Fixed Rate Vault
+// VIP-667 [BNB Chain] — Hash Global hBNB Fixed Rate Vault
 // ===================================================================================================
 
 export const { RESILIENT_ORACLE, ATLAS_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
@@ -70,13 +70,13 @@ export const riskConfig = [
   LATE_PENALTY_RATE, // latePenaltyRate
 ];
 
-export const vip999 = () => {
+export const vip667 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] List the Hash Global hBNB Fixed-Term Institutional Loan Vault",
+    title: "VIP-667 [BNB Chain] List the Hash Global hBNB Fixed-Term Institutional Loan Vault",
     description: `#### Summary
 
-This VIP lists a fixed-term institutional loan vault for Hash Global on the Venus Institutional Fixed Rate Vault system on BNB Chain. The institution borrows up to 150,000 U for 30 days at a 2.7% fixed APY, collateralised by 198 hBNB, DigiFT's tokenized Hash Global BNB Yield Fund. The VIP makes hBNB priceable, creates the vault and registers it on the U Liquidity Hub.
+This VIP lists a fixed-term institutional loan vault for Hash Global on the Venus Institutional Fixed Rate Vault system on BNB Chain. The vault allows the institution to borrow up to 150,000 U for 30 days at a 2.7% fixed APY, collateralised by 198 hBNB, DigiFT's tokenized Hash Global BNB Yield Fund. The VIP makes hBNB priceable, creates the vault and registers it on the U Liquidity Hub.
 
 #### Description
 
@@ -100,10 +100,11 @@ At the maximum 150,000 U drawdown the loan is ≈65% of the collateral's deal va
 
 **Considerations.**
 
-- *hBNB is a permissioned token.* DigiFT gates every hBNB transfer. Under its current transfer mode, the institution operator and the vault are whitelisted for collateral in and out, and the LiquidationAdapter and Critical Guardian for liquidation. DigiFT can pause hBNB or change its transfer mode at any time.
-- *Liquidation is handled off-chain.* The 198 hBNB is most of the hBNB supply, so an open-market liquidation is not realistic. The Critical Guardian can still liquidate on-chain through the LiquidationAdapter as a fallback.
-- *Open only once the full collateral is posted.* If fundraising ends with less than 198 hBNB posted, the margin is confiscated and paid to lenders in hBNB, which lenders that are not DigiFT investors (including the U Hub) cannot receive. The Critical Guardian should call openVault only after all 198 hBNB is posted.
-- *Fresh price required.* createVault and the institution's drawdown read the hBNB price, so they revert while the feed is outside its 65-minute window.
+- **hBNB is a permissioned token.** DigiFT gates every hBNB transfer. Under its current transfer mode, the institution operator and the vault are whitelisted for collateral in and out, and the LiquidationAdapter and Critical Guardian for liquidation. DigiFT can pause hBNB or change its transfer mode at any time.
+- **Liquidation is handled off-chain.** The 198 hBNB is most of the hBNB supply, so an open-market liquidation is not realistic. The Critical Guardian can still liquidate on-chain through the LiquidationAdapter as a fallback.
+- **Open only once the full collateral is posted.** If fundraising ends with less than 198 hBNB posted, the margin is confiscated and paid to lenders in hBNB, which lenders that are not DigiFT investors (including the U Hub) cannot receive. The Critical Guardian should call openVault only after all 198 hBNB is posted.
+- **Liquidation fee transfer restriction.** The ProtocolShareReserve is not whitelisted for hBNB, so the LiquidationAdapter cannot sweep accrued hBNB protocol fees to it unless DigiFT updates the whitelist.
+- **Fresh price required.** createVault and the institution's drawdown read the hBNB price, so they revert while the feed is outside its 65-minute window.
 
 **Access control.** No new permissions are required: the Normal Timelock already holds createVault on the controller, setTokenConfig on both oracles, and addResource on the U FRV source.
 
@@ -163,4 +164,4 @@ At the maximum 150,000 U drawdown the loan is ≈65% of the collateral's deal va
   );
 };
 
-export default vip999;
+export default vip667;

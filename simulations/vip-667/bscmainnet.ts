@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip667, {
   ADAPTER_FRV,
   ATLAS_ORACLE,
   FIXED_APY,
@@ -36,7 +36,7 @@ import vip999, {
   U_FRV_SOURCE,
   VAULT_NAME,
   VAULT_SYMBOL,
-} from "../../vips/vip-999/bscmainnet";
+} from "../../vips/vip-667/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import FRV_SOURCE_ABI from "./abi/FRVSource.json";
@@ -225,7 +225,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-999 List the Hash Global hBNB Fixed-Term Institutional Loan Vault", await vip999(), {
+  testVip("VIP-667 List the Hash Global hBNB Fixed-Term Institutional Loan Vault", await vip667(), {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: [
       "0x34221485302f6F2029660a000908B5FCABB9BC6e",
