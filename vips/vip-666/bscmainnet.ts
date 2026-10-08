@@ -1,4 +1,4 @@
-import { parseUnits } from "ethers/lib/utils";
+import { parseUnits, solidityKeccak256 } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -78,6 +78,21 @@ export const CENTRIFUGE_SOURCE_USDT = "0xDA5AFfeb43719f517676E031a727071c7D40098
 export const JTRSY_VAULT_USDT = "0x6e6B8498415083a4386BE83DD59Edd4366402FFa";
 export const JAAA_VAULT_USDT = "0xcbAfe61d84C6Fb88252a6Adf1C9CB0B9D029cb99";
 
+// All existing YieldGroups across the USDT, USDC and U Hubs. VIP-661 granted the Operator
+// adapter replacement on each of them; removing it from the new source's grants is not enough.
+export const LIVE_YIELD_GROUPS = [
+  "0xC9E6ceD9589363f8dC5695Be2C79AB4dDaECC94B", // CoreSource_USDT
+  "0xe3df38E12E37ED80E1b3ccf2bdf84F9e1527ce14", // FluxSource_USDT
+  "0x621eF38cE0C4e7060fF0bF3D609E3D46EC144bE7", // FRVSource_USDT
+  CENTRIFUGE_SOURCE_USDT,
+  CORE_SOURCE_USDC,
+  FLUX_SOURCE_USDC,
+  FRV_SOURCE_USDC, // Empty today, but the existing permission must still be revoked.
+  "0x8A680F77A5367FA7cD33a02f51896Cb1d55159c3", // CoreSource_U
+  "0xe31B8851c3fa9B3dD39a04a2ed9493869A410616", // FluxSource_U
+  "0x30908eddB9E94add7AC9944a0adda66d80B89143", // FRVSource_U
+];
+
 export const SPOT_APY_BPS_USDT = [
   { resource: JTRSY_VAULT_USDT, apyBps: 316 },
   { resource: JAAA_VAULT_USDT, apyBps: 478 },
@@ -85,7 +100,7 @@ export const SPOT_APY_BPS_USDT = [
 
 export const OUTER_WITHDRAW_QUEUE = [FLUX_SOURCE_USDC, CORE_SOURCE_USDC, FRV_SOURCE_USDC, CENTRIFUGE_SOURCE_USDC];
 
-// Who gets which slice of the source's surface: 20 + 16 + 4 + 8 = 48 grants, all on the new source.
+// Who gets which slice of the source's surface: 20 + 15 + 4 + 8 = 47 grants, all on the new source.
 export const GRANTS: [string[], string][] = [
   [CENTRIFUGE_GOVERNANCE, NORMAL_TIMELOCK],
   [CENTRIFUGE_OPERATOR, OPERATOR],
@@ -96,89 +111,63 @@ export const GRANTS: [string[], string][] = [
 export const vip666 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-666 [BNB Chain] Liquidity Hub (USDC) — onboard the Centrifuge YieldGroup",
+    title: "VIP-666 [BNB Chain] Liquidity Hub — onboard USDC Centrifuge and restrict adapter replacement",
     description: `#### Summary
 
-Onboards the **Centrifuge YieldGroup** to the Liquidity Hub (USDC) on BNB Chain, on the same terms as
-the USDT Hub: grants the ACM roles on the newly deployed USDC source, registers the USDC
-vaults of Centrifuge's two BNB Chain funds — **JTRSY** and **JAAA** — behind the existing
-**AdapterCentrifuge**, sets the source's inner withdraw queue, configures a NAV band and publishes a
-starting APY on each fund, and adds the group to the Hub. It also refreshes the APY the USDT Hub's
-Centrifuge source publishes for the same two funds to the same current rates.
+Onboard the Centrifuge YieldGroup to the USDC Liquidity Hub and reserve adapter replacement for
+Guardian and governance across all BNB Chain YieldGroups. Refresh the USDT Centrifuge APYs to
+match the USDC funds. No capital moves and no implementation or beacon changes in this proposal.
+Centrifuge share-class membership is required before allocation and is managed by Centrifuge,
+not granted by this VIP. USDC subscriptions/redemptions have no on/off-ramp fee.
 
-Today the USDC Hub can only allocate to Venus Core, Fluid and the Fixed-Rate Vaults. Centrifuge
-settles USDC subscriptions and redemptions with no on/off-ramp fee, unlike USDT, so USDC is the
-cheaper way into the same two funds.
+#### Permissions
 
-No capital moves in this proposal. Before capital can be allocated, Centrifuge must add the USDC
-source to both share-class memberlists; this proposal does not grant that membership.
+The new USDC Centrifuge source receives 47 ACM grants:
 
-#### The two funds
+- **Normal Timelock (20)**: full governance surface, including sweep.
+- **Operator (15)**: inner queues, async requests/cancellations, four claims, pauseResource,
+  unpauseResource, NAV-band configuration/snapshot/enabling, and setSpotAPYBps. No updateResourceAdapter.
+- **Keeper (4)**: claimDeposit, claimRedeem, claimCancelDeposit, claimCancelRedeem only.
+- **Guardian (8)**: pauseResource, unpauseResource, updateResourceAdapter, forceRemoveResource,
+  NAV-band configuration/snapshot/enabling, and setSpotAPYBps.
 
-Live ERC-7540 vaults on BNB Chain denominated in USDC. They share their share token, pool, NAV and
-AsyncRequestManager with the USDT vaults already on the USDT Hub; each vault keeps its own
-per-holder request state, so the two Hubs' positions are accounted separately.
+The Operator (${OPERATOR}) also loses updateResourceAdapter(address,address) on **all ten existing
+YieldGroups**: Core, Flux and FRV for each of USDT, USDC and U, plus USDT Centrifuge. This explicitly
+includes the empty USDC FRV group. VIP-661 granted these permissions; deleting a future grant does
+not revoke them. Ten revokeRole calls enforce the change at YieldGroup level, covering
+every resource in each group. Guardian and Normal Timelock retain adapter replacement; every other
+existing permission, including Operator pause/unpause, is unchanged. Fast-Track and Critical
+Timelocks receive no grants.
 
-- **JTRSY**: Vault: ${JTRSY_VAULT}; Share: ${JTRSY_SHARE}.
-- **JAAA**: Vault: ${JAAA_VAULT}; Share: ${JAAA_SHARE}.
+#### Funds and configuration
 
-#### Roles
+The USDC vaults share their share classes, NAV and request manager with their USDT counterparts;
+request state remains separate per vault and holder.
 
-48 grants on the new source, each a giveCallPermission on the AccessControlManager, in the same
-role layout as the USDT source:
+- **JTRSY**: vault ${JTRSY_VAULT}, share ${JTRSY_SHARE}; NAV drift 5%, upper gap 2%, lower gap 5%; APY 3.16%.
+- **JAAA**: vault ${JAAA_VAULT}, share ${JAAA_SHARE}; NAV drift 5.5%, upper gap 2%, lower gap 5%; APY 4.78%.
 
-- **Normal Timelock**: Signatures: 20; Surface: everything, including sweep which it alone holds.
-- **Operator**: Signatures: 16; Surface: both inner queues, the async lifecycle, the four claims, pauseResource, unpauseResource, updateResourceAdapter, the NAV band, setSpotAPYBps.
-- **Keeper**: Signatures: 4; Surface: the four claim functions, nothing else.
-- **Guardian**: Signatures: 8; Surface: pauseResource, unpauseResource, updateResourceAdapter, forceRemoveResource, the NAV band, setSpotAPYBps.
+Both NAV-band sides are enabled, with a daily re-anchor interval. Values outside the band are
+clamped, not reverted. The USDC Centrifuge cap is 5,000,000 USDC and 25% of Hub TVL. Its inner deposit
+queue stays empty. The existing Hub deposit queue and withdrawal order are preserved, with
+Centrifuge appended last. USDT Centrifuge APYs change from 3.37%/5.29% to 3.16%/4.78% for JTRSY/JAAA.
 
-The Fast-Track and Critical timelocks are granted nothing, matching the rest of the Liquidity Hub.
+#### Actions (68 commands, atomic)
 
-#### NAV band
+1. Revoke Operator adapter replacement on the ten existing YieldGroups.
+2. Grant the 47 roles above on USDC Centrifuge.
+3. Register both USDC vaults with AdapterCentrifuge and set the inner withdraw queue, JTRSY first.
+4. Configure both NAV bands and publish both APYs.
+5. Add USDC Centrifuge to the Hub with the caps above and append it to the outer withdraw queue.
+6. Refresh both USDT Centrifuge APYs.
 
-Each fund gets the same band as on the USDT Hub: a band around the value it reports, held to an
-anchor that drifts at a published rate and re-anchors daily. A reading outside the band is reported
-at the edge of it; it never reverts.
+#### Contracts and references
 
-- **JTRSY**: Drift: 5.00%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 3.16%.
-- **JAAA**: Drift: 5.50%; Band up: 2%; Band down: 5%; Re-anchor: daily; Published APY: 4.78%.
-
-Centrifuge publishes no rate on chain, so the APY each fund reports is set by setSpotAPYBps, at the
-rate Centrifuge currently reports for each fund.
-
-The USDT Hub's Centrifuge source still publishes the starting rates set by VIP-661 (JTRSY 3.37%,
-JAAA 5.29%). This proposal refreshes them to 3.16% and 4.78%, so both Hubs report the same APY for
-the same fund. The Normal Timelock already holds setSpotAPYBps on that source.
-
-#### Actions (59 commands, executed atomically in order)
-
-1. Grant the 48 roles above on the source (giveCallPermission).
-2. Register both USDC vaults on the source behind **AdapterCentrifuge** (addResource).
-3. Set the source's inner withdraw queue to both funds, JTRSY first. The inner deposit queue is left
-   unset, so an ordinary Hub deposit never routes into a fund that settles over days.
-4. Configure the NAV band on each fund, both sides armed.
-5. Publish the starting APY for each fund.
-6. Register the group on the Hub with an absolute cap of 5,000,000 USDC and a 25% cap on TVL.
-7. Append Centrifuge to the **end** of the Hub's withdraw cascade, leaving the existing order and the
-   deposit queue untouched.
-8. Refresh the published APY of both funds on the USDT Hub's Centrifuge source (setSpotAPYBps), to
-   the same rates as step 5.
-
-#### Deployed contracts (BNB Chain)
-
-- CentrifugeSource_USDC: ${CENTRIFUGE_SOURCE_USDC} — a BeaconProxy over the existing
-  CentrifugeBeacon, bound to the USDC Hub, with no owner of its own, so every gated call on it is
-  ACM-controlled
-- CentrifugeSource_USDT: ${CENTRIFUGE_SOURCE_USDT} — the live source behind the USDT Hub; only its
-  published APYs change
-- Reused from the USDT Hub's Centrifuge onboarding, unchanged: AdapterCentrifuge (${ADAPTER_CENTRIFUGE}), CentrifugeBeacon
-  (${CENTRIFUGE_BEACON}, owned by the Normal Timelock) and YieldGroupCentrifuge implementation
-  (${YIELD_GROUP_CENTRIFUGE_IMPL})
-
-#### References
-
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/769)
-- [VIP-661](https://app.venus.io/#/governance/proposal/661?chainId=56) — onboarded the Centrifuge YieldGroup to the Liquidity Hub (USDT)
+- New USDC source: ${CENTRIFUGE_SOURCE_USDC}; Hub: ${HUB_USDC}.
+- Existing USDT Centrifuge source: ${CENTRIFUGE_SOURCE_USDT}.
+- Reused adapter: ${ADAPTER_CENTRIFUGE}; beacon: ${CENTRIFUGE_BEACON}; implementation: ${YIELD_GROUP_CENTRIFUGE_IMPL}.
+- [Original onboarding PR](https://github.com/VenusProtocol/vips/pull/769).
+- [VIP-661](https://app.venus.io/#/governance/proposal/661?chainId=56): prior Centrifuge onboarding and existing YieldGroup grants.
 - HashDit audit of the Centrifuge YieldGroup`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -186,6 +175,14 @@ the same fund. The Normal Timelock already holds setSpotAPYBps on that source.
   };
   return makeProposal(
     [
+      ...LIVE_YIELD_GROUPS.map(group => ({
+        target: ACM,
+        // Use the same role hash as revokeCallPermission, with smaller calldata so propose fits
+        // BNB Chain's per-transaction gas cap. ACM still emits its standard RoleRevoked event.
+        signature: "revokeRole(bytes32,address)",
+        params: [solidityKeccak256(["address", "string"], [group, "updateResourceAdapter(address,address)"]), OPERATOR],
+      })),
+
       ...GRANTS.flatMap(([sigs, account]) =>
         sigs.map(sig => ({
           target: ACM,

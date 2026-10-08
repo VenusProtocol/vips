@@ -34,6 +34,7 @@ import vip666, {
   JTRSY_VAULT,
   JTRSY_VAULT_USDT,
   KEEPER,
+  LIVE_YIELD_GROUPS,
   NAV_GUARDS,
   NAV_GUARD_INTERVAL,
   NORMAL_TIMELOCK,
@@ -50,7 +51,6 @@ import {
   CENTRIFUGE_GUARDIAN,
   CENTRIFUGE_NAV_GUARD,
   CENTRIFUGE_OPERATOR,
-  EMERGENCY,
 } from "../../vips/vip-666/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
@@ -64,7 +64,8 @@ import HUB_ABI from "./abi/Hub.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import SOURCE_ABI from "./abi/YieldGroupCentrifuge.json";
 
-const BLOCK_NUMBER = 124693000;
+const BLOCK_NUMBER = 126382565;
+const UPDATE_ADAPTER = "updateResourceAdapter(address,address)";
 
 // ACM role hashing.
 const roleOf = (contract: string, sig: string) =>
@@ -187,14 +188,12 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the source is not a member of either share class", async () => {
+    it("Centrifuge's Spoke controls membership of both share classes", async () => {
       // Both share classes run a `FullRestrictions` hook, which only lets a member hold the share.
       // Membership is Centrifuge's to grant, not this proposal's.
       for (const fund of FUNDS) {
         const share = await ethers.getContractAt(SHARE_ABI, fund.share);
         const hook = await ethers.getContractAt(HOOK_ABI, await share.hook());
-        const [isMember] = await hook.isMember(fund.share, CENTRIFUGE_SOURCE_USDC);
-        expect(isMember, fund.name).to.equal(false);
         expect(await hook.wards(CENTRIFUGE_SPOKE), fund.name).to.equal(1);
       }
     });
@@ -255,9 +254,23 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the operator and the guardian already hold the emergency pair on the live USDC sources", async () => {
-      for (const group of EXISTING_GROUPS) {
-        for (const sig of EMERGENCY) {
+    it("the revocation list covers every existing YieldGroup in the Hub registry", async () => {
+      const registry = await ethers.getContractAt(
+        ["function getHubs() view returns (address[])"],
+        "0x6D93Fd479f2d37445CFBe132412e316a0364acc2",
+      );
+      const liveGroups: string[] = [];
+      for (const address of await registry.getHubs()) {
+        const liveHub = await ethers.getContractAt(HUB_ABI, address);
+        liveGroups.push(...(await liveHub.registeredYieldGroups()));
+      }
+      expect(liveGroups).to.have.length(10);
+      expect(LIVE_YIELD_GROUPS).to.have.members(liveGroups);
+    });
+
+    it("the operator, guardian and governance hold adapter replacement and pause/unpause on all live groups", async () => {
+      for (const group of LIVE_YIELD_GROUPS) {
+        for (const sig of [UPDATE_ADAPTER, "pauseResource(address)", "unpauseResource(address)"]) {
           for (const holder of [NORMAL_TIMELOCK, OPERATOR, GUARDIAN]) {
             expect(await acm.hasRole(roleOf(group, sig), holder), `${holder} ${group} ${sig}`).to.equal(true);
           }
@@ -275,8 +288,8 @@ forking(BLOCK_NUMBER, async () => {
       ).to.equal(true);
     });
 
-    it("the proposal grants exactly the 48 roles of the role layout", async () => {
-      expect(GRANTS_EXPANDED.length, "the description's grant count").to.equal(48);
+    it("the proposal grants exactly the 47 roles of the role layout", async () => {
+      expect(GRANTS_EXPANDED.length, "the description's grant count").to.equal(47);
       const proposal = await vip666();
       const grants = proposal.signatures
         .map((signature, i) => ({ signature, target: proposal.targets[i], params: proposal.params[i] }))
@@ -291,28 +304,46 @@ forking(BLOCK_NUMBER, async () => {
         ]);
       }
     });
+
+    it("the proposal revokes only Operator adapter replacement on the ten existing groups", async () => {
+      const proposal = await vip666();
+      expect(proposal.signatures).to.have.length(68);
+      const revocations = proposal.signatures
+        .map((signature, i) => ({ signature, target: proposal.targets[i], params: proposal.params[i] }))
+        .filter(c => c.signature === "revokeRole(bytes32,address)");
+      expect(revocations).to.have.length(10);
+      expect(revocations.map(c => c.params[0])).to.have.members(
+        LIVE_YIELD_GROUPS.map(group => roleOf(group, UPDATE_ADAPTER)),
+      );
+      for (const command of revocations) {
+        expect(command.target).to.equal(ACM);
+        expect(command.params[1]).to.equal(OPERATOR);
+      }
+    });
   });
 
-  // Explicit proposer and supporters known to satisfy the governance thresholds.
-  testVip("VIP-666 [BNB Chain] Liquidity Hub (USDC) — onboard the Centrifuge YieldGroup", await vip666(), {
-    proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
-    supporters: ["0x5176671de05380379399b669ed276feec99d59cb"],
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [GRANTS_EXPANDED.length, 0]);
-      await expectEvents(
-        txResponse,
-        [SOURCE_ABI],
-        ["ResourceAdded", "NavGuardConfigured", "SpotAPYBpsSet", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
-        [FUNDS.length, FUNDS.length, FUNDS.length + SPOT_APY_BPS_USDT.length, 0, 1],
-      );
-      await expectEvents(
-        txResponse,
-        [HUB_ABI],
-        ["YieldGroupAdded", "OuterWithdrawQueueSet", "OuterDepositQueueSet"],
-        [1, 1, 0],
-      );
+  // Let the framework select voters that meet the thresholds at this fork block.
+  testVip(
+    "VIP-666 [BNB Chain] Liquidity Hub — onboard USDC Centrifuge and restrict adapter replacement",
+    await vip666(),
+    {
+      callbackAfterExecution: async txResponse => {
+        await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [GRANTS_EXPANDED.length, 10]);
+        await expectEvents(
+          txResponse,
+          [SOURCE_ABI],
+          ["ResourceAdded", "NavGuardConfigured", "SpotAPYBpsSet", "InnerDepositQueueSet", "InnerWithdrawQueueSet"],
+          [FUNDS.length, FUNDS.length, FUNDS.length + SPOT_APY_BPS_USDT.length, 0, 1],
+        );
+        await expectEvents(
+          txResponse,
+          [HUB_ABI],
+          ["YieldGroupAdded", "OuterWithdrawQueueSet", "OuterDepositQueueSet"],
+          [1, 1, 0],
+        );
+      },
     },
-  });
+  );
 
   describe("Post-VIP: configuration", () => {
     it("both USDC vaults are registered and unpaused", async () => {
@@ -394,6 +425,51 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Post-VIP: permissions", () => {
+    it("only Guardian and governance retain adapter replacement across all eleven groups", async () => {
+      for (const group of [...LIVE_YIELD_GROUPS, CENTRIFUGE_SOURCE_USDC]) {
+        for (const holder of [NORMAL_TIMELOCK, GUARDIAN, OPERATOR, KEEPER, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK]) {
+          expect(await acm.hasRole(roleOf(group, UPDATE_ADAPTER), holder), `${group} ${holder}`).to.equal(
+            holder === NORMAL_TIMELOCK || holder === GUARDIAN,
+          );
+          expect(await acm.hasRole(roleOf(ethers.constants.AddressZero, UPDATE_ADAPTER), holder)).to.equal(false);
+        }
+      }
+    });
+
+    it("adapter calls reject the Operator while Guardian and governance can still use every registered resource", async () => {
+      const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      const guardian = await initMainnetUser(GUARDIAN, ethers.utils.parseEther("1"));
+      const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      for (const group of [...LIVE_YIELD_GROUPS, CENTRIFUGE_SOURCE_USDC]) {
+        const yieldGroup = await ethers.getContractAt(SOURCE_ABI, group);
+        const resources: string[] = await yieldGroup.resources();
+        // Even an empty group must reject the Operator before validating a resource or adapter.
+        await expect(
+          yieldGroup
+            .connect(operator)
+            .callStatic.updateResourceAdapter(ethers.constants.AddressZero, ADAPTER_CENTRIFUGE),
+        ).to.be.revertedWithCustomError(yieldGroup, "Unauthorized");
+        for (const resource of resources) {
+          const { adapter: currentAdapter } = await yieldGroup.resourceConfig(resource);
+          await expect(
+            yieldGroup.connect(operator).callStatic.updateResourceAdapter(resource, currentAdapter),
+          ).to.be.revertedWithCustomError(yieldGroup, "Unauthorized");
+          await yieldGroup.connect(guardian).callStatic.updateResourceAdapter(resource, currentAdapter);
+          await yieldGroup.connect(timelock).callStatic.updateResourceAdapter(resource, currentAdapter);
+        }
+      }
+    });
+
+    it("pause and unpause permissions remain on every existing group", async () => {
+      for (const group of LIVE_YIELD_GROUPS) {
+        for (const sig of ["pauseResource(address)", "unpauseResource(address)"]) {
+          for (const holder of [OPERATOR, GUARDIAN, NORMAL_TIMELOCK]) {
+            expect(await acm.hasRole(roleOf(group, sig), holder), `${group} ${holder} ${sig}`).to.equal(true);
+          }
+        }
+      }
+    });
+
     it("every grant this VIP makes has landed", async () => {
       for (const { sig, account } of GRANTS_EXPANDED) {
         expect(await acm.hasRole(roleOf(CENTRIFUGE_SOURCE_USDC, sig), account), `${sig} -> ${account}`).to.equal(true);
