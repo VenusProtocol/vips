@@ -63,7 +63,7 @@ const captureSetupHooks = (register: () => void): (() => Promise<void>)[] => {
 
 // Without a fork no chain is read, so every batch comes out without an index.
 describe("buildCommandsWithBatches", () => {
-  it("wraps a chain's batch in a DEFAULT_ADMIN_ROLE grant and revoke", async () => {
+  it("wraps each batch in a DEFAULT_ADMIN_ROLE grant and revoke", async () => {
     const { commands, batches } = await build([batch([setValue(1), acmGrant("a()")])]);
 
     expect(commands.map(c => [c.target, c.signature, c.params])).to.deep.equal([
@@ -135,15 +135,17 @@ describe("buildCommandsWithBatches", () => {
     ]);
 
     expect(commands.map(c => c.signature)).to.deep.equal([
+      SET,
       "grantRole(bytes32,address)",
-      SET,
       "executeBatch(uint256)",
-      "acceptOwnership()",
-      "executeBatch(uint256)",
-      SET,
       "revokeRole(bytes32,address)",
+      "acceptOwnership()",
+      "grantRole(bytes32,address)",
+      "executeBatch(uint256)",
+      "revokeRole(bytes32,address)",
+      SET,
     ]);
-    expect([commands[1], commands[3], commands[5]]).to.deep.equal([plain, accept, plain]);
+    expect([commands[0], commands[4], commands[8]]).to.deep.equal([plain, accept, plain]);
     expect(batches.map(b => b.calls.map(c => c.signature))).to.deep.equal([
       [GIVE, SET, SET, REVOKE],
       [GIVE, GIVE, SET, "acceptOwnership()", REVOKE, REVOKE],
@@ -165,13 +167,6 @@ describe("buildCommandsWithBatches", () => {
     expect(await rejection(build([batch([setValue(1, { value: "1" })])]))).to.include(
       `batch: ${SET} on ${TARGET} sends value and can't be batched`,
     );
-  });
-
-  it("keeps commands written with the home chain's dstChainId local", async () => {
-    const home = { dstChainId: LzChainId.bscmainnet };
-    const entries = [batch([setValue(1, home), setValue(2)]), setValue(3, home)];
-    const proposal = await makeProposal(entries, undefined, ProposalType.REGULAR);
-    expect(proposal.signatures).to.include(SET).and.not.include("execute(uint16,bytes,bytes,address)");
   });
 
   it("seeds signature and arguments by default, and full calldata with an empty signature when raw", async () => {
@@ -227,7 +222,7 @@ describe("buildCommandsWithBatches", () => {
     }
   });
 
-  it("builds a remote chain in place of its first command and leaves other chains alone", async () => {
+  it("wraps a remote batch for its chain and leaves other chains alone", async () => {
     const remote = setValue(5, { dstChainId: LzChainId.ethereum });
     const { commands, batches } = await build([setValue(1), batch([remote, { ...remote, params: [6] }]), setValue(2)]);
 
@@ -251,22 +246,22 @@ describe("buildCommandsWithBatches", () => {
     );
 
     expect(proposal.targets.slice(0, 5)).to.deep.equal([
-      bscmainnet.ACCESS_CONTROL_MANAGER,
       TARGET,
+      bscmainnet.ACCESS_CONTROL_MANAGER,
       bscmainnet.AUXILIARY_COMMANDS_AGGREGATOR,
-      TARGET,
       bscmainnet.ACCESS_CONTROL_MANAGER,
+      TARGET,
     ]);
     expect(proposal.signatures).to.deep.equal([
+      SET,
       "grantRole(bytes32,address)",
-      SET,
       "executeBatch(uint256)",
-      SET,
       "revokeRole(bytes32,address)",
+      SET,
       "execute(uint16,bytes,bytes,address)",
     ]);
-    expect(proposal.params[1]).to.deep.equal([1]);
-    expect(proposal.params[3]).to.deep.equal([3]);
+    expect(proposal.params[0]).to.deep.equal([1]);
+    expect(proposal.params[4]).to.deep.equal([3]);
     expect(proposal.params[5][0]).to.equal(LzChainId.ethereum);
 
     const [targets, values, signatures, calldatas, type] = ethers.utils.defaultAbiCoder.decode(
@@ -274,17 +269,17 @@ describe("buildCommandsWithBatches", () => {
       proposal.params[5][1],
     );
     expect(targets).to.deep.equal([
-      ethereum.ACCESS_CONTROL_MANAGER,
       TARGET,
+      ethereum.ACCESS_CONTROL_MANAGER,
       ethereum.AUXILIARY_COMMANDS_AGGREGATOR,
-      TARGET,
       ethereum.ACCESS_CONTROL_MANAGER,
+      TARGET,
     ]);
     expect(signatures).to.deep.equal(proposal.signatures.slice(0, 5));
     expect(values.map(String)).to.deep.equal(["0", "0", "0", "0", "0"]);
-    expect(calldatas[1]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [10]));
+    expect(calldatas[0]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [10]));
     expect(calldatas[2]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [ethers.constants.MaxUint256]));
-    expect(calldatas[3]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [30]));
+    expect(calldatas[4]).to.equal(ethers.utils.defaultAbiCoder.encode(["uint256"], [30]));
     expect(type).to.equal(ProposalType.REGULAR);
     expect(proposal.aggregatorBatches?.map(b => b.network)).to.deep.equal(["bscmainnet", "ethereum"]);
   });

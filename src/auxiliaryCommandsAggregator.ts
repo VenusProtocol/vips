@@ -39,9 +39,8 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Batch =>
   return { kind: "batch", commands, options };
 };
 
-// Builds every command of the proposal, plain and batched. Each chain with a batch() comes out as
-// grantRole(DEFAULT_ADMIN_ROLE), its commands with each batch() replaced by executeBatch(index), revokeRole, in place
-// of its first command. Chains without a batch() are left alone.
+// Builds every command of the proposal, plain and batched. Each batch() comes out in place as
+// grantRole(DEFAULT_ADMIN_ROLE), executeBatch(index), revokeRole; every other command stays as written.
 export const buildCommandsWithBatches = async (
   entries: (Command | Batch)[],
   type: ProposalType | undefined,
@@ -49,43 +48,27 @@ export const buildCommandsWithBatches = async (
   // Only the Normal Timelock holds the ACM DEFAULT_ADMIN_ROLE that each chain lends its aggregator.
   if (type !== ProposalType.REGULAR) throw new Error("batch: only ProposalType.REGULAR proposals are supported");
 
-  const batchedChainIds = new Set(entries.filter(isBatch).map(chainIdOf));
-  const commandsByChain = new Map<LzChainId, Command[]>();
-  const batches: AggregatorBatch[] = [];
-  for (const chainId of batchedChainIds) {
-    const chain = await buildChainCommandsWithBatches(entries, chainId);
-    commandsByChain.set(chainId, chain.commands);
-    batches.push(...chain.batches);
+  // `batches` keeps VIP order, so the nth batch() runs batches[n]. Each chain's aggregator is read once to give its
+  // batches their indices.
+  const batched = entries.filter(isBatch);
+  const batches = batched.map(entry => encodeBatch(entry, chainIdOf(entry)));
+  for (const chain of new Set(batches.map(batch => batch.network))) {
+    const onChain = await readOnChainBatches(chain);
+    if (onChain) await assignIndices(batches, batched, onChain, chain);
   }
 
-  // A batched chain's commands take the place of its first command; its other commands are already inside them.
-  const placed = new Set<LzChainId>();
-  const commands = entries.flatMap(entry => {
-    const chainId = chainIdOf(entry);
-    const chainCommands = commandsByChain.get(chainId);
-    // Every batch's chain is in commandsByChain, so an entry on any other chain is a plain command.
-    if (!chainCommands) return [entry as Command];
-    // Already inside its chain's block, placed at the chain's first entry.
-    if (placed.has(chainId)) return [];
-    placed.add(chainId);
-    return chainCommands;
-  });
+  let next = 0;
+  const commands = entries.flatMap(entry =>
+    isBatch(entry) ? executeBatchCommands(batches[next++], chainIdOf(entry)) : [entry],
+  );
   // The proposal keeps batches as aggregatorBatches, for seeding (sims, seedAggregatorBatches) and propose checks.
   return { commands, batches };
 };
 
-// Builds one chain's commands, batched and plain, and returns the batches its executeBatch calls run.
-const buildChainCommandsWithBatches = async (entries: (Command | Batch)[], chainId: LzChainId) => {
-  const chainEntries = entries.filter(entry => chainIdOf(entry) === chainId);
-  const chain = LzChainId[chainId] as SUPPORTED_NETWORKS;
-  const { aggregator, acm } = aggregatorAddresses(chain);
-  const batched = chainEntries.filter(isBatch);
-  // `batches` keeps entry order, so the nth batch entry runs batches[n].
-  const batches = batched.map(entry => encodeBatch(entry, chain, aggregator, acm));
-  const onChainBatches = await readOnChainBatches(chain, aggregator);
-  if (onChainBatches) await assignIndices(batches, batched, onChainBatches, chain);
-
-  // BNB Chain commands stay local; every other chain keeps its dstChainId.
+// The three commands that run one batch. bytes32(0) is DEFAULT_ADMIN_ROLE; the aggregator holds it only while its
+// batch runs. BNB Chain commands stay local; every other chain keeps its dstChainId.
+const executeBatchCommands = ({ network, aggregator, index }: AggregatorBatch, chainId: LzChainId): Command[] => {
+  const { acm } = aggregatorAddresses(network);
   const dstChainId = chainId === bscChainId() ? undefined : chainId;
   const command = (target: string, signature: string, params: unknown[]): Command => ({
     target,
@@ -93,21 +76,12 @@ const buildChainCommandsWithBatches = async (entries: (Command | Batch)[], chain
     params,
     dstChainId,
   });
-  // Each batch() becomes executeBatch(index); every other command stays as written, minus a home-chain dstChainId.
-  const local = ({ dstChainId: _home, ...rest }: Command): Command => rest;
-  let nextBatch = 0;
-  const chainCommands = chainEntries.map(entry =>
-    isBatch(entry)
-      ? // Unread chain: MaxUint256 is never a seeded index, so it reverts BatchNotFound, not a wrong batch.
-        command(aggregator, "executeBatch(uint256)", [batches[nextBatch++].index ?? constants.MaxUint256])
-      : dstChainId
-      ? entry
-      : local(entry),
-  );
-  // bytes32(0) is DEFAULT_ADMIN_ROLE; the aggregator holds it while the chain's commands run.
-  const grant = command(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]);
-  const revoke = command(acm, "revokeRole(bytes32,address)", [constants.HashZero, aggregator]);
-  return { batches, commands: [grant, ...chainCommands, revoke] };
+  return [
+    command(acm, "grantRole(bytes32,address)", [constants.HashZero, aggregator]),
+    // Unread chain: MaxUint256 is never a seeded index, so it reverts BatchNotFound, not a wrong batch.
+    command(aggregator, "executeBatch(uint256)", [index ?? constants.MaxUint256]),
+    command(acm, "revokeRole(bytes32,address)", [constants.HashZero, aggregator]),
+  ];
 };
 
 const aggregatorAddresses = (chain: SUPPORTED_NETWORKS) => {
@@ -123,12 +97,9 @@ const aggregatorAddresses = (chain: SUPPORTED_NETWORKS) => {
 // Encodes one batch() as its aggregator stores it: a giveCallPermission for each distinct permission the calls need,
 // the calls, then the matching revokeCallPermission calls. Calls on the ACM need no grant, since the aggregator holds
 // DEFAULT_ADMIN_ROLE while its batches run. The index and seeded flag are set once the chain is read.
-const encodeBatch = (
-  { commands, options }: Batch,
-  network: SUPPORTED_NETWORKS,
-  aggregator: string,
-  acm: string,
-): AggregatorBatch => {
+const encodeBatch = ({ commands, options }: Batch, chainId: LzChainId): AggregatorBatch => {
+  const network = LzChainId[chainId] as SUPPORTED_NETWORKS;
+  const { aggregator, acm } = aggregatorAddresses(network);
   const commandCalls = commands.map(cmd => {
     // A seeded call carries no value, so the aggregator could not forward it.
     if (BigNumber.from(cmd.value ?? 0).gt(0)) {
@@ -189,6 +160,7 @@ const assignIndices = async (
 ) => {
   let nextFree = count;
   for (const [i, batch] of batches.entries()) {
+    if (batch.network !== chain) continue;
     const { expectedIndex, seededIndex } = batched[i].options;
     const index = BigNumber.from(seededIndex ?? expectedIndex ?? nextFree);
     const seeded = index.lt(count) && sameCalls(await contract.getBatch(index), batch.calls);
@@ -212,7 +184,7 @@ const assignIndices = async (
     }
     Object.assign(batch, { index, seeded });
   }
-  const indices = batches.map(({ index }) => String(index));
+  const indices = batches.filter(batch => batch.network === chain).map(({ index }) => String(index));
   if (new Set(indices).size < indices.length) {
     throw new Error(`batch: ${chain} has two batches at one index; check their expectedIndex and seededIndex`);
   }
@@ -228,9 +200,10 @@ const sameCalls = (a: AggregatorCall[], b: AggregatorCall[]) => {
 // Reads the chain's aggregator and its batch count, or returns undefined when the chain is not read in this context.
 // Sims read only the forked chain: every other chain resolves its batches in its own simulation. Live builds read every
 // chain over its archive node.
-const readOnChainBatches = async (chain: SUPPORTED_NETWORKS, aggregator: string) => {
+const readOnChainBatches = async (chain: SUPPORTED_NETWORKS) => {
   const simulation = isSimulation();
   if (simulation && chain !== FORKED_NETWORK) return undefined;
+  const { aggregator } = aggregatorAddresses(chain);
   const url = process.env[`ARCHIVE_NODE_${chain}`];
   if (!simulation && !url) throw new Error(`batch: set ARCHIVE_NODE_${chain} to look up its batches`);
   const contract = new Contract(
