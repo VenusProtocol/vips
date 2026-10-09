@@ -75,7 +75,7 @@ A REGULAR proposal that would exceed the propose gas cap, the 100-operation cap 
 - **Size:** a batch must fit one `addBatch` transaction. An oversized one reverts when seeded, in simulation setup (which sends it under the chain's per-tx gas cap, or the block gas limit where none is configured) or in `seedAggregatorBatches`. Use `raw: true`, move the oversized command out, or split the VIP.
 - **Indices:** a batch runs once, so an unpinned batch takes the chain's next free index and an index whose batch already ran is refused. `{ seededIndex }` pins a batch to an index that already holds its calls (keep `raw: true` when pinning a raw batch). `{ expectedIndex }` seeds at that index, which must be the chain's next free one unless the batch is already seeded there.
 - **Simulations:** `makeProposal()` reads only the forked chain's aggregator and resolves indices without seeding. `testVip` and `testForkedNetworkVipCommands` seed the forked chain's unseeded batches in test setup. Pass `{ seedProposalBatches: false }` and call `seedProposalBatchesOnFork(proposal)` (exported from `src/vip-framework`) to seed yourself, for example before building a second unpinned proposal on the same fork, since two unseeded builds take the same index. Pinned batches must already be seeded at the fork block. After execution the tests check that every batch ran and the aggregator holds no role or permission. On BNB Chain a failing batch is replayed call by call to name the failing call.
-- **Proposing:** `propose`, `createProposal` and `proposeOnTestnet` refuse a proposal with an unseeded batch (`BATCH_NOT_SEEDED`) or one built without reading its chain (`batches were not read`): build against a live network, e.g. `--network bscmainnet`. No testnet has an aggregator address yet, so `batch()` is mainnet-only.
+- **Proposing:** `propose`, `createProposal` and `proposeOnTestnet` refuse a proposal with an unseeded batch (`BATCH_NOT_SEEDED`) or one built without reading its chain (`batches were not read`): build against a live network, e.g. `--network bscmainnet`. Among the testnets only `bsctestnet` has an aggregator address, so `batch()` builds on the mainnets and `bsctestnet`.
 - **Seeding:** after final review, run `npx hardhat seedAggregatorBatches <path> --network bscmainnet`. It signs with `AGGREGATOR_BATCHER_PRIVATE_KEY` over each chain's `ARCHIVE_NODE_<network>`, seeds every unpinned batch, and prints each chain's indices in VIP order, e.g. `{"bscmainnet":[5,6]}`. Pin each batch with `seededIndex` and move the sims' fork blocks past the seeding; a second run seeds any still-unpinned batch again.
 
 ### VIP File Pattern
@@ -230,6 +230,7 @@ ARCHIVE_NODE_ethereum=https://...
 ## Conventions
 
 - VIP default exports must be functions (used by simulation and proposal tasks)
+- Write VIP files to be easy to read and review; don't over-optimize them
 - ABIs for simulation tests are stored alongside the simulation file in an `abi/` subdirectory
 - Network addresses imported from `src/networkAddresses.ts` via `NETWORK_ADDRESSES.<network>.<key>`
 - Commit messages follow conventional commits (enforced by commitlint + husky)
