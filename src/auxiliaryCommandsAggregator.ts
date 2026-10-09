@@ -20,7 +20,8 @@ export const isBatch = (entry: Command | Batch): entry is Batch => "kind" in ent
 
 // Groups commands into one proposal entry. Batched calls run as the aggregator, so calls that must
 // come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is seeded, so
-// split its commands across batch() calls or seed it with { raw: true }.
+// seed it with { raw: true } or move commands out. One batch() per chain: a second repeats the grantRole and
+// revokeRole commands, and the Timelock refuses an identical command queued at the same eta.
 export const batch = (commands: Command[], options: BatchOptions = {}): Batch => {
   const { expectedIndex, seededIndex } = options;
   if (commands.length === 0) throw new Error("batch: a batch() needs at least one command");
