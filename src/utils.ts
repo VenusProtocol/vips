@@ -7,9 +7,11 @@ import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
+import { buildCommandsWithBatches, isBatch } from "./auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import { PER_TX_GAS_CAP_BY_NETWORK } from "./networkConfig";
 import {
+  Batch,
   Command,
   LzChainId,
   Proposal,
@@ -246,7 +248,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
 };
 
 export const makeProposal = async (
-  commands: Command[],
+  entries: (Command | Batch)[],
   meta?: ProposalMeta,
   type?: ProposalType,
 ): Promise<Proposal> => {
@@ -260,6 +262,14 @@ export const makeProposal = async (
     meta,
     type,
   };
+  let commands: Command[];
+  if (entries.every((entry): entry is Command => !isBatch(entry))) {
+    commands = entries;
+  } else {
+    const { commands: proposalCommands, batches } = await buildCommandsWithBatches(entries, type);
+    commands = proposalCommands;
+    proposal.aggregatorBatches = batches;
+  }
 
   const map = new Map<number, Command[]>();
   const _commands = [];

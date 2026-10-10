@@ -23,6 +23,10 @@ yarn prettier                 # Auto-format code
 # Single VIP simulation (requires --fork)
 npx hardhat test simulations/<vip-path>/simulations.ts --fork bscmainnet
 
+# zkSync simulation: runs against a local anvil-zksync fork, not --fork alone (README: "Run Simulations for ZKSync")
+yarn local-anvil-node:zksyncmainnet --fork-block-number <block-number>   # separate terminal, fresh for every run
+npx hardhat test simulations/<vip-path>/zksyncmainnet.ts --network zksynctestnode --fork zksyncmainnet --config hardhat.config.zksync.ts
+
 # Multisig simulation
 npx hardhat test multisig/simulations/<network>/<vip-path>/index.ts --fork <network>
 
@@ -34,6 +38,7 @@ yarn tsc --noEmit
 
 ```bash
 npx hardhat propose <path-relative-to-vips/> --network bscmainnet
+npx hardhat seedAggregatorBatches <path-relative-to-vips/> --network bscmainnet
 npx hardhat proposeOnTestnet <path-relative-to-vips/> --network bsctestnet
 npx hardhat createProposal --network <networkName>
 npx hardhat multisig <path-relative-to-multisig/proposals/> --network <network>
@@ -50,7 +55,7 @@ npx hardhat safeTxData <path-relative-to-multisig/proposals/> --network <network
 
 ### Core Types (src/types.ts)
 
-- **`Command`**: Single contract call — `{ target, signature, params, value?, dstChainId? }`
+- **`Command`**: Single contract call — `{ target, signature, params, value?, dstChainId?, aclSignature? }`
 - **`Proposal`**: Array of targets/signatures/params/values built from Commands
 - **`ProposalType`**: `REGULAR` (0), `FAST_TRACK` (1), `CRITICAL` (2) — different timelock delays
 - **`LzChainId`**: LayerZero chain IDs for cross-chain proposals
@@ -58,6 +63,20 @@ npx hardhat safeTxData <path-relative-to-multisig/proposals/> --network <network
 ### Key Utility: `makeProposal()` (src/utils.ts)
 
 Converts an array of `Command` objects into a `Proposal`. Automatically handles cross-chain routing: commands with `dstChainId` are bundled into LayerZero omnichain execution calls via `OmnichainProposalSender`.
+
+### Aggregator Batches: `batch()` (src/auxiliaryCommandsAggregator.ts)
+
+A REGULAR proposal that would exceed the propose gas cap, the 100-operation cap or the LayerZero payload cap can wrap commands in `batch([...])` on any chain with an `AUXILIARY_COMMANDS_AGGREGATOR` in `NETWORK_ADDRESSES`. Building reads that chain's aggregator, which must be the upgraded one (it has `getBatchCount()`); an older one fails the build. Its ABI (`src/vip-framework/abi/`) and the unit-test fixture (`tests/fixtures/`) come from the same governance-contracts build, so regenerate them together.
+
+- **What it builds:** `batch()` is one proposal entry, not a spread: `makeProposal([normalCommand, batch([commandA, commandB])], meta, ProposalType.REGULAR)`. Each `batch()` becomes one aggregator batch, executed by `executeBatch(index)` in its place; the other commands stay as written. Each `executeBatch` is wrapped in its own `grantRole(DEFAULT_ADMIN_ROLE, aggregator)` … `revokeRole(...)`, so the aggregator holds the role only while that batch runs. Use one `batch()` per chain per VIP: a second one repeats the grant and revoke commands byte for byte, and the Timelock refuses an identical command already queued at the same eta.
+- **What goes in:** one chain's commands, at least one, no nested batches, no value. Batched calls run as the aggregator, not the timelock, so keep owner-only calls, `acceptOwnership()` and calls on the caller's own balance, allowance or votes out of it. Every target must have code or `addBatch` reverts with `InvalidTarget`.
+- **Permissions:** each batch starts with `giveCallPermission` for every distinct target and signature it calls and ends with the matching `revokeCallPermission`; calls on the ACM itself need no grant. `aclSignature` on a command replaces `signature` in the grant when the target checks a different string.
+- **Call format:** by default each call is stored as its signature plus ABI-encoded arguments, readable on chain. `batch(commands, { raw: true })` stores every call, grants and revokes included, as full calldata with an empty signature: fewer bytes and cheaper seeding, but no function names on chain.
+- **Size:** a batch must fit one `addBatch` transaction. An oversized one reverts when seeded, in simulation setup (which sends it under the chain's per-tx gas cap, or the block gas limit where none is configured) or in `seedAggregatorBatches`. Use `raw: true`, move the oversized command out, or split the VIP.
+- **Indices:** a batch runs once, so an unpinned batch takes the chain's next free index and an index whose batch already ran is refused. `{ seededIndex }` pins a batch to an index that already holds its calls (keep `raw: true` when pinning a raw batch). `{ expectedIndex }` seeds at that index, which must be the chain's next free one unless the batch is already seeded there.
+- **Simulations:** `makeProposal()` reads only the forked chain's aggregator and resolves indices without seeding. `testVip` and `testForkedNetworkVipCommands` seed the forked chain's unseeded batches in test setup. Pass `{ seedProposalBatches: false }` and call `seedProposalBatchesOnFork(proposal)` (exported from `src/vip-framework`) to seed yourself, for example before building a second unpinned proposal on the same fork, since two unseeded builds take the same index. Pinned batches must already be seeded at the fork block. After execution the tests check that every batch ran and the aggregator holds no role or permission. On BNB Chain a failing batch is replayed call by call to name the failing call.
+- **Proposing:** `propose`, `createProposal` and `proposeOnTestnet` refuse a proposal with an unseeded batch (`BATCH_NOT_SEEDED`) or one built without reading its chain (`batches were not read`): build against a live network, e.g. `--network bscmainnet`. No testnet has an aggregator address yet, so `batch()` is mainnet-only.
+- **Seeding:** after final review, run `npx hardhat seedAggregatorBatches <path> --network bscmainnet`. It signs with `AGGREGATOR_BATCHER_PRIVATE_KEY` over each chain's `ARCHIVE_NODE_<network>`, seeds every unpinned batch, and prints each chain's indices in VIP order, e.g. `{"bscmainnet":[5,6]}`. Pin each batch with `seededIndex` and move the sims' fork blocks past the seeding; a second run seeds any still-unpinned batch again.
 
 ### VIP File Pattern
 
