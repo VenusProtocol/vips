@@ -74,7 +74,7 @@ New AuxiliaryCommandsAggregator implementations:
 #### References
 
 - [AuxiliaryCommandsAggregator changes](https://github.com/VenusProtocol/governance-contracts/pull/182)
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/TBD)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/777)
 `,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
