@@ -7,7 +7,7 @@ import vip668, { AGGREGATOR_ARBITRUM, NEW_IMPL_ARBITRUM, PROXY_ADMIN_ARBITRUM } 
 import PROXY_ABI from "./abi/TransparentUpgradeableProxy.json";
 import { checkAfterUpgrade, checkBeforeUpgrade } from "./utils/checks";
 
-const BLOCK_NUMBER = 513402828;
+const BLOCK_NUMBER = 514012721;
 const OLD_IMPLEMENTATION = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
 const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 
