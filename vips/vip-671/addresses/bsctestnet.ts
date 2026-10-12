@@ -54,17 +54,21 @@ export const SPOKE_VTOKEN_BEACON = "0xB9c3b5A6f13FD5BEF51eE8B62ED3EA384a9d1B45";
 /// isolated-pools deployments/bsctestnet_addresses.json (SpokeComptrollerImpl).
 ///
 /// Used only by ./bsctestnet-addendum.ts. The listing VIP ran against the previous implementation,
-/// 0x7F81dC61F3D75569A67155fb188171Aef173a52b, which the beacon still serves.
+/// 0x7F81dC61F3D75569A67155fb188171Aef173a52b.
 export const SPOKE_COMPTROLLER_IMPL = "0xf4b98889F07909c9326100b74AfBcE49813473C6";
+
+/// The `SpokeComptroller` implementation with the Bailsec and Sherlock fixes, from isolated-pools
+/// deployments/bsctestnet/SpokeComptrollerImpl.json. Used only by ./bsctestnet-addendum2.ts.
+export const SPOKE_COMPTROLLER_IMPL_ADDENDUM2 = "0x9D46801Ad4a0877dF1DB17431f131799B9a8348e";
 
 /// Reference only. The lens holds no state, has no owner and no AccessControlManager, takes the
 /// registry to read as a call argument, and nothing on chain stores its address, so it needs no
 /// command in this or any VIP.
 ///
-/// Redeployed after the listing VIP executed. The address the listing VIP was written against,
-/// 0xfbCBFF4ca8b2fFe3231b0c0BBEa25C79F4B0597c, still carries code but is no longer the one the
-/// isolated-pools deployment record names.
-export const SPOKE_POOL_LENS = "0x372978251378CCE54cf9Ca3D3f4cFA58e84e5da8";
+/// Redeployed twice after the listing VIP executed. The earlier addresses,
+/// 0xfbCBFF4ca8b2fFe3231b0c0BBEa25C79F4B0597c and 0x372978251378CCE54cf9Ca3D3f4cFA58e84e5da8, still
+/// carry code but lack `spokeVTokenPricesAll`.
+export const SPOKE_POOL_LENS = "0xb958022214Fb040FBF14A8912335493f3fb0358c";
 
 // ---------------------------------------------------------------------------------------------------
 // Markets and underlyings.
@@ -76,6 +80,9 @@ export const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 
 export const VUSDT_SPOKE = "0xC88bAF0bA49a98F15A00182752f6d10bd3932F6a"; // vUSDT_HubSpoke
 export const VUSDC_SPOKE = "0xD05514217FD359659aE7da7740e79C11947eBB32"; // vUSDC_HubSpoke
+
+/// A collateral market listed after VIP-671, with a nonzero liquidation threshold.
+export const VTSLAB_SPOKE = "0x301d27Fa22FE4d2e7397550ACa825140EB7Bff3a"; // vTSLAB_HubSpoke
 
 /// One shared `JumpRateModelV2` for both markets. Verified on chain: kink 0.8e18, 70,080,000 blocks
 /// per year. Constructed by deploy/028 from the curve in isolated-pools helpers/spokeDeploymentConfig.
