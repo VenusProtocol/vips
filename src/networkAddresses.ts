@@ -80,6 +80,7 @@ export const NETWORK_ADDRESSES = {
     RESILIENT_ORACLE: oracleBsctestnetContracts.addresses.ResilientOracle,
     REDSTONE_ORACLE: oracleBsctestnetContracts.addresses.RedStoneOracle,
     ATLAS_ORACLE: "0x7F00af2f30a55e79311392C98fBBfA629D19b3A5",
+    AUXILIARY_COMMANDS_AGGREGATOR: "0x65BF4644a6889A1dB18bad99B3d16cA00D4E504c",
   },
   ethereum: {
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",

@@ -73,87 +73,93 @@ export const checkAfterUpgrade = (u: AggregatorUpgrade) => {
       expect(await aggregator.getBatchCount()).to.equal(0);
     });
 
-    for (const raw of [false, true]) {
-      it(`seeds and executes a ${raw ? "raw" : "signature"} batch with temporary ACM permissions`, async () => {
-        const batcher = await initMainnetUser(BATCHER, parseUnits("1", 18));
-        const timelock = await initMainnetUser(u.timelock, parseUnits("1", 18));
-        const acm = new ethers.Contract(u.acm, ACM_ABI, timelock);
-        const adminRole = ethers.constants.HashZero;
-        const signature = "addAuthorizedBatchers(address[])";
-        const permissionRole = ethers.utils.solidityKeccak256(["address", "string"], [u.aggregator, signature]);
-        // Use the real upgraded aggregator as an ACM-controlled target on every chain.
-        const newBatcher = raw
-          ? "0x0000000000000000000000000000000000001002"
-          : "0x0000000000000000000000000000000000001001";
-        const index = await aggregator.getBatchCount();
-        const calls = [
-          {
-            target: u.acm,
-            signature: "giveCallPermission(address,string,address)",
-            data: ethers.utils.defaultAbiCoder.encode(
-              ["address", "string", "address"],
-              [u.aggregator, signature, u.aggregator],
-            ),
-          },
-          {
-            target: u.aggregator,
-            signature,
-            data: ethers.utils.defaultAbiCoder.encode(["address[]"], [[newBatcher]]),
-          },
-          {
-            target: u.acm,
-            signature: "revokeCallPermission(address,string,address)",
-            data: ethers.utils.defaultAbiCoder.encode(
-              ["address", "string", "address"],
-              [u.aggregator, signature, u.aggregator],
-            ),
-          },
-        ].map(call =>
-          raw
-            ? { ...call, signature: "", data: ethers.utils.id(call.signature).slice(0, 10) + call.data.slice(2) }
-            : call,
-        );
-
-        expect(await aggregator.authorizedBatchers(newBatcher)).to.equal(false);
-        expect(await acm.hasRole(adminRole, u.aggregator)).to.equal(false);
-        expect(await acm.hasRole(permissionRole, u.aggregator)).to.equal(false);
-
-        await (await aggregator.connect(batcher)["addBatch((address,string,bytes)[],uint256)"](calls, index)).wait();
-        expect(await aggregator.getBatchCount()).to.equal(index.add(1));
-        expect(
-          (await aggregator.getBatch(index)).map((call: { target: string; signature: string; data: string }) => [
-            call.target,
-            call.signature,
-            call.data,
-          ]),
-        ).to.deep.equal(calls.map(call => [call.target, call.signature, call.data]));
-        // Seeding only stores calls: it neither changes the target nor grants any role.
-        expect(await aggregator.authorizedBatchers(newBatcher)).to.equal(false);
-        expect(await acm.hasRole(adminRole, u.aggregator)).to.equal(false);
-        expect(await acm.hasRole(permissionRole, u.aggregator)).to.equal(false);
-        expect(await aggregator.batchExecuted(index)).to.equal(false);
-
-        // Reproduce a future VIP's grant -> execute -> revoke sequence on the fork.
-        await (await acm.grantRole(adminRole, u.aggregator)).wait();
-        await expect(aggregator.connect(batcher).callStatic.executeBatch(index)).to.be.revertedWithCustomError(
-          aggregator,
-          "Unauthorized",
-        );
-        await expect(aggregator.connect(timelock).executeBatch(index))
-          .to.emit(aggregator, "BatchExecuted")
-          .withArgs(index)
-          .and.to.emit(aggregator, "AuthorizedBatcherUpdated")
-          .withArgs(newBatcher, true);
-        await (await acm.revokeRole(adminRole, u.aggregator)).wait();
-
-        expect(await aggregator.authorizedBatchers(newBatcher)).to.equal(true);
-        expect(await aggregator.batchExecuted(index)).to.equal(true);
-        expect(await acm.hasRole(adminRole, u.aggregator)).to.equal(false);
-        expect(await acm.hasRole(permissionRole, u.aggregator)).to.equal(false);
-        await expect(aggregator.connect(timelock).callStatic.executeBatch(index))
-          .to.be.revertedWithCustomError(aggregator, "BatchAlreadyExecuted")
-          .withArgs(index);
-      });
-    }
+    checkBatchRoundTrip(u);
   });
+};
+
+// Seeds a batch as a batcher and runs it as the timelock inside a grant -> execute -> revoke sequence, as a VIP would.
+export const checkBatchRoundTrip = (u: Pick<AggregatorUpgrade, "aggregator" | "acm" | "timelock">) => {
+  const aggregator = new ethers.Contract(u.aggregator, AGGREGATOR_ABI, ethers.provider);
+  for (const raw of [false, true]) {
+    it(`seeds and executes a ${raw ? "raw" : "signature"} batch with temporary ACM permissions`, async () => {
+      const batcher = await initMainnetUser(BATCHER, parseUnits("1", 18));
+      const timelock = await initMainnetUser(u.timelock, parseUnits("1", 18));
+      const acm = new ethers.Contract(u.acm, ACM_ABI, timelock);
+      const adminRole = ethers.constants.HashZero;
+      const signature = "addAuthorizedBatchers(address[])";
+      const permissionRole = ethers.utils.solidityKeccak256(["address", "string"], [u.aggregator, signature]);
+      // Use the real upgraded aggregator as an ACM-controlled target on every chain.
+      const newBatcher = raw
+        ? "0x0000000000000000000000000000000000001002"
+        : "0x0000000000000000000000000000000000001001";
+      const index = await aggregator.getBatchCount();
+      const calls = [
+        {
+          target: u.acm,
+          signature: "giveCallPermission(address,string,address)",
+          data: ethers.utils.defaultAbiCoder.encode(
+            ["address", "string", "address"],
+            [u.aggregator, signature, u.aggregator],
+          ),
+        },
+        {
+          target: u.aggregator,
+          signature,
+          data: ethers.utils.defaultAbiCoder.encode(["address[]"], [[newBatcher]]),
+        },
+        {
+          target: u.acm,
+          signature: "revokeCallPermission(address,string,address)",
+          data: ethers.utils.defaultAbiCoder.encode(
+            ["address", "string", "address"],
+            [u.aggregator, signature, u.aggregator],
+          ),
+        },
+      ].map(call =>
+        raw
+          ? { ...call, signature: "", data: ethers.utils.id(call.signature).slice(0, 10) + call.data.slice(2) }
+          : call,
+      );
+
+      expect(await aggregator.authorizedBatchers(newBatcher)).to.equal(false);
+      expect(await acm.hasRole(adminRole, u.aggregator)).to.equal(false);
+      expect(await acm.hasRole(permissionRole, u.aggregator)).to.equal(false);
+
+      await (await aggregator.connect(batcher)["addBatch((address,string,bytes)[],uint256)"](calls, index)).wait();
+      expect(await aggregator.getBatchCount()).to.equal(index.add(1));
+      expect(
+        (await aggregator.getBatch(index)).map((call: { target: string; signature: string; data: string }) => [
+          call.target,
+          call.signature,
+          call.data,
+        ]),
+      ).to.deep.equal(calls.map(call => [call.target, call.signature, call.data]));
+      // Seeding only stores calls: it neither changes the target nor grants any role.
+      expect(await aggregator.authorizedBatchers(newBatcher)).to.equal(false);
+      expect(await acm.hasRole(adminRole, u.aggregator)).to.equal(false);
+      expect(await acm.hasRole(permissionRole, u.aggregator)).to.equal(false);
+      expect(await aggregator.batchExecuted(index)).to.equal(false);
+
+      // Reproduce a future VIP's grant -> execute -> revoke sequence on the fork.
+      await (await acm.grantRole(adminRole, u.aggregator)).wait();
+      await expect(aggregator.connect(batcher).callStatic.executeBatch(index)).to.be.revertedWithCustomError(
+        aggregator,
+        "Unauthorized",
+      );
+      await expect(aggregator.connect(timelock).executeBatch(index))
+        .to.emit(aggregator, "BatchExecuted")
+        .withArgs(index)
+        .and.to.emit(aggregator, "AuthorizedBatcherUpdated")
+        .withArgs(newBatcher, true);
+      await (await acm.revokeRole(adminRole, u.aggregator)).wait();
+
+      expect(await aggregator.authorizedBatchers(newBatcher)).to.equal(true);
+      expect(await aggregator.batchExecuted(index)).to.equal(true);
+      expect(await acm.hasRole(adminRole, u.aggregator)).to.equal(false);
+      expect(await acm.hasRole(permissionRole, u.aggregator)).to.equal(false);
+      await expect(aggregator.connect(timelock).callStatic.executeBatch(index))
+        .to.be.revertedWithCustomError(aggregator, "BatchAlreadyExecuted")
+        .withArgs(index);
+    });
+  }
 };
