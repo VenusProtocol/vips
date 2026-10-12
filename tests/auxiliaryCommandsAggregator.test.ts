@@ -12,7 +12,7 @@ import { seedProposalBatchesOnFork } from "src/vip-framework/aggregatorBatches";
 
 import AGGREGATOR_FIXTURE from "./fixtures/AuxiliaryCommandsAggregator.json";
 
-const { bscmainnet, ethereum } = NETWORK_ADDRESSES;
+const { bscmainnet, bsctestnet, ethereum } = NETWORK_ADDRESSES;
 const GIVE = "giveCallPermission(address,string,address)";
 const SET = "setValue(uint256)";
 const REVOKE = "revokeCallPermission(address,string,address)";
@@ -216,7 +216,10 @@ describe("buildCommandsWithBatches", () => {
     const forked = hre.FORKED_NETWORK;
     hre.FORKED_NETWORK = "sepolia";
     try {
-      expect(await rejection(build([batch([setValue(1)])]))).to.include("no AuxiliaryCommandsAggregator on bsctestnet");
+      const { commands, batches } = await build([batch([setValue(1)])]);
+      expect(commands.every(c => c.dstChainId === undefined)).to.equal(true);
+      expect(commands[1].target).to.equal(bsctestnet.AUXILIARY_COMMANDS_AGGREGATOR);
+      expect(batches[0]).to.include({ network: "bsctestnet", aggregator: bsctestnet.AUXILIARY_COMMANDS_AGGREGATOR });
     } finally {
       hre.FORKED_NETWORK = forked;
     }
