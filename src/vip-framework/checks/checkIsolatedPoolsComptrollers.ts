@@ -57,20 +57,30 @@ const calculateBorrowableAmount = async (
   return borrowTokenAmount.gt(availableCash) ? availableCash : borrowTokenAmount;
 };
 
-const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
-  console.log(`${pool.name} > generic comptroller checks for pool`);
+type Signer = Awaited<ReturnType<typeof initMainnetUser>>;
+
+type SelectedMarkets = {
+  supplyMarket?: Contract;
+  borrowMarket?: Contract;
+  supplyUnderlying?: Contract;
+  borrowUnderlying?: Contract;
+};
+
+/**
+ * Pick one listed market the supplier can supply into and another it can borrow from.
+ * Either may come back undefined when the pool offers no usable candidate.
+ */
+const selectMarkets = async (
+  comptroller: Contract,
+  markets: string[],
+  poolSupplier: string,
+  signer: Signer,
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- market selection loop, tracked for refactor
+): Promise<SelectedMarkets> => {
   let supplyMarket: Contract | undefined = undefined;
   let borrowMarket: Contract | undefined = undefined;
   let supplyUnderlying: Contract | undefined = undefined;
   let borrowUnderlying: Contract | undefined = undefined;
-
-  const signer = await initMainnetUser(poolSupplier, ethers.utils.parseEther("50"));
-  const timelockSigner = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
-
-  const comptroller: Contract = await ethers.getContractAt(COMPTROLLER_ABI, pool.comptroller, signer);
-  const resilientOracle: Contract = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
-
-  const markets: string[] = await comptroller.getAllMarkets();
 
   for (const market of markets) {
     const isListed = (await comptroller.markets(market)).isListed;
@@ -97,6 +107,27 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
 
     if (supplyMarket && borrowMarket) break; // Exit the loop if both supplyMarket and borrowMarket are initialized
   }
+
+  return { supplyMarket, borrowMarket, supplyUnderlying, borrowUnderlying };
+};
+
+const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
+  console.log(`${pool.name} > generic comptroller checks for pool`);
+
+  const signer = await initMainnetUser(poolSupplier, ethers.utils.parseEther("50"));
+  const timelockSigner = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
+
+  const comptroller: Contract = await ethers.getContractAt(COMPTROLLER_ABI, pool.comptroller, signer);
+  const resilientOracle: Contract = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
+
+  const markets: string[] = await comptroller.getAllMarkets();
+
+  const { supplyMarket, borrowMarket, supplyUnderlying, borrowUnderlying } = await selectMarkets(
+    comptroller,
+    markets,
+    poolSupplier,
+    signer,
+  );
 
   if (!supplyMarket || !borrowMarket) {
     return;

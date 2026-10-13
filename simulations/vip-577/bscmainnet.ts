@@ -195,6 +195,7 @@ forking(71819752, async () => {
       }
     });
 
+    // eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
     it("Users can repay their borrows", async () => {
       // Find a user with borrow balance
       const filter = vToken.filters.Borrow();

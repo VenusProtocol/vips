@@ -1,0 +1,30 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "vault", "type": "address" },
+      { "internalType": "address", "name": "controller", "type": "address" }
+    ],
+    "name": "investments",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint128", "name": "maxMint", "type": "uint128" },
+          { "internalType": "uint128", "name": "maxWithdraw", "type": "uint128" },
+          { "internalType": "uint128", "name": "depositPrice", "type": "uint128" },
+          { "internalType": "uint128", "name": "redeemPrice", "type": "uint128" },
+          { "internalType": "uint128", "name": "pendingDepositRequest", "type": "uint128" },
+          { "internalType": "uint128", "name": "pendingRedeemRequest", "type": "uint128" },
+          { "internalType": "uint128", "name": "claimableCancelDepositRequest", "type": "uint128" },
+          { "internalType": "uint128", "name": "claimableCancelRedeemRequest", "type": "uint128" },
+          { "internalType": "bool", "name": "pendingCancelDepositRequest", "type": "bool" },
+          { "internalType": "bool", "name": "pendingCancelRedeemRequest", "type": "bool" }
+        ],
+        "internalType": "struct AsyncInvestmentState",
+        "name": "state",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

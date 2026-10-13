@@ -74,6 +74,7 @@ interface NetworkData {
 /**
  * Fetches market data for a given comptroller
  */
+// eslint-disable-next-line complexity, sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 async function fetchPoolData(
   comptrollerAddress: string,
   poolName: string,
