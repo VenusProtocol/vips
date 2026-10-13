@@ -4,14 +4,14 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { ACM, NORMAL_TIMELOCK, SPOKE_COMPTROLLER, VUSDT_SPOKE } from "../../vips/vip-997/bsctestnet";
+import { ACM, NORMAL_TIMELOCK, SPOKE_COMPTROLLER, VUSDT_SPOKE } from "../../vips/vip-671/bsctestnet-hub";
 import vip997Addendum, {
   BSTOCK_LIQUIDATOR,
   CORE_COMPTROLLER,
   ENTER_MARKET_FOR_ACCOUNT,
   NEW_COLLATERAL_GATEWAY,
   OLD_COLLATERAL_GATEWAY,
-} from "../../vips/vip-997/bsctestnet-addendum";
+} from "../../vips/vip-671/bsctestnet-hub-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import FLASH_LOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 

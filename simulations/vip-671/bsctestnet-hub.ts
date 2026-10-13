@@ -26,7 +26,7 @@ import vip997, {
   SPOKE_SOURCE_USDT,
   USDT,
   VUSDT_SPOKE,
-} from "../../vips/vip-997/bsctestnet";
+} from "../../vips/vip-671/bsctestnet-hub";
 import {
   GUARDIAN_GRANTS,
   GUARDIAN_WILDCARDS,
@@ -35,7 +35,7 @@ import {
   SET_ALLOWED_SUPPLIER,
   SPOKE_SOURCE_GOVERNANCE,
   TIMELOCK_GRANTS,
-} from "../../vips/vip-997/permissions-bsctestnet";
+} from "../../vips/vip-671/permissions-hub-bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_SPOKE_ABI from "./abi/AdapterSpokeV1.json";
 import HUB_ABI from "./abi/Hub.json";

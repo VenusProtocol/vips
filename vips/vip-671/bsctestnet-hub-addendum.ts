@@ -2,8 +2,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { ACM, SPOKE_COMPTROLLER } from "./bsctestnet";
-import { giveCallPermission } from "./permissions-bsctestnet";
+import { ACM, SPOKE_COMPTROLLER } from "./bsctestnet-hub";
+import { giveCallPermission } from "./permissions-hub-bsctestnet";
+
+// Addendum to VIP-997 (./bsctestnet-hub.ts), executed as testnet proposal 721. The title and description are what
+// was proposed on chain, so they keep the VIP-997 name.
 
 export const CORE_COMPTROLLER = NETWORK_ADDRESSES.bsctestnet.UNITROLLER;
 
