@@ -145,17 +145,7 @@ const listMarket = (m: SpokeMarket): Command[] => {
     {
       target: SPOKE_POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [
-        [
-          m.vToken,
-          m.collateralFactor,
-          m.liquidationThreshold,
-          seed,
-          SEED_RECEIVER,
-          m.supplyCap,
-          m.borrowCap,
-        ],
-      ],
+      params: [[m.vToken, m.collateralFactor, m.liquidationThreshold, seed, SEED_RECEIVER, m.supplyCap, m.borrowCap]],
     },
     { target: m.underlying, signature: "approve(address,uint256)", params: [SPOKE_POOL_REGISTRY, 0] },
   ];
@@ -238,8 +228,18 @@ If passed, this VIP will list the markets of the **bStock index** Hub-Funded Spo
 | --- | --- | --- | --- | --- | --- | --- | --- |
 ${marketRows.map(r => `| ${r} |`).join("\n")}
 
-- Interest rate model of USDT, USDC and U: JumpRateModelV2 with a ${pct(LIQUIDITY_IRM.baseRatePerYear, 2)} base rate, a ${pct(LIQUIDITY_IRM.multiplierPerYear, 2)} multiplier and a ${pct(LIQUIDITY_IRM.jumpMultiplierPerYear, 2)} jump multiplier per year, and a ${pct(LIQUIDITY_IRM.kink)} kink. QQQB and SPYB charge no interest.
-- Every market: ${pct(PROTOCOL_SEIZE_SHARE)} protocol seize share, and reserves sent to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString("en-US")} blocks.
+- Interest rate model of USDT, USDC and U: JumpRateModelV2 with a ${pct(
+      LIQUIDITY_IRM.baseRatePerYear,
+      2,
+    )} base rate, a ${pct(LIQUIDITY_IRM.multiplierPerYear, 2)} multiplier and a ${pct(
+      LIQUIDITY_IRM.jumpMultiplierPerYear,
+      2,
+    )} jump multiplier per year, and a ${pct(LIQUIDITY_IRM.kink)} kink. QQQB and SPYB charge no interest.
+- Every market: ${pct(
+      PROTOCOL_SEIZE_SHARE,
+    )} protocol seize share, and reserves sent to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString(
+      "en-US",
+    )} blocks.
 
 #### Spoke yield group caps
 

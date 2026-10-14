@@ -88,9 +88,7 @@ export const buildSpokeSourceGrantsBatch = (): AcmCommand[] => {
     throw new Error(`VIP-${VIP_NUMBER} part 2: Spoke source pending for ${unresolved.join(", ")}`);
   }
   return HUB_STACKS.flatMap(({ spokeSource }) =>
-    SPOKE_SOURCE_GRANTS.map(
-      ({ role, account }) => giveCallPermission(ACM, spokeSource, role, account) as AcmCommand,
-    ),
+    SPOKE_SOURCE_GRANTS.map(({ role, account }) => giveCallPermission(ACM, spokeSource, role, account) as AcmCommand),
   );
 };
 
