@@ -64,9 +64,6 @@ export const NORMAL_TIMELOCK_GRANTS = SPOKE_COMPTROLLER_ROLES;
 
 /// Risk parameters. The chain does not check every incentive rule, so a Critical Guardian call keeps the same
 /// rules a proposal does (shipment plan, Section 1.1).
-///
-/// TODO(decision): the guardian split below is the VIP document's proposal (§6.1, open decision 1). Confirm
-/// it, or move or drop a role. Moving one keeps VIP-A at 27 commands; dropping one removes one command.
 export const CRITICAL_GUARDIAN_GRANTS = [
   SET_CLOSE_FACTOR,
   SET_LIQUIDATION_INCENTIVE,
