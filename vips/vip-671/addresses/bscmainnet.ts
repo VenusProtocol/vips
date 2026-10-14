@@ -3,24 +3,25 @@ import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain] — Hub-Funded Spoke pool address book, for VIP-A and VIP-B.
+// VIP-671 [BNB Chain] — Hub-Funded Spoke pool address book, for VIP-A, VIP-B and VIP-C.
 //
 // VIP-A (part 1) stands up the empty pool: ownership, ACM grants, both oracles, the ProtocolShareReserve
 // upgrade, `addPool`, and the `BStockLiquidator` upgrade. It lists no market. VIP-B (part 2) upgrades the
-// Liquidity Hub, swaps the live adapters and registers an empty Spoke source on each Hub. VIP-C (part 3,
-// markets and Hub wiring) follows both.
+// Liquidity Hub, swaps the live adapters and registers an empty Spoke source on each Hub. VIP-C (part 3) lists
+// the five markets and connects each liquidity market to its Hub.
 //
 // ---------------------------------------------------------------------------------------------------
 // STATUS: NOT ADDRESS-COMPLETE.
 //
-// Nothing VIP-A creates is deployed on bscmainnet yet, nor is the new Hub implementation or the Spoke family
-// VIP-B registers. Every `PENDING` address below is filled from its deployment, then re-read from chain before
-// the proposal is opened. `PENDING` fails loudly: each part collects every one it needs that survives and
-// throws with the full list, so no proposal can be built, simulated or proposed half-filled.
+// Nothing VIP-A creates is deployed on bscmainnet yet, nor is the new Hub implementation, the Spoke family VIP-B
+// registers, or the markets and gateway VIP-C lists. Every `PENDING` address below is filled from its deployment,
+// then re-read from chain before the proposal is opened. `PENDING` fails loudly: each part collects every one it
+// needs that survives and throws with the full list, so no proposal can be built, simulated or proposed
+// half-filled. VIP-C's risk values that are still open are `null` and fail the same way.
 //
 // WHAT IS REAL: every address in the "already on chain" sections was read back from bscmainnet, not taken
 // from a deployment record alone. VIP-A's on 2026-10-13 (block ~127,396,000), VIP-B's on 2026-10-14
-// (block ~127,532,000).
+// (block ~127,532,000), VIP-C's on 2026-10-14 (block ~127,552,000).
 // ===================================================================================================
 
 /// Sentinel for an address that does not exist on bscmainnet yet. The guard in each part is the only real
@@ -37,6 +38,7 @@ export const PENDING = "0x0000000000000000000000000000000000000000";
 
 const {
   ACCESS_CONTROL_MANAGER,
+  ATLAS_ORACLE,
   CRITICAL_GUARDIAN,
   CRITICAL_TIMELOCK,
   DEFAULT_PROXY_ADMIN,
@@ -46,6 +48,7 @@ const {
   POOL_REGISTRY,
   RESILIENT_ORACLE,
   UNITROLLER,
+  VTREASURY,
 } = NETWORK_ADDRESSES.bscmainnet;
 
 export const ACM = ACCESS_CONTROL_MANAGER;
@@ -451,3 +454,187 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 /// (`batchCount()`); any batch stored before ours moves it. Set it to the live `batchCount()` just before running
 /// ../provisionAcmBatches.ts, which refuses to store on a mismatch.
 export const SPOKE_SOURCE_GRANTS_BATCH_INDEX = 5;
+
+// ===================================================================================================
+// VIP-C: markets and Hub wiring. Already on chain, read on 2026-10-14 (block ~127,552,000).
+//
+// Market values are the risk listing sheet's ("bStock index spoke pool listing"). All five underlyings have 18
+// decimals (read on chain), so every token amount below is 18-decimal scaled.
+// ===================================================================================================
+
+/// Owned by the Normal Timelock. Pays each market's seed through `withdrawTreasuryBEP20` (`onlyOwner`). It held none
+/// of the five underlyings on 2026-10-14, so it has to be funded before execution.
+export { VTREASURY };
+
+/// Main and pivot oracle of the Core bStocks, both `ChainlinkOracle` proxies owned by the Normal Timelock. TSLAB reads
+/// Atlas with a 3800s and APRO with a 3900s max stale period, inside a 0.95 to 1.05 `BoundValidator` band.
+export { ATLAS_ORACLE };
+export const APRO_ORACLE = "0x04480f1Ba2252CDF89deB022B58d0a03d1B4cF91";
+export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
+export const ATLAS_MAX_STALE_PERIOD = 3800;
+export const APRO_MAX_STALE_PERIOD = 3900;
+export const BOUND_UPPER_RATIO = parseUnits("1.05", 18);
+export const BOUND_LOWER_RATIO = parseUnits("0.95", 18);
+
+/// The live isolated-pools `Shortfall`. `028` initializes every market with it, but it cannot auction this pool's bad
+/// debt: auctions are paused, and `startAuction` resolves pools through the isolated-pools registry only. VIP-C points
+/// each market's `shortfall` at the Normal Timelock instead.
+export const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
+
+/// Beacon proxies of the same token family as TSLAB (same proxy code and beacon). No Venus oracle or DBO config for
+/// either on 2026-10-14.
+export const QQQB = "0x205812CdBed920aFf76C6580abD681a46D11efc7";
+export const SPYB = "0x7138b48df7D98D7e3cc221BfE7192D0a178182D8";
+
+/// Receives every market's seed vTokens, per the risk listing sheet. `addMarket` rejects address(0).
+///
+/// TODO(risk): confirm for QQQB and SPYB. The VIP document (§3.3) and the shipment plan send the collateral markets'
+/// seed vTokens to the VTreasury instead.
+export const SEED_RECEIVER = "0x000000000000000000000000000000000000dEaD";
+
+// ---------------------------------------------------------------------------------------------------
+// TODO(feed): published by Atlas and by APRO. Neither has a QQQB or SPYB feed on Venus today. APRO's access controller
+// on each feed must allow APRO_ORACLE.
+// ---------------------------------------------------------------------------------------------------
+
+export const QQQB_ATLAS_FEED = PENDING;
+export const QQQB_APRO_FEED = PENDING;
+export const SPYB_ATLAS_FEED = PENDING;
+export const SPYB_APRO_FEED = PENDING;
+
+// ---------------------------------------------------------------------------------------------------
+// TODO(deploy): VIP-C's new contracts. Fill each from its deployment, then re-read it from chain.
+// ---------------------------------------------------------------------------------------------------
+
+/// TODO(deploy): the five markets, BeaconProxies on SPOKE_VTOKEN_BEACON (isolated-pools `028`), owned by the Normal
+/// Timelock from `initialize`. `028` needs a `bscmainnet` entry in `spokeDeploymentConfig.ts`, and QQQB and SPYB
+/// entries in `tokensConfig`, first.
+export const VUSDT_SPOKE = PENDING;
+export const VUSDC_SPOKE = PENDING;
+export const VU_SPOKE = PENDING;
+export const VQQQB_SPOKE = PENDING;
+export const VSPYB_SPOKE = PENDING;
+
+/// TODO(deploy): reference only. The rate models `028` builds the markets with: LIQUIDITY_IRM below for USDT, USDC
+/// and U. For QQQB and SPYB the risk sheet sets an IRM of 0 without naming a model; `028`'s config needs one, and
+/// the simulation checks that it charges nothing.
+export const IRM_LIQUIDITY = PENDING;
+export const IRM_COLLATERAL = PENDING;
+
+/// TODO(deploy): `AdapterSpokeV1` (venus-liquidity-hub `13_DeploySpoke`). Stateless, no constructor argument.
+export const ADAPTER_SPOKE_V1 = PENDING;
+
+/// TODO(deploy): `CollateralGateway` (venus-periphery `028`; #74 with its fixes in #78 and #83, none merged on
+/// 2026-10-14). Its Core Comptroller and spoke registry are constructor immutables and it is not upgradeable, so read
+/// back CORE_COMPTROLLER, SPOKE_POOL_REGISTRY and the Normal Timelock as owner before filling it in.
+export const COLLATERAL_GATEWAY = PENDING;
+
+// ---------------------------------------------------------------------------------------------------
+// Market parameters.
+// ---------------------------------------------------------------------------------------------------
+
+/// Blocks between reserve sweeps to the ProtocolShareReserve, on every market. No deploy script sets it.
+export const REDUCE_RESERVES_BLOCK_DELTA = 28800;
+
+/// Every market's protocol seize share, per the risk sheet. It is the VToken default, so VIP-C has no
+/// `setProtocolSeizeShare`.
+export const PROTOCOL_SEIZE_SHARE = parseUnits("0.05", 18);
+
+/// The liquidity markets' JumpRateModelV2, per the risk sheet. Per-year values; the model divides them by its
+/// `blocksOrSecondsPerYear`.
+export const LIQUIDITY_IRM = {
+  baseRatePerYear: BigNumber.from("14888916156458044"),
+  multiplierPerYear: BigNumber.from("37459988156559232"),
+  jumpMultiplierPerYear: BigNumber.from("998472797360528128"),
+  kink: parseUnits("0.9", 18),
+};
+
+export type SpokeMarket = {
+  symbol: string;
+  vToken: string;
+  underlying: string;
+  interestRateModel: string;
+  collateralFactor: BigNumber;
+  liquidationThreshold: BigNumber;
+  supplyCap: BigNumber;
+  borrowCap: BigNumber;
+  reserveFactor: BigNumber;
+  /// Pulled from the VTreasury and minted to SEED_RECEIVER by `addMarket`.
+  initialSupply: BigNumber | null;
+};
+
+/// Supplied only by its Hub's Spoke source, through the supply allowlist. CF and LT 0, so supplying gives no borrow
+/// power, and it never needs an incentive of its own.
+export type LiquidityMarket = SpokeMarket & {
+  stack: HubStack;
+};
+
+export type DboConfig = {
+  cooldownPeriod: number;
+  triggerThreshold: BigNumber;
+  resetThreshold: BigNumber;
+  enableBoundedPricing: boolean;
+  enableCaching: boolean;
+};
+
+/// Open to any supplier, usable as collateral, not borrowable: borrow cap 0 and BORROW paused.
+export type CollateralMarket = SpokeMarket & {
+  liquidationIncentive: BigNumber;
+  atlasFeed: string;
+  aproFeed: string;
+  /// `setTokenConfig` runs once per asset and reverts `MarketAlreadyInitialized` after that.
+  dbo: DboConfig | null;
+};
+
+const liquidity = {
+  interestRateModel: IRM_LIQUIDITY,
+  collateralFactor: BigNumber.from(0),
+  liquidationThreshold: BigNumber.from(0),
+  supplyCap: parseUnits("5000000", 18),
+  borrowCap: parseUnits("5000000", 18),
+  reserveFactor: parseUnits("0.1", 18),
+  initialSupply: parseUnits("10", 18),
+};
+
+/// USDT, USDC and U, one per Hub.
+export const LIQUIDITY_MARKETS: LiquidityMarket[] = [
+  { ...liquidity, symbol: "vUSDT_HubSpoke", vToken: VUSDT_SPOKE, underlying: USDT, stack: HUB_STACKS[0] },
+  { ...liquidity, symbol: "vUSDC_HubSpoke", vToken: VUSDC_SPOKE, underlying: USDC, stack: HUB_STACKS[1] },
+  { ...liquidity, symbol: "vU_HubSpoke", vToken: VU_SPOKE, underlying: U, stack: HUB_STACKS[2] },
+];
+
+const collateral = {
+  interestRateModel: IRM_COLLATERAL,
+  collateralFactor: parseUnits("0.8", 18),
+  liquidationThreshold: parseUnits("0.85", 18),
+  supplyCap: parseUnits("10000", 18),
+  borrowCap: BigNumber.from(0),
+  reserveFactor: parseUnits("0.1", 18),
+  // The pool-wide value, pinned per market: every market with LT above 0 gets an incentive of its own.
+  liquidationIncentive: parseUnits("1.1", 18),
+  // TODO(risk): the seed in tokens. The risk sheet sets $10 of each, so fix the amount at the price when the
+  // proposal is created.
+  initialSupply: null,
+  // TODO(risk): the DBO window. The risk sheet asks for one but sets no values. For reference, TSLAB and NVDAB run
+  // cooldown 3600s, trigger 1.667e17, reset 5e16, bounded pricing on and caching off (read 2026-10-14).
+  dbo: null,
+};
+
+export const COLLATERAL_MARKETS: CollateralMarket[] = [
+  {
+    ...collateral,
+    symbol: "vQQQB_HubSpoke",
+    vToken: VQQQB_SPOKE,
+    underlying: QQQB,
+    atlasFeed: QQQB_ATLAS_FEED,
+    aproFeed: QQQB_APRO_FEED,
+  },
+  {
+    ...collateral,
+    symbol: "vSPYB_HubSpoke",
+    vToken: VSPYB_SPOKE,
+    underlying: SPYB,
+    atlasFeed: SPYB_ATLAS_FEED,
+    aproFeed: SPYB_APRO_FEED,
+  },
+];

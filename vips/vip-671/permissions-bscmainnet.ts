@@ -1,9 +1,16 @@
 import {
+  APRO_ORACLE,
+  ATLAS_ORACLE,
+  BOUND_VALIDATOR,
+  COLLATERAL_GATEWAY,
   CRITICAL_GUARDIAN,
+  DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
+  HUB_STACKS,
   NORMAL_TIMELOCK,
   OPERATOR,
   PAUSE_GUARDIAN,
+  RESILIENT_ORACLE,
   SPOKE_POOL_REGISTRY,
 } from "./addresses/bscmainnet";
 import {
@@ -33,15 +40,16 @@ import {
 } from "./permissions";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain] — ACM grants for VIP-A (on `Comptroller_HubSpoke`) and VIP-B (on each Spoke source), and
-// what each relies on.
+// VIP-671 [BNB Chain] — ACM grants for VIP-A (on `Comptroller_HubSpoke`), VIP-B (on each Spoke source) and VIP-C
+// (one, to `CollateralGateway`), and what each relies on.
 //
 // Every string is the literal the checking contract (`SpokeComptroller`, `PoolRegistry`, `VToken`, `YieldGroup`,
 // `Hub`) passes to `_checkAccessAllowed`, imported from ./permissions.ts where it is shared.
 //
 // VIP-A's: read from the ACM 0x4788…3555 on 2026-10-13 (block 127,396,467) with `isAllowedToCall(account, role)`
 // called from an UNRELATED `msg.sender`, so a `true` proves an address(0) wildcard rather than a grant against
-// one contract. The mainnet ACM does not expose `hasPermission`. VIP-B's are read in its own section below.
+// one contract. The mainnet ACM does not expose `hasPermission`. VIP-B's and VIP-C's are read in their own sections
+// below.
 // ===================================================================================================
 
 type Grant = { role: string; account: string };
@@ -173,3 +181,24 @@ export const SPOKE_SOURCE_GRANTS: Grant[] = [
 /// Roles VIP-B calls on existing contracts. The Normal Timelock holds each as an exact grant, not a wildcard.
 export const HUB_ROLES_CALLED = ["addYieldGroup(address,uint256,uint16)", "setOuterWithdrawQueue(address[])"];
 export const YIELD_GROUP_ROLES_CALLED = [UPDATE_RESOURCE_ADAPTER];
+
+// ===================================================================================================
+// VIP-C: the one grant, and the roles it calls on existing contracts.
+//
+// Read from the ACM on 2026-10-14 (block ~127,552,000) with `hasRole` for the exact grant and for the address(0)
+// wildcard. The Normal Timelock holds every role below as an exact grant, none as a wildcard. VIP-C's comptroller,
+// registry, market and Spoke source calls use VIP-A's and VIP-B's grants and the wildcards in ASSUMED_WILDCARDS.
+// ===================================================================================================
+
+/// `enterMarketForAccount(address,address)` on `Comptroller_HubSpoke`, to `CollateralGateway` only. The gateway passes
+/// its own caller as the account; any other holder could enter any account into a market.
+export const VIP_C_GRANTS: Grant[] = ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY }));
+
+/// The batch setters on Atlas, APRO, `ResilientOracle` and `BoundValidator` loop the single setter and check its role.
+/// The DBO's batch setter checks a role of its own.
+export const VIP_C_ROLES_CALLED: { contract: string; role: string }[] = [
+  ...[ATLAS_ORACLE, APRO_ORACLE, RESILIENT_ORACLE].map(contract => ({ contract, role: "setTokenConfig(TokenConfig)" })),
+  { contract: BOUND_VALIDATOR, role: "setValidateConfig(ValidateConfig)" },
+  { contract: DEVIATION_BOUNDED_ORACLE, role: "setTokenConfigs((address,uint64,uint256,uint256,bool,bool)[])" },
+  ...HUB_STACKS.map(({ hub }) => ({ contract: hub, role: "setOuterDepositQueue(address[])" })),
+];
