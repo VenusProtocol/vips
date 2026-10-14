@@ -144,10 +144,11 @@ export const MUST_NOT_BE_WILDCARD = [
 // ===================================================================================================
 // VIP-B: ACM grants on each Spoke source, and the Hub and yield-group roles it calls with.
 //
-// Read from the ACM on 2026-10-14 (block 127,532,699) with `hasRole(keccak256(contract, role), account)` for the
-// exact grant and `hasRole(keccak256(address(0), role), account)` for the wildcard, for the Normal, Fast-track and
+// Read from the ACM on 2026-10-14 with `hasRole(keccak256(contract, role), account)` for the exact grant (block
+// 127,532,699) and `hasRole` on the wildcard key for the wildcard (block 127,594,075), for the Normal, Fast-track and
 // Critical timelocks, both guardians, the Oracle Guardian and the Operator, on all eleven live yield groups and all
-// three Hubs. No account holds any of these roles as a wildcard.
+// three Hubs. No account holds any of these roles as a wildcard. The mainnet ACM keys a wildcard on 32 zero bytes
+// before the role, not a 20-byte address(0); `isAllowedToCall` from an unrelated sender agrees.
 // ===================================================================================================
 
 /// On all six live Core and Flux sources (the same generic `YieldGroup` as Spoke), the Normal Timelock holds all
@@ -182,9 +183,10 @@ export const YIELD_GROUP_ROLES_CALLED = [UPDATE_RESOURCE_ADAPTER];
 // ===================================================================================================
 // VIP-C: the one grant, and the roles it calls on existing contracts.
 //
-// Read from the ACM on 2026-10-14 (block ~127,552,000) with `hasRole` for the exact grant and for the address(0)
-// wildcard. The Normal Timelock holds every role below as an exact grant, none as a wildcard. VIP-C's comptroller,
-// registry, market and Spoke source calls use VIP-A's and VIP-B's grants and the wildcards in ASSUMED_WILDCARDS.
+// Read from the ACM on 2026-10-14 with `hasRole` for the exact grant (block ~127,552,000) and on the wildcard key
+// above for the wildcard (block 127,594,075). The Normal Timelock holds every role below as an exact grant, none as
+// a wildcard. VIP-C's comptroller, registry, market and Spoke source calls use VIP-A's and VIP-B's grants and the
+// wildcards in ASSUMED_WILDCARDS.
 // ===================================================================================================
 
 /// `enterMarketForAccount(address,address)` on `Comptroller_HubSpoke`, to `CollateralGateway` only. The gateway passes
