@@ -13,13 +13,16 @@ import {
   BSTOCK_LIQUIDATOR_VBNB,
   BSTOCK_LIQUIDATOR_VWBNB,
   CLOSE_FACTOR,
+  COLLATERAL_FACTORS_RISK_STEWARD,
   CORE_COMPTROLLER,
   CRITICAL_GUARDIAN,
   CRITICAL_TIMELOCK,
   DEFAULT_PROXY_ADMIN,
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
+  IRM_RISK_STEWARD,
   ISOLATED_POOL_REGISTRY,
+  MARKET_CAPS_RISK_STEWARD,
   MAX_LOOPS_LIMIT,
   MIN_LIQUIDATABLE_COLLATERAL,
   NORMAL_TIMELOCK,
@@ -34,6 +37,7 @@ import {
   PROTOCOL_SHARE_RESERVE_LIVE_IMPL,
   RESILIENT_ORACLE,
   RISK_FUND_CONVERTER,
+  RISK_STEWARD_RECEIVER,
   SPOKE_COMPTROLLER,
   SPOKE_COMPTROLLER_BEACON,
   SPOKE_POOL_REGISTRY,
@@ -42,7 +46,13 @@ import {
 } from "../../vips/vip-671/addresses/bscmainnet";
 import vip671Part1Bscmainnet, { pendingDeployments } from "../../vips/vip-671/bscmainnet-part-1";
 import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES } from "../../vips/vip-671/permissions";
-import { ASSUMED_WILDCARDS, MUST_NOT_BE_WILDCARD, VIP_A_GRANTS } from "../../vips/vip-671/permissions-bscmainnet";
+import {
+  ASSUMED_WILDCARDS,
+  MUST_NOT_BE_WILDCARD,
+  RISK_STEWARD_GRANTS,
+  SET_INTEREST_RATE_MODEL,
+  VIP_A_GRANTS,
+} from "../../vips/vip-671/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BSTOCK_LIQUIDATOR_ABI from "./abi/BStockLiquidator.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
@@ -81,6 +91,24 @@ const KNOWN_ACCOUNTS = [
   OPERATOR,
   ORACLE_GUARDIAN,
   ISOLATED_POOL_REGISTRY,
+  COLLATERAL_FACTORS_RISK_STEWARD,
+  MARKET_CAPS_RISK_STEWARD,
+  IRM_RISK_STEWARD,
+];
+
+/// The steward each Risk Oracle update type must reach through the receiver, as VIP-592 configured it.
+const STEWARD_BY_UPDATE_TYPE = {
+  supplyCap: MARKET_CAPS_RISK_STEWARD,
+  borrowCap: MARKET_CAPS_RISK_STEWARD,
+  collateralFactors: COLLATERAL_FACTORS_RISK_STEWARD,
+  interestRateModel: IRM_RISK_STEWARD,
+};
+const RECEIVER_ABI = [
+  "function getRiskParameterConfig(string) view returns (tuple(bool active, uint256 debounce, uint256 timelock, address riskSteward))",
+];
+const STEWARD_ABI = [
+  "function RISK_STEWARD_RECEIVER() view returns (address)",
+  "function CORE_POOL_COMPTROLLER() view returns (address)",
 ];
 
 const ACM_IFACE = new ethers.utils.Interface(["function isAllowedToCall(address,string) view returns (bool)"]);
@@ -159,6 +187,28 @@ forking(FORK_BLOCK, async () => {
 
     it("holds none of the 19 VIP-A grants as a wildcard, so each grant is a real change", async () => {
       for (const { role, account } of VIP_A_GRANTS.filter(g => !sameAddress(g.account, PENDING))) {
+        expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.false;
+      }
+    });
+
+    it("routes each update type to the steward VIP-A grants, and each steward to that receiver", async () => {
+      const receiver = new ethers.Contract(RISK_STEWARD_RECEIVER, RECEIVER_ABI, ethers.provider);
+      for (const [updateType, steward] of Object.entries(STEWARD_BY_UPDATE_TYPE)) {
+        const config = await receiver.getRiskParameterConfig(updateType);
+        expect(config.active, `${updateType} active`).to.be.true;
+        expectAddress(config.riskSteward, steward, `${updateType} steward`);
+        const contract = new ethers.Contract(steward, STEWARD_ABI, ethers.provider);
+        expectAddress(await contract.RISK_STEWARD_RECEIVER(), RISK_STEWARD_RECEIVER, `${updateType} receiver`);
+      }
+      // These two branch on the Core comptroller and take the isolated-pools path for any other.
+      for (const steward of [COLLATERAL_FACTORS_RISK_STEWARD, IRM_RISK_STEWARD]) {
+        const contract = new ethers.Contract(steward, STEWARD_ABI, ethers.provider);
+        expectAddress(await contract.CORE_POOL_COMPTROLLER(), CORE_COMPTROLLER, `${steward} Core comptroller`);
+      }
+    });
+
+    it("holds none of the four Risk Steward grants as a wildcard, so each grant is a real change", async () => {
+      for (const { role, account } of RISK_STEWARD_GRANTS) {
         expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.false;
       }
     });
@@ -296,7 +346,7 @@ forking(FORK_BLOCK, async () => {
   testVip("VIP-671 [bscmainnet] VIP-A spoke pool infrastructure", await vip671Part1Bscmainnet(), {
     callbackAfterExecution: async txResponse => {
       // The mainnet ACM emits no PermissionGranted, so RoleGranted is the count, one per grant.
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_A_GRANTS.length]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_A_GRANTS.length + RISK_STEWARD_GRANTS.length]);
       // Both Ownable2Step contracts share the event, so it is counted through one ABI only.
       await expectEvents(
         txResponse,
@@ -334,6 +384,16 @@ forking(FORK_BLOCK, async () => {
     it("grants none of them as a wildcard", async () => {
       for (const { role, account } of VIP_A_GRANTS) {
         expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.false;
+      }
+    });
+
+    it("grants the four Risk Steward roles as wildcards, reaching the spoke comptroller", async () => {
+      for (const { role, account } of RISK_STEWARD_GRANTS) {
+        expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.true;
+      }
+      // The rate model role is checked on each market, and VIP-A lists none.
+      for (const { role, account } of RISK_STEWARD_GRANTS.filter(g => g.role !== SET_INTEREST_RATE_MODEL)) {
+        expect(await mayCall(SPOKE_COMPTROLLER, account, role), `${account} may ${role}`).to.be.true;
       }
     });
 

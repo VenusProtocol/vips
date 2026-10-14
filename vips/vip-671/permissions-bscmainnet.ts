@@ -2,11 +2,14 @@ import {
   APRO_ORACLE,
   ATLAS_ORACLE,
   BOUND_VALIDATOR,
+  COLLATERAL_FACTORS_RISK_STEWARD,
   COLLATERAL_GATEWAY,
   CRITICAL_GUARDIAN,
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
   HUB_STACKS,
+  IRM_RISK_STEWARD,
+  MARKET_CAPS_RISK_STEWARD,
   NORMAL_TIMELOCK,
   OPERATOR,
   PAUSE_GUARDIAN,
@@ -40,8 +43,8 @@ import {
 } from "./permissions";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain] — ACM grants for VIP-A (on `Comptroller_HubSpoke`), VIP-B (on each Spoke source) and VIP-C
-// (one, to `CollateralGateway`), and what each relies on.
+// VIP-671 [BNB Chain] — ACM grants for VIP-A (19 on `Comptroller_HubSpoke`, and four Risk Steward wildcards), VIP-B
+// (on each Spoke source) and VIP-C (one, to `CollateralGateway`), and what each relies on.
 //
 // Every string is the literal the checking contract (`SpokeComptroller`, `PoolRegistry`, `VToken`, `YieldGroup`,
 // `Hub`) passes to `_checkAccessAllowed`, imported from ./permissions.ts where it is shared.
@@ -87,6 +90,42 @@ export const VIP_A_GRANTS: Grant[] = [
   ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
   ...CRITICAL_GUARDIAN_GRANTS.map(role => ({ role, account: CRITICAL_GUARDIAN })),
   ...PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
+];
+
+// ---------------------------------------------------------------------------------------------------
+// VIP-A: the Risk Steward wildcards. Unlike the 19 above, these four are granted against address(0) on purpose.
+//
+// Each steward reads the market's comptroller and, for any comptroller other than the Core pool's, calls the
+// isolated-pools setter below. A wildcard covers the spoke comptroller and every spoke market `028` deploys and VIP-C
+// lists, and also every isolated-pools comptroller and vToken on this chain. The Normal and Fast-track timelocks
+// already hold all four as wildcards and the Critical Guardian the first three; the stewards hold none (read with
+// `isAllowedToCall` from an unrelated sender on 2026-10-14, block 127,593,829).
+//
+// The Core pool's cap and rate model setters check other strings (`_setMarketSupplyCaps`, `_setMarketBorrowCaps`,
+// `_setInterestRateModel`), so three of the wildcards do not reach it. Its Core-only
+// `setCollateralFactor(address,uint256,uint256)` checks the same string as the isolated pools, so the fourth does.
+// The collateral factors steward never calls it: for the Core comptroller it calls the pool-id form VIP-592 granted.
+// The steward proxies can only be upgraded by the Normal Timelock, through DEFAULT_PROXY_ADMIN.
+// ---------------------------------------------------------------------------------------------------
+
+/// The isolated-pools `VToken` rate model setter.
+export const SET_INTEREST_RATE_MODEL = "setInterestRateModel(address)";
+
+/// The ACM's any-contract key. Deliberate here; PENDING has the same value but means "not deployed yet".
+export const ANY_CONTRACT = "0x0000000000000000000000000000000000000000";
+
+/// One wildcard per role, in proposal order.
+///
+/// RATE MODELS: a spoke market, like every isolated-pools market, calls `getBorrowRate` with four arguments (bad debt
+/// last), while a Core pool model takes three. A Core model set on a spoke market makes every later accrual revert,
+/// `setInterestRateModel` included because it accrues first, so the market stays stuck until SpokeVTokenBeacon is
+/// upgraded. The receiver never applies a rate model update directly: it waits out the timelock (6 hours today), and
+/// only its whitelisted executors can then execute or reject it.
+export const RISK_STEWARD_GRANTS: Grant[] = [
+  { role: SET_COLLATERAL_FACTOR, account: COLLATERAL_FACTORS_RISK_STEWARD },
+  { role: SET_MARKET_SUPPLY_CAPS, account: MARKET_CAPS_RISK_STEWARD },
+  { role: SET_MARKET_BORROW_CAPS, account: MARKET_CAPS_RISK_STEWARD },
+  { role: SET_INTEREST_RATE_MODEL, account: IRM_RISK_STEWARD },
 ];
 
 // ---------------------------------------------------------------------------------------------------

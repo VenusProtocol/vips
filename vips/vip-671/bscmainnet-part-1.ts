@@ -22,10 +22,10 @@ import {
   SPOKE_VTOKEN_BEACON,
 } from "./addresses/bscmainnet";
 import { giveCallPermission } from "./permissions";
-import { VIP_A_GRANTS } from "./permissions-bscmainnet";
+import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_A_GRANTS } from "./permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain] — Hub-Funded Spoke pool, VIP-A: spoke pool infrastructure. 27 commands, no markets.
+// VIP-671 [BNB Chain] — Hub-Funded Spoke pool, VIP-A: spoke pool infrastructure. 31 commands, no markets.
 //
 // Part 1 of 3, all in this directory. VIP-B (part 2, Hub infrastructure) does not depend on this one. VIP-C
 // (part 3, markets and Hub wiring) needs both executed first.
@@ -141,6 +141,10 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
 4. Upgrade the **ProtocolShareReserve** so it can resolve markets through more than one pool registry, and register the spoke pool registry next to the existing one. Without this, every liquidation in the pool would revert. The existing isolated pools are unaffected: their registry stays the primary one and is still checked first.
 5. Register the pool as **bStock index**, with a 50% close factor, a 10% liquidation incentive and a minimum liquidatable collateral of $100.
 6. Upgrade **BStockLiquidator**, the atomic liquidator for bStock collateral, so it can also serve this pool. Its behaviour for the Core pool is unchanged.
+7. Let the **Risk Stewards** apply collateral factor, supply cap, borrow cap and interest rate model updates from the Risk Oracle to this pool, as they already do on the Core pool. Each permission is granted on every contract (an ACM wildcard), so it covers the markets this pool lists later and also reaches the existing isolated pools on BNB Chain:
+   - CollateralFactorsRiskSteward: \`setCollateralFactor(address,uint256,uint256)\`
+   - MarketCapsRiskSteward: \`setMarketSupplyCaps(address[],uint256[])\` and \`setMarketBorrowCaps(address[],uint256[])\`
+   - IRMRiskSteward: \`setInterestRateModel(address)\`
 
 #### Notes
 
@@ -148,12 +152,15 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
 - No ProtocolShareReserve distribution changes. Income from this pool will split across the same destinations as the rest of the protocol.
 - The ProtocolShareReserve upgrade also lets governance remove an additional registry and raise the loop limit, and makes removing a distribution target revert unless the target exists and its percentage is already zero.
 - After execution, the BStockLiquidator owner will point it at the spoke pool registry and set its flash loan sources, before any collateral market opens.
+- The Normal and Fast-track timelocks already hold the four Risk Steward permissions on every contract, and the Critical Guardian the first three.
+- Interest rate model updates from the Risk Stewards always wait for the RiskStewardReceiver timelock. They must name an isolated-pools model: a Core pool model would stop the market from accruing interest.
 
 #### References
 
 - [Spoke pool contracts](https://github.com/VenusProtocol/isolated-pools/pull/559)
 - [ProtocolShareReserve multi-registry support](https://github.com/VenusProtocol/protocol-reserve/pull/168)
-- [BStockLiquidator spoke pool support](https://github.com/VenusProtocol/venus-protocol/pull/707)`,
+- [BStockLiquidator spoke pool support](https://github.com/VenusProtocol/venus-protocol/pull/707)
+- [Risk Stewards (VIP-592)](https://github.com/VenusProtocol/vips/tree/main/vips/vip-592)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -244,6 +251,14 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
       signature: "upgrade(address,address)",
       params: [BSTOCK_LIQUIDATOR, BSTOCK_LIQUIDATOR_IMPL],
     },
+
+    // -------------------------------------------------------------------------------------------
+    // 7. Four Risk Steward grants, each against address(0): a wildcard on purpose, unlike step 2. It covers the
+    //    markets `028` deploys and VIP-C lists, with no further grant, and every isolated pool on this chain. Nothing
+    //    above depends on these. See ./permissions-bscmainnet.ts for the scope, the Core pool's
+    //    `setCollateralFactor(address,uint256,uint256)`, and why a Core rate model must never reach a spoke market.
+    // -------------------------------------------------------------------------------------------
+    ...RISK_STEWARD_GRANTS.map(({ role, account }) => giveCallPermission(ACM, ANY_CONTRACT, role, account)),
   ];
 
   return makeProposal(commands, meta, ProposalType.REGULAR);

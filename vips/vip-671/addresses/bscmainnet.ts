@@ -2,13 +2,20 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
+import {
+  COLLATERALFACTORS_STEWARD,
+  IRM_STEWARD,
+  MARKETCAP_STEWARD,
+  RISK_STEWARD_RECEIVER,
+} from "../../vip-592/bscmainnet";
+
 // ===================================================================================================
 // VIP-671 [BNB Chain] — Hub-Funded Spoke pool address book, for VIP-A, VIP-B and VIP-C.
 //
 // VIP-A (part 1) stands up the empty pool: ownership, ACM grants, both oracles, the ProtocolShareReserve
-// upgrade, `addPool`, and the `BStockLiquidator` upgrade. It lists no market. VIP-B (part 2) upgrades the
-// Liquidity Hub, swaps the live adapters and registers an empty Spoke source on each Hub. VIP-C (part 3) lists
-// the five markets and connects each liquidity market to its Hub.
+// upgrade, `addPool`, the `BStockLiquidator` upgrade and the Risk Steward wildcards. It lists no market.
+// VIP-B (part 2) upgrades the Liquidity Hub, swaps the live adapters and registers an empty Spoke source on each
+// Hub. VIP-C (part 3) lists the five markets and connects each liquidity market to its Hub.
 //
 // ---------------------------------------------------------------------------------------------------
 // STATUS: NOT ADDRESS-COMPLETE.
@@ -74,6 +81,16 @@ export const ORACLE_GUARDIAN = "0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF";
 /// The Core pool Comptroller (Unitroller). Constructor immutable of `BStockLiquidator` and of the
 /// ProtocolShareReserve, read back to prove both new implementations keep it.
 export const CORE_COMPTROLLER = UNITROLLER;
+
+/// The Risk Steward contracts from VIP-592, each a transparent proxy behind DEFAULT_PROXY_ADMIN. The receiver routes
+/// Risk Oracle updates to them: both caps to the caps steward, collateral factors to the collateral factors steward
+/// and rate models to the rate model steward. Each reads the market's comptroller and takes the isolated-pools path
+/// for any comptroller other than CORE_COMPTROLLER. VIP-A grants them four wildcards (../permissions-bscmainnet.ts).
+/// Routing and each steward's receiver read back on 2026-10-14 (block 127,593,754).
+export { RISK_STEWARD_RECEIVER };
+export const MARKET_CAPS_RISK_STEWARD = MARKETCAP_STEWARD;
+export const COLLATERAL_FACTORS_RISK_STEWARD = COLLATERALFACTORS_STEWARD;
+export const IRM_RISK_STEWARD = IRM_STEWARD;
 
 /// The isolated-pools registry. Referenced only to make the contrast explicit: this pool is NOT listed here,
 /// and the wildcard ACM grants this address holds name it as the account, so none of them carry over to the
