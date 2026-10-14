@@ -17,6 +17,7 @@ import {
   BOUND_UPPER_RATIO,
   BOUND_VALIDATOR,
   BSTOCK_LIQUIDATOR,
+  COLLATERAL_FACTORS_RISK_STEWARD,
   COLLATERAL_GATEWAY,
   COLLATERAL_MARKETS,
   CORE_COMPTROLLER,
@@ -26,6 +27,7 @@ import {
   FAST_TRACK_TIMELOCK,
   LIQUIDITY_IRM,
   LIQUIDITY_MARKETS,
+  MARKET_CAPS_RISK_STEWARD,
   NORMAL_TIMELOCK,
   OPERATOR,
   ORACLE_GUARDIAN,
@@ -35,6 +37,8 @@ import {
   PROTOCOL_SHARE_RESERVE,
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
+  RISK_ORACLE,
+  RISK_STEWARD_RECEIVER,
   SEED_RECEIVER,
   SHORTFALL,
   SPOKE_COMPTROLLER,
@@ -122,6 +126,24 @@ const COLLATERAL_SUPPLY = ethers.utils.parseUnits("1", 18);
 
 /// 10 ** (18 + underlying decimals - 8), with 18-decimal underlyings. `028` initializes every market with it.
 const INITIAL_EXCHANGE_RATE = ethers.utils.parseUnits("1", 28);
+
+/// The Risk Oracle, receiver and steward calls VIP-C's steward test makes (governance-contracts, as deployed).
+const RISK_ORACLE_ABI = [
+  "function publishRiskParameterUpdate(string,bytes,string,address,uint96,uint32,bytes)",
+  "function updateCounter() view returns (uint256)",
+  "function authorizedSenders(address) view returns (bool)",
+];
+const RISK_STEWARD_RECEIVER_ABI = [
+  "function processUpdate(uint256)",
+  "function executeRegisteredUpdate(uint256)",
+  "function whitelistedExecutors(address) view returns (bool)",
+  "function paused() view returns (bool)",
+  "function getRiskParameterConfig(string) view returns (tuple(bool active, uint256 debounce, uint256 timelock, address riskSteward))",
+  "event UpdateRegistered(uint256 indexed updateId, uint256 unlockTime, string updateType, address indexed market)",
+  "event UpdateExecuted(uint256 indexed updateId)",
+  "error UpdateNotUnlocked()",
+];
+const RISK_STEWARD_ABI = ["function safeDeltaBps() view returns (uint256)"];
 
 const ACM_IFACE = new ethers.utils.Interface(["function isAllowedToCall(address,string) view returns (bool)"]);
 const mayCall = async (onBehalfOf: string, account: string, signature: string): Promise<boolean> => {
@@ -697,6 +719,101 @@ forking(FORK_BLOCK, async () => {
         await v.connect(source).redeem(1);
         expect(await v.balanceOf(m.stack.spokeSource), `${m.symbol} redeem`).to.equal(held.sub(1));
       }
+    });
+  });
+
+  // The Risk Stewards VIP-A grants, on one liquidity and one collateral market, through the path they run on mainnet:
+  // the Operator publishes to the Risk Oracle as VIP-592's authorised sender, the receiver routes the update to its
+  // steward, and the steward calls the isolated-pools setter. Safe deltas and timelocks are read from chain. Runs
+  // last: it moves caps, a collateral factor, a rate model and the clock.
+  describe("Post-VIP: Risk Stewards, from the Risk Oracle to the spoke markets", () => {
+    const [liquidity] = LIQUIDITY_MARKETS;
+    const [collateral] = COLLATERAL_MARKETS;
+    const riskOracle = new ethers.Contract(RISK_ORACLE, RISK_ORACLE_ABI, ethers.provider);
+    const receiver = new ethers.Contract(RISK_STEWARD_RECEIVER, RISK_STEWARD_RECEIVER_ABI, ethers.provider);
+    const capsSteward = new ethers.Contract(MARKET_CAPS_RISK_STEWARD, RISK_STEWARD_ABI, ethers.provider);
+    const factorsSteward = new ethers.Contract(COLLATERAL_FACTORS_RISK_STEWARD, RISK_STEWARD_ABI, ethers.provider);
+    let operator: Awaited<ReturnType<typeof initMainnetUser>>;
+
+    const abi = ethers.utils.defaultAbiCoder;
+    const encodeUint = (value: BigNumber) => abi.encode(["uint256"], [value]);
+    const encodeFactors = (cf: BigNumber, lt: BigNumber) => abi.encode(["uint256", "uint256"], [cf, lt]);
+    const encodeAddress = (address: string) => abi.encode(["address"], [address]);
+
+    /// Publishes one update as the Operator, for no eMode pool and this chain, and returns its id.
+    const publish = async (updateType: string, market: string, newValue: string): Promise<BigNumber> => {
+      const id: BigNumber = (await riskOracle.updateCounter()).add(1);
+      await riskOracle.connect(operator).publishRiskParameterUpdate("sim", newValue, updateType, market, 0, 0, "0x");
+      return id;
+    };
+
+    /// Processes an update the steward does not apply directly, proves it is registered and still locked, then waits
+    /// out its timelock.
+    const registerAndWait = async (updateType: string, id: BigNumber) => {
+      await expect(receiver.connect(operator).processUpdate(id)).to.emit(receiver, "UpdateRegistered");
+      await expect(receiver.connect(operator).executeRegisteredUpdate(id)).to.be.revertedWithCustomError(
+        receiver,
+        "UpdateNotUnlocked",
+      );
+      const { timelock } = await receiver.getRiskParameterConfig(updateType);
+      await ethers.provider.send("evm_increaseTime", [timelock.add(1).toNumber()]);
+      await ethers.provider.send("evm_mine", []);
+    };
+
+    before(async () => {
+      operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+    });
+
+    it("lets the Operator publish to the Risk Oracle and execute on the receiver", async () => {
+      expect(await riskOracle.authorizedSenders(OPERATOR)).to.be.true;
+      expect(await receiver.whitelistedExecutors(OPERATOR)).to.be.true;
+      expect(await receiver.paused()).to.be.false;
+    });
+
+    // Before any time travel: `setCollateralFactor` reads the collateral's price.
+    it("applies a collateral factor change within the safe delta directly", async () => {
+      const current = await comptroller.markets(collateral.vToken);
+      const ratio = 10000 - (await factorsSteward.safeDeltaBps()).div(2).toNumber();
+      const nextCf = current.collateralFactorMantissa.mul(ratio).div(10000);
+      const nextLt = current.liquidationThresholdMantissa.mul(ratio).div(10000);
+      const id = await publish("collateralFactors", collateral.vToken, encodeFactors(nextCf, nextLt));
+      await expect(receiver.connect(operator).processUpdate(id)).to.emit(receiver, "UpdateExecuted").withArgs(id);
+      const market = await comptroller.markets(collateral.vToken);
+      expect(market.collateralFactorMantissa).to.equal(nextCf);
+      expect(market.liquidationThresholdMantissa).to.equal(nextLt);
+    });
+
+    it("applies a supply cap change within the safe delta directly", async () => {
+      const current: BigNumber = await comptroller.supplyCaps(liquidity.vToken);
+      const next = current.add(current.mul(await capsSteward.safeDeltaBps()).div(20000));
+      const id = await publish("supplyCap", liquidity.vToken, encodeUint(next));
+      await expect(receiver.connect(operator).processUpdate(id)).to.emit(receiver, "UpdateExecuted").withArgs(id);
+      expect(await comptroller.supplyCaps(liquidity.vToken)).to.equal(next);
+    });
+
+    it("timelocks a borrow cap change outside the safe delta, then applies it", async () => {
+      const current: BigNumber = await comptroller.borrowCaps(liquidity.vToken);
+      const id = await publish("borrowCap", liquidity.vToken, encodeUint(current.mul(3)));
+      await registerAndWait("borrowCap", id);
+      expect(await comptroller.borrowCaps(liquidity.vToken)).to.equal(current);
+      await expect(receiver.connect(operator).executeRegisteredUpdate(id)).to.emit(receiver, "UpdateExecuted");
+      expect(await comptroller.borrowCaps(liquidity.vToken)).to.equal(current.mul(3));
+    });
+
+    it("timelocks a rate model change, then moves a collateral market onto the liquidity JumpRateModelV2", async () => {
+      // An isolated-pools model, as every spoke market needs: a spoke market calls `getBorrowRate` with four
+      // arguments, and a Core pool model takes three.
+      const v = vTokenOf(collateral.vToken);
+      expectAddress(await v.interestRateModel(), collateral.interestRateModel);
+      const id = await publish("interestRateModel", collateral.vToken, encodeAddress(liquidity.interestRateModel));
+      await registerAndWait("interestRateModel", id);
+      expectAddress(await v.interestRateModel(), collateral.interestRateModel);
+      await expect(receiver.connect(operator).executeRegisteredUpdate(id)).to.emit(receiver, "UpdateExecuted");
+      expectAddress(await v.interestRateModel(), liquidity.interestRateModel);
+
+      // The market accrues through the new model in a later block.
+      await ethers.provider.send("evm_mine", []);
+      await expect(v.connect(operator).accrueInterest()).to.emit(v, "AccrueInterest");
     });
   });
 });

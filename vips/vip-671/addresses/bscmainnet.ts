@@ -6,6 +6,7 @@ import {
   COLLATERALFACTORS_STEWARD,
   IRM_STEWARD,
   MARKETCAP_STEWARD,
+  RISK_ORACLE,
   RISK_STEWARD_RECEIVER,
 } from "../../vip-592/bscmainnet";
 
@@ -86,8 +87,9 @@ export const CORE_COMPTROLLER = UNITROLLER;
 /// Risk Oracle updates to them: both caps to the caps steward, collateral factors to the collateral factors steward
 /// and rate models to the rate model steward. Each reads the market's comptroller and takes the isolated-pools path
 /// for any comptroller other than CORE_COMPTROLLER. VIP-A grants them four wildcards (../permissions-bscmainnet.ts).
-/// Routing and each steward's receiver read back on 2026-10-14 (block 127,593,754).
-export { RISK_STEWARD_RECEIVER };
+/// Routing and each steward's receiver read back on 2026-10-14 (block 127,593,754). The Operator is the Risk Oracle's
+/// authorised sender and one of the receiver's whitelisted executors; VIP-C's simulation runs the stewards as it.
+export { RISK_ORACLE, RISK_STEWARD_RECEIVER };
 export const MARKET_CAPS_RISK_STEWARD = MARKETCAP_STEWARD;
 export const COLLATERAL_FACTORS_RISK_STEWARD = COLLATERALFACTORS_STEWARD;
 export const IRM_RISK_STEWARD = IRM_STEWARD;
