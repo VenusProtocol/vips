@@ -295,7 +295,8 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-671 [bscmainnet] VIP-A spoke pool infrastructure", await vip671Part1Bscmainnet(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [VIP_A_GRANTS.length]);
+      // The mainnet ACM emits no PermissionGranted, so RoleGranted is the count, one per grant.
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_A_GRANTS.length]);
       // Both Ownable2Step contracts share the event, so it is counted through one ABI only.
       await expectEvents(
         txResponse,

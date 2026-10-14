@@ -237,6 +237,48 @@ export const ASSUMED_GUARDIAN_ROLES = [
   "setMarketBorrowCaps(address[],uint256[])",
 ];
 
+// ===================================================================================================
+// Spoke source (`SpokeSource_<asset>`) role strings, shared by both chains.
+//
+// The Spoke yield family is the generic `YieldGroup` behind a beacon of its own, so its gated surface is
+// exactly the Core and Flux one: eight `YieldGroupBase` setters plus three `YieldGroup` ones. Each string is
+// the literal passed to `_checkAccessAllowed(...)` in venus-liquidity-hub#22, the code `SpokeBeacon` serves:
+//   contracts/YieldGroup/base/YieldGroupBase.sol:112 to :246  addResource ... sweep
+//   contracts/YieldGroup/YieldGroup.sol:35, :47, :62          raiseResourceCap, lowerResourceCap, setBlocksPerYear
+// The generic `YieldGroup` has no `forceRemoveResource` (FRV and Centrifuge only), so it is absent.
+// ===================================================================================================
+
+export const ADD_RESOURCE = "addResource(address,address)";
+export const REMOVE_RESOURCE = "removeResource(address)";
+export const UPDATE_RESOURCE_ADAPTER = "updateResourceAdapter(address,address)";
+export const SET_INNER_DEPOSIT_QUEUE = "setInnerDepositQueue(address[])";
+export const SET_INNER_WITHDRAW_QUEUE = "setInnerWithdrawQueue(address[])";
+export const PAUSE_RESOURCE = "pauseResource(address)";
+export const UNPAUSE_RESOURCE = "unpauseResource(address)";
+export const SWEEP = "sweep(address,address)";
+export const RAISE_RESOURCE_CAP = "raiseResourceCap(address,uint256)";
+export const LOWER_RESOURCE_CAP = "lowerResourceCap(address,uint256)";
+export const SET_BLOCKS_PER_YEAR = "setBlocksPerYear(uint256)";
+
+export const YIELD_GROUP_BASE_ROLES = [
+  ADD_RESOURCE,
+  REMOVE_RESOURCE,
+  UPDATE_RESOURCE_ADAPTER,
+  SET_INNER_DEPOSIT_QUEUE,
+  SET_INNER_WITHDRAW_QUEUE,
+  PAUSE_RESOURCE,
+  UNPAUSE_RESOURCE,
+  SWEEP,
+];
+
+/// The full gated surface of a Spoke source.
+export const SPOKE_SOURCE_ROLES = [
+  ...YIELD_GROUP_BASE_ROLES,
+  RAISE_RESOURCE_CAP,
+  LOWER_RESOURCE_CAP,
+  SET_BLOCKS_PER_YEAR,
+];
+
 /// ACM `giveCallPermission` command builder.
 export const giveCallPermission = (acm: string, contract: string, signature: string, account: string) => ({
   target: acm,

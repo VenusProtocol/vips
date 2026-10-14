@@ -162,8 +162,8 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
   const commands: Command[] = [
     // -------------------------------------------------------------------------------------------
     // 1. Take ownership of both Ownable2Step contracts. Everything `onlyOwner` below depends on these.
-    //    The two beacons are plain `Ownable` and handed over inside their deploy transactions, and the lens
-    //    has no owner, so none of the three needs a command.
+    //    The two beacons are plain `Ownable` and handed over by their deploy scripts, and the lens has no
+    //    owner, so none of the three needs a command.
     // -------------------------------------------------------------------------------------------
     { target: SPOKE_POOL_REGISTRY, signature: "acceptOwnership()", params: [] },
     { target: SPOKE_COMPTROLLER, signature: "acceptOwnership()", params: [] },

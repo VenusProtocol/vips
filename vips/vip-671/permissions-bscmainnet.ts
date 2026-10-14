@@ -2,17 +2,23 @@ import {
   CRITICAL_GUARDIAN,
   FAST_TRACK_TIMELOCK,
   NORMAL_TIMELOCK,
+  OPERATOR,
   PAUSE_GUARDIAN,
   SPOKE_POOL_REGISTRY,
 } from "./addresses/bscmainnet";
 import {
+  LOWER_RESOURCE_CAP,
+  PAUSE_RESOURCE,
   PAUSE_ROLE,
+  RAISE_RESOURCE_CAP,
   REGISTRY_DRIVEN_ROLES,
   ROUTER_ROLES,
   SET_ALLOWED_LIQUIDATOR,
   SET_CLOSE_FACTOR,
   SET_COLLATERAL_FACTOR,
   SET_FORCED_LIQUIDATION,
+  SET_INNER_DEPOSIT_QUEUE,
+  SET_INNER_WITHDRAW_QUEUE,
   SET_LIQUIDATION_ALLOWLIST_ENABLED,
   SET_LIQUIDATION_INCENTIVE,
   SET_MARKET_BORROW_CAPS,
@@ -20,18 +26,22 @@ import {
   SET_MARKET_SUPPLY_CAPS,
   SET_MIN_LIQUIDATABLE_COLLATERAL,
   SPOKE_COMPTROLLER_ROLES,
+  SPOKE_SOURCE_ROLES,
   UNLIST_ROLE,
+  UNPAUSE_RESOURCE,
+  UPDATE_RESOURCE_ADAPTER,
 } from "./permissions";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain] — VIP-A ACM grants on `Comptroller_HubSpoke`, and the wildcards it relies on.
+// VIP-671 [BNB Chain] — ACM grants for VIP-A (on `Comptroller_HubSpoke`) and VIP-B (on each Spoke source), and
+// what each relies on.
 //
-// Every string is the literal `SpokeComptroller` / `PoolRegistry` / `VToken` passes to
-// `_checkAccessAllowed`, imported from ./permissions.ts rather than written out again.
+// Every string is the literal the checking contract (`SpokeComptroller`, `PoolRegistry`, `VToken`, `YieldGroup`,
+// `Hub`) passes to `_checkAccessAllowed`, imported from ./permissions.ts where it is shared.
 //
-// Read from the ACM 0x4788…3555 on 2026-10-13 (block 127,396,467) with `isAllowedToCall(account, role)`
+// VIP-A's: read from the ACM 0x4788…3555 on 2026-10-13 (block 127,396,467) with `isAllowedToCall(account, role)`
 // called from an UNRELATED `msg.sender`, so a `true` proves an address(0) wildcard rather than a grant against
-// one contract. The mainnet ACM does not expose `hasPermission`.
+// one contract. The mainnet ACM does not expose `hasPermission`. VIP-B's are read in its own section below.
 // ===================================================================================================
 
 type Grant = { role: string; account: string };
@@ -125,3 +135,41 @@ export const MUST_NOT_BE_WILDCARD = [
   ...ROUTER_ROLES,
   "setActionsPaused(address[],uint8[],bool)",
 ];
+
+// ===================================================================================================
+// VIP-B: ACM grants on each Spoke source, and the Hub and yield-group roles it calls with.
+//
+// Read from the ACM on 2026-10-14 (block 127,532,699) with `hasRole(keccak256(contract, role), account)` for the
+// exact grant and `hasRole(keccak256(address(0), role), account)` for the wildcard, for the Normal, Fast-track and
+// Critical timelocks, both guardians, the Oracle Guardian and the Operator, on all eleven live yield groups and all
+// three Hubs. No account holds any of these roles as a wildcard.
+// ===================================================================================================
+
+/// On all six live Core and Flux sources (the same generic `YieldGroup` as Spoke), the Normal Timelock holds all
+/// eleven source roles, the Pause Guardian three and the Operator six; the Fast-track and Critical timelocks, the
+/// Critical Guardian and the Oracle Guardian hold none. Each Spoke source gets the same.
+export const SPOKE_SOURCE_NORMAL_TIMELOCK_GRANTS = SPOKE_SOURCE_ROLES;
+
+/// Incident levers. The Pause Guardian also holds `pauseYieldGroup` on every Hub.
+export const SPOKE_SOURCE_PAUSE_GUARDIAN_GRANTS = [UPDATE_RESOURCE_ADAPTER, PAUSE_RESOURCE, UNPAUSE_RESOURCE];
+
+/// Routing inside the source. Not `addResource`, which stays with the Normal Timelock.
+export const SPOKE_SOURCE_OPERATOR_GRANTS = [
+  SET_INNER_DEPOSIT_QUEUE,
+  SET_INNER_WITHDRAW_QUEUE,
+  PAUSE_RESOURCE,
+  UNPAUSE_RESOURCE,
+  RAISE_RESOURCE_CAP,
+  LOWER_RESOURCE_CAP,
+];
+
+/// The 20 grants on one Spoke source. VIP-B issues them on each of the three, 60 in all, never against address(0).
+export const SPOKE_SOURCE_GRANTS: Grant[] = [
+  ...SPOKE_SOURCE_NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
+  ...SPOKE_SOURCE_PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
+  ...SPOKE_SOURCE_OPERATOR_GRANTS.map(role => ({ role, account: OPERATOR })),
+];
+
+/// Roles VIP-B calls on existing contracts. The Normal Timelock holds each as an exact grant, not a wildcard.
+export const HUB_ROLES_CALLED = ["addYieldGroup(address,uint256,uint16)", "setOuterWithdrawQueue(address[])"];
+export const YIELD_GROUP_ROLES_CALLED = [UPDATE_RESOURCE_ADAPTER];
