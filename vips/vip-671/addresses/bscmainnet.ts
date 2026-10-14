@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
@@ -386,7 +387,19 @@ export type HubStack = {
   withdrawQueueBefore: string[];
   /// Read on chain. VIP-B does not change it.
   depositQueue: string[];
+  /// The Spoke source's caps, set by VIP-B's `addYieldGroup`. The effective cap is the lower of the absolute cap and
+  /// the percentage of the Hub's TVL.
+  spokeAbsoluteCap: BigNumber;
+  spokePercentageCapBps: number;
 };
+
+/// Spoke source caps from the risk listing sheet: 50% of the Hub's TVL, and an absolute cap of half the Core market's
+/// supply cap (600M USDT, 180M USDC, 60M U, read on 2026-10-14).
+///
+/// Registered with these final values, so no later raise is needed. Nothing reaches a source before VIP-C: the Hub
+/// deposits only through its deposit queue, which VIP-B leaves alone, a source with no resource refunds any deposit,
+/// and a reallocation into it reverts `ResourceNotRegistered`.
+const SPOKE_PERCENTAGE_CAP_BPS = 5000;
 
 /// The three Hubs. VIP-B appends each Spoke source to the end of its Hub's withdraw queue, the order the VIP
 /// document sets (§3.4).
@@ -398,6 +411,8 @@ export const HUB_STACKS: HubStack[] = [
     spokeSource: SPOKE_SOURCE_USDT,
     withdrawQueueBefore: [FLUX_SOURCE_USDT, CORE_SOURCE_USDT, FRV_SOURCE_USDT, CENTRIFUGE_SOURCE_USDT],
     depositQueue: [CORE_SOURCE_USDT, FLUX_SOURCE_USDT],
+    spokeAbsoluteCap: parseUnits("300000000", 18),
+    spokePercentageCapBps: SPOKE_PERCENTAGE_CAP_BPS,
   },
   {
     name: "Hub_USDC",
@@ -406,6 +421,8 @@ export const HUB_STACKS: HubStack[] = [
     spokeSource: SPOKE_SOURCE_USDC,
     withdrawQueueBefore: [FLUX_SOURCE_USDC, CORE_SOURCE_USDC, FRV_SOURCE_USDC, CENTRIFUGE_SOURCE_USDC],
     depositQueue: [CORE_SOURCE_USDC, FLUX_SOURCE_USDC],
+    spokeAbsoluteCap: parseUnits("90000000", 18),
+    spokePercentageCapBps: SPOKE_PERCENTAGE_CAP_BPS,
   },
   {
     name: "Hub_U",
@@ -414,14 +431,10 @@ export const HUB_STACKS: HubStack[] = [
     spokeSource: SPOKE_SOURCE_U,
     withdrawQueueBefore: [FLUX_SOURCE_U, CORE_SOURCE_U, FRV_SOURCE_U],
     depositQueue: [CORE_SOURCE_U, FLUX_SOURCE_U],
+    spokeAbsoluteCap: parseUnits("30000000", 18),
+    spokePercentageCapBps: SPOKE_PERCENTAGE_CAP_BPS,
   },
 ];
-
-/// Both caps start at 0, so the effective cap is 0 until VIP-C raises it. `raiseYieldGroupCap` needs both values
-/// at or above the current ones, so the percentage starts at 0, not at the 10000 sentinel that disables it: from
-/// 10000, any lower percentage would need `lowerYieldGroupCap` first.
-export const SPOKE_ABSOLUTE_CAP = 0;
-export const SPOKE_PERCENTAGE_CAP_BPS = 0;
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-B: ACM batching through the AuxiliaryCommandsAggregator (VIP-628). See ../bscmainnet-part-2.ts for why.

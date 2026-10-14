@@ -23,9 +23,7 @@ import {
   OPERATOR,
   ORACLE_GUARDIAN,
   PAUSE_GUARDIAN,
-  SPOKE_ABSOLUTE_CAP,
   SPOKE_BEACON,
-  SPOKE_PERCENTAGE_CAP_BPS,
   SPOKE_SOURCE_GRANTS_BATCH_INDEX,
   SPOKE_SOURCE_IMPL,
 } from "../../vips/vip-671/addresses/bscmainnet";
@@ -443,15 +441,18 @@ forking(FORK_BLOCK, async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, AUX_COMMANDS_AGGREGATOR)).to.be.false;
     });
 
-    it("registers each Spoke source unpaused with both caps at 0, so its effective cap is 0", async () => {
-      for (const { name, hub, spokeSource } of HUB_STACKS) {
+    it("registers each Spoke source unpaused with its caps", async () => {
+      for (const { name, hub, spokeSource, spokeAbsoluteCap, spokePercentageCapBps } of HUB_STACKS) {
         const h = hubOf(hub);
         const config = await h.yieldGroupConfig(spokeSource);
-        expect(config.absoluteCap, `${name} absoluteCap`).to.equal(SPOKE_ABSOLUTE_CAP);
-        expect(config.percentageCapBps, `${name} percentageCapBps`).to.equal(SPOKE_PERCENTAGE_CAP_BPS);
+        expect(config.absoluteCap, `${name} absoluteCap`).to.equal(spokeAbsoluteCap);
+        expect(config.percentageCapBps, `${name} percentageCapBps`).to.equal(spokePercentageCapBps);
         expect(config.paused, `${name} paused`).to.be.false;
         expect(config.registered, `${name} registered`).to.be.true;
-        expect(await h.yieldGroupEffectiveCap(spokeSource), `${name} effective cap`).to.equal(0);
+        // `Hub._effectiveCap`: the lower of the absolute cap and the percentage of `totalAssets()`.
+        const byPercentage = (await h.totalAssets()).mul(spokePercentageCapBps).div(10000);
+        const expected = byPercentage.lt(spokeAbsoluteCap) ? byPercentage : spokeAbsoluteCap;
+        expect(await h.yieldGroupEffectiveCap(spokeSource), `${name} effective cap`).to.equal(expected);
       }
     });
 

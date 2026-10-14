@@ -11,9 +11,7 @@ import {
   HUB_IMPL,
   HUB_STACKS,
   PENDING,
-  SPOKE_ABSOLUTE_CAP,
   SPOKE_BEACON,
-  SPOKE_PERCENTAGE_CAP_BPS,
   SPOKE_SOURCE_GRANTS_BATCH_INDEX,
   SPOKE_SOURCE_IMPL,
 } from "./addresses/bscmainnet";
@@ -39,8 +37,8 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 // this must be REGULAR.
 //
 // GAS, from a bscmainnet fork at block 127,532,000 with the Hub implementation and Spoke family deployed on the
-// fork from venus-liquidity-hub#22: propose() about 4.46M (26.6% of the cap), queue() 1.33M, execute() 5.24M
-// (31.2%). Storing the batch is a separate transaction: addBatch 10.37M (61.8%).
+// fork from venus-liquidity-hub#22: propose() about 4.59M (27.4% of the cap), queue() 1.33M, execute() 5.30M
+// (31.6%). Storing the batch is a separate transaction: addBatch 10.37M (61.8%).
 //
 // ---------------------------------------------------------------------------------------------------
 // WHAT CHANGES FOR THE LIVE HUBS
@@ -57,8 +55,8 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 //  - `addYieldGroup` before `setOuterWithdrawQueue` on the same Hub, or `YieldGroupNotRegistered`.
 //
 // NOT IN THIS PROPOSAL:
-//  - Spoke markets, Spoke caps above 0, and Spoke in a deposit queue: VIP-C. Until a market is registered, which
-//    only governance can do (`addResource`), no deposit can reach a Spoke source.
+//  - Spoke markets and Spoke in a deposit queue: VIP-C. Until a market is registered, which only governance can do
+//    (`addResource`), no deposit can reach a Spoke source.
 //  - Yield-group beacon upgrades. #20 and #22 change no yield-group contract, and the live implementations
 //    already have `updateResourceAdapter` and `accrue()`.
 //  - SpokeBeacon ownership: `13_DeploySpoke` transfers it to the Normal Timelock. Spoke sources have no owner.
@@ -116,6 +114,12 @@ export const vip671Part2Bscmainnet = () => {
     );
   }
 
+  const capLines = HUB_STACKS.map(({ name, spokeAbsoluteCap, spokePercentageCapBps }) => {
+    const symbol = name.replace("Hub_", "");
+    const absolute = Number(ethers.utils.formatUnits(spokeAbsoluteCap, 18)).toLocaleString("en-US");
+    return `   - ${symbol} Hub: ${absolute} ${symbol}, or ${spokePercentageCapBps / 100}% of the Hub's assets`;
+  });
+
   // TODO(meta): add the audit report links for venus-liquidity-hub#20 and #22, the deployed addresses, and a
   // public link to the full list of batched grants.
   const meta = {
@@ -123,7 +127,7 @@ export const vip671Part2Bscmainnet = () => {
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: Liquidity Hub infrastructure`,
     description: `#### Summary
 
-If passed, this VIP will prepare the **Liquidity Hub** for the Hub-Funded Spoke pool on BNB Chain. It upgrades the three Hubs (USDT, USDC and U), moves every existing yield group resource to new adapters, and registers a new, empty **Spoke** yield group on each Hub. No funds move: each Spoke yield group is registered with a cap of zero and holds no market. A later proposal lists the pool's markets and lets the Hubs supply them.
+If passed, this VIP will prepare the **Liquidity Hub** for the Hub-Funded Spoke pool on BNB Chain. It upgrades the three Hubs (USDT, USDC and U), moves every existing yield group resource to new adapters, and registers a new, empty **Spoke** yield group on each Hub. No funds move: each Spoke yield group holds no market and stays out of its Hub's deposit queue. A later proposal lists the pool's markets and lets the Hubs supply them.
 
 #### Proposed changes
 
@@ -135,13 +139,14 @@ If passed, this VIP will prepare the **Liquidity Hub** for the Hub-Funded Spoke 
    - the Normal Timelock: all 11 yield group permissions
    - the Pause Guardian: replace an adapter, and pause and unpause a resource
    - the Operator: both inner queues, pause and unpause a resource, and raise and lower a resource cap
-4. Register the Spoke yield group on each Hub with both caps at zero.
+4. Register the Spoke yield group on each Hub with its caps, the lower of the two applying:
+${capLines.join("\n")}
 5. Add it to the end of each Hub's withdraw queue. The deposit queues are unchanged.
 
 #### Notes
 
 - The 60 permissions in step 3 are pre-stored on the AuxiliaryCommandsAggregator (${AUX_COMMANDS_AGGREGATOR}) and run as batch ${SPOKE_SOURCE_GRANTS_BATCH_INDEX}, to keep the proposal under BNB Chain's per-transaction gas limit. The aggregator holds the AccessControlManager admin role only while the batch runs, within this proposal.
-- No funds can reach a Spoke yield group until a later proposal registers its market and its cap is raised above zero.
+- No funds can reach a Spoke yield group until a later proposal registers its market and adds it to its Hub's deposit queue.
 - Integrators that read \`maxDeposit\` or \`maxMint\` on a Hub to size a deposit should read them from HubLens instead.
 
 #### References
@@ -175,12 +180,12 @@ If passed, this VIP will prepare the **Liquidity Hub** for the Hub-Funded Spoke 
     },
     { target: ACM, signature: "revokeRole(bytes32,address)", params: [DEFAULT_ADMIN_ROLE, AUX_COMMANDS_AGGREGATOR] },
 
-    // 4. Register each Spoke source with both caps at 0. `addYieldGroup` checks `asset()` but not `hub()`; the
+    // 4. Register each Spoke source with its final caps. `addYieldGroup` checks `asset()` but not `hub()`; the
     //    simulation checks both.
-    ...HUB_STACKS.map(({ hub, spokeSource }) => ({
+    ...HUB_STACKS.map(({ hub, spokeSource, spokeAbsoluteCap, spokePercentageCapBps }) => ({
       target: hub,
       signature: "addYieldGroup(address,uint256,uint16)",
-      params: [spokeSource, SPOKE_ABSOLUTE_CAP, SPOKE_PERCENTAGE_CAP_BPS],
+      params: [spokeSource, spokeAbsoluteCap, spokePercentageCapBps],
     })),
 
     // 5. Append each Spoke source to its Hub's withdraw queue. The queue must keep every funded group, or
