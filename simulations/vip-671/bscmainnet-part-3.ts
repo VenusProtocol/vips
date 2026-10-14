@@ -173,7 +173,6 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
 forking(FORK_BLOCK, async () => {
   const missing = [...pendingDeployments(), ...pendingRiskValues()];
 
-  const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, ethers.provider);
