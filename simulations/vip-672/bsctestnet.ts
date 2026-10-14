@@ -134,6 +134,8 @@ forking(FORK_BLOCK, async () => {
         .to.emit(vTSLAB, "NewMarketInterestRateModel")
         .withArgs(IRM_SPOKE, ALTERNATE_IRM);
       expect(await vTSLAB.interestRateModel()).to.equal(ALTERNATE_IRM);
+      // The market still prices through the new model.
+      await vTSLAB.borrowRatePerBlock();
     });
 
     it("still refuses an account that holds nothing", async () => {

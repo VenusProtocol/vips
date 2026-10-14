@@ -58,8 +58,8 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
     let capsSteward: Contract;
     let factorsSteward: Contract;
     let irmSteward: Contract;
-    let timelock: BigNumber;
-    let debounce: BigNumber;
+    /// Per update type: the receiver configures debounce and timelock separately for each.
+    let config: Record<string, { debounce: BigNumber; timelock: BigNumber }>;
     let expiration: BigNumber;
     let capsDelta: BigNumber;
     let factorsDelta: BigNumber;
@@ -83,8 +83,8 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
       );
     };
 
-    const executeAfterTimelock = async (id: BigNumber) => {
-      await travel(timelock);
+    const executeAfterTimelock = async (updateType: string, id: BigNumber) => {
+      await travel(config[updateType].timelock);
       await expect(receiver.connect(executor).executeRegisteredUpdate(id))
         .to.emit(receiver, "UpdateExecuted")
         .withArgs(id);
@@ -96,15 +96,18 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
     before(async () => {
       sender = await initMainnetUser(spec.authorizedSender, ethers.utils.parseEther("1"));
       executor = await initMainnetUser(spec.executor, ethers.utils.parseEther("1"));
-      const supply = await receiver.getRiskParameterConfig("supplyCap");
-      const factors = await receiver.getRiskParameterConfig("collateralFactors");
-      timelock = supply.timelock;
-      debounce = supply.debounce;
+      config = {};
+      for (const updateType of ["supplyCap", "borrowCap", "collateralFactors", "interestRateModel"]) {
+        config[updateType] = await receiver.getRiskParameterConfig(updateType);
+      }
       expiration = await receiver.UPDATE_EXPIRATION_TIME();
-      capsSteward = new Contract(supply.riskSteward, MARKET_CAPS_STEWARD_ABI, ethers.provider);
-      factorsSteward = new Contract(factors.riskSteward, COLLATERAL_FACTORS_STEWARD_ABI, ethers.provider);
-      const irm = await receiver.getRiskParameterConfig("interestRateModel");
-      irmSteward = new Contract(irm.riskSteward, IRM_STEWARD_ABI, ethers.provider);
+      capsSteward = new Contract(config.supplyCap.riskSteward, MARKET_CAPS_STEWARD_ABI, ethers.provider);
+      factorsSteward = new Contract(
+        config.collateralFactors.riskSteward,
+        COLLATERAL_FACTORS_STEWARD_ABI,
+        ethers.provider,
+      );
+      irmSteward = new Contract(config.interestRateModel.riskSteward, IRM_STEWARD_ABI, ethers.provider);
       capsDelta = await capsSteward.safeDeltaBps();
       factorsDelta = await factorsSteward.safeDeltaBps();
     });
@@ -126,31 +129,31 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
           receiver,
           "UpdateTooFrequent",
         );
-        await travel(debounce);
+        await travel(config.supplyCap.debounce);
         const late = await publish("supplyCap", spec.capsMarket, encodeUint(next));
         await expect(receiver.connect(executor).processUpdate(late)).to.emit(receiver, "UpdateExecuted");
         expect(await comptroller.supplyCaps(spec.capsMarket)).to.equal(next);
       });
 
       it("timelocks a change outside the safe delta, then applies it", async () => {
-        await travel(debounce);
+        await travel(config.supplyCap.debounce);
         const current: BigNumber = await comptroller.supplyCaps(spec.capsMarket);
         const next = current.mul(3);
         const id = await publish("supplyCap", spec.capsMarket, encodeUint(next));
         await register(id);
         expect(await comptroller.supplyCaps(spec.capsMarket)).to.equal(current);
-        await executeAfterTimelock(id);
+        await executeAfterTimelock("supplyCap", id);
         expect(await comptroller.supplyCaps(spec.capsMarket)).to.equal(next);
       });
 
       it("lets the executor reject a timelocked update, which then never applies", async () => {
-        await travel(debounce);
+        await travel(config.supplyCap.debounce);
         const current: BigNumber = await comptroller.supplyCaps(spec.capsMarket);
         const id = await publish("supplyCap", spec.capsMarket, encodeUint(current.mul(3)));
         await register(id);
         await expect(receiver.connect(executor).rejectUpdate(id)).to.emit(receiver, "UpdateRejected").withArgs(id);
         expect((await receiver.updates(id)).status).to.equal(REJECTED);
-        await travel(timelock);
+        await travel(config.supplyCap.timelock);
         await expect(receiver.connect(executor).executeRegisteredUpdate(id)).to.be.revertedWithCustomError(
           receiver,
           "UpdateAlreadyResolved",
@@ -175,7 +178,7 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
         const current: BigNumber = await comptroller.supplyCaps(spec.capsMarket);
         const id = await publish("supplyCap", spec.capsMarket, encodeUint(current.mul(3)));
         await expect(receiver.connect(outsider).processUpdate(id)).to.emit(receiver, "UpdateRegistered");
-        await travel(timelock);
+        await travel(config.supplyCap.timelock);
         await expect(receiver.connect(outsider).executeRegisteredUpdate(id)).to.be.revertedWithCustomError(
           receiver,
           "NotAnExecutor",
@@ -199,12 +202,12 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
       });
 
       it("timelocks a change outside the safe delta, then applies it", async () => {
-        await travel(debounce);
+        await travel(config.borrowCap.debounce);
         const current: BigNumber = await comptroller.borrowCaps(spec.capsMarket);
         const next = current.mul(3);
         const id = await publish("borrowCap", spec.capsMarket, encodeUint(next));
         await register(id);
-        await executeAfterTimelock(id);
+        await executeAfterTimelock("borrowCap", id);
         expect(await comptroller.borrowCaps(spec.capsMarket)).to.equal(next);
       });
     });
@@ -225,22 +228,22 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
       });
 
       it("timelocks a change outside the safe delta, then applies it", async () => {
-        await travel(debounce);
+        await travel(config.collateralFactors.debounce);
         const { cf, lt } = await factors();
         const ratio = MAX_BPS - factorsDelta.toNumber() - 1;
         const [nextCf, nextLt] = [scaled(cf, ratio), scaled(lt, ratio)];
         const id = await publish("collateralFactors", spec.collateralMarket, encodeFactors(nextCf, nextLt));
         await register(id);
-        await executeAfterTimelock(id);
+        await executeAfterTimelock("collateralFactors", id);
         expect(await factors()).to.deep.equal({ cf: nextCf, lt: nextLt });
       });
 
-      it("refuses an e-mode pool id on a pool that has none", async () => {
-        await travel(debounce);
+      it("refuses a nonzero pool id on a non-core comptroller", async () => {
+        await travel(config.collateralFactors.debounce);
         const { cf, lt } = await factors();
         const id = await publish("collateralFactors", spec.collateralMarket, encodeFactors(cf.sub(1), lt), 1);
         await register(id);
-        await travel(timelock);
+        await travel(config.collateralFactors.timelock);
         await expect(receiver.connect(executor).executeRegisteredUpdate(id)).to.be.revertedWithCustomError(
           factorsSteward,
           "InvalidPool",
@@ -259,16 +262,16 @@ export const checkRiskStewardFlow = (spec: RiskStewardFlowSpec) => {
         );
         await register(id);
         expect(await vToken.interestRateModel()).to.equal(current);
-        await executeAfterTimelock(id);
+        await executeAfterTimelock("interestRateModel", id);
         expect(await vToken.interestRateModel()).to.equal(spec.alternateInterestRateModel);
         // The market now prices through the new model: both rate getters call it, and accrual uses them.
         await vToken.borrowRatePerBlock();
         await vToken.supplyRatePerBlock();
-        await vToken.connect(executor).accrueInterest();
+        await expect(vToken.connect(executor).accrueInterest()).to.emit(vToken, "AccrueInterest");
       });
 
       it("refuses the model the market already has", async () => {
-        await travel(debounce);
+        await travel(config.interestRateModel.debounce);
         const current = await vToken.interestRateModel();
         const id = await publish("interestRateModel", spec.collateralMarket, encodeAddress(current));
         await expect(receiver.connect(executor).processUpdate(id)).to.be.revertedWithCustomError(
