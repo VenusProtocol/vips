@@ -3,7 +3,7 @@ import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-netw
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import cliProgress from "cli-progress";
-import { BigNumber, Contract, ContractInterface } from "ethers";
+import { BigNumber, BigNumberish, Contract, ContractInterface } from "ethers";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
@@ -211,7 +211,7 @@ const NEAR_CAP_WARN_BPS = 9700; // 97%
 // Because of EIP-150's 63/64 forwarding reserve compounding across the Safe-proxy/singleton
 // and Governor-proxy call layers, the required limit exceeds consumption — a tx can consume
 // under the cap yet be unprovisionable (its required limit is over the cap, so propose OOGs).
-const reportTxGas = async (
+export const reportTxGas = async (
   description: string,
   label: string,
   gas: BigNumber,
@@ -253,9 +253,10 @@ const reportTxGas = async (
 // gas — immaterial against propose's ~16M and well inside the near-cap warning band. (We avoid
 // approveHash/getTransactionHash because getTransactionHash drifts across mined blocks on a
 // hardhat fork, breaking hash pre-approval.)
-const estimateProposeViaMultisig = async (
+export const estimateProposeViaMultisig = async (
   proposeCalldata: string,
   proposerAddress: string = DEFAULT_PROPOSER_ADDRESS,
+  target: string = GOVERNOR_PROXY,
 ): Promise<BigNumber> => {
   const safe = new ethers.Contract(proposerAddress, SAFE_ABI, ethers.provider);
   const owners: string[] = await safe.getOwners();
@@ -274,12 +275,12 @@ const estimateProposeViaMultisig = async (
   const executor = await initMainnetUser(owner, ethers.utils.parseEther("1"));
   return safe
     .connect(executor)
-    .estimateGas.execTransaction(GOVERNOR_PROXY, 0, proposeCalldata, 0, 0, 0, 0, zero, zero, signatures);
+    .estimateGas.execTransaction(target, 0, proposeCalldata, 0, 0, 0, 0, zero, zero, signatures);
 };
 
 // True if `addr` is a Gnosis Safe (used to decide whether to enforce the cap against the
 // real execTransaction path; non-Safe proposers fall back to direct-propose consumption).
-const isSafe = async (addr: string): Promise<boolean> => {
+export const isSafe = async (addr: string): Promise<boolean> => {
   try {
     await new ethers.Contract(addr, SAFE_ABI, ethers.provider).getThreshold();
     return true;
@@ -352,11 +353,93 @@ const resolveGovernanceVoters = async (
   }
 };
 
+// Explicit overrides win; otherwise pick voters that satisfy the live threshold/quorum.
+const governanceVoters = async (governorProxy: Contract, proposalType: ProposalType, options: TestingOptions) => {
+  const explicitProposer = options.proposer;
+  const explicitSupporters = options.supporters ?? (options.supporter ? [options.supporter] : undefined);
+  const { proposerAddress, supporterAddresses } =
+    explicitProposer || explicitSupporters
+      ? {
+          proposerAddress: explicitProposer ?? DEFAULT_PROPOSER_ADDRESS,
+          supporterAddresses: explicitSupporters ?? DEFAULT_SUPPORTER_ADDRESSES,
+        }
+      : await resolveGovernanceVoters(
+          governorProxy,
+          proposalType,
+          DEFAULT_PROPOSER_ADDRESS,
+          DEFAULT_SUPPORTER_ADDRESSES,
+        );
+
+  return {
+    proposer: await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0")),
+    supporters: await Promise.all(
+      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
+    ),
+  };
+};
+
+// A submitted proposal moving through governance; the hooks and steps that run first fill it in.
+interface ProposalRun {
+  governorProxy: Contract;
+  proposer: SignerWithAddress;
+  supporters: SignerWithAddress[];
+  proposalType?: ProposalType;
+  proposalId: BigNumberish;
+  executionReceipt?: TransactionReceipt;
+}
+
+const testVoteQueueExecute = (description: string, run: ProposalRun, options: TestingOptions) => {
+  it("should be voteable", async () => {
+    const proposalConfig = await run.governorProxy.proposalConfigs(run.proposalType);
+    const votingDelay = await proposalConfig.votingDelay;
+    await mine(votingDelay);
+    await expect(run.governorProxy.connect(run.proposer).castVote(run.proposalId, 1)).to.emit(
+      run.governorProxy,
+      "VoteCast",
+    );
+    for (const s of run.supporters) {
+      await expect(run.governorProxy.connect(s).castVote(run.proposalId, 1)).to.emit(run.governorProxy, "VoteCast");
+    }
+  });
+
+  it("should be queued successfully", async () => {
+    await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
+    const tx = await run.governorProxy.connect(run.proposer).queue(run.proposalId);
+    const receipt = await tx.wait();
+    await reportTxGas(description, "queue(proposalId)", receipt.gasUsed);
+  });
+
+  it("should be executed successfully", async () => {
+    await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[run.proposalType || 0]);
+    const blockchainProposal = await run.governorProxy.proposals(run.proposalId);
+    await time.increaseTo(blockchainProposal.eta.toNumber());
+
+    // Mirror the chain's protocol per-tx cap by capping tx.gasLimit. Hardhat
+    // fork does not enforce protocol per-tx caps (those are consensus rules,
+    // not tx fields), so without this an over-cap proposal passes simulation
+    // but OOGs on chain. Setting gasLimit = cap forces hardhat to revert
+    // out-of-gas exactly as mainnet would. Build the tx via
+    // `populateTransaction` so the override is applied at the raw-tx layer
+    // (passing it as a second arg to the contract method gets misinterpreted
+    // as a positional fn arg by ethers v5).
+    const cap = await resolvePerTxGasCap(FORKED_NETWORK);
+    const populated = await run.governorProxy.connect(run.proposer).populateTransaction.execute(run.proposalId);
+    if (Number.isFinite(cap)) {
+      populated.gasLimit = BigNumber.from(cap);
+    }
+    const tx = await run.proposer.sendTransaction(populated);
+    run.executionReceipt = await tx.wait();
+    await reportTxGas(description, "execute(proposalId)", run.executionReceipt.gasUsed);
+
+    if (options.callbackAfterExecution) {
+      await options.callbackAfterExecution(tx);
+    }
+  });
+};
+
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
   let impersonatedTimelock: SignerWithAddress;
-  let governorProxy: Contract;
-  let proposer: SignerWithAddress;
-  let supporters: SignerWithAddress[];
+  const run = { proposalType: proposal.type } as ProposalRun;
 
   const governanceFixture = async (): Promise<void> => {
     // loadFixture snapshots the seeded batches so command tests and full execution can each run them once.
@@ -368,31 +451,11 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     }[proposal.type || ProposalType.REGULAR];
 
     // Iniitalize impl via Proxy
-    governorProxy = await ethers.getContractAt(
+    run.governorProxy = await ethers.getContractAt(
       (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
       GOVERNOR_PROXY,
     );
-
-    // Explicit overrides win; otherwise pick voters that satisfy the live threshold/quorum.
-    const explicitProposer = options.proposer;
-    const explicitSupporters = options.supporters ?? (options.supporter ? [options.supporter] : undefined);
-    const { proposerAddress, supporterAddresses } =
-      explicitProposer || explicitSupporters
-        ? {
-            proposerAddress: explicitProposer ?? DEFAULT_PROPOSER_ADDRESS,
-            supporterAddresses: explicitSupporters ?? DEFAULT_SUPPORTER_ADDRESSES,
-          }
-        : await resolveGovernanceVoters(
-            governorProxy,
-            proposal.type ?? ProposalType.REGULAR,
-            DEFAULT_PROPOSER_ADDRESS,
-            DEFAULT_SUPPORTER_ADDRESSES,
-          );
-
-    proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
-    supporters = await Promise.all(
-      supporterAddresses.map(addr => initMainnetUser(addr, ethers.utils.parseEther("1.0"))),
-    );
+    Object.assign(run, await governanceVoters(run.governorProxy, proposal.type ?? ProposalType.REGULAR, options));
     impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
   };
 
@@ -412,10 +475,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       await loadFixture(governanceFixture);
     });
 
-    let proposalId: number;
-    let executionReceipt: TransactionReceipt;
-
     it("can be proposed", async () => {
+      const { governorProxy, proposer } = run;
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
 
@@ -449,61 +510,37 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
         enforce: !(await isSafe(proposer.address)),
       });
 
-      proposalId = await governorProxy.callStatic.proposalCount();
-      expect(proposalIdBefore.add(1)).to.equal(proposalId);
+      run.proposalId = await governorProxy.callStatic.proposalCount();
+      expect(proposalIdBefore.add(1)).to.equal(run.proposalId);
     });
 
-    it("should be voteable", async () => {
-      const proposalConfig = await governorProxy.proposalConfigs(proposal.type);
-      const votingDelay = await proposalConfig.votingDelay;
-      await mine(votingDelay);
-      await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
-      for (const s of supporters) {
-        await expect(governorProxy.connect(s).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
-      }
-    });
-
-    it("should be queued successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
-      const tx = await governorProxy.connect(proposer).queue(proposalId);
-      const receipt = await tx.wait();
-      await reportTxGas(description, "queue(proposalId)", receipt.gasUsed);
-    });
-
-    it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type || 0]);
-      const blockchainProposal = await governorProxy.proposals(proposalId);
-      await time.increaseTo(blockchainProposal.eta.toNumber());
-
-      // Mirror the chain's protocol per-tx cap by capping tx.gasLimit. Hardhat
-      // fork does not enforce protocol per-tx caps (those are consensus rules,
-      // not tx fields), so without this an over-cap proposal passes simulation
-      // but OOGs on chain. Setting gasLimit = cap forces hardhat to revert
-      // out-of-gas exactly as mainnet would. Build the tx via
-      // `populateTransaction` so the override is applied at the raw-tx layer
-      // (passing it as a second arg to the contract method gets misinterpreted
-      // as a positional fn arg by ethers v5).
-      const cap = await resolvePerTxGasCap(FORKED_NETWORK);
-      const populated = await governorProxy.connect(proposer).populateTransaction.execute(proposalId);
-      if (Number.isFinite(cap)) {
-        populated.gasLimit = BigNumber.from(cap);
-      }
-      const tx = await proposer.sendTransaction(populated);
-      executionReceipt = await tx.wait();
-      await reportTxGas(description, "execute(proposalId)", executionReceipt.gasUsed);
-
-      if (options.callbackAfterExecution) {
-        await options.callbackAfterExecution(tx);
-      }
-    });
+    testVoteQueueExecute(description, run, options);
 
     if (forkedBatches(proposal).length) {
       it("runs every aggregator batch and leaves the aggregator without its permissions", async function () {
         // the execution test above failed and already reported why
-        if (!executionReceipt) this.skip();
-        await expectForkedBatchesRan(proposal, executionReceipt);
+        if (!run.executionReceipt) this.skip();
+        await expectForkedBatchesRan(proposal, run.executionReceipt);
       });
     }
+  });
+};
+
+// For a proposal already submitted on the fork, such as one a contract builds and proposes itself.
+export const testVipById = (description: string, proposalId: BigNumberish, options: TestingOptions = {}) => {
+  const run = { proposalId } as ProposalRun;
+
+  describe(`${description} execution`, () => {
+    before(async () => {
+      run.governorProxy = await ethers.getContractAt(
+        (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
+        GOVERNOR_PROXY,
+      );
+      run.proposalType = (await run.governorProxy.proposals(proposalId)).proposalType;
+      Object.assign(run, await governanceVoters(run.governorProxy, run.proposalType ?? ProposalType.REGULAR, options));
+    });
+
+    testVoteQueueExecute(description, run, options);
   });
 };
 
