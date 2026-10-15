@@ -42,9 +42,6 @@ export const QQQB = "0x205812CdBed920aFf76C6580abD681a46D11efc7";
 export const SPYB = "0x7138b48df7D98D7e3cc221BfE7192D0a178182D8";
 
 /// Receives every market's seed vTokens, per the risk listing sheet. `addMarket` rejects address(0).
-///
-/// TODO(risk): confirm for QQQB and SPYB. The VIP document (§3.3) and the shipment plan send the collateral markets'
-/// seed vTokens to the VTreasury instead.
 export const SEED_RECEIVER = "0x000000000000000000000000000000000000dEaD";
 
 // ---------------------------------------------------------------------------------------------------
