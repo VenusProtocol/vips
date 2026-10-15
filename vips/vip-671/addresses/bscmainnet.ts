@@ -155,39 +155,39 @@ export const BSTOCK_LIQUIDATOR_ROUTERS = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// TODO(deploy): the spoke stack. isolated-pools deploy/024 through deploy/027.
+// The spoke stack, isolated-pools deploy/024 through deploy/027 (isolated-pools#570).
 //
 // `028` (the markets) is not run before VIP-A: it logs and returns until a `bscmainnet` market entry exists.
 // Fill each of these from the deployment, then re-read them from chain before the proposal is opened.
 // ---------------------------------------------------------------------------------------------------
 
-/// TODO(deploy): `SpokePoolRegistry`, a second `PoolRegistry` instance behind DEFAULT_PROXY_ADMIN (`024`).
+/// `SpokePoolRegistry`, a second `PoolRegistry` instance behind DEFAULT_PROXY_ADMIN (`024`).
 /// Ownable2Step and only nominated, so `acceptOwnership()` comes first in the VIP.
-export const SPOKE_POOL_REGISTRY = PENDING;
+export const SPOKE_POOL_REGISTRY = "0x372D0eE44993B5c6eb641364BAB939311e8e5B4c";
 
-/// TODO(deploy): `Comptroller_HubSpoke`, a BeaconProxy over SpokeComptrollerBeacon (`025`). Ownable2Step,
+/// `Comptroller_HubSpoke`, a BeaconProxy over SpokeComptrollerBeacon (`025`). Ownable2Step,
 /// nominated only.
 ///
 /// Its `poolRegistry()` is a CONSTRUCTOR IMMUTABLE of the implementation with no setter, and `supportMarket`
 /// checks it. A value that does not equal SPOKE_POOL_REGISTRY can only be fixed by redeploying the
 /// implementation and re-pointing the beacon. Nothing in this VIP can correct it.
-export const SPOKE_COMPTROLLER = PENDING;
+export const SPOKE_COMPTROLLER = "0x1e75332a3e2CC8e5ee9055aF4c737DA34Cb7cEDf";
 
-/// TODO(deploy): reference only. `UpgradeableBeacon` is plain `Ownable`, and the `025` and `027` deploy scripts
+/// Reference only. `UpgradeableBeacon` is plain `Ownable`, and the `025` and `027` deploy scripts
 /// hand both to the Normal Timelock, so VIP-A has no command for either.
-export const SPOKE_COMPTROLLER_BEACON = PENDING;
-export const SPOKE_VTOKEN_BEACON = PENDING;
+export const SPOKE_COMPTROLLER_BEACON = "0xDE74d82bF2379DD75FbBF753fcc9141cA83Ba1f3";
+export const SPOKE_VTOKEN_BEACON = "0xd8BC6C3624187649A222eacE8eF2eA13fF3B0D48";
 
-/// TODO(deploy): reference only (`026`). The lens holds no state, has no owner and no AccessControlManager,
+/// Reference only (`026`). The lens holds no state, has no owner and no AccessControlManager,
 /// and takes the registry to read as a call argument, so it needs no command in this or any VIP.
-export const SPOKE_POOL_LENS = PENDING;
+export const SPOKE_POOL_LENS = "0xEA83D98DaD34377A4752c4fB31f81ab9805fb301";
 
-/// TODO(deploy): the multi-registry `ProtocolShareReserve` implementation, deployed from the
-/// protocol-reserve#170 head. Before filling it in, read back on chain that `CORE_POOL_COMPTROLLER`, `WBNB`
+/// The multi-registry `ProtocolShareReserve` implementation, deployed from protocol-reserve#168
+/// (which includes #170). Before filling it in, read back on chain that `CORE_POOL_COMPTROLLER`, `WBNB`
 /// and `vBNB` equal the live implementation's. `deploy/000-psr.ts` falls back to `ADDRESS_ONE` when an
 /// artifact is missing, and a drifted CORE_POOL_COMPTROLLER silently breaks the core-pool bypass in
 /// `updateAssetsState`.
-export const PROTOCOL_SHARE_RESERVE_IMPL = PENDING;
+export const PROTOCOL_SHARE_RESERVE_IMPL = "0x842B9774eeff04b0497fA52d5F235A79D144764b";
 
 /// TODO(deploy): the `BStockLiquidator` implementation from venus-protocol#707, constructed with
 /// CORE_COMPTROLLER, BSTOCK_LIQUIDATOR_VBNB, BSTOCK_LIQUIDATOR_VWBNB and WBNB. Deployed with an
