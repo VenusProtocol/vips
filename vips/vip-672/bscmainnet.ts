@@ -86,8 +86,6 @@ export const vip672 = () => {
     return `   - ${symbol} Hub: ${absolute} ${symbol}, or ${spokePercentageCapBps / 100}% of the Hub's assets`;
   });
 
-  // TODO(meta): add the audit report links for venus-liquidity-hub#20 and #22 once published, and a public link to
-  // the full list of batched grants.
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: Liquidity Hub infrastructure`,
@@ -98,7 +96,7 @@ If passed, this VIP will prepare the **Liquidity Hub** for the Hub-Funded Spoke 
 #### Proposed changes
 
 1. Upgrade the Hub implementation behind the shared Hub beacon, which moves all three Hubs:
-   - \`maxDeposit\` and \`maxMint\` no longer compute the remaining capacity on chain. Deposits stay limited by each yield group's caps; the new HubLens contract reports the real capacity.
+   - \`maxDeposit\` and \`maxMint\` no longer compute the remaining capacity on chain and return the maximum value, even while a Hub is paused (they returned 0 then). Deposits stay limited by each yield group's caps; the new HubLens contract reports the real capacity.
    - During a Hub pause, an emergency reallocation first settles interest on each yield group, and skips a group whose settlement fails instead of failing the whole operation.
    - A yield group's percentage cap rounds up instead of down, so caps that add up to 100% leave no gap of a single unit.
 2. Move the 13 resources of the existing Core, Flux, FRV and Centrifuge yield groups to new adapters. The new adapters expose each resource's name, and the FRV adapter reports its APY net of the vault's reserve factor. Valuation, deposits and withdrawals are unchanged.

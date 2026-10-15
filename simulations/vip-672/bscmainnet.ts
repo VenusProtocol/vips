@@ -213,6 +213,16 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    it("values every resource the same through the new adapter as through the live one", async () => {
+      for (const { name, yieldGroup, resource, liveAdapter, newAdapter } of ADAPTER_SWAPS) {
+        const [live, next] = [liveAdapter, newAdapter].map(a => new ethers.Contract(a, ADAPTER_ABI, ethers.provider));
+        for (const fn of ["totalAssets", "maxWithdraw", "receiptBalance"]) {
+          expect(await next[fn](resource, yieldGroup), `${name} ${fn}`).to.equal(await live[fn](resource, yieldGroup));
+        }
+        expect(await next.maxDeposit(resource), `${name} maxDeposit`).to.equal(await live.maxDeposit(resource));
+      }
+    });
+
     it("gives the Normal Timelock every role VIP-672 calls with, as exact grants", async () => {
       for (const { name, hub } of HUB_STACKS) {
         for (const role of HUB_ROLES_CALLED) {
