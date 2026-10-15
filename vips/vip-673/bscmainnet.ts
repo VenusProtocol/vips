@@ -61,9 +61,11 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //    and `addResource` before both inner queues (`ResourceNotRegistered` otherwise).
 //
 // AT EXECUTION, or the whole proposal reverts:
-//  - The VTreasury holds every seed. It held none of the five underlyings on 2026-10-14.
 //  - The QQQB and SPYB feeds are fresh (Atlas within 3800s, APRO within 3900s) and within 5% of each other.
 //  - Neither QQQB nor SPYB has a DBO config (`MarketAlreadyInitialized`).
+// The VTreasury must also hold every seed (none of the five on 2026-10-14). `withdrawTreasuryBEP20` caps at its
+// balance, so a short U, QQQB or SPYB seed reverts, but a short USDT or USDC seed is paid from the Normal Timelock's
+// own balance (about 58 of each on 2026-10-15) without reverting.
 // Re-read each Hub's deposit queue and Spoke caps too: the Operator can change both, and step 7 overwrites the queue
 // without reverting.
 //
@@ -255,7 +257,7 @@ ${capRows.map(r => `| ${r} |`).join("\n")}
 #### Notes
 
 - Liquidations are permissionless. The pool's liquidation allowlist stays off.
-- Each Hub deposits into its Spoke market first, up to the caps above, and withdraws from it last.
+- Each Hub deposits into its Spoke market first and withdraws from it last. The market's 5M supply cap binds before the yield group caps above.
 
 #### References
 
