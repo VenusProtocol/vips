@@ -475,9 +475,5 @@ forking(FORK_BLOCK, async () => {
       // Appended storage starts empty. The Operator sets it after execution, outside this proposal.
       expectAddress(await liquidator.poolRegistry(), ethers.constants.AddressZero);
     });
-
-    // TODO(decision): a Core bStock liquidation through the upgraded liquidator, to prove the Core path is
-    // unchanged end to end. Needs a liquidatable Core bStock position and a router quote at the fork block.
-    it("liquidates a Core bStock position through the upgraded liquidator as before");
   });
 });
