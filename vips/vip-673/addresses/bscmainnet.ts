@@ -79,10 +79,9 @@ export const IRM_COLLATERAL = PENDING;
 /// `AdapterSpokeV1` (venus-liquidity-hub `13_DeploySpoke`, #39). Stateless, no constructor argument.
 export const ADAPTER_SPOKE_V1 = "0x231915FfE3e3A6Be09B0E5c73EFA2F1a4FF8Aa69";
 
-/// TODO(deploy): `CollateralGateway` (venus-periphery `028`; #74 with its fixes in #78 and #83, none merged on
-/// 2026-10-14). Its Core Comptroller and spoke registry are constructor immutables and it is not upgradeable, so read
-/// back CORE_COMPTROLLER, SPOKE_POOL_REGISTRY and the Normal Timelock as owner before filling it in.
-export const COLLATERAL_GATEWAY = PENDING;
+/// `CollateralGateway` (venus-periphery `028`, #85, which carries the #78 and #83 fixes). Not upgradeable. Read back
+/// on 2026-10-15: CORE_COMPTROLLER and SPOKE_POOL_REGISTRY as its immutables, owner the Normal Timelock.
+export const COLLATERAL_GATEWAY = "0xd0F7B94BF06675D13e8bA9a2546835a1c32a80b8";
 
 // ---------------------------------------------------------------------------------------------------
 // Market parameters.

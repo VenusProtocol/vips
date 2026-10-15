@@ -42,7 +42,7 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //
 // Third of three. Needs VIP-671 and VIP-672 executed first.
 //
-// STATUS: DRAFT. The markets, both rate models, `CollateralGateway` and the QQQB and SPYB feeds are `PENDING` in
+// STATUS: DRAFT. The markets, both rate models and the QQQB and SPYB feeds are `PENDING` in
 // ./addresses/bscmainnet.ts, and two risk values are `null` there: the QQQB and SPYB seeds and their DBO windows.
 // `vip673()` throws until all are filled.
 //
