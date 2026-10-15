@@ -111,8 +111,6 @@ export const vip671 = () => {
     );
   }
 
-  // TODO(meta): add links to the final audit reports of isolated-pools#559, protocol-reserve#168 and
-  // venus-protocol#707 once they are published.
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: infrastructure`,
