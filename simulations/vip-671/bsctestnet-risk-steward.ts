@@ -6,19 +6,20 @@ import { forking, testVip } from "src/vip-framework";
 import { checkRiskStewardFlow } from "src/vip-framework/checks/checkRiskStewardFlow";
 
 import { ACM, IRM_SPOKE, SPOKE_COMPTROLLER, VTSLAB_SPOKE, VUSDT_SPOKE } from "../../vips/vip-671/addresses/bsctestnet";
-import vip672, {
+import vip671RiskSteward, {
   COLLATERAL_FACTORS_RISK_STEWARD,
   IRM_RISK_STEWARD,
   MARKET_CAPS_RISK_STEWARD,
   RISK_STEWARD_RECEIVER,
   STEWARD_GRANTS,
-} from "../../vips/vip-672/bsctestnet";
+} from "../../vips/vip-671/bsctestnet-risk-steward";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import RECEIVER_ABI from "./abi/RiskStewardReceiver.json";
-import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
+// Post-addendum-2 ABI: has `UnsafeLiquidationParams`, which ./abi/SpokeComptroller.json predates.
+import COMPTROLLER_ABI from "./abi/SpokeComptrollerV2.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
-const FORK_BLOCK = 136700000;
+const FORK_BLOCK = 136939367;
 
 /// Holds no role anywhere.
 const UNPRIVILEGED = "0x0000000000000000000000000000000000000100";
@@ -70,7 +71,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-672: risk stewards on the spoke pool", await vip672(), {
+  testVip("VIP-671: risk stewards on the spoke pool", await vip671RiskSteward(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [STEWARD_GRANTS.length]);
     },

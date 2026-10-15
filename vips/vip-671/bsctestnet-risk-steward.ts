@@ -1,10 +1,10 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { ACM } from "../vip-671/addresses/bsctestnet";
+import { ACM } from "./addresses/bsctestnet";
 
 // ===================================================================================================
-// VIP-672 [BNB Chain Testnet] — the Risk Stewards on the Hub-Funded Spoke pool.
+// VIP-671 [BNB Chain Testnet] — the Risk Stewards on the Hub-Funded Spoke pool.
 //
 // `CollateralFactorsRiskSteward`, `MarketCapsRiskSteward` and `IRMRiskSteward` take the isolated-pool path for
 // any comptroller that is not the Core one, and `SpokeComptroller` keeps the setters and getters that path
@@ -45,10 +45,10 @@ export const STEWARD_GRANTS = [
   { role: SET_INTEREST_RATE_MODEL, account: IRM_RISK_STEWARD },
 ];
 
-export const vip672 = () => {
+export const vip671RiskSteward = () => {
   const meta = {
     version: "v2",
-    title: "VIP-672 [BNB Chain Testnet] Risk Stewards on the Hub-Funded Spoke pool",
+    title: "VIP-671 [BNB Chain Testnet] Risk Stewards on the Hub-Funded Spoke pool",
     description: `#### Summary
 
 If passed, this proposal will let the Risk Stewards manage the Hub-Funded Spoke pool on BNB Chain Testnet the way they manage the Core and isolated pools: collateral factor, supply cap, borrow cap and interest rate model updates published to the Risk Oracle will be applied to the spoke markets through \`RiskStewardReceiver\`, without a proposal or a Guardian transaction.
@@ -80,4 +80,4 @@ Because they are wildcards, the stewards can also apply these updates on any iso
   );
 };
 
-export default vip672;
+export default vip671RiskSteward;
