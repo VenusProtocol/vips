@@ -22,21 +22,19 @@ import {
   SPOKE_VTOKEN_BEACON,
 } from "./addresses/bscmainnet";
 import { giveCallPermission } from "./permissions";
-import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_A_GRANTS } from "./permissions-bscmainnet";
+import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_671_GRANTS } from "./permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain] — Hub-Funded Spoke pool, VIP-A: spoke pool infrastructure. 31 commands, no markets.
+// VIP-671 [BNB Chain]: Hub-Funded Spoke pool infrastructure. 31 commands, no markets.
 //
-// Part 1 of 3, all in this directory. VIP-B (part 2, Hub infrastructure) does not depend on this one. VIP-C
-// (part 3, markets and Hub wiring) needs both executed first.
+// First of three. VIP-672 (Liquidity Hub infrastructure) does not depend on this one. VIP-673 (markets and Hub wiring)
+// needs both executed first.
 //
 // ---------------------------------------------------------------------------------------------------
-// STATUS: DRAFT. THIS PROPOSAL CANNOT BE BUILT YET, AND THAT IS ENFORCED RATHER THAN DOCUMENTED.
-//
-// The spoke stack, the multi-registry ProtocolShareReserve implementation and the new `BStockLiquidator`
-// implementation are not deployed on bscmainnet. Each is a `PENDING` address in ./addresses/bscmainnet.ts,
-// and `vip671Part1Bscmainnet()` throws with the full list of what is missing rather than letting a
-// half-filled proposal build, simulate or be proposed.
+// STATUS: every contract VIP-671 needs is deployed on bscmainnet and filled in ./addresses/bscmainnet.ts: the spoke
+// stack (isolated-pools#570), the ProtocolShareReserve implementation (protocol-reserve#168) and the
+// `BStockLiquidator` implementation (venus-protocol#707). `vip671()` still throws if any of them is
+// set back to `PENDING`, so a half-filled proposal cannot build, simulate or be proposed.
 //
 // ---------------------------------------------------------------------------------------------------
 // WHY THIS POOL HAS A REGISTRY OF ITS OWN
@@ -62,7 +60,7 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_A_GRANTS } from "./permissions-b
 //  3. `setPriceOracle` BEFORE `addPool`, which reads `comptroller.oracle()` and rejects zero.
 //  4. `setDeviationBoundedOracle` before the pool is registered. Until it is set, borrow fails, and so do
 //     redeem, transfer and `exitMarket` for market members.
-//  5. The ProtocolShareReserve upgrade and `addPoolRegistry` before any market is listed (VIP-C). `VToken`
+//  5. The ProtocolShareReserve upgrade and `addPoolRegistry` before any market is listed (VIP-673). `VToken`
 //     calls `updateAssetsState` on every protocol seize and every reserve sweep, and today's PSR reverts
 //     `InvalidAddress` for a comptroller outside the isolated-pools registry.
 //
@@ -74,12 +72,12 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_A_GRANTS } from "./permissions-b
 //    this pool. Both schemas total 10000 bps. Re-read both before proposing: if another proposal edits a row
 //    meanwhile, correct it in a single `addOrUpdateDistributionConfigs` call.
 //  - `setMaxLoopsLimit`. `025` initializes the comptroller with 50, and the limit can only be raised.
-//  - `enterMarketForAccount(address,address)`. Its only holder is `CollateralGateway`, granted in VIP-C.
+//  - `enterMarketForAccount(address,address)`. Its only holder is `CollateralGateway`, granted in VIP-673.
 //  - `setPoolRegistry` and `setCoreFlashSource` on `BStockLiquidator`. Both are `onlyOwner`, and the owner is
 //    the Operator multisig, not governance. After execution it calls `setPoolRegistry(SpokePoolRegistry)`,
 //    then `setCoreFlashSource` for each liquidity market's underlying against its Core market (USDT, USDC and
-//    U in the listing sheet; VIP-C fixes the set). `setPoolRegistry` probes `getPoolByComptroller(address(0))`,
-//    which an empty registry answers, so all of these can follow at once. They must land before VIP-C opens
+//    U in the listing sheet; VIP-673 fixes the set). `setPoolRegistry` probes `getPoolByComptroller(address(0))`,
+//    which an empty registry answers, so all of these can follow at once. They must land before VIP-673 opens
 //    the collateral markets.
 // ===================================================================================================
 
@@ -87,7 +85,7 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_A_GRANTS } from "./permissions-b
 /// change together when the proposal is opened.
 const VIP_NUMBER = 671;
 
-/// Every address VIP-A needs that does not exist on bscmainnet yet. Exported so the simulation can report what
+/// Every address VIP-671 needs that does not exist on bscmainnet yet. Exported so the simulation can report what
 /// is still missing instead of failing to load.
 export const pendingDeployments = (): string[] =>
   [
@@ -103,7 +101,7 @@ export const pendingDeployments = (): string[] =>
     .filter(({ address }) => address === PENDING)
     .map(({ name }) => name);
 
-export const vip671Part1Bscmainnet = () => {
+export const vip671 = () => {
   const missing = pendingDeployments();
   if (missing.length > 0) {
     throw new Error(
@@ -114,7 +112,7 @@ export const vip671Part1Bscmainnet = () => {
   }
 
   // TODO(meta): add links to the final audit reports of isolated-pools#559, protocol-reserve#168 and
-  // venus-protocol#707, and the deployed addresses, once both exist.
+  // venus-protocol#707 once they are published.
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: infrastructure`,
@@ -184,7 +182,7 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
     //    isolated-pools registry as the account, so the spoke registry inherits nothing and `addPool` in step
     //    5 reverts without these.
     // -------------------------------------------------------------------------------------------
-    ...VIP_A_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
+    ...VIP_671_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
 
     // -------------------------------------------------------------------------------------------
     // 3. Oracles. Both setters are `onlyOwner`, so they follow step 1. `setPriceOracle` also has to precede
@@ -254,7 +252,7 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
 
     // -------------------------------------------------------------------------------------------
     // 7. Four Risk Steward grants, each against address(0): a wildcard on purpose, unlike step 2. It covers the
-    //    markets `028` deploys and VIP-C lists, with no further grant, and every isolated pool on this chain. Nothing
+    //    markets `028` deploys and VIP-673 lists, with no further grant, and every isolated pool on this chain. Nothing
     //    above depends on these. See ./permissions-bscmainnet.ts for the scope, the Core pool's
     //    `setCollateralFactor(address,uint256,uint256)`, and why a Core rate model must never reach a spoke market.
     // -------------------------------------------------------------------------------------------
@@ -264,4 +262,4 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
   return makeProposal(commands, meta, ProposalType.REGULAR);
 };
 
-export default vip671Part1Bscmainnet;
+export default vip671;
