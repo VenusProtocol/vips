@@ -9,9 +9,8 @@ import { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "./bscmainnet";
 //
 //   npx hardhat run vips/vip-672/provisionAcmBatches.ts --network bscmainnet
 //
-// Run once, by hand, from a wallet in the aggregator's `authorizedBatchers` allowlist, and only once the Spoke
-// sources are deployed and VIP-672 is final. Batches are append-only, so anything stored early is dead weight and
-// shifts every index that follows.
+// Run once, by hand, from a wallet in the aggregator's `authorizedBatchers` allowlist, and only once VIP-672 is final.
+// Batches are append-only, so anything stored early is dead weight and shifts every index that follows.
 //
 // Contents come from `buildSpokeSourceGrantsBatch`, which the simulation also reads.
 // ---------------------------------------------------------------------------------------------------
@@ -29,7 +28,6 @@ async function main() {
     throw new Error(`provisionAcmBatches: expected --network bscmainnet, got "${hre.network.name}"`);
   }
 
-  // Throws while any Spoke source is still PENDING.
   const batch = buildSpokeSourceGrantsBatch();
 
   const [signer] = await ethers.getSigners();

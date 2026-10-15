@@ -11,10 +11,7 @@ import {
   HUB_BEACON,
   HUB_IMPL,
   HUB_STACKS,
-  PENDING,
-  SPOKE_BEACON,
   SPOKE_SOURCE_GRANTS_BATCH_INDEX,
-  SPOKE_SOURCE_IMPL,
 } from "./addresses/bscmainnet";
 import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 
@@ -23,10 +20,8 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 //
 // Second of three. Independent of VIP-671. VIP-673 (markets and Hub wiring) needs both executed.
 //
-// STATUS: the new Hub implementation and the Spoke family are deployed (venus-liquidity-hub#39) and filled in
-// ./addresses/bscmainnet.ts. `vip672()` still throws if any is set back to `PENDING`. Before the
-// proposal is created, the grants batch must be stored with ./provisionAcmBatches.ts (not stored yet on 2026-10-15:
-// the aggregator holds 5 batches, so index 5 is next).
+// STATUS: before the proposal is created, the grants batch must be stored with ./provisionAcmBatches.ts (not stored
+// yet on 2026-10-15: the aggregator holds 5 batches, so index 5 is next).
 //
 // ---------------------------------------------------------------------------------------------------
 // WHY THE GRANTS ARE BATCHED
@@ -65,32 +60,14 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 /// Placeholder, as in VIP-671. VIP numbers are assigned by the governor at proposal time.
 const VIP_NUMBER = 672;
 
-/// Every address VIP-672 needs that is not deployed yet. Exported so the simulation can report what is missing.
-export const pendingDeployments = (): string[] =>
-  [
-    { name: "Hub implementation", address: HUB_IMPL },
-    // No command targets these two, but the simulation checks both.
-    { name: "SpokeBeacon", address: SPOKE_BEACON },
-    { name: "Spoke source implementation", address: SPOKE_SOURCE_IMPL },
-    ...HUB_STACKS.map(({ name, spokeSource }) => ({ name: `Spoke source for ${name}`, address: spokeSource })),
-  ]
-    .filter(({ address }) => address === PENDING)
-    .map(({ name }) => name);
-
 export type AcmCommand = { target: string; signature: string; params: [string, string, string] };
 
 /// The 60 Spoke source grants, 20 per source. ./provisionAcmBatches.ts stores exactly this and the simulation
-/// compares the stored batch against it. Throws while a Spoke source is PENDING: a stored batch cannot be removed,
-/// and an address(0) contract would make every grant in it a wildcard over every yield group.
-export const buildSpokeSourceGrantsBatch = (): AcmCommand[] => {
-  const unresolved = HUB_STACKS.filter(({ spokeSource }) => spokeSource === PENDING).map(({ name }) => name);
-  if (unresolved.length > 0) {
-    throw new Error(`VIP-${VIP_NUMBER}: Spoke source pending for ${unresolved.join(", ")}`);
-  }
-  return HUB_STACKS.flatMap(({ spokeSource }) =>
+/// compares the stored batch against it.
+export const buildSpokeSourceGrantsBatch = (): AcmCommand[] =>
+  HUB_STACKS.flatMap(({ spokeSource }) =>
     SPOKE_SOURCE_GRANTS.map(({ role, account }) => giveCallPermission(ACM, spokeSource, role, account) as AcmCommand),
   );
-};
 
 /// The batch as the aggregator stores it, `(target, calldata)` per call. Shared by the script and the simulation.
 export const encodeAcmBatch = (batch: AcmCommand[]) =>
@@ -103,15 +80,6 @@ export const encodeAcmBatch = (batch: AcmCommand[]) =>
   }));
 
 export const vip672 = () => {
-  const missing = pendingDeployments();
-  if (missing.length > 0) {
-    throw new Error(
-      `VIP-${VIP_NUMBER} [bscmainnet] is still a draft: ${missing.length} address(es) pending in ` +
-        `vips/vip-672/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
-        `Deploy them and fill the addresses first. Nothing here has a safe default.`,
-    );
-  }
-
   const capLines = HUB_STACKS.map(({ name, spokeAbsoluteCap, spokePercentageCapBps }) => {
     const symbol = name.replace("Hub_", "");
     const absolute = Number(ethers.utils.formatUnits(spokeAbsoluteCap, 18)).toLocaleString("en-US");

@@ -28,7 +28,7 @@ import {
   SPOKE_SOURCE_GRANTS_BATCH_INDEX,
   SPOKE_SOURCE_IMPL,
 } from "../../vips/vip-672/addresses/bscmainnet";
-import vip672, { buildSpokeSourceGrantsBatch, encodeAcmBatch, pendingDeployments } from "../../vips/vip-672/bscmainnet";
+import vip672, { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "../../vips/vip-672/bscmainnet";
 import {
   HUB_ROLES_CALLED,
   SPOKE_SOURCE_GRANTS,
@@ -114,8 +114,6 @@ type HubSnapshot = {
 };
 
 forking(FORK_BLOCK, async () => {
-  const missing = pendingDeployments();
-
   const beacon = new ethers.Contract(HUB_BEACON, BEACON_ABI, ethers.provider);
   const aggregator = new ethers.Contract(AUX_COMMANDS_AGGREGATOR, AGGREGATOR_ABI, ethers.provider);
   const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
@@ -260,14 +258,6 @@ forking(FORK_BLOCK, async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, AUX_COMMANDS_AGGREGATOR)).to.be.false;
     });
   });
-
-  if (missing.length > 0) {
-    describe("VIP-672 [bscmainnet] Hub-Funded Spoke pool Liquidity Hub infrastructure", () => {
-      // Mocha reports an `it` without a body as pending, so the run stays green and says what is missing.
-      it(`is not simulated until these are deployed: ${missing.join(", ")}`);
-    });
-    return;
-  }
 
   describe("Pre-VIP: the deployed Hub implementation and Spoke family", () => {
     it("deploys a new Hub implementation", async () => {
