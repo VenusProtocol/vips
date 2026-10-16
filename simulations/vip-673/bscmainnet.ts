@@ -1,10 +1,12 @@
+import BEACON_PROXY from "@venusprotocol/isolated-pools/artifacts/@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol/BeaconProxy.json";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import vip671 from "../../vips/vip-671/bscmainnet";
 import {
   ADD_RESOURCE,
   PAUSE_ROLE,
@@ -15,6 +17,7 @@ import {
   SET_MARKET_LIQUIDATION_INCENTIVE,
   SET_SUPPLY_ALLOWLIST_ENABLED,
 } from "../../vips/vip-671/permissions";
+import vip672, { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "../../vips/vip-672/bscmainnet";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -23,25 +26,31 @@ import {
   APRO_ORACLE,
   ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
+  AUX_COMMANDS_AGGREGATOR,
   BOUND_LOWER_RATIO,
   BOUND_UPPER_RATIO,
   BOUND_VALIDATOR,
   BSTOCK_LIQUIDATOR,
   COLLATERAL_FACTORS_RISK_STEWARD,
   COLLATERAL_GATEWAY,
-  COLLATERAL_MARKETS,
   CORE_COMPTROLLER,
   CRITICAL_GUARDIAN,
   CRITICAL_TIMELOCK,
+  CollateralMarket,
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
+  IRM_COLLATERAL,
+  IRM_LIQUIDITY,
   LIQUIDITY_IRM,
-  LIQUIDITY_MARKETS,
+  LiquidityMarket,
+  COLLATERAL_MARKETS as MAINNET_COLLATERAL_MARKETS,
+  LIQUIDITY_MARKETS as MAINNET_LIQUIDITY_MARKETS,
   MARKET_CAPS_RISK_STEWARD,
   NORMAL_TIMELOCK,
   OPERATOR,
   ORACLE_GUARDIAN,
   PAUSE_GUARDIAN,
+  PENDING,
   POOL_LIQUIDATION_INCENTIVE,
   PROTOCOL_SEIZE_SHARE,
   PROTOCOL_SHARE_RESERVE,
@@ -53,12 +62,13 @@ import {
   SHORTFALL,
   SPOKE_COMPTROLLER,
   SPOKE_POOL_REGISTRY,
+  SPOKE_SOURCE_GRANTS_BATCH_INDEX,
   SPOKE_VTOKEN_BEACON,
   SpokeMarket,
   U,
   VTREASURY,
 } from "../../vips/vip-673/addresses/bscmainnet";
-import vip673, { pendingDeployments, pendingRiskValues } from "../../vips/vip-673/bscmainnet";
+import vip673, { Vip673Markets, pendingDeployments, pendingRiskValues } from "../../vips/vip-673/bscmainnet";
 import { VIP_673_GRANTS, VIP_673_ROLES_CALLED } from "../../vips/vip-673/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterSpokeV1.json";
@@ -74,11 +84,13 @@ import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
+import JUMP_RATE_MODEL from "./bytecode/JumpRateModelV2.json";
+import WHITE_PAPER_MODEL from "./bytecode/WhitePaperInterestRateModel.json";
 
-/// TODO(deploy): move past the blocks where VIP-671 and VIP-672 execute and VIP-673's contracts deploy, so the gated
-/// assertions below run against the real state. Until then this block only checks what VIP-673 relies on from the
-/// live chain.
-const FORK_BLOCK = 127552000;
+/// After every VIP-671 and VIP-672 contract and CollateralGateway (block 127,740,476) are deployed. Whatever has not
+/// happened on mainnet by this block (VIP-671 and VIP-672 executing, VIP-673's markets) the simulation does on the fork.
+/// TODO(deploy): move past the blocks where VIP-671 and VIP-672 execute and VIP-673's markets deploy.
+const FORK_BLOCK = 127750000;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -92,6 +104,10 @@ const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils
 /// Fresh accounts. The default hardhat signer carries EIP-7702 code on BNB Chain.
 const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 hub depositor"), 12));
 const SUPPLIER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 collateral supplier"), 12));
+const LIQUIDATOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 liquidator"), 12));
+const DEPLOYER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 fork deployer"), 12));
+const borrowerFor = (symbol: string) =>
+  ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-673 borrower ${symbol}`), 12));
 
 const KNOWN_ACCOUNTS = [
   NORMAL_TIMELOCK,
@@ -103,12 +119,10 @@ const KNOWN_ACCOUNTS = [
   ORACLE_GUARDIAN,
 ];
 
-const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
-
 /// Each liquidity asset's Core market, which holds the asset as cash. It funds the fork, and it is the flash source
 /// `BStockLiquidator` repays spoke debt with.
 const CORE_MARKET: Record<string, string> = Object.fromEntries(
-  LIQUIDITY_MARKETS.map(({ underlying, stack }) => [
+  MAINNET_LIQUIDITY_MARKETS.map(({ underlying, stack }) => [
     underlying,
     ADAPTER_SWAPS.find(s => s.name.startsWith(`CoreSource_${stack.name.replace("Hub_", "")}:`))!.resource,
   ]),
@@ -192,8 +206,164 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
   await ethers.provider.send("hardhat_setStorageAt", [token, slot, ethers.utils.hexZeroPad(balance.toHexString(), 32)]);
 };
 
+const AGGREGATOR_ABI = [
+  "function batchCount() view returns (uint256)",
+  "function addBatch((address target, bytes data)[] calls, uint256 expectedIndex) returns (uint256)",
+];
+const LIQUIDATOR_ABI = [
+  "function poolRegistry() view returns (address)",
+  "function coreFlashSource(address) view returns (address)",
+  "function setPoolRegistry(address)",
+  "function setCoreFlashSource(address,address)",
+];
+
+/// Core TSLAB. Its Atlas and APRO feeds and its DBO window stand in for QQQB's and SPYB's until those exist.
+const TSLAB = "0x5b1910eAaD6450E50f816082Aa078C41F10C292f";
+
+/// Stand-in seed for QQQB and SPYB, whose $10 amount is fixed at proposal time.
+const STAND_IN_SEED = ethers.utils.parseUnits("1", 18);
+
+/// Runs VIP-671 and VIP-672 on the fork when they have not executed at FORK_BLOCK, with what each needs around it:
+/// VIP-672's grants batch stored on the aggregator first, and the Operator's two BStockLiquidator calls after VIP-671.
+const executeEarlierVips = async () => {
+  const comptroller = new ethers.Contract(SPOKE_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+  if (!sameAddress(await comptroller.owner(), NORMAL_TIMELOCK)) {
+    await pretendExecutingVip(await vip671(), NORMAL_TIMELOCK);
+    console.warn("[vip-673] VIP-671 executed on the fork");
+  }
+
+  const [{ stack }] = MAINNET_LIQUIDITY_MARKETS;
+  if (
+    !(await new ethers.Contract(stack.hub, HUB_ABI, ethers.provider).yieldGroupConfig(stack.spokeSource)).registered
+  ) {
+    const aggregator = new ethers.Contract(AUX_COMMANDS_AGGREGATOR, AGGREGATOR_ABI, ethers.provider);
+    if ((await aggregator.batchCount()).eq(SPOKE_SOURCE_GRANTS_BATCH_INDEX)) {
+      const batcher = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      await aggregator
+        .connect(batcher)
+        .addBatch(encodeAcmBatch(buildSpokeSourceGrantsBatch()), SPOKE_SOURCE_GRANTS_BATCH_INDEX);
+    }
+    await pretendExecutingVip(await vip672(), NORMAL_TIMELOCK);
+    console.warn("[vip-673] VIP-672 executed on the fork");
+  }
+
+  const liquidator = new ethers.Contract(BSTOCK_LIQUIDATOR, LIQUIDATOR_ABI, ethers.provider);
+  const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+  if (!sameAddress(await liquidator.poolRegistry(), SPOKE_POOL_REGISTRY)) {
+    await liquidator.connect(operator).setPoolRegistry(SPOKE_POOL_REGISTRY);
+  }
+  for (const { underlying } of MAINNET_LIQUIDITY_MARKETS) {
+    if (!sameAddress(await liquidator.coreFlashSource(underlying), CORE_MARKET[underlying])) {
+      await liquidator.connect(operator).setCoreFlashSource(underlying, CORE_MARKET[underlying]);
+    }
+  }
+};
+
+/// Stands in on the fork for every VIP-673 input still pending. Markets and rate models are deployed as isolated-pools
+/// `028` deploys them from its `bscmainnet` config (isolated-pools#570, 073e779d); QQQB and SPYB borrow TSLAB's feeds
+/// and DBO window and get STAND_IN_SEED. Every value that is set on mainnet is kept.
+const standInOnFork = async (): Promise<Vip673Markets> => {
+  const deployer = await initMainnetUser(DEPLOYER, ethers.utils.parseEther("10"));
+  const deploy = async (artifact: { abi: unknown[]; bytecode: string }, args: unknown[]): Promise<string> => {
+    const contract = await new ethers.ContractFactory(artifact.abi as never, artifact.bytecode, deployer).deploy(
+      ...args,
+    );
+    await contract.deployed();
+    return contract.address;
+  };
+
+  // The rate models count time the way the markets do: read from the SpokeVToken implementation.
+  const beacon = new ethers.Contract(
+    SPOKE_VTOKEN_BEACON,
+    ["function implementation() view returns (address)"],
+    ethers.provider,
+  );
+  const impl = new ethers.Contract(await beacon.implementation(), VTOKEN_ABI, ethers.provider);
+  const timeBased: boolean = await impl.isTimeBased();
+  const blocksPerYear = timeBased ? 0 : await impl.blocksOrSecondsPerYear();
+
+  const liquidityIrm =
+    IRM_LIQUIDITY !== PENDING
+      ? IRM_LIQUIDITY
+      : await deploy(JUMP_RATE_MODEL, [
+          LIQUIDITY_IRM.baseRatePerYear,
+          LIQUIDITY_IRM.multiplierPerYear,
+          LIQUIDITY_IRM.jumpMultiplierPerYear,
+          LIQUIDITY_IRM.kink,
+          ACM,
+          timeBased,
+          blocksPerYear,
+        ]);
+  const collateralIrm =
+    IRM_COLLATERAL !== PENDING ? IRM_COLLATERAL : await deploy(WHITE_PAPER_MODEL, [0, 0, timeBased, blocksPerYear]);
+
+  const vTokenIface = new ethers.utils.Interface(VTOKEN_ABI);
+  const market = async <M extends SpokeMarket>(m: M, irm: string): Promise<M> => {
+    const interestRateModel = m.interestRateModel === PENDING ? irm : m.interestRateModel;
+    if (m.vToken !== PENDING) return { ...m, interestRateModel };
+    const asset = m.symbol.replace(/^v/, "").replace(/_HubSpoke$/, "");
+    const data = vTokenIface.encodeFunctionData("initialize", [
+      m.underlying,
+      SPOKE_COMPTROLLER,
+      interestRateModel,
+      INITIAL_EXCHANGE_RATE,
+      `Venus ${asset} (bStock index)`,
+      m.symbol,
+      8,
+      NORMAL_TIMELOCK,
+      ACM,
+      [SHORTFALL, PROTOCOL_SHARE_RESERVE],
+      m.reserveFactor,
+    ]);
+    return { ...m, interestRateModel, vToken: await deploy(BEACON_PROXY, [SPOKE_VTOKEN_BEACON, data]) };
+  };
+
+  const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+  const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+  const tslabWindow = await new ethers.Contract(
+    DEVIATION_BOUNDED_ORACLE,
+    DBO_ABI,
+    ethers.provider,
+  ).assetProtectionConfig(TSLAB);
+  const tslabAtlasFeed: string = (await atlas.tokenConfigs(TSLAB)).feed;
+  const tslabAproFeed: string = (await apro.tokenConfigs(TSLAB)).feed;
+
+  const liquidity: LiquidityMarket[] = [];
+  for (const m of MAINNET_LIQUIDITY_MARKETS) {
+    liquidity.push(await market(m, liquidityIrm));
+  }
+  const collateral: CollateralMarket[] = [];
+  for (const m of MAINNET_COLLATERAL_MARKETS) {
+    collateral.push({
+      ...(await market(m, collateralIrm)),
+      atlasFeed: m.atlasFeed === PENDING ? tslabAtlasFeed : m.atlasFeed,
+      aproFeed: m.aproFeed === PENDING ? tslabAproFeed : m.aproFeed,
+      initialSupply: m.initialSupply ?? STAND_IN_SEED,
+      dbo: m.dbo ?? {
+        cooldownPeriod: tslabWindow.cooldownPeriod,
+        triggerThreshold: tslabWindow.triggerThreshold,
+        resetThreshold: tslabWindow.resetThreshold,
+        enableBoundedPricing: tslabWindow.isBoundedPricingEnabled,
+        enableCaching: tslabWindow.cachingEnabled,
+      },
+    });
+  }
+  return { liquidity, collateral };
+};
+
 forking(FORK_BLOCK, async () => {
-  const missing = [...pendingDeployments(), ...pendingRiskValues()];
+  await executeEarlierVips();
+
+  const standIns = [...pendingDeployments(), ...pendingRiskValues()];
+  const inputs: Vip673Markets =
+    standIns.length > 0
+      ? await standInOnFork()
+      : { liquidity: MAINNET_LIQUIDITY_MARKETS, collateral: MAINNET_COLLATERAL_MARKETS };
+  if (standIns.length > 0) {
+    console.warn(`[vip-673] stood in on the fork for: ${standIns.join(", ")}`);
+  }
+  const { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS } = inputs;
+  const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
 
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -279,15 +449,8 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  if (missing.length > 0) {
-    describe("VIP-673 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", () => {
-      // Mocha reports an `it` without a body as pending, so the run stays green and says what is missing.
-      it(`is not simulated until these are set: ${missing.join(", ")}`);
-    });
-    return;
-  }
-
   const treasuryBefore: Record<string, BigNumber> = {};
+  const timelockBefore: Record<string, BigNumber> = {};
 
   describe("Pre-VIP: VIP-671 and VIP-672 executed", () => {
     it("has the pool registered, owned by the Normal Timelock and wired to both oracles", async () => {
@@ -333,11 +496,7 @@ forking(FORK_BLOCK, async () => {
 
     it("has BStockLiquidator pointed at the spoke registry, with each liquidity asset's Core flash source", async () => {
       // `onlyOwner` calls by the Operator after VIP-671, needed before the collateral markets open.
-      const liquidator = new ethers.Contract(
-        BSTOCK_LIQUIDATOR,
-        ["function poolRegistry() view returns (address)", "function coreFlashSource(address) view returns (address)"],
-        ethers.provider,
-      );
+      const liquidator = new ethers.Contract(BSTOCK_LIQUIDATOR, LIQUIDATOR_ABI, ethers.provider);
       expectAddress(await liquidator.poolRegistry(), SPOKE_POOL_REGISTRY);
       for (const { symbol, underlying } of LIQUIDITY_MARKETS) {
         expectAddress(await liquidator.coreFlashSource(underlying), CORE_MARKET[underlying], symbol);
@@ -438,10 +597,9 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  let fundedOnFork = false;
-
   describe("Pre-VIP: the VTreasury holds every seed", () => {
     before(async () => {
+      let fundedOnFork = false;
       // TODO(ops): delete this fallback once the VTreasury is funded on mainnet and FORK_BLOCK is past it.
       for (const m of MARKETS) {
         const seed = m.initialSupply!;
@@ -451,15 +609,10 @@ forking(FORK_BLOCK, async () => {
           fundedOnFork = true;
         }
         treasuryBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(VTREASURY);
+        timelockBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(NORMAL_TIMELOCK);
       }
       if (fundedOnFork) {
         console.warn("[vip-673] VTreasury funded on the fork");
-      }
-    });
-
-    it("is funded on mainnet, not by this simulation", function () {
-      if (fundedOnFork) {
-        this.skip();
       }
     });
 
@@ -490,7 +643,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-673 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip673(), {
+  testVip("VIP-673 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip673(inputs), {
     callbackAfterExecution: async txResponse => {
       const collateral = COLLATERAL_MARKETS.length;
       const liquidity = LIQUIDITY_MARKETS.length;
@@ -579,7 +732,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("mints every seed to the seed receiver and leaves the Normal Timelock no tokens and no allowance", async () => {
+    it("pays every seed from the VTreasury, not the Normal Timelock, and mints it to the seed receiver", async () => {
       for (const m of MARKETS) {
         const v = vTokenOf(m.vToken);
         const token = erc20Of(m.underlying);
@@ -590,6 +743,8 @@ forking(FORK_BLOCK, async () => {
         expect(await token.balanceOf(VTREASURY), `${m.symbol} treasury`).to.equal(
           treasuryBefore[m.underlying].sub(seed),
         );
+        // `withdrawTreasuryBEP20` caps at the treasury's balance, so a short seed would come out of this balance.
+        expect(await token.balanceOf(NORMAL_TIMELOCK), `${m.symbol} timelock`).to.equal(timelockBefore[m.underlying]);
         expect(await token.allowance(NORMAL_TIMELOCK, SPOKE_POOL_REGISTRY), `${m.symbol} allowance`).to.equal(0);
       }
     });
@@ -718,6 +873,99 @@ forking(FORK_BLOCK, async () => {
         const source = await initMainnetUser(m.stack.spokeSource, ethers.utils.parseEther("1"));
         await v.connect(source).redeem(1);
         expect(await v.balanceOf(m.stack.spokeSource), `${m.symbol} redeem`).to.equal(held.sub(1));
+      }
+    });
+  });
+
+  // The paths the pool exists for: a borrow of each liquidity asset against QQQB, its liquidation after a price drop,
+  // and the Hub taking liquidity back out of its Spoke source. Runs before the Risk Stewards, which move the clock.
+  describe("Post-VIP: borrow, liquidate and withdraw", () => {
+    const [qqqb] = COLLATERAL_MARKETS;
+    const COLLATERAL = ethers.utils.parseUnits("10", 18);
+    const borrowed: Record<string, BigNumber> = {};
+    let price: BigNumber;
+    let timelock: Awaited<ReturnType<typeof initMainnetUser>>;
+
+    const pinPrice = async (value: BigNumber) => {
+      // Atlas and APRO move together, so the band between them holds.
+      await atlas.connect(timelock).setDirectPrice(qqqb.underlying, value);
+      await apro.connect(timelock).setDirectPrice(qqqb.underlying, value);
+    };
+
+    before(async () => {
+      timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      price = await resilientOracle.getPrice(qqqb.underlying);
+      // The proposal's voting and timelock delay leave the liquidity assets' main and pivot feeds stale on the fork.
+      const chainlink = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+      for (const { underlying } of LIQUIDITY_MARKETS) {
+        await chainlink.connect(timelock).setDirectPrice(underlying, MANTISSA_ONE);
+        await atlas.connect(timelock).setDirectPrice(underlying, MANTISSA_ONE);
+      }
+    });
+
+    it("borrows each liquidity asset against QQQB supplied through CollateralGateway", async () => {
+      const depositor = await initMainnetUser(DEPOSITOR, ethers.utils.parseEther("1"));
+      for (const m of LIQUIDITY_MARKETS) {
+        const account = borrowerFor(m.symbol);
+        const borrower = await initMainnetUser(account, ethers.utils.parseEther("1"));
+        await fund(qqqb.underlying, account, COLLATERAL);
+        await erc20Of(qqqb.underlying).connect(borrower).approve(COLLATERAL_GATEWAY, COLLATERAL);
+        await gateway.connect(borrower).supplyAndEnterSpokeMarkets([qqqb.vToken], [COLLATERAL]);
+
+        // Half the collateral's value, under the 0.8 CF. Prices and all five underlyings are 18-decimal.
+        const amount = COLLATERAL.mul(price).div(MANTISSA_ONE).div(2);
+        // The market lends what its Hub deposits, and the Hub deposits into its Spoke source first.
+        await fund(m.underlying, DEPOSITOR, amount);
+        await erc20Of(m.underlying).connect(depositor).approve(m.stack.hub, amount);
+        await hubOf(m.stack.hub).connect(depositor).deposit(amount, DEPOSITOR);
+
+        await vTokenOf(m.vToken).connect(borrower).borrow(amount);
+        expect(await erc20Of(m.underlying).balanceOf(account), m.symbol).to.equal(amount);
+        expect(await vTokenOf(m.vToken).borrowBalanceStored(account), m.symbol).to.equal(amount);
+        borrowed[m.underlying] = amount;
+      }
+    });
+
+    it("liquidates each position after QQQB halves, sending the protocol's share to the ProtocolShareReserve", async () => {
+      // Debt is half the original collateral value; at half the price, LT 0.85 covers 0.425 of it.
+      await pinPrice(price.div(2));
+      const liquidator = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
+      const vCollateral = vTokenOf(qqqb.vToken);
+      for (const m of LIQUIDITY_MARKETS) {
+        const account = borrowerFor(m.symbol);
+        const [, , shortfall] = await comptroller.getAccountLiquidity(account);
+        expect(shortfall, `${m.symbol} shortfall`).to.be.gt(0);
+
+        // Half of the 0.5 close factor.
+        const repay = borrowed[m.underlying].div(4);
+        await fund(m.underlying, LIQUIDATOR, repay);
+        await erc20Of(m.underlying).connect(liquidator).approve(m.vToken, repay);
+        const seizedBefore: BigNumber = await vCollateral.balanceOf(LIQUIDATOR);
+        const reserveBefore: BigNumber = await erc20Of(qqqb.underlying).balanceOf(PROTOCOL_SHARE_RESERVE);
+
+        await vTokenOf(m.vToken).connect(liquidator).liquidateBorrow(account, repay, qqqb.vToken);
+        expect(await vTokenOf(m.vToken).borrowBalanceStored(account), `${m.symbol} debt`).to.be.lt(
+          borrowed[m.underlying],
+        );
+        expect(await vCollateral.balanceOf(LIQUIDATOR), `${m.symbol} seized`).to.be.gt(seizedBefore);
+        expect(await erc20Of(qqqb.underlying).balanceOf(PROTOCOL_SHARE_RESERVE), `${m.symbol} PSR`).to.be.gt(
+          reserveBefore,
+        );
+      }
+      await pinPrice(price);
+    });
+
+    it("withdraws from each Spoke source to its Hub, out of the Spoke market", async () => {
+      // A user's Hub withdraw reaches the Spoke source last, after every other group, so it is called here as the Hub
+      // calls it.
+      const amount = ethers.utils.parseUnits("100", 18);
+      for (const m of LIQUIDITY_MARKETS) {
+        const hub = await initMainnetUser(m.stack.hub, ethers.utils.parseEther("1"));
+        const held: BigNumber = await vTokenOf(m.vToken).balanceOf(m.stack.spokeSource);
+        const hubBalance: BigNumber = await erc20Of(m.underlying).balanceOf(m.stack.hub);
+        await groupOf(m.stack.spokeSource).connect(hub).withdraw(amount, m.stack.hub);
+        expect(await erc20Of(m.underlying).balanceOf(m.stack.hub), m.symbol).to.equal(hubBalance.add(amount));
+        expect(await vTokenOf(m.vToken).balanceOf(m.stack.spokeSource), m.symbol).to.be.lt(held);
       }
     });
   });

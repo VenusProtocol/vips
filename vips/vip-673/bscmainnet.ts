@@ -18,8 +18,6 @@ import {
   COLLATERAL_MARKETS,
   CollateralMarket,
   DEVIATION_BOUNDED_ORACLE,
-  IRM_COLLATERAL,
-  IRM_LIQUIDITY,
   LIQUIDITY_IRM,
   LIQUIDITY_MARKETS,
   LiquidityMarket,
@@ -88,25 +86,27 @@ const VIP_NUMBER = 673;
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
 const ACTION_BORROW = 2;
 
-const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
+/// The markets VIP-673 lists. Mainnet's by default; the simulation passes markets it deployed on the fork while the
+/// real ones are pending.
+export type Vip673Markets = { liquidity: LiquidityMarket[]; collateral: CollateralMarket[] };
+const MAINNET_MARKETS: Vip673Markets = { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS };
 
 /// Every address VIP-673 needs that is not deployed yet, including the VIP-671 and VIP-672 ones its commands target.
 /// Exported so the simulation can report what is missing.
-export const pendingDeployments = (): string[] =>
+export const pendingDeployments = ({ liquidity, collateral }: Vip673Markets = MAINNET_MARKETS): string[] =>
   [
     { name: "SpokePoolRegistry (VIP-671)", address: SPOKE_POOL_REGISTRY },
     { name: "Comptroller_HubSpoke (VIP-671)", address: SPOKE_COMPTROLLER },
-    ...LIQUIDITY_MARKETS.map(m => ({
+    ...liquidity.map(m => ({
       name: `Spoke source for ${m.stack.name} (VIP-672)`,
       address: m.stack.spokeSource,
     })),
-    ...MARKETS.map(m => ({ name: m.symbol, address: m.vToken })),
-    // No command targets the two rate models, but the simulation checks each market's.
-    { name: "Liquidity markets' rate model", address: IRM_LIQUIDITY },
-    { name: "Collateral markets' rate model", address: IRM_COLLATERAL },
+    ...[...liquidity, ...collateral].map(m => ({ name: m.symbol, address: m.vToken })),
+    // No command targets the rate models, but the simulation checks each market's.
+    ...[...liquidity, ...collateral].map(m => ({ name: `${m.symbol} rate model`, address: m.interestRateModel })),
     { name: "AdapterSpokeV1", address: ADAPTER_SPOKE_V1 },
     { name: "CollateralGateway", address: COLLATERAL_GATEWAY },
-    ...COLLATERAL_MARKETS.flatMap(m => [
+    ...collateral.flatMap(m => [
       { name: `${m.symbol} Atlas feed`, address: m.atlasFeed },
       { name: `${m.symbol} APRO feed`, address: m.aproFeed },
     ]),
@@ -115,8 +115,8 @@ export const pendingDeployments = (): string[] =>
     .map(({ name }) => name);
 
 /// Every risk value that is still open.
-export const pendingRiskValues = (): string[] => [
-  ...COLLATERAL_MARKETS.flatMap(m => [
+export const pendingRiskValues = ({ collateral }: Vip673Markets = MAINNET_MARKETS): string[] => [
+  ...collateral.flatMap(m => [
     ...(m.initialSupply === null ? [`${m.symbol} seed`] : []),
     ...(m.dbo === null ? [`${m.symbol} DBO window`] : []),
   ]),
@@ -173,8 +173,10 @@ const wireHub = (m: LiquidityMarket): Command[] => {
   ];
 };
 
-export const vip673 = () => {
-  const missing = [...pendingDeployments(), ...pendingRiskValues()];
+export const vip673 = (markets: Vip673Markets = MAINNET_MARKETS) => {
+  const { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS } = markets;
+  const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
+  const missing = [...pendingDeployments(markets), ...pendingRiskValues(markets)];
   if (missing.length > 0) {
     throw new Error(
       `VIP-${VIP_NUMBER} [bscmainnet] is still a draft: ${missing.length} value(s) pending in ` +
