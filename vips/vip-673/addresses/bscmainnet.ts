@@ -45,13 +45,15 @@ export const SPYB = "0x7138b48df7D98D7e3cc221BfE7192D0a178182D8";
 export const SEED_RECEIVER = "0x000000000000000000000000000000000000dEaD";
 
 // ---------------------------------------------------------------------------------------------------
-// TODO(feed): published by Atlas and by APRO. Neither has a QQQB or SPYB feed on Venus today. APRO's access controller
-// on each feed must allow APRO_ORACLE.
+// QQQB and SPYB feeds, per the risk sheet. APRO's access controller on the QQQB feed already allows APRO_ORACLE.
+// TODO(feed): Atlas has not authorized ATLAS_ORACLE on either Atlas feed yet (`isAuthorizedCaller` false on
+// 2026-10-16), so `ATLAS_ORACLE` reads revert `OnlyAuthorizedCallerAllowed()` until it does. The risk sheet has no
+// SPYB APRO feed yet.
 // ---------------------------------------------------------------------------------------------------
 
-export const QQQB_ATLAS_FEED = PENDING;
-export const QQQB_APRO_FEED = PENDING;
-export const SPYB_ATLAS_FEED = PENDING;
+export const QQQB_ATLAS_FEED = "0x7D2f703D2A188f32310dC9707E86acE503207027";
+export const QQQB_APRO_FEED = "0x2708567c468db65a72095716FCff023dcDfEA07A";
+export const SPYB_ATLAS_FEED = "0xCda6d5cE036AC0D6A387A377062EBd18Dd531177";
 export const SPYB_APRO_FEED = PENDING;
 
 // ---------------------------------------------------------------------------------------------------
@@ -149,9 +151,9 @@ const liquidity = {
 
 /// USDT, USDC and U, one per Hub.
 export const LIQUIDITY_MARKETS: LiquidityMarket[] = [
-  { ...liquidity, symbol: "vUSDT_HubSpoke", vToken: VUSDT_SPOKE, underlying: USDT, stack: HUB_STACKS[0] },
-  { ...liquidity, symbol: "vUSDC_HubSpoke", vToken: VUSDC_SPOKE, underlying: USDC, stack: HUB_STACKS[1] },
-  { ...liquidity, symbol: "vU_HubSpoke", vToken: VU_SPOKE, underlying: U, stack: HUB_STACKS[2] },
+  { ...liquidity, symbol: "vUSDT_bStockIndex", vToken: VUSDT_SPOKE, underlying: USDT, stack: HUB_STACKS[0] },
+  { ...liquidity, symbol: "vUSDC_bStockIndex", vToken: VUSDC_SPOKE, underlying: USDC, stack: HUB_STACKS[1] },
+  { ...liquidity, symbol: "vU_bStockIndex", vToken: VU_SPOKE, underlying: U, stack: HUB_STACKS[2] },
 ];
 
 const collateral = {
@@ -166,15 +168,19 @@ const collateral = {
   // TODO(risk): the seed in tokens. The risk sheet sets $10 of each, so fix the amount at the price when the
   // proposal is created.
   initialSupply: null,
-  // TODO(risk): the DBO window. The risk sheet asks for one but sets no values. For reference, TSLAB and NVDAB run
-  // cooldown 3600s, trigger 1.667e17, reset 5e16, bounded pricing on and caching off (read 2026-10-14).
-  dbo: null,
+  dbo: {
+    cooldownPeriod: 3600,
+    triggerThreshold: parseUnits("0.125", 18),
+    resetThreshold: parseUnits("0.05", 18),
+    enableBoundedPricing: true,
+    enableCaching: false,
+  },
 };
 
 export const COLLATERAL_MARKETS: CollateralMarket[] = [
   {
     ...collateral,
-    symbol: "vQQQB_HubSpoke",
+    symbol: "vQQQB_bStockIndex",
     vToken: VQQQB_SPOKE,
     underlying: QQQB,
     atlasFeed: QQQB_ATLAS_FEED,
@@ -182,7 +188,7 @@ export const COLLATERAL_MARKETS: CollateralMarket[] = [
   },
   {
     ...collateral,
-    symbol: "vSPYB_HubSpoke",
+    symbol: "vSPYB_bStockIndex",
     vToken: VSPYB_SPOKE,
     underlying: SPYB,
     atlasFeed: SPYB_ATLAS_FEED,

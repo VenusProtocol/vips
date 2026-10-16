@@ -217,11 +217,31 @@ const LIQUIDATOR_ABI = [
   "function setCoreFlashSource(address,address)",
 ];
 
-/// Core TSLAB. Its Atlas and APRO feeds and its DBO window stand in for QQQB's and SPYB's until those exist.
+/// Core TSLAB. Its Atlas and APRO feeds and its DBO window stand in for QQQB's and SPYB's until those are usable.
 const TSLAB = "0x5b1910eAaD6450E50f816082Aa078C41F10C292f";
 
 /// Stand-in seed for QQQB and SPYB, whose $10 amount is fixed at proposal time.
 const STAND_IN_SEED = ethers.utils.parseUnits("1", 18);
+
+/// Atlas feeds answer `ATLAS_ORACLE` only once Atlas authorizes it, and revert `OnlyAuthorizedCallerAllowed()` before.
+const atlasAuthorized = async (m: CollateralMarket): Promise<boolean> =>
+  m.atlasFeed !== PENDING &&
+  (await new ethers.Contract(
+    m.atlasFeed,
+    ["function isAuthorizedCaller(address) view returns (bool)"],
+    ethers.provider,
+  ).isAuthorizedCaller(ATLAS_ORACLE));
+
+/// Collateral markets whose Atlas feed is set but does not answer `ATLAS_ORACLE` yet.
+const unauthorizedAtlasFeeds = async (): Promise<string[]> => {
+  const names: string[] = [];
+  for (const m of MAINNET_COLLATERAL_MARKETS) {
+    if (m.atlasFeed !== PENDING && !(await atlasAuthorized(m))) {
+      names.push(`${m.symbol} feeds (Atlas has not authorized ATLAS_ORACLE)`);
+    }
+  }
+  return names;
+};
 
 /// Runs VIP-671 and VIP-672 on the fork when they have not executed at FORK_BLOCK, with what each needs around it:
 /// VIP-672's grants batch stored on the aggregator first, and the Operator's two BStockLiquidator calls after VIP-671.
@@ -260,8 +280,10 @@ const executeEarlierVips = async () => {
 };
 
 /// Stands in on the fork for every VIP-673 input still pending. Markets and rate models are deployed as isolated-pools
-/// `028` deploys them from its `bscmainnet` config (isolated-pools#570, 073e779d); QQQB and SPYB borrow TSLAB's feeds
-/// and DBO window and get STAND_IN_SEED. Every value that is set on mainnet is kept.
+/// `028` deploys them from its `bscmainnet` config (isolated-pools#570, efb3b381); QQQB and SPYB get STAND_IN_SEED. A
+/// collateral market keeps its own feeds only when both are set and Atlas answers `ATLAS_ORACLE` on its feed, and
+/// takes both of TSLAB's otherwise: one TSLAB feed against one of its own would break the 5% band. Every other value
+/// that is set on mainnet is kept.
 const standInOnFork = async (): Promise<Vip673Markets> => {
   const deployer = await initMainnetUser(DEPLOYER, ethers.utils.parseEther("10"));
   const deploy = async (artifact: { abi: unknown[]; bytecode: string }, args: unknown[]): Promise<string> => {
@@ -301,7 +323,7 @@ const standInOnFork = async (): Promise<Vip673Markets> => {
   const market = async <M extends SpokeMarket>(m: M, irm: string): Promise<M> => {
     const interestRateModel = m.interestRateModel === PENDING ? irm : m.interestRateModel;
     if (m.vToken !== PENDING) return { ...m, interestRateModel };
-    const asset = m.symbol.replace(/^v/, "").replace(/_HubSpoke$/, "");
+    const asset = m.symbol.replace(/^v/, "").replace(/_bStockIndex$/, "");
     const data = vTokenIface.encodeFunctionData("initialize", [
       m.underlying,
       SPOKE_COMPTROLLER,
@@ -334,10 +356,11 @@ const standInOnFork = async (): Promise<Vip673Markets> => {
   }
   const collateral: CollateralMarket[] = [];
   for (const m of MAINNET_COLLATERAL_MARKETS) {
+    const ownFeeds = m.aproFeed !== PENDING && (await atlasAuthorized(m));
     collateral.push({
       ...(await market(m, collateralIrm)),
-      atlasFeed: m.atlasFeed === PENDING ? tslabAtlasFeed : m.atlasFeed,
-      aproFeed: m.aproFeed === PENDING ? tslabAproFeed : m.aproFeed,
+      atlasFeed: ownFeeds ? m.atlasFeed : tslabAtlasFeed,
+      aproFeed: ownFeeds ? m.aproFeed : tslabAproFeed,
       initialSupply: m.initialSupply ?? STAND_IN_SEED,
       dbo: m.dbo ?? {
         cooldownPeriod: tslabWindow.cooldownPeriod,
@@ -354,7 +377,7 @@ const standInOnFork = async (): Promise<Vip673Markets> => {
 forking(FORK_BLOCK, async () => {
   await executeEarlierVips();
 
-  const standIns = [...pendingDeployments(), ...pendingRiskValues()];
+  const standIns = [...pendingDeployments(), ...pendingRiskValues(), ...(await unauthorizedAtlasFeeds())];
   const inputs: Vip673Markets =
     standIns.length > 0
       ? await standInOnFork()

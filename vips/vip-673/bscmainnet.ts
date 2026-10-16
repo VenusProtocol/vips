@@ -40,9 +40,8 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //
 // Third of three. Needs VIP-671 and VIP-672 executed first.
 //
-// STATUS: DRAFT. The markets, both rate models and the QQQB and SPYB feeds are `PENDING` in
-// ./addresses/bscmainnet.ts, and two risk values are `null` there: the QQQB and SPYB seeds and their DBO windows.
-// `vip673()` throws until all are filled.
+// STATUS: DRAFT. The markets, both rate models and SPYB's APRO feed are `PENDING` in ./addresses/bscmainnet.ts, and
+// the QQQB and SPYB seeds are `null` there. `vip673()` throws until all are filled.
 //
 // GAS, from a bscmainnet fork at block 127,552,000 with every VIP-671, VIP-672 and VIP-673 contract deployed on the
 // fork from the PR heads, VIP-671 and VIP-672 executed, and placeholders for the open risk values: 62 commands,
@@ -60,6 +59,8 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //
 // AT EXECUTION, or the whole proposal reverts:
 //  - The QQQB and SPYB feeds are fresh (Atlas within 3800s, APRO within 3900s) and within 5% of each other.
+//  - Atlas authorizes `ATLAS_ORACLE` on both Atlas feeds (`isAuthorizedCaller`). The DBO's price read reverts
+//    `OnlyAuthorizedCallerAllowed()` otherwise.
 //  - Neither QQQB nor SPYB has a DBO config (`MarketAlreadyInitialized`).
 // The VTreasury must also hold every seed (none of the five on 2026-10-14). `withdrawTreasuryBEP20` caps at its
 // balance, so a short U, QQQB or SPYB seed reverts, but a short USDT or USDC seed is paid from the Normal Timelock's
