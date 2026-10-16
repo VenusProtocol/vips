@@ -1,34 +1,17 @@
+import { SPOKE_SOURCE_ROLES, YIELD_GROUP_BASE_ROLES } from "./permissions";
+
 // ===================================================================================================
 // VIP-997 — ACM role strings for SpokeSource_USDT on BNB Chain Testnet.
 //
 // The Spoke family is the generic `YieldGroup` behind its own beacon, so its gated surface is exactly
-// the Core / Flux one: the eight `YieldGroupBase` functions plus the three `YieldGroup` adds. Every
-// string is the literal argument each function passes to `_checkAccessAllowed(...)`, copied from
-// venus-liquidity-hub PR #22 (the code SpokeBeacon serves), not derived from the ABI:
-//   contracts/YieldGroup/base/YieldGroupBase.sol  addResource ... sweep
-//   contracts/YieldGroup/YieldGroup.sol           raiseResourceCap, lowerResourceCap, setBlocksPerYear
-// The generic YieldGroup has no `forceRemoveResource` (that is FRV and Centrifuge only), so it is
-// deliberately absent.
+// the Core / Flux one: the eight `YieldGroupBase` functions plus the three `YieldGroup` adds. The strings
+// live in ./permissions.ts, shared with the bscmainnet proposals, with the source lines they are copied from.
 // ===================================================================================================
 
-export const YIELD_GROUP_BASE = [
-  "addResource(address,address)",
-  "removeResource(address)",
-  "updateResourceAdapter(address,address)",
-  "setInnerDepositQueue(address[])",
-  "setInnerWithdrawQueue(address[])",
-  "pauseResource(address)",
-  "unpauseResource(address)",
-  "sweep(address,address)",
-];
+export const YIELD_GROUP_BASE = YIELD_GROUP_BASE_ROLES;
 
 // The full gated surface of SpokeSource_USDT.
-export const SPOKE_SOURCE_GOVERNANCE = [
-  ...YIELD_GROUP_BASE,
-  "raiseResourceCap(address,uint256)",
-  "lowerResourceCap(address,uint256)",
-  "setBlocksPerYear(uint256)",
-];
+export const SPOKE_SOURCE_GOVERNANCE = SPOKE_SOURCE_ROLES;
 
 // ---------------------------------------------------------------------------------------------------
 // Who holds what on testnet.
