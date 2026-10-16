@@ -43,24 +43,24 @@ import {
   SPOKE_POOL_REGISTRY,
   SPOKE_VTOKEN_BEACON,
   WBNB,
-} from "../../vips/vip-671/addresses/bscmainnet";
-import vip671, { pendingDeployments } from "../../vips/vip-671/bscmainnet";
-import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES } from "../../vips/vip-671/permissions";
+} from "../../vips/vip-668/addresses/bscmainnet";
+import vip668, { pendingDeployments } from "../../vips/vip-668/bscmainnet";
 import {
   ASSUMED_WILDCARDS,
   MUST_NOT_BE_WILDCARD,
   RISK_STEWARD_GRANTS,
   SET_INTEREST_RATE_MODEL,
-  VIP_671_GRANTS,
-} from "../../vips/vip-671/permissions-bscmainnet";
-import ACM_ABI from "./abi/AccessControlManager.json";
-import BSTOCK_LIQUIDATOR_ABI from "./abi/BStockLiquidator.json";
-import DBO_ABI from "./abi/DeviationBoundedOracle.json";
-import PSR_ABI from "./abi/ProtocolShareReserve.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
-import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
-import POOL_REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
-import VTOKEN_ABI from "./abi/VToken.json";
+  VIP_668_GRANTS,
+} from "../../vips/vip-668/permissions-bscmainnet";
+import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES } from "../../vips/vip-671/permissions";
+import ACM_ABI from "../vip-671/abi/AccessControlManager.json";
+import BSTOCK_LIQUIDATOR_ABI from "../vip-671/abi/BStockLiquidator.json";
+import DBO_ABI from "../vip-671/abi/DeviationBoundedOracle.json";
+import PSR_ABI from "../vip-671/abi/ProtocolShareReserve.json";
+import PROXY_ADMIN_ABI from "../vip-671/abi/ProxyAdmin.json";
+import COMPTROLLER_ABI from "../vip-671/abi/SpokeComptroller.json";
+import POOL_REGISTRY_ABI from "../vip-671/abi/SpokePoolRegistry.json";
+import VTOKEN_ABI from "../vip-671/abi/VToken.json";
 
 /// After the spoke stack, the ProtocolShareReserve implementation and the BStockLiquidator implementation (block
 /// 127,749,788) are deployed.
@@ -75,7 +75,7 @@ const BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b3
 /// A `msg.sender` that holds no grant of its own. `isAllowedToCall` tries `keccak256(msg.sender, role)` and
 /// then `keccak256(address(0), role)`, so asking from here isolates the address(0) wildcard. Asking from the
 /// target contract instead answers "wildcard OR a grant against this contract", which is what a real call sees.
-const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-671 unrelated sender"), 12));
+const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-668 unrelated sender"), 12));
 
 /// Every account whose permissions this proposal touches or relies on. A wildcard held by anyone else cannot be
 /// seen from here; these are the ones that would matter. SPOKE_POOL_REGISTRY is the zero address until it is
@@ -154,13 +154,13 @@ forking(FORK_BLOCK, async () => {
     return rows.map(r => ({ schema: r.schema, percentage: r.percentage, destination: r.destination }));
   };
 
-  /// Captured before the proposal runs and compared after it: VIP-671 must not move a single distribution row.
+  /// Captured before the proposal runs and compared after it: VIP-668 must not move a single distribution row.
   let distributionsBefore: DistributionRow[] = [];
 
-  // Everything VIP-671 takes for granted rather than granting, read from the chain as it is today. None of it
+  // Everything VIP-668 takes for granted rather than granting, read from the chain as it is today. None of it
   // depends on the spoke stack being deployed, so it runs on every fork block. A revocation or an upgrade by
-  // another proposal turns this red instead of reverting VIP-671 on execution.
-  describe("Pre-VIP: what VIP-671 relies on, on the live chain", () => {
+  // another proposal turns this red instead of reverting VIP-668 on execution.
+  describe("Pre-VIP: what VIP-668 relies on, on the live chain", () => {
     it("holds every wildcard the proposal relies on, for every account the VIP document names", async () => {
       for (const [target, grants] of Object.entries(ASSUMED_WILDCARDS)) {
         for (const { role, account } of grants) {
@@ -170,7 +170,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("gives the isolated-pools registry the setters addPool drives, as wildcards naming that registry", async () => {
-      // The spoke registry is a different account and inherits none of these, which is why VIP-671 grants them.
+      // The spoke registry is a different account and inherits none of these, which is why VIP-668 grants them.
       for (const role of REGISTRY_DRIVEN_ROLES) {
         expect(await mayCall(UNRELATED, ISOLATED_POOL_REGISTRY, role), `isolated registry may ${role}`).to.be.true;
       }
@@ -184,13 +184,13 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("holds none of the 19 VIP-671 grants as a wildcard, so each grant is a real change", async () => {
-      for (const { role, account } of VIP_671_GRANTS.filter(g => !sameAddress(g.account, PENDING))) {
+    it("holds none of the 19 VIP-668 grants as a wildcard, so each grant is a real change", async () => {
+      for (const { role, account } of VIP_668_GRANTS.filter(g => !sameAddress(g.account, PENDING))) {
         expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.false;
       }
     });
 
-    it("routes each update type to the steward VIP-671 grants, and each steward to that receiver", async () => {
+    it("routes each update type to the steward VIP-668 grants, and each steward to that receiver", async () => {
       const receiver = new ethers.Contract(RISK_STEWARD_RECEIVER, RECEIVER_ABI, ethers.provider);
       for (const [updateType, steward] of Object.entries(STEWARD_BY_UPDATE_TYPE)) {
         const config = await receiver.getRiskParameterConfig(updateType);
@@ -268,7 +268,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   if (missing.length > 0) {
-    describe("VIP-671 [bscmainnet] Hub-Funded Spoke pool infrastructure", () => {
+    describe("VIP-668 [bscmainnet] Hub-Funded Spoke pool infrastructure", () => {
       // Mocha reports an `it` without a body as pending, so the run stays green and says what is missing.
       it(`is not simulated until these are deployed: ${missing.join(", ")}`);
     });
@@ -316,8 +316,8 @@ forking(FORK_BLOCK, async () => {
       expectAddress(await comptroller.deviationBoundedOracle(), ethers.constants.AddressZero);
     });
 
-    it("gives no account any of the 19 VIP-671 permissions on the comptroller yet", async () => {
-      for (const { role, account } of VIP_671_GRANTS) {
+    it("gives no account any of the 19 VIP-668 permissions on the comptroller yet", async () => {
+      for (const { role, account } of VIP_668_GRANTS) {
         expect(await mayCall(SPOKE_COMPTROLLER, account, role), `${account} may ${role}`).to.be.false;
       }
     });
@@ -342,10 +342,10 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-671 [bscmainnet] Hub-Funded Spoke pool infrastructure", await vip671(), {
+  testVip("VIP-668 [bscmainnet] Hub-Funded Spoke pool infrastructure", await vip668(), {
     callbackAfterExecution: async txResponse => {
       // The mainnet ACM emits no PermissionGranted, so RoleGranted is the count, one per grant.
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_671_GRANTS.length + RISK_STEWARD_GRANTS.length]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_668_GRANTS.length + RISK_STEWARD_GRANTS.length]);
       // Both Ownable2Step contracts share the event, so it is counted through one ABI only.
       await expectEvents(
         txResponse,
@@ -375,13 +375,13 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("grants all 19 permissions on the spoke comptroller", async () => {
-      for (const { role, account } of VIP_671_GRANTS) {
+      for (const { role, account } of VIP_668_GRANTS) {
         expect(await mayCall(SPOKE_COMPTROLLER, account, role), `${account} may ${role}`).to.be.true;
       }
     });
 
     it("grants none of them as a wildcard", async () => {
-      for (const { role, account } of VIP_671_GRANTS) {
+      for (const { role, account } of VIP_668_GRANTS) {
         expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.false;
       }
     });
@@ -390,14 +390,14 @@ forking(FORK_BLOCK, async () => {
       for (const { role, account } of RISK_STEWARD_GRANTS) {
         expect(await mayCall(UNRELATED, account, role), `${account} holds ${role} as a wildcard`).to.be.true;
       }
-      // The rate model role is checked on each market, and VIP-671 lists none.
+      // The rate model role is checked on each market, and VIP-668 lists none.
       for (const { role, account } of RISK_STEWARD_GRANTS.filter(g => g.role !== SET_INTEREST_RATE_MODEL)) {
         expect(await mayCall(SPOKE_COMPTROLLER, account, role), `${account} may ${role}`).to.be.true;
       }
     });
 
     it("gives the spoke-only roles to no account the proposal did not name", async () => {
-      const named = VIP_671_GRANTS.map(g => `${ethers.utils.getAddress(g.account)}:${g.role}`);
+      const named = VIP_668_GRANTS.map(g => `${ethers.utils.getAddress(g.account)}:${g.role}`);
       for (const role of SPOKE_COMPTROLLER_ROLES) {
         for (const account of KNOWN_ACCOUNTS) {
           const expected = named.includes(`${ethers.utils.getAddress(account)}:${role}`);
