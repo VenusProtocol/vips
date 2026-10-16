@@ -61,8 +61,8 @@ export const SPYB_APRO_FEED = PENDING;
 // ---------------------------------------------------------------------------------------------------
 
 /// TODO(deploy): the five markets, BeaconProxies on SPOKE_VTOKEN_BEACON (isolated-pools `028`), owned by the Normal
-/// Timelock from `initialize`. `028` needs a `bscmainnet` entry in `spokeDeploymentConfig.ts`, and QQQB and SPYB
-/// entries in `tokensConfig`, first.
+/// Timelock from `initialize`. `028`'s `bscmainnet` config, with the QQQB and SPYB token entries, is in
+/// isolated-pools#570.
 export const VUSDT_SPOKE = PENDING;
 export const VUSDC_SPOKE = PENDING;
 export const VU_SPOKE = PENDING;
@@ -70,8 +70,8 @@ export const VQQQB_SPOKE = PENDING;
 export const VSPYB_SPOKE = PENDING;
 
 /// TODO(deploy): reference only. The rate models `028` builds the markets with: LIQUIDITY_IRM below for USDT, USDC
-/// and U. For QQQB and SPYB the risk sheet sets an IRM of 0 without naming a model; `028`'s config needs one, and
-/// the simulation checks that it charges nothing.
+/// and U, and for QQQB and SPYB a WhitePaper model with both rates 0, for the risk sheet's IRM of 0. The simulation
+/// checks that it charges nothing.
 export const IRM_LIQUIDITY = PENDING;
 export const IRM_COLLATERAL = PENDING;
 

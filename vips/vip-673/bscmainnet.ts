@@ -43,9 +43,9 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 // STATUS: DRAFT. The markets, both rate models and SPYB's APRO feed are `PENDING` in ./addresses/bscmainnet.ts, and
 // the QQQB and SPYB seeds are `null` there. `vip673()` throws until all are filled.
 //
-// GAS, from a bscmainnet fork at block 127,552,000 with every VIP-671, VIP-672 and VIP-673 contract deployed on the
-// fork from the PR heads, VIP-671 and VIP-672 executed, and placeholders for the open risk values: 62 commands,
-// propose() about 11.86M (70.7% of the 16,777,216 per-tx cap), queue() 3.50M, execute() 6.96M (41.5%).
+// GAS, from the simulation (bscmainnet fork at block 127,750,000, VIP-671 and VIP-672 executed and VIP-673's markets
+// deployed on the fork, stand-ins for the open values): 62 commands, propose() about 11.86M (70.7% of the 16,777,216
+// per-tx cap), queue() 3.50M, execute() 6.97M (41.5%).
 //
 // ---------------------------------------------------------------------------------------------------
 // ORDER that matters:
@@ -62,9 +62,9 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //  - Atlas authorizes `ATLAS_ORACLE` on both Atlas feeds (`isAuthorizedCaller`). The DBO's price read reverts
 //    `OnlyAuthorizedCallerAllowed()` otherwise.
 //  - Neither QQQB nor SPYB has a DBO config (`MarketAlreadyInitialized`).
-// The VTreasury must also hold every seed (none of the five on 2026-10-14). `withdrawTreasuryBEP20` caps at its
-// balance, so a short U, QQQB or SPYB seed reverts, but a short USDT or USDC seed is paid from the Normal Timelock's
-// own balance (about 58 of each on 2026-10-15) without reverting.
+// The VTreasury must also hold every seed. It held none of the five on 2026-10-16. `withdrawTreasuryBEP20` caps at its
+// balance, and `addMarket` takes the rest from the Normal Timelock's own balance. That silently covers a short USDT or
+// USDC seed (about 58 of each on 2026-10-16), but not U, QQQB or SPYB, so a short seed of those reverts.
 // Re-read each Hub's deposit queue and Spoke caps too: the Operator can change both, and step 7 overwrites the queue
 // without reverting.
 //
@@ -81,18 +81,17 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //  - `BStockLiquidator.setPoolRegistry` and `setCoreFlashSource`: `onlyOwner` calls by the Operator after VIP-671.
 // ===================================================================================================
 
-/// Placeholder, as in parts 1 and 2. VIP numbers are assigned by the governor at proposal time.
+/// Placeholder, as in VIP-671 and VIP-672. VIP numbers are assigned by the governor at proposal time.
 const VIP_NUMBER = 673;
 
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
 const ACTION_BORROW = 2;
 
-/// The markets VIP-673 lists. Mainnet's by default; the simulation passes markets it deployed on the fork while the
-/// real ones are pending.
+/// The markets VIP-673 lists. Mainnet's by default; the simulation passes fork stand-ins for whatever is still pending.
 export type Vip673Markets = { liquidity: LiquidityMarket[]; collateral: CollateralMarket[] };
 const MAINNET_MARKETS: Vip673Markets = { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS };
 
-/// Every address VIP-673 needs that is not deployed yet, including the VIP-671 and VIP-672 ones its commands target.
+/// Every address VIP-673 needs that is still `PENDING`, including the VIP-671 and VIP-672 ones its commands target.
 /// Exported so the simulation can report what is missing.
 export const pendingDeployments = ({ liquidity, collateral }: Vip673Markets = MAINNET_MARKETS): string[] =>
   [
@@ -208,8 +207,8 @@ export const vip673 = (markets: Vip673Markets = MAINNET_MARKETS) => {
     [stack.name, tokens(stack.spokeAbsoluteCap), `${stack.spokePercentageCapBps / 100}%`].join(" | "),
   );
 
-  // TODO(meta): add the audit report links for isolated-pools#559, venus-liquidity-hub#22 and venus-periphery#74,
-  // the community post, and the deployed addresses.
+  // TODO(meta): list the five markets and both rate models under a "Deployed contracts" heading once `028` deploys
+  // them.
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: markets and Liquidity Hub wiring`,
@@ -226,7 +225,7 @@ If passed, this VIP will list the markets of the **bStock index** Hub-Funded Spo
 2. List the five markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
 3. Give QQQB and SPYB a liquidation incentive of their own, and pause borrowing on both.
 4. Restrict supply on the USDT, USDC and U markets to each Hub's Spoke yield group.
-5. Point every market's shortfall handler at the Normal Timelock, so bad debt is recovered by governance.
+5. Point every market's shortfall handler at the Normal Timelock, so governance, not a Shortfall auction, handles any bad debt.
 6. Allow the CollateralGateway (${COLLATERAL_GATEWAY}) to enter a user into a market, so supplying and enabling collateral take one transaction.
 7. Register each liquidity market in its Spoke yield group, and put the group first in its Hub's deposit queue.
 
@@ -260,7 +259,7 @@ ${capRows.map(r => `| ${r} |`).join("\n")}
 #### Notes
 
 - Liquidations are permissionless. The pool's liquidation allowlist stays off.
-- Each Hub deposits into its Spoke market first and withdraws from it last. The market's 5M supply cap binds before the yield group caps above.
+- Each Hub deposits into its Spoke market first and withdraws from it last, up to the lowest of the market's supply cap and the two yield group caps above.
 
 #### References
 
@@ -351,7 +350,7 @@ ${capRows.map(r => `| ${r} |`).join("\n")}
     // 6. `CollateralGateway` as the only holder of `enterMarketForAccount`, against this comptroller only.
     ...VIP_673_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
 
-    // 7. Connect each liquidity market to its Hub. Its caps were set by VIP-672.
+    // 7. Connect each liquidity market to its Hub. VIP-672 already set each Spoke source's caps on its Hub.
     ...LIQUIDITY_MARKETS.flatMap(wireHub),
   ];
 
