@@ -47,6 +47,16 @@ task("propose", "Propose proposal")
     await proposeVip(proposalPath);
   });
 
+task("seedAggregatorBatches", "Seed the AuxiliaryCommandsAggregator batches a proposal executes")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .setAction(async function (taskArguments, hre) {
+    hre.FORKED_NETWORK = hre.network.name as "bscmainnet";
+    const { proposalPath } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const seedAggregatorBatches = require("./scripts/seedAggregatorBatches").default;
+    return seedAggregatorBatches(proposalPath);
+  });
+
 task("proposeOnTestnet", "Propose proposal on testnet")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
   .setAction(async function (taskArguments, hre) {
