@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { pinOracleFeedPrice } from "src/vip-framework/oracleStaleness";
 
 import {
-  ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
   BORROW_ACTION,
   DBO_COOLDOWN_PERIOD,
@@ -17,7 +17,6 @@ import {
   DBO_TRIGGER_THRESHOLD,
   DEVIATION_BOUNDED_ORACLE,
   MARKETS,
-  ONE_YEAR,
   PROTOCOL_SHARE_RESERVE,
   REDUCE_RESERVES_BLOCK_DELTA,
   convertAmountToVTokens,
@@ -51,6 +50,12 @@ forking(FORK_BLOCK, async () => {
     for (const m of MARKETS) {
       const underlying = new ethers.Contract(m.vToken.underlying.address, ERC20_ABI, ethers.provider);
       treasuryBalanceBefore[m.vToken.address] = await underlying.balanceOf(bscmainnet.VTREASURY);
+      // The VIP lists the market on a new Atlas feed with its real ~1h window.
+      await pinOracleFeedPrice(m.oracle.address, {
+        asset: m.vToken.underlying.address,
+        feed: m.oracle.feed,
+        maxStalePeriod: m.oracle.maxStalePeriod,
+      });
     }
   });
 
@@ -69,7 +74,7 @@ forking(FORK_BLOCK, async () => {
     }
   });
 
-  testVip("VIP-643", await vip643(true), {
+  testVip("VIP-643", await vip643(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -134,8 +139,7 @@ forking(FORK_BLOCK, async () => {
         it("configures the Atlas Oracle feed for the underlying", async () => {
           const config = await atlasOracle.tokenConfigs(m.vToken.underlying.address);
           expect(config.feed).to.equal(m.oracle.feed);
-          // Simulations configure a 1-year stale period (see VIP-615 workaround).
-          expect(config.maxStalePeriod).to.equal(ONE_YEAR);
+          expect(config.maxStalePeriod).to.equal(m.oracle.maxStalePeriod);
         });
 
         it("enables Oracle Dynamic Protection Mode with a 16.67% trigger", async () => {
@@ -192,28 +196,6 @@ forking(FORK_BLOCK, async () => {
         it("should pause borrowing on the market", async () => {
           expect(await comptroller.actionPaused(m.vToken.address, BORROW_ACTION)).to.equal(true);
         });
-      });
-    }
-  });
-
-  // Runs last: the proposal configures ONE_YEAR for simulation purposes; here we roll the Atlas
-  // stale period back to the production value to confirm it is settable by the Normal Timelock.
-  // (Must come after the price assertions above — once the real ~1h period is in place, the feed
-  // is stale relative to the mined governance lifecycle and getUnderlyingPrice would revert.)
-  describe("Atlas Oracle stale period rollback", () => {
-    before(async () => {
-      const timelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      for (const m of MARKETS) {
-        await atlasOracle
-          .connect(timelock)
-          .setTokenConfig([m.vToken.underlying.address, m.oracle.feed, ATLAS_MAX_STALE_PERIOD]);
-      }
-    });
-
-    for (const m of MARKETS) {
-      it(`resets the ${m.vToken.symbol} Atlas stale period to the production value`, async () => {
-        const config = await atlasOracle.tokenConfigs(m.vToken.underlying.address);
-        expect(config.maxStalePeriod).to.equal(ATLAS_MAX_STALE_PERIOD);
       });
     }
   });
