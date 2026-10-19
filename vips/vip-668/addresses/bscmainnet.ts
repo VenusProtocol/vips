@@ -10,20 +10,20 @@ import {
 } from "../../vip-592/bscmainnet";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain]: Hub-Funded Spoke pool address book, plus what VIP-672 (../../vip-672) and VIP-673
+// VIP-668 [BNB Chain]: Hub-Funded Spoke pool address book, plus what VIP-672 (../../vip-672) and VIP-673
 // (../../vip-673) share with it. Each of those keeps its own constants in its own address book, which re-exports this.
 //
-// VIP-671 stands up the empty pool: ownership, ACM grants, both oracles, the ProtocolShareReserve upgrade, `addPool`,
+// VIP-668 stands up the empty pool: ownership, ACM grants, both oracles, the ProtocolShareReserve upgrade, `addPool`,
 // the `BStockLiquidator` upgrade and the Risk Steward wildcards. It lists no market.
 //
 // ---------------------------------------------------------------------------------------------------
-// STATUS: everything VIP-671 needs is deployed and filled in (2026-10-15). A `PENDING` address is filled from its
+// STATUS: everything VIP-668 needs is deployed and filled in (2026-10-15). A `PENDING` address is filled from its
 // deployment, then re-read from chain before the proposal is opened. `PENDING` fails loudly: each part
 // collects every one it needs that survives and throws with the full list, so no proposal can be built, simulated
 // or proposed half-filled. VIP-673's risk values that are still open are `null` and fail the same way.
 //
 // WHAT IS REAL: every address in the "already on chain" sections was read back from bscmainnet, not taken
-// from a deployment record alone. VIP-671's on 2026-10-13 (block ~127,396,000), VIP-672's on 2026-10-14
+// from a deployment record alone. VIP-668's on 2026-10-13 (block ~127,396,000), VIP-672's on 2026-10-14
 // (block ~127,532,000), VIP-673's on 2026-10-14 (block ~127,552,000).
 // ===================================================================================================
 
@@ -55,15 +55,15 @@ const {
 export const ACM = ACCESS_CONTROL_MANAGER;
 export { CRITICAL_TIMELOCK, DEFAULT_PROXY_ADMIN, FAST_TRACK_TIMELOCK, NORMAL_TIMELOCK, RESILIENT_ORACLE };
 
-/// The multisig for risk parameters. Holds the collateral factor and cap wildcards today; VIP-671 adds the
+/// The multisig for risk parameters. Holds the collateral factor and cap wildcards today; VIP-668 adds the
 /// five pool-level and per-market liquidation levers.
 export { CRITICAL_GUARDIAN };
 
 /// The multisig for pauses and unlisting, `GUARDIAN` in this repo. Holds the `setActionsPaused` and
-/// `unlistMarket` wildcards today; VIP-671 adds the two liquidation-allowlist levers.
+/// `unlistMarket` wildcards today; VIP-668 adds the two liquidation-allowlist levers.
 export const PAUSE_GUARDIAN = GUARDIAN;
 
-/// Day-to-day Hub multisig and the `BStockLiquidator` owner. Gets nothing from VIP-671. Referenced because,
+/// Day-to-day Hub multisig and the `BStockLiquidator` owner. Gets nothing from VIP-668. Referenced because,
 /// as that owner, it makes the two follow-up calls after execution (see ../bscmainnet.ts). VIP-672 gives it
 /// on each Spoke source the six roles it holds on every live Core and Flux source.
 export const OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
@@ -79,7 +79,7 @@ export const CORE_COMPTROLLER = UNITROLLER;
 /// The Risk Steward contracts from VIP-592, each a transparent proxy behind DEFAULT_PROXY_ADMIN. The receiver routes
 /// Risk Oracle updates to them: both caps to the caps steward, collateral factors to the collateral factors steward
 /// and rate models to the rate model steward. Each reads the market's comptroller and takes the isolated-pools path
-/// for any comptroller other than CORE_COMPTROLLER. VIP-671 grants them four wildcards (../permissions-bscmainnet.ts).
+/// for any comptroller other than CORE_COMPTROLLER. VIP-668 grants them four wildcards (../permissions-bscmainnet.ts).
 /// Routing and each steward's receiver read back on 2026-10-14 (block 127,593,754). The Operator is the Risk Oracle's
 /// authorised sender and one of the receiver's whitelisted executors; VIP-673's simulation runs the stewards as it.
 export { RISK_ORACLE, RISK_STEWARD_RECEIVER };
@@ -89,7 +89,7 @@ export const IRM_RISK_STEWARD = IRM_STEWARD;
 
 /// The isolated-pools registry. Referenced only to make the contrast explicit: this pool is NOT listed here,
 /// and the wildcard ACM grants this address holds name it as the account, so none of them carry over to the
-/// spoke registry. That is what the six registry grants in VIP-671 are for.
+/// spoke registry. That is what the six registry grants in VIP-668 are for.
 export const ISOLATED_POOL_REGISTRY = POOL_REGISTRY;
 
 /// Prices borrow, redeem, transfer and exit-market: collateral at the low end of its recent window, debt at
@@ -150,7 +150,7 @@ export const BSTOCK_LIQUIDATOR_ROUTERS = [
 // ---------------------------------------------------------------------------------------------------
 // The spoke stack, isolated-pools deploy/024 through deploy/027 (isolated-pools#570).
 //
-// `028` (the markets) is not run before VIP-671: it logs and returns until a `bscmainnet` market entry exists.
+// `028` (the markets) is not run before VIP-668: it logs and returns until a `bscmainnet` market entry exists.
 // Fill each of these from the deployment, then re-read them from chain before the proposal is opened.
 // ---------------------------------------------------------------------------------------------------
 
@@ -167,7 +167,7 @@ export const SPOKE_POOL_REGISTRY = "0x372D0eE44993B5c6eb641364BAB939311e8e5B4c";
 export const SPOKE_COMPTROLLER = "0x1e75332a3e2CC8e5ee9055aF4c737DA34Cb7cEDf";
 
 /// Reference only. `UpgradeableBeacon` is plain `Ownable`, and the `025` and `027` deploy scripts
-/// hand both to the Normal Timelock, so VIP-671 has no command for either.
+/// hand both to the Normal Timelock, so VIP-668 has no command for either.
 export const SPOKE_COMPTROLLER_BEACON = "0xDE74d82bF2379DD75FbBF753fcc9141cA83Ba1f3";
 export const SPOKE_VTOKEN_BEACON = "0xd8BC6C3624187649A222eacE8eF2eA13fF3B0D48";
 
@@ -187,7 +187,7 @@ export const PROTOCOL_SHARE_RESERVE_IMPL = "0x842B9774eeff04b0497fA52d5F235A79D1
 export const BSTOCK_LIQUIDATOR_IMPL = "0x122E8f16a6cab6549075fa0b102c01E1b2dD63B6";
 
 // ---------------------------------------------------------------------------------------------------
-// Pool-level parameters, consumed by `addPool`. Values from the shipment plan (VIP-671, `addPool`).
+// Pool-level parameters, consumed by `addPool`. Values from the shipment plan (VIP-668, `addPool`).
 // ---------------------------------------------------------------------------------------------------
 
 export const POOL_NAME = "bStock index";
@@ -206,7 +206,7 @@ export const POOL_LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
 export const MIN_LIQUIDATABLE_COLLATERAL = parseUnits("100", 18);
 
 /// What `025` initializes the comptroller with on bscmainnet. Read back in the simulation; `setMaxLoopsLimit`
-/// can only raise it, so VIP-671 carries no command for it.
+/// can only raise it, so VIP-668 carries no command for it.
 export const MAX_LOOPS_LIMIT = 50;
 
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";

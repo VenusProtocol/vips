@@ -56,12 +56,6 @@ const BEACON_ABI: JsonFragment[] = [
   { type: "function", name: "owner", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
 ];
 
-/// `enterMarketForAccount` does not exist in ./abi/SpokeComptroller.json, which was captured from the
-/// implementation the listing VIP ran against. That ABI is otherwise identical to the new one: the
-/// rename is the only difference between the two implementations, so everything else below keeps
-/// using it, and only this call needs a fragment of its own.
-const RENAMED_ABI = ["function enterMarketForAccount(address account, address vToken)"];
-
 /// `AccessControlManager.isAllowedToCall` keys the role on `msg.sender`, so the only honest way to ask
 /// "may X call this on THIS comptroller" is to ask it from the comptroller's own address. It consults
 /// the address(0) wildcards, which `hasPermission` does not, and a wildcard is exactly the thing that
@@ -255,10 +249,9 @@ forking(FORK_BLOCK, async () => {
 
     it("lets the Guardian enter a market on another account's behalf", async () => {
       const vToken = COLLATERAL_MARKET.vToken;
-      const renamed = new ethers.Contract(SPOKE_COMPTROLLER, RENAMED_ABI, guardian);
 
       expect(await comptroller.checkMembership(BENEFICIARY, vToken)).to.be.false;
-      await expect(renamed.enterMarketForAccount(BENEFICIARY, vToken))
+      await expect(comptroller.connect(guardian).enterMarketForAccount(BENEFICIARY, vToken))
         .to.emit(comptroller, "MarketEntered")
         .withArgs(vToken, BENEFICIARY);
       expect(await comptroller.checkMembership(BENEFICIARY, vToken)).to.be.true;

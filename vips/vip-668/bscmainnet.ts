@@ -1,6 +1,7 @@
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { giveCallPermission } from "../vip-671/permissions";
 import {
   ACM,
   BSTOCK_LIQUIDATOR,
@@ -21,19 +22,18 @@ import {
   SPOKE_POOL_REGISTRY,
   SPOKE_VTOKEN_BEACON,
 } from "./addresses/bscmainnet";
-import { giveCallPermission } from "./permissions";
-import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_671_GRANTS } from "./permissions-bscmainnet";
+import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_668_GRANTS } from "./permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain]: Hub-Funded Spoke pool infrastructure. 31 commands, no markets.
+// VIP-668 [BNB Chain]: Hub-Funded Spoke pool infrastructure. 31 commands, no markets.
 //
 // First of three. VIP-672 (Liquidity Hub infrastructure) does not depend on this one. VIP-673 (markets and Hub wiring)
 // needs both executed first.
 //
 // ---------------------------------------------------------------------------------------------------
-// STATUS: every contract VIP-671 needs is deployed on bscmainnet and filled in ./addresses/bscmainnet.ts: the spoke
+// STATUS: every contract VIP-668 needs is deployed on bscmainnet and filled in ./addresses/bscmainnet.ts: the spoke
 // stack (isolated-pools#570), the ProtocolShareReserve implementation (protocol-reserve#168) and the
-// `BStockLiquidator` implementation (venus-protocol#707). `vip671()` still throws if any of them is
+// `BStockLiquidator` implementation (venus-protocol#707). `vip668()` still throws if any of them is
 // set back to `PENDING`, so a half-filled proposal cannot build, simulate or be proposed.
 //
 // ---------------------------------------------------------------------------------------------------
@@ -83,9 +83,9 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_671_GRANTS } from "./permissions
 
 /// Placeholder. VIP numbers are assigned by the governor at proposal time, so this line and the directory name
 /// change together when the proposal is opened.
-const VIP_NUMBER = 671;
+const VIP_NUMBER = 668;
 
-/// Every address VIP-671 needs that does not exist on bscmainnet yet. Exported so the simulation can report what
+/// Every address VIP-668 needs that does not exist on bscmainnet yet. Exported so the simulation can report what
 /// is still missing instead of failing to load.
 export const pendingDeployments = (): string[] =>
   [
@@ -101,18 +101,16 @@ export const pendingDeployments = (): string[] =>
     .filter(({ address }) => address === PENDING)
     .map(({ name }) => name);
 
-export const vip671 = () => {
+export const vip668 = () => {
   const missing = pendingDeployments();
   if (missing.length > 0) {
     throw new Error(
       `VIP-${VIP_NUMBER} [bscmainnet] is still a draft: ${missing.length} address(es) pending in ` +
-        `vips/vip-671/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
+        `vips/vip-668/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
         `Deploy them and fill the addresses first. Nothing here has a safe default.`,
     );
   }
 
-  // TODO(meta): add links to the final audit reports of isolated-pools#559, protocol-reserve#168 and
-  // venus-protocol#707 once they are published.
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: infrastructure`,
@@ -125,7 +123,7 @@ A Hub-Funded Spoke pool is one pool whose two sides are controlled separately:
 - **Liquidity side**: borrowable, but only the Liquidity Hub may supply it, and supplying it gives no borrow power.
 - **Collateral side**: permissionless to supply, usable as collateral, and not borrowable.
 
-The pool has its own Comptroller and its own registry, so a price problem or bad debt in it stays in it and cannot reach the Core pool or the existing isolated pools.
+The pool has its own Comptroller and registry, with separate collateral and debt accounting. This does not eliminate economic exposure through the Liquidity Hubs that fund it, or through positions backed by those Hubs.
 
 #### Proposed changes
 
@@ -140,9 +138,9 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
 5. Register the pool as **bStock index**, with a 50% close factor, a 10% liquidation incentive and a minimum liquidatable collateral of $100.
 6. Upgrade **BStockLiquidator**, the atomic liquidator for bStock collateral, so it can also serve this pool. Its behaviour for the Core pool is unchanged.
 7. Let the **Risk Stewards** apply collateral factor, supply cap, borrow cap and interest rate model updates from the Risk Oracle to this pool, as they already do on the Core pool. Each permission is granted on every contract (an ACM wildcard), so it covers the markets this pool lists later and also reaches the existing isolated pools on BNB Chain:
-   - CollateralFactorsRiskSteward: \`setCollateralFactor(address,uint256,uint256)\`
-   - MarketCapsRiskSteward: \`setMarketSupplyCaps(address[],uint256[])\` and \`setMarketBorrowCaps(address[],uint256[])\`
-   - IRMRiskSteward: \`setInterestRateModel(address)\`
+   - CollateralFactorsRiskSteward: setCollateralFactor(address,uint256,uint256)
+   - MarketCapsRiskSteward: setMarketSupplyCaps(address[],uint256[]) and setMarketBorrowCaps(address[],uint256[])
+   - IRMRiskSteward: setInterestRateModel(address)
 
 #### Notes
 
@@ -182,7 +180,7 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
     //    isolated-pools registry as the account, so the spoke registry inherits nothing and `addPool` in step
     //    5 reverts without these.
     // -------------------------------------------------------------------------------------------
-    ...VIP_671_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
+    ...VIP_668_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
 
     // -------------------------------------------------------------------------------------------
     // 3. Oracles. Both setters are `onlyOwner`, so they follow step 1. `setPriceOracle` also has to precede
@@ -262,4 +260,4 @@ The pool has its own Comptroller and its own registry, so a price problem or bad
   return makeProposal(commands, meta, ProposalType.REGULAR);
 };
 
-export default vip671;
+export default vip668;

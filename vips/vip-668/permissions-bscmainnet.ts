@@ -1,14 +1,4 @@
 import {
-  COLLATERAL_FACTORS_RISK_STEWARD,
-  CRITICAL_GUARDIAN,
-  FAST_TRACK_TIMELOCK,
-  IRM_RISK_STEWARD,
-  MARKET_CAPS_RISK_STEWARD,
-  NORMAL_TIMELOCK,
-  PAUSE_GUARDIAN,
-  SPOKE_POOL_REGISTRY,
-} from "./addresses/bscmainnet";
-import {
   PAUSE_ROLE,
   REGISTRY_DRIVEN_ROLES,
   ROUTER_ROLES,
@@ -24,16 +14,26 @@ import {
   SET_MIN_LIQUIDATABLE_COLLATERAL,
   SPOKE_COMPTROLLER_ROLES,
   UNLIST_ROLE,
-} from "./permissions";
+} from "../vip-671/permissions";
+import {
+  COLLATERAL_FACTORS_RISK_STEWARD,
+  CRITICAL_GUARDIAN,
+  FAST_TRACK_TIMELOCK,
+  IRM_RISK_STEWARD,
+  MARKET_CAPS_RISK_STEWARD,
+  NORMAL_TIMELOCK,
+  PAUSE_GUARDIAN,
+  SPOKE_POOL_REGISTRY,
+} from "./addresses/bscmainnet";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain]: ACM grants (19 on `Comptroller_HubSpoke`, and four Risk Steward wildcards), and what
+// VIP-668 [BNB Chain]: ACM grants (19 on `Comptroller_HubSpoke`, and four Risk Steward wildcards), and what
 // it relies on. VIP-672's and VIP-673's live in ../vip-672 and ../vip-673.
 //
 // Every string is the literal the checking contract (`SpokeComptroller`, `PoolRegistry`, `VToken`, `YieldGroup`,
 // `Hub`) passes to `_checkAccessAllowed`, imported from ./permissions.ts where it is shared.
 //
-// VIP-671's: read from the ACM 0x4788…3555 on 2026-10-13 (block 127,396,467) with `isAllowedToCall(account, role)`
+// VIP-668's: read from the ACM 0x4788…3555 on 2026-10-13 (block 127,396,467) with `isAllowedToCall(account, role)`
 // called from an UNRELATED `msg.sender`, so a `true` proves an address(0) wildcard rather than a grant against
 // one contract. The mainnet ACM does not expose `hasPermission`.
 // ===================================================================================================
@@ -42,7 +42,7 @@ export type Grant = { role: string; account: string };
 
 /// The six setters `PoolRegistry` drives on the comptroller as `msg.sender` during `addPool` and `addMarket`.
 /// The isolated-pools registry holds all six as wildcards, but the spoke registry is a different account and
-/// inherits none, so `addPool` reverts without these. The likeliest way for VIP-671 to fail.
+/// inherits none, so `addPool` reverts without these. The likeliest way for VIP-668 to fail.
 export const REGISTRY_GRANTS = REGISTRY_DRIVEN_ROLES;
 
 /// The five spoke-only setters plus forced liquidation. Held by nobody on this chain, as a grant or a wildcard.
@@ -68,7 +68,7 @@ export const PAUSE_GUARDIAN_GRANTS = [SET_LIQUIDATION_ALLOWLIST_ENABLED, SET_ALL
 
 /// All 19, in proposal order. Each against `Comptroller_HubSpoke`, never address(0): a wildcard reaches every
 /// contract that checks the same role string.
-export const VIP_671_GRANTS: Grant[] = [
+export const VIP_668_GRANTS: Grant[] = [
   ...REGISTRY_GRANTS.map(role => ({ role, account: SPOKE_POOL_REGISTRY })),
   ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
   ...CRITICAL_GUARDIAN_GRANTS.map(role => ({ role, account: CRITICAL_GUARDIAN })),
@@ -76,7 +76,7 @@ export const VIP_671_GRANTS: Grant[] = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-671: the Risk Steward wildcards. Unlike the 19 above, these four are granted against address(0) on purpose.
+// VIP-668: the Risk Steward wildcards. Unlike the 19 above, these four are granted against address(0) on purpose.
 //
 // Each steward reads the market's comptroller and, for any comptroller other than the Core pool's, calls the
 // isolated-pools setter below. A wildcard covers the spoke comptroller and every spoke market `028` deploys and VIP-673
@@ -112,7 +112,7 @@ export const RISK_STEWARD_GRANTS: Grant[] = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// Wildcards VIP-671 and VIP-673 RELY ON but do not grant. A wildcard reaches a contract deployed after it was
+// Wildcards VIP-668 and VIP-673 RELY ON but do not grant. A wildcard reaches a contract deployed after it was
 // made, so these cover the new comptroller, registry and markets from their first block. Asserted BEFORE the
 // proposal runs, so a revocation fails the simulation instead of the execution.
 //
@@ -153,7 +153,7 @@ export const ASSUMED_WILDCARDS: Record<"comptroller" | "poolRegistry" | "vToken"
   ],
 };
 
-/// Roles no account may hold as an address(0) wildcard before VIP-671, or a grant in VIP-671 is a no-op and a
+/// Roles no account may hold as an address(0) wildcard before VIP-668, or a grant in VIP-668 is a no-op and a
 /// wildcard holder could already drive this pool. `enterMarketForAccount` is the critical one: its holder can
 /// enter any account into any market and make that account's supply seizable collateral, and only
 /// `CollateralGateway` may hold it (VIP-673). The `uint8[]` pause form is pinned so neither spelling gets "fixed".
