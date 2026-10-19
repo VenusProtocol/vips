@@ -194,28 +194,27 @@ export const vip670 = (markets: Vip670Markets = MAINNET_MARKETS) => {
       ? pct(own.sub(parseUnits("1", 18)))
       : `${pct(POOL_LIQUIDATION_INCENTIVE.sub(parseUnits("1", 18)))} (pool-wide)`;
   };
-  const marketRows = MARKETS.map(m =>
-    [
-      m.symbol,
-      pct(m.collateralFactor),
-      pct(m.liquidationThreshold),
-      incentive(m),
-      tokens(m.supplyCap),
-      tokens(m.borrowCap),
-      pct(m.reserveFactor),
-      tokens(required(m.initialSupply, `${m.symbol} seed`)),
-    ].join(" | "),
+  const marketLines = MARKETS.map(
+    m =>
+      `- **${m.symbol}**: collateral factor ${pct(m.collateralFactor)}, liquidation threshold ${pct(
+        m.liquidationThreshold,
+      )}, liquidation incentive ${incentive(m)}, supply cap ${tokens(m.supplyCap)}, borrow cap ${tokens(
+        m.borrowCap,
+      )}, reserve factor ${pct(m.reserveFactor)}, seed ${tokens(required(m.initialSupply, `${m.symbol} seed`))}`,
   );
-  const capRows = LIQUIDITY_MARKETS.map(({ stack }) =>
-    [stack.name, tokens(stack.spokeAbsoluteCap), `${stack.spokePercentageCapBps / 100}%`].join(" | "),
+  const capLines = LIQUIDITY_MARKETS.map(
+    ({ stack }) =>
+      `- ${stack.name}: ${tokens(stack.spokeAbsoluteCap)} absolute, ${
+        stack.spokePercentageCapBps / 100
+      }% of the Hub's assets`,
   );
-  const contractRows = [
+  const contractLines = [
     ...MARKETS.map(m => [m.symbol, m.vToken]),
     ["JumpRateModelV2 of USDT, USDC and U", LIQUIDITY_MARKETS[0].interestRateModel],
     ["WhitePaperInterestRateModel of QQQB and SPYB", COLLATERAL_MARKETS[0].interestRateModel],
     ["AdapterSpokeV1", ADAPTER_SPOKE_V1],
     ["CollateralGateway", COLLATERAL_GATEWAY],
-  ].map(r => r.join(" | "));
+  ].map(([name, address]) => `- ${name}: ${address}`);
 
   const meta = {
     version: "v2",
@@ -239,9 +238,7 @@ If passed, this VIP will list the markets of the **bStock index** Hub-Funded Spo
 
 #### Market parameters
 
-| Market | Collateral factor | Liquidation threshold | Liquidation incentive | Supply cap | Borrow cap | Reserve factor | Seed |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-${marketRows.map(r => `| ${r} |`).join("\n")}
+${marketLines.join("\n")}
 
 - Interest rate model of USDT, USDC and U: JumpRateModelV2 with a ${pct(
       LIQUIDITY_IRM.baseRatePerYear,
@@ -260,9 +257,7 @@ ${marketRows.map(r => `| ${r} |`).join("\n")}
 
 Set when each Spoke yield group was registered on its Hub. The lower of the two applies.
 
-| Hub | Absolute cap | Percentage of the Hub's assets |
-| --- | --- | --- |
-${capRows.map(r => `| ${r} |`).join("\n")}
+${capLines.join("\n")}
 
 #### Notes
 
@@ -271,15 +266,14 @@ ${capRows.map(r => `| ${r} |`).join("\n")}
 
 #### Deployed contracts
 
-| Contract | Address |
-| --- | --- |
-${contractRows.map(r => `| ${r} |`).join("\n")}
+${contractLines.join("\n")}
 
 #### References
 
 - [Spoke pool contracts](https://github.com/VenusProtocol/isolated-pools/pull/559)
 - [Spoke yield family](https://github.com/VenusProtocol/venus-liquidity-hub/pull/22)
-- [CollateralGateway](https://github.com/VenusProtocol/venus-periphery/pull/74)`,
+- [CollateralGateway](https://github.com/VenusProtocol/venus-periphery/pull/74)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/782)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
