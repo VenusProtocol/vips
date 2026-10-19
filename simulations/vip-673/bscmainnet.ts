@@ -1,4 +1,3 @@
-import BEACON_PROXY from "@venusprotocol/isolated-pools/artifacts/@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol/BeaconProxy.json";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
@@ -39,10 +38,7 @@ import {
   CollateralMarket,
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
-  IRM_COLLATERAL,
-  IRM_LIQUIDITY,
   LIQUIDITY_IRM,
-  LiquidityMarket,
   COLLATERAL_MARKETS as MAINNET_COLLATERAL_MARKETS,
   LIQUIDITY_MARKETS as MAINNET_LIQUIDITY_MARKETS,
   MARKET_CAPS_RISK_STEWARD,
@@ -84,8 +80,6 @@ import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
-import JUMP_RATE_MODEL from "./bytecode/JumpRateModelV2.json";
-import WHITE_PAPER_MODEL from "./bytecode/WhitePaperInterestRateModel.json";
 
 /// After every VIP-671, VIP-672 and VIP-673 contract is deployed (VIP-673's markets by block 128,481,540). Whatever has
 /// not happened on mainnet by this block (VIP-671 and VIP-672 executing) the simulation does on the fork.
@@ -105,7 +99,6 @@ const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils
 const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 hub depositor"), 12));
 const SUPPLIER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 collateral supplier"), 12));
 const LIQUIDATOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 liquidator"), 12));
-const DEPLOYER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 fork deployer"), 12));
 const borrowerFor = (symbol: string) =>
   ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-673 borrower ${symbol}`), 12));
 
@@ -279,67 +272,11 @@ const executeEarlierVips = async () => {
   }
 };
 
-/// Stands in on the fork for every VIP-673 input still pending. Markets and rate models are deployed as isolated-pools
-/// `028` deploys them from its `bscmainnet` config (isolated-pools#570, efb3b381); QQQB and SPYB get STAND_IN_SEED. A
-/// collateral market keeps its own feeds only when both are set and Atlas answers `ATLAS_ORACLE` on its feed, and
-/// takes both of TSLAB's otherwise: one TSLAB feed against one of its own would break the 5% band. Every other value
-/// that is set on mainnet is kept.
+/// Stands in on the fork for every VIP-673 input still pending: QQQB and SPYB get STAND_IN_SEED, and a collateral
+/// market keeps its own feeds only when both are set and Atlas answers `ATLAS_ORACLE` on its feed. Otherwise it takes
+/// both of TSLAB's: one TSLAB feed against one of its own would break the 5% band. Every other value set on mainnet is
+/// kept.
 const standInOnFork = async (): Promise<Vip673Markets> => {
-  const deployer = await initMainnetUser(DEPLOYER, ethers.utils.parseEther("10"));
-  const deploy = async (artifact: { abi: unknown[]; bytecode: string }, args: unknown[]): Promise<string> => {
-    const contract = await new ethers.ContractFactory(artifact.abi as never, artifact.bytecode, deployer).deploy(
-      ...args,
-    );
-    await contract.deployed();
-    return contract.address;
-  };
-
-  // The rate models count time the way the markets do: read from the SpokeVToken implementation.
-  const beacon = new ethers.Contract(
-    SPOKE_VTOKEN_BEACON,
-    ["function implementation() view returns (address)"],
-    ethers.provider,
-  );
-  const impl = new ethers.Contract(await beacon.implementation(), VTOKEN_ABI, ethers.provider);
-  const timeBased: boolean = await impl.isTimeBased();
-  const blocksPerYear = timeBased ? 0 : await impl.blocksOrSecondsPerYear();
-
-  const liquidityIrm =
-    IRM_LIQUIDITY !== PENDING
-      ? IRM_LIQUIDITY
-      : await deploy(JUMP_RATE_MODEL, [
-          LIQUIDITY_IRM.baseRatePerYear,
-          LIQUIDITY_IRM.multiplierPerYear,
-          LIQUIDITY_IRM.jumpMultiplierPerYear,
-          LIQUIDITY_IRM.kink,
-          ACM,
-          timeBased,
-          blocksPerYear,
-        ]);
-  const collateralIrm =
-    IRM_COLLATERAL !== PENDING ? IRM_COLLATERAL : await deploy(WHITE_PAPER_MODEL, [0, 0, timeBased, blocksPerYear]);
-
-  const vTokenIface = new ethers.utils.Interface(VTOKEN_ABI);
-  const market = async <M extends SpokeMarket>(m: M, irm: string): Promise<M> => {
-    const interestRateModel = m.interestRateModel === PENDING ? irm : m.interestRateModel;
-    if (m.vToken !== PENDING) return { ...m, interestRateModel };
-    const asset = m.symbol.replace(/^v/, "").replace(/_bStockIndex$/, "");
-    const data = vTokenIface.encodeFunctionData("initialize", [
-      m.underlying,
-      SPOKE_COMPTROLLER,
-      interestRateModel,
-      INITIAL_EXCHANGE_RATE,
-      `Venus ${asset} (bStock index)`,
-      m.symbol,
-      8,
-      NORMAL_TIMELOCK,
-      ACM,
-      [SHORTFALL, PROTOCOL_SHARE_RESERVE],
-      m.reserveFactor,
-    ]);
-    return { ...m, interestRateModel, vToken: await deploy(BEACON_PROXY, [SPOKE_VTOKEN_BEACON, data]) };
-  };
-
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const tslabWindow = await new ethers.Contract(
@@ -350,15 +287,11 @@ const standInOnFork = async (): Promise<Vip673Markets> => {
   const tslabAtlasFeed: string = (await atlas.tokenConfigs(TSLAB)).feed;
   const tslabAproFeed: string = (await apro.tokenConfigs(TSLAB)).feed;
 
-  const liquidity: LiquidityMarket[] = [];
-  for (const m of MAINNET_LIQUIDITY_MARKETS) {
-    liquidity.push(await market(m, liquidityIrm));
-  }
   const collateral: CollateralMarket[] = [];
   for (const m of MAINNET_COLLATERAL_MARKETS) {
     const ownFeeds = m.aproFeed !== PENDING && (await atlasAuthorized(m));
     collateral.push({
-      ...(await market(m, collateralIrm)),
+      ...m,
       atlasFeed: ownFeeds ? m.atlasFeed : tslabAtlasFeed,
       aproFeed: ownFeeds ? m.aproFeed : tslabAproFeed,
       initialSupply: m.initialSupply ?? STAND_IN_SEED,
@@ -371,7 +304,7 @@ const standInOnFork = async (): Promise<Vip673Markets> => {
       },
     });
   }
-  return { liquidity, collateral };
+  return { liquidity: MAINNET_LIQUIDITY_MARKETS, collateral };
 };
 
 forking(FORK_BLOCK, async () => {
