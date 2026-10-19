@@ -5,7 +5,7 @@ import { makeProposal } from "src/utils";
 import { GUARDIAN_GRANTS, TIMELOCK_GRANTS, giveCallPermission } from "./permissions-hub-bsctestnet";
 
 // VIP-997 on bsctestnet, executed as testnet proposal 720: the Liquidity Hub side of the Hub-Funded Spoke pool.
-// It lives in vip-671 with the rest of the pool's testnet record. The title and description are what was
+// It lives in vip-668 with the rest of the pool's testnet record. The title and description are what was
 // proposed on chain, so they keep the VIP-997 name.
 
 const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } =

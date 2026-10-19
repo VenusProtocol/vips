@@ -1,7 +1,7 @@
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { giveCallPermission } from "../vip-671/permissions";
+import { giveCallPermission } from "../vip-668/permissions";
 import {
   ACM,
   BSTOCK_LIQUIDATOR,
@@ -27,7 +27,7 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_668_GRANTS } from "./permissions
 // ===================================================================================================
 // VIP-668 [BNB Chain]: Hub-Funded Spoke pool infrastructure. 31 commands, no markets.
 //
-// First of three. VIP-672 (Liquidity Hub infrastructure) does not depend on this one. VIP-673 (markets and Hub wiring)
+// First of three. VIP-669 (Liquidity Hub infrastructure) does not depend on this one. VIP-670 (markets and Hub wiring)
 // needs both executed first.
 //
 // ---------------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_668_GRANTS } from "./permissions
 //  3. `setPriceOracle` BEFORE `addPool`, which reads `comptroller.oracle()` and rejects zero.
 //  4. `setDeviationBoundedOracle` before the pool is registered. Until it is set, borrow fails, and so do
 //     redeem, transfer and `exitMarket` for market members.
-//  5. The ProtocolShareReserve upgrade and `addPoolRegistry` before any market is listed (VIP-673). `VToken`
+//  5. The ProtocolShareReserve upgrade and `addPoolRegistry` before any market is listed (VIP-670). `VToken`
 //     calls `updateAssetsState` on every protocol seize and every reserve sweep, and today's PSR reverts
 //     `InvalidAddress` for a comptroller outside the isolated-pools registry.
 //
@@ -72,12 +72,12 @@ import { ANY_CONTRACT, RISK_STEWARD_GRANTS, VIP_668_GRANTS } from "./permissions
 //    this pool. Both schemas total 10000 bps. Re-read both before proposing: if another proposal edits a row
 //    meanwhile, correct it in a single `addOrUpdateDistributionConfigs` call.
 //  - `setMaxLoopsLimit`. `025` initializes the comptroller with 50, and the limit can only be raised.
-//  - `enterMarketForAccount(address,address)`. Its only holder is `CollateralGateway`, granted in VIP-673.
+//  - `enterMarketForAccount(address,address)`. Its only holder is `CollateralGateway`, granted in VIP-670.
 //  - `setPoolRegistry` and `setCoreFlashSource` on `BStockLiquidator`. Both are `onlyOwner`, and the owner is
 //    the Operator multisig, not governance. After execution it calls `setPoolRegistry(SpokePoolRegistry)`,
 //    then `setCoreFlashSource` for each liquidity market's underlying against its Core market (USDT, USDC and
-//    U in the listing sheet; VIP-673 fixes the set). `setPoolRegistry` probes `getPoolByComptroller(address(0))`,
-//    which an empty registry answers, so all of these can follow at once. They must land before VIP-673 opens
+//    U in the listing sheet; VIP-670 fixes the set). `setPoolRegistry` probes `getPoolByComptroller(address(0))`,
+//    which an empty registry answers, so all of these can follow at once. They must land before VIP-670 opens
 //    the collateral markets.
 // ===================================================================================================
 
@@ -250,7 +250,7 @@ The pool has its own Comptroller and registry, with separate collateral and debt
 
     // -------------------------------------------------------------------------------------------
     // 7. Four Risk Steward grants, each against address(0): a wildcard on purpose, unlike step 2. It covers the
-    //    markets `028` deploys and VIP-673 lists, with no further grant, and every isolated pool on this chain. Nothing
+    //    markets `028` deploys and VIP-670 lists, with no further grant, and every isolated pool on this chain. Nothing
     //    above depends on these. See ./permissions-bscmainnet.ts for the scope, the Core pool's
     //    `setCollateralFactor(address,uint256,uint256)`, and why a Core rate model must never reach a spoke market.
     // -------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ import {
 import { PAUSE_ROLE, ROUTER_ROLES, UNLIST_ROLE, giveCallPermission } from "./permissions";
 
 // ===================================================================================================
-// VIP-671 addendum [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1 follow-up.
+// VIP-668 addendum [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1 follow-up.
 //
 // The listing VIP is executed and the pool is live. This addendum does two things and nothing else:
 // point the comptroller beacon at the current `SpokeComptroller` implementation, and give the
@@ -87,13 +87,13 @@ import { PAUSE_ROLE, ROUTER_ROLES, UNLIST_ROLE, giveCallPermission } from "./per
 /// is one rename away from granting a role nothing checks.
 export const ADDENDUM_GUARDIAN_ROLES = [PAUSE_ROLE, UNLIST_ROLE, ...ROUTER_ROLES];
 
-export const vip671Addendum = () => {
+export const vip668Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-671 addendum [BNB Chain Testnet] Spoke comptroller upgrade and Guardian permissions",
+    title: "VIP-668 addendum [BNB Chain Testnet] Spoke comptroller upgrade and Guardian permissions",
     description: `#### Summary
 
-If passed, this addendum to VIP-671 will:
+If passed, this addendum to VIP-668 will:
 
 - Upgrade the Hub-Funded Spoke comptroller beacon to the current \`SpokeComptroller\` implementation. The live implementation was compiled before \`enterMarketBehalf\` was renamed to \`enterMarketForAccount\`, so its ABI no longer matches the source. That rename is the only difference between the two implementations, and it changes no storage.
 - Grant the Guardian three permissions on the spoke comptroller that the original VIP left with the Normal Timelock alone: \`setActionsPaused(address[],uint256[],bool)\`, \`unlistMarket(address)\` and \`enterMarketForAccount(address,address)\`.
@@ -108,7 +108,7 @@ These grants are a testnet decision and do not carry to a mainnet listing.
 
 #### References
 
-- VIP-671, the original listing: https://github.com/VenusProtocol/vips/pull/762
+- VIP-668, the original listing: https://github.com/VenusProtocol/vips/pull/762
 - Spoke pool contracts: https://github.com/VenusProtocol/isolated-pools/pull/559
 - CollateralGateway, Phase 2: https://github.com/VenusProtocol/venus-periphery/pull/74`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -130,4 +130,4 @@ These grants are a testnet decision and do not carry to a mainnet listing.
   );
 };
 
-export default vip671Addendum;
+export default vip668Addendum;

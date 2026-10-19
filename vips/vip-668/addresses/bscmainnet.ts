@@ -10,8 +10,8 @@ import {
 } from "../../vip-592/bscmainnet";
 
 // ===================================================================================================
-// VIP-668 [BNB Chain]: Hub-Funded Spoke pool address book, plus what VIP-672 (../../vip-672) and VIP-673
-// (../../vip-673) share with it. Each of those keeps its own constants in its own address book, which re-exports this.
+// VIP-668 [BNB Chain]: Hub-Funded Spoke pool address book, plus what VIP-669 (../../vip-669) and VIP-670
+// (../../vip-670) share with it. Each of those keeps its own constants in its own address book, which re-exports this.
 //
 // VIP-668 stands up the empty pool: ownership, ACM grants, both oracles, the ProtocolShareReserve upgrade, `addPool`,
 // the `BStockLiquidator` upgrade and the Risk Steward wildcards. It lists no market.
@@ -20,11 +20,11 @@ import {
 // STATUS: everything VIP-668 needs is deployed and filled in (2026-10-15). A `PENDING` address is filled from its
 // deployment, then re-read from chain before the proposal is opened. `PENDING` fails loudly: each part
 // collects every one it needs that survives and throws with the full list, so no proposal can be built, simulated
-// or proposed half-filled. VIP-673's risk values that are still open are `null` and fail the same way.
+// or proposed half-filled. VIP-670's risk values that are still open are `null` and fail the same way.
 //
 // WHAT IS REAL: every address in the "already on chain" sections was read back from bscmainnet, not taken
-// from a deployment record alone. VIP-668's on 2026-10-13 (block ~127,396,000), VIP-672's on 2026-10-14
-// (block ~127,532,000), VIP-673's on 2026-10-14 (block ~127,552,000).
+// from a deployment record alone. VIP-668's on 2026-10-13 (block ~127,396,000), VIP-669's on 2026-10-14
+// (block ~127,532,000), VIP-670's on 2026-10-14 (block ~127,552,000).
 // ===================================================================================================
 
 /// Sentinel for an address that does not exist on bscmainnet yet. The guard in each part is the only real
@@ -64,7 +64,7 @@ export { CRITICAL_GUARDIAN };
 export const PAUSE_GUARDIAN = GUARDIAN;
 
 /// Day-to-day Hub multisig and the `BStockLiquidator` owner. Gets nothing from VIP-668. Referenced because,
-/// as that owner, it makes the two follow-up calls after execution (see ../bscmainnet.ts). VIP-672 gives it
+/// as that owner, it makes the two follow-up calls after execution (see ../bscmainnet.ts). VIP-669 gives it
 /// on each Spoke source the six roles it holds on every live Core and Flux source.
 export const OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 
@@ -81,7 +81,7 @@ export const CORE_COMPTROLLER = UNITROLLER;
 /// and rate models to the rate model steward. Each reads the market's comptroller and takes the isolated-pools path
 /// for any comptroller other than CORE_COMPTROLLER. VIP-668 grants them four wildcards (../permissions-bscmainnet.ts).
 /// Routing and each steward's receiver read back on 2026-10-14 (block 127,593,754). The Operator is the Risk Oracle's
-/// authorised sender and one of the receiver's whitelisted executors; VIP-673's simulation runs the stewards as it.
+/// authorised sender and one of the receiver's whitelisted executors; VIP-670's simulation runs the stewards as it.
 export { RISK_ORACLE, RISK_STEWARD_RECEIVER };
 export const MARKET_CAPS_RISK_STEWARD = MARKETCAP_STEWARD;
 export const COLLATERAL_FACTORS_RISK_STEWARD = COLLATERALFACTORS_STEWARD;

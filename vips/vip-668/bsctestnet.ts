@@ -38,7 +38,7 @@ import {
 import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES, giveCallPermission } from "./permissions";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1: the spoke pool itself.
+// VIP-668 [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1: the spoke pool itself.
 //
 // SCOPE. This VIP covers only the work in isolated-pools#559: stand the spoke pool up, register it in
 // its own registry, list its markets, and grant the permissions that pool needs. Two things are
@@ -95,7 +95,7 @@ import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES, giveCallPermission } fr
 //   Those inherited grants are the assumption this VIP is most exposed to, because nothing in the
 //   proposal touches them and a revocation would only surface at execution. They are therefore listed
 //   as `ASSUMED_WILDCARD_ROLES` in ./permissions.ts rather than as prose, and asserted BEFORE the
-//   proposal runs in simulations/vip-671/bsctestnet.ts, together with the two ownership assumptions
+//   proposal runs in simulations/vip-668/bsctestnet.ts, together with the two ownership assumptions
 //   step 4 rests on. Re-running that simulation is what re-verifies them.
 //
 // ---------------------------------------------------------------------------------------------------
@@ -149,10 +149,10 @@ const listMarket = (m: SpokeMarket): Command[] => [
   },
 ];
 
-export const vip671 = () => {
+export const vip668 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-671 [BNB Chain Testnet] Hub-Funded Spoke pool: list the pool and its markets",
+    title: "VIP-668 [BNB Chain Testnet] Hub-Funded Spoke pool: list the pool and its markets",
     description: `#### Summary
 
 If passed, this VIP will register the first **Hub-Funded Spoke pool** on BNB Chain testnet, in a pool registry of its own, and list its two markets.
@@ -457,7 +457,7 @@ Risk parameters mirror the isolated pools' Stablecoins pool on this network. Thi
       //  - `addRewardsDistributor` — no rewards programme is defined for this pool.
       //  - Liquidity Hub wiring and the bStock liquidation leg — Phase 2, see the scope note above.
       //
-      // Covered by simulations/vip-671/bsctestnet.ts, which asserts the pre-VIP deployment state, the
+      // Covered by simulations/vip-668/bsctestnet.ts, which asserts the pre-VIP deployment state, the
       // permissions this VIP assumes rather than grants, every command, and the post-VIP state. It also
       // pins the two things most expensive to get wrong: that `SpokeComptroller.poolRegistry()` is the
       // spoke registry, a constructor immutable no VIP can fix, and that the live isolated pools still
@@ -469,4 +469,4 @@ Risk parameters mirror the isolated pools' Stablecoins pool on this network. Thi
   );
 };
 
-export default vip671;
+export default vip668;

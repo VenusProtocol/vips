@@ -22,8 +22,8 @@ import {
   SPOKE_POOL_REGISTRY,
   SPOKE_VTOKEN_BEACON,
   VTREASURY,
-} from "../../vips/vip-671/addresses/bsctestnet";
-import vip671 from "../../vips/vip-671/bsctestnet";
+} from "../../vips/vip-668/addresses/bsctestnet";
+import vip668 from "../../vips/vip-668/bsctestnet";
 import {
   CLOSE_FACTOR,
   COLLATERAL_MARKET,
@@ -39,14 +39,14 @@ import {
   RISK_FUND_SHARE_BPS,
   SCHEMA_LIQUIDATION,
   SCHEMA_SPREAD,
-} from "../../vips/vip-671/config";
+} from "../../vips/vip-668/config";
 import {
   ASSUMED_GUARDIAN_ROLES,
   ASSUMED_WILDCARD_ROLES,
   PAUSE_ROLE,
   REGISTRY_DRIVEN_ROLES,
   SPOKE_COMPTROLLER_ROLES,
-} from "../../vips/vip-671/permissions";
+} from "../../vips/vip-668/permissions";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import DBO_ABI from "./abi/DeviationBoundedOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -285,7 +285,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-671 Hub-Funded Spoke pool", await vip671(), {
+  testVip("VIP-668 Hub-Funded Spoke pool", await vip668(), {
     callbackAfterExecution: async txResponse => {
       // 6 to the spoke registry, then the same 6 spoke-only roles to each of the two grantees.
       await expectEvents(
