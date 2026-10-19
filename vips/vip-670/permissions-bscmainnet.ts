@@ -1,5 +1,5 @@
-import { ROUTER_ROLES } from "../vip-671/permissions";
-import { Grant } from "../vip-671/permissions-bscmainnet";
+import { ROUTER_ROLES } from "../vip-668/permissions";
+import { Grant } from "../vip-668/permissions-bscmainnet";
 import {
   APRO_ORACLE,
   ATLAS_ORACLE,
@@ -10,24 +10,24 @@ import {
   RESILIENT_ORACLE,
 } from "./addresses/bscmainnet";
 
-export * from "../vip-672/permissions-bscmainnet";
+export * from "../vip-669/permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-673: the one grant, and the roles it calls on existing contracts.
+// VIP-670: the one grant, and the roles it calls on existing contracts.
 //
 // Read from the ACM on 2026-10-14 with `hasRole` for the exact grant (block ~127,552,000) and on the wildcard key
-// described in ../vip-672/permissions-bscmainnet.ts for the wildcard (block 127,594,075). The Normal Timelock holds
-// every role below as an exact grant, none as a wildcard. VIP-673's comptroller, registry, market and Spoke source
-// calls use VIP-671's and VIP-672's grants and the wildcards in ASSUMED_WILDCARDS.
+// described in ../vip-669/permissions-bscmainnet.ts for the wildcard (block 127,594,075). The Normal Timelock holds
+// every role below as an exact grant, none as a wildcard. VIP-670's comptroller, registry, market and Spoke source
+// calls use VIP-668's and VIP-669's grants and the wildcards in ASSUMED_WILDCARDS.
 // ===================================================================================================
 
 /// `enterMarketForAccount(address,address)` on `Comptroller_HubSpoke`, to `CollateralGateway` only. The gateway passes
 /// its own caller as the account; any other holder could enter any account into a market.
-export const VIP_673_GRANTS: Grant[] = ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY }));
+export const VIP_670_GRANTS: Grant[] = ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY }));
 
 /// The batch setters on Atlas, APRO, `ResilientOracle` and `BoundValidator` loop the single setter and check its role.
 /// The DBO's batch setter checks a role of its own.
-export const VIP_673_ROLES_CALLED: { contract: string; role: string }[] = [
+export const VIP_670_ROLES_CALLED: { contract: string; role: string }[] = [
   ...[ATLAS_ORACLE, APRO_ORACLE, RESILIENT_ORACLE].map(contract => ({ contract, role: "setTokenConfig(TokenConfig)" })),
   { contract: BOUND_VALIDATOR, role: "setValidateConfig(ValidateConfig)" },
   { contract: DEVIATION_BOUNDED_ORACLE, role: "setTokenConfigs((address,uint64,uint256,uint256,bool,bool)[])" },

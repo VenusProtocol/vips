@@ -3,7 +3,7 @@ import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { giveCallPermission } from "../vip-671/permissions";
+import { giveCallPermission } from "../vip-668/permissions";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -33,19 +33,19 @@ import {
   SpokeMarket,
   VTREASURY,
 } from "./addresses/bscmainnet";
-import { VIP_673_GRANTS } from "./permissions-bscmainnet";
+import { VIP_670_GRANTS } from "./permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-673 [BNB Chain]: Hub-Funded Spoke pool, markets and Liquidity Hub wiring.
+// VIP-670 [BNB Chain]: Hub-Funded Spoke pool, markets and Liquidity Hub wiring.
 //
-// Third of three. Needs VIP-671 and VIP-672 executed first.
+// Third of three. Needs VIP-668 and VIP-669 executed first.
 //
-// STATUS: DRAFT. `vip673()` throws while any address or risk value in ./addresses/bscmainnet.ts is still open.
+// STATUS: DRAFT. `vip670()` throws while any address or risk value in ./addresses/bscmainnet.ts is still open.
 //
 // ORACLES: QQQB is priced the way the Core pool prices TSLAB, Atlas as main and APRO as pivot inside a 5% band. APRO
 // has no SPYB feed on BNB Chain, so SPYB is priced by Atlas alone, with no APRO config and no band.
 //
-// GAS, from the simulation (bscmainnet fork at block 128,482,000, VIP-671 and VIP-672 executed on the fork, stand-ins
+// GAS, from the simulation (bscmainnet fork at block 128,482,000, VIP-668 and VIP-669 executed on the fork, stand-ins
 // for the open values): 52 commands, propose() about 10.82M (64.5% of the 16,777,216 per-tx cap), queue() 3.03M,
 // execute() 6.66M (39.7%).
 //
@@ -79,31 +79,31 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //    the final values directly.
 //  - Oracle changes for USDT, USDC and U: their live `ResilientOracle` configs match the risk sheet, and the sheet
 //    gives them no DBO window.
-//  - Hub caps on the Spoke sources: VIP-672 registers them with their final values.
+//  - Hub caps on the Spoke sources: VIP-669 registers them with their final values.
 //  - `raiseResourceCap` on the Spoke sources: the risk sheet sets none. 0 means no resource cap, and each market's
 //    supply cap still bounds the source.
 //  - `setLiquidationAllowlistEnabled`: the allowlist is off by default and stays off.
-//  - `BStockLiquidator.setPoolRegistry` and `setCoreFlashSource`: `onlyOwner` calls by the Operator after VIP-671.
+//  - `BStockLiquidator.setPoolRegistry` and `setCoreFlashSource`: `onlyOwner` calls by the Operator after VIP-668.
 // ===================================================================================================
 
-/// Placeholder, as in VIP-671 and VIP-672. VIP numbers are assigned by the governor at proposal time.
-const VIP_NUMBER = 673;
+/// Placeholder, as in VIP-668 and VIP-669. VIP numbers are assigned by the governor at proposal time.
+const VIP_NUMBER = 670;
 
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
 const ACTION_BORROW = 2;
 
-/// The markets VIP-673 lists. Mainnet's by default; the simulation passes fork stand-ins for whatever is still pending.
-export type Vip673Markets = { liquidity: LiquidityMarket[]; collateral: CollateralMarket[] };
-const MAINNET_MARKETS: Vip673Markets = { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS };
+/// The markets VIP-670 lists. Mainnet's by default; the simulation passes fork stand-ins for whatever is still pending.
+export type Vip670Markets = { liquidity: LiquidityMarket[]; collateral: CollateralMarket[] };
+const MAINNET_MARKETS: Vip670Markets = { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS };
 
-/// Every address VIP-673 needs that is still `PENDING`, including the VIP-671 and VIP-672 ones its commands target.
+/// Every address VIP-670 needs that is still `PENDING`, including the VIP-668 and VIP-669 ones its commands target.
 /// Exported so the simulation can report what is missing.
-export const pendingDeployments = ({ liquidity, collateral }: Vip673Markets = MAINNET_MARKETS): string[] =>
+export const pendingDeployments = ({ liquidity, collateral }: Vip670Markets = MAINNET_MARKETS): string[] =>
   [
-    { name: "SpokePoolRegistry (VIP-671)", address: SPOKE_POOL_REGISTRY },
-    { name: "Comptroller_HubSpoke (VIP-671)", address: SPOKE_COMPTROLLER },
+    { name: "SpokePoolRegistry (VIP-668)", address: SPOKE_POOL_REGISTRY },
+    { name: "Comptroller_HubSpoke (VIP-668)", address: SPOKE_COMPTROLLER },
     ...liquidity.map(m => ({
-      name: `Spoke source for ${m.stack.name} (VIP-672)`,
+      name: `Spoke source for ${m.stack.name} (VIP-669)`,
       address: m.stack.spokeSource,
     })),
     ...[...liquidity, ...collateral].map(m => ({ name: m.symbol, address: m.vToken })),
@@ -120,7 +120,7 @@ export const pendingDeployments = ({ liquidity, collateral }: Vip673Markets = MA
     .map(({ name }) => name);
 
 /// Every risk value that is still open.
-export const pendingRiskValues = ({ collateral }: Vip673Markets = MAINNET_MARKETS): string[] => [
+export const pendingRiskValues = ({ collateral }: Vip670Markets = MAINNET_MARKETS): string[] => [
   ...collateral.flatMap(m => [
     ...(m.initialSupply === null ? [`${m.symbol} seed`] : []),
     ...(m.dbo === null ? [`${m.symbol} DBO window`] : []),
@@ -176,14 +176,14 @@ const wireHub = (m: LiquidityMarket): Command[] => {
   ];
 };
 
-export const vip673 = (markets: Vip673Markets = MAINNET_MARKETS) => {
+export const vip670 = (markets: Vip670Markets = MAINNET_MARKETS) => {
   const { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS } = markets;
   const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
   const missing = [...pendingDeployments(markets), ...pendingRiskValues(markets)];
   if (missing.length > 0) {
     throw new Error(
       `VIP-${VIP_NUMBER} [bscmainnet] is still a draft: ${missing.length} value(s) pending in ` +
-        `vips/vip-673/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
+        `vips/vip-670/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
         `Deploy or decide them and fill them in first. Nothing here has a safe default.`,
     );
   }
@@ -340,7 +340,7 @@ ${contractRows.map(r => `| ${r} |`).join("\n")}
       ],
     },
 
-    // 2. List the five markets. The registry calls the comptroller under VIP-671's registry grants.
+    // 2. List the five markets. The registry calls the comptroller under VIP-668's registry grants.
     ...MARKETS.flatMap(listMarket),
 
     // 3. Collateral markets: an incentive of their own, and BORROW paused behind the 0 borrow cap.
@@ -370,13 +370,13 @@ ${contractRows.map(r => `| ${r} |`).join("\n")}
     })),
 
     // 6. `CollateralGateway` as the only holder of `enterMarketForAccount`, against this comptroller only.
-    ...VIP_673_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
+    ...VIP_670_GRANTS.map(({ role, account }) => giveCallPermission(ACM, SPOKE_COMPTROLLER, role, account)),
 
-    // 7. Connect each liquidity market to its Hub. VIP-672 already set each Spoke source's caps on its Hub.
+    // 7. Connect each liquidity market to its Hub. VIP-669 already set each Spoke source's caps on its Hub.
     ...LIQUIDITY_MARKETS.flatMap(wireHub),
   ];
 
   return makeProposal(commands, meta, ProposalType.REGULAR);
 };
 
-export default vip673;
+export default vip670;

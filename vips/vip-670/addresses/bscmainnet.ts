@@ -2,16 +2,16 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
-import { U, USDC, USDT } from "../../vip-671/addresses/bscmainnet";
-import { HUB_STACKS, HubStack } from "../../vip-672/addresses/bscmainnet";
+import { U, USDC, USDT } from "../../vip-668/addresses/bscmainnet";
+import { HUB_STACKS, HubStack } from "../../vip-669/addresses/bscmainnet";
 
-// VIP-673 address book. Re-exports VIP-672's, which re-exports VIP-671's.
-export * from "../../vip-672/addresses/bscmainnet";
+// VIP-670 address book. Re-exports VIP-669's, which re-exports VIP-668's.
+export * from "../../vip-669/addresses/bscmainnet";
 
 const { ATLAS_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
 // ===================================================================================================
-// VIP-673: markets and Hub wiring. Already on chain, read on 2026-10-14 (block ~127,552,000).
+// VIP-670: markets and Hub wiring. Already on chain, read on 2026-10-14 (block ~127,552,000).
 //
 // Market values are the risk listing sheet's ("bStock index spoke pool listing"). All five underlyings have 18
 // decimals (read on chain), so every token amount below is 18-decimal scaled.
@@ -32,7 +32,7 @@ export const BOUND_UPPER_RATIO = parseUnits("1.05", 18);
 export const BOUND_LOWER_RATIO = parseUnits("0.95", 18);
 
 /// The live isolated-pools `Shortfall`. `028` initializes every market with it, but it cannot auction this pool's bad
-/// debt: auctions are paused, and `startAuction` resolves pools through the isolated-pools registry only. VIP-673
+/// debt: auctions are paused, and `startAuction` resolves pools through the isolated-pools registry only. VIP-670
 /// points each market's `shortfall` at the Normal Timelock instead.
 export const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
 
@@ -59,7 +59,7 @@ export const QQQB_APRO_FEED = "0x2708567c468db65a72095716FCff023dcDfEA07A";
 export const SPYB_ATLAS_FEED = "0xCda6d5cE036AC0D6A387A377062EBd18Dd531177";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-673's new contracts.
+// VIP-670's new contracts.
 // ---------------------------------------------------------------------------------------------------
 
 /// The five markets, from isolated-pools `028` (#570, e285a412). Read back on 2026-10-19 (block 128,482,331): each is
@@ -91,7 +91,7 @@ export const COLLATERAL_GATEWAY = "0xd0F7B94BF06675D13e8bA9a2546835a1c32a80b8";
 /// Blocks between reserve sweeps to the ProtocolShareReserve, on every market. No deploy script sets it.
 export const REDUCE_RESERVES_BLOCK_DELTA = 28800;
 
-/// Every market's protocol seize share, per the risk sheet. It is the VToken default, so VIP-673 has no
+/// Every market's protocol seize share, per the risk sheet. It is the VToken default, so VIP-670 has no
 /// `setProtocolSeizeShare`.
 export const PROTOCOL_SEIZE_SHARE = parseUnits("0.05", 18);
 

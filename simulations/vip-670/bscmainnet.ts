@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import vip671 from "../../vips/vip-671/bscmainnet";
+import vip668 from "../../vips/vip-668/bscmainnet";
 import {
   ADD_RESOURCE,
   PAUSE_ROLE,
@@ -15,8 +15,8 @@ import {
   SET_INNER_WITHDRAW_QUEUE,
   SET_MARKET_LIQUIDATION_INCENTIVE,
   SET_SUPPLY_ALLOWLIST_ENABLED,
-} from "../../vips/vip-671/permissions";
-import vip672, { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "../../vips/vip-672/bscmainnet";
+} from "../../vips/vip-668/permissions";
+import vip669, { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "../../vips/vip-669/bscmainnet";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -63,9 +63,9 @@ import {
   SpokeMarket,
   U,
   VTREASURY,
-} from "../../vips/vip-673/addresses/bscmainnet";
-import vip673, { Vip673Markets, pendingDeployments, pendingRiskValues } from "../../vips/vip-673/bscmainnet";
-import { VIP_673_GRANTS, VIP_673_ROLES_CALLED } from "../../vips/vip-673/permissions-bscmainnet";
+} from "../../vips/vip-670/addresses/bscmainnet";
+import vip670, { Vip670Markets, pendingDeployments, pendingRiskValues } from "../../vips/vip-670/bscmainnet";
+import { VIP_670_GRANTS, VIP_670_ROLES_CALLED } from "../../vips/vip-670/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterSpokeV1.json";
 import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
@@ -81,9 +81,9 @@ import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-/// After every VIP-671, VIP-672 and VIP-673 contract is deployed (VIP-673's markets by block 128,481,540). Whatever has
-/// not happened on mainnet by this block (VIP-671 and VIP-672 executing) the simulation does on the fork.
-/// TODO(deploy): move past the blocks where VIP-671 and VIP-672 execute.
+/// After every VIP-668, VIP-669 and VIP-670 contract is deployed (VIP-670's markets by block 128,481,540). Whatever has
+/// not happened on mainnet by this block (VIP-668 and VIP-669 executing) the simulation does on the fork.
+/// TODO(deploy): move past the blocks where VIP-668 and VIP-669 execute.
 const FORK_BLOCK = 128482000;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
@@ -93,14 +93,14 @@ const BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b3
 
 /// A `msg.sender` that holds no grant of its own, so `isAllowedToCall` asked from here answers only for the
 /// address(0) wildcard.
-const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 unrelated sender"), 12));
+const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 unrelated sender"), 12));
 
 /// Fresh accounts. The default hardhat signer carries EIP-7702 code on BNB Chain.
-const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 hub depositor"), 12));
-const SUPPLIER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 collateral supplier"), 12));
-const LIQUIDATOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-673 liquidator"), 12));
+const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 hub depositor"), 12));
+const SUPPLIER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 collateral supplier"), 12));
+const LIQUIDATOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 liquidator"), 12));
 const borrowerFor = (symbol: string) =>
-  ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-673 borrower ${symbol}`), 12));
+  ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-670 borrower ${symbol}`), 12));
 
 const KNOWN_ACCOUNTS = [
   NORMAL_TIMELOCK,
@@ -134,7 +134,7 @@ const COLLATERAL_SUPPLY = ethers.utils.parseUnits("1", 18);
 /// 10 ** (18 + underlying decimals - 8), with 18-decimal underlyings. `028` initializes every market with it.
 const INITIAL_EXCHANGE_RATE = ethers.utils.parseUnits("1", 28);
 
-/// The Risk Oracle, receiver and steward calls VIP-673's steward test makes (governance-contracts, as deployed).
+/// The Risk Oracle, receiver and steward calls VIP-670's steward test makes (governance-contracts, as deployed).
 const RISK_ORACLE_ABI = [
   "function publishRiskParameterUpdate(string,bytes,string,address,uint96,uint32,bytes)",
   "function updateCounter() view returns (uint256)",
@@ -236,13 +236,13 @@ const unauthorizedAtlasFeeds = async (): Promise<string[]> => {
   return names;
 };
 
-/// Runs VIP-671 and VIP-672 on the fork when they have not executed at FORK_BLOCK, with what each needs around it:
-/// VIP-672's grants batch stored on the aggregator first, and the Operator's two BStockLiquidator calls after VIP-671.
+/// Runs VIP-668 and VIP-669 on the fork when they have not executed at FORK_BLOCK, with what each needs around it:
+/// VIP-669's grants batch stored on the aggregator first, and the Operator's two BStockLiquidator calls after VIP-668.
 const executeEarlierVips = async () => {
   const comptroller = new ethers.Contract(SPOKE_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   if (!sameAddress(await comptroller.owner(), NORMAL_TIMELOCK)) {
-    await pretendExecutingVip(await vip671(), NORMAL_TIMELOCK);
-    console.warn("[vip-673] VIP-671 executed on the fork");
+    await pretendExecutingVip(await vip668(), NORMAL_TIMELOCK);
+    console.warn("[vip-670] VIP-668 executed on the fork");
   }
 
   const [{ stack }] = MAINNET_LIQUIDITY_MARKETS;
@@ -256,8 +256,8 @@ const executeEarlierVips = async () => {
         .connect(batcher)
         .addBatch(encodeAcmBatch(buildSpokeSourceGrantsBatch()), SPOKE_SOURCE_GRANTS_BATCH_INDEX);
     }
-    await pretendExecutingVip(await vip672(), NORMAL_TIMELOCK);
-    console.warn("[vip-673] VIP-672 executed on the fork");
+    await pretendExecutingVip(await vip669(), NORMAL_TIMELOCK);
+    console.warn("[vip-670] VIP-669 executed on the fork");
   }
 
   const liquidator = new ethers.Contract(BSTOCK_LIQUIDATOR, LIQUIDATOR_ABI, ethers.provider);
@@ -272,11 +272,11 @@ const executeEarlierVips = async () => {
   }
 };
 
-/// Stands in on the fork for every VIP-673 input still pending: QQQB and SPYB get STAND_IN_SEED, and a collateral
+/// Stands in on the fork for every VIP-670 input still pending: QQQB and SPYB get STAND_IN_SEED, and a collateral
 /// market keeps its own feeds only when they are set and Atlas answers `ATLAS_ORACLE` on its feed. Otherwise it takes
 /// TSLAB's: both of them for a market with an APRO pivot, since one TSLAB feed against one of its own would break the
 /// 5% band, and the Atlas one alone for a market priced by Atlas alone. Every other value set on mainnet is kept.
-const standInOnFork = async (): Promise<Vip673Markets> => {
+const standInOnFork = async (): Promise<Vip670Markets> => {
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const tslabWindow = await new ethers.Contract(
@@ -311,12 +311,12 @@ forking(FORK_BLOCK, async () => {
   await executeEarlierVips();
 
   const standIns = [...pendingDeployments(), ...pendingRiskValues(), ...(await unauthorizedAtlasFeeds())];
-  const inputs: Vip673Markets =
+  const inputs: Vip670Markets =
     standIns.length > 0
       ? await standInOnFork()
       : { liquidity: MAINNET_LIQUIDITY_MARKETS, collateral: MAINNET_COLLATERAL_MARKETS };
   if (standIns.length > 0) {
-    console.warn(`[vip-673] stood in on the fork for: ${standIns.join(", ")}`);
+    console.warn(`[vip-670] stood in on the fork for: ${standIns.join(", ")}`);
   }
   const { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS } = inputs;
   const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
@@ -334,8 +334,8 @@ forking(FORK_BLOCK, async () => {
   const hubOf = (address: string) => new ethers.Contract(address, HUB_ABI, ethers.provider);
   const groupOf = (address: string) => new ethers.Contract(address, YIELD_GROUP_ABI, ethers.provider);
 
-  // What VIP-673 relies on, read from the live chain. Needs no new deployment, so it runs on every fork block.
-  describe("Pre-VIP: what VIP-673 relies on, on the live chain", () => {
+  // What VIP-670 relies on, read from the live chain. Needs no new deployment, so it runs on every fork block.
+  describe("Pre-VIP: what VIP-670 relies on, on the live chain", () => {
     it("has QQQB and SPYB at 18 decimals, with no Venus oracle or DBO config yet", async () => {
       // The DBO's `setTokenConfig` reverts `MarketAlreadyInitialized` on a second call.
       for (const { symbol, underlying } of COLLATERAL_MARKETS) {
@@ -364,7 +364,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("prices USDT, USDC and U as the risk sheet does, so VIP-673 changes none of them", async () => {
+    it("prices USDT, USDC and U as the risk sheet does, so VIP-670 changes none of them", async () => {
       for (const { symbol, underlying } of LIQUIDITY_MARKETS) {
         const config = await resilientOracle.getTokenConfig(underlying);
         const hasFallback = !sameAddress(underlying, U);
@@ -375,8 +375,8 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("gives the Normal Timelock every oracle and Hub role VIP-673 calls, as exact grants", async () => {
-      for (const { contract, role } of VIP_673_ROLES_CALLED) {
+    it("gives the Normal Timelock every oracle and Hub role VIP-670 calls, as exact grants", async () => {
+      for (const { contract, role } of VIP_670_ROLES_CALLED) {
         expect(await mayCall(contract, NORMAL_TIMELOCK, role), `${contract}: ${role}`).to.be.true;
         expect(await mayCall(UNRELATED, NORMAL_TIMELOCK, role), `${role} as a wildcard`).to.be.false;
       }
@@ -395,7 +395,7 @@ forking(FORK_BLOCK, async () => {
       expectAddress(await treasury.owner(), NORMAL_TIMELOCK);
     });
 
-    it("has the deposit queues VIP-673 puts each Spoke source in front of", async () => {
+    it("has the deposit queues VIP-670 puts each Spoke source in front of", async () => {
       // The Operator holds `setOuterDepositQueue`, so this can move before execution.
       for (const { stack } of LIQUIDITY_MARKETS) {
         expect(normalize(await hubOf(stack.hub).outerDepositQueue()), stack.name).to.deep.equal(
@@ -408,7 +408,7 @@ forking(FORK_BLOCK, async () => {
   const treasuryBefore: Record<string, BigNumber> = {};
   const timelockBefore: Record<string, BigNumber> = {};
 
-  describe("Pre-VIP: VIP-671 and VIP-672 executed", () => {
+  describe("Pre-VIP: VIP-668 and VIP-669 executed", () => {
     it("has the pool registered, owned by the Normal Timelock and wired to both oracles", async () => {
       expectAddress((await registry.getPoolByComptroller(SPOKE_COMPTROLLER)).comptroller, SPOKE_COMPTROLLER);
       expectAddress(await comptroller.owner(), NORMAL_TIMELOCK);
@@ -418,7 +418,7 @@ forking(FORK_BLOCK, async () => {
       expect(normalize(await psr.getPoolRegistries())).to.include(ethers.utils.getAddress(SPOKE_POOL_REGISTRY));
     });
 
-    it("lets the Normal Timelock call every comptroller, registry and Spoke source setter VIP-673 uses", async () => {
+    it("lets the Normal Timelock call every comptroller, registry and Spoke source setter VIP-670 uses", async () => {
       const comptrollerRoles = [
         SET_MARKET_LIQUIDATION_INCENTIVE,
         SET_SUPPLY_ALLOWLIST_ENABLED,
@@ -437,7 +437,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("has each Spoke source registered on its Hub with its caps, last to withdraw and holding nothing", async () => {
-      // The Operator can move the caps after VIP-672.
+      // The Operator can move the caps after VIP-669.
       for (const { stack } of LIQUIDITY_MARKETS) {
         const config = await hubOf(stack.hub).yieldGroupConfig(stack.spokeSource);
         expect(config.registered, stack.name).to.be.true;
@@ -451,7 +451,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("has BStockLiquidator pointed at the spoke registry, with each liquidity asset's Core flash source", async () => {
-      // `onlyOwner` calls by the Operator after VIP-671, needed before the collateral markets open.
+      // `onlyOwner` calls by the Operator after VIP-668, needed before the collateral markets open.
       const liquidator = new ethers.Contract(BSTOCK_LIQUIDATOR, LIQUIDATOR_ABI, ethers.provider);
       expectAddress(await liquidator.poolRegistry(), SPOKE_POOL_REGISTRY);
       for (const { symbol, underlying } of LIQUIDITY_MARKETS) {
@@ -460,7 +460,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("Pre-VIP: VIP-673's deployments", () => {
+  describe("Pre-VIP: VIP-670's deployments", () => {
     it("builds each market on SpokeVTokenBeacon against this comptroller, unlisted and owned by the Normal Timelock", async () => {
       for (const m of MARKETS) {
         const v = vTokenOf(m.vToken);
@@ -475,9 +475,9 @@ forking(FORK_BLOCK, async () => {
         expect(await v.decimals(), `${m.symbol} decimals`).to.equal(8);
         expect(await v.totalSupply(), `${m.symbol} supply`).to.equal(0);
         expect(await v.exchangeRateStored(), `${m.symbol} exchange rate`).to.equal(INITIAL_EXCHANGE_RATE);
-        // The VToken default. VIP-673 does not call `setProtocolSeizeShare`.
+        // The VToken default. VIP-670 does not call `setProtocolSeizeShare`.
         expect(await v.protocolSeizeShareMantissa(), `${m.symbol} seize share`).to.equal(PROTOCOL_SEIZE_SHARE);
-        // Set by `028`'s `initialize`. VIP-673 does not call `setReserveFactor`.
+        // Set by `028`'s `initialize`. VIP-670 does not call `setReserveFactor`.
         expect(await v.reserveFactorMantissa(), `${m.symbol} RF`).to.equal(m.reserveFactor);
         expect((await comptroller.markets(m.vToken)).isListed, `${m.symbol} listed`).to.be.false;
         expect(await registry.getVTokenForAsset(SPOKE_COMPTROLLER, m.underlying), m.symbol).to.equal(
@@ -576,7 +576,7 @@ forking(FORK_BLOCK, async () => {
         timelockBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(NORMAL_TIMELOCK);
       }
       if (fundedOnFork) {
-        console.warn("[vip-673] VTreasury funded on the fork");
+        console.warn("[vip-670] VTreasury funded on the fork");
       }
     });
 
@@ -611,7 +611,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-673 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip673(inputs), {
+  testVip("VIP-670 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip670(inputs), {
     callbackAfterExecution: async txResponse => {
       const collateral = COLLATERAL_MARKETS.length;
       const pivoted = COLLATERAL_MARKETS.filter(m => m.aproFeed !== null).length;
@@ -641,7 +641,7 @@ forking(FORK_BLOCK, async () => {
         [MARKETS.length, collateral, collateral, liquidity, liquidity],
       );
       // The mainnet ACM emits no PermissionGranted, so RoleGranted is the count.
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_673_GRANTS.length]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [VIP_670_GRANTS.length]);
       await expectEvents(
         txResponse,
         [YIELD_GROUP_ABI],
@@ -719,7 +719,7 @@ forking(FORK_BLOCK, async () => {
         );
         // `withdrawTreasuryBEP20` caps at the treasury's balance, so a short seed would come out of this balance.
         expect(await token.balanceOf(NORMAL_TIMELOCK), `${m.symbol} timelock`).to.equal(timelockBefore[m.underlying]);
-        // `addMarket` pulls exactly the approved seed, so VIP-673 needs no approve back to 0.
+        // `addMarket` pulls exactly the approved seed, so VIP-670 needs no approve back to 0.
         expect(await token.allowance(NORMAL_TIMELOCK, SPOKE_POOL_REGISTRY), `${m.symbol} allowance`).to.equal(0);
       }
     });
@@ -945,7 +945,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  // The Risk Stewards VIP-671 grants, on one liquidity and one collateral market, through the path they run on mainnet:
+  // The Risk Stewards VIP-668 grants, on one liquidity and one collateral market, through the path they run on mainnet:
   // the Operator publishes to the Risk Oracle as VIP-592's authorised sender, the receiver routes the update to its
   // steward, and the steward calls the isolated-pools setter. Safe deltas and timelocks are read from chain. Runs
   // last: it moves caps, a collateral factor, a rate model and the clock.
