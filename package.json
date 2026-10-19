@@ -26,7 +26,7 @@
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "@venusprotocol/governance-contracts": "^1.4.0",
     "@venusprotocol/isolated-pools": "^2.5.0",
-    "@venusprotocol/oracle": "^1.10.0",
+    "@venusprotocol/oracle": "^2.16.0",
     "@venusprotocol/token-bridge": "^1.1.0",
     "@venusprotocol/venus-protocol": "^7.4.0",
     "ajv": "^8.12.0",
