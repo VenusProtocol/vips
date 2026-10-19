@@ -1,3 +1,4 @@
+import { Grant } from "../vip-668/permissions-bscmainnet";
 import {
   LOWER_RESOURCE_CAP,
   PAUSE_RESOURCE,
@@ -8,10 +9,9 @@ import {
   UNPAUSE_RESOURCE,
   UPDATE_RESOURCE_ADAPTER,
 } from "../vip-671/permissions";
-import { Grant } from "../vip-671/permissions-bscmainnet";
 import { NORMAL_TIMELOCK, OPERATOR, PAUSE_GUARDIAN } from "./addresses/bscmainnet";
 
-export * from "../vip-671/permissions-bscmainnet";
+export * from "../vip-668/permissions-bscmainnet";
 
 // ===================================================================================================
 // VIP-669: ACM grants on each Spoke source, and the Hub and yield-group roles it calls with.

@@ -1,10 +1,10 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
-import { U, USDC, USDT } from "../../vip-671/addresses/bscmainnet";
+import { U, USDC, USDT } from "../../vip-668/addresses/bscmainnet";
 
 // VIP-669 address book. Re-exports VIP-671's, so VIP-669 and VIP-673 each import one module.
-export * from "../../vip-671/addresses/bscmainnet";
+export * from "../../vip-668/addresses/bscmainnet";
 
 // ===================================================================================================
 // VIP-669: Liquidity Hub infrastructure. Already on chain, read on 2026-10-14 (block ~127,532,000).
