@@ -16,12 +16,12 @@ import {
 import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-672 [BNB Chain]: Hub-Funded Spoke pool, Liquidity Hub infrastructure. 23 commands, no funds move.
+// VIP-669 [BNB Chain]: Hub-Funded Spoke pool, Liquidity Hub infrastructure. 23 commands, no funds move.
 //
 // Second of three. Independent of VIP-671. VIP-673 (markets and Hub wiring) needs both executed.
 //
-// STATUS: before the proposal is created, the grants batch must be stored with ./provisionAcmBatches.ts (not stored
-// yet on 2026-10-15: the aggregator holds 5 batches, so index 5 is next).
+// STATUS: the grants batch is stored at index 5 by ./provisionAcmBatches.ts (bscmainnet block 128,505,093, tx
+// 0x67cc851ce00b0501cfdc527c0c042946c856fd918cb7ff29332f0a38d3ac6b1b), and the simulation compares it call for call.
 //
 // ---------------------------------------------------------------------------------------------------
 // WHY THE GRANTS ARE BATCHED
@@ -57,8 +57,7 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 //  - SpokeBeacon ownership: `13_DeploySpoke` transfers it to the Normal Timelock. Spoke sources have no owner.
 // ===================================================================================================
 
-/// Placeholder, as in VIP-671. VIP numbers are assigned by the governor at proposal time.
-const VIP_NUMBER = 672;
+const VIP_NUMBER = 669;
 
 export type AcmCommand = { target: string; signature: string; params: [string, string, string] };
 
@@ -79,7 +78,7 @@ export const encodeAcmBatch = (batch: AcmCommand[]) =>
     ),
   }));
 
-export const vip672 = () => {
+export const vip669 = () => {
   const capLines = HUB_STACKS.map(({ name, spokeAbsoluteCap, spokePercentageCapBps }) => {
     const symbol = name.replace("Hub_", "");
     const absolute = Number(ethers.utils.formatUnits(spokeAbsoluteCap, 18)).toLocaleString("en-US");
@@ -96,7 +95,7 @@ If passed, this VIP will prepare the **Liquidity Hub** for the Hub-Funded Spoke 
 #### Proposed changes
 
 1. Upgrade the Hub implementation behind the shared Hub beacon, which moves all three Hubs:
-   - \`maxDeposit\` and \`maxMint\` no longer compute the remaining capacity on chain and return the maximum value, even while a Hub is paused (they returned 0 then). Deposits stay limited by each yield group's caps; the new HubLens contract reports the real capacity.
+   - maxDeposit and maxMint no longer compute the remaining capacity on chain and return the maximum value, even while a Hub is paused (they returned 0 then). Deposits stay limited by each yield group's caps; the new HubLens contract reports the real capacity.
    - During a Hub pause, an emergency reallocation first settles interest on each yield group, and skips a group whose settlement fails instead of failing the whole operation.
    - A yield group's percentage cap rounds up instead of down, so caps that add up to 100% leave no gap of a single unit.
 2. Move the 13 resources of the existing Core, Flux, FRV and Centrifuge yield groups to new adapters. The new adapters expose each resource's name, and the FRV adapter reports its APY net of the vault's reserve factor. Valuation, deposits and withdrawals are unchanged.
@@ -112,12 +111,13 @@ ${capLines.join("\n")}
 
 - The 60 permissions in step 3 are pre-stored on the AuxiliaryCommandsAggregator (${AUX_COMMANDS_AGGREGATOR}) and run as batch ${SPOKE_SOURCE_GRANTS_BATCH_INDEX}, to keep the proposal under BNB Chain's per-transaction gas limit. The aggregator holds the AccessControlManager admin role only while the batch runs, within this proposal.
 - No funds can reach a Spoke yield group until a later proposal registers its market and adds it to its Hub's deposit queue.
-- Integrators that read \`maxDeposit\` or \`maxMint\` on a Hub to size a deposit should read them from HubLens instead.
+- Integrators that read maxDeposit or maxMint on a Hub to size a deposit should read them from HubLens instead.
 
 #### References
 
 - [Hub deposit capacity, adapter resource names and FRV APY](https://github.com/VenusProtocol/venus-liquidity-hub/pull/20)
-- [Spoke yield family](https://github.com/VenusProtocol/venus-liquidity-hub/pull/22)`,
+- [Spoke yield family](https://github.com/VenusProtocol/venus-liquidity-hub/pull/22)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/781)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -165,4 +165,4 @@ ${capLines.join("\n")}
   return makeProposal(commands, meta, ProposalType.REGULAR);
 };
 
-export default vip672;
+export default vip669;

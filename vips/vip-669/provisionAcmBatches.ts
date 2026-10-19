@@ -4,12 +4,12 @@ import { AUX_COMMANDS_AGGREGATOR, SPOKE_SOURCE_GRANTS_BATCH_INDEX } from "./addr
 import { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "./bscmainnet";
 
 // ---------------------------------------------------------------------------------------------------
-// Stores VIP-672's 60 Spoke source grants (./bscmainnet.ts) on the bscmainnet AuxiliaryCommandsAggregator,
+// Stores VIP-669's 60 Spoke source grants (./bscmainnet.ts) on the bscmainnet AuxiliaryCommandsAggregator,
 // as one batch at SPOKE_SOURCE_GRANTS_BATCH_INDEX:
 //
-//   npx hardhat run vips/vip-672/provisionAcmBatches.ts --network bscmainnet
+//   npx hardhat run vips/vip-669/provisionAcmBatches.ts --network bscmainnet
 //
-// Run once, by hand, from a wallet in the aggregator's `authorizedBatchers` allowlist, and only once VIP-672 is final.
+// Run once, by hand, from a wallet in the aggregator's `authorizedBatchers` allowlist, and only once VIP-669 is final.
 // Batches are append-only, so anything stored early is dead weight and shifts every index that follows.
 //
 // Contents come from `buildSpokeSourceGrantsBatch`, which the simulation also reads.
@@ -89,7 +89,7 @@ async function main() {
   console.log(`
 Stored and verified: all ${calls.length} calls at index ${index}, block ${receipt.blockNumber}.
 
-Next: set FORK_BLOCK in simulations/vip-672/bscmainnet.ts to a block after ${receipt.blockNumber}, so
+Next: set FORK_BLOCK in simulations/vip-669/bscmainnet.ts to a block after ${receipt.blockNumber}, so
 the simulation deep-compares the batch actually stored on chain instead of storing its own on the fork.
 If any role string or address changes after this, the stored batch is stale: set
 SPOKE_SOURCE_GRANTS_BATCH_INDEX to the new batchCount() and re-run this script.

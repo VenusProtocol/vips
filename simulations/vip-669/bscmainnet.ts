@@ -4,7 +4,6 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { SPOKE_SOURCE_ROLES } from "../../vips/vip-671/permissions";
 import {
   ACM,
   ADAPTER_FLUX,
@@ -27,13 +26,14 @@ import {
   SPOKE_BEACON,
   SPOKE_SOURCE_GRANTS_BATCH_INDEX,
   SPOKE_SOURCE_IMPL,
-} from "../../vips/vip-672/addresses/bscmainnet";
-import vip672, { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "../../vips/vip-672/bscmainnet";
+} from "../../vips/vip-669/addresses/bscmainnet";
+import vip669, { buildSpokeSourceGrantsBatch, encodeAcmBatch } from "../../vips/vip-669/bscmainnet";
 import {
   HUB_ROLES_CALLED,
   SPOKE_SOURCE_GRANTS,
   YIELD_GROUP_ROLES_CALLED,
-} from "../../vips/vip-672/permissions-bscmainnet";
+} from "../../vips/vip-669/permissions-bscmainnet";
+import { SPOKE_SOURCE_ROLES } from "../../vips/vip-671/permissions";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterSpokeV1.json";
 import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";
@@ -43,8 +43,8 @@ import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
 /// After the Hub implementation, HubLens and the Spoke family are deployed (venus-liquidity-hub#39, last at block
-/// 127,749,025).
-const FORK_BLOCK = 127750000;
+/// 127,749,025), and after the grants batch is stored on the aggregator (block 128,505,093).
+const FORK_BLOCK = 128505200;
 
 /// EIP-1967 beacon slot, `bytes32(uint256(keccak256("eip1967.proxy.beacon")) - 1)`.
 const BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50";
@@ -52,10 +52,10 @@ const BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b3
 /// A `msg.sender` that holds no grant of its own, so `isAllowedToCall` asked from here answers only for the
 /// address(0) wildcard. Asked from the target contract it answers "wildcard OR a grant against this contract",
 /// which is what a real call sees.
-const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-672 unrelated sender"), 12));
+const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-669 unrelated sender"), 12));
 
 /// A fresh account for the post-VIP deposit. The default hardhat signer carries EIP-7702 code on BNB Chain.
-const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-672 hub depositor"), 12));
+const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-669 hub depositor"), 12));
 
 /// The accounts every role check covers.
 const KNOWN_ACCOUNTS = [
@@ -68,7 +68,7 @@ const KNOWN_ACCOUNTS = [
   ORACLE_GUARDIAN,
 ];
 
-/// The six live Core and Flux sources, which run the same generic `YieldGroup` as Spoke. VIP-672 copies their grants.
+/// The six live Core and Flux sources, which run the same generic `YieldGroup` as Spoke. VIP-669 copies their grants.
 const LIVE_GENERIC_SOURCES = [
   ...new Set(ADAPTER_SWAPS.filter(s => s.name.match(/^(Core|Flux)/)).map(s => s.yieldGroup)),
 ];
@@ -154,8 +154,8 @@ forking(FORK_BLOCK, async () => {
   const snapshotsBefore: Record<string, HubSnapshot> = {};
   const resourcePausedBefore: Record<string, boolean> = {};
 
-  // What VIP-672 relies on, read from the live chain. Needs no new deployment, so it runs on every fork block.
-  describe("Pre-VIP: what VIP-672 relies on, on the live chain", () => {
+  // What VIP-669 relies on, read from the live chain. Needs no new deployment, so it runs on every fork block.
+  describe("Pre-VIP: what VIP-669 relies on, on the live chain", () => {
     it("runs all three Hubs on the live implementation, behind the Normal Timelock's beacon", async () => {
       expectAddress(await beacon.implementation(), HUB_LIVE_IMPL);
       expectAddress(await beacon.owner(), NORMAL_TIMELOCK);
@@ -166,7 +166,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("has the queues VIP-672 was built against, with every registered group in the withdraw queue", async () => {
+    it("has the queues VIP-669 was built against, with every registered group in the withdraw queue", async () => {
       // The Operator holds both queue setters, so either can move before execution.
       for (const { name, hub, withdrawQueueBefore, depositQueue } of HUB_STACKS) {
         const h = hubOf(hub);
@@ -174,7 +174,7 @@ forking(FORK_BLOCK, async () => {
           normalize(withdrawQueueBefore),
         );
         expect(normalize(await h.outerDepositQueue()), `${name} deposit queue`).to.deep.equal(normalize(depositQueue));
-        // `setOuterWithdrawQueue` rejects a queue that omits a funded group, so VIP-672's queue keeps them all.
+        // `setOuterWithdrawQueue` rejects a queue that omits a funded group, so VIP-669's queue keeps them all.
         expect(normalize(await h.registeredYieldGroups()).sort(), `${name} registered`).to.deep.equal(
           normalize(withdrawQueueBefore).sort(),
         );
@@ -223,7 +223,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("gives the Normal Timelock every role VIP-672 calls with, as exact grants", async () => {
+    it("gives the Normal Timelock every role VIP-669 calls with, as exact grants", async () => {
       for (const { name, hub } of HUB_STACKS) {
         for (const role of HUB_ROLES_CALLED) {
           expect(await mayCall(hub, NORMAL_TIMELOCK, role), `${name}: ${role}`).to.be.true;
@@ -239,7 +239,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("grants the live Core and Flux sources exactly the role set VIP-672 copies to each Spoke source", async () => {
+    it("grants the live Core and Flux sources exactly the role set VIP-669 copies to each Spoke source", async () => {
       expect(LIVE_GENERIC_SOURCES).to.have.lengthOf(6);
       for (const source of LIVE_GENERIC_SOURCES) {
         for (const role of SPOKE_SOURCE_ROLES) {
@@ -313,38 +313,10 @@ forking(FORK_BLOCK, async () => {
   });
 
   const batch = buildSpokeSourceGrantsBatch();
-  let storedOnFork = false;
 
   describe("Pre-VIP: the Spoke source grants batch", () => {
-    before(async () => {
-      const batchCount: number = (await aggregator.batchCount()).toNumber();
-      if (batchCount > SPOKE_SOURCE_GRANTS_BATCH_INDEX) {
-        return;
-      }
-      // TODO(ops): delete this fallback once provisionAcmBatches.ts has stored the batch on mainnet and FORK_BLOCK
-      // is past it. Until then the Normal Timelock (an authorized batcher) stores it on the fork, and the
-      // comparison below only checks the builder against itself.
-      if (batchCount < SPOKE_SOURCE_GRANTS_BATCH_INDEX) {
-        throw new Error(
-          `aggregator holds ${batchCount} batches, so index ${SPOKE_SOURCE_GRANTS_BATCH_INDEX} cannot be stored next`,
-        );
-      }
-      const batcher = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      const tx = await aggregator
-        .connect(batcher)
-        ["addBatch((address,bytes)[],uint256)"](encodeAcmBatch(batch), SPOKE_SOURCE_GRANTS_BATCH_INDEX);
-      const { gasUsed } = await tx.wait();
-      storedOnFork = true;
-      // The real `addBatch` is its own transaction under the same per-tx cap.
-      console.warn(
-        `[vip-672] grants batch stored on the fork at index ${SPOKE_SOURCE_GRANTS_BATCH_INDEX}, gasUsed=${gasUsed}`,
-      );
-    });
-
-    it("reads the batch stored on mainnet, not one this simulation stored", function () {
-      if (storedOnFork) {
-        this.skip();
-      }
+    it("reads the batch stored on mainnet at block 128,505,093", async () => {
+      expect((await aggregator.batchCount()).toNumber()).to.be.greaterThan(SPOKE_SOURCE_GRANTS_BATCH_INDEX);
     });
 
     it("stores exactly the builder's 60 grants, call for call, every one against the ACM", async () => {
@@ -359,7 +331,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-672 [bscmainnet] Hub-Funded Spoke pool Liquidity Hub infrastructure", await vip672(), {
+  testVip("VIP-669 [bscmainnet] Hub-Funded Spoke pool Liquidity Hub infrastructure", await vip669(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [1]);
       await expectEvents(txResponse, [YIELD_GROUP_ABI], ["ResourceAdapterUpdated"], [ADAPTER_SWAPS.length]);

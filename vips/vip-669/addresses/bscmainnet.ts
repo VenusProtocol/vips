@@ -3,11 +3,11 @@ import { parseUnits } from "ethers/lib/utils";
 
 import { U, USDC, USDT } from "../../vip-671/addresses/bscmainnet";
 
-// VIP-672 address book. Re-exports VIP-671's, so VIP-672 and VIP-673 each import one module.
+// VIP-669 address book. Re-exports VIP-671's, so VIP-669 and VIP-673 each import one module.
 export * from "../../vip-671/addresses/bscmainnet";
 
 // ===================================================================================================
-// VIP-672: Liquidity Hub infrastructure. Already on chain, read on 2026-10-14 (block ~127,532,000).
+// VIP-669: Liquidity Hub infrastructure. Already on chain, read on 2026-10-14 (block ~127,532,000).
 // ===================================================================================================
 
 /// The one beacon behind all three Hubs, owned by the Normal Timelock. `upgradeTo` is `onlyOwner`, so it needs no
@@ -157,7 +157,7 @@ export const ADAPTER_SWAPS: AdapterSwap[] = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-672's new contracts, deployed by venus-liquidity-hub `deploy/10` and `deploy/12` to `deploy/14` from #39, which
+// VIP-669's new contracts, deployed by venus-liquidity-hub `deploy/10` and `deploy/12` to `deploy/14` from #39, which
 // carries #20, #22, #29 and #37.
 // ---------------------------------------------------------------------------------------------------
 
@@ -179,7 +179,7 @@ export const SPOKE_SOURCE_USDT = "0x3cC1eDE91419dC7EC199a06704EC8ECAb665a684";
 export const SPOKE_SOURCE_USDC = "0x4cd4aB2F88E39D3F3e481bb2555EcdF00266f717";
 export const SPOKE_SOURCE_U = "0xcA3f9AFD7C4c1022E4A37a12671Ef57B8A7bfc51";
 
-/// Reference only (`10_DeployHubLens`); nothing in VIP-672 uses it. After the upgrade, Hub `maxDeposit` and `maxMint`
+/// Reference only (`10_DeployHubLens`); nothing in VIP-669 uses it. After the upgrade, Hub `maxDeposit` and `maxMint`
 /// return `type(uint256).max` and `HubLens` reports the real capacity.
 export const HUB_LENS = "0xE5d8A002A794CcDba248ba774a359eF2B9E4Ba8B";
 
@@ -190,9 +190,9 @@ export type HubStack = {
   spokeSource: string;
   /// Read on chain. Holds every registered group.
   withdrawQueueBefore: string[];
-  /// Read on chain. VIP-672 does not change it.
+  /// Read on chain. VIP-669 does not change it.
   depositQueue: string[];
-  /// The Spoke source's caps, set by VIP-672's `addYieldGroup`. The effective cap is the lower of the absolute cap and
+  /// The Spoke source's caps, set by VIP-669's `addYieldGroup`. The effective cap is the lower of the absolute cap and
   /// the percentage of the Hub's TVL.
   spokeAbsoluteCap: BigNumber;
   spokePercentageCapBps: number;
@@ -202,11 +202,11 @@ export type HubStack = {
 /// supply cap (600M USDT, 180M USDC, 60M U, read on 2026-10-14).
 ///
 /// Registered with these final values, so no later raise is needed. Nothing reaches a source before VIP-673: the Hub
-/// deposits only through its deposit queue, which VIP-672 leaves alone, a source with no resource refunds any deposit,
+/// deposits only through its deposit queue, which VIP-669 leaves alone, a source with no resource refunds any deposit,
 /// and a reallocation into it reverts `ResourceNotRegistered`.
 const SPOKE_PERCENTAGE_CAP_BPS = 5000;
 
-/// The three Hubs. VIP-672 appends each Spoke source to the end of its Hub's withdraw queue, the order the VIP
+/// The three Hubs. VIP-669 appends each Spoke source to the end of its Hub's withdraw queue, the order the VIP
 /// document sets (§3.4).
 export const HUB_STACKS: HubStack[] = [
   {
@@ -242,7 +242,7 @@ export const HUB_STACKS: HubStack[] = [
 ];
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-672: ACM batching through the AuxiliaryCommandsAggregator (VIP-628). See ../bscmainnet.ts for why.
+// VIP-669: ACM batching through the AuxiliaryCommandsAggregator (VIP-628). See ../bscmainnet.ts for why.
 //
 // Read on 2026-10-14: the Normal Timelock owns the aggregator, holds `executeBatch(uint256)` on it and is an
 // authorized batcher. Of the Normal, Fast-track and Critical timelocks and the two guardians, only the Normal
@@ -252,7 +252,6 @@ export const HUB_STACKS: HubStack[] = [
 export const AUX_COMMANDS_AGGREGATOR = "0x528A428748dfE73DFcc844176B401475D1831057";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-/// TODO(ops): the aggregator slot of the Spoke source grants batch. 5 is the next free slot on 2026-10-14
-/// (`batchCount()`); any batch stored before ours moves it. Set it to the live `batchCount()` just before running
-/// ../provisionAcmBatches.ts, which refuses to store on a mismatch.
+/// The aggregator slot of the Spoke source grants batch, stored by ../provisionAcmBatches.ts at bscmainnet block
+/// 128,505,093.
 export const SPOKE_SOURCE_GRANTS_BATCH_INDEX = 5;

@@ -14,7 +14,7 @@ import { NORMAL_TIMELOCK, OPERATOR, PAUSE_GUARDIAN } from "./addresses/bscmainne
 export * from "../vip-671/permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-672: ACM grants on each Spoke source, and the Hub and yield-group roles it calls with.
+// VIP-669: ACM grants on each Spoke source, and the Hub and yield-group roles it calls with.
 //
 // Read from the ACM on 2026-10-14 with `hasRole(keccak256(contract, role), account)` for the exact grant (block
 // 127,532,699) and `hasRole` on the wildcard key for the wildcard (block 127,594,075), for the Normal, Fast-track and
@@ -41,13 +41,13 @@ export const SPOKE_SOURCE_OPERATOR_GRANTS = [
   LOWER_RESOURCE_CAP,
 ];
 
-/// The 20 grants on one Spoke source. VIP-672 issues them on each of the three, 60 in all, never against address(0).
+/// The 20 grants on one Spoke source. VIP-669 issues them on each of the three, 60 in all, never against address(0).
 export const SPOKE_SOURCE_GRANTS: Grant[] = [
   ...SPOKE_SOURCE_NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
   ...SPOKE_SOURCE_PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
   ...SPOKE_SOURCE_OPERATOR_GRANTS.map(role => ({ role, account: OPERATOR })),
 ];
 
-/// Roles VIP-672 calls on existing contracts. The Normal Timelock holds each as an exact grant, not a wildcard.
+/// Roles VIP-669 calls on existing contracts. The Normal Timelock holds each as an exact grant, not a wildcard.
 export const HUB_ROLES_CALLED = ["addYieldGroup(address,uint256,uint16)", "setOuterWithdrawQueue(address[])"];
 export const YIELD_GROUP_ROLES_CALLED = [UPDATE_RESOURCE_ADAPTER];
