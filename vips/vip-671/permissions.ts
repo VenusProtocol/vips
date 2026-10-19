@@ -1,9 +1,11 @@
 // ===================================================================================================
 // VIP-671 — ACM role strings for the Hub-Funded Spoke pool (Phase 1).
 //
-// The role-string arrays below are properties of the contracts, so any listing of this pool can import
-// them. THE ON-CHAIN VERIFICATION RECORDED IN THIS FILE IS BSCTESTNET'S. Another chain needs its own,
-// because the existing wildcards differ per chain.
+// SHARED BY BOTH CHAINS. The role strings below are properties of the contracts, so the bsctestnet and
+// bscmainnet proposals in this directory both import them. THE ON-CHAIN VERIFICATION RECORDED IN THIS FILE IS
+// BSCTESTNET'S. bscmainnet's is recorded separately in ./permissions-bscmainnet.ts, and the two chains differ: on
+// bscmainnet the grantees are the Normal Timelock, the Critical Guardian and the Pause Guardian rather than one
+// Guardian, and the Fast-track Timelock holds more pre-existing wildcards than on bsctestnet.
 //
 // Every string is the literal argument passed to `_checkAccessAllowed(...)` in the contract, copied
 // verbatim from isolated-pools/contracts/Spoke/SpokeComptroller.sol. The ACM hashes
@@ -74,17 +76,32 @@
 // grants a role nothing checks. Reported upstream; it does not affect this VIP.)
 // ===================================================================================================
 
+/// Each `SpokeComptroller` role string a listing grants, named once so the role lists below and the
+/// bscmainnet grant table in ./permissions-bscmainnet.ts share one spelling of each.
+export const SET_CLOSE_FACTOR = "setCloseFactor(uint256)";
+export const SET_LIQUIDATION_INCENTIVE = "setLiquidationIncentive(uint256)";
+export const SET_MIN_LIQUIDATABLE_COLLATERAL = "setMinLiquidatableCollateral(uint256)";
+export const SET_COLLATERAL_FACTOR = "setCollateralFactor(address,uint256,uint256)";
+export const SET_MARKET_SUPPLY_CAPS = "setMarketSupplyCaps(address[],uint256[])";
+export const SET_MARKET_BORROW_CAPS = "setMarketBorrowCaps(address[],uint256[])";
+export const SET_MARKET_LIQUIDATION_INCENTIVE = "setMarketLiquidationIncentive(address,uint256)";
+export const SET_SUPPLY_ALLOWLIST_ENABLED = "setSupplyAllowlistEnabled(address,bool)";
+export const SET_ALLOWED_SUPPLIER = "setAllowedSupplier(address,address,bool)";
+export const SET_LIQUIDATION_ALLOWLIST_ENABLED = "setLiquidationAllowlistEnabled(bool)";
+export const SET_ALLOWED_LIQUIDATOR = "setAllowedLiquidator(address,bool)";
+export const SET_FORCED_LIQUIDATION = "setForcedLiquidation(address,bool)";
+
 /**
  * The five role strings that exist only on `SpokeComptroller`. No other Venus contract checks a string
  * with these names, so no pre-existing wildcard can cover them. A pool listed without these is listed
  * with its allowlists and its per-market liquidation incentives permanently unreachable.
  */
 export const SPOKE_ONLY_ROLES = [
-  "setMarketLiquidationIncentive(address,uint256)",
-  "setSupplyAllowlistEnabled(address,bool)",
-  "setAllowedSupplier(address,address,bool)",
-  "setLiquidationAllowlistEnabled(bool)",
-  "setAllowedLiquidator(address,bool)",
+  SET_MARKET_LIQUIDATION_INCENTIVE,
+  SET_SUPPLY_ALLOWLIST_ENABLED,
+  SET_ALLOWED_SUPPLIER,
+  SET_LIQUIDATION_ALLOWLIST_ENABLED,
+  SET_ALLOWED_LIQUIDATOR,
 ];
 
 /**
@@ -93,7 +110,7 @@ export const SPOKE_ONLY_ROLES = [
  * that makes a stablecoin position liquidatable on demand, which is how the liquidation path gets
  * tested here without waiting for a real depeg.
  */
-export const SPOKE_EXTRA_ROLES = ["setForcedLiquidation(address,bool)"];
+export const SPOKE_EXTRA_ROLES = [SET_FORCED_LIQUIDATION];
 
 export const SPOKE_COMPTROLLER_ROLES = [...SPOKE_ONLY_ROLES, ...SPOKE_EXTRA_ROLES];
 
@@ -106,12 +123,12 @@ export const SPOKE_COMPTROLLER_ROLES = [...SPOKE_ONLY_ROLES, ...SPOKE_EXTRA_ROLE
  * this VIP to fail, because the wildcards make it look covered until you check the account.
  */
 export const REGISTRY_DRIVEN_ROLES = [
-  "setCloseFactor(uint256)",
-  "setLiquidationIncentive(uint256)",
-  "setMinLiquidatableCollateral(uint256)",
-  "setCollateralFactor(address,uint256,uint256)",
-  "setMarketSupplyCaps(address[],uint256[])",
-  "setMarketBorrowCaps(address[],uint256[])",
+  SET_CLOSE_FACTOR,
+  SET_LIQUIDATION_INCENTIVE,
+  SET_MIN_LIQUIDATABLE_COLLATERAL,
+  SET_COLLATERAL_FACTOR,
+  SET_MARKET_SUPPLY_CAPS,
+  SET_MARKET_BORROW_CAPS,
 ];
 
 /**
@@ -123,7 +140,7 @@ export const REGISTRY_DRIVEN_ROLES = [
  * NOTE on PAUSE_ROLE. The role string carries `uint256[]` while the CALL signature is
  * `setActionsPaused(address[],uint8[],bool)`, because `Action` is an enum. They hash to different
  * roles. The `uint256[]` form is the one the contract checks. Do not "fix" either to match the other.
- *   SpokeComptroller.sol:1067  setActionsPaused(address[],uint256[],bool)
+ *   SpokeComptroller.sol:1093  setActionsPaused(address[],uint256[],bool)
  *   SpokeComptroller.sol:161   unlistMarket(address)
  */
 export const PAUSE_ROLE = "setActionsPaused(address[],uint256[],bool)";
@@ -157,8 +174,8 @@ export const ROUTER_ROLES = ["enterMarketForAccount(address,address)"];
  * name rather than the expanded tuple, which is where this kind of list usually goes wrong:
  *   PoolRegistry.sol:162        addMarket(AddMarketInput)
  *   PoolRegistry.sol:226        updatePoolMetadata(address,VenusPoolMetaData)
- *   ProtocolShareReserve.sol:235 addOrUpdateDistributionConfigs(DistributionConfig[])
- *   ProtocolShareReserve.sol:283 removeDistributionConfig(Schema,address)
+ *   ProtocolShareReserve.sol:264 addOrUpdateDistributionConfigs(DistributionConfig[])
+ *   ProtocolShareReserve.sol:316 removeDistributionConfig(Schema,address)
  * The DeviationBoundedOracle goes the other way and uses the expanded tuple
  * (DeviationBoundedOracle.sol:302).
  *
@@ -218,6 +235,48 @@ export const ASSUMED_GUARDIAN_ROLES = [
   "setCollateralFactor(address,uint256,uint256)",
   "setMarketSupplyCaps(address[],uint256[])",
   "setMarketBorrowCaps(address[],uint256[])",
+];
+
+// ===================================================================================================
+// Spoke source (`SpokeSource_<asset>`) role strings, shared by both chains.
+//
+// The Spoke yield family is the generic `YieldGroup` behind a beacon of its own, so its gated surface is
+// exactly the Core and Flux one: eight `YieldGroupBase` setters plus three `YieldGroup` ones. Each string is
+// the literal passed to `_checkAccessAllowed(...)` in venus-liquidity-hub#22, the code `SpokeBeacon` serves:
+//   contracts/YieldGroup/base/YieldGroupBase.sol:112 to :246  addResource ... sweep
+//   contracts/YieldGroup/YieldGroup.sol:35, :47, :62          raiseResourceCap, lowerResourceCap, setBlocksPerYear
+// The generic `YieldGroup` has no `forceRemoveResource` (FRV and Centrifuge only), so it is absent.
+// ===================================================================================================
+
+export const ADD_RESOURCE = "addResource(address,address)";
+export const REMOVE_RESOURCE = "removeResource(address)";
+export const UPDATE_RESOURCE_ADAPTER = "updateResourceAdapter(address,address)";
+export const SET_INNER_DEPOSIT_QUEUE = "setInnerDepositQueue(address[])";
+export const SET_INNER_WITHDRAW_QUEUE = "setInnerWithdrawQueue(address[])";
+export const PAUSE_RESOURCE = "pauseResource(address)";
+export const UNPAUSE_RESOURCE = "unpauseResource(address)";
+export const SWEEP = "sweep(address,address)";
+export const RAISE_RESOURCE_CAP = "raiseResourceCap(address,uint256)";
+export const LOWER_RESOURCE_CAP = "lowerResourceCap(address,uint256)";
+export const SET_BLOCKS_PER_YEAR = "setBlocksPerYear(uint256)";
+
+export const YIELD_GROUP_BASE_ROLES = [
+  ADD_RESOURCE,
+  REMOVE_RESOURCE,
+  UPDATE_RESOURCE_ADAPTER,
+  SET_INNER_DEPOSIT_QUEUE,
+  SET_INNER_WITHDRAW_QUEUE,
+  PAUSE_RESOURCE,
+  UNPAUSE_RESOURCE,
+  SWEEP,
+];
+
+/// The full gated surface of a Spoke source.
+export const SPOKE_SOURCE_ROLES = [
+  ...YIELD_GROUP_BASE_ROLES,
+  RAISE_RESOURCE_CAP,
+  LOWER_RESOURCE_CAP,
+  SET_BLOCKS_PER_YEAR,
 ];
 
 /// ACM `giveCallPermission` command builder.

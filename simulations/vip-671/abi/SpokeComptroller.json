@@ -398,6 +398,22 @@
     "type": "error"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "liquidationThresholdMantissa",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidationIncentiveMantissa",
+        "type": "uint256"
+      }
+    ],
+    "name": "UnsafeLiquidationParams",
+    "type": "error"
+  },
+  {
     "inputs": [],
     "name": "ZeroAddressNotAllowed",
     "type": "error"
@@ -1166,16 +1182,16 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "vToken",
+        "name": "account",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "account",
+        "name": "vToken",
         "type": "address"
       }
     ],
-    "name": "enterMarketBehalf",
+    "name": "enterMarketForAccount",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
