@@ -1,4 +1,4 @@
-import { TransactionRequest, TransactionResponse } from "@ethersproject/providers";
+import { TransactionReceipt, TransactionRequest, TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
@@ -25,6 +25,14 @@ import {
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
+import {
+  expectForkedBatchesRan,
+  explainBatchFailure,
+  forkedBatches,
+  seedProposalBatchesOnFork,
+} from "./aggregatorBatches";
+
+export { seedProposalBatchesOnFork };
 
 // XVS Vault stakes erode over time and governance has raised the bar (1,000,000 XVS proposal
 // threshold, 1,500,000 XVS quorum as of block ~111,098,000), so a single default supporter no
@@ -77,11 +85,15 @@ export const forking = (blockNumber: number, fn: () => Promise<void>) => {
       run();
     } catch (e) {
       console.error(e);
+      // Mocha never runs, so without this a failed setup exits 0.
+      process.exitCode = 1;
     }
   })();
 };
 
 export interface TestingOptions {
+  // Defaults to seeding when the proposal has unseeded batches on this fork. Set false for manual setup.
+  seedProposalBatches?: boolean;
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
@@ -347,6 +359,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   let supporters: SignerWithAddress[];
 
   const governanceFixture = async (): Promise<void> => {
+    // loadFixture snapshots the seeded batches so command tests and full execution can each run them once.
+    if (options.seedProposalBatches !== false) await seedProposalBatchesOnFork(proposal);
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
       [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
@@ -388,7 +402,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
     proposal.signatures.map((signature, i) => {
       it(`executes ${signature} successfully`, async () => {
-        await executeCommand(impersonatedTimelock, proposal, i);
+        await executeCommand(impersonatedTimelock, proposal, i).catch(error => explainBatchFailure(proposal, i, error));
       });
     });
   });
@@ -399,6 +413,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     let proposalId: number;
+    let executionReceipt: TransactionReceipt;
 
     it("can be proposed", async () => {
       const { targets, signatures, values, meta } = proposal;
@@ -474,13 +489,21 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
         populated.gasLimit = BigNumber.from(cap);
       }
       const tx = await proposer.sendTransaction(populated);
-      const receipt = await tx.wait();
-      await reportTxGas(description, "execute(proposalId)", receipt.gasUsed);
+      executionReceipt = await tx.wait();
+      await reportTxGas(description, "execute(proposalId)", executionReceipt.gasUsed);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
       }
     });
+
+    if (forkedBatches(proposal).length) {
+      it("runs every aggregator batch and leaves the aggregator without its permissions", async function () {
+        // the execution test above failed and already reported why
+        if (!executionReceipt) this.skip();
+        await expectForkedBatchesRan(proposal, executionReceipt);
+      });
+    }
   });
 };
 
@@ -491,10 +514,12 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
   let targets: string[];
   let signatures: string[];
   let proposalType: ProposalType;
+  let executionReceipt: TransactionReceipt;
   const provider = ethers.provider;
 
   describe(`${description} execution`, () => {
     before(async () => {
+      if (options.seedProposalBatches !== false) await seedProposalBatchesOnFork(proposal);
       executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
@@ -594,11 +619,11 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       }
 
       const tx = await executor.execute(proposalId, txnParams);
-      const receipt = await tx.wait();
+      executionReceipt = await tx.wait();
 
-      const gasUsed = receipt.gasUsed.toString();
+      const gasUsed = executionReceipt.gasUsed.toString();
       const capSuffix = Number.isFinite(cap)
-        ? ` (${receipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
+        ? ` (${executionReceipt.gasUsed.mul(10000).div(cap).toNumber() / 100}% of ${FORKED_NETWORK} per-tx cap ${cap})`
         : ` (${FORKED_NETWORK} has no enforced per-tx cap)`;
       console.log(`[gas] ${description} executor.execute(proposalId) gasUsed=${gasUsed}${capSuffix}`);
 
@@ -606,5 +631,13 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         await options.callbackAfterExecution(tx);
       }
     });
+
+    if (forkedBatches(proposal).length) {
+      it("runs every aggregator batch and leaves the aggregator without its permissions", async function () {
+        // the execution test above failed and already reported why
+        if (!executionReceipt) this.skip();
+        await expectForkedBatchesRan(proposal, executionReceipt);
+      });
+    }
   });
 };

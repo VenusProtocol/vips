@@ -1,4 +1,4 @@
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 
 export type SUPPORTED_NETWORKS =
   | "bsctestnet"
@@ -65,6 +65,7 @@ export interface Proposal {
   gasLimitMultiplicationFactor?: number[];
   meta?: ProposalMeta;
   type?: ProposalType;
+  aggregatorBatches?: AggregatorBatch[];
 }
 
 export interface Command {
@@ -77,6 +78,50 @@ export interface Command {
   gasFeeMultiplicationFactor?: number;
   // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
   gasLimitMultiplicationFactor?: number;
+  // function string the aggregator is granted for this command when the target's ACM check differs from `signature`
+  aclSignature?: string;
+}
+
+// One proposal entry whose commands execute together through the aggregator.
+export interface Batch {
+  kind: "batch";
+  commands: Command[];
+  options: BatchOptions;
+}
+
+export interface BatchOptions {
+  // seeds the batch at this index, which must be the chain's next free index unless the batch is already seeded there
+  expectedIndex?: number;
+  // the index the batch is already seeded at: the seeded calls must match, and the batch is never seeded again
+  seededIndex?: number;
+  // seeds every call of the batch as full calldata with an empty signature, which stores fewer bytes than the default
+  // signature plus arguments but shows no function name on chain
+  raw?: boolean;
+}
+
+// A call as the aggregator stores it: `data` holds the ABI-encoded arguments, or the full calldata when `signature` is
+// empty
+export interface AggregatorCall {
+  target: string;
+  signature: string;
+  data: string;
+}
+
+export interface CallPermission {
+  target: string;
+  signature: string;
+}
+
+export interface AggregatorBatch {
+  network: SUPPORTED_NETWORKS;
+  aggregator: string;
+  // seededIndex, else expectedIndex, else the chain's next free index; undefined when the chain was not read
+  index?: BigNumber;
+  // whether `calls` are seeded at `index` on the chain the proposal was built against
+  seeded: boolean;
+  calls: AggregatorCall[];
+  // granted to the aggregator at the start of the batch and revoked at its end
+  permissions: CallPermission[];
 }
 
 export interface TokenConfig {
