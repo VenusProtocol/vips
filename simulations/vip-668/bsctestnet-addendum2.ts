@@ -12,8 +12,8 @@ import {
   SPOKE_COMPTROLLER_IMPL,
   SPOKE_COMPTROLLER_IMPL_ADDENDUM2,
   VTSLAB_SPOKE,
-} from "../../vips/vip-671/addresses/bsctestnet";
-import vip671Addendum2 from "../../vips/vip-671/bsctestnet-addendum2";
+} from "../../vips/vip-668/addresses/bsctestnet";
+import vip668Addendum2 from "../../vips/vip-668/bsctestnet-addendum2";
 import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 
 // After the new implementation was deployed at block 136,362,704.
@@ -118,7 +118,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-671 addendum 2: spoke comptroller upgrade with audit fixes", await vip671Addendum2(), {
+  testVip("VIP-668 addendum 2: spoke comptroller upgrade with audit fixes", await vip668Addendum2(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [1]);
     },

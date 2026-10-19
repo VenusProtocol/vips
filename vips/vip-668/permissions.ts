@@ -1,5 +1,5 @@
 // ===================================================================================================
-// VIP-671 — ACM role strings for the Hub-Funded Spoke pool (Phase 1).
+// VIP-668 — ACM role strings for the Hub-Funded Spoke pool (Phase 1).
 //
 // SHARED BY BOTH CHAINS. The role strings below are properties of the contracts, so the bsctestnet and
 // bscmainnet proposals in this directory both import them. THE ON-CHAIN VERIFICATION RECORDED IN THIS FILE IS
@@ -33,7 +33,7 @@
 //   ALREADY COVERED, so this VIP does NOT re-grant them. That list is `ASSUMED_WILDCARD_ROLES` and
 //   `ASSUMED_GUARDIAN_ROLES` at the bottom of this file, deliberately as code rather than as prose: a
 //   comment claiming a permission exists is exactly the assumption that turns into a failed execution,
-//   so every entry is asserted BEFORE the VIP runs in simulations/vip-671/bsctestnet.ts. A revocation
+//   so every entry is asserted BEFORE the VIP runs in simulations/vip-668/bsctestnet.ts. A revocation
 //   between now and the proposal then fails the simulation instead of the proposal.
 //
 //   NOT COVERED for any timelock, for the Guardian, or for anyone else, and therefore granted by this
@@ -179,7 +179,7 @@ export const ROUTER_ROLES = ["enterMarketForAccount(address,address)"];
  * The DeviationBoundedOracle goes the other way and uses the expanded tuple
  * (DeviationBoundedOracle.sol:302).
  *
- * Asserted pre-VIP in simulations/vip-671/bsctestnet.ts, for the accounts named against each group.
+ * Asserted pre-VIP in simulations/vip-668/bsctestnet.ts, for the accounts named against each group.
  */
 export const ASSUMED_WILDCARD_ROLES = {
   /// Held by the Normal Timelock. The first six are the same strings the spoke registry is granted in

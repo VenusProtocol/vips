@@ -1,7 +1,7 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 // ===================================================================================================
-// VIP-671 [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1 address book.
+// VIP-668 [BNB Chain Testnet] — Hub-Funded Spoke pool, PHASE 1 address book.
 //
 // Phase 1 covers the spoke pool side only (isolated-pools#559). The Liquidity Hub wiring
 // (venus-liquidity-hub#22) and the bStock liquidation leg (venus-protocol#707) are Phase 2 and have
@@ -81,7 +81,7 @@ export const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 export const VUSDT_SPOKE = "0xC88bAF0bA49a98F15A00182752f6d10bd3932F6a"; // vUSDT_HubSpoke
 export const VUSDC_SPOKE = "0xD05514217FD359659aE7da7740e79C11947eBB32"; // vUSDC_HubSpoke
 
-/// A collateral market listed after VIP-671, with a nonzero liquidation threshold.
+/// A collateral market listed after VIP-668, with a nonzero liquidation threshold.
 export const VTSLAB_SPOKE = "0x301d27Fa22FE4d2e7397550ACa825140EB7Bff3a"; // vTSLAB_HubSpoke
 
 /// One shared `JumpRateModelV2` for both markets. Verified on chain: kink 0.8e18, 70,080,000 blocks

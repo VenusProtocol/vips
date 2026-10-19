@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { IRM_SPOKE, USDC, USDT, VUSDC_SPOKE, VUSDT_SPOKE } from "./addresses/bsctestnet";
 
 // ===================================================================================================
-// VIP-671 — Hub-Funded Spoke pool parameters (BNB Chain Testnet), PHASE 1.
+// VIP-668 — Hub-Funded Spoke pool parameters (BNB Chain Testnet), PHASE 1.
 //
 // Every value here is copied from isolated-pools helpers/spokeDeploymentConfig.ts, the file the
 // deployment was run from, so the listing matches what was deployed rather than a second opinion.

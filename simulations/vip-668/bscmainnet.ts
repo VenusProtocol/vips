@@ -45,6 +45,7 @@ import {
   WBNB,
 } from "../../vips/vip-668/addresses/bscmainnet";
 import vip668, { pendingDeployments } from "../../vips/vip-668/bscmainnet";
+import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES } from "../../vips/vip-668/permissions";
 import {
   ASSUMED_WILDCARDS,
   MUST_NOT_BE_WILDCARD,
@@ -52,15 +53,14 @@ import {
   SET_INTEREST_RATE_MODEL,
   VIP_668_GRANTS,
 } from "../../vips/vip-668/permissions-bscmainnet";
-import { REGISTRY_DRIVEN_ROLES, SPOKE_COMPTROLLER_ROLES } from "../../vips/vip-671/permissions";
-import ACM_ABI from "../vip-671/abi/AccessControlManager.json";
-import BSTOCK_LIQUIDATOR_ABI from "../vip-671/abi/BStockLiquidator.json";
-import DBO_ABI from "../vip-671/abi/DeviationBoundedOracle.json";
-import PSR_ABI from "../vip-671/abi/ProtocolShareReserve.json";
-import PROXY_ADMIN_ABI from "../vip-671/abi/ProxyAdmin.json";
-import COMPTROLLER_ABI from "../vip-671/abi/SpokeComptroller.json";
-import POOL_REGISTRY_ABI from "../vip-671/abi/SpokePoolRegistry.json";
-import VTOKEN_ABI from "../vip-671/abi/VToken.json";
+import ACM_ABI from "../vip-668/abi/AccessControlManager.json";
+import BSTOCK_LIQUIDATOR_ABI from "../vip-668/abi/BStockLiquidator.json";
+import DBO_ABI from "../vip-668/abi/DeviationBoundedOracle.json";
+import PSR_ABI from "../vip-668/abi/ProtocolShareReserve.json";
+import PROXY_ADMIN_ABI from "../vip-668/abi/ProxyAdmin.json";
+import COMPTROLLER_ABI from "../vip-668/abi/SpokeComptroller.json";
+import POOL_REGISTRY_ABI from "../vip-668/abi/SpokePoolRegistry.json";
+import VTOKEN_ABI from "../vip-668/abi/VToken.json";
 
 /// After the spoke stack, the ProtocolShareReserve implementation and the BStockLiquidator implementation (block
 /// 127,749,788) are deployed.

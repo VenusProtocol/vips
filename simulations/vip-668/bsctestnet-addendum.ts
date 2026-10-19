@@ -13,14 +13,14 @@ import {
   SPOKE_COMPTROLLER_BEACON,
   SPOKE_COMPTROLLER_IMPL,
   SPOKE_POOL_REGISTRY,
-} from "../../vips/vip-671/addresses/bsctestnet";
-import vip671Addendum, { ADDENDUM_GUARDIAN_ROLES } from "../../vips/vip-671/bsctestnet-addendum";
-import { COLLATERAL_MARKET, MARKETS } from "../../vips/vip-671/config";
-import { PAUSE_ROLE, UNLIST_ROLE } from "../../vips/vip-671/permissions";
+} from "../../vips/vip-668/addresses/bsctestnet";
+import vip668Addendum, { ADDENDUM_GUARDIAN_ROLES } from "../../vips/vip-668/bsctestnet-addendum";
+import { COLLATERAL_MARKET, MARKETS } from "../../vips/vip-668/config";
+import { PAUSE_ROLE, UNLIST_ROLE } from "../../vips/vip-668/permissions";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 
-/// After VIP-671 executed, so the pool is listed and configured, and after the new implementation was
+/// After VIP-668 executed, so the pool is listed and configured, and after the new implementation was
 /// deployed at block 132,661,139, so `upgradeTo` has a contract to point at. The pre-VIP block below
 /// re-proves both rather than trusting the number: a fork block below the deployment reverts the
 /// whole proposal with `UpgradeableBeacon: implementation is not a contract`, which says nothing
@@ -73,7 +73,7 @@ const hasSelector = async (implementation: string, signature: string): Promise<b
   return code.includes(ethers.utils.id(signature).slice(2, 10));
 };
 
-/// Every comptroller value VIP-671 wrote. The beacon upgrade changes no storage layout, so all of it
+/// Every comptroller value VIP-668 wrote. The beacon upgrade changes no storage layout, so all of it
 /// has to read back identical afterwards. A layout that drifted would show up here as garbage rather
 /// than as a revert, which is the failure mode a beacon upgrade on a live pool actually has.
 const readPoolState = async (comptroller: Contract) => {
@@ -120,7 +120,7 @@ forking(FORK_BLOCK, async () => {
       preState = await readPoolState(comptroller);
     });
 
-    it("has the pool already listed and configured by VIP-671", async () => {
+    it("has the pool already listed and configured by VIP-668", async () => {
       // If this fails, FORK_BLOCK is before the listing executed and nothing below means anything.
       expect(preState.owner).to.equal(NORMAL_TIMELOCK);
       expect(preState.poolRegistry).to.equal(SPOKE_POOL_REGISTRY);
@@ -181,13 +181,13 @@ forking(FORK_BLOCK, async () => {
 
     it("already lets the Normal Timelock pause and unlist", async () => {
       // The Guardian becomes a second holder of these two. It does not become the only one, and the
-      // emergency path that VIP-671 relied on is untouched.
+      // emergency path that VIP-668 relied on is untouched.
       expect(await mayCall(NORMAL_TIMELOCK, PAUSE_ROLE)).to.be.true;
       expect(await mayCall(NORMAL_TIMELOCK, UNLIST_ROLE)).to.be.true;
     });
   });
 
-  testVip("VIP-671 addendum: spoke comptroller upgrade and Guardian permissions", await vip671Addendum(), {
+  testVip("VIP-668 addendum: spoke comptroller upgrade and Guardian permissions", await vip668Addendum(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [ADDENDUM_GUARDIAN_ROLES.length]);
@@ -204,7 +204,7 @@ forking(FORK_BLOCK, async () => {
       expect(await hasSelector(SPOKE_COMPTROLLER_IMPL, "enterMarketBehalf(address,address)")).to.be.false;
     });
 
-    it("leaves every comptroller value VIP-671 wrote untouched", async () => {
+    it("leaves every comptroller value VIP-668 wrote untouched", async () => {
       expect(await readPoolState(comptroller)).to.deep.equal(preState);
     });
 
