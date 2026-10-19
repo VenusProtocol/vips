@@ -46,8 +46,7 @@ export const SEED_RECEIVER = "0x000000000000000000000000000000000000dEaD";
 
 // ---------------------------------------------------------------------------------------------------
 // QQQB and SPYB feeds, per the risk sheet. APRO's access controller on the QQQB feed already allows APRO_ORACLE.
-// TODO(feed): Atlas has not authorized ATLAS_ORACLE on either Atlas feed yet (`isAuthorizedCaller` false on
-// 2026-10-16), so `ATLAS_ORACLE` reads revert `OnlyAuthorizedCallerAllowed()` until it does.
+// Atlas authorizes ATLAS_ORACLE on both Atlas feeds (`isAuthorizedCaller` true on 2026-10-19).
 //
 // APRO publishes no SPYB feed on BNB Chain (its BSC feed list has QQQB, not SPYB, on 2026-10-19), and the risk sheet
 // leaves SPYB's pivot blank. SPYB is priced by Atlas alone: no APRO config, no `BoundValidator` band, and no pivot in

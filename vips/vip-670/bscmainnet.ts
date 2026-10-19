@@ -45,9 +45,8 @@ import { VIP_670_GRANTS } from "./permissions-bscmainnet";
 // ORACLES: QQQB is priced the way the Core pool prices TSLAB, Atlas as main and APRO as pivot inside a 5% band. APRO
 // has no SPYB feed on BNB Chain, so SPYB is priced by Atlas alone, with no APRO config and no band.
 //
-// GAS, from the simulation (bscmainnet fork at block 128,482,000, VIP-668 and VIP-669 executed on the fork, stand-ins
-// for the open values): 52 commands, propose() about 10.82M (64.5% of the 16,777,216 per-tx cap), queue() 3.03M,
-// execute() 6.66M (39.7%).
+// GAS, from the simulation (bscmainnet fork at block 128,543,000, VIP-668 and VIP-669 executed on the fork): 52
+// commands, propose() about 10.66M (63.5% of the 16,777,216 per-tx cap), queue() 3.01M, execute() 6.47M (38.6%).
 //
 // ---------------------------------------------------------------------------------------------------
 // ORDER that matters:
@@ -66,9 +65,10 @@ import { VIP_670_GRANTS } from "./permissions-bscmainnet";
 //  - Atlas authorizes `ATLAS_ORACLE` on both Atlas feeds (`isAuthorizedCaller`). The DBO's price read reverts
 //    `OnlyAuthorizedCallerAllowed()` otherwise.
 //  - Neither QQQB nor SPYB has a DBO config (`MarketAlreadyInitialized`).
-// The VTreasury must also hold every seed. It held none of the five on 2026-10-16. `withdrawTreasuryBEP20` caps at its
-// balance, and `addMarket` takes the rest from the Normal Timelock's own balance. That silently covers a short USDT or
-// USDC seed (about 58 of each on 2026-10-16), but not U, QQQB or SPYB, so a short seed of those reverts.
+// The VTreasury must also hold every seed. It holds exactly the 10 USDT, USDC and U seeds on 2026-10-19, so nothing
+// else may draw on those first. `withdrawTreasuryBEP20` caps at its balance, and `addMarket` takes the rest from the
+// Normal Timelock's own balance. That silently covers a short USDT or USDC seed (about 58 of each on 2026-10-16), but
+// not U, QQQB or SPYB, so a short seed of those reverts.
 // Re-read each Hub's deposit queue and Spoke caps too: the Operator can change both, and step 7 overwrites the queue
 // without reverting.
 //
