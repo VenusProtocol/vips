@@ -47,7 +47,6 @@ import {
   OPERATOR,
   ORACLE_GUARDIAN,
   PAUSE_GUARDIAN,
-  PENDING,
   POOL_LIQUIDATION_INCENTIVE,
   PROTOCOL_SEIZE_SHARE,
   PROTOCOL_SHARE_RESERVE,
@@ -65,7 +64,7 @@ import {
   U,
   VTREASURY,
 } from "../../vips/vip-670/addresses/bscmainnet";
-import vip670, { Vip670Markets, pendingDeployments, pendingRiskValues } from "../../vips/vip-670/bscmainnet";
+import vip670, { pendingDeployments, pendingRiskValues } from "../../vips/vip-670/bscmainnet";
 import { VIP_670_GRANTS, VIP_670_ROLES_CALLED } from "../../vips/vip-670/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterSpokeV1.json";
@@ -82,10 +81,11 @@ import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-/// After every VIP-668, VIP-669 and VIP-670 contract is deployed (VIP-670's markets by block 128,481,540). Whatever has
+/// After every VIP-668, VIP-669 and VIP-670 contract is deployed, the VTreasury holds every seed, VIP-669's grants
+/// batch is stored and Atlas authorizes ATLAS_ORACLE on both feeds (all on chain by block 128,538,176). Whatever has
 /// not happened on mainnet by this block (VIP-668 and VIP-669 executing) the simulation does on the fork.
 /// TODO(deploy): move past the blocks where VIP-668 and VIP-669 execute.
-const FORK_BLOCK = 128482000;
+const FORK_BLOCK = 128543000;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -100,6 +100,7 @@ const UNRELATED = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils
 const DEPOSITOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 hub depositor"), 12));
 const SUPPLIER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 collateral supplier"), 12));
 const LIQUIDATOR = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 liquidator"), 12));
+const ENTERER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-670 market enterer"), 12));
 const borrowerFor = (symbol: string) =>
   ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-670 borrower ${symbol}`), 12));
 
@@ -200,10 +201,7 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
   await ethers.provider.send("hardhat_setStorageAt", [token, slot, ethers.utils.hexZeroPad(balance.toHexString(), 32)]);
 };
 
-const AGGREGATOR_ABI = [
-  "function batchCount() view returns (uint256)",
-  "function addBatch((address target, bytes data)[] calls, uint256 expectedIndex) returns (uint256)",
-];
+const AGGREGATOR_ABI = ["function getBatch(uint256 index) view returns ((address target, bytes data)[])"];
 const LIQUIDATOR_ABI = [
   "function poolRegistry() view returns (address)",
   "function coreFlashSource(address) view returns (address)",
@@ -211,34 +209,27 @@ const LIQUIDATOR_ABI = [
   "function setCoreFlashSource(address,address)",
 ];
 
-/// Core TSLAB. Its Atlas and APRO feeds and its DBO window stand in for QQQB's and SPYB's until those are usable.
-const TSLAB = "0x5b1910eAaD6450E50f816082Aa078C41F10C292f";
-
-/// Stand-in seed for QQQB and SPYB, whose $10 amount is fixed at proposal time.
-const STAND_IN_SEED = ethers.utils.parseUnits("1", 18);
-
 /// Atlas feeds answer `ATLAS_ORACLE` only once Atlas authorizes it, and revert `OnlyAuthorizedCallerAllowed()` before.
 const atlasAuthorized = async (m: CollateralMarket): Promise<boolean> =>
-  m.atlasFeed !== PENDING &&
-  (await new ethers.Contract(
+  new ethers.Contract(
     m.atlasFeed,
     ["function isAuthorizedCaller(address) view returns (bool)"],
     ethers.provider,
-  ).isAuthorizedCaller(ATLAS_ORACLE));
+  ).isAuthorizedCaller(ATLAS_ORACLE);
 
-/// Collateral markets whose Atlas feed is set but does not answer `ATLAS_ORACLE` yet.
-const unauthorizedAtlasFeeds = async (): Promise<string[]> => {
-  const names: string[] = [];
-  for (const m of MAINNET_COLLATERAL_MARKETS) {
-    if (m.atlasFeed !== PENDING && !(await atlasAuthorized(m))) {
-      names.push(`${m.symbol} feeds (Atlas has not authorized ATLAS_ORACLE)`);
-    }
-  }
-  return names;
+/// Seconds since the feed's last update, read as the oracle that reads it on chain.
+const feedAge = async (oracle: string, feed: string): Promise<number> => {
+  const data = FEED_IFACE.encodeFunctionData("latestRoundData");
+  const [, , , updatedAt] = FEED_IFACE.decodeFunctionResult(
+    "latestRoundData",
+    await ethers.provider.call({ to: feed, from: oracle, data }),
+  );
+  const { timestamp } = await ethers.provider.getBlock("latest");
+  return timestamp - BigNumber.from(updatedAt).toNumber();
 };
 
-/// Runs VIP-668 and VIP-669 on the fork when they have not executed at FORK_BLOCK, with what each needs around it:
-/// VIP-669's grants batch stored on the aggregator first, and the Operator's two BStockLiquidator calls after VIP-668.
+/// Runs VIP-668 and VIP-669 on the fork when they have not executed at FORK_BLOCK, with the Operator's two
+/// BStockLiquidator calls after VIP-668. VIP-669's grants batch is already stored on mainnet.
 const executeEarlierVips = async () => {
   const comptroller = new ethers.Contract(SPOKE_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   if (!sameAddress(await comptroller.owner(), NORMAL_TIMELOCK)) {
@@ -250,13 +241,6 @@ const executeEarlierVips = async () => {
   if (
     !(await new ethers.Contract(stack.hub, HUB_ABI, ethers.provider).yieldGroupConfig(stack.spokeSource)).registered
   ) {
-    const aggregator = new ethers.Contract(AUX_COMMANDS_AGGREGATOR, AGGREGATOR_ABI, ethers.provider);
-    if ((await aggregator.batchCount()).eq(SPOKE_SOURCE_GRANTS_BATCH_INDEX)) {
-      const batcher = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      await aggregator
-        .connect(batcher)
-        .addBatch(encodeAcmBatch(buildSpokeSourceGrantsBatch()), SPOKE_SOURCE_GRANTS_BATCH_INDEX);
-    }
     await pretendExecutingVip(await vip669(), NORMAL_TIMELOCK);
     console.warn("[vip-670] VIP-669 executed on the fork");
   }
@@ -273,53 +257,18 @@ const executeEarlierVips = async () => {
   }
 };
 
-/// Stands in on the fork for every VIP-670 input still pending: QQQB and SPYB get STAND_IN_SEED, and a collateral
-/// market keeps its own feeds only when they are set and Atlas answers `ATLAS_ORACLE` on its feed. Otherwise it takes
-/// TSLAB's: both of them for a market with an APRO pivot, since one TSLAB feed against one of its own would break the
-/// 5% band, and the Atlas one alone for a market priced by Atlas alone. Every other value set on mainnet is kept.
-const standInOnFork = async (): Promise<Vip670Markets> => {
-  const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
-  const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
-  const tslabWindow = await new ethers.Contract(
-    DEVIATION_BOUNDED_ORACLE,
-    DBO_ABI,
-    ethers.provider,
-  ).assetProtectionConfig(TSLAB);
-  const tslabAtlasFeed: string = (await atlas.tokenConfigs(TSLAB)).feed;
-  const tslabAproFeed: string = (await apro.tokenConfigs(TSLAB)).feed;
-
-  const collateral: CollateralMarket[] = [];
-  for (const m of MAINNET_COLLATERAL_MARKETS) {
-    const ownFeeds = m.aproFeed !== PENDING && (await atlasAuthorized(m));
-    collateral.push({
-      ...m,
-      atlasFeed: ownFeeds ? m.atlasFeed : tslabAtlasFeed,
-      aproFeed: ownFeeds || m.aproFeed === null ? m.aproFeed : tslabAproFeed,
-      initialSupply: m.initialSupply ?? STAND_IN_SEED,
-      dbo: m.dbo ?? {
-        cooldownPeriod: tslabWindow.cooldownPeriod,
-        triggerThreshold: tslabWindow.triggerThreshold,
-        resetThreshold: tslabWindow.resetThreshold,
-        enableBoundedPricing: tslabWindow.isBoundedPricingEnabled,
-        enableCaching: tslabWindow.cachingEnabled,
-      },
-    });
-  }
-  return { liquidity: MAINNET_LIQUIDITY_MARKETS, collateral };
-};
-
 forking(FORK_BLOCK, async () => {
+  // Read before VIP-669 runs on the fork and executes it.
+  const storedGrantsBatch: { target: string; data: string }[] = await new ethers.Contract(
+    AUX_COMMANDS_AGGREGATOR,
+    AGGREGATOR_ABI,
+    ethers.provider,
+  ).getBatch(SPOKE_SOURCE_GRANTS_BATCH_INDEX);
+
   await executeEarlierVips();
 
-  const standIns = [...pendingDeployments(), ...pendingRiskValues(), ...(await unauthorizedAtlasFeeds())];
-  const inputs: Vip670Markets =
-    standIns.length > 0
-      ? await standInOnFork()
-      : { liquidity: MAINNET_LIQUIDITY_MARKETS, collateral: MAINNET_COLLATERAL_MARKETS };
-  if (standIns.length > 0) {
-    console.warn(`[vip-670] stood in on the fork for: ${standIns.join(", ")}`);
-  }
-  const { liquidity: LIQUIDITY_MARKETS, collateral: COLLATERAL_MARKETS } = inputs;
+  const LIQUIDITY_MARKETS = MAINNET_LIQUIDITY_MARKETS;
+  const COLLATERAL_MARKETS = MAINNET_COLLATERAL_MARKETS;
   const MARKETS: SpokeMarket[] = [...LIQUIDITY_MARKETS, ...COLLATERAL_MARKETS];
 
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -334,6 +283,25 @@ forking(FORK_BLOCK, async () => {
   const erc20Of = (address: string) => new ethers.Contract(address, ERC20_ABI, ethers.provider);
   const hubOf = (address: string) => new ethers.Contract(address, HUB_ABI, ethers.provider);
   const groupOf = (address: string) => new ethers.Contract(address, YIELD_GROUP_ABI, ethers.provider);
+
+  describe("VIP-670 inputs", () => {
+    it("are all mainnet's, with nothing stood in on the fork", async () => {
+      expect(pendingDeployments()).to.deep.equal([]);
+      expect(pendingRiskValues()).to.deep.equal([]);
+      for (const m of COLLATERAL_MARKETS) {
+        expect(await atlasAuthorized(m), `${m.symbol}: Atlas authorizes ATLAS_ORACLE`).to.be.true;
+      }
+    });
+
+    it("has VIP-669's Spoke source grants stored on the aggregator at FORK_BLOCK, call for call", async () => {
+      const expected = encodeAcmBatch(buildSpokeSourceGrantsBatch());
+      expect(storedGrantsBatch).to.have.lengthOf(expected.length);
+      expected.forEach((call, i) => {
+        expectAddress(storedGrantsBatch[i].target, call.target, `call ${i} target`);
+        expect(storedGrantsBatch[i].data.toLowerCase(), `call ${i} data`).to.equal(call.data.toLowerCase());
+      });
+    });
+  });
 
   // What VIP-670 relies on, read from the live chain. Needs no new deployment, so it runs on every fork block.
   describe("Pre-VIP: what VIP-670 relies on, on the live chain", () => {
@@ -556,6 +524,21 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    it("has live feeds VIP-670 could execute on: fresh, and QQQB's APRO within the band of its Atlas", async () => {
+      // The DBO config reads the live price, so stale feeds or a QQQB pivot outside the band revert the whole VIP.
+      // Checked at FORK_BLOCK, before any time travel; at execution it has to hold again.
+      for (const m of COLLATERAL_MARKETS) {
+        expect(await feedAge(ATLAS_ORACLE, m.atlasFeed), `${m.symbol} Atlas age`).to.be.lte(ATLAS_MAX_STALE_PERIOD);
+        if (m.aproFeed === null) continue;
+        expect(await feedAge(APRO_ORACLE, m.aproFeed), `${m.symbol} APRO age`).to.be.lte(APRO_MAX_STALE_PERIOD);
+        // `BoundValidator`: pivot * 1e18 / main, inside [lower, upper].
+        const ratio = (await readFeed(APRO_ORACLE, m.aproFeed))
+          .mul(MANTISSA_ONE)
+          .div(await readFeed(ATLAS_ORACLE, m.atlasFeed));
+        expect(ratio, `${m.symbol} APRO/Atlas`).to.be.gte(BOUND_LOWER_RATIO).and.lte(BOUND_UPPER_RATIO);
+      }
+    });
+
     it("prices SPYB by Atlas alone, as APRO publishes no SPYB feed", async () => {
       const pivots = Object.fromEntries(MAINNET_COLLATERAL_MARKETS.map(m => [m.symbol, m.aproFeed !== null]));
       expect(pivots).to.deep.equal({ vQQQB_bStockIndex: true, vSPYB_bStockIndex: false });
@@ -564,24 +547,13 @@ forking(FORK_BLOCK, async () => {
 
   describe("Pre-VIP: the VTreasury holds every seed", () => {
     before(async () => {
-      let fundedOnFork = false;
-      // TODO(ops): delete this fallback once the VTreasury is funded on mainnet and FORK_BLOCK is past it.
       for (const m of MARKETS) {
-        const seed = m.initialSupply!;
-        const balance: BigNumber = await erc20Of(m.underlying).balanceOf(VTREASURY);
-        if (balance.lt(seed)) {
-          await fund(m.underlying, VTREASURY, seed.sub(balance));
-          fundedOnFork = true;
-        }
         treasuryBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(VTREASURY);
         timelockBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(NORMAL_TIMELOCK);
       }
-      if (fundedOnFork) {
-        console.warn("[vip-670] VTreasury funded on the fork");
-      }
     });
 
-    it("holds at least each market's seed", async () => {
+    it("is funded on mainnet with at least each market's seed, not by this simulation", async () => {
       for (const m of MARKETS) {
         expect(treasuryBefore[m.underlying], m.symbol).to.be.gte(m.initialSupply!);
       }
@@ -612,7 +584,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-670 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip670(inputs), {
+  testVip("VIP-670 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip670(), {
     callbackAfterExecution: async txResponse => {
       const collateral = COLLATERAL_MARKETS.length;
       const pivoted = COLLATERAL_MARKETS.filter(m => m.aproFeed !== null).length;
@@ -800,6 +772,20 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    it("enters a collateral market already supplied directly, through CollateralGateway", async () => {
+      const account = await initMainnetUser(ENTERER, ethers.utils.parseEther("1"));
+      for (const m of COLLATERAL_MARKETS) {
+        await fund(m.underlying, ENTERER, COLLATERAL_SUPPLY);
+        await erc20Of(m.underlying).connect(account).approve(m.vToken, COLLATERAL_SUPPLY);
+        await vTokenOf(m.vToken).connect(account).mint(COLLATERAL_SUPPLY);
+        expect(await comptroller.checkMembership(ENTERER, m.vToken), m.symbol).to.be.false;
+      }
+      await gateway.connect(account).enterSpokeMarkets(COLLATERAL_MARKETS.map(m => m.vToken));
+      for (const m of COLLATERAL_MARKETS) {
+        expect(await comptroller.checkMembership(ENTERER, m.vToken), m.symbol).to.be.true;
+      }
+    });
+
     it("registers each liquidity market in its Spoke source, behind AdapterSpokeV1, in both inner queues", async () => {
       for (const { symbol, vToken, stack } of LIQUIDITY_MARKETS) {
         const source = groupOf(stack.spokeSource);
@@ -853,24 +839,30 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  // The paths the pool exists for: a borrow of each liquidity asset against QQQB, its liquidation after a price drop,
-  // and the Hub taking liquidity back out of its Spoke source. Runs before the Risk Stewards, which move the clock.
+  // The paths the pool exists for: a borrow of each liquidity asset against QQQB and against SPYB, its liquidation
+  // after a price drop, and the Hub taking liquidity back out of its Spoke source. Runs before the Risk Stewards,
+  // which move the clock.
   describe("Post-VIP: borrow, liquidate and withdraw", () => {
-    const [qqqb] = COLLATERAL_MARKETS;
     const COLLATERAL = ethers.utils.parseUnits("10", 18);
     const borrowed: Record<string, BigNumber> = {};
-    let price: BigNumber;
+    const price: Record<string, BigNumber> = {};
     let timelock: Awaited<ReturnType<typeof initMainnetUser>>;
 
-    const pinPrice = async (value: BigNumber) => {
-      // Atlas and APRO move together, so the band between them holds.
-      await atlas.connect(timelock).setDirectPrice(qqqb.underlying, value);
-      await apro.connect(timelock).setDirectPrice(qqqb.underlying, value);
+    const key = (c: CollateralMarket, m: SpokeMarket) => `${c.symbol} ${m.symbol}`;
+
+    const pinPrice = async (c: CollateralMarket, value: BigNumber) => {
+      // QQQB's Atlas and APRO move together, so the band between them holds. SPYB has Atlas only.
+      await atlas.connect(timelock).setDirectPrice(c.underlying, value);
+      if (c.aproFeed !== null) {
+        await apro.connect(timelock).setDirectPrice(c.underlying, value);
+      }
     };
 
     before(async () => {
       timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      price = await resilientOracle.getPrice(qqqb.underlying);
+      for (const c of COLLATERAL_MARKETS) {
+        price[c.underlying] = await resilientOracle.getPrice(c.underlying);
+      }
       // The proposal's voting and timelock delay leave the liquidity assets' main and pivot feeds stale on the fork.
       const chainlink = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
       for (const { underlying } of LIQUIDITY_MARKETS) {
@@ -879,57 +871,59 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("borrows each liquidity asset against QQQB supplied through CollateralGateway", async () => {
-      const depositor = await initMainnetUser(DEPOSITOR, ethers.utils.parseEther("1"));
-      for (const m of LIQUIDITY_MARKETS) {
-        const account = borrowerFor(m.symbol);
-        const borrower = await initMainnetUser(account, ethers.utils.parseEther("1"));
-        await fund(qqqb.underlying, account, COLLATERAL);
-        await erc20Of(qqqb.underlying).connect(borrower).approve(COLLATERAL_GATEWAY, COLLATERAL);
-        await gateway.connect(borrower).supplyAndEnterSpokeMarkets([qqqb.vToken], [COLLATERAL]);
+    for (const c of COLLATERAL_MARKETS) {
+      it(`borrows each liquidity asset against ${c.symbol} supplied through CollateralGateway`, async () => {
+        const depositor = await initMainnetUser(DEPOSITOR, ethers.utils.parseEther("1"));
+        for (const m of LIQUIDITY_MARKETS) {
+          const account = borrowerFor(key(c, m));
+          const borrower = await initMainnetUser(account, ethers.utils.parseEther("1"));
+          await fund(c.underlying, account, COLLATERAL);
+          await erc20Of(c.underlying).connect(borrower).approve(COLLATERAL_GATEWAY, COLLATERAL);
+          await gateway.connect(borrower).supplyAndEnterSpokeMarkets([c.vToken], [COLLATERAL]);
 
-        // Half the collateral's value, under the 0.8 CF. Prices and all five underlyings are 18-decimal.
-        const amount = COLLATERAL.mul(price).div(MANTISSA_ONE).div(2);
-        // The market lends what its Hub deposits, and the Hub deposits into its Spoke source first.
-        await fund(m.underlying, DEPOSITOR, amount);
-        await erc20Of(m.underlying).connect(depositor).approve(m.stack.hub, amount);
-        await hubOf(m.stack.hub).connect(depositor).deposit(amount, DEPOSITOR);
+          // Half the collateral's value, under the 0.8 CF. Prices and all five underlyings are 18-decimal.
+          const amount = COLLATERAL.mul(price[c.underlying]).div(MANTISSA_ONE).div(2);
+          // The market lends what its Hub deposits, and the Hub deposits into its Spoke source first.
+          await fund(m.underlying, DEPOSITOR, amount);
+          await erc20Of(m.underlying).connect(depositor).approve(m.stack.hub, amount);
+          await hubOf(m.stack.hub).connect(depositor).deposit(amount, DEPOSITOR);
 
-        await vTokenOf(m.vToken).connect(borrower).borrow(amount);
-        expect(await erc20Of(m.underlying).balanceOf(account), m.symbol).to.equal(amount);
-        expect(await vTokenOf(m.vToken).borrowBalanceStored(account), m.symbol).to.equal(amount);
-        borrowed[m.underlying] = amount;
-      }
-    });
+          await vTokenOf(m.vToken).connect(borrower).borrow(amount);
+          expect(await erc20Of(m.underlying).balanceOf(account), key(c, m)).to.equal(amount);
+          expect(await vTokenOf(m.vToken).borrowBalanceStored(account), key(c, m)).to.equal(amount);
+          borrowed[key(c, m)] = amount;
+        }
+      });
 
-    it("liquidates each position after QQQB halves, sending the protocol's share to the ProtocolShareReserve", async () => {
-      // Debt is half the original collateral value; at half the price, LT 0.85 covers 0.425 of it.
-      await pinPrice(price.div(2));
-      const liquidator = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
-      const vCollateral = vTokenOf(qqqb.vToken);
-      for (const m of LIQUIDITY_MARKETS) {
-        const account = borrowerFor(m.symbol);
-        const [, , shortfall] = await comptroller.getAccountLiquidity(account);
-        expect(shortfall, `${m.symbol} shortfall`).to.be.gt(0);
+      it(`liquidates each position after ${c.symbol} halves, sending the protocol's share to the ProtocolShareReserve`, async () => {
+        // Debt is half the original collateral value; at half the price, LT 0.85 covers 0.425 of it.
+        await pinPrice(c, price[c.underlying].div(2));
+        const liquidator = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
+        const vCollateral = vTokenOf(c.vToken);
+        for (const m of LIQUIDITY_MARKETS) {
+          const account = borrowerFor(key(c, m));
+          const [, , shortfall] = await comptroller.getAccountLiquidity(account);
+          expect(shortfall, `${key(c, m)} shortfall`).to.be.gt(0);
 
-        // Half of the 0.5 close factor.
-        const repay = borrowed[m.underlying].div(4);
-        await fund(m.underlying, LIQUIDATOR, repay);
-        await erc20Of(m.underlying).connect(liquidator).approve(m.vToken, repay);
-        const seizedBefore: BigNumber = await vCollateral.balanceOf(LIQUIDATOR);
-        const reserveBefore: BigNumber = await erc20Of(qqqb.underlying).balanceOf(PROTOCOL_SHARE_RESERVE);
+          // Half of the 0.5 close factor.
+          const repay = borrowed[key(c, m)].div(4);
+          await fund(m.underlying, LIQUIDATOR, repay);
+          await erc20Of(m.underlying).connect(liquidator).approve(m.vToken, repay);
+          const seizedBefore: BigNumber = await vCollateral.balanceOf(LIQUIDATOR);
+          const reserveBefore: BigNumber = await erc20Of(c.underlying).balanceOf(PROTOCOL_SHARE_RESERVE);
 
-        await vTokenOf(m.vToken).connect(liquidator).liquidateBorrow(account, repay, qqqb.vToken);
-        expect(await vTokenOf(m.vToken).borrowBalanceStored(account), `${m.symbol} debt`).to.be.lt(
-          borrowed[m.underlying],
-        );
-        expect(await vCollateral.balanceOf(LIQUIDATOR), `${m.symbol} seized`).to.be.gt(seizedBefore);
-        expect(await erc20Of(qqqb.underlying).balanceOf(PROTOCOL_SHARE_RESERVE), `${m.symbol} PSR`).to.be.gt(
-          reserveBefore,
-        );
-      }
-      await pinPrice(price);
-    });
+          await vTokenOf(m.vToken).connect(liquidator).liquidateBorrow(account, repay, c.vToken);
+          expect(await vTokenOf(m.vToken).borrowBalanceStored(account), `${key(c, m)} debt`).to.be.lt(
+            borrowed[key(c, m)],
+          );
+          expect(await vCollateral.balanceOf(LIQUIDATOR), `${key(c, m)} seized`).to.be.gt(seizedBefore);
+          expect(await erc20Of(c.underlying).balanceOf(PROTOCOL_SHARE_RESERVE), `${key(c, m)} PSR`).to.be.gt(
+            reserveBefore,
+          );
+        }
+        await pinPrice(c, price[c.underlying]);
+      });
+    }
 
     it("withdraws from each Spoke source to its Hub, out of the Spoke market", async () => {
       // A user's Hub withdraw reaches the Spoke source last, after every other group, so it is called here as the Hub
