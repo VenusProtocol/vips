@@ -165,9 +165,9 @@ const collateral = {
   reserveFactor: parseUnits("0.1", 18),
   // The pool-wide value, pinned per market: every market with LT above 0 gets an incentive of its own.
   liquidationIncentive: parseUnits("1.1", 18),
-  // TODO(risk): the seed in tokens. The risk sheet sets $10 of each, so fix the amount at the price when the
-  // proposal is created.
-  initialSupply: null,
+  // Fixed seed of 0.014 tokens per collateral market, approximately $10 at preparation time.
+  // The seed vTokens are minted to SEED_RECEIVER.
+  initialSupply: parseUnits("0.014", 18),
   dbo: {
     cooldownPeriod: 3600,
     triggerThreshold: parseUnits("0.125", 18),
