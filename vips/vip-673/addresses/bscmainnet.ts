@@ -57,23 +57,23 @@ export const SPYB_ATLAS_FEED = "0xCda6d5cE036AC0D6A387A377062EBd18Dd531177";
 export const SPYB_APRO_FEED = PENDING;
 
 // ---------------------------------------------------------------------------------------------------
-// TODO(deploy): VIP-673's new contracts. Fill each from its deployment, then re-read it from chain.
+// VIP-673's new contracts.
 // ---------------------------------------------------------------------------------------------------
 
-/// TODO(deploy): the five markets, BeaconProxies on SPOKE_VTOKEN_BEACON (isolated-pools `028`), owned by the Normal
-/// Timelock from `initialize`. `028`'s `bscmainnet` config, with the QQQB and SPYB token entries, is in
-/// isolated-pools#570.
-export const VUSDT_SPOKE = PENDING;
-export const VUSDC_SPOKE = PENDING;
-export const VU_SPOKE = PENDING;
-export const VQQQB_SPOKE = PENDING;
-export const VSPYB_SPOKE = PENDING;
+/// The five markets, from isolated-pools `028` (#570, e285a412). Read back on 2026-10-19 (block 128,482,331): each is
+/// a BeaconProxy on SPOKE_VTOKEN_BEACON, built on SPOKE_COMPTROLLER with its rate model below, a 10% reserve factor,
+/// SHORTFALL and the ProtocolShareReserve, owned by the Normal Timelock with no pending owner, and not listed yet.
+export const VUSDT_SPOKE = "0xEA0096142fBB56AAc0F594ED1D4de3E4De638f22";
+export const VUSDC_SPOKE = "0x6adb5e462ac6eA880246F24E3C47D23f70FCCbF6";
+export const VU_SPOKE = "0x713bBaA44Dc99e691F1F9fE8086FC328E94B6f27";
+export const VQQQB_SPOKE = "0xeA32B70f4106d9ef6f0fF95f7422Fa679494c362";
+export const VSPYB_SPOKE = "0x259311A868B49CdA457C1843F89D4dDA33be0390";
 
-/// TODO(deploy): reference only. The rate models `028` builds the markets with: LIQUIDITY_IRM below for USDT, USDC
-/// and U, and for QQQB and SPYB a WhitePaper model with both rates 0, for the risk sheet's IRM of 0. The simulation
-/// checks that it charges nothing.
-export const IRM_LIQUIDITY = PENDING;
-export const IRM_COLLATERAL = PENDING;
+/// Reference only: no command targets them. The rate models `028` built the markets with, both at 70,080,000 blocks
+/// per year as the markets are: LIQUIDITY_IRM below for USDT, USDC and U, and for QQQB and SPYB a WhitePaper model with
+/// both rates 0, for the risk sheet's IRM of 0.
+export const IRM_LIQUIDITY = "0xb3AEAcC027991171F8f6C05e4D9254DF507b52C7";
+export const IRM_COLLATERAL = "0x11C29b4b3cDbC7069920b2bE9A0b9D1711617A4d";
 
 /// `AdapterSpokeV1` (venus-liquidity-hub `13_DeploySpoke`, #39). Stateless, no constructor argument.
 export const ADAPTER_SPOKE_V1 = "0x231915FfE3e3A6Be09B0E5c73EFA2F1a4FF8Aa69";

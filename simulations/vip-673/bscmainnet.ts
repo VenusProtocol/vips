@@ -87,10 +87,10 @@ import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 import JUMP_RATE_MODEL from "./bytecode/JumpRateModelV2.json";
 import WHITE_PAPER_MODEL from "./bytecode/WhitePaperInterestRateModel.json";
 
-/// After every VIP-671 and VIP-672 contract and CollateralGateway (block 127,740,476) are deployed. Whatever has not
-/// happened on mainnet by this block (VIP-671 and VIP-672 executing, VIP-673's markets) the simulation does on the fork.
-/// TODO(deploy): move past the blocks where VIP-671 and VIP-672 execute and VIP-673's markets deploy.
-const FORK_BLOCK = 127750000;
+/// After every VIP-671, VIP-672 and VIP-673 contract is deployed (VIP-673's markets by block 128,481,540). Whatever has
+/// not happened on mainnet by this block (VIP-671 and VIP-672 executing) the simulation does on the fork.
+/// TODO(deploy): move past the blocks where VIP-671 and VIP-672 execute.
+const FORK_BLOCK = 128482000;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -544,6 +544,8 @@ forking(FORK_BLOCK, async () => {
         expect(await v.exchangeRateStored(), `${m.symbol} exchange rate`).to.equal(INITIAL_EXCHANGE_RATE);
         // The VToken default. VIP-673 does not call `setProtocolSeizeShare`.
         expect(await v.protocolSeizeShareMantissa(), `${m.symbol} seize share`).to.equal(PROTOCOL_SEIZE_SHARE);
+        // Set by `028`'s `initialize`. VIP-673 does not call `setReserveFactor`.
+        expect(await v.reserveFactorMantissa(), `${m.symbol} RF`).to.equal(m.reserveFactor);
         expect((await comptroller.markets(m.vToken)).isListed, `${m.symbol} listed`).to.be.false;
         expect(await registry.getVTokenForAsset(SPOKE_COMPTROLLER, m.underlying), m.symbol).to.equal(
           ethers.constants.AddressZero,
@@ -587,12 +589,11 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("lets the Normal Timelock set each market's reserve delta and reserve factor", async () => {
-      // Existing wildcards (ASSUMED_WILDCARDS.vToken), so a revocation fails here instead of at execution.
+    it("lets the Normal Timelock set each market's reserve delta", async () => {
+      // An existing wildcard (ASSUMED_WILDCARDS.vToken), so a revocation fails here instead of at execution.
+      const role = "setReduceReservesBlockDelta(uint256)";
       for (const m of MARKETS) {
-        for (const role of ["setReduceReservesBlockDelta(uint256)", "setReserveFactor(uint256)"]) {
-          expect(await mayCall(m.vToken, NORMAL_TIMELOCK, role), `${m.symbol}: ${role}`).to.be.true;
-        }
+        expect(await mayCall(m.vToken, NORMAL_TIMELOCK, role), `${m.symbol}: ${role}`).to.be.true;
       }
     });
 
@@ -680,7 +681,7 @@ forking(FORK_BLOCK, async () => {
         txResponse,
         [VTOKEN_ABI],
         ["NewReduceReservesBlockDelta", "NewReserveFactor", "NewShortfallContract"],
-        [MARKETS.length, MARKETS.length, MARKETS.length],
+        [MARKETS.length, 0, MARKETS.length],
       );
       await expectEvents(
         txResponse,
@@ -768,6 +769,7 @@ forking(FORK_BLOCK, async () => {
         );
         // `withdrawTreasuryBEP20` caps at the treasury's balance, so a short seed would come out of this balance.
         expect(await token.balanceOf(NORMAL_TIMELOCK), `${m.symbol} timelock`).to.equal(timelockBefore[m.underlying]);
+        // `addMarket` pulls exactly the approved seed, so VIP-673 needs no approve back to 0.
         expect(await token.allowance(NORMAL_TIMELOCK, SPOKE_POOL_REGISTRY), `${m.symbol} allowance`).to.equal(0);
       }
     });

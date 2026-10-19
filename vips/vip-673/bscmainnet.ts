@@ -40,18 +40,19 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //
 // Third of three. Needs VIP-671 and VIP-672 executed first.
 //
-// STATUS: DRAFT. The markets, both rate models and SPYB's APRO feed are `PENDING` in ./addresses/bscmainnet.ts, and
-// the QQQB and SPYB seeds are `null` there. `vip673()` throws until all are filled.
+// STATUS: DRAFT. SPYB's APRO feed is `PENDING` in ./addresses/bscmainnet.ts, and the QQQB and SPYB seeds are `null`
+// there. `vip673()` throws until all are filled.
 //
-// GAS, from the simulation (bscmainnet fork at block 127,750,000, VIP-671 and VIP-672 executed and VIP-673's markets
-// deployed on the fork, stand-ins for the open values): 62 commands, propose() about 11.86M (70.7% of the 16,777,216
-// per-tx cap), queue() 3.50M, execute() 6.97M (41.5%).
+// GAS, from the simulation (bscmainnet fork at block 128,482,000, VIP-671 and VIP-672 executed on the fork, stand-ins
+// for the open values): 52 commands, propose() about 10.82M (64.5% of the 16,777,216 per-tx cap), queue() 3.03M,
+// execute() 6.66M (39.7%).
 //
 // ---------------------------------------------------------------------------------------------------
 // ORDER that matters:
 //  - The four price configs before the DBO, whose `setTokenConfig` reads the live `ResilientOracle` price. The
 //    `ResilientOracle` config before the collateral markets' `addMarket`: a CF above 0 needs a nonzero price.
-//  - Per market: VTreasury withdrawal and approve before `addMarket`, approve back to 0 after it.
+//  - Per market: VTreasury withdrawal and approve before `addMarket`. `addMarket` pulls exactly the seed, so the
+//    allowance ends at 0 without a second approve.
 //  - `addMarket` before every comptroller setter on that market, which reverts `MarketNotListed` otherwise. The
 //    supply allowlist in particular cannot be armed first, and would block the seed mint if it could.
 //  - Per Hub: `setAllowedSupplier` before `addResource` (the adapter rejects a source the allowlist does not admit),
@@ -70,6 +71,7 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //
 // NOT IN THIS PROPOSAL:
 //  - `setProtocolSeizeShare`: every market keeps the 5% it is initialized with, the risk sheet's value.
+//  - `setReserveFactor`: `028` initializes every market with the risk sheet's 10%.
 //  - `setCollateralFactor` after listing: LT 0.85 times the pool-wide 1.1 incentive is below 1, so `addMarket` takes
 //    the final values directly.
 //  - Oracle changes for USDT, USDC and U: their live `ResilientOracle` configs match the risk sheet, and the sheet
@@ -140,7 +142,6 @@ const listMarket = (m: SpokeMarket): Command[] => {
   const seed = required(m.initialSupply, `${m.symbol} seed`);
   return [
     { target: m.vToken, signature: "setReduceReservesBlockDelta(uint256)", params: [REDUCE_RESERVES_BLOCK_DELTA] },
-    { target: m.vToken, signature: "setReserveFactor(uint256)", params: [m.reserveFactor] },
     {
       target: VTREASURY,
       signature: "withdrawTreasuryBEP20(address,uint256,address)",
@@ -152,7 +153,6 @@ const listMarket = (m: SpokeMarket): Command[] => {
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [[m.vToken, m.collateralFactor, m.liquidationThreshold, seed, SEED_RECEIVER, m.supplyCap, m.borrowCap]],
     },
-    { target: m.underlying, signature: "approve(address,uint256)", params: [SPOKE_POOL_REGISTRY, 0] },
   ];
 };
 
@@ -206,9 +206,14 @@ export const vip673 = (markets: Vip673Markets = MAINNET_MARKETS) => {
   const capRows = LIQUIDITY_MARKETS.map(({ stack }) =>
     [stack.name, tokens(stack.spokeAbsoluteCap), `${stack.spokePercentageCapBps / 100}%`].join(" | "),
   );
+  const contractRows = [
+    ...MARKETS.map(m => [m.symbol, m.vToken]),
+    ["JumpRateModelV2 of USDT, USDC and U", LIQUIDITY_MARKETS[0].interestRateModel],
+    ["WhitePaperInterestRateModel of QQQB and SPYB", COLLATERAL_MARKETS[0].interestRateModel],
+    ["AdapterSpokeV1", ADAPTER_SPOKE_V1],
+    ["CollateralGateway", COLLATERAL_GATEWAY],
+  ].map(r => r.join(" | "));
 
-  // TODO(meta): list the five markets and both rate models under a "Deployed contracts" heading once `028` deploys
-  // them.
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] Hub-Funded Spoke pool: markets and Liquidity Hub wiring`,
@@ -260,6 +265,12 @@ ${capRows.map(r => `| ${r} |`).join("\n")}
 
 - Liquidations are permissionless. The pool's liquidation allowlist stays off.
 - Each Hub deposits into its Spoke market first and withdraws from it last, up to the lowest of the market's supply cap and the two yield group caps above.
+
+#### Deployed contracts
+
+| Contract | Address |
+| --- | --- |
+${contractRows.map(r => `| ${r} |`).join("\n")}
 
 #### References
 
