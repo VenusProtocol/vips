@@ -39,6 +39,7 @@ import {
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
   LIQUIDITY_IRM,
+  LiquidityMarket,
   COLLATERAL_MARKETS as MAINNET_COLLATERAL_MARKETS,
   LIQUIDITY_MARKETS as MAINNET_LIQUIDITY_MARKETS,
   MARKET_CAPS_RISK_STEWARD,
@@ -1037,6 +1038,228 @@ forking(FORK_BLOCK, async () => {
       // The market accrues through the new model in a later block.
       await ethers.provider.send("evm_mine", []);
       await expect(v.connect(operator).accrueInterest()).to.emit(v, "AccrueInterest");
+    });
+  });
+
+  // The whole loop the pool exists for, across VIP-668, VIP-669 and VIP-670: each Hub moves existing liquidity into its
+  // Spoke market, a Hub deposit lands there too, QQQB and SPYB holders borrow all three liquidity assets, a day of
+  // interest reaches the Hubs, and everything unwinds back to where it came from. Runs last, on its own accounts, and
+  // pins every price it reads, as the Risk Stewards above move the clock.
+  describe("Post-VIP: end to end, from Hub liquidity to a borrow and back", () => {
+    const [qqqb, spyb] = COLLATERAL_MARKETS;
+    const [usdt, usdc, u] = LIQUIDITY_MARKETS;
+    const e2eAccount = (name: string) =>
+      ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-670 e2e ${name}`), 12));
+    const ALICE = e2eAccount("alice");
+    const BOB = e2eAccount("bob");
+    const STRANGER = e2eAccount("stranger");
+    const HUB_USER = e2eAccount("hub user");
+    const COLLATERAL = ethers.utils.parseUnits("100", 18);
+    const HUB_DEPOSIT = ethers.utils.parseUnits("50000", 18);
+    const ONE = ethers.utils.parseUnits("1", 18);
+    /// What the Operator moves out of each Hub's existing groups, well inside each Spoke source's caps.
+    const REALLOCATED: Record<string, BigNumber> = {
+      [usdt.underlying]: ethers.utils.parseUnits("1000000", 18),
+      [usdc.underlying]: ethers.utils.parseUnits("300000", 18),
+      [u.underlying]: ethers.utils.parseUnits("2000000", 18),
+    };
+    type Leg = { yieldGroup: string; resource: string; amount: BigNumber };
+    const origin: Record<string, Leg> = {};
+    const prices: Record<string, BigNumber> = {};
+    let timelock: Awaited<ReturnType<typeof initMainnetUser>>;
+    let operator: Awaited<ReturnType<typeof initMainnetUser>>;
+
+    const pinPrices = async () => {
+      const chainlink = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+      for (const { underlying } of LIQUIDITY_MARKETS) {
+        await chainlink.connect(timelock).setDirectPrice(underlying, MANTISSA_ONE);
+        await atlas.connect(timelock).setDirectPrice(underlying, MANTISSA_ONE);
+      }
+      // Atlas and APRO move together, so QQQB's band holds.
+      for (const m of COLLATERAL_MARKETS) {
+        await atlas.connect(timelock).setDirectPrice(m.underlying, prices[m.underlying]);
+        if (m.aproFeed !== null) {
+          await apro.connect(timelock).setDirectPrice(m.underlying, prices[m.underlying]);
+        }
+      }
+    };
+    const state = async (m: LiquidityMarket) => ({
+      cash: (await vTokenOf(m.vToken).getCash()) as BigNumber,
+      borrows: (await vTokenOf(m.vToken).totalBorrows()) as BigNumber,
+      source: (await groupOf(m.stack.spokeSource).totalAssets()) as BigNumber,
+      hub: (await hubOf(m.stack.hub).totalAssets()) as BigNumber,
+    });
+
+    before(async () => {
+      timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+      for (const m of COLLATERAL_MARKETS) {
+        prices[m.underlying] = await readFeed(ATLAS_ORACLE, m.atlasFeed);
+      }
+      await pinPrices();
+    });
+
+    it("lets the Operator move existing Hub liquidity into each Spoke market, at no cost to the Hub", async () => {
+      for (const m of LIQUIDITY_MARKETS) {
+        const hub = hubOf(m.stack.hub).connect(operator);
+        const amount = REALLOCATED[m.underlying];
+        const into: Leg = { yieldGroup: m.stack.spokeSource, resource: m.vToken, amount };
+        // The first resource of an existing group that can fund the move.
+        for (const yieldGroup of m.stack.depositQueue) {
+          for (const resource of (await groupOf(yieldGroup).resources()) as string[]) {
+            const leg = { yieldGroup, resource, amount };
+            const funds = await hub.callStatic.reallocate([leg], [into]).then(
+              () => true,
+              () => false,
+            );
+            if (funds && !origin[m.underlying]) {
+              origin[m.underlying] = leg;
+            }
+          }
+        }
+        expect(origin[m.underlying], `${m.stack.name} has no group that can fund the move`).to.not.equal(undefined);
+
+        const before = await state(m);
+        await hub.reallocate([origin[m.underlying]], [into]);
+        const after = await state(m);
+        expect(after.cash.sub(before.cash), m.symbol).to.equal(amount);
+        expect(after.source.sub(before.source), m.symbol).to.be.closeTo(amount, ONE);
+        // Moving settles the source's pending interest, so the Hub can only gain.
+        expect(after.hub, `${m.stack.name} value`).to.be.gte(before.hub.sub(ONE));
+      }
+    });
+
+    it("lands a Hub deposit in the Spoke market first", async () => {
+      const user = await initMainnetUser(HUB_USER, ethers.utils.parseEther("1"));
+      for (const m of LIQUIDITY_MARKETS) {
+        const before = await state(m);
+        await fund(m.underlying, HUB_USER, HUB_DEPOSIT);
+        await erc20Of(m.underlying).connect(user).approve(m.stack.hub, HUB_DEPOSIT);
+        await hubOf(m.stack.hub).connect(user).deposit(HUB_DEPOSIT, HUB_USER);
+        expect((await state(m)).cash.sub(before.cash), m.symbol).to.equal(HUB_DEPOSIT);
+      }
+    });
+
+    it("takes QQQB through CollateralGateway and SPYB through mint and enterMarkets as collateral", async () => {
+      const alice = await initMainnetUser(ALICE, ethers.utils.parseEther("1"));
+      await fund(qqqb.underlying, ALICE, COLLATERAL);
+      await erc20Of(qqqb.underlying).connect(alice).approve(COLLATERAL_GATEWAY, COLLATERAL);
+      await gateway.connect(alice).supplyAndEnterSpokeMarkets([qqqb.vToken], [COLLATERAL]);
+
+      const bob = await initMainnetUser(BOB, ethers.utils.parseEther("1"));
+      await fund(spyb.underlying, BOB, COLLATERAL);
+      await erc20Of(spyb.underlying).connect(bob).approve(spyb.vToken, COLLATERAL);
+      await vTokenOf(spyb.vToken).connect(bob).mint(COLLATERAL);
+      await comptroller.connect(bob).enterMarkets([spyb.vToken]);
+
+      for (const [account, m] of [
+        [ALICE, qqqb],
+        [BOB, spyb],
+      ] as const) {
+        expect(await comptroller.checkMembership(account, m.vToken), m.symbol).to.be.true;
+        const [, liquidity, shortfall] = await comptroller.getAccountLiquidity(account);
+        expect(liquidity, m.symbol).to.be.gt(0);
+        expect(shortfall, m.symbol).to.equal(0);
+      }
+    });
+
+    it("lends USDT and USDC against QQQB, and U and USDT against SPYB, and refuses what it must", async () => {
+      const alice = await initMainnetUser(ALICE, ethers.utils.parseEther("1"));
+      const bob = await initMainnetUser(BOB, ethers.utils.parseEther("1"));
+      // 30% of the collateral's value per borrow, 60% in all, under every collateral factor.
+      const share = (m: CollateralMarket) => COLLATERAL.mul(prices[m.underlying]).div(MANTISSA_ONE).mul(30).div(100);
+      const plan: [typeof alice, LiquidityMarket, BigNumber][] = [
+        [alice, usdt, share(qqqb)],
+        [alice, usdc, share(qqqb)],
+        [bob, u, share(spyb)],
+        [bob, usdt, share(spyb)],
+      ];
+      for (const [signer, m, amount] of plan) {
+        const before = await state(m);
+        const balance: BigNumber = await erc20Of(m.underlying).balanceOf(signer.address);
+        await vTokenOf(m.vToken).connect(signer).borrow(amount);
+        const after = await state(m);
+        expect((await erc20Of(m.underlying).balanceOf(signer.address)).sub(balance), m.symbol).to.equal(amount);
+        expect(before.cash.sub(after.cash), m.symbol).to.equal(amount);
+        expect(after.hub, `${m.stack.name} value`).to.be.gte(before.hub.sub(ONE));
+      }
+      for (const account of [ALICE, BOB]) {
+        const [, , shortfall] = await comptroller.getAccountLiquidity(account);
+        expect(shortfall).to.equal(0);
+      }
+
+      // Past the collateral's limit, a supply that skips the Hub, and a borrow of a collateral asset.
+      await expect(vTokenOf(u.vToken).connect(bob).borrow(share(spyb).mul(2))).to.be.reverted;
+      const stranger = await initMainnetUser(STRANGER, ethers.utils.parseEther("1"));
+      await fund(usdt.underlying, STRANGER, ONE);
+      await erc20Of(usdt.underlying).connect(stranger).approve(usdt.vToken, ONE);
+      await expect(vTokenOf(usdt.vToken).connect(stranger).mint(ONE)).to.be.reverted;
+      await expect(vTokenOf(qqqb.vToken).connect(bob).borrow(1)).to.be.reverted;
+    });
+
+    it("passes a day of interest through each Spoke source to its Hub", async () => {
+      const before: Record<string, Awaited<ReturnType<typeof state>>> = {};
+      for (const m of LIQUIDITY_MARKETS) {
+        before[m.underlying] = await state(m);
+      }
+      // 192,000 blocks, a day at 0.45s.
+      await ethers.provider.send("hardhat_mine", ["0x2EE00", "0x1"]);
+      await pinPrices();
+      for (const m of LIQUIDITY_MARKETS) {
+        await vTokenOf(m.vToken).connect(timelock).accrueInterest();
+        const after = await state(m);
+        expect(after.borrows, m.symbol).to.be.gt(before[m.underlying].borrows);
+        expect(after.source, m.symbol).to.be.gt(before[m.underlying].source);
+        expect(after.hub, m.stack.name).to.be.gt(before[m.underlying].hub);
+      }
+    });
+
+    it("lets each borrower repay in full and take the collateral back", async () => {
+      for (const [account, debts, collateral] of [
+        [ALICE, [usdt, usdc], qqqb],
+        [BOB, [u, usdt], spyb],
+      ] as const) {
+        const signer = await initMainnetUser(account, ethers.utils.parseEther("1"));
+        for (const m of debts) {
+          const v = vTokenOf(m.vToken).connect(signer);
+          await v.accrueInterest();
+          // The interest on top of what was borrowed, with room for the repay block's own.
+          await fund(m.underlying, account, (await v.borrowBalanceStored(account)).div(100).add(ONE));
+          await erc20Of(m.underlying).connect(signer).approve(m.vToken, ethers.constants.MaxUint256);
+          await v.repayBorrow(ethers.constants.MaxUint256);
+          expect(await v.borrowBalanceStored(account), m.symbol).to.equal(0);
+        }
+        const v = vTokenOf(collateral.vToken).connect(signer);
+        await v.redeem(await v.balanceOf(account));
+        await comptroller.connect(signer).exitMarket(collateral.vToken);
+        expect(await erc20Of(collateral.underlying).balanceOf(account), collateral.symbol).to.be.closeTo(
+          COLLATERAL,
+          10,
+        );
+      }
+    });
+
+    it("lets the Hub user exit with interest, and the Operator move the liquidity back where it came from", async () => {
+      const user = await initMainnetUser(HUB_USER, ethers.utils.parseEther("1"));
+      for (const m of LIQUIDITY_MARKETS) {
+        const hub = hubOf(m.stack.hub);
+        const balance: BigNumber = await erc20Of(m.underlying).balanceOf(HUB_USER);
+        await hub.connect(user).redeem(await hub.balanceOf(HUB_USER), HUB_USER, HUB_USER);
+        expect((await erc20Of(m.underlying).balanceOf(HUB_USER)).sub(balance), m.symbol).to.be.gte(HUB_DEPOSIT);
+
+        const back = origin[m.underlying];
+        const before = await state(m);
+        const groupBefore: BigNumber = await groupOf(back.yieldGroup).totalAssets();
+        await hub
+          .connect(operator)
+          .reallocate([{ yieldGroup: m.stack.spokeSource, resource: m.vToken, amount: back.amount }], [back]);
+        const after = await state(m);
+        expect(before.source.sub(after.source), m.symbol).to.be.closeTo(back.amount, ONE);
+        expect((await groupOf(back.yieldGroup).totalAssets()).sub(groupBefore), m.symbol).to.be.gte(
+          back.amount.sub(ONE),
+        );
+        expect(after.hub, `${m.stack.name} value`).to.be.gte(before.hub.sub(ONE));
+      }
     });
   });
 });
