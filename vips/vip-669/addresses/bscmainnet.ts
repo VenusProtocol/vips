@@ -3,7 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 
 import { U, USDC, USDT } from "../../vip-668/addresses/bscmainnet";
 
-// VIP-669 address book. Re-exports VIP-671's, so VIP-669 and VIP-673 each import one module.
+// VIP-669 address book. Re-exports VIP-668's, so VIP-669 and VIP-670 each import one module.
 export * from "../../vip-668/addresses/bscmainnet";
 
 // ===================================================================================================
@@ -201,7 +201,7 @@ export type HubStack = {
 /// Spoke source caps from the risk listing sheet: 50% of the Hub's TVL, and an absolute cap of half the Core market's
 /// supply cap (600M USDT, 180M USDC, 60M U, read on 2026-10-14).
 ///
-/// Registered with these final values, so no later raise is needed. Nothing reaches a source before VIP-673: the Hub
+/// Registered with these final values, so no later raise is needed. Nothing reaches a source before VIP-670: the Hub
 /// deposits only through its deposit queue, which VIP-669 leaves alone, a source with no resource refunds any deposit,
 /// and a reallocation into it reverts `ResourceNotRegistered`.
 const SPOKE_PERCENTAGE_CAP_BPS = 5000;

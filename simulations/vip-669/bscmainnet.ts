@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
+import { SPOKE_SOURCE_ROLES } from "../../vips/vip-668/permissions";
 import {
   ACM,
   ADAPTER_FLUX,
@@ -33,7 +34,6 @@ import {
   SPOKE_SOURCE_GRANTS,
   YIELD_GROUP_ROLES_CALLED,
 } from "../../vips/vip-669/permissions-bscmainnet";
-import { SPOKE_SOURCE_ROLES } from "../../vips/vip-671/permissions";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterSpokeV1.json";
 import AGGREGATOR_ABI from "./abi/AuxiliaryCommandsAggregator.json";

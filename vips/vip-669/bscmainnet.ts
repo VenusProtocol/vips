@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { giveCallPermission } from "../vip-671/permissions";
+import { giveCallPermission } from "../vip-668/permissions";
 import {
   ACM,
   ADAPTER_SWAPS,
@@ -18,7 +18,7 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 // ===================================================================================================
 // VIP-669 [BNB Chain]: Hub-Funded Spoke pool, Liquidity Hub infrastructure. 23 commands, no funds move.
 //
-// Second of three. Independent of VIP-671. VIP-673 (markets and Hub wiring) needs both executed.
+// Second of three. Independent of VIP-668. VIP-670 (markets and Hub wiring) needs both executed.
 //
 // STATUS: the grants batch is stored at index 5 by ./provisionAcmBatches.ts (bscmainnet block 128,505,093, tx
 // 0x67cc851ce00b0501cfdc527c0c042946c856fd918cb7ff29332f0a38d3ac6b1b), and the simulation compares it call for call.
@@ -50,7 +50,7 @@ import { SPOKE_SOURCE_GRANTS } from "./permissions-bscmainnet";
 //  - `addYieldGroup` before `setOuterWithdrawQueue` on the same Hub, or `YieldGroupNotRegistered`.
 //
 // NOT IN THIS PROPOSAL:
-//  - Spoke markets and Spoke in a deposit queue: VIP-673. Until a market is registered, which only governance can do
+//  - Spoke markets and Spoke in a deposit queue: VIP-670. Until a market is registered, which only governance can do
 //    (`addResource`), no deposit can reach a Spoke source.
 //  - Yield-group beacon upgrades. #20 and #22 change no yield-group contract, and the live implementations
 //    already have `updateResourceAdapter` and `accrue()`.
