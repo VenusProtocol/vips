@@ -40,8 +40,10 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //
 // Third of three. Needs VIP-671 and VIP-672 executed first.
 //
-// STATUS: DRAFT. SPYB's APRO feed is `PENDING` in ./addresses/bscmainnet.ts, and the QQQB and SPYB seeds are `null`
-// there. `vip673()` throws until all are filled.
+// STATUS: DRAFT. `vip673()` throws while any address or risk value in ./addresses/bscmainnet.ts is still open.
+//
+// ORACLES: QQQB is priced the way the Core pool prices TSLAB, Atlas as main and APRO as pivot inside a 5% band. APRO
+// has no SPYB feed on BNB Chain, so SPYB is priced by Atlas alone, with no APRO config and no band.
 //
 // GAS, from the simulation (bscmainnet fork at block 128,482,000, VIP-671 and VIP-672 executed on the fork, stand-ins
 // for the open values): 52 commands, propose() about 10.82M (64.5% of the 16,777,216 per-tx cap), queue() 3.03M,
@@ -59,7 +61,8 @@ import { VIP_673_GRANTS } from "./permissions-bscmainnet";
 //    and `addResource` before both inner queues (`ResourceNotRegistered` otherwise).
 //
 // AT EXECUTION, or the whole proposal reverts:
-//  - The QQQB and SPYB feeds are fresh (Atlas within 3800s, APRO within 3900s) and within 5% of each other.
+//  - The QQQB and SPYB Atlas feeds are fresh (within 3800s), and the QQQB APRO feed is fresh (within 3900s) and
+//    within 5% of QQQB's Atlas price.
 //  - Atlas authorizes `ATLAS_ORACLE` on both Atlas feeds (`isAuthorizedCaller`). The DBO's price read reverts
 //    `OnlyAuthorizedCallerAllowed()` otherwise.
 //  - Neither QQQB nor SPYB has a DBO config (`MarketAlreadyInitialized`).
@@ -110,7 +113,7 @@ export const pendingDeployments = ({ liquidity, collateral }: Vip673Markets = MA
     { name: "CollateralGateway", address: COLLATERAL_GATEWAY },
     ...collateral.flatMap(m => [
       { name: `${m.symbol} Atlas feed`, address: m.atlasFeed },
-      { name: `${m.symbol} APRO feed`, address: m.aproFeed },
+      ...(m.aproFeed === null ? [] : [{ name: `${m.symbol} APRO feed`, address: m.aproFeed }]),
     ]),
   ]
     .filter(({ address }) => address === PENDING)
@@ -226,7 +229,7 @@ If passed, this VIP will list the markets of the **bStock index** Hub-Funded Spo
 
 #### Proposed changes
 
-1. Price QQQB and SPYB the way the Core pool prices TSLAB: Atlas as the main oracle (${ATLAS_MAX_STALE_PERIOD}s max stale period), APRO as the pivot (${APRO_MAX_STALE_PERIOD}s), a ±5% band between them, and a DeviationBoundedOracle window.
+1. Price QQQB and SPYB with Atlas as the main oracle (${ATLAS_MAX_STALE_PERIOD}s max stale period) and a DeviationBoundedOracle window. QQQB also gets APRO as the pivot (${APRO_MAX_STALE_PERIOD}s) inside a ±5% band, the way the Core pool prices TSLAB. APRO has no SPYB feed, so SPYB has no pivot.
 2. List the five markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
 3. Give QQQB and SPYB a liquidation incentive of their own, and pause borrowing on both.
 4. Restrict supply on the USDT, USDC and U markets to each Hub's Spoke yield group.
@@ -284,32 +287,40 @@ ${contractRows.map(r => `| ${r} |`).join("\n")}
 
   const dbo = (m: CollateralMarket) => required(m.dbo, `${m.symbol} DBO window`);
 
+  /// The collateral markets with an APRO pivot. The others are priced by Atlas alone.
+  const PIVOTED = COLLATERAL_MARKETS.filter(m => m.aproFeed !== null);
+
   const commands: Command[] = [
-    // 1. QQQB and SPYB pricing. The DBO call is last: it reads the live price, so both feeds have to be fresh and
-    //    within the band at execution.
+    // 1. QQQB and SPYB pricing. The DBO call is last: it reads the live price, so the feeds have to be fresh, and
+    //    QQQB's two within the band, at execution.
     {
       target: ATLAS_ORACLE,
       signature: "setTokenConfigs((address,address,uint256)[])",
       params: [COLLATERAL_MARKETS.map(m => [m.underlying, m.atlasFeed, ATLAS_MAX_STALE_PERIOD])],
     },
-    {
-      target: APRO_ORACLE,
-      signature: "setTokenConfigs((address,address,uint256)[])",
-      params: [COLLATERAL_MARKETS.map(m => [m.underlying, m.aproFeed, APRO_MAX_STALE_PERIOD])],
-    },
-    {
-      target: BOUND_VALIDATOR,
-      signature: "setValidateConfigs((address,uint256,uint256)[])",
-      params: [COLLATERAL_MARKETS.map(m => [m.underlying, BOUND_UPPER_RATIO, BOUND_LOWER_RATIO])],
-    },
+    // Both batch setters revert on an empty array, so neither is sent without a pivoted market.
+    ...(PIVOTED.length === 0
+      ? []
+      : [
+          {
+            target: APRO_ORACLE,
+            signature: "setTokenConfigs((address,address,uint256)[])",
+            params: [PIVOTED.map(m => [m.underlying, m.aproFeed, APRO_MAX_STALE_PERIOD])],
+          },
+          {
+            target: BOUND_VALIDATOR,
+            signature: "setValidateConfigs((address,uint256,uint256)[])",
+            params: [PIVOTED.map(m => [m.underlying, BOUND_UPPER_RATIO, BOUND_LOWER_RATIO])],
+          },
+        ]),
     {
       target: RESILIENT_ORACLE,
       signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
       params: [
         COLLATERAL_MARKETS.map(m => [
           m.underlying,
-          [ATLAS_ORACLE, APRO_ORACLE, constants.AddressZero],
-          [true, true, false],
+          [ATLAS_ORACLE, m.aproFeed === null ? constants.AddressZero : APRO_ORACLE, constants.AddressZero],
+          [true, m.aproFeed !== null, false],
           false,
         ]),
       ],

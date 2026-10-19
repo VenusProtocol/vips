@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
-import { PENDING, U, USDC, USDT } from "../../vip-671/addresses/bscmainnet";
+import { U, USDC, USDT } from "../../vip-671/addresses/bscmainnet";
 import { HUB_STACKS, HubStack } from "../../vip-672/addresses/bscmainnet";
 
 // VIP-673 address book. Re-exports VIP-672's, which re-exports VIP-671's.
@@ -47,14 +47,16 @@ export const SEED_RECEIVER = "0x000000000000000000000000000000000000dEaD";
 // ---------------------------------------------------------------------------------------------------
 // QQQB and SPYB feeds, per the risk sheet. APRO's access controller on the QQQB feed already allows APRO_ORACLE.
 // TODO(feed): Atlas has not authorized ATLAS_ORACLE on either Atlas feed yet (`isAuthorizedCaller` false on
-// 2026-10-16), so `ATLAS_ORACLE` reads revert `OnlyAuthorizedCallerAllowed()` until it does. The risk sheet has no
-// SPYB APRO feed yet.
+// 2026-10-16), so `ATLAS_ORACLE` reads revert `OnlyAuthorizedCallerAllowed()` until it does.
+//
+// APRO publishes no SPYB feed on BNB Chain (its BSC feed list has QQQB, not SPYB, on 2026-10-19), and the risk sheet
+// leaves SPYB's pivot blank. SPYB is priced by Atlas alone: no APRO config, no `BoundValidator` band, and no pivot in
+// the `ResilientOracle`.
 // ---------------------------------------------------------------------------------------------------
 
 export const QQQB_ATLAS_FEED = "0x7D2f703D2A188f32310dC9707E86acE503207027";
 export const QQQB_APRO_FEED = "0x2708567c468db65a72095716FCff023dcDfEA07A";
 export const SPYB_ATLAS_FEED = "0xCda6d5cE036AC0D6A387A377062EBd18Dd531177";
-export const SPYB_APRO_FEED = PENDING;
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-673's new contracts.
@@ -134,7 +136,8 @@ export type DboConfig = {
 export type CollateralMarket = SpokeMarket & {
   liquidationIncentive: BigNumber;
   atlasFeed: string;
-  aproFeed: string;
+  /// The APRO pivot, inside the `BoundValidator` band. `null` prices the asset by Atlas alone.
+  aproFeed: string | null;
   /// `setTokenConfig` runs once per asset and reverts `MarketAlreadyInitialized` after that.
   dbo: DboConfig | null;
 };
@@ -192,6 +195,6 @@ export const COLLATERAL_MARKETS: CollateralMarket[] = [
     vToken: VSPYB_SPOKE,
     underlying: SPYB,
     atlasFeed: SPYB_ATLAS_FEED,
-    aproFeed: SPYB_APRO_FEED,
+    aproFeed: null,
   },
 ];

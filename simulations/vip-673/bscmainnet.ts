@@ -273,9 +273,9 @@ const executeEarlierVips = async () => {
 };
 
 /// Stands in on the fork for every VIP-673 input still pending: QQQB and SPYB get STAND_IN_SEED, and a collateral
-/// market keeps its own feeds only when both are set and Atlas answers `ATLAS_ORACLE` on its feed. Otherwise it takes
-/// both of TSLAB's: one TSLAB feed against one of its own would break the 5% band. Every other value set on mainnet is
-/// kept.
+/// market keeps its own feeds only when they are set and Atlas answers `ATLAS_ORACLE` on its feed. Otherwise it takes
+/// TSLAB's: both of them for a market with an APRO pivot, since one TSLAB feed against one of its own would break the
+/// 5% band, and the Atlas one alone for a market priced by Atlas alone. Every other value set on mainnet is kept.
 const standInOnFork = async (): Promise<Vip673Markets> => {
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -293,7 +293,7 @@ const standInOnFork = async (): Promise<Vip673Markets> => {
     collateral.push({
       ...m,
       atlasFeed: ownFeeds ? m.atlasFeed : tslabAtlasFeed,
-      aproFeed: ownFeeds ? m.aproFeed : tslabAproFeed,
+      aproFeed: ownFeeds || m.aproFeed === null ? m.aproFeed : tslabAproFeed,
       initialSupply: m.initialSupply ?? STAND_IN_SEED,
       dbo: m.dbo ?? {
         cooldownPeriod: tslabWindow.cooldownPeriod,
@@ -546,11 +546,18 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("has the QQQB and SPYB feeds answering Atlas and APRO", async () => {
+    it("has the QQQB and SPYB feeds answering Atlas, and QQQB's answering APRO", async () => {
       for (const m of COLLATERAL_MARKETS) {
         expect(await readFeed(ATLAS_ORACLE, m.atlasFeed), `${m.symbol} Atlas feed`).to.be.gt(0);
-        expect(await readFeed(APRO_ORACLE, m.aproFeed), `${m.symbol} APRO feed`).to.be.gt(0);
+        if (m.aproFeed !== null) {
+          expect(await readFeed(APRO_ORACLE, m.aproFeed), `${m.symbol} APRO feed`).to.be.gt(0);
+        }
       }
+    });
+
+    it("prices SPYB by Atlas alone, as APRO publishes no SPYB feed", async () => {
+      const pivots = Object.fromEntries(MAINNET_COLLATERAL_MARKETS.map(m => [m.symbol, m.aproFeed !== null]));
+      expect(pivots).to.deep.equal({ vQQQB_bStockIndex: true, vSPYB_bStockIndex: false });
     });
   });
 
@@ -588,14 +595,18 @@ forking(FORK_BLOCK, async () => {
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       for (const m of COLLATERAL_MARKETS) {
         await atlas.connect(timelock).setDirectPrice(m.underlying, await readFeed(ATLAS_ORACLE, m.atlasFeed));
-        await apro.connect(timelock).setDirectPrice(m.underlying, await readFeed(APRO_ORACLE, m.aproFeed));
+        if (m.aproFeed !== null) {
+          await apro.connect(timelock).setDirectPrice(m.underlying, await readFeed(APRO_ORACLE, m.aproFeed));
+        }
       }
     });
 
-    it("pins a nonzero QQQB and SPYB price on Atlas and APRO", async () => {
-      for (const { symbol, underlying } of COLLATERAL_MARKETS) {
+    it("pins a nonzero QQQB and SPYB price on Atlas, and QQQB's on APRO", async () => {
+      for (const { symbol, underlying, aproFeed } of COLLATERAL_MARKETS) {
         expect(await atlas.getPrice(underlying), `${symbol} Atlas`).to.be.gt(0);
-        expect(await apro.getPrice(underlying), `${symbol} APRO`).to.be.gt(0);
+        if (aproFeed !== null) {
+          expect(await apro.getPrice(underlying), `${symbol} APRO`).to.be.gt(0);
+        }
       }
     });
   });
@@ -603,11 +614,12 @@ forking(FORK_BLOCK, async () => {
   testVip("VIP-673 [bscmainnet] Hub-Funded Spoke pool markets and Hub wiring", await vip673(inputs), {
     callbackAfterExecution: async txResponse => {
       const collateral = COLLATERAL_MARKETS.length;
+      const pivoted = COLLATERAL_MARKETS.filter(m => m.aproFeed !== null).length;
       const liquidity = LIQUIDITY_MARKETS.length;
       // Atlas and APRO share the `ChainlinkOracle` event; `ResilientOracle`'s has a different signature.
-      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [2 * collateral]);
+      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [collateral + pivoted]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [collateral]);
-      await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [collateral]);
+      await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [pivoted]);
       await expectEvents(txResponse, [DBO_ABI], ["ProtectionInitialized"], [collateral]);
       await expectEvents(txResponse, [REGISTRY_ABI], ["MarketAdded"], [MARKETS.length]);
       await expectEvents(
@@ -641,24 +653,29 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Post-VIP", () => {
-    it("prices QQQB and SPYB through Atlas, APRO and the band, with a DBO window", async () => {
+    it("prices QQQB through Atlas, APRO and the band, and SPYB through Atlas alone, each with a DBO window", async () => {
       for (const m of COLLATERAL_MARKETS) {
+        const pivoted = m.aproFeed !== null;
         const atlasConfig = await atlas.tokenConfigs(m.underlying);
         expectAddress(atlasConfig.feed, m.atlasFeed, `${m.symbol} Atlas feed`);
         expect(atlasConfig.maxStalePeriod, `${m.symbol} Atlas`).to.equal(ATLAS_MAX_STALE_PERIOD);
         const aproConfig = await apro.tokenConfigs(m.underlying);
-        expectAddress(aproConfig.feed, m.aproFeed, `${m.symbol} APRO feed`);
-        expect(aproConfig.maxStalePeriod, `${m.symbol} APRO`).to.equal(APRO_MAX_STALE_PERIOD);
-
         const band = await boundValidator.validateConfigs(m.underlying);
-        expect(band.upperBoundRatio, `${m.symbol} upper`).to.equal(BOUND_UPPER_RATIO);
-        expect(band.lowerBoundRatio, `${m.symbol} lower`).to.equal(BOUND_LOWER_RATIO);
+        if (m.aproFeed !== null) {
+          expectAddress(aproConfig.feed, m.aproFeed, `${m.symbol} APRO feed`);
+          expect(aproConfig.maxStalePeriod, `${m.symbol} APRO`).to.equal(APRO_MAX_STALE_PERIOD);
+          expect(band.upperBoundRatio, `${m.symbol} upper`).to.equal(BOUND_UPPER_RATIO);
+          expect(band.lowerBoundRatio, `${m.symbol} lower`).to.equal(BOUND_LOWER_RATIO);
+        } else {
+          expect(aproConfig.asset, `${m.symbol} APRO`).to.equal(ethers.constants.AddressZero);
+          expect(band.asset, `${m.symbol} band`).to.equal(ethers.constants.AddressZero);
+        }
 
         const config = await resilientOracle.getTokenConfig(m.underlying);
         expect(normalize(config.oracles), m.symbol).to.deep.equal(
-          normalize([ATLAS_ORACLE, APRO_ORACLE, ethers.constants.AddressZero]),
+          normalize([ATLAS_ORACLE, pivoted ? APRO_ORACLE : ethers.constants.AddressZero, ethers.constants.AddressZero]),
         );
-        expect([...config.enableFlagsForOracles], m.symbol).to.deep.equal([true, true, false]);
+        expect([...config.enableFlagsForOracles], m.symbol).to.deep.equal([true, pivoted, false]);
         expect(config.cachingEnabled, m.symbol).to.be.false;
         expect(await resilientOracle.getPrice(m.underlying), `${m.symbol} price`).to.be.gt(0);
 
