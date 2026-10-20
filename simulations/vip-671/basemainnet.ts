@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip668, { AGGREGATOR_BASE, NEW_IMPL_BASE, PROXY_ADMIN_BASE } from "../../vips/vip-668/bscmainnet";
+import vip671, { AGGREGATOR_BASE, NEW_IMPL_BASE, PROXY_ADMIN_BASE } from "../../vips/vip-671/bscmainnet";
 import PROXY_ABI from "./abi/TransparentUpgradeableProxy.json";
 import { checkAfterUpgrade, checkBeforeUpgrade } from "./utils/checks";
 
@@ -23,7 +23,7 @@ const upgrade = {
 forking(BLOCK_NUMBER, async () => {
   checkBeforeUpgrade(upgrade);
 
-  testForkedNetworkVipCommands("VIP-668 upgrade the AuxiliaryCommandsAggregator", await vip668(), {
+  testForkedNetworkVipCommands("VIP-671 upgrade the AuxiliaryCommandsAggregator", await vip671(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
     },

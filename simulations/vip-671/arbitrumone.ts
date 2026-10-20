@@ -3,27 +3,27 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip668, { AGGREGATOR_ETHEREUM, NEW_IMPL_ETHEREUM, PROXY_ADMIN_ETHEREUM } from "../../vips/vip-668/bscmainnet";
+import vip671, { AGGREGATOR_ARBITRUM, NEW_IMPL_ARBITRUM, PROXY_ADMIN_ARBITRUM } from "../../vips/vip-671/bscmainnet";
 import PROXY_ABI from "./abi/TransparentUpgradeableProxy.json";
 import { checkAfterUpgrade, checkBeforeUpgrade } from "./utils/checks";
 
-const BLOCK_NUMBER = 26159476;
-const OLD_IMPLEMENTATION = "0x16691f500541ca35bd63DD878B6D78728C9518AE";
-const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
+const BLOCK_NUMBER = 514012721;
+const OLD_IMPLEMENTATION = "0xc79Cb7efEBd121DC4B39eA141C214606595D665A";
+const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 
 const upgrade = {
-  aggregator: AGGREGATOR_ETHEREUM,
-  proxyAdmin: PROXY_ADMIN_ETHEREUM,
+  aggregator: AGGREGATOR_ARBITRUM,
+  proxyAdmin: PROXY_ADMIN_ARBITRUM,
   oldImplementation: OLD_IMPLEMENTATION,
-  newImplementation: NEW_IMPL_ETHEREUM,
+  newImplementation: NEW_IMPL_ARBITRUM,
   acm: ACM,
-  timelock: NETWORK_ADDRESSES.ethereum.NORMAL_TIMELOCK,
+  timelock: NETWORK_ADDRESSES.arbitrumone.NORMAL_TIMELOCK,
 };
 
 forking(BLOCK_NUMBER, async () => {
   checkBeforeUpgrade(upgrade);
 
-  testForkedNetworkVipCommands("VIP-668 upgrade the AuxiliaryCommandsAggregator", await vip668(), {
+  testForkedNetworkVipCommands("VIP-671 upgrade the AuxiliaryCommandsAggregator", await vip671(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
     },
