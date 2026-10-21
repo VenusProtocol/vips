@@ -91,7 +91,7 @@ forking(BLOCK_NUMBER, async () => {
     );
 
   describe("Pre-VIP behavior", () => {
-    it("every Centrifuge position reports a value, except JAAA under the USDC Hub", async () => {
+    it("Centrifuge positions report their values", async () => {
       for (const { yieldGroup, resource, status } of NAV_GUARDS) {
         const { observedValue } = await new Contract(yieldGroup, YIELD_GROUP_ABI, ethers.provider).navGuardStatus(
           resource,
@@ -101,19 +101,19 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("EBrake runs the old implementation, with IS_ISOLATED_POOL false on the Core comptroller", async () => {
+    it("EBrake runs the old implementation", async () => {
       expect(await ebrakeImplementation()).to.equal(OLD_EBRAKE_IMPLEMENTATION);
       expect(await ebrake.IS_ISOLATED_POOL()).to.be.false;
       expect(await ebrake.COMPTROLLER()).to.equal(UNITROLLER);
     });
 
-    it("the Guardian cannot pause a Hub through EBrake yet", async () => {
+    it("Guardian cannot pause a Hub through EBrake", async () => {
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
       await expect(ebrake.connect(guardian).pauseHub(HUB_USDT)).to.be.revertedWithoutReason();
       expect(await usdtHub.hubPaused()).to.be.false;
     });
 
-    it("no account holds any of the VIP's grants yet", async () => {
+    it("permissions are not granted yet", async () => {
       for (const { contract, signature, account } of PERMISSIONS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
@@ -122,7 +122,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the sentinel is initialized, offers its ownership to the Normal Timelock and watches nothing", async () => {
+    it("sentinel is initialized and pending Normal Timelock ownership", async () => {
       expect(await sentinel.accessControlManager()).to.equal(ACCESS_CONTROL_MANAGER);
       expect(await sentinel.EBRAKE()).to.equal(EBRAKE);
       expect(await sentinel.HUB_REGISTRY()).to.equal(HUB_REGISTRY);
@@ -152,7 +152,7 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Post-VIP behavior", () => {
-    it("EBrake runs the new implementation on the same Core comptroller, with its storage intact", async () => {
+    it("EBrake is upgraded", async () => {
       expect(await ebrakeImplementation()).to.equal(NEW_EBRAKE_IMPLEMENTATION);
       expect(await ebrake.IS_ISOLATED_POOL()).to.be.false;
       expect(await ebrake.COMPTROLLER()).to.equal(UNITROLLER);
@@ -160,7 +160,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await ebrake.owner()).to.equal(NORMAL_TIMELOCK);
     });
 
-    it("every grant is held", async () => {
+    it("permissions are granted", async () => {
       for (const { contract, signature, account } of PERMISSIONS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
@@ -169,13 +169,13 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the Normal Timelock owns the sentinel, which trusts the keeper", async () => {
+    it("Normal Timelock owns the sentinel and the keeper is trusted", async () => {
       expect(await sentinel.owner()).to.equal(NORMAL_TIMELOCK);
       expect(await sentinel.pendingOwner()).to.equal(ethers.constants.AddressZero);
       expect(await sentinel.trustedKeepers(KEEPER)).to.be.true;
     });
 
-    it("every Centrifuge position is configured and armed", async () => {
+    it("Centrifuge positions are configured and armed", async () => {
       for (const { yieldGroup, resource, hub } of NAV_GUARDS) {
         const config = await sentinel.navGuardConfigs(yieldGroup, resource);
         expect(config.hub).to.equal(hub);
@@ -196,7 +196,7 @@ forking(BLOCK_NUMBER, async () => {
       await snapshot.restore();
     });
 
-    it("with every position inside its band, the keeper's call reverts with the band's own reason", async () => {
+    it("keeper cannot pause while positions are within their bands", async () => {
       const keeper = await initMainnetUser(KEEPER, parseEther("1"));
       for (const { yieldGroup, resource, hub, status } of NAV_GUARDS) {
         const check = await sentinel.checkNavGuardDeviation(yieldGroup, resource);
@@ -217,7 +217,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("an untrusted caller cannot drive the sentinel", async () => {
+    it("non-keeper cannot call the sentinel", async () => {
       const [stranger] = await ethers.getSigners();
       await expect(
         sentinel.connect(stranger).handleNavGuardDeviation(CENTRIFUGE_SOURCE_USDT, JTRSY_USDT),
@@ -227,7 +227,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("once JTRSY falls behind its band, the keeper pauses the USDT Hub and only that Hub", async () => {
+    it("keeper pauses the USDT Hub on a breach", async () => {
       // The fund's price stays put on the fork while the band's centre drifts up, so a month on JTRSY sits under the
       // centre by more than a 1 bps threshold.
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseEther("1"));
@@ -260,7 +260,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await uHub.hubPaused()).to.be.false;
     });
 
-    it("the Guardian pauses one resource and one YieldGroup through EBrake, and nothing else", async () => {
+    it("Guardian pauses a resource and a YieldGroup through EBrake", async () => {
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
       const centrifugeUsdt = new Contract(CENTRIFUGE_SOURCE_USDT, YIELD_GROUP_ABI, ethers.provider);
       expect((await centrifugeUsdt.resourceConfig(JAAA_USDT)).paused).to.be.false;
@@ -283,7 +283,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("every EBrake operator can pause a Hub through EBrake, and the Critical Timelock cannot", async () => {
+    it("EBrake operators can pause a Hub, Critical Timelock cannot", async () => {
       for (const account of EBRAKE_OPERATORS) {
         const beforePause = await takeSnapshot();
         const operator = await initMainnetUser(account, parseEther("1"));
@@ -299,7 +299,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await uHub.hubPaused()).to.be.false;
     });
 
-    it("every sentinel admin can retune a band, and the multisig cannot", async () => {
+    it("sentinel admins can update a band, multisig cannot", async () => {
       for (const account of SENTINEL_ADMINS) {
         const beforeRetune = await takeSnapshot();
         const admin = await initMainnetUser(account, parseEther("1"));
@@ -320,7 +320,7 @@ forking(BLOCK_NUMBER, async () => {
         .withArgs(VENUS_MULTISIG, HUB_NAV_SENTINEL, "setHubNavConfig(address,address,uint16,uint16,uint256)");
     });
 
-    it("EBrake still pauses one action on one Core pool market after the upgrade", async () => {
+    it("EBrake still pauses Core pool markets", async () => {
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
       expect(await comptroller.actionPaused(VUSDT, MINT_ACTION)).to.be.false;
       await expect(ebrake.connect(guardian).pauseSupply(VUSDT))
@@ -330,7 +330,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await comptroller.actionPaused(VUSDT, BORROW_ACTION)).to.be.false;
     });
 
-    it("EBrake zeroes a Core market's CF through the Diamond and snapshots it", async () => {
+    it("EBrake still decreases a Core market's CF", async () => {
       // vUSDT's Core pool collateral factor and liquidation threshold at the fork block
       const cfAndLt = parseUnits("0.8", 18);
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));

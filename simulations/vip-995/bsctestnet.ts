@@ -73,18 +73,18 @@ forking(BLOCK_NUMBER, async () => {
     );
 
   describe("Pre-VIP behavior", () => {
-    it("the mock vault reads outside its NavGuard band", async () => {
+    it("mock vault is outside its NavGuard band", async () => {
       const status = await centrifugeSource.navGuardStatus(CENTRIFUGE_VAULT_USDT);
       expect(status.isClamped).to.be.true;
       observedAtFork = status.observedValue;
     });
 
-    it("the sentinel proxy runs the pre-audit implementation, with its 1 bps Hub NAV gate", async () => {
+    it("sentinel runs the pre-audit implementation", async () => {
       expect(await implementation()).to.equal(OLD_HUB_NAV_SENTINEL_IMPLEMENTATION);
       expect(await oldSentinel.minHubNavGapBps()).to.equal(1);
     });
 
-    it("the audited implementation is deployed against EBrake and the Hub registry, with initializers disabled", async () => {
+    it("audited implementation is deployed", async () => {
       const audited = new Contract(NEW_HUB_NAV_SENTINEL_IMPLEMENTATION, SENTINEL_ABI, ethers.provider);
       expect(await audited.EBRAKE()).to.equal(EBRAKE);
       expect(await audited.HUB_REGISTRY()).to.equal(HUB_REGISTRY);
@@ -94,7 +94,7 @@ forking(BLOCK_NUMBER, async () => {
       );
     });
 
-    it("every permission the VIP revokes is held", async () => {
+    it("permissions to revoke are held", async () => {
       for (const { contract, signature, account } of REVOKES) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
@@ -103,7 +103,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("no permission the VIP grants is held yet", async () => {
+    it("permissions to grant are not held yet", async () => {
       for (const { contract, signature, account } of GRANTS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
@@ -112,7 +112,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("EBrake already runs the Hub-pausing build, with IS_REMOTE_CHAIN false and its Hub-side rights", async () => {
+    it("EBrake can already pause the Hub", async () => {
       expect(await ebrake.IS_REMOTE_CHAIN()).to.be.false;
       expect(await ebrake.COMPTROLLER()).to.equal(UNITROLLER);
       expect(await acm.isAllowedToCall(EBRAKE, "pauseHub()", { from: HUB_USDT })).to.be.true;
@@ -120,7 +120,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await acm.isAllowedToCall(EBRAKE, "pauseResource(address)", { from: CENTRIFUGE_SOURCE_USDT })).to.be.true;
     });
 
-    it("the Centrifuge vault is armed with 10% bands and the Hub is live", async () => {
+    it("Centrifuge vault is armed with 10% bands", async () => {
       const [configHub, pauseUpBps, pauseDownBps, enabled] = await oldSentinel.navGuardConfigs(
         CENTRIFUGE_SOURCE_USDT,
         CENTRIFUGE_VAULT_USDT,
@@ -144,20 +144,20 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Post-VIP behavior", () => {
-    it("the sentinel proxy runs the audited implementation, without the Hub NAV gate", async () => {
+    it("sentinel runs the audited implementation", async () => {
       expect(await implementation()).to.equal(NEW_HUB_NAV_SENTINEL_IMPLEMENTATION);
       expect(await sentinel.EBRAKE()).to.equal(EBRAKE);
       expect(await sentinel.HUB_REGISTRY()).to.equal(HUB_REGISTRY);
       await expect(oldSentinel.minHubNavGapBps()).to.be.revertedWithoutReason();
     });
 
-    it("the upgrade keeps the sentinel's ACM, owner and keeper", async () => {
+    it("sentinel keeps its ACM, owner and keeper", async () => {
       expect(await sentinel.accessControlManager()).to.equal(ACCESS_CONTROL_MANAGER);
       expect(await sentinel.owner()).to.equal(NORMAL_TIMELOCK);
       expect(await sentinel.trustedKeepers(GUARDIAN)).to.be.true;
     });
 
-    it("every revoked permission is gone", async () => {
+    it("old permissions are revoked", async () => {
       for (const { contract, signature, account } of REVOKES) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
@@ -166,7 +166,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("every granted permission is held", async () => {
+    it("new permissions are granted", async () => {
       for (const { contract, signature, account } of GRANTS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
@@ -175,7 +175,7 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the Centrifuge vault keeps its bands, gains the minimum pause gap and stays armed", async () => {
+    it("Centrifuge vault has the minimum pause gap", async () => {
       const config = await sentinel.navGuardConfigs(CENTRIFUGE_SOURCE_USDT, CENTRIFUGE_VAULT_USDT);
       expect(config.hub).to.equal(HUB_USDT);
       expect(config.pauseUpBps).to.equal(PAUSE_UP_BPS);
@@ -184,7 +184,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(config.minPauseGap).to.equal(MIN_PAUSE_GAP);
     });
 
-    it("the 4-argument setHubNavConfig no longer exists", async () => {
+    it("old setHubNavConfig is removed", async () => {
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
       await expect(
         oldSentinel
@@ -203,7 +203,7 @@ forking(BLOCK_NUMBER, async () => {
       await snapshot.restore();
     });
 
-    it("the vault sits past its band by less than the minimum gap, so the keeper's call reverts", async () => {
+    it("keeper cannot pause below the minimum gap", async () => {
       const check = await sentinel.checkNavGuardDeviation(CENTRIFUGE_SOURCE_USDT, CENTRIFUGE_VAULT_USDT);
       expect(check.status).to.equal(WITHIN_THRESHOLD);
       expect(check.observedValue).to.equal(observedAtFork);
@@ -215,7 +215,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.hubPaused()).to.be.false;
     });
 
-    it("an untrusted caller cannot drive the sentinel", async () => {
+    it("non-keeper cannot call the sentinel", async () => {
       const [stranger] = await ethers.getSigners();
       await expect(
         sentinel.connect(stranger).handleNavGuardDeviation(CENTRIFUGE_SOURCE_USDT, CENTRIFUGE_VAULT_USDT),
@@ -223,7 +223,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.hubPaused()).to.be.false;
     });
 
-    it("with a 1 USDT minimum gap the keeper pauses the Hub through EBrake", async () => {
+    it("keeper pauses the Hub with a 1 USDT minimum gap", async () => {
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
       await expect(
         sentinel
@@ -261,7 +261,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.hubPaused()).to.be.true;
     });
 
-    it("the Guardian pauses one resource and one YieldGroup through EBrake, and nothing else", async () => {
+    it("Guardian pauses a resource and a YieldGroup through EBrake", async () => {
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
       expect((await centrifugeSource.resourceConfig(CENTRIFUGE_VAULT_USDT)).paused).to.be.false;
       expect((await hub.yieldGroupConfig(CENTRIFUGE_SOURCE_USDT)).paused).to.be.false;
@@ -280,7 +280,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.hubPaused()).to.be.false;
     });
 
-    it("the Guardian and every Timelock can pause the Hub through EBrake, and a stranger cannot", async () => {
+    it("Guardian and Timelocks can pause the Hub, others cannot", async () => {
       for (const account of [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK]) {
         const beforePause = await takeSnapshot();
         const operator = await initMainnetUser(account, parseEther("1"));
@@ -298,7 +298,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await hub.hubPaused()).to.be.false;
     });
 
-    it("the Normal Timelock and the Guardian can retune the band, and the Fast-track Timelock cannot", async () => {
+    it("Normal Timelock and Guardian can update the band, Fast-track cannot", async () => {
       for (const account of [NORMAL_TIMELOCK, GUARDIAN]) {
         const beforeRetune = await takeSnapshot();
         const admin = await initMainnetUser(account, parseEther("1"));
