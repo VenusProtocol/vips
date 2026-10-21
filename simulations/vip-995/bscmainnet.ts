@@ -8,6 +8,8 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip995, {
+  CENTRIFUGE_SOURCE_USDC,
+  CENTRIFUGE_SOURCE_USDT,
   JAAA_USDC,
   JAAA_USDT,
   JTRSY_USDC,
@@ -19,16 +21,10 @@ import vip995, {
   PAUSE_UP_BPS,
 } from "../../vips/vip-995/bscmainnet";
 import {
-  CENTRIFUGE_SOURCE_USDC,
-  CENTRIFUGE_SOURCE_USDT,
-  CORE_SOURCE_USDC,
   EBRAKE,
   EBRAKE_OPERATORS,
   HUB_NAV_SENTINEL,
   HUB_SENTINEL_GRANTEES,
-  HUB_U,
-  HUB_USDC,
-  HUB_USDT,
   PERMISSIONS,
   VENUS_TEAM_MULTISIG,
 } from "../../vips/vip-995/permissions-bscmainnet";
@@ -47,6 +43,10 @@ const BLOCK_NUMBER = 128928685;
 
 const OLD_EBRAKE_IMPLEMENTATION = "0x2D36677EcA318c9536011D53aa752F042dd01DE8";
 const HUB_REGISTRY = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2";
+const HUB_USDT = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
+const HUB_USDC = "0x9D2D9592cF8DFbf59107fAab703d08494BE14617";
+const HUB_U = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
+const CORE_SOURCE_USDC = "0x299D9Be7CEfff91c68F13F267d525CFC18e965ef";
 
 const IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
@@ -166,6 +166,19 @@ forking(BLOCK_NUMBER, async () => {
           await acm.isAllowedToCall(account, signature, { from: contract }),
           `${signature} on ${contract} for ${account}`,
         ).to.be.true;
+      }
+    });
+
+    it("EBrake's wildcard pauses reach every Hub and YieldGroup", async () => {
+      for (const hub of hubs) {
+        for (const signature of ["pauseHub()", "pauseYieldGroup(address)"]) {
+          expect(await acm.isAllowedToCall(EBRAKE, signature, { from: hub.address }), `${signature} on ${hub.address}`)
+            .to.be.true;
+        }
+        for (const yieldGroup of await hub.registeredYieldGroups()) {
+          expect(await acm.isAllowedToCall(EBRAKE, "pauseResource(address)", { from: yieldGroup }), yieldGroup).to.be
+            .true;
+        }
       }
     });
 
