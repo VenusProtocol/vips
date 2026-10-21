@@ -23,7 +23,7 @@ import vip995, {
   PAUSE_UP_BPS,
 } from "../../vips/vip-995/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
-import EBRAKE_ABI from "./abi/EBrake.json";
+import EBRAKE_ABI from "./abi/EBrakeSpoke.json";
 import HUB_ABI from "./abi/Hub.json";
 import SENTINEL_ABI from "./abi/HubNavDeviationSentinel.json";
 import PRE_AUDIT_SENTINEL_ABI from "./abi/HubNavDeviationSentinelPreAudit.json";

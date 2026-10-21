@@ -8,7 +8,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isRemoteChain_",
+        "name": "isIsolatedPool_",
         "type": "bool"
       }
     ],
@@ -111,24 +111,8 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "expected",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "actual",
-        "type": "address"
-      }
-    ],
-    "name": "MarketsOnDifferentComptrollers",
-    "type": "error"
-  },
-  {
     "inputs": [],
-    "name": "NotSupportedOnRemoteChain",
+    "name": "NotSupportedOnIsolatedPool",
     "type": "error"
   },
   {
@@ -549,7 +533,7 @@
   },
   {
     "inputs": [],
-    "name": "IS_REMOTE_CHAIN",
+    "name": "IS_ISOLATED_POOL",
     "outputs": [
       {
         "internalType": "bool",

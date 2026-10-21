@@ -13,8 +13,7 @@ import {
 
 const { ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES.bscmainnet;
 
-// PLACEHOLDER: not deployed yet. Swap in the real address before proposing.
-export const NEW_EBRAKE_IMPLEMENTATION = "0x1111111111111111111111111111111111111111";
+export const NEW_EBRAKE_IMPLEMENTATION = "0xeB18c8B6d0ddc13D3d7A8cD5FF684F11E5bcBCfb";
 
 const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 export const KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
@@ -41,7 +40,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
 
 #### Actions
 
-1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). The new implementation adds \`pauseHub\`, \`pauseHubYieldGroup\` and \`pauseHubResource\`, and applies each market action through that market's own comptroller. Its storage layout is unchanged.
+1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). The new implementation adds \`pauseHub\`, \`pauseHubYieldGroup\` and \`pauseHubResource\`. Its storage layout is unchanged.
 2. Accept ownership of the **HubNavDeviationSentinel** at [${HUB_NAV_SENTINEL}](https://bscscan.com/address/${HUB_NAV_SENTINEL}).
 3. Grant 39 ACM permissions, each on a single contract (no wildcards):
    - EBrake: \`pauseHub()\` and \`pauseYieldGroup(address)\` on the USDT, USDC and U Hubs, and \`pauseResource(address)\` on their 11 YieldGroups

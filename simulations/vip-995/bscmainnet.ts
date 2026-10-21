@@ -35,7 +35,6 @@ import {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
-import EBRAKE_PRE_UPGRADE_ABI from "./abi/EBrakePreUpgrade.json";
 import HUB_ABI from "./abi/Hub.json";
 import SENTINEL_ABI from "./abi/HubNavDeviationSentinel.json";
 import PROXY_ABI from "./abi/OptimizedTransparentUpgradeableProxy.json";
@@ -44,7 +43,7 @@ import YIELD_GROUP_ABI from "./abi/YieldGroupCentrifuge.json";
 const { ACCESS_CONTROL_MANAGER, CRITICAL_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } =
   NETWORK_ADDRESSES.bscmainnet;
 
-const BLOCK_NUMBER = 128897000;
+const BLOCK_NUMBER = 128928685;
 
 const OLD_EBRAKE_IMPLEMENTATION = "0x2D36677EcA318c9536011D53aa752F042dd01DE8";
 const HUB_REGISTRY = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2";
@@ -79,7 +78,6 @@ const NAV_GUARDS = [
 forking(BLOCK_NUMBER, async () => {
   const acm = new Contract(ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
   const ebrake = new Contract(EBRAKE, EBRAKE_ABI, ethers.provider);
-  const oldEbrake = new Contract(EBRAKE, EBRAKE_PRE_UPGRADE_ABI, ethers.provider);
   const sentinel = new Contract(HUB_NAV_SENTINEL, SENTINEL_ABI, ethers.provider);
   const comptroller = new Contract(UNITROLLER, COMPTROLLER_ABI, ethers.provider);
   const hubs = [HUB_USDT, HUB_USDC, HUB_U].map(hub => new Contract(hub, HUB_ABI, ethers.provider));
@@ -105,9 +103,8 @@ forking(BLOCK_NUMBER, async () => {
 
     it("EBrake runs the old implementation, with IS_ISOLATED_POOL false on the Core comptroller", async () => {
       expect(await ebrakeImplementation()).to.equal(OLD_EBRAKE_IMPLEMENTATION);
-      expect(await oldEbrake.IS_ISOLATED_POOL()).to.be.false;
+      expect(await ebrake.IS_ISOLATED_POOL()).to.be.false;
       expect(await ebrake.COMPTROLLER()).to.equal(UNITROLLER);
-      await expect(ebrake.IS_REMOTE_CHAIN()).to.be.revertedWithoutReason();
     });
 
     it("the Guardian cannot pause a Hub through EBrake yet", async () => {
@@ -155,11 +152,10 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Post-VIP behavior", () => {
-    it("EBrake runs the new implementation, with IS_REMOTE_CHAIN false and its storage intact", async () => {
+    it("EBrake runs the new implementation on the same Core comptroller, with its storage intact", async () => {
       expect(await ebrakeImplementation()).to.equal(NEW_EBRAKE_IMPLEMENTATION);
-      expect(await ebrake.IS_REMOTE_CHAIN()).to.be.false;
+      expect(await ebrake.IS_ISOLATED_POOL()).to.be.false;
       expect(await ebrake.COMPTROLLER()).to.equal(UNITROLLER);
-      await expect(oldEbrake.IS_ISOLATED_POOL()).to.be.revertedWithoutReason();
       expect(await ebrake.accessControlManager()).to.equal(ACCESS_CONTROL_MANAGER);
       expect(await ebrake.owner()).to.equal(NORMAL_TIMELOCK);
     });
@@ -334,7 +330,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await comptroller.actionPaused(VUSDT, BORROW_ACTION)).to.be.false;
     });
 
-    it("with IS_REMOTE_CHAIN false, EBrake zeroes a Core market's CF through the Diamond and snapshots it", async () => {
+    it("EBrake zeroes a Core market's CF through the Diamond and snapshots it", async () => {
       // vUSDT's Core pool collateral factor and liquidation threshold at the fork block
       const cfAndLt = parseUnits("0.8", 18);
       const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));

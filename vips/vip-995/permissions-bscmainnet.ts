@@ -2,17 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 const { FAST_TRACK_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
-// ===================================================================================================
-// ACM grants for EBrake's Hub pausing and the HubNavDeviationSentinel on BNB Chain mainnet.
-//
-// Every string is the literal the checking contract (Hub, YieldGroup, EBrake, HubNavDeviationSentinel) passes to
-// `_checkAccessAllowed`. Every grant is against one contract, never address(0): a wildcard reaches any contract
-// that checks the same string, and this chain's ACM cannot remove one through `revokeCallPermission`. So a Hub or
-// YieldGroup added later needs its own EBrake grants before EBrake, or the sentinel, can pause it.
-// ===================================================================================================
-
-// PLACEHOLDER: not deployed yet. Swap in the real address before proposing.
-export const HUB_NAV_SENTINEL = "0x3333333333333333333333333333333333333333";
+export const HUB_NAV_SENTINEL = "0x26E9497384bC4d123b9e1C530E2bC3A0dF49d2AB";
 
 export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
 export const VENUS_MULTISIG = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
