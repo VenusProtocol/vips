@@ -301,9 +301,9 @@ forking(BLOCK_NUMBER, async () => {
     it("Normal Timelock and Guardian can update the band, Fast-track cannot", async () => {
       for (const account of [NORMAL_TIMELOCK, GUARDIAN]) {
         const beforeRetune = await takeSnapshot();
-        const admin = await initMainnetUser(account, parseEther("1"));
+        const grantee = await initMainnetUser(account, parseEther("1"));
         await expect(
-          sentinel.connect(admin).setHubNavConfig(CENTRIFUGE_SOURCE_USDT, CENTRIFUGE_VAULT_USDT, 500, 900, 1),
+          sentinel.connect(grantee).setHubNavConfig(CENTRIFUGE_SOURCE_USDT, CENTRIFUGE_VAULT_USDT, 500, 900, 1),
         ).to.emit(sentinel, "NavGuardConfigUpdated");
         const config = await sentinel.navGuardConfigs(CENTRIFUGE_SOURCE_USDT, CENTRIFUGE_VAULT_USDT);
         expect([config.pauseUpBps, config.pauseDownBps, config.minPauseGap.toNumber()], account).to.deep.equal([

@@ -16,6 +16,7 @@ const { ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES.bscmainnet;
 export const NEW_EBRAKE_IMPLEMENTATION = "0xeB18c8B6d0ddc13D3d7A8cD5FF684F11E5bcBCfb";
 
 const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+// Already the trusted keeper of DeviationSentinel on BNB Chain (VIP-590) and on the remote chains (VIP-616)
 export const KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
 // Centrifuge vaults, the only Hub resources with a NavGuard band
@@ -44,7 +45,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
 2. Accept ownership of the **HubNavDeviationSentinel** at [${HUB_NAV_SENTINEL}](https://bscscan.com/address/${HUB_NAV_SENTINEL}).
 3. Grant 39 ACM permissions, each on a single contract (no wildcards):
    - EBrake: \`pauseHub()\` and \`pauseYieldGroup(address)\` on the USDT, USDC and U Hubs, and \`pauseResource(address)\` on their 11 YieldGroups
-   - the Guardian, the Normal and Fast-track Timelocks and the Venus multisig: EBrake's three new actions. They already hold its market pause actions.
+   - the Guardian, the Normal and Fast-track Timelocks and the Venus team multisig: EBrake's three new actions. They already hold its market pause actions.
    - the Guardian and the Normal and Fast-track Timelocks: the sentinel's three setters
    - the sentinel: \`pauseHub(address)\` on EBrake
 4. Register the keeper [${KEEPER}](https://bscscan.com/address/${KEEPER}) on the sentinel. It is the keeper that already drives DeviationSentinel.
@@ -83,13 +84,18 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
       })),
 
       // ────────────────────────────────────────────────────────────────
-      // 3. Keeper and NavGuard monitoring
+      // 3. Sentinel keeper
       // ────────────────────────────────────────────────────────────────
       {
         target: HUB_NAV_SENTINEL,
         signature: "setTrustedKeeper(address,bool)",
         params: [KEEPER, true],
       },
+
+      // ────────────────────────────────────────────────────────────────
+      // 4. NavGuard monitoring: pause thresholds, then arming, for each Centrifuge position
+      // ────────────────────────────────────────────────────────────────
+      // JTRSY on the USDT Hub
       {
         target: HUB_NAV_SENTINEL,
         signature: "setHubNavConfig(address,address,uint16,uint16,uint256)",
@@ -100,6 +106,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
         signature: "setNavMonitoringEnabled(address,address,bool)",
         params: [CENTRIFUGE_SOURCE_USDT, JTRSY_USDT, true],
       },
+      // JAAA on the USDT Hub
       {
         target: HUB_NAV_SENTINEL,
         signature: "setHubNavConfig(address,address,uint16,uint16,uint256)",
@@ -110,6 +117,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
         signature: "setNavMonitoringEnabled(address,address,bool)",
         params: [CENTRIFUGE_SOURCE_USDT, JAAA_USDT, true],
       },
+      // JTRSY on the USDC Hub
       {
         target: HUB_NAV_SENTINEL,
         signature: "setHubNavConfig(address,address,uint16,uint16,uint256)",
@@ -120,6 +128,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
         signature: "setNavMonitoringEnabled(address,address,bool)",
         params: [CENTRIFUGE_SOURCE_USDC, JTRSY_USDC, true],
       },
+      // JAAA on the USDC Hub, no deposits yet so its band is still closed
       {
         target: HUB_NAV_SENTINEL,
         signature: "setHubNavConfig(address,address,uint16,uint16,uint256)",

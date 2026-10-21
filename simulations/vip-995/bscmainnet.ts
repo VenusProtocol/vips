@@ -25,12 +25,12 @@ import {
   EBRAKE,
   EBRAKE_OPERATORS,
   HUB_NAV_SENTINEL,
+  HUB_SENTINEL_GRANTEES,
   HUB_U,
   HUB_USDC,
   HUB_USDT,
   PERMISSIONS,
-  SENTINEL_ADMINS,
-  VENUS_MULTISIG,
+  VENUS_TEAM_MULTISIG,
 } from "../../vips/vip-995/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -299,14 +299,13 @@ forking(BLOCK_NUMBER, async () => {
       expect(await uHub.hubPaused()).to.be.false;
     });
 
-    it("sentinel admins can update a band, multisig cannot", async () => {
-      for (const account of SENTINEL_ADMINS) {
+    it("Hub sentinel grantees can update a band, team multisig cannot", async () => {
+      for (const account of HUB_SENTINEL_GRANTEES) {
         const beforeRetune = await takeSnapshot();
-        const admin = await initMainnetUser(account, parseEther("1"));
-        await expect(sentinel.connect(admin).setHubNavConfig(CENTRIFUGE_SOURCE_USDT, JTRSY_USDT, 500, 900, 1)).to.emit(
-          sentinel,
-          "NavGuardConfigUpdated",
-        );
+        const grantee = await initMainnetUser(account, parseEther("1"));
+        await expect(
+          sentinel.connect(grantee).setHubNavConfig(CENTRIFUGE_SOURCE_USDT, JTRSY_USDT, 500, 900, 1),
+        ).to.emit(sentinel, "NavGuardConfigUpdated");
         const config = await sentinel.navGuardConfigs(CENTRIFUGE_SOURCE_USDT, JTRSY_USDT);
         expect([config.pauseUpBps, config.pauseDownBps, config.minPauseGap.toNumber()], account).to.deep.equal([
           500, 900, 1,
@@ -314,10 +313,10 @@ forking(BLOCK_NUMBER, async () => {
         await beforeRetune.restore();
       }
 
-      const multisig = await initMainnetUser(VENUS_MULTISIG, parseEther("1"));
+      const multisig = await initMainnetUser(VENUS_TEAM_MULTISIG, parseEther("1"));
       await expect(sentinel.connect(multisig).setHubNavConfig(CENTRIFUGE_SOURCE_USDT, JTRSY_USDT, 500, 900, 1))
         .to.be.revertedWithCustomError(sentinel, "Unauthorized")
-        .withArgs(VENUS_MULTISIG, HUB_NAV_SENTINEL, "setHubNavConfig(address,address,uint16,uint16,uint256)");
+        .withArgs(VENUS_TEAM_MULTISIG, HUB_NAV_SENTINEL, "setHubNavConfig(address,address,uint16,uint16,uint256)");
     });
 
     it("EBrake still pauses Core pool markets", async () => {

@@ -5,7 +5,7 @@ const { FAST_TRACK_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsc
 export const HUB_NAV_SENTINEL = "0x26E9497384bC4d123b9e1C530E2bC3A0dF49d2AB";
 
 export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
-export const VENUS_MULTISIG = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
+export const VENUS_TEAM_MULTISIG = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
 
 export const HUB_USDT = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
 export const HUB_USDC = "0x9D2D9592cF8DFbf59107fAab703d08494BE14617";
@@ -48,16 +48,14 @@ const SENTINEL_SETTERS = [
   "setNavMonitoringEnabled(address,address,bool)",
 ];
 
-export const EBRAKE_OPERATORS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, VENUS_MULTISIG];
-
-export const SENTINEL_ADMINS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
+export const EBRAKE_OPERATORS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, VENUS_TEAM_MULTISIG];
+export const HUB_SENTINEL_GRANTEES = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
 
 const PERMISSION_SETS = [
-  // EBrake's three Hub actions land as these calls, checked by the Hub and the YieldGroup themselves
   { contracts: HUBS, signatures: ["pauseHub()", "pauseYieldGroup(address)"], accounts: [EBRAKE] },
   { contracts: YIELD_GROUPS, signatures: ["pauseResource(address)"], accounts: [EBRAKE] },
   { contracts: [EBRAKE], signatures: EBRAKE_HUB_ACTIONS, accounts: EBRAKE_OPERATORS },
-  { contracts: [HUB_NAV_SENTINEL], signatures: SENTINEL_SETTERS, accounts: SENTINEL_ADMINS },
+  { contracts: [HUB_NAV_SENTINEL], signatures: SENTINEL_SETTERS, accounts: HUB_SENTINEL_GRANTEES },
   // The sentinel's one write: `handleNavGuardDeviation` pauses the breaching resource's Hub through EBrake
   { contracts: [EBRAKE], signatures: ["pauseHub(address)"], accounts: [HUB_NAV_SENTINEL] },
 ];
