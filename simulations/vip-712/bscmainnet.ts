@@ -3,8 +3,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodForAllAssets } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
+import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
 import vip712, {
   COLLATERAL_GATEWAY,
@@ -19,7 +20,6 @@ import vip712, {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
-import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -29,7 +29,8 @@ const ENTER_MARKET_FOR_ACCOUNT_SELECTOR = "0x2e30a93c";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const VBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
-const REPAY_AMOUNT = ethers.utils.parseUnits("1000", 18);
+const VHUSDT = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
+const VVHUSDT = "0xc0768948e668B7BacFf8b4BD1BaBe0eD2b512d3c";
 
 // EIP-1967 implementation slot: keccak256("eip1967.proxy.implementation") - 1
 const IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
@@ -44,31 +45,28 @@ const readImplementation = async (proxy: string) => {
   return ethers.utils.getAddress(ethers.utils.hexDataSlice(raw, 12));
 };
 
-forking(129099700, async () => {
+forking(129144152, async () => {
   const provider = ethers.provider;
   let unitroller: Contract;
   let acm: Contract;
   let oldMarketFacetSelectors: string[];
-  let seizeTokensBefore: BigNumber;
+  let otherFacets: { address: string; selectors: string[] }[];
 
   before(async () => {
     unitroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
     acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, provider);
     oldMarketFacetSelectors = await unitroller.facetFunctionSelectors(OLD_MARKET_FACET);
-
-    // Governance time travel leaves every feed stale, so widen the stale period for the two
-    // markets the seize check prices.
-    const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
-    await setMaxStalePeriodForAllAssets(resilientOracle, [
-      new ethers.Contract(USDT, ERC20_ABI, provider),
-      new ethers.Contract(ORACLE_BNB, ERC20_ABI, provider),
-    ]);
-
-    [, seizeTokensBefore] = await unitroller["liquidateCalculateSeizeTokens(address,address,uint256)"](
-      VUSDT,
-      VBNB,
-      REPAY_AMOUNT,
+    const addresses: string[] = await unitroller.facetAddresses();
+    otherFacets = await Promise.all(
+      addresses
+        .filter(address => address !== OLD_MARKET_FACET)
+        .map(async address => ({
+          address,
+          selectors: await unitroller.facetFunctionSelectors(address),
+        })),
     );
+
+    await bypassStalePrices([USDT, ORACLE_BNB, VHUSDT]);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -102,7 +100,13 @@ forking(129099700, async () => {
 
     it("Comptroller uses the old lens", async () => {
       expect(await unitroller.comptrollerLens()).to.equal(OLD_COMPTROLLER_LENS);
-      expect(seizeTokensBefore).to.be.gt(0);
+      const [err, seizeTokens] = await unitroller["liquidateCalculateSeizeTokens(address,address,uint256)"](
+        VUSDT,
+        VBNB,
+        ethers.utils.parseUnits("1000", 18),
+      );
+      expect(err).to.equal(0);
+      expect(seizeTokens).to.be.gt(0);
     });
   });
 
@@ -126,7 +130,13 @@ forking(129099700, async () => {
       expect(actual).to.deep.equal(expected);
       expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
       expect(await unitroller.facetAddresses()).to.include(NEW_MARKET_FACET);
-      expect(await unitroller.facetAddresses()).to.not.include(OLD_MARKET_FACET);
+      expect(await unitroller.facetAddresses()).to.have.members([
+        NEW_MARKET_FACET,
+        ...otherFacets.map(facet => facet.address),
+      ]);
+      for (const facet of otherFacets) {
+        expect(await unitroller.facetFunctionSelectors(facet.address)).to.deep.equal(facet.selectors);
+      }
     });
 
     it("gateway can call enterMarketForAccount", async () => {
@@ -138,17 +148,50 @@ forking(129099700, async () => {
       expect(await unitroller.authorizedFlashLoan(COLLATERAL_GATEWAY)).to.equal(true);
     });
 
-    it("Comptroller uses the new lens and seize amounts for 18-decimal markets are unchanged", async () => {
-      expect(await unitroller.comptrollerLens()).to.equal(NEW_COMPTROLLER_LENS);
-      const [err, seizeTokensAfter] = await unitroller["liquidateCalculateSeizeTokens(address,address,uint256)"](
-        VUSDT,
-        VBNB,
-        REPAY_AMOUNT,
-      );
-      expect(err).to.equal(0);
-      // The old lens truncates the ratio before multiplying by the repay amount, so the two
-      // results differ only by that rounding: well under one part per million.
-      expect(seizeTokensAfter).to.be.closeTo(seizeTokensBefore, seizeTokensBefore.div(1_000_000));
-    });
+    for (const [decimals, borrowed] of [
+      [18, VUSDT],
+      [24, VVHUSDT],
+    ] as const) {
+      it(`routes ${decimals}-decimal debt through the new lens with one final rounding`, async () => {
+        expect(await unitroller.comptrollerLens()).to.equal(NEW_COMPTROLLER_LENS);
+        const repay = ethers.utils.parseUnits("1000", decimals);
+        const [err, seizeTokens] = await unitroller["liquidateCalculateSeizeTokens(address,address,uint256)"](
+          borrowed,
+          VBNB,
+          repay,
+        );
+        expect(err).to.equal(0);
+        const oracle = new Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
+        const collateral = new Contract(VBNB, ["function exchangeRateStored() view returns (uint256)"], provider);
+        const debtPrice: BigNumber = await oracle.getUnderlyingPrice(borrowed);
+        const collateralPrice: BigNumber = await oracle.getUnderlyingPrice(VBNB);
+        const exchangeRate: BigNumber = await collateral.exchangeRateStored();
+        const incentive: BigNumber = await unitroller.getLiquidationIncentive(VBNB);
+        const expected = repay.mul(incentive).mul(debtPrice).div(collateralPrice.mul(exchangeRate));
+        expect(seizeTokens).to.equal(expected);
+        expect(seizeTokens).to.be.gt(0);
+
+        // Compare both deployed lenses at the SAME state. Comparing before/after the governance
+        // warp also measures oracle/cache changes, which are unrelated to the rounding fix.
+        const oldLens = new Contract(
+          OLD_COMPTROLLER_LENS,
+          ["function liquidateCalculateSeizeTokens(address,address,address,uint256) view returns (uint256,uint256)"],
+          provider,
+        );
+        const [oldErr, oldSeize] = await oldLens.liquidateCalculateSeizeTokens(
+          unitroller.address,
+          borrowed,
+          VBNB,
+          repay,
+        );
+        expect(oldErr).to.equal(0);
+        if (decimals === 18) {
+          expect(seizeTokens).to.be.closeTo(oldSeize, oldSeize.div(1_000_000));
+        } else {
+          // This deployed 24-decimal Hub share exposes the old ratio's premature truncation.
+          expect(oldSeize).to.be.lt(seizeTokens);
+        }
+      });
+    }
   });
 });

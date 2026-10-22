@@ -3,8 +3,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
+import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
+import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
 import vip712, {
   COLLATERAL_GATEWAY,
@@ -15,7 +16,6 @@ import vip712, {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { parseEther } = ethers.utils;
 const { MaxUint256 } = ethers.constants;
@@ -62,12 +62,11 @@ const LENS_ABI = [
 
 // Use the deployed Gateway, Prime implementation and Lens after the actual governance lifecycle.
 // No new implementation deployment, bytecode replacement or manual Gateway permission grants.
-forking(129099700, async () => {
+forking(129144152, async () => {
   const provider = ethers.provider;
   const core = new Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
   const acm = new Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, provider);
   const prime = new Contract(PRIME, PRIME_ABI, provider);
-  const oracle = new Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const flashEvents = new Contract(
     core.address,
     ["event FlashLoanExecuted(address indexed receiver,address[] assets,uint256[] amounts)"],
@@ -82,10 +81,7 @@ forking(129099700, async () => {
     for (const market of markets) {
       assets.add(await new Contract(market, VTOKEN_ABI, provider).underlying());
     }
-    await setMaxStalePeriodForAllAssets(
-      oracle,
-      [...assets].map(address => new Contract(address, ERC20_ABI, provider)),
-    );
+    await bypassStalePrices([...assets]);
   });
 
   testVip("VIP-712 business scenarios", await vip712());
