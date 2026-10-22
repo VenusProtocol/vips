@@ -30,14 +30,15 @@ const CORE_AND_FLUX_SOURCES = [
   "0xA65bB4b20542268B64CF08871a98D75342AFE927", // Flux USDC
   "0xe31B8851c3fa9B3dD39a04a2ed9493869A410616", // Flux U
 ];
-const YIELD_GROUPS = [
-  ...CORE_AND_FLUX_SOURCES,
+/// The sources with `forceRemoveResource`
+const FRV_AND_CENTRIFUGE_SOURCES = [
   "0x621eF38cE0C4e7060fF0bF3D609E3D46EC144bE7", // FRV USDT
   "0x438388847eE16850Ab4f5b82dc7954c0d043B716", // FRV USDC
   "0x30908eddB9E94add7AC9944a0adda66d80B89143", // FRV U
   CENTRIFUGE_SOURCE_USDT,
   CENTRIFUGE_SOURCE_USDC,
 ];
+const YIELD_GROUPS = [...CORE_AND_FLUX_SOURCES, ...FRV_AND_CENTRIFUGE_SOURCES];
 
 // ────────────────────────────────────────────────────────────────
 // 1. EBrake and sentinel roles
@@ -97,10 +98,15 @@ const YIELD_GROUP_ROLES = [
       "raiseResourceCap(address,uint256)",
       "lowerResourceCap(address,uint256)",
       "setBlocksPerYear(uint256)",
+      "forceRemoveResource(address)",
     ],
     accounts: [NORMAL_TIMELOCK],
   },
-  { contracts: [WILDCARD], signatures: ["updateResourceAdapter(address,address)"], accounts: [GUARDIAN] },
+  {
+    contracts: [WILDCARD],
+    signatures: ["updateResourceAdapter(address,address)", "forceRemoveResource(address)"],
+    accounts: [GUARDIAN],
+  },
   {
     contracts: [WILDCARD],
     signatures: [
@@ -133,10 +139,12 @@ const YIELD_GROUP_TIMELOCK_REVOKES = [
     signatures: ["raiseResourceCap(address,uint256)", "lowerResourceCap(address,uint256)", "setBlocksPerYear(uint256)"],
     accounts: [NORMAL_TIMELOCK],
   },
+  { contracts: FRV_AND_CENTRIFUGE_SOURCES, signatures: ["forceRemoveResource(address)"], accounts: [NORMAL_TIMELOCK] },
 ];
 
 const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
   { contracts: YIELD_GROUPS, signatures: ["updateResourceAdapter(address,address)"], accounts: [GUARDIAN] },
+  { contracts: FRV_AND_CENTRIFUGE_SOURCES, signatures: ["forceRemoveResource(address)"], accounts: [GUARDIAN] },
   {
     contracts: YIELD_GROUPS,
     signatures: [
@@ -176,7 +184,7 @@ export const GRANT_PERMISSIONS = expand([...EBRAKE_AND_SENTINEL_ROLES, ...PAUSE_
 // Revokes of the per-contract grants the wildcards replace, one aggregator batch each
 export const REVOKE_BATCHES = [
   expand(PAUSE_WILDCARD_REVOKES), // 62
-  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 84
-  expand(YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES), // 67
+  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 89
+  expand(YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES), // 72
   SPOKE_SOURCE_REVOKES, // 60
 ];
