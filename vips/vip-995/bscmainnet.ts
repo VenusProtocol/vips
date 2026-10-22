@@ -8,9 +8,9 @@ import {
   CENTRIFUGE_SOURCE_USDC,
   CENTRIFUGE_SOURCE_USDT,
   EBRAKE,
+  GRANT_PERMISSIONS,
   HUB_NAV_SENTINEL,
   HUB_OPERATOR,
-  PERMISSIONS,
   REVOKE_BATCHES,
 } from "./permissions-bscmainnet";
 
@@ -84,7 +84,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
       // ────────────────────────────────────────────────────────────────
       // 2. ACM permissions
       // ────────────────────────────────────────────────────────────────
-      ...PERMISSIONS.map(({ contract, signature, account }) => ({
+      ...GRANT_PERMISSIONS.map(({ contract, signature, account }) => ({
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [contract, signature, account],

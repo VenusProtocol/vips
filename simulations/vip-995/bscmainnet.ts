@@ -24,9 +24,9 @@ import {
   CENTRIFUGE_SOURCE_USDT,
   EBRAKE,
   EBRAKE_OPERATORS,
+  GRANT_PERMISSIONS,
   HUB_NAV_SENTINEL,
   HUB_SENTINEL_GRANTEES,
-  PERMISSIONS,
   REVOKE_BATCHES,
   VENUS_TEAM_MULTISIG,
 } from "../../vips/vip-995/permissions-bscmainnet";
@@ -137,7 +137,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("permissions are not granted yet", async () => {
-      for (const { contract, signature, account } of PERMISSIONS) {
+      for (const { contract, signature, account } of GRANT_PERMISSIONS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
           `${signature} on ${contract} for ${account}`,
@@ -176,7 +176,7 @@ forking(BLOCK_NUMBER, async () => {
         txResponse,
         [ACM_ABI],
         ["RoleGranted", "RoleRevoked"],
-        [PERMISSIONS.length + 1, REVOKES.length + 1],
+        [GRANT_PERMISSIONS.length + 1, REVOKES.length + 1],
       );
       await expectEvents(
         txResponse,
@@ -197,7 +197,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("permissions are granted", async () => {
-      for (const { contract, signature, account } of PERMISSIONS) {
+      for (const { contract, signature, account } of GRANT_PERMISSIONS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
           `${signature} on ${contract} for ${account}`,
@@ -219,7 +219,7 @@ forking(BLOCK_NUMBER, async () => {
       for (const hub of hubs) {
         contracts.push(...(await hub.registeredYieldGroups()));
       }
-      for (const { contract, signature, account } of PERMISSIONS) {
+      for (const { contract, signature, account } of GRANT_PERMISSIONS) {
         if (contract !== ethers.constants.AddressZero) continue;
         for (const from of contracts) {
           expect(await acm.isAllowedToCall(account, signature, { from }), `${signature} on ${from} for ${account}`).to

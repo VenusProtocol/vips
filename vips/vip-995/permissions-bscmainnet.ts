@@ -37,7 +37,7 @@ const YIELD_GROUPS = [
 ];
 
 // ────────────────────────────────────────────────────────────────
-// EBrake and sentinel roles
+// 1. EBrake and sentinel roles
 // ────────────────────────────────────────────────────────────────
 /// What EBrake's Hub actions forward to, checked by each Hub and YieldGroup against its own address
 const HUB_SIDE_PAUSES = ["pauseHub()", "pauseYieldGroup(address)", "pauseResource(address)"];
@@ -53,38 +53,33 @@ const SENTINEL_SETTERS = [
 export const EBRAKE_OPERATORS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, VENUS_TEAM_MULTISIG];
 export const HUB_SENTINEL_GRANTEES = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
 
-// ────────────────────────────────────────────────────────────────
-// 1. Direct pauses: Normal Timelock and Guardian, in case EBrake cannot pause
-// ────────────────────────────────────────────────────────────────
-const DIRECT_PAUSES = {
-  contracts: [WILDCARD],
-  signatures: HUB_SIDE_PAUSES,
-  accounts: [NORMAL_TIMELOCK, GUARDIAN],
-};
-const DIRECT_PAUSE_REVOKES = [
-  {
-    contracts: HUBS,
-    signatures: ["pauseHub()", "pauseYieldGroup(address)"],
-    accounts: [NORMAL_TIMELOCK, GUARDIAN],
-  },
-  { contracts: YIELD_GROUPS, signatures: ["pauseResource(address)"], accounts: [NORMAL_TIMELOCK, GUARDIAN] },
+const EBRAKE_AND_SENTINEL_ROLES = [
+  // Wildcard so a Hub or YieldGroup added later is covered without a new grant
+  { contracts: [WILDCARD], signatures: HUB_SIDE_PAUSES, accounts: [EBRAKE] },
+  { contracts: [EBRAKE], signatures: EBRAKE_HUB_ACTIONS, accounts: EBRAKE_OPERATORS },
+  { contracts: [HUB_NAV_SENTINEL], signatures: SENTINEL_SETTERS, accounts: HUB_SENTINEL_GRANTEES },
+  // The sentinel's one write: `handleNavGuardDeviation` pauses the breaching resource's Hub through EBrake
+  { contracts: [EBRAKE], signatures: ["pauseHub(address)"], accounts: [HUB_NAV_SENTINEL] },
 ];
 
 // ────────────────────────────────────────────────────────────────
-// 2. Direct unpauses: Normal Timelock and Guardian
+// 2. Normal Timelock and Guardian pause and unpause: per-contract grants replaced by wildcards
 // ────────────────────────────────────────────────────────────────
-const DIRECT_UNPAUSES = {
-  contracts: [WILDCARD],
-  signatures: ["unpauseHub()", "unpauseYieldGroup(address)", "unpauseResource(address)"],
-  accounts: [NORMAL_TIMELOCK, GUARDIAN],
-};
-const DIRECT_UNPAUSE_REVOKES = [
+const HUB_SIDE_UNPAUSES = ["unpauseHub()", "unpauseYieldGroup(address)", "unpauseResource(address)"];
+
+const PAUSE_WILDCARD_ROLES = [
+  { contracts: [WILDCARD], signatures: HUB_SIDE_PAUSES, accounts: [NORMAL_TIMELOCK, GUARDIAN] },
+  { contracts: [WILDCARD], signatures: HUB_SIDE_UNPAUSES, accounts: [NORMAL_TIMELOCK, GUARDIAN] },
+];
+const PAUSE_WILDCARD_REVOKES = [
+  { contracts: HUBS, signatures: ["pauseHub()", "pauseYieldGroup(address)"], accounts: [NORMAL_TIMELOCK, GUARDIAN] },
+  { contracts: YIELD_GROUPS, signatures: ["pauseResource(address)"], accounts: [NORMAL_TIMELOCK, GUARDIAN] },
   { contracts: HUBS, signatures: ["unpauseHub()", "unpauseYieldGroup(address)"], accounts: [NORMAL_TIMELOCK] },
   { contracts: YIELD_GROUPS, signatures: ["unpauseResource(address)"], accounts: [NORMAL_TIMELOCK, GUARDIAN] },
 ];
 
 // ────────────────────────────────────────────────────────────────
-// 3. YieldGroup roles each source is granted one by one
+// 3. YieldGroup roles: per-contract grants replaced by wildcards
 // ────────────────────────────────────────────────────────────────
 const YIELD_GROUP_ROLES = [
   {
@@ -155,36 +150,20 @@ const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
   },
 ];
 
-// ────────────────────────────────────────────────────────────────
-// Grants, in proposal order.
-// ────────────────────────────────────────────────────────────────
-export const PERMISSIONS = [
-  // Wildcard so a Hub or YieldGroup added later is covered without a new grant
-  { contracts: [WILDCARD], signatures: HUB_SIDE_PAUSES, accounts: [EBRAKE] },
-  DIRECT_PAUSES,
-  DIRECT_UNPAUSES,
-  ...YIELD_GROUP_ROLES,
-  { contracts: [EBRAKE], signatures: EBRAKE_HUB_ACTIONS, accounts: EBRAKE_OPERATORS },
-  { contracts: [HUB_NAV_SENTINEL], signatures: SENTINEL_SETTERS, accounts: HUB_SENTINEL_GRANTEES },
-  // The sentinel's one write: `handleNavGuardDeviation` pauses the breaching resource's Hub through EBrake
-  { contracts: [EBRAKE], signatures: ["pauseHub(address)"], accounts: [HUB_NAV_SENTINEL] },
-].flatMap(({ contracts, signatures, accounts }) =>
-  contracts.flatMap(contract =>
-    signatures.flatMap(signature => accounts.map(account => ({ contract, signature, account }))),
-  ),
-);
-
-// ────────────────────────────────────────────────────────────────
-// Revokes of the per-contract grants the wildcards replace, one aggregator batch each
-// ────────────────────────────────────────────────────────────────
-export const REVOKE_BATCHES = [
-  [...DIRECT_PAUSE_REVOKES, ...DIRECT_UNPAUSE_REVOKES], // 62
-  YIELD_GROUP_TIMELOCK_REVOKES, // 87
-  YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES, // 67
-].map(sets =>
+// One (contract, signature, account) per combination in each set
+const expand = (sets: { contracts: string[]; signatures: string[]; accounts: string[] }[]) =>
   sets.flatMap(({ contracts, signatures, accounts }) =>
     contracts.flatMap(contract =>
       signatures.flatMap(signature => accounts.map(account => ({ contract, signature, account }))),
     ),
-  ),
-);
+  );
+
+// Grants, in proposal order
+export const GRANT_PERMISSIONS = expand([...EBRAKE_AND_SENTINEL_ROLES, ...PAUSE_WILDCARD_ROLES, ...YIELD_GROUP_ROLES]);
+
+// Revokes of the per-contract grants the wildcards replace, one aggregator batch each
+export const REVOKE_BATCHES = [
+  expand(PAUSE_WILDCARD_REVOKES), // 62
+  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 87
+  expand(YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES), // 67
+];
