@@ -60,21 +60,31 @@ export const buildCommandsWithBatches = async (
     if (onChain) await assignIndices(batches, batched, onChain, chain);
   }
 
+  // Adjacent batches on one chain form a run: one grantRole before its first batch, one revokeRole after its last.
+  const commands: Command[] = [];
   let next = 0;
-  const commands = entries.flatMap((entry, i) => {
-    if (!isBatch(entry)) return [entry];
-    const chainId = chainIdOf(entry);
-    const sameChainBatch = (other?: Command | Batch) => !!other && isBatch(other) && chainIdOf(other) === chainId;
-    const [grant, execute, revoke] = executeBatchCommands(batches[next++], chainId);
-    return [
-      ...(sameChainBatch(entries[i - 1]) ? [] : [grant]),
-      execute,
-      ...(sameChainBatch(entries[i + 1]) ? [] : [revoke]),
-    ];
+  entries.forEach((entry, i) => {
+    if (!isBatch(entry)) {
+      commands.push(entry);
+      return;
+    }
+    const [grant, execute, revoke] = executeBatchCommands(batches[next++], chainIdOf(entry));
+    const firstOfRun = !sameChainBatches(entries[i - 1], entry);
+    const lastOfRun = !sameChainBatches(entry, entries[i + 1]);
+    if (firstOfRun) commands.push(grant);
+    commands.push(execute);
+    if (lastOfRun) commands.push(revoke);
   });
   // The proposal keeps batches as aggregatorBatches, for seeding (sims, seedAggregatorBatches) and propose checks.
   return { commands, batches };
 };
+
+const sameChainBatches = (entry?: Command | Batch, neighbour?: Command | Batch) =>
+  entry !== undefined &&
+  neighbour !== undefined &&
+  isBatch(entry) &&
+  isBatch(neighbour) &&
+  chainIdOf(entry) === chainIdOf(neighbour);
 
 // The three commands that run one batch. bytes32(0) is DEFAULT_ADMIN_ROLE; the aggregator holds it only while its
 // batch runs. BNB Chain commands stay local; every other chain keeps its dstChainId.
