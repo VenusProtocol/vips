@@ -423,6 +423,7 @@ forking(FORK_BLOCK, async () => {
     },
   });
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
   describe("Post-VIP behavior", () => {
     it("should update lastPoolId to the new pool", async () => {
       expect(await comptroller.lastPoolId()).to.equals(EMODE_POOLS[EMODE_POOLS.length - 1].id);
@@ -892,6 +893,7 @@ forking(FORK_BLOCK, async () => {
               }
             });
 
+            // eslint-disable-next-line complexity, sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
             it(`enterLeverage: supply ${collateral.key}, borrow ${borrow.key}`, async () => {
               try {
                 // Compute seed dynamically: ~$20 worth of collateral
@@ -1008,6 +1010,7 @@ forking(FORK_BLOCK, async () => {
               }
             });
 
+            // eslint-disable-next-line complexity, sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
             it(`exitLeverage: redeem ${collateral.key}, repay ${borrow.key}`, async () => {
               const borrowBalanceBefore = await vBorrow.callStatic.borrowBalanceCurrent(userAddress);
 
@@ -1126,6 +1129,7 @@ forking(FORK_BLOCK, async () => {
 
             // enterLeverageFromBorrow only for the original primary+USDT pair
             if (isPrimaryUSDTPair) {
+              // eslint-disable-next-line complexity, sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
               it(`enterLeverageFromBorrow: increase leverage for ${collateral.key}`, async () => {
                 try {
                   // Compute amounts dynamically using oracle prices to stay within borrowing capacity

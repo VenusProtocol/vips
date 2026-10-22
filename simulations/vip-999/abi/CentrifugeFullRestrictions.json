@@ -1,0 +1,33 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "isMember",
+    "outputs": [
+      { "internalType": "bool", "name": "isValid", "type": "bool" },
+      { "internalType": "uint64", "name": "validUntil", "type": "uint64" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "uint64", "name": "validUntil", "type": "uint64" }
+    ],
+    "name": "updateMember",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "wards",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

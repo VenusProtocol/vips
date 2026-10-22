@@ -37,6 +37,7 @@ const getStack = (key: string) => {
 
 const eq = (a: string, b: string) => ethers.utils.getAddress(a) === ethers.utils.getAddress(b);
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 async function main() {
   const usdt = getStack("USDT").asset;
   const u = getStack("U").asset;

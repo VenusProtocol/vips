@@ -1,12 +1,32 @@
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
+import { Proposal } from "./types";
 import { getCalldatas } from "./utils";
 
 const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
 
+export const assertBatchesSeeded = ({ aggregatorBatches = [] }: Proposal, path: string) => {
+  const unread = [...new Set(aggregatorBatches.filter(batch => !batch.index).map(batch => batch.network))];
+  if (unread.length) {
+    throw new Error(
+      `batch: ${unread.join(", ")} batches were not read; build against a live network, e.g. --network bscmainnet`,
+    );
+  }
+  const unseeded = aggregatorBatches.filter(batch => !batch.seeded);
+  if (unseeded.length === 0) return;
+  throw new Error(
+    `BATCH_NOT_SEEDED: ${unseeded
+      .map(batch => `${batch.network} batch ${batch.index} (${batch.calls.length} calls)`)
+      .join(", ")}; seed them with \`npx hardhat seedAggregatorBatches ${path} --network ${
+      FORKED_NETWORK ?? "bscmainnet"
+    }\`, ` + "then pin each with batch(commands, { seededIndex }), keeping raw: true on raw batches",
+  );
+};
+
 export const loadProposal = async (path: string) => {
   const proposalModule = await import(`../vips/${path}`);
   const proposalCreated = await proposalModule.default();
+  assertBatchesSeeded(proposalCreated, path);
   const proposal = {
     signatures: proposalCreated.signatures,
     targets: proposalCreated.targets,

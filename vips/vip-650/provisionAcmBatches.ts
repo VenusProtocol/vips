@@ -59,6 +59,7 @@ const encodeCalls = (commands: AcmCommand[]) =>
     ),
   }));
 
+// eslint-disable-next-line complexity, sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 async function main() {
   if (hre.network.name !== "bscmainnet") {
     throw new Error(`provisionAcmBatches: expected --network bscmainnet, got "${hre.network.name}"`);

@@ -25,6 +25,7 @@ const ABI = [
   "function getBatch(uint256) view returns (tuple(address target, bytes data)[])",
 ];
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- predates the complexity gates, tracked for refactor
 async function main() {
   let failed = false;
   for (const chain of Object.keys(AGGREGATOR) as AggregatorChain[]) {
