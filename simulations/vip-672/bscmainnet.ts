@@ -7,7 +7,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
-import vip712, {
+import vip672, {
   COLLATERAL_GATEWAY,
   ENTER_MARKET_FOR_ACCOUNT_SIGNATURE,
   NEW_COMPTROLLER_LENS,
@@ -16,11 +16,11 @@ import vip712, {
   OLD_MARKET_FACET,
   PRIME,
   PRIME_NEW_IMPLEMENTATION,
-} from "../../vips/vip-712/bscmainnet";
-import ACM_ABI from "./abi/AccessControlManager.json";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import DIAMOND_ABI from "./abi/Diamond.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+} from "../../vips/vip-672/bscmainnet";
+import ACM_ABI from "../vip-712/abi/AccessControlManager.json";
+import COMPTROLLER_ABI from "../vip-712/abi/Comptroller.json";
+import DIAMOND_ABI from "../vip-712/abi/Diamond.json";
+import RESILIENT_ORACLE_ABI from "../vip-712/abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -110,7 +110,7 @@ forking(129144152, async () => {
     });
   });
 
-  testVip("vip-712", await vip712(), {
+  testVip("vip-672", await vip672(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [1]);

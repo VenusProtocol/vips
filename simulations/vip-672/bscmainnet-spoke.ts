@@ -16,7 +16,7 @@ import {
   SPOKE_COMPTROLLER,
   SPOKE_POOL_REGISTRY,
 } from "../../vips/vip-670/addresses/bscmainnet";
-import vip712, { ENTER_MARKET_FOR_ACCOUNT_SIGNATURE } from "../../vips/vip-712/bscmainnet";
+import vip672, { ENTER_MARKET_FOR_ACCOUNT_SIGNATURE } from "../../vips/vip-672/bscmainnet";
 import ACM_ABI from "../vip-670/abi/AccessControlManager.json";
 import GATEWAY_ABI from "../vip-670/abi/CollateralGateway.json";
 import ERC20_ABI from "../vip-670/abi/ERC20.json";
@@ -26,7 +26,7 @@ import VTOKEN_ABI from "../vip-670/abi/VToken.json";
 const { parseEther, keccak256, defaultAbiCoder, hexZeroPad } = ethers.utils;
 const { MaxUint256, AddressZero } = ethers.constants;
 const SUPPLY = parseEther("1");
-const USER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-712 spoke user"), 12));
+const USER = ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id("vip-672 spoke user"), 12));
 const CORE_VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 // Same token funding fixture as VIP-670: bStocks use OZ v5's ERC-7201 ERC20 namespace.
 // Only test-user balances are injected. Deployed code, listing, permissions and caps remain real.
@@ -47,7 +47,7 @@ forking(129144152, async () => {
     await bypassStalePrices(COLLATERAL_MARKETS.map(m => m.underlying));
   });
 
-  testVip("VIP-712 with Spoke prerequisites", await vip712());
+  testVip("VIP-672 with Spoke prerequisites", await vip672());
 
   async function userFixture() {
     const user = await initMainnetUser(USER, parseEther("10"));

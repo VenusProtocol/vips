@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-712/utils/cut-params-bscmainnet.json";
+import { cutParams as params } from "../../simulations/vip-672/utils/cut-params-bscmainnet.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -31,25 +31,27 @@ export const PRIME_LENS = "0x645B99bDBD9e9125740907B17F19a3ca8544Bc83";
 
 export const ENTER_MARKET_FOR_ACCOUNT_SIGNATURE = "enterMarketForAccount(address,address)";
 
-export const vip712 = () => {
+export const vip672 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-712 [BNB Chain] Prime upgrade and leveraged position migration support",
+    title: "VIP-672 [BNB Chain] Prime upgrade, leveraged position migration support and ComptrollerLens fix",
     description: `#### Summary
 
-If passed, this VIP will upgrade the Prime implementation on BNB Chain, upgrade the MarketFacet of the core pool Comptroller to add \`enterMarketForAccount\`, authorize the CollateralGateway to enter markets for users and to initiate flash loans, and point the core pool Comptroller at a new ComptrollerLens that computes liquidation seize amounts with a single division.
+If passed, this VIP will upgrade the Prime implementation on BNB Chain, upgrade the MarketFacet of the core pool Comptroller to add enterMarketForAccount, authorize the CollateralGateway to enter markets for users and to initiate flash loans, and point the core pool Comptroller at a new ComptrollerLens that computes liquidation seize amounts with a single division.
 
 #### Description
 
-1. **Upgrade the Prime implementation** — Calls \`upgrade(${PRIME}, ${PRIME_NEW_IMPLEMENTATION})\` on the Prime ProxyAdmin ([${PRIME_PROXY_ADMIN}](https://bscscan.com/address/${PRIME_PROXY_ADMIN})). The ProxyAdmin is owned by the Normal Timelock, so no ownership handoff is needed.
+1. **Upgrade the Prime implementation** — Adds support for markets whose underlying token has up to 24 decimals. Calls upgrade(${PRIME}, ${PRIME_NEW_IMPLEMENTATION}) on the Prime ProxyAdmin ([${PRIME_PROXY_ADMIN}](https://bscscan.com/address/${PRIME_PROXY_ADMIN})). The ProxyAdmin is owned by the Normal Timelock, so no ownership handoff is needed.
 
-2. **Upgrade the Comptroller MarketFacet** — Calls \`diamondCut\` on the core pool Comptroller ([${UNITROLLER}](https://bscscan.com/address/${UNITROLLER})), replacing the 31 selectors currently routed to the MarketFacet and adding one new selector, \`${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE}\` (\`0x2e30a93c\`).
+2. **Upgrade the Comptroller MarketFacet** — Calls diamondCut on the core pool Comptroller ([${UNITROLLER}](https://bscscan.com/address/${UNITROLLER})), replacing the 31 selectors currently routed to the MarketFacet and adding one new selector, ${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE} (0x2e30a93c).
 
-3. **Grant the CollateralGateway permission to enter markets for a user** — Calls \`giveCallPermission\` on the AccessControlManager ([${ACM}](https://bscscan.com/address/${ACM})), allowing the CollateralGateway to call \`${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE}\` on the Comptroller. This follows the diamond cut, because the selector is not routed before it.
+3. **Grant the CollateralGateway permission to enter markets for a user** — Calls giveCallPermission on the AccessControlManager ([${ACM}](https://bscscan.com/address/${ACM})), allowing the CollateralGateway to call ${ENTER_MARKET_FOR_ACCOUNT_SIGNATURE} on the Comptroller. This follows the diamond cut, because the selector is not routed before it.
 
-4. **Whitelist the CollateralGateway as a flash loan account** — Calls \`setWhiteListFlashLoanAccount(gateway, true)\` on the Comptroller. The core pool flash loan feature is live and the Comptroller only allows whitelisted accounts to initiate flash loans, so without this the leveraged position migration reverts. The Normal Timelock already holds this permission, so no ACM grant is required for it.
+4. **Whitelist the CollateralGateway as a flash loan account** — Calls setWhiteListFlashLoanAccount(gateway, true) on the Comptroller. The core pool flash loan feature is live and the Comptroller only allows whitelisted accounts to initiate flash loans, so without this the leveraged position migration reverts. The Normal Timelock already holds this permission, so no ACM grant is required for it.
 
-5. **Set the new ComptrollerLens** — Calls \`_setComptrollerLens(${NEW_COMPTROLLER_LENS})\` on the Comptroller. The current lens rounds the seize ratio to 18 decimals before applying the repay amount, which drops part or all of the seized collateral when the borrowed asset has a small price mantissa, such as a 24-decimal token. The new lens multiplies first and divides once. The Comptroller admin is the Normal Timelock, so no ACM grant is required for it.
+5. **Set the new ComptrollerLens** — Calls _setComptrollerLens(${NEW_COMPTROLLER_LENS}) on the Comptroller. The current lens rounds the seize ratio to 18 decimals before applying the repay amount, which drops part or all of the seized collateral when the borrowed asset has a small price mantissa, such as a 24-decimal token. The new lens multiplies first and divides once. The Comptroller admin is the Normal Timelock, so no ACM grant is required for it.
+
+The CollateralGateway permissions in this VIP apply to the Core pool. Its permission on the Spoke Comptroller is handled separately in [VIP-670](https://github.com/VenusProtocol/vips/pull/782).
 
 #### Deployed contracts
 
@@ -115,4 +117,4 @@ If passed, this VIP will upgrade the Prime implementation on BNB Chain, upgrade 
   );
 };
 
-export default vip712;
+export default vip672;

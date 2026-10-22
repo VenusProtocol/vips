@@ -7,15 +7,15 @@ import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
-import vip712, {
+import vip672, {
   COLLATERAL_GATEWAY,
   ENTER_MARKET_FOR_ACCOUNT_SIGNATURE,
   PRIME,
   PRIME_LENS,
-} from "../../vips/vip-712/bscmainnet";
-import ACM_ABI from "./abi/AccessControlManager.json";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import ERC20_ABI from "./abi/ERC20.json";
+} from "../../vips/vip-672/bscmainnet";
+import ACM_ABI from "../vip-712/abi/AccessControlManager.json";
+import COMPTROLLER_ABI from "../vip-712/abi/Comptroller.json";
+import ERC20_ABI from "../vip-712/abi/ERC20.json";
 
 const { parseEther } = ethers.utils;
 const { MaxUint256 } = ethers.constants;
@@ -84,7 +84,7 @@ forking(129144152, async () => {
     await bypassStalePrices([...assets]);
   });
 
-  testVip("VIP-712 business scenarios", await vip712());
+  testVip("VIP-672 business scenarios", await vip672());
 
   async function userFixture() {
     const [, user] = await ethers.getSigners();
