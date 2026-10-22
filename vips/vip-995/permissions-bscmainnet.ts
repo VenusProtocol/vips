@@ -83,7 +83,7 @@ const PAUSE_WILDCARD_REVOKES = [
 ];
 
 // ────────────────────────────────────────────────────────────────
-// 3. YieldGroup roles: per-contract grants replaced by wildcards
+// 3. YieldGroup roles: per-contract grants replaced by wildcards, except the Hub operator's `unpauseResource`
 // ────────────────────────────────────────────────────────────────
 const YIELD_GROUP_ROLES = [
   {
@@ -113,7 +113,6 @@ const YIELD_GROUP_ROLES = [
       "setInnerDepositQueue(address[])",
       "setInnerWithdrawQueue(address[])",
       "pauseResource(address)",
-      "unpauseResource(address)",
       "raiseResourceCap(address,uint256)",
       "lowerResourceCap(address,uint256)",
     ],
@@ -140,6 +139,8 @@ const YIELD_GROUP_TIMELOCK_REVOKES = [
     accounts: [NORMAL_TIMELOCK],
   },
   { contracts: FRV_AND_CENTRIFUGE_SOURCES, signatures: ["forceRemoveResource(address)"], accounts: [NORMAL_TIMELOCK] },
+  // The Hubs' sweep too: the wildcard covers them as well
+  { contracts: HUBS, signatures: ["sweep(address,address)"], accounts: [NORMAL_TIMELOCK] },
 ];
 
 const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
@@ -151,7 +152,7 @@ const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
       "setInnerDepositQueue(address[])",
       "setInnerWithdrawQueue(address[])",
       "pauseResource(address)",
-      "unpauseResource(address)",
+      "unpauseResource(address)", // not re-granted: unpausing stays with governance
     ],
     accounts: [HUB_OPERATOR],
   },
@@ -163,7 +164,8 @@ const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
 ];
 
 // ────────────────────────────────────────────────────────────────
-// 4. Spoke sources: the 20 per-contract grants VIP-669 gives each, replaced by the wildcards above
+// 4. Spoke sources: the 20 per-contract grants VIP-669 gives each, covered by the wildcards above except the Hub
+//    operator's `unpauseResource`
 // ────────────────────────────────────────────────────────────────
 export const SPOKE_SOURCES = [SPOKE_SOURCE_USDT, SPOKE_SOURCE_USDC, SPOKE_SOURCE_U];
 const SPOKE_SOURCE_REVOKES = SPOKE_SOURCES.flatMap(contract =>
@@ -181,10 +183,11 @@ const expand = (sets: { contracts: string[]; signatures: string[]; accounts: str
 // Grants, in proposal order
 export const GRANT_PERMISSIONS = expand([...EBRAKE_AND_SENTINEL_ROLES, ...PAUSE_WILDCARD_ROLES, ...YIELD_GROUP_ROLES]);
 
-// Revokes of the per-contract grants the wildcards replace, one aggregator batch each
+// Revokes of the per-contract grants the wildcards replace, plus the Hub operator's `unpauseResource`, one aggregator
+// batch each
 export const REVOKE_BATCHES = [
   expand(PAUSE_WILDCARD_REVOKES), // 62
-  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 89
+  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 92
   expand(YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES), // 72
   SPOKE_SOURCE_REVOKES, // 60
 ];

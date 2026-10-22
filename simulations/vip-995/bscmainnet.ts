@@ -27,6 +27,7 @@ import {
   EBRAKE_OPERATORS,
   GRANT_PERMISSIONS,
   HUB_NAV_SENTINEL,
+  HUB_OPERATOR,
   HUB_SENTINEL_GRANTEES,
   REVOKE_BATCHES,
   SPOKE_SOURCES,
@@ -46,6 +47,12 @@ const { ACCESS_CONTROL_MANAGER, CRITICAL_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK, UN
 const BLOCK_NUMBER = 128928685;
 
 const REVOKES = REVOKE_BATCHES.flat();
+// (signature, account) pairs the VIP re-grants as wildcards; a revoke outside this set is a real removal
+const WILDCARDS = new Set(
+  GRANT_PERMISSIONS.filter(({ contract }) => contract === ethers.constants.AddressZero).map(
+    ({ signature, account }) => `${signature}|${account}`,
+  ),
+);
 
 const OLD_EBRAKE_IMPLEMENTATION = "0x2D36677EcA318c9536011D53aa752F042dd01DE8";
 const HUB_REGISTRY = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2";
@@ -151,6 +158,16 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
+    it("Hub operator can unpause a resource", async () => {
+      const beforePause = await takeSnapshot();
+      const operator = await initMainnetUser(HUB_OPERATOR, parseEther("1"));
+      const centrifugeUsdt = new Contract(CENTRIFUGE_SOURCE_USDT, YIELD_GROUP_ABI, ethers.provider);
+      await centrifugeUsdt.connect(operator).pauseResource(JAAA_USDT);
+      await centrifugeUsdt.connect(operator).unpauseResource(JAAA_USDT);
+      expect((await centrifugeUsdt.resourceConfig(JAAA_USDT)).paused).to.be.false;
+      await beforePause.restore();
+    });
+
     it("sentinel is initialized and pending Normal Timelock ownership", async () => {
       expect(await sentinel.accessControlManager()).to.equal(ACCESS_CONTROL_MANAGER);
       expect(await sentinel.EBRAKE()).to.equal(EBRAKE);
@@ -204,12 +221,14 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("per-contract grants are revoked, and each account keeps the role through its wildcard", async () => {
+    it("per-contract grants are revoked, and each account keeps the role only through its wildcard", async () => {
       for (const { contract, signature, account } of REVOKES) {
         const role = ethers.utils.solidityKeccak256(["address", "string"], [contract, signature]);
         expect(await acm.hasRole(role, account), `${signature} on ${contract} for ${account}`).to.be.false;
-        expect(await acm.isAllowedToCall(account, signature, { from: contract }), `${signature} on ${contract}`).to.be
-          .true;
+        expect(
+          await acm.isAllowedToCall(account, signature, { from: contract }),
+          `${signature} on ${contract} for ${account}`,
+        ).to.equal(WILDCARDS.has(`${signature}|${account}`));
       }
     });
 
@@ -316,6 +335,16 @@ forking(BLOCK_NUMBER, async () => {
       expect(await usdtHub.hubPaused()).to.be.true;
       expect(await usdcHub.hubPaused()).to.be.false;
       expect(await uHub.hubPaused()).to.be.false;
+    });
+
+    it("Hub operator pauses a resource but can no longer unpause it", async () => {
+      const operator = await initMainnetUser(HUB_OPERATOR, parseEther("1"));
+      const centrifugeUsdt = new Contract(CENTRIFUGE_SOURCE_USDT, YIELD_GROUP_ABI, ethers.provider);
+      await centrifugeUsdt.connect(operator).pauseResource(JAAA_USDT);
+      expect((await centrifugeUsdt.resourceConfig(JAAA_USDT)).paused).to.be.true;
+      await expect(centrifugeUsdt.connect(operator).unpauseResource(JAAA_USDT))
+        .to.be.revertedWithCustomError(centrifugeUsdt, "Unauthorized")
+        .withArgs(HUB_OPERATOR, "unpauseResource(address)");
     });
 
     it("Guardian pauses a resource and a YieldGroup through EBrake", async () => {

@@ -46,21 +46,21 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
 
 1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). The new implementation adds \`pauseHub\`, \`pauseHubYieldGroup\` and \`pauseHubResource\`. Its storage layout is unchanged.
 2. Accept ownership of the **HubNavDeviationSentinel** at [${HUB_NAV_SENTINEL}](https://bscscan.com/address/${HUB_NAV_SENTINEL}).
-3. Grant 55 ACM permissions, pre-stored on the AuxiliaryCommandsAggregator as one batch:
+3. Grant 54 ACM permissions, pre-stored on the AuxiliaryCommandsAggregator as one batch:
    - EBrake: \`pauseHub()\`, \`pauseYieldGroup(address)\` and \`pauseResource(address)\` as wildcards (contract address zero), so they cover the USDT, USDC and U Hubs, their YieldGroups, including the three Spoke sources VIP-669 registers, and any Hub or YieldGroup added later
    - the Normal Timelock and the Guardian: the same three pauses, and \`unpauseHub()\`, \`unpauseYieldGroup(address)\` and \`unpauseResource(address)\`, as wildcards. Both can then pause a Hub directly if EBrake cannot. They already hold these on every live Hub and YieldGroup, except the Guardian's Hub and YieldGroup unpauses, which are new.
-   - the YieldGroup roles each live source grants one by one, as wildcards, so a new YieldGroup needs no grants: ten to the Normal Timelock (\`addResource\`, \`removeResource\`, \`updateResourceAdapter\`, both inner queues, \`sweep\`, both resource caps, \`setBlocksPerYear\` and the FRV and Centrifuge sources' \`forceRemoveResource\`), \`updateResourceAdapter\` and \`forceRemoveResource\` to the Guardian, and both inner queues, \`pauseResource\`, \`unpauseResource\` and both resource caps to the Hub operator multisig [${HUB_OPERATOR}](https://bscscan.com/address/${HUB_OPERATOR})
+   - the YieldGroup roles each live source grants one by one, as wildcards, so a new YieldGroup needs no grants: ten to the Normal Timelock (\`addResource\`, \`removeResource\`, \`updateResourceAdapter\`, both inner queues, \`sweep\`, both resource caps, \`setBlocksPerYear\` and the FRV and Centrifuge sources' \`forceRemoveResource\`), \`updateResourceAdapter\` and \`forceRemoveResource\` to the Guardian, and both inner queues, \`pauseResource\` and both resource caps to the Hub operator multisig [${HUB_OPERATOR}](https://bscscan.com/address/${HUB_OPERATOR})
    - the Guardian, the Normal and Fast-track Timelocks and the Venus team multisig: EBrake's three new actions. They already hold its market pause actions.
    - the Guardian and the Normal and Fast-track Timelocks: the sentinel's three setters
    - the sentinel: \`pauseHub(address)\` on EBrake
-4. Revoke the 283 per-contract grants that the new wildcards make redundant, so each role is held in one place: 223 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. These run as four more pre-stored batches. The aggregator holds the AccessControlManager admin role only while the five batches run.
+4. Revoke 286 per-contract grants: 226 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. All but the Hub operator's \`unpauseResource(address)\` are redundant with the new wildcards, so each role is held in one place. The operator's \`unpauseResource\` is not re-granted: unpausing a resource stays with the Normal Timelock and the Guardian. These run as four more pre-stored batches. The aggregator holds the AccessControlManager admin role only while the five batches run.
 5. Register the keeper [${KEEPER}](https://bscscan.com/address/${KEEPER}) on the sentinel. It is the keeper that already drives DeviationSentinel.
 6. Configure and arm the sentinel for the JTRSY and JAAA positions on both Hubs. The sentinel pauses the Hub when a position's value is more than 4% above or 8% below its band centre (measured as a share of the band's anchor), and only when that gap exceeds 10,000 USDT or USDC.
 
 #### Notes
 
 - The sentinel can only pause. Unpausing a Hub stays with the Normal Timelock and the Guardian.
-- On the live Hubs and YieldGroups, the wildcards and revokes together change only one thing: the Guardian can now unpause a Hub and a YieldGroup.
+- On the live Hubs and YieldGroups, the wildcards and revokes together change two things: the Guardian can now unpause a Hub and a YieldGroup, and the Hub operator can no longer unpause a resource.
 - It pauses the whole Hub rather than the one position, because a YieldGroup's total assets still include a paused resource.
 - Both thresholds are wider than the bands' own gaps (2% up, 5% down), so normal clamping by the Hub never triggers a pause.
 - The sentinel's code has been audited by HashDit, and this deployment includes the fixes from that audit.`,
