@@ -40,7 +40,7 @@ import vip996, {
   SENTINEL_SETTERS,
   SET_ACTIONS_PAUSED,
   SPOKE_COMPTROLLER,
-} from "../../vips/vip-996/bsctestnet";
+} from "../../vips/vip-668/bsctestnet-hub-upgrades";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import FLASH_LOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
