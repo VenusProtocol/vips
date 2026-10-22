@@ -7,6 +7,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import vip669 from "../../vips/vip-669/bscmainnet";
 import vip671 from "../../vips/vip-671/bscmainnet";
 import vip995, {
   JAAA_USDC,
@@ -28,6 +29,7 @@ import {
   HUB_NAV_SENTINEL,
   HUB_SENTINEL_GRANTEES,
   REVOKE_BATCHES,
+  SPOKE_SOURCES,
   VENUS_TEAM_MULTISIG,
 } from "../../vips/vip-995/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
@@ -51,11 +53,6 @@ const HUB_USDT = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
 const HUB_USDC = "0x9D2D9592cF8DFbf59107fAab703d08494BE14617";
 const HUB_U = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
 const CORE_SOURCE_USDC = "0x299D9Be7CEfff91c68F13F267d525CFC18e965ef";
-const SPOKE_SOURCES = [
-  "0x3cC1eDE91419dC7EC199a06704EC8ECAb665a684",
-  "0x4cd4aB2F88E39D3F3e481bb2555EcdF00266f717",
-  "0xcA3f9AFD7C4c1022E4A37a12671Ef57B8A7bfc51",
-];
 
 const IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
@@ -85,7 +82,9 @@ const NAV_GUARDS = [
 ];
 
 forking(BLOCK_NUMBER, async () => {
-  // The revoke batch needs the AuxiliaryCommandsAggregator upgrade queued in VIP-671
+  // Both queued ahead of this VIP: VIP-669 grants the Spoke source roles batch 4 revokes, and VIP-671 upgrades the
+  // AuxiliaryCommandsAggregator the revoke batches need
+  await pretendExecutingVip(await vip669(), NORMAL_TIMELOCK);
   await pretendExecutingVip(await vip671(), NORMAL_TIMELOCK);
 
   const acm = new Contract(ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);

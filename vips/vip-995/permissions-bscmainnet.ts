@@ -1,6 +1,9 @@
 import { ethers } from "ethers";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
+import { SPOKE_SOURCE_U, SPOKE_SOURCE_USDC, SPOKE_SOURCE_USDT } from "../vip-669/addresses/bscmainnet";
+import { SPOKE_SOURCE_GRANTS } from "../vip-669/permissions-bscmainnet";
+
 const { FAST_TRACK_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 const WILDCARD = ethers.constants.AddressZero;
 
@@ -150,6 +153,14 @@ const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
   },
 ];
 
+// ────────────────────────────────────────────────────────────────
+// 4. Spoke sources: the 20 per-contract grants VIP-669 gives each, replaced by the wildcards above
+// ────────────────────────────────────────────────────────────────
+export const SPOKE_SOURCES = [SPOKE_SOURCE_USDT, SPOKE_SOURCE_USDC, SPOKE_SOURCE_U];
+const SPOKE_SOURCE_REVOKES = SPOKE_SOURCES.flatMap(contract =>
+  SPOKE_SOURCE_GRANTS.map(({ role, account }) => ({ contract, signature: role, account })),
+);
+
 // One (contract, signature, account) per combination in each set
 const expand = (sets: { contracts: string[]; signatures: string[]; accounts: string[] }[]) =>
   sets.flatMap(({ contracts, signatures, accounts }) =>
@@ -166,4 +177,5 @@ export const REVOKE_BATCHES = [
   expand(PAUSE_WILDCARD_REVOKES), // 62
   expand(YIELD_GROUP_TIMELOCK_REVOKES), // 87
   expand(YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES), // 67
+  SPOKE_SOURCE_REVOKES, // 60
 ];
