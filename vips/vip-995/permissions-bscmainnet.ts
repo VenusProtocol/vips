@@ -114,6 +114,7 @@ const YIELD_GROUP_ROLES = [
     accounts: [HUB_OPERATOR],
   },
 ];
+
 const YIELD_GROUP_TIMELOCK_REVOKES = [
   {
     contracts: YIELD_GROUPS,
@@ -132,8 +133,8 @@ const YIELD_GROUP_TIMELOCK_REVOKES = [
     signatures: ["raiseResourceCap(address,uint256)", "lowerResourceCap(address,uint256)", "setBlocksPerYear(uint256)"],
     accounts: [NORMAL_TIMELOCK],
   },
-  { contracts: HUBS, signatures: ["sweep(address,address)"], accounts: [NORMAL_TIMELOCK] },
 ];
+
 const YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES = [
   { contracts: YIELD_GROUPS, signatures: ["updateResourceAdapter(address,address)"], accounts: [GUARDIAN] },
   {
@@ -175,7 +176,7 @@ export const GRANT_PERMISSIONS = expand([...EBRAKE_AND_SENTINEL_ROLES, ...PAUSE_
 // Revokes of the per-contract grants the wildcards replace, one aggregator batch each
 export const REVOKE_BATCHES = [
   expand(PAUSE_WILDCARD_REVOKES), // 62
-  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 87
+  expand(YIELD_GROUP_TIMELOCK_REVOKES), // 84
   expand(YIELD_GROUP_GUARDIAN_AND_OPERATOR_REVOKES), // 67
   SPOKE_SOURCE_REVOKES, // 60
 ];

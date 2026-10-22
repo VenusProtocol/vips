@@ -53,7 +53,7 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
    - the Guardian, the Normal and Fast-track Timelocks and the Venus team multisig: EBrake's three new actions. They already hold its market pause actions.
    - the Guardian and the Normal and Fast-track Timelocks: the sentinel's three setters
    - the sentinel: \`pauseHub(address)\` on EBrake
-4. Revoke the 276 per-contract grants that the new wildcards make redundant, so each role is held in one place: 216 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. These run as four batches pre-stored on the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while the batches run.
+4. Revoke the 273 per-contract grants that the new wildcards make redundant, so each role is held in one place: 213 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. These run as four batches pre-stored on the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while the batches run.
 5. Register the keeper [${KEEPER}](https://bscscan.com/address/${KEEPER}) on the sentinel. It is the keeper that already drives DeviationSentinel.
 6. Configure and arm the sentinel for the JTRSY and JAAA positions on both Hubs. The sentinel pauses the Hub when a position's value is more than 4% above or 8% below its band centre (measured as a share of the band's anchor), and only when that gap exceeds 10,000 USDT or USDC.
 
