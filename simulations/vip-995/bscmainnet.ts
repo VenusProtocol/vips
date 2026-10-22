@@ -82,8 +82,8 @@ const NAV_GUARDS = [
 ];
 
 forking(BLOCK_NUMBER, async () => {
-  // Both queued ahead of this VIP: VIP-669 grants the Spoke source roles batch 4 revokes, and VIP-671 upgrades the
-  // AuxiliaryCommandsAggregator the revoke batches need
+  // Both queued ahead of this VIP: VIP-669 gives the Spoke source grants the last batch revokes, and VIP-671 upgrades
+  // the AuxiliaryCommandsAggregator the batches need
   await pretendExecutingVip(await vip669(), NORMAL_TIMELOCK);
   await pretendExecutingVip(await vip671(), NORMAL_TIMELOCK);
 
@@ -170,7 +170,7 @@ forking(BLOCK_NUMBER, async () => {
     supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
-      // Plus the aggregator's DEFAULT_ADMIN_ROLE around the revoke batch
+      // Plus the aggregator's DEFAULT_ADMIN_ROLE around the five batches
       await expectEvents(
         txResponse,
         [ACM_ABI],
