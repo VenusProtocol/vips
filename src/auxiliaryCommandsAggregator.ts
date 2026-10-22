@@ -20,8 +20,9 @@ export const isBatch = (entry: Command | Batch): entry is Batch => "kind" in ent
 
 // Groups commands into one proposal entry. Batched calls run as the aggregator, so calls that must
 // come from the timelock stay out of batch(). A batch too large for one addBatch runs out of gas when it is seeded, so
-// seed it with { raw: true } or move commands out. One batch() per chain: a second repeats the grantRole and
-// revokeRole commands, and the Timelock refuses an identical command queued at the same eta.
+// seed it with { raw: true } or move commands out, or split it into adjacent batch() calls. Adjacent batches on one
+// chain share one grantRole and revokeRole; separated, they would repeat them, and the Timelock refuses an identical
+// command queued at the same eta.
 export const batch = (commands: Command[], options: BatchOptions = {}): Batch => {
   const { expectedIndex, seededIndex } = options;
   if (commands.length === 0) throw new Error("batch: a batch() needs at least one command");
@@ -41,7 +42,8 @@ export const batch = (commands: Command[], options: BatchOptions = {}): Batch =>
 };
 
 // Builds every command of the proposal, plain and batched. Each batch() comes out in place as
-// grantRole(DEFAULT_ADMIN_ROLE), executeBatch(index), revokeRole; every other command stays as written.
+// grantRole(DEFAULT_ADMIN_ROLE), executeBatch(index), revokeRole, with one grantRole and revokeRole around adjacent
+// batches on one chain; every other command stays as written.
 export const buildCommandsWithBatches = async (
   entries: (Command | Batch)[],
   type: ProposalType | undefined,
@@ -59,9 +61,17 @@ export const buildCommandsWithBatches = async (
   }
 
   let next = 0;
-  const commands = entries.flatMap(entry =>
-    isBatch(entry) ? executeBatchCommands(batches[next++], chainIdOf(entry)) : [entry],
-  );
+  const commands = entries.flatMap((entry, i) => {
+    if (!isBatch(entry)) return [entry];
+    const chainId = chainIdOf(entry);
+    const sameChainBatch = (other?: Command | Batch) => !!other && isBatch(other) && chainIdOf(other) === chainId;
+    const [grant, execute, revoke] = executeBatchCommands(batches[next++], chainId);
+    return [
+      ...(sameChainBatch(entries[i - 1]) ? [] : [grant]),
+      execute,
+      ...(sameChainBatch(entries[i + 1]) ? [] : [revoke]),
+    ];
+  });
   // The proposal keeps batches as aggregatorBatches, for seeding (sims, seedAggregatorBatches) and propose checks.
   return { commands, batches };
 };

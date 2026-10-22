@@ -152,6 +152,32 @@ describe("buildCommandsWithBatches", () => {
     ]);
   });
 
+  it("shares one grant and revoke across adjacent batches on one chain", async () => {
+    const remote = (value: number) => batch([setValue(value, { dstChainId: LzChainId.ethereum })]);
+    const { commands, batches } = await build([
+      batch([setValue(1)]),
+      batch([setValue(2)]),
+      remote(3),
+      remote(4),
+      batch([setValue(5)]),
+    ]);
+
+    expect(commands.map(c => [c.signature, c.dstChainId])).to.deep.equal([
+      ["grantRole(bytes32,address)", undefined],
+      ["executeBatch(uint256)", undefined],
+      ["executeBatch(uint256)", undefined],
+      ["revokeRole(bytes32,address)", undefined],
+      ["grantRole(bytes32,address)", LzChainId.ethereum],
+      ["executeBatch(uint256)", LzChainId.ethereum],
+      ["executeBatch(uint256)", LzChainId.ethereum],
+      ["revokeRole(bytes32,address)", LzChainId.ethereum],
+      ["grantRole(bytes32,address)", undefined],
+      ["executeBatch(uint256)", undefined],
+      ["revokeRole(bytes32,address)", undefined],
+    ]);
+    expect(batches).to.have.lengthOf(5);
+  });
+
   it("rejects nested batches instead of overwriting their options", () => {
     const inner = batch([setValue(2)], { seededIndex: 5, raw: true });
     expect(() =>
