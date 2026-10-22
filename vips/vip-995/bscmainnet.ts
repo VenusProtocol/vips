@@ -46,14 +46,14 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
 
 1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). The new implementation adds \`pauseHub\`, \`pauseHubYieldGroup\` and \`pauseHubResource\`. Its storage layout is unchanged.
 2. Accept ownership of the **HubNavDeviationSentinel** at [${HUB_NAV_SENTINEL}](https://bscscan.com/address/${HUB_NAV_SENTINEL}).
-3. Grant 55 ACM permissions:
+3. Grant 55 ACM permissions, pre-stored on the AuxiliaryCommandsAggregator as one batch:
    - EBrake: \`pauseHub()\`, \`pauseYieldGroup(address)\` and \`pauseResource(address)\` as wildcards (contract address zero), so they cover the USDT, USDC and U Hubs, their YieldGroups, including the three Spoke sources VIP-669 registers, and any Hub or YieldGroup added later
    - the Normal Timelock and the Guardian: the same three pauses, and \`unpauseHub()\`, \`unpauseYieldGroup(address)\` and \`unpauseResource(address)\`, as wildcards. Both can then pause a Hub directly if EBrake cannot. They already hold these on every live Hub and YieldGroup, except the Guardian's Hub and YieldGroup unpauses, which are new.
    - the YieldGroup roles each live source grants one by one, as wildcards, so a new YieldGroup needs no grants: ten to the Normal Timelock (\`addResource\`, \`removeResource\`, \`updateResourceAdapter\`, both inner queues, \`sweep\`, both resource caps, \`setBlocksPerYear\` and the FRV and Centrifuge sources' \`forceRemoveResource\`), \`updateResourceAdapter\` and \`forceRemoveResource\` to the Guardian, and both inner queues, \`pauseResource\`, \`unpauseResource\` and both resource caps to the Hub operator multisig [${HUB_OPERATOR}](https://bscscan.com/address/${HUB_OPERATOR})
    - the Guardian, the Normal and Fast-track Timelocks and the Venus team multisig: EBrake's three new actions. They already hold its market pause actions.
    - the Guardian and the Normal and Fast-track Timelocks: the sentinel's three setters
    - the sentinel: \`pauseHub(address)\` on EBrake
-4. Revoke the 283 per-contract grants that the new wildcards make redundant, so each role is held in one place: 223 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. These run as four batches pre-stored on the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while the batches run.
+4. Revoke the 283 per-contract grants that the new wildcards make redundant, so each role is held in one place: 223 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. These run as four more pre-stored batches. The aggregator holds the AccessControlManager admin role only while the five batches run.
 5. Register the keeper [${KEEPER}](https://bscscan.com/address/${KEEPER}) on the sentinel. It is the keeper that already drives DeviationSentinel.
 6. Configure and arm the sentinel for the JTRSY and JAAA positions on both Hubs. The sentinel pauses the Hub when a position's value is more than 4% above or 8% below its band centre (measured as a share of the band's anchor), and only when that gap exceeds 10,000 USDT or USDC.
 
@@ -82,13 +82,16 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
       { target: HUB_NAV_SENTINEL, signature: "acceptOwnership()", params: [] },
 
       // ────────────────────────────────────────────────────────────────
-      // 2. ACM permissions
+      // 2. ACM permissions, as adjacent aggregator batches so propose() fits the per-tx gas cap
       // ────────────────────────────────────────────────────────────────
-      ...GRANT_PERMISSIONS.map(({ contract, signature, account }) => ({
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [contract, signature, account],
-      })),
+      batch(
+        GRANT_PERMISSIONS.map(({ contract, signature, account }) => ({
+          target: ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [contract, signature, account],
+        })),
+        { raw: true },
+      ),
       ...REVOKE_BATCHES.map(revokes =>
         batch(
           revokes.map(({ contract, signature, account }) => ({
