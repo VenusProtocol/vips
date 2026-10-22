@@ -5,11 +5,10 @@ import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import vip671 from "../../vips/vip-671/bscmainnet";
 import vip995, {
-  CENTRIFUGE_SOURCE_USDC,
-  CENTRIFUGE_SOURCE_USDT,
   JAAA_USDC,
   JAAA_USDT,
   JTRSY_USDC,
@@ -21,11 +20,14 @@ import vip995, {
   PAUSE_UP_BPS,
 } from "../../vips/vip-995/bscmainnet";
 import {
+  CENTRIFUGE_SOURCE_USDC,
+  CENTRIFUGE_SOURCE_USDT,
   EBRAKE,
   EBRAKE_OPERATORS,
   HUB_NAV_SENTINEL,
   HUB_SENTINEL_GRANTEES,
   PERMISSIONS,
+  REVOKE_BATCHES,
   VENUS_TEAM_MULTISIG,
 } from "../../vips/vip-995/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
@@ -41,12 +43,19 @@ const { ACCESS_CONTROL_MANAGER, CRITICAL_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK, UN
 
 const BLOCK_NUMBER = 128928685;
 
+const REVOKES = REVOKE_BATCHES.flat();
+
 const OLD_EBRAKE_IMPLEMENTATION = "0x2D36677EcA318c9536011D53aa752F042dd01DE8";
 const HUB_REGISTRY = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2";
 const HUB_USDT = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
 const HUB_USDC = "0x9D2D9592cF8DFbf59107fAab703d08494BE14617";
 const HUB_U = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
 const CORE_SOURCE_USDC = "0x299D9Be7CEfff91c68F13F267d525CFC18e965ef";
+const SPOKE_SOURCES = [
+  "0x3cC1eDE91419dC7EC199a06704EC8ECAb665a684",
+  "0x4cd4aB2F88E39D3F3e481bb2555EcdF00266f717",
+  "0xcA3f9AFD7C4c1022E4A37a12671Ef57B8A7bfc51",
+];
 
 const IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
@@ -76,6 +85,9 @@ const NAV_GUARDS = [
 ];
 
 forking(BLOCK_NUMBER, async () => {
+  // The revoke batch needs the AuxiliaryCommandsAggregator upgrade queued in VIP-671
+  await pretendExecutingVip(await vip671(), NORMAL_TIMELOCK);
+
   const acm = new Contract(ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
   const ebrake = new Contract(EBRAKE, EBRAKE_ABI, ethers.provider);
   const sentinel = new Contract(HUB_NAV_SENTINEL, SENTINEL_ABI, ethers.provider);
@@ -113,12 +125,30 @@ forking(BLOCK_NUMBER, async () => {
       expect(await usdtHub.hubPaused()).to.be.false;
     });
 
+    it("Guardian cannot unpause a Hub", async () => {
+      const beforePause = await takeSnapshot();
+      const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseEther("1"));
+      await usdtHub.connect(timelock).pauseHub();
+      const guardian = await initMainnetUser(GUARDIAN, parseEther("1"));
+      await expect(usdtHub.connect(guardian).unpauseHub())
+        .to.be.revertedWithCustomError(usdtHub, "Unauthorized")
+        .withArgs(GUARDIAN, HUB_USDT, "unpauseHub()");
+      await beforePause.restore();
+    });
+
     it("permissions are not granted yet", async () => {
       for (const { contract, signature, account } of PERMISSIONS) {
         expect(
           await acm.isAllowedToCall(account, signature, { from: contract }),
           `${signature} on ${contract} for ${account}`,
         ).to.be.false;
+      }
+    });
+
+    it("per-contract grants to revoke are held", async () => {
+      for (const { contract, signature, account } of REVOKES) {
+        const role = ethers.utils.solidityKeccak256(["address", "string"], [contract, signature]);
+        expect(await acm.hasRole(role, account), `${signature} on ${contract} for ${account}`).to.be.true;
       }
     });
 
@@ -141,7 +171,13 @@ forking(BLOCK_NUMBER, async () => {
     supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [PERMISSIONS.length]);
+      // Plus the aggregator's DEFAULT_ADMIN_ROLE around the revoke batch
+      await expectEvents(
+        txResponse,
+        [ACM_ABI],
+        ["RoleGranted", "RoleRevoked"],
+        [PERMISSIONS.length + 1, REVOKES.length + 1],
+      );
       await expectEvents(
         txResponse,
         [SENTINEL_ABI],
@@ -169,15 +205,25 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("EBrake's wildcard pauses reach every Hub and YieldGroup", async () => {
+    it("per-contract grants are revoked, and each account keeps the role through its wildcard", async () => {
+      for (const { contract, signature, account } of REVOKES) {
+        const role = ethers.utils.solidityKeccak256(["address", "string"], [contract, signature]);
+        expect(await acm.hasRole(role, account), `${signature} on ${contract} for ${account}`).to.be.false;
+        expect(await acm.isAllowedToCall(account, signature, { from: contract }), `${signature} on ${contract}`).to.be
+          .true;
+      }
+    });
+
+    it("wildcards reach every Hub and YieldGroup, and the Spoke sources", async () => {
+      const contracts = [...hubs.map(hub => hub.address), ...SPOKE_SOURCES];
       for (const hub of hubs) {
-        for (const signature of ["pauseHub()", "pauseYieldGroup(address)"]) {
-          expect(await acm.isAllowedToCall(EBRAKE, signature, { from: hub.address }), `${signature} on ${hub.address}`)
-            .to.be.true;
-        }
-        for (const yieldGroup of await hub.registeredYieldGroups()) {
-          expect(await acm.isAllowedToCall(EBRAKE, "pauseResource(address)", { from: yieldGroup }), yieldGroup).to.be
-            .true;
+        contracts.push(...(await hub.registeredYieldGroups()));
+      }
+      for (const { contract, signature, account } of PERMISSIONS) {
+        if (contract !== ethers.constants.AddressZero) continue;
+        for (const from of contracts) {
+          expect(await acm.isAllowedToCall(account, signature, { from }), `${signature} on ${from} for ${account}`).to
+            .be.true;
         }
       }
     });
@@ -293,6 +339,28 @@ forking(BLOCK_NUMBER, async () => {
 
       for (const hub of hubs) {
         expect(await hub.hubPaused(), hub.address).to.be.false;
+      }
+    });
+
+    it("Normal Timelock and Guardian pause and unpause a Hub, a YieldGroup and a resource directly", async () => {
+      const centrifugeUsdt = new Contract(CENTRIFUGE_SOURCE_USDT, YIELD_GROUP_ABI, ethers.provider);
+      for (const account of [NORMAL_TIMELOCK, GUARDIAN]) {
+        const signer = await initMainnetUser(account, parseEther("1"));
+
+        await usdtHub.connect(signer).pauseHub();
+        expect(await usdtHub.hubPaused(), account).to.be.true;
+        await usdtHub.connect(signer).unpauseHub();
+        expect(await usdtHub.hubPaused(), account).to.be.false;
+
+        await usdcHub.connect(signer).pauseYieldGroup(CENTRIFUGE_SOURCE_USDC);
+        expect((await usdcHub.yieldGroupConfig(CENTRIFUGE_SOURCE_USDC)).paused, account).to.be.true;
+        await usdcHub.connect(signer).unpauseYieldGroup(CENTRIFUGE_SOURCE_USDC);
+        expect((await usdcHub.yieldGroupConfig(CENTRIFUGE_SOURCE_USDC)).paused, account).to.be.false;
+
+        await centrifugeUsdt.connect(signer).pauseResource(JAAA_USDT);
+        expect((await centrifugeUsdt.resourceConfig(JAAA_USDT)).paused, account).to.be.true;
+        await centrifugeUsdt.connect(signer).unpauseResource(JAAA_USDT);
+        expect((await centrifugeUsdt.resourceConfig(JAAA_USDT)).paused, account).to.be.false;
       }
     });
 
