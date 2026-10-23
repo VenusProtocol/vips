@@ -52,16 +52,16 @@ import {
   YIELD_GROUP_BASE,
 } from "../../vips/vip-661/permissions-bscmainnet";
 import { ACM_AGGREGATOR_ABI, LIVE_SOURCES, buildPermissions } from "../../vips/vip-661/scripts/acmPermissions";
-import ACM_ABI from "../vip-999/abi/AccessControlManager.json";
-import ADAPTER_ABI from "../vip-999/abi/AdapterCentrifuge.json";
-import MANAGER_ABI from "../vip-999/abi/CentrifugeAsyncRequestManager.json";
-import VAULT_ABI from "../vip-999/abi/CentrifugeAsyncVault.json";
-import HOOK_ABI from "../vip-999/abi/CentrifugeFullRestrictions.json";
-import SHARE_ABI from "../vip-999/abi/CentrifugeShare.json";
-import ERC20_ABI from "../vip-999/abi/ERC20.json";
-import HUB_ABI from "../vip-999/abi/Hub.json";
-import BEACON_ABI from "../vip-999/abi/UpgradeableBeacon.json";
-import SOURCE_ABI from "../vip-999/abi/YieldGroupCentrifugeLatest.json";
+import ACM_ABI from "./abi/AccessControlManager.json";
+import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
+import MANAGER_ABI from "./abi/CentrifugeAsyncRequestManager.json";
+import VAULT_ABI from "./abi/CentrifugeAsyncVault.json";
+import HOOK_ABI from "./abi/CentrifugeFullRestrictions.json";
+import SHARE_ABI from "./abi/CentrifugeShare.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import HUB_ABI from "./abi/Hub.json";
+import BEACON_ABI from "./abi/UpgradeableBeacon.json";
+import SOURCE_ABI from "./abi/YieldGroupCentrifugeLatest.json";
 
 const BLOCK_NUMBER = 122188386;
 

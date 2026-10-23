@@ -32,13 +32,13 @@ import vip999Addendum, {
   PERCENTAGE_CAP_DISABLED,
   USDT,
   YIELD_GROUP_CENTRIFUGE_IMPL,
-} from "../../vips/vip-999/bsctestnet-addendum";
+} from "../../vips/vip-661/bsctestnet-addendum";
 import {
   CENTRIFUGE_NEW_SURFACE,
   GUARDIAN_WILDCARDS,
   NEW_GUARDIAN_GRANTS,
   NEW_TIMELOCK_GRANTS,
-} from "../../vips/vip-999/permissions-bsctestnet-addendum";
+} from "../../vips/vip-661/permissions-bsctestnet-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/AdapterCentrifuge.json";
 import ERC20_ABI from "./abi/ERC20.json";

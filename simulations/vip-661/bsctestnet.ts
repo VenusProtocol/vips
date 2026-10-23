@@ -18,13 +18,13 @@ import vip999, {
   MOCK_CENTRIFUGE_VAULT_USDT,
   NORMAL_TIMELOCK,
   USDT,
-} from "../../vips/vip-999/bsctestnet";
+} from "../../vips/vip-661/bsctestnet";
 import {
   CENTRIFUGE_FULL_SURFACE,
   GUARDIAN_GRANTS,
   GUARDIAN_WILDCARDS,
   NORMAL_TIMELOCK_GRANTS,
-} from "../../vips/vip-999/permissions-bsctestnet";
+} from "../../vips/vip-661/permissions-bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import HUB_ABI from "./abi/Hub.json";
 import VAULT_ABI from "./abi/TestnetCentrifugeVault.json";
