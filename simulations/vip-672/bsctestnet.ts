@@ -14,7 +14,7 @@ import vip712, {
   PRIME,
   PRIME_NEW_IMPLEMENTATION,
   SPOKE_COMPTROLLER,
-} from "../../vips/vip-712/bsctestnet";
+} from "../../vips/vip-672/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";

@@ -13,9 +13,9 @@ import vip672, {
   PRIME,
   PRIME_LENS,
 } from "../../vips/vip-672/bscmainnet";
-import ACM_ABI from "../vip-712/abi/AccessControlManager.json";
-import COMPTROLLER_ABI from "../vip-712/abi/Comptroller.json";
-import ERC20_ABI from "../vip-712/abi/ERC20.json";
+import ACM_ABI from "./abi/AccessControlManager.json";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import ERC20_ABI from "./abi/ERC20.json";
 
 const { parseEther } = ethers.utils;
 const { MaxUint256 } = ethers.constants;

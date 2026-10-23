@@ -10,7 +10,7 @@ import vip712Addendum, {
   NEW_COMPTROLLER_LENS,
   OLD_COMPTROLLER_LENS,
   UNITROLLER,
-} from "../../vips/vip-712/bsctestnet-addendum";
+} from "../../vips/vip-672/bsctestnet-addendum";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
