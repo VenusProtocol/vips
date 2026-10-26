@@ -90,16 +90,16 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
           signature: "giveCallPermission(address,string,address)",
           params: [contract, signature, account],
         })),
-        { raw: true },
+        { raw: true, seededIndex: 0 },
       ),
-      ...REVOKE_BATCHES.map(revokes =>
+      ...REVOKE_BATCHES.map((revokes, i) =>
         batch(
           revokes.map(({ contract, signature, account }) => ({
             target: ACCESS_CONTROL_MANAGER,
             signature: "revokeCallPermission(address,string,address)",
             params: [contract, signature, account],
           })),
-          { raw: true },
+          { raw: true, seededIndex: i + 1 },
         ),
       ),
 

@@ -5,10 +5,8 @@ import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { forking, testVip } from "src/vip-framework";
 
-import vip669 from "../../vips/vip-669/bscmainnet";
-import vip671 from "../../vips/vip-671/bscmainnet";
 import vip995, {
   JAAA_USDC,
   JAAA_USDT,
@@ -44,7 +42,8 @@ import YIELD_GROUP_ABI from "./abi/YieldGroupCentrifuge.json";
 const { ACCESS_CONTROL_MANAGER, CRITICAL_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } =
   NETWORK_ADDRESSES.bscmainnet;
 
-const BLOCK_NUMBER = 128928685;
+// After VIP-669 and VIP-671 executed and the five batches were seeded at indices 0-4
+const BLOCK_NUMBER = 129872500;
 
 const REVOKES = REVOKE_BATCHES.flat();
 // (signature, account) pairs the VIP re-grants as wildcards; a revoke outside this set is a real removal
@@ -89,11 +88,6 @@ const NAV_GUARDS = [
 ];
 
 forking(BLOCK_NUMBER, async () => {
-  // Both queued ahead of this VIP: VIP-669 gives the Spoke source grants the last batch revokes, and VIP-671 upgrades
-  // the AuxiliaryCommandsAggregator the batches need
-  await pretendExecutingVip(await vip669(), NORMAL_TIMELOCK);
-  await pretendExecutingVip(await vip671(), NORMAL_TIMELOCK);
-
   const acm = new Contract(ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
   const ebrake = new Contract(EBRAKE, EBRAKE_ABI, ethers.provider);
   const sentinel = new Contract(HUB_NAV_SENTINEL, SENTINEL_ABI, ethers.provider);
