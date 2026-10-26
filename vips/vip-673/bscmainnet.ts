@@ -34,26 +34,26 @@ export const PAUSE_UP_BPS = 400;
 export const PAUSE_DOWN_BPS = 800;
 export const MIN_PAUSE_GAP = parseUnits("10000", 18);
 
-export const vip995 = () => {
+export const vip673 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-995 [BNB Chain] EBrake Liquidity Hub pausing and Hub NAV deviation sentinel",
+    title: "VIP-673 [BNB Chain] EBrake Liquidity Hub pausing and Hub NAV deviation sentinel",
     description: `#### Summary
 
 If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new HubNavDeviationSentinel will watch the Centrifuge positions on the USDT and USDC Hubs. When a position's reported value moves well outside its NavGuard band, a keeper calls the sentinel, which pauses that Hub through EBrake.
 
 #### Actions
 
-1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). The new implementation adds \`pauseHub\`, \`pauseHubYieldGroup\` and \`pauseHubResource\`. Its storage layout is unchanged.
+1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). The new implementation adds pauseHub, pauseHubYieldGroup and pauseHubResource. Its storage layout is unchanged.
 2. Accept ownership of the **HubNavDeviationSentinel** at [${HUB_NAV_SENTINEL}](https://bscscan.com/address/${HUB_NAV_SENTINEL}).
-3. Grant 54 ACM permissions, pre-stored on the AuxiliaryCommandsAggregator as one batch:
-   - EBrake: \`pauseHub()\`, \`pauseYieldGroup(address)\` and \`pauseResource(address)\` as wildcards (contract address zero), so they cover the USDT, USDC and U Hubs, their YieldGroups, including the three Spoke sources VIP-669 registers, and any Hub or YieldGroup added later
-   - the Normal Timelock and the Guardian: the same three pauses, and \`unpauseHub()\`, \`unpauseYieldGroup(address)\` and \`unpauseResource(address)\`, as wildcards. Both can then pause a Hub directly if EBrake cannot. They already hold these on every live Hub and YieldGroup, except the Guardian's Hub and YieldGroup unpauses, which are new.
-   - the YieldGroup roles each live source grants one by one, as wildcards, so a new YieldGroup needs no grants: ten to the Normal Timelock (\`addResource\`, \`removeResource\`, \`updateResourceAdapter\`, both inner queues, \`sweep\`, both resource caps, \`setBlocksPerYear\` and the FRV and Centrifuge sources' \`forceRemoveResource\`), \`updateResourceAdapter\` and \`forceRemoveResource\` to the Guardian, and both inner queues, \`pauseResource\` and both resource caps to the Hub operator multisig [${HUB_OPERATOR}](https://bscscan.com/address/${HUB_OPERATOR})
+3. Grant 54 ACM permissions, pre-stored on the AuxiliaryCommandsAggregator as batch 0:
+   - EBrake: pauseHub(), pauseYieldGroup(address) and pauseResource(address) as wildcards (contract address zero), so they cover the USDT, USDC and U Hubs, their YieldGroups, including the three Spoke sources VIP-669 registers, and any Hub or YieldGroup added later
+   - the Normal Timelock and the Guardian: the same three pauses, and unpauseHub(), unpauseYieldGroup(address) and unpauseResource(address), as wildcards. Both can then pause a Hub directly if EBrake cannot. They already hold these on every live Hub and YieldGroup, except the Guardian's Hub and YieldGroup unpauses, which are new.
+   - the YieldGroup roles each live source grants one by one, as wildcards, so a new YieldGroup needs no grants: ten to the Normal Timelock (addResource, removeResource, updateResourceAdapter, both inner queues, sweep, both resource caps, setBlocksPerYear and the FRV and Centrifuge sources' forceRemoveResource), updateResourceAdapter and forceRemoveResource to the Guardian, and both inner queues, pauseResource and both resource caps to the Hub operator multisig [${HUB_OPERATOR}](https://bscscan.com/address/${HUB_OPERATOR})
    - the Guardian, the Normal and Fast-track Timelocks and the Venus team multisig: EBrake's three new actions. They already hold its market pause actions.
    - the Guardian and the Normal and Fast-track Timelocks: the sentinel's three setters
-   - the sentinel: \`pauseHub(address)\` on EBrake
-4. Revoke 286 per-contract grants: 226 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. All but the Hub operator's \`unpauseResource(address)\` are redundant with the new wildcards, so each role is held in one place. The operator's \`unpauseResource\` is not re-granted: unpausing a resource stays with the Normal Timelock and the Guardian. These run as four more pre-stored batches. The aggregator holds the AccessControlManager admin role only while the five batches run.
+   - the sentinel: pauseHub(address) on EBrake
+4. Revoke 286 per-contract grants: 226 on the live Hubs and YieldGroups, and the 60 VIP-669 gives the three Spoke sources. All but the Hub operator's unpauseResource(address) are redundant with the new wildcards, so each role is held in one place. The operator's unpauseResource is not re-granted: unpausing a resource stays with the Normal Timelock and the Guardian. These run as four more pre-stored batches, 1 to 4. The aggregator holds the AccessControlManager admin role only while the five batches run.
 5. Register the keeper [${KEEPER}](https://bscscan.com/address/${KEEPER}) on the sentinel. It is the keeper that already drives DeviationSentinel.
 6. Configure and arm the sentinel for the JTRSY and JAAA positions on both Hubs. The sentinel pauses the Hub when a position's value is more than 4% above or 8% below its band centre (measured as a share of the band's anchor), and only when that gap exceeds 10,000 USDT or USDC.
 
@@ -165,4 +165,4 @@ If this VIP passes, EBrake will be able to pause the Liquidity Hubs, and a new H
   );
 };
 
-export default vip995;
+export default vip673;

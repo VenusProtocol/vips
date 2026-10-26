@@ -21,7 +21,7 @@ import vip995, {
   OLD_HUB_NAV_SENTINEL_IMPLEMENTATION,
   PAUSE_DOWN_BPS,
   PAUSE_UP_BPS,
-} from "../../vips/vip-995/bsctestnet";
+} from "../../vips/vip-673/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import EBRAKE_ABI from "./abi/EBrakeSpoke.json";
 import HUB_ABI from "./abi/Hub.json";

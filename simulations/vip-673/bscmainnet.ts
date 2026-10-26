@@ -7,7 +7,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip995, {
+import vip673, {
   JAAA_USDC,
   JAAA_USDT,
   JTRSY_USDC,
@@ -17,7 +17,7 @@ import vip995, {
   NEW_EBRAKE_IMPLEMENTATION,
   PAUSE_DOWN_BPS,
   PAUSE_UP_BPS,
-} from "../../vips/vip-995/bscmainnet";
+} from "../../vips/vip-673/bscmainnet";
 import {
   CENTRIFUGE_SOURCE_USDC,
   CENTRIFUGE_SOURCE_USDT,
@@ -30,7 +30,7 @@ import {
   REVOKE_BATCHES,
   SPOKE_SOURCES,
   VENUS_TEAM_MULTISIG,
-} from "../../vips/vip-995/permissions-bscmainnet";
+} from "../../vips/vip-673/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
@@ -176,7 +176,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-995 EBrake Liquidity Hub pausing and Hub NAV deviation sentinel", await vip995(), {
+  testVip("VIP-673 EBrake Liquidity Hub pausing and Hub NAV deviation sentinel", await vip673(), {
     proposer: PROPOSER,
     supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
