@@ -3,15 +3,17 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { ADAPTER_FRV } from "../vip-669/addresses/bscmainnet";
+
 // ===================================================================================================
 // VIP-674 [BNB Chain] — Octagon SolvBTC Fixed Rate Vault
 // ===================================================================================================
 
 export const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
+export { ADAPTER_FRV }; // VIP-669's AdapterFRV, which the live U FRV resources use
 
 export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
 export const U_FRV_SOURCE = "0x30908eddB9E94add7AC9944a0adda66d80B89143";
-export const ADAPTER_FRV = "0x1FA0365bDd603452CE96BE3c0e12Db5515a35902";
 
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666"; // loan (supply) asset, 18 dec
 export const SOLVBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7"; // collateral, 18 dec
@@ -96,7 +98,7 @@ This VIP lists a fixed-term institutional loan vault for Octagon Digital Asset L
 
 At the maximum 2,000,000 U drawdown the loan is ≈75% of the collateral's deal value. With the 30-day coupon the debt is ≈2,006,575 U, which reaches the 85% liquidation threshold if SolvBTC falls ≈11.6% from the deal price, to ≈$70,660. The 80% margin call (≈$75,070, a ≈6.1% fall) is an off-chain monitoring threshold with no on-chain parameter.
 
-**Liquidity Hub.** The vault is added as a resource on the U Hub's FRV source (${U_FRV_SOURCE}) behind the shared AdapterFRV, so the Hub Operator can allocate U into it.
+**Liquidity Hub.** The vault is added as a resource on the U Hub's FRV source (${U_FRV_SOURCE}) behind the shared AdapterFRV (${ADAPTER_FRV}), so the Hub Operator can allocate U into it.
 
 **Considerations.**
 

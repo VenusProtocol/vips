@@ -111,6 +111,8 @@ forking(FORK_BLOCK, async () => {
     [
       "function maxWithdraw(address resource, address holder) view returns (uint256)",
       "function totalAssets(address resource, address holder) view returns (uint256)",
+      "function spotAPYBps(address resource, uint256 blocksPerYear) view returns (uint64)",
+      "function resourceName(address resource) view returns (string)",
     ],
     ethers.provider,
   );
@@ -192,6 +194,14 @@ forking(FORK_BLOCK, async () => {
     it("U FRV source does not list the vault yet", async () => {
       expect(await frvSource.asset()).to.equal(U);
       expect(await frvSource.resources()).to.not.include(predictedVault);
+    });
+
+    it("every live U FRV resource uses the same AdapterFRV as this VIP", async () => {
+      const resources: string[] = await frvSource.resources();
+      expect(resources.length).to.be.gt(0);
+      for (const resource of resources) {
+        expect((await frvSource.resourceConfig(resource)).adapter).to.equal(ADAPTER_FRV);
+      }
     });
 
     it("U Hub's FRV yield group has room for the full 2M U", async () => {
@@ -278,6 +288,7 @@ forking(FORK_BLOCK, async () => {
       expect(resourceConfig.registered).to.equal(true);
       expect(resourceConfig.paused).to.equal(false);
       expect(resourceConfig.adapter).to.equal(ADAPTER_FRV);
+      expect(await adapterFrv.resourceName(vault.address)).to.equal(VAULT_NAME);
     });
   });
 
@@ -347,6 +358,10 @@ forking(FORK_BLOCK, async () => {
       expect(await vault.balanceOf(lenderAddress)).to.equal(LENDER_DEPOSIT);
       expect((await vault.runtime()).totalRaised).to.equal(MAX_BORROW_CAP);
       expect(await vault.maxDeposit(lenderAddress)).to.equal(0);
+    });
+
+    it("adapter reports the 3.6% supply APY, net of the reserve factor", async () => {
+      expect(await adapterFrv.spotAPYBps(vault.address, 0)).to.equal(360);
     });
 
     it("vault locks after the 1-day open window", async () => {
