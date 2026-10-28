@@ -110,8 +110,8 @@ At the maximum 2,000,000 U drawdown the loan is ≈75% of the collateral's deal 
 
 #### Actions
 
-1. Create the Octagon vault on the controller: createVault(...).
-2. Register the vault as a resource on the U Hub's FRV source: addResource(vault, AdapterFRV).
+1. Create the Octagon vault on the InstitutionalVaultController (${INSTITUTIONAL_VAULT_CONTROLLER}): createVault(...).
+2. Register the vault as a resource on the U Hub's FRV source (${U_FRV_SOURCE}): addResource(${OCTAGON_VAULT}, ${ADAPTER_FRV}).
 
 #### Voting options
 
