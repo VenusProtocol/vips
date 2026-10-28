@@ -8,8 +8,8 @@ import { Vip674Part, buildCommands, collateralPartMeta } from "./commands";
 // VIP-675 [BNB Chain]: the Bluechips Hub-Funded Spoke pool, part 2 of 3.
 //
 // Lists the tier 2 and tier 3 bStocks into the pool part 1 (./bscmainnet.ts) creates, and needs part 1 executed first:
-// `addMarket` reverts `PoolRegistry: Pool not registered` before it. Its own on-chain proposal, so its own VIP number.
-// See part 1 for why there are three, and for what has to hold at execution.
+// `addMarket` reverts `PoolRegistry: Pool not registered` before it. See part 1 for why there are three, and for what
+// has to hold at execution.
 // ===================================================================================================
 
 const POOL_VIP_NUMBER = 674;

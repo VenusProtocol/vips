@@ -274,7 +274,7 @@ forking(FORK_BLOCK, async () => {
     };
   }
 
-  // The VTreasury pays every seed. It holds none of them yet but 0.01 SKHYB, so the fork tops it up.
+  // The VTreasury pays every seed. At FORK_BLOCK it holds none of them, so the fork tops it up.
   const treasuryBefore: Record<string, BigNumber> = {};
   const timelockBefore: Record<string, BigNumber> = {};
   const fundedOnFork: string[] = [];
@@ -291,10 +291,9 @@ forking(FORK_BLOCK, async () => {
     console.warn(`[vip-674] funded the VTreasury on the fork with the seed of: ${fundedOnFork.join(", ")}`);
   }
 
-  // The feeds go stale over the simulated voting and timelock delay. Pin each feed's current answer as a direct price,
-  // which `getPrice` returns without a staleness check, as VIP-670's simulation does. The oracles then never call the
-  // feeds, so the simulation does not exercise Atlas's caller gate: at execution the feeds themselves have to be fresh,
-  // authorized for ATLAS_ORACLE and within the band of each other.
+  // The feeds go stale over the simulated voting and timelock delay, so pin each feed's current answer as a direct
+  // price, which `getPrice` returns without a staleness check. The oracles then never call the feeds, so the
+  // simulation does not cover Atlas's caller gate.
   const prices: Record<string, BigNumber> = {};
   const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
   for (const m of COLLATERAL) {
@@ -328,7 +327,9 @@ forking(FORK_BLOCK, async () => {
       expect(await comptroller.borrowCaps(m.vToken), `${m.symbol} borrow cap`).to.equal(m.borrowCap);
       expect(await v.reserveFactorMantissa(), `${m.symbol} RF`).to.equal(m.reserveFactor);
       expect(await v.reduceReservesBlockDelta(), `${m.symbol} delta`).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
-      expect(await v.protocolSeizeShareMantissa(), `${m.symbol} seize share`).to.equal(PROTOCOL_SEIZE_SHARE);
+      expect(await v.protocolSeizeShareMantissa(), `${m.symbol} seize share`).to.equal(
+        "protocolSeizeShare" in m ? (m as BluechipsCollateralMarket).protocolSeizeShare : PROTOCOL_SEIZE_SHARE,
+      );
       expectAddress(await v.shortfall(), NORMAL_TIMELOCK, `${m.symbol} shortfall`);
       expectAddress(await registry.getVTokenForAsset(COMPTROLLER, m.underlying), m.vToken, m.symbol);
 
@@ -351,6 +352,7 @@ forking(FORK_BLOCK, async () => {
     for (const m of markets) {
       const incentive: BigNumber = await comptroller.effectiveLiquidationIncentive(m.vToken);
       expect(incentive, m.symbol).to.equal(m.liquidationIncentive);
+      expect(incentive, `${m.symbol} incentive over seize share`).to.be.gte(MANTISSA_ONE.add(m.protocolSeizeShare));
       expect(m.liquidationThreshold.mul(incentive), m.symbol).to.be.lt(MANTISSA_ONE.mul(MANTISSA_ONE));
       expect(await comptroller.actionPaused(m.vToken, ACTION_BORROW), `${m.symbol} borrow`).to.be.true;
       expect(await comptroller.actionPaused(m.vToken, ACTION_MINT), `${m.symbol} mint`).to.be.false;
@@ -412,8 +414,8 @@ forking(FORK_BLOCK, async () => {
     await expectEvents(
       txResponse,
       [VTOKEN_ABI],
-      ["NewReduceReservesBlockDelta", "NewReserveFactor", "NewShortfallContract"],
-      [markets, 0, 0],
+      ["NewReduceReservesBlockDelta", "NewProtocolSeizeShare", "NewReserveFactor", "NewShortfallContract"],
+      [markets, part.collateral.filter(m => !m.protocolSeizeShare.eq(PROTOCOL_SEIZE_SHARE)).length, 0, 0],
     );
     await expectEvents(
       txResponse,
@@ -555,7 +557,7 @@ forking(FORK_BLOCK, async () => {
 
     it("has every underlying at 18 decimals, accepting a zero-value transfer", async () => {
       // Every amount in vips/vip-674/addresses/bscmainnet.ts is 18-decimal. A token that rejects a zero-value
-      // transfer can block `healAccount` on dust collateral (shipment plan, Section 1.1).
+      // transfer can block `healAccount` on dust collateral.
       const data = new ethers.utils.Interface(ERC20_ABI).encodeFunctionData("transfer", [UNRELATED, 0]);
       for (const m of MARKETS) {
         expect(await erc20Of(m.underlying).decimals(), m.symbol).to.equal(18);
@@ -658,7 +660,6 @@ forking(FORK_BLOCK, async () => {
       expect(await comptroller.liquidationIncentiveMantissa()).to.equal(POOL_LIQUIDATION_INCENTIVE);
       expect(await comptroller.minLiquidatableCollateral()).to.equal(MIN_LIQUIDATABLE_COLLATERAL);
       expect(await comptroller.isLiquidationAllowlistEnabled()).to.be.false;
-      // The bStock index pool stays registered.
       expectAddress((await registry.getPoolByComptroller(SPOKE_COMPTROLLER)).comptroller, SPOKE_COMPTROLLER);
     });
 
@@ -685,7 +686,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("gives each collateral market its own incentive and pauses its borrowing", async () => {
+    it("gives each collateral market its own incentive and seize share, and pauses its borrowing", async () => {
       await expectCollateralSetup(COLLATERAL_1);
     });
 
@@ -717,7 +718,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("keeps the pool-wide incentive, which the liquidity markets fall back to, above every seize share", async () => {
+    it("keeps the pool-wide incentive, which the liquidity markets fall back to, above their seize share", async () => {
       const poolWide: BigNumber = await comptroller.liquidationIncentiveMantissa();
       for (const m of LIQUIDITY) {
         expect(await comptroller.effectiveLiquidationIncentive(m.vToken), m.symbol).to.equal(
@@ -792,7 +793,10 @@ forking(FORK_BLOCK, async () => {
       expect((await erc20Of(usdt.underlying).balanceOf(SUPPLIER)).sub(balance)).to.equal(borrow);
       const [, , shortfall] = await comptroller.getAccountLiquidity(SUPPLIER);
       expect(shortfall).to.equal(0);
-      await expect(vTokenOf(collateral.vToken).connect(supplier).borrow(1)).to.be.reverted;
+      await expect(vTokenOf(collateral.vToken).connect(supplier).borrow(1)).to.be.revertedWithCustomError(
+        comptroller,
+        "ActionPaused",
+      );
     });
   });
 
@@ -810,6 +814,9 @@ forking(FORK_BLOCK, async () => {
 
     it("lists part 2's markets with their risk values and seeds, paid by the VTreasury", async () => {
       await expectListed(COLLATERAL_2);
+    });
+
+    it("gives each part 2 market its own incentive and seize share, and pauses its borrowing", async () => {
       await expectCollateralSetup(COLLATERAL_2);
     });
 
@@ -844,6 +851,9 @@ forking(FORK_BLOCK, async () => {
 
     it("lists part 3's markets with their risk values and seeds, paid by the VTreasury", async () => {
       await expectListed(COLLATERAL_3);
+    });
+
+    it("gives each part 3 market its own incentive and seize share, and pauses its borrowing", async () => {
       await expectCollateralSetup(COLLATERAL_3);
     });
 
@@ -883,8 +893,9 @@ forking(FORK_BLOCK, async () => {
     const borrowerOf = (c: BluechipsCollateralMarket) => account(`e2e borrower ${c.symbol}`);
     /// Each loan's collateral is worth $1,000. Half of it is still above the $100 minimum liquidatable collateral.
     const COLLATERAL_VALUE = ethers.utils.parseUnits("1000", 18);
-    /// 40% of the collateral's value, under every collateral factor. Underlyings and prices are all 18-decimal.
-    const LOAN = COLLATERAL_VALUE.mul(4).div(10);
+    /// 45% of the collateral's value: under every collateral factor (50% at the lowest), and above what any liquidation
+    /// threshold (80% at the highest) covers once the price halves. Underlyings and prices are all 18-decimal.
+    const LOAN = COLLATERAL_VALUE.mul(45).div(100);
     const market = (asset: string) => COLLATERAL.find(m => ticker(m) === asset)!;
     /// One bStock from each part, each against a different liquidity asset: one priced for Core, a new one with an APRO
     /// pivot and a new one priced by Atlas alone.
@@ -908,7 +919,7 @@ forking(FORK_BLOCK, async () => {
       timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
     });
 
-    it("takes all 21 bStocks as collateral in one CollateralGateway call, and lends none of them", async () => {
+    it("takes all 20 bStocks as collateral in one CollateralGateway call, and lends none of them", async () => {
       const holder = await initMainnetUser(HOLDER, ethers.utils.parseEther("1"));
       for (const m of COLLATERAL) {
         await fund(m.underlying, HOLDER, m.initialSupply!);
@@ -943,7 +954,7 @@ forking(FORK_BLOCK, async () => {
         await vTokenOf(debt.vToken).connect(borrower).borrow(LOAN);
         expect(await erc20Of(debt.underlying).balanceOf(borrower.address), debt.symbol).to.equal(LOAN);
 
-        // At half the price, the largest LT (70%) covers $350 of the $400 debt.
+        // At half the price, the largest LT (80%) covers $400 of the $450 debt.
         await pinPrice(c, prices[c.underlying].div(2));
         const [, , shortfall] = await comptroller.getAccountLiquidity(borrower.address);
         expect(shortfall, "shortfall").to.be.gt(0);

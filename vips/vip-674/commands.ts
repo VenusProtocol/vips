@@ -46,10 +46,10 @@ import { OTHER_GRANTS_BLUECHIPS, REGISTRY_GRANTS_BLUECHIPS } from "./permissions
 //     sets a collateral factor above 0, which needs a nonzero price) and the one batch run comes after it.
 //  3. List the part's markets: VTreasury withdrawal, approve and `addMarket` per market. Inline: the withdrawal is
 //     `onlyOwner` and `addMarket` pulls the seed from `msg.sender`, so neither can run as the aggregator.
-//  4. One run of adjacent aggregator batches with everything that needs a listed market or has no order: the other 14
-//     comptroller grants (part 1), each market's reserve delta, the collateral markets' incentive and BORROW pause, and
-//     (part 1) each liquidity market's supply allowlist and Hub wiring. Each batch grants the aggregator what it calls
-//     and revokes it after, so none of the aggregator's own grants outlives the proposal.
+//  4. The rest, in one run of adjacent aggregator batches: the other 14 comptroller grants (part 1), each market's
+//     reserve delta, the collateral markets' incentive, seize share and BORROW pause, and (part 1) each liquidity
+//     market's supply allowlist and Hub wiring. Each batch grants the aggregator what it calls and revokes it after, so
+//     none of the aggregator's own grants outlives the proposal.
 //
 // ORDER that matters: `addMarket` before every comptroller setter on that market (`MarketNotListed`), and inside the
 // batch run `setAllowedSupplier` before `addResource` (the adapter rejects a source the allowlist does not admit) and
@@ -57,7 +57,9 @@ import { OTHER_GRANTS_BLUECHIPS, REGISTRY_GRANTS_BLUECHIPS } from "./permissions
 //
 // NOT IN VIP-674:
 //  - `setShortfallContract`: the markets are deployed with the Normal Timelock as `shortfall`.
-//  - `setReserveFactor` and `setProtocolSeizeShare`: the markets are deployed with 10% and keep the default 5%.
+//  - `setReserveFactor`: every market is deployed with 10%.
+//  - `setProtocolSeizeShare` on a market whose share is the 5% it is deployed with: the liquidity markets, GOOGLB,
+//    AAPLB and METAB.
 //  - Oracle and DBO commands for NVDAB, TSLAB, SPCXB and SKHYB: their configs are per asset and already live for Core.
 //  - Hub caps and outer queues: each Spoke source keeps its place and caps; the new markets sit inside it.
 // ===================================================================================================
@@ -66,12 +68,11 @@ import { OTHER_GRANTS_BLUECHIPS, REGISTRY_GRANTS_BLUECHIPS } from "./permissions
 const ACTION_BORROW = 2;
 
 /// Entries per aggregator batch, counting each batch's own grants and revokes. Keeps every `addBatch` under the per-tx
-/// gas cap: a full 80-entry batch seeds for about 13.2M (79%) in the simulation, which seeds each batch under that cap.
+/// gas cap: a full batch seeds for about 13M in the simulation.
 const MAX_BATCH_ENTRIES = 80;
 
 export type Vip674Part = {
   vipNumber: number;
-  /// BLUECHIPS_COMPTROLLER.
   comptroller: string;
   /// Part 1 stands up the pool and lists the liquidity markets. Later parts only add collateral markets.
   createsPool: boolean;
@@ -230,6 +231,14 @@ const batchedCommands = (part: Vip674Part): Command[] => [
     signature: "setMarketLiquidationIncentive(address,uint256)",
     params: [m.vToken, m.liquidationIncentive],
   })),
+  // After the incentive: `setProtocolSeizeShare` bounds the share by the market's own incentive.
+  ...part.collateral
+    .filter(m => !m.protocolSeizeShare.eq(PROTOCOL_SEIZE_SHARE))
+    .map(m => ({
+      target: m.vToken,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [m.protocolSeizeShare],
+    })),
   ...(part.collateral.length === 0
     ? []
     : [
@@ -293,7 +302,7 @@ export const pct = (mantissa: BigNumber, digits?: number) => {
   const value = Number(formatUnits(mantissa, 16));
   return `${digits === undefined ? value : value.toFixed(digits)}%`;
 };
-const tokens = (amount: BigNumber) => {
+export const tokens = (amount: BigNumber) => {
   const [whole, fraction] = formatUnits(amount, 18).split(".");
   return `${BigInt(whole).toLocaleString("en-US")}${fraction === "0" ? "" : `.${fraction}`}`;
 };
@@ -310,9 +319,11 @@ export const marketLines = (part: Vip674Part): string[] => [
     m =>
       `- **${m.symbol}** (tier ${m.tier}): collateral factor ${pct(m.collateralFactor)}, liquidation threshold ${pct(
         m.liquidationThreshold,
-      )}, liquidation incentive ${pct(m.liquidationIncentive.sub(parseUnits("1", 18)))}, supply cap ${tokens(
-        m.supplyCap,
-      )}, borrow cap 0, reserve factor ${pct(m.reserveFactor)}, seed ${tokens(m.initialSupply!)}`,
+      )}, liquidation incentive ${pct(m.liquidationIncentive.sub(parseUnits("1", 18)))}, protocol seize share ${pct(
+        m.protocolSeizeShare,
+      )}, supply cap ${tokens(m.supplyCap)}, borrow cap 0, reserve factor ${pct(m.reserveFactor)}, seed ${tokens(
+        m.initialSupply!,
+      )}`,
   ),
 ];
 
@@ -346,7 +357,7 @@ If passed, this VIP will list ${
 
 1. Price the assets with Atlas as the main oracle and a DeviationBoundedOracle window, with APRO as pivot where it has a feed.
 2. List the markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
-3. Give each market a liquidation incentive of its own, and pause borrowing on them.
+3. Give each market a liquidation incentive of its own, set its protocol seize share where it is not the default 5%, and pause borrowing on them.
 
 Step 3 runs through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
 
@@ -388,11 +399,10 @@ export const commonParameters = (part: Vip674Part) =>
             LIQUIDITY_IRM.jumpMultiplierPerYear,
             2,
           )} jump multiplier per year, and a ${pct(LIQUIDITY_IRM.kink)} kink.`,
+          `- USDT, USDC and U: ${pct(PROTOCOL_SEIZE_SHARE)} protocol seize share.`,
         ]),
     `- The bStocks charge no interest.`,
-    `- Every market: ${pct(
-      PROTOCOL_SEIZE_SHARE,
-    )} protocol seize share, and reserves sent to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString(
+    `- Every market sends its reserves to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString(
       "en-US",
     )} blocks.`,
     `- New assets are priced by Atlas (${ATLAS_MAX_STALE_PERIOD}s max stale period), with APRO (${APRO_MAX_STALE_PERIOD}s) as pivot inside a ±5% band where APRO has a feed, and a DeviationBoundedOracle window with a 1 hour cooldown, a 12.5% trigger and a 5% reset.`,

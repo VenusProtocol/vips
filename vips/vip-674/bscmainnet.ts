@@ -1,4 +1,4 @@
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -23,6 +23,7 @@ import {
   pct,
   pricingLines,
   referenceLines,
+  tokens,
 } from "./commands";
 
 // ===================================================================================================
@@ -32,17 +33,10 @@ import {
 // (./bscmainnet-part-2.ts) lists tiers 2 and 3, part 3 (./bscmainnet-part-3.ts) tier 4, into the same pool. Both need
 // this one executed first; they do not depend on each other.
 //
-// WHY THREE PARTS: execute() runs every call in one transaction under the 16,777,216 per-tx gas cap, and each new
-// bStock adds about 1.1M to it (listing, pricing and its batched setters). The three parts execute in about 30.3M
-// together, and tiers 2 to 4 in one part would take about 17.2M. Two parts do not fit either: the part that creates the
-// pool fits at most 8 bStocks before its execute() reverts, and the 13 left over already need more than the cap. The
-// aggregator only takes the op count and the propose() calldata down; the seed withdrawal, `approve` and `addMarket`
-// stay inline. The split is by tier so each part reviews on its own.
-//
-// GAS, from the simulation (bscmainnet fork at block 130,088,000, the propose() figure through the proposer Safe):
-//  - part 1: propose() 11.39M (68%), queue() 3.03M, execute() 12.47M (74%)
-//  - part 2: propose() 9.62M (57%), queue() 2.31M, execute() 10.22M (61%)
-//  - part 3: propose() 7.40M (44%), queue() 1.83M, execute() 7.62M (45%)
+// WHY THREE PARTS: execute() runs every call in one transaction under the 16,777,216 per-tx gas cap, and each bStock
+// adds about 1.1M to 1.4M to it. Two parts do not fit: the part that creates the pool fits at most 8 bStocks, and the
+// other 12 revert in one part. The aggregator cuts the op count and the propose() calldata, not execute() gas. The
+// split is by tier so each part reviews on its own.
 //
 // STATUS: DRAFT. `vip674()` throws while any address in ./addresses/bscmainnet.ts is still `PENDING`.
 //
@@ -54,7 +48,7 @@ import {
 //    the Normal Timelock, which holds no bStock.
 // ===================================================================================================
 
-/// Placeholder, as in VIP-668 to VIP-670. VIP numbers are assigned by the governor at proposal time.
+/// The governor assigns the real number at proposal time.
 const VIP_NUMBER = 674;
 
 export const PART_1: Vip674Part = {
@@ -84,13 +78,12 @@ VIP-${VIP_NUMBER + 1} (tier 2 and 3) and VIP-${VIP_NUMBER + 2} (tier 4) list the
 
 1. Register the pool in the Spoke pool registry, with a ${pct(CLOSE_FACTOR)} close factor, a ${pct(
       POOL_LIQUIDATION_INCENTIVE.sub(parseUnits("1", 18)),
-    )} pool-wide liquidation incentive and a $${formatUnits(
+    )} pool-wide liquidation incentive and a $${tokens(
       MIN_LIQUIDATABLE_COLLATERAL,
-      18,
     )} minimum liquidatable collateral, priced by the ResilientOracle and the DeviationBoundedOracle.
 2. Price the new assets with Atlas as the main oracle and a DeviationBoundedOracle window, with APRO as pivot where it has a feed. NVDAB, TSLAB, SPCXB and SKHYB keep the configs they already have for the Core pool.
 3. List the markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
-4. Give each collateral market a liquidation incentive of its own, and pause borrowing on them.
+4. Give each collateral market a liquidation incentive of its own, set its protocol seize share where it is not the default 5%, and pause borrowing on them.
 5. Restrict supply on the USDT, USDC and U markets to each Hub's Spoke yield group, and add each market to its yield group, after the bStock index market to deposit and before it to withdraw.
 6. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
 

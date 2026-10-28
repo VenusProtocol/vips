@@ -25,8 +25,8 @@ export * from "../../vip-670/addresses/bscmainnet";
 // "bStock index" pool (`Comptroller_HubSpoke`), with single-stock bStocks as collateral and USDT, USDC and U as
 // liquidity. Its liquidity markets are funded by the same Spoke sources as the bStock index pool's.
 //
-// STATUS: DRAFT. Four assets wait for Atlas to name their canonical feed, and the risk values are placeholders the risk
-// owner still has to confirm. Every `PENDING` fails loudly: the proposals throw with the full list until it is empty.
+// STATUS: DRAFT. Four assets wait for Atlas to name their canonical feed. Every `PENDING` fails loudly: the proposals
+// throw with the full list until it is empty.
 //
 // Token data and feeds read on chain on 2026-10-27 (block ~130,080,000). Every underlying has 18 decimals, so every
 // token amount below is 18-decimal scaled.
@@ -38,8 +38,7 @@ export const BLUECHIPS_POOL_NAME = "Bluechips";
 const SYMBOL_SUFFIX = "Bluechips";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-674's new contracts, from isolated-pools `025` and `028` (isolated-pools#575). Read back on 2026-10-27
-// (block ~130,086,000).
+// VIP-674's new contracts, from isolated-pools `025` and `028` (isolated-pools#575).
 // ---------------------------------------------------------------------------------------------------
 
 /// `Comptroller_Bluechips`, a BeaconProxy over SPOKE_COMPTROLLER_BEACON, so its `poolRegistry()` immutable is
@@ -47,9 +46,9 @@ const SYMBOL_SUFFIX = "Bluechips";
 /// deployer still owns it and the Normal Timelock is only nominated.
 export const BLUECHIPS_COMPTROLLER = "0xE14175059adc1B3C533184710425805A3063455B";
 
-/// Each a BeaconProxy over SPOKE_VTOKEN_BEACON, built on BLUECHIPS_COMPTROLLER with its rate model below, a 10% reserve
-/// factor, the Normal Timelock as `shortfall` (so no `setShortfallContract` is needed) and the ProtocolShareReserve,
-/// owned by the Normal Timelock with no pending owner, 8 decimals, no supply and a reserve delta of 0.
+/// Each a BeaconProxy over SPOKE_VTOKEN_BEACON on BLUECHIPS_COMPTROLLER, owned by the Normal Timelock, with a 10%
+/// reserve factor and the Normal Timelock as `shortfall`, so no `setShortfallContract` is needed. `028` also deployed a
+/// vAMATB_Bluechips market; the listing sheet has since dropped AMATB, so no VIP lists it.
 export const VUSDT_BLUECHIPS = "0x6bdEB94bcFb8E7B256d05994B156900268BDc469";
 export const VUSDC_BLUECHIPS = "0xF2147D0CF323eb0dFCB5ded960d7f87f98EA9Ad8";
 export const VU_BLUECHIPS = "0xfBf57056e01D69afc037218f94Dbd00FD1740691";
@@ -71,7 +70,6 @@ export const VMRNAB_BLUECHIPS = "0xE63e40d6e2578d1Cf0f8666fCB0aaAE77d8EF6b4";
 export const VMUB_BLUECHIPS = "0x0a3743D383DaDF01DDf0Aa04aD9A2a4D414FA91C";
 export const VINTCB_BLUECHIPS = "0x3D6239e4c0100ac08226e20d89C016de1a3020eb";
 export const VDRAMB_BLUECHIPS = "0x74dD3941432688aC4937e56a5368e47bCcFD58d7";
-export const VAMATB_BLUECHIPS = "0xAD69259df05EaC19FDAE4AC234987d7307D6264b";
 export const VTSMB_BLUECHIPS = "0xaD7997FbDE9fe81A9Eb9c719209a663d0dC94E3c";
 export const VCOINB_BLUECHIPS = "0x9E77a943CC84c304AE0b60ea42e78a75e06dcad0";
 
@@ -97,7 +95,6 @@ export const MRNAB = "0x5fd86da9B05abE396fe9d02a4A213A7c00556503";
 export const MUB = "0xcdf2f3e0fa43C47A6662a91C9E4a7C5f69762699";
 export const INTCB = "0xe614E2fc6C787035FF51f452e8E826Bfd32D5283";
 export const DRAMB = "0x93862d63fd9Fd488B1328E9b47717d75e994a84B";
-export const AMATB = "0xa304BD78e739C0F777202B3eB73Ac3736d1df801";
 export const TSMB = "0xAB78b89B5bb00236Be0B4B20704cBfa04EfC711c";
 export const COINB = "0x585BDE7C54ABB5cCD7791F923D6c2187635f3952";
 
@@ -105,7 +102,7 @@ export const COINB = "0x585BDE7C54ABB5cCD7791F923D6c2187635f3952";
 // Feeds. NVDAB, TSLAB, SPCXB and SKHYB are already priced for the Core pool: their Atlas, APRO, band and DBO configs
 // are per asset, so this pool shares them and VIP-674 sends none. Their feeds are listed for the simulation to compare.
 //
-// The other 17 have no Venus oracle or DBO config yet. Atlas has to authorize ATLAS_ORACLE on each of their feeds
+// The other 16 have no Venus oracle or DBO config yet. Atlas has to authorize ATLAS_ORACLE on each of their feeds
 // before execution: the DBO's `setTokenConfigs` reads the live price, and every feed set below still rejects
 // ATLAS_ORACLE with `OnlyAuthorizedCallerAllowed()` (probed 2026-10-27). Only CRCLB, SNDKB, METAB, MSFTB and MUB have
 // an APRO feed on BNB Chain, and APRO_ORACLE already reads each. The rest are priced by Atlas alone, as SPYB is in the
@@ -144,6 +141,8 @@ export type BluechipsCollateralMarket = CollateralMarket & {
   /// Listed on the Core pool too, so already priced: VIP-674 sends no oracle or DBO command for it, and its `dbo` is
   /// `null`.
   pricedOnCore: boolean;
+  /// Set with `setProtocolSeizeShare` where it differs from the PROTOCOL_SEIZE_SHARE the market is deployed with.
+  protocolSeizeShare: BigNumber;
 };
 
 /// The bStock index pool's market of the same asset, in the same Spoke source.
@@ -198,22 +197,21 @@ export const LIQUIDITY_MARKETS_BLUECHIPS: BluechipsLiquidityMarket[] = [
   },
 ];
 
-// PLACEHOLDER risk values, to be confirmed by the risk owner. The four Core assets take their Core collateral factor,
-// liquidation threshold and supply cap; the other 17 take the listing sheet's template defaults (CF 60%, LT 65%) and a
-// supply cap of about $100,000 at the 2026-10-27 Atlas price, rounded to two significant figures.
+// The listing sheet's risk values. Supply caps are sized in USD by tier (T1 $1M, T2 $300k, T3 and T4 $100k, at most 15%
+// of the on-chain float) at the 2026-10-28 oracle price; re-convert them at the price before proposing.
 const cap = (tokens: number) => parseUnits(tokens.toString(), 18);
-const factors = (cf: string, lt: string) => ({
+/// Every collateral market gets an incentive of its own, even where it equals the pool-wide 10%.
+const risk = (cf: string, lt: string, incentive: string, seizeShare: string) => ({
   collateralFactor: parseUnits(cf, 18),
   liquidationThreshold: parseUnits(lt, 18),
+  liquidationIncentive: parseUnits(incentive, 18),
+  protocolSeizeShare: parseUnits(seizeShare, 18),
 });
-const TEMPLATE = factors("0.6", "0.65");
 
 const collateral = {
   interestRateModel: IRM_COLLATERAL,
   borrowCap: BigNumber.from(0),
   reserveFactor: parseUnits("0.1", 18),
-  // The pool-wide value, pinned per market: every market with LT above 0 gets an incentive of its own.
-  liquidationIncentive: parseUnits("1.1", 18),
 };
 
 // The Core assets keep the window they already have: it is global per asset, so changing it would change Core too.
@@ -226,84 +224,84 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
   // Tier 1
   {
     ...onCore,
-    ...factors("0.6", "0.7"),
+    ...risk("0.75", "0.8", "1.08", "0.04"),
     tier: 1,
     symbol: symbol("NVDAB"),
     vToken: VNVDAB_BLUECHIPS,
     underlying: NVDAB,
-    supplyCap: cap(1500),
+    supplyCap: cap(4580),
     initialSupply: parseUnits("0.046", 18),
     atlasFeed: "0x8a44cF4E55adD99EB8bAC5D5DB749C63106d54AA",
     aproFeed: "0x310EFC9Fefe89B8085F89E91Ac782Bef6416499E",
   },
   {
     ...onCore,
-    ...factors("0.6", "0.7"),
+    ...risk("0.75", "0.8", "1.08", "0.04"),
     tier: 1,
     symbol: symbol("TSLAB"),
     vToken: VTSLAB_BLUECHIPS,
     underlying: TSLAB,
-    supplyCap: cap(236),
+    supplyCap: cap(2460),
     initialSupply: parseUnits("0.026", 18),
     atlasFeed: "0x63950C265e7CDB4016bA60C288c46291C0148ce2",
     aproFeed: "0xe1bc21701Bc8FFa39DaecDb8f58263C1d5e1c0bc",
   },
   {
     ...onCore,
-    ...factors("0.5", "0.65"),
+    ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 1,
     symbol: symbol("SPCXB"),
     vToken: VSPCXB_BLUECHIPS,
     underlying: SPCXB,
-    supplyCap: cap(2000),
+    supplyCap: cap(6700),
     initialSupply: parseUnits("0.068", 18),
     atlasFeed: "0x0072e55bff6fEC200708cE82612569a1C0EB4B24",
     aproFeed: "0x44c4173459121690613Bc22C110c4f0624254f3E",
   },
   {
     ...onCore,
-    ...factors("0.5", "0.65"),
+    ...risk("0.55", "0.65", "1.15", "0.075"),
     tier: 1,
     symbol: symbol("SKHYB"),
     vToken: VSKHYB_BLUECHIPS,
     underlying: SKHYB,
-    supplyCap: cap(375),
+    supplyCap: cap(6480),
     initialSupply: parseUnits("0.068", 18),
     atlasFeed: "0x8A87B38D4c8ef07546A1DD87a9D58f0B36B11a2B",
     aproFeed: "0x2446DCeDd294EDB5d90Ee16Fa32Da56Bc2973ACd",
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.6", "0.7", "1.125", "0.0625"),
     tier: 1,
     symbol: symbol("CRCLB"),
     vToken: VCRCLB_BLUECHIPS,
     underlying: CRCLB,
-    supplyCap: cap(1300),
+    supplyCap: cap(12340),
     initialSupply: parseUnits("0.13", 18),
     atlasFeed: PENDING,
     aproFeed: "0x48e6876A8CDa6cf8db2089128cF20a18e58089D2",
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.7", "0.75", "1.1", "0.05"),
     tier: 1,
     symbol: symbol("GOOGLB"),
     vToken: VGOOGLB_BLUECHIPS,
     underlying: GOOGLB,
-    supplyCap: cap(310),
+    supplyCap: cap(3060),
     initialSupply: parseUnits("0.032", 18),
     atlasFeed: "0x2FcEafD81a4dBDa2409B6fe5ce2afFe3cD46eDbC",
     aproFeed: null,
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.7", "0.75", "1.1", "0.05"),
     tier: 1,
     symbol: symbol("AAPLB"),
     vToken: VAAPLB_BLUECHIPS,
     underlying: AAPLB,
-    supplyCap: cap(290),
+    supplyCap: cap(2330),
     initialSupply: parseUnits("0.03", 18),
     atlasFeed: "0xD96eB519e205cEA68522E6639B6464249948294c",
     aproFeed: null,
@@ -311,48 +309,48 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
   // Tier 2
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.6", "0.7", "1.125", "0.0625"),
     tier: 2,
     symbol: symbol("MSTRB"),
     vToken: VMSTRB_BLUECHIPS,
     underlying: MSTRB,
-    supplyCap: cap(710),
+    supplyCap: cap(2120),
     initialSupply: parseUnits("0.072", 18),
     atlasFeed: "0x5453B1ABf6029A5d05De56D48d3a835Df80b7A7f",
     aproFeed: null,
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 2,
     symbol: symbol("SNDKB"),
     vToken: VSNDKB_BLUECHIPS,
     underlying: SNDKB,
-    supplyCap: cap(78),
+    supplyCap: cap(220),
     initialSupply: parseUnits("0.008", 18),
     atlasFeed: PENDING,
     aproFeed: "0xDCDa13B927F7d7641470a0d3173709d69443A361",
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.7", "0.75", "1.1", "0.05"),
     tier: 2,
     symbol: symbol("METAB"),
     vToken: VMETAB_BLUECHIPS,
     underlying: METAB,
-    supplyCap: cap(160),
+    supplyCap: cap(480),
     initialSupply: parseUnits("0.016", 18),
     atlasFeed: "0xD53300F42830552D826244fc17a6A0a4a95980A6",
     aproFeed: "0x32Fd1E5E20b091Df7286EE8C69937C4A8D619885",
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.75", "0.8", "1.08", "0.04"),
     tier: 2,
     symbol: symbol("MSFTB"),
     vToken: VMSFTB_BLUECHIPS,
     underlying: MSFTB,
-    supplyCap: cap(190),
+    supplyCap: cap(560),
     initialSupply: parseUnits("0.019", 18),
     atlasFeed: PENDING,
     aproFeed: "0xBC92F296c48E31409eD4DbD638F1fbe0ee5A3724",
@@ -360,31 +358,31 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
   // Tier 3. BNCB is not listed: neither Atlas nor APRO has a feed for it.
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 3,
     symbol: symbol("NBISB"),
     vToken: VNBISB_BLUECHIPS,
     underlying: NBISB,
-    supplyCap: cap(640),
+    supplyCap: cap(580),
     initialSupply: parseUnits("0.064", 18),
     atlasFeed: "0x50f67D3CE440A98fFeC832726260ae03667fbE5E",
     aproFeed: null,
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 3,
     symbol: symbol("BEB"),
     vToken: VBEB_BLUECHIPS,
     underlying: BEB,
-    supplyCap: cap(470),
+    supplyCap: cap(450),
     initialSupply: parseUnits("0.048", 18),
     atlasFeed: "0xC1972AebD7df78E4687164122E728Bb59EDACDa0",
     aproFeed: null,
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 3,
     symbol: symbol("AMDB"),
     vToken: VAMDB_BLUECHIPS,
@@ -396,12 +394,12 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 3,
     symbol: symbol("MRNAB"),
     vToken: VMRNAB_BLUECHIPS,
     underlying: MRNAB,
-    supplyCap: cap(520),
+    supplyCap: cap(490),
     initialSupply: parseUnits("0.052", 18),
     atlasFeed: "0x84846012824f993E942519DA3414A43CaBEe6Dd1",
     aproFeed: null,
@@ -409,55 +407,43 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
   // Tier 4
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 4,
     symbol: symbol("MUB"),
     vToken: VMUB_BLUECHIPS,
     underlying: MUB,
-    supplyCap: cap(110),
+    supplyCap: cap(100),
     initialSupply: parseUnits("0.011", 18),
     atlasFeed: PENDING,
     aproFeed: "0x9bDd29A3e175855d3DaD239F15fc7bFe1Fd70095",
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 4,
     symbol: symbol("INTCB"),
     vToken: VINTCB_BLUECHIPS,
     underlying: INTCB,
-    supplyCap: cap(1100),
+    supplyCap: cap(1060),
     initialSupply: parseUnits("0.11", 18),
     atlasFeed: "0x04676ef12A9787761DDd0d1e27522c4a65b64262",
     aproFeed: null,
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.55", "0.65", "1.15", "0.075"),
     tier: 4,
     symbol: symbol("DRAMB"),
     vToken: VDRAMB_BLUECHIPS,
     underlying: DRAMB,
-    supplyCap: cap(2000),
+    supplyCap: cap(1920),
     initialSupply: parseUnits("0.21", 18),
     atlasFeed: "0x6eaed198cA7d86C7982C30CAC4dc1c28BE915744",
     aproFeed: null,
   },
   {
     ...newAsset,
-    ...TEMPLATE,
-    tier: 4,
-    symbol: symbol("AMATB"),
-    vToken: VAMATB_BLUECHIPS,
-    underlying: AMATB,
-    supplyCap: cap(260),
-    initialSupply: parseUnits("0.026", 18),
-    atlasFeed: "0xA39c1D2E58B872eC90aF6CdeE836e433Fc4A6d11",
-    aproFeed: null,
-  },
-  {
-    ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 4,
     symbol: symbol("TSMB"),
     vToken: VTSMB_BLUECHIPS,
@@ -469,12 +455,12 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
   },
   {
     ...newAsset,
-    ...TEMPLATE,
+    ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 4,
     symbol: symbol("COINB"),
     vToken: VCOINB_BLUECHIPS,
     underlying: COINB,
-    supplyCap: cap(620),
+    supplyCap: cap(630),
     initialSupply: parseUnits("0.063", 18),
     atlasFeed: "0x758aB25F2Db37AAE2CC09D5542B2C69b5fC70E61",
     aproFeed: null,
