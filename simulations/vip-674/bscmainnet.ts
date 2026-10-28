@@ -17,12 +17,9 @@ import {
   ATLAS_FEED_CANDIDATES,
   ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
-  BLUECHIPS_POOL_NAME,
   BOUND_LOWER_RATIO,
   BOUND_UPPER_RATIO,
   BOUND_VALIDATOR,
-  BluechipsCollateralMarket,
-  BluechipsLiquidityMarket,
   CLOSE_FACTOR,
   COLLATERAL_GATEWAY,
   CORE_COMPTROLLER,
@@ -31,8 +28,11 @@ import {
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
   LIQUIDITY_IRM,
+  MAINSTREAM_POOL_NAME,
   MAX_LOOPS_LIMIT,
   MIN_LIQUIDATABLE_COLLATERAL,
+  MainstreamCollateralMarket,
+  MainstreamLiquidityMarket,
   NORMAL_TIMELOCK,
   OPERATOR,
   ORACLE_GUARDIAN,
@@ -75,9 +75,9 @@ import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-/// After isolated-pools#575 deploys the comptroller and the 24 markets.
-/// TODO: move past the VTreasury funding, Atlas's authorizations and VIP-673's voting period (block 130,195,455).
-const FORK_BLOCK = 130088000;
+/// After isolated-pools#575 deploys the comptroller and the 23 markets.
+/// TODO: move past the VTreasury funding and Atlas's authorizations.
+const FORK_BLOCK = 130250000;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -157,14 +157,15 @@ const readFeed = async (oracle: string, feed: string): Promise<BigNumber> => {
   return BigNumber.from(answer).mul(BigNumber.from(10).pow(18 - decimals));
 };
 
-/// Seconds since the feed's last update.
+/// Seconds from the feed's last update to FORK_BLOCK. Not to the latest block: the fork's clock follows the wall clock
+/// from FORK_BLOCK on, so a slow setup would age the feed.
 const feedAge = async (oracle: string, feed: string): Promise<number> => {
   const data = FEED_IFACE.encodeFunctionData("latestRoundData");
   const [, , , updatedAt] = FEED_IFACE.decodeFunctionResult(
     "latestRoundData",
     await ethers.provider.call({ to: feed, from: oracle, data }),
   );
-  const { timestamp } = await ethers.provider.getBlock("latest");
+  const { timestamp } = await ethers.provider.getBlock(FORK_BLOCK);
   return timestamp - BigNumber.from(updatedAt).toNumber();
 };
 
@@ -200,35 +201,23 @@ const standInOnFork = (part: Vip674Part): Vip674Part => ({
   })),
 });
 
-const GOVERNOR_ABI = [
-  "function state(uint256) view returns (uint8)",
-  "function guardian() view returns (address)",
-  "function cancel(uint256)",
-];
+const GOVERNOR_ABI = ["function state(uint256) view returns (uint8)"];
 const VIP_673 = 673;
-/// `ProposalState` in GovernorBravo.
-const PENDING_STATE = 0;
-const ACTIVE_STATE = 1;
+/// `ProposalState.Executed` in GovernorBravo.
 const EXECUTED_STATE = 7;
 
-/// VIP-673 is in its voting period until block 130,195,455, and it was proposed by the framework's fallback proposer,
-/// which the governor lets hold one live proposal at a time. Until the fork moves past that block, cancel it on the
-/// fork so the same account can propose VIP-674, and apply its commands as the Normal Timelock, as it is expected to
-/// execute before VIP-674 on mainnet.
-const clearVip673 = async () => {
+/// VIP-673 is queued at FORK_BLOCK and is expected to execute before VIP-674 on mainnet, so until the fork moves past
+/// its execution, apply its commands as the Normal Timelock.
+const applyVip673 = async () => {
   const governor = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.GOVERNOR_PROXY, GOVERNOR_ABI, ethers.provider);
   const state: number = await governor.state(VIP_673);
   if (state === EXECUTED_STATE) return;
-  if (state === PENDING_STATE || state === ACTIVE_STATE) {
-    const guardian = await initMainnetUser(await governor.guardian(), ethers.utils.parseEther("1"));
-    await governor.connect(guardian).cancel(VIP_673);
-  }
   await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
-  console.warn(`[vip-674] VIP-673 (state ${state}) cancelled and applied on the fork`);
+  console.warn(`[vip-674] VIP-673 (state ${state}) applied on the fork`);
 };
 
 forking(FORK_BLOCK, async () => {
-  await clearVip673();
+  await applyVip673();
 
   const standIns = [...new Set([PART_1, PART_2, PART_3].flatMap(pendingDeployments))];
   const [part1, part2, part3] = [PART_1, PART_2, PART_3].map(standInOnFork);
@@ -244,7 +233,7 @@ forking(FORK_BLOCK, async () => {
   const COLLATERAL = [...COLLATERAL_1, ...COLLATERAL_2, ...COLLATERAL_3];
   const MARKETS_1: SpokeMarket[] = [...LIQUIDITY, ...COLLATERAL_1];
   const MARKETS: SpokeMarket[] = [...MARKETS_1, ...COLLATERAL_2, ...COLLATERAL_3];
-  const newlyPriced = (markets: BluechipsCollateralMarket[]) => markets.filter(m => !m.pricedOnCore);
+  const newlyPriced = (markets: MainstreamCollateralMarket[]) => markets.filter(m => !m.pricedOnCore);
   const onCore = COLLATERAL.filter(m => m.pricedOnCore);
 
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -328,7 +317,7 @@ forking(FORK_BLOCK, async () => {
       expect(await v.reserveFactorMantissa(), `${m.symbol} RF`).to.equal(m.reserveFactor);
       expect(await v.reduceReservesBlockDelta(), `${m.symbol} delta`).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
       expect(await v.protocolSeizeShareMantissa(), `${m.symbol} seize share`).to.equal(
-        "protocolSeizeShare" in m ? (m as BluechipsCollateralMarket).protocolSeizeShare : PROTOCOL_SEIZE_SHARE,
+        "protocolSeizeShare" in m ? (m as MainstreamCollateralMarket).protocolSeizeShare : PROTOCOL_SEIZE_SHARE,
       );
       expectAddress(await v.shortfall(), NORMAL_TIMELOCK, `${m.symbol} shortfall`);
       expectAddress(await registry.getVTokenForAsset(COMPTROLLER, m.underlying), m.vToken, m.symbol);
@@ -348,7 +337,7 @@ forking(FORK_BLOCK, async () => {
     }
   };
 
-  const expectCollateralSetup = async (markets: BluechipsCollateralMarket[]) => {
+  const expectCollateralSetup = async (markets: MainstreamCollateralMarket[]) => {
     for (const m of markets) {
       const incentive: BigNumber = await comptroller.effectiveLiquidationIncentive(m.vToken);
       expect(incentive, m.symbol).to.equal(m.liquidationIncentive);
@@ -360,7 +349,7 @@ forking(FORK_BLOCK, async () => {
     }
   };
 
-  const expectPriced = async (markets: BluechipsCollateralMarket[]) => {
+  const expectPriced = async (markets: MainstreamCollateralMarket[]) => {
     for (const m of newlyPriced(markets)) {
       const pivoted = m.aproFeed !== null;
       const atlasConfig = await atlas.tokenConfigs(m.underlying);
@@ -448,7 +437,7 @@ forking(FORK_BLOCK, async () => {
       // Fails once Atlas names a feed: put it in vips/vip-674/addresses/bscmainnet.ts and drop it from
       // ATLAS_FEED_CANDIDATES.
       expect(standIns).to.have.members(
-        Object.keys(ATLAS_FEED_CANDIDATES).map(asset => `v${asset}_Bluechips Atlas feed`),
+        Object.keys(ATLAS_FEED_CANDIDATES).map(asset => `v${asset}_bStockMainstream Atlas feed`),
       );
       for (const part of [PART_1, PART_2, PART_3]) {
         expect(pendingRiskValues(part), `VIP-${part.vipNumber}`).to.deep.equal([]);
@@ -641,7 +630,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-674 [bscmainnet] Bluechips Spoke pool, part 1", proposal1, {
+  testVip("VIP-674 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, part1);
@@ -651,7 +640,7 @@ forking(FORK_BLOCK, async () => {
   describe("Post-VIP-674", () => {
     it("registers the pool, owned by the Normal Timelock and wired to both oracles", async () => {
       const pool = await registry.getPoolByComptroller(COMPTROLLER);
-      expect(pool.name).to.equal(BLUECHIPS_POOL_NAME);
+      expect(pool.name).to.equal(MAINSTREAM_POOL_NAME);
       expectAddress(pool.comptroller, COMPTROLLER);
       expectAddress(await comptroller.owner(), NORMAL_TIMELOCK);
       expectAddress(await comptroller.oracle(), RESILIENT_ORACLE);
@@ -745,7 +734,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("lets the Operator move Hub liquidity into each Bluechips market, at no cost to the Hub", async () => {
+    it("lets the Operator move Hub liquidity into each bStock mainstream market, at no cost to the Hub", async () => {
       const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
       const amount = ethers.utils.parseUnits("1000", 18);
       for (const m of LIQUIDITY) {
@@ -800,7 +789,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-675 [bscmainnet] Bluechips Spoke pool, part 2", proposal2, {
+  testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, part2);
@@ -838,7 +827,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-676 [bscmainnet] Bluechips Spoke pool, part 3", proposal3, {
+  testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, part3);
     },
@@ -885,12 +874,13 @@ forking(FORK_BLOCK, async () => {
 
   // The paths the pool exists for, across all three parts: every bStock taken as collateral in one call, a loan of
   // each liquidity asset and its liquidation after a price drop, a day of interest reaching the Hubs and the
-  // ProtocolShareReserve, full repayment, and each Hub drawing its liquidity back out of the Bluechips market first.
+  // ProtocolShareReserve, full repayment, and each Hub drawing its liquidity back out of the bStock mainstream market
+  // first.
   // Runs last: it halves prices and moves the clock.
   describe("Post-VIP-676: end to end, across the whole pool", () => {
     const HOLDER = account("e2e holder");
     const LIQUIDATOR = account("e2e liquidator");
-    const borrowerOf = (c: BluechipsCollateralMarket) => account(`e2e borrower ${c.symbol}`);
+    const borrowerOf = (c: MainstreamCollateralMarket) => account(`e2e borrower ${c.symbol}`);
     /// Each loan's collateral is worth $1,000. Half of it is still above the $100 minimum liquidatable collateral.
     const COLLATERAL_VALUE = ethers.utils.parseUnits("1000", 18);
     /// 45% of the collateral's value: under every collateral factor (50% at the lowest), and above what any liquidation
@@ -908,7 +898,7 @@ forking(FORK_BLOCK, async () => {
     let timelock: Awaited<ReturnType<typeof initMainnetUser>>;
 
     /// Atlas and APRO move together, so the band between them holds.
-    const pinPrice = async (c: BluechipsCollateralMarket, value: BigNumber) => {
+    const pinPrice = async (c: MainstreamCollateralMarket, value: BigNumber) => {
       await atlas.connect(timelock).setDirectPrice(c.underlying, value);
       if (c.aproFeed !== null) {
         await apro.connect(timelock).setDirectPrice(c.underlying, value);
@@ -976,7 +966,7 @@ forking(FORK_BLOCK, async () => {
     }
 
     it("passes a day of interest through each Spoke source to its Hub, and sweeps the reserves to the PSR", async () => {
-      const state = async (m: BluechipsLiquidityMarket) => ({
+      const state = async (m: MainstreamLiquidityMarket) => ({
         borrows: (await vTokenOf(m.vToken).totalBorrows()) as BigNumber,
         source: (await groupOf(m.stack.spokeSource).totalAssets()) as BigNumber,
         hub: (await hubOf(m.stack.hub).totalAssets()) as BigNumber,
@@ -1022,7 +1012,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("draws each Hub's withdrawal from its Bluechips market first, leaving the bStock index market alone", async () => {
+    it("draws each Hub's withdrawal from its bStock mainstream market first, leaving the bStock index market alone", async () => {
       // A Hub withdrawal reaches its Spoke source last, after every other group, so it is called here as the Hub
       // calls it.
       const amount = ethers.utils.parseUnits("100", 18);

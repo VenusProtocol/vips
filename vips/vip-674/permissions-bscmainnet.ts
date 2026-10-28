@@ -22,8 +22,8 @@ import {
 export * from "../vip-670/permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-674: the grants on `Comptroller_Bluechips`. The same 19 VIP-668 gives `Comptroller_HubSpoke` and the one VIP-670
-// gives CollateralGateway, each against the new comptroller and never as a wildcard. None carries over from the
+// VIP-674: the grants on `Comptroller_bStockMainstream`. The same 19 VIP-668 gives `Comptroller_HubSpoke` and the one
+// VIP-670 gives CollateralGateway, each against the new comptroller and never as a wildcard. None carries over from the
 // bStock index pool: every one of them names that comptroller, not address(0).
 //
 // The registry, rate model, market and Spoke source calls use wildcards and Risk Steward grants that already reach a
@@ -32,19 +32,22 @@ export * from "../vip-670/permissions-bscmainnet";
 
 /// The six setters SPOKE_POOL_REGISTRY drives during `addPool` and `addMarket`. Inline, before `addPool`, which
 /// reverts without them.
-export const REGISTRY_GRANTS_BLUECHIPS: Grant[] = REGISTRY_GRANTS.map(role => ({ role, account: SPOKE_POOL_REGISTRY }));
+export const REGISTRY_GRANTS_MAINSTREAM: Grant[] = REGISTRY_GRANTS.map(role => ({
+  role,
+  account: SPOKE_POOL_REGISTRY,
+}));
 
 /// The other 14: the Normal Timelock's six, the Critical Guardian's five, the Pause Guardian's two and
 /// CollateralGateway's `enterMarketForAccount`. Nothing in VIP-674 needs them first, so they run in the aggregator
 /// batch.
-export const OTHER_GRANTS_BLUECHIPS: Grant[] = [
+export const OTHER_GRANTS_MAINSTREAM: Grant[] = [
   ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
   ...CRITICAL_GUARDIAN_GRANTS.map(role => ({ role, account: CRITICAL_GUARDIAN })),
   ...PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
   ...ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY })),
 ];
 
-export const VIP_674_GRANTS: Grant[] = [...REGISTRY_GRANTS_BLUECHIPS, ...OTHER_GRANTS_BLUECHIPS];
+export const VIP_674_GRANTS: Grant[] = [...REGISTRY_GRANTS_MAINSTREAM, ...OTHER_GRANTS_MAINSTREAM];
 
 /// The roles the Normal Timelock calls inline on existing contracts to price the new assets, each an exact grant it
 /// already holds. The batch setters on Atlas, APRO, the ResilientOracle and the BoundValidator check the single

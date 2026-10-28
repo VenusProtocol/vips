@@ -3,12 +3,12 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import {
-  BLUECHIPS_COMPTROLLER,
-  BLUECHIPS_POOL_NAME,
   CLOSE_FACTOR,
   COLLATERAL_GATEWAY,
-  COLLATERAL_MARKETS_BLUECHIPS,
-  LIQUIDITY_MARKETS_BLUECHIPS,
+  COLLATERAL_MARKETS_MAINSTREAM,
+  LIQUIDITY_MARKETS_MAINSTREAM,
+  MAINSTREAM_COMPTROLLER,
+  MAINSTREAM_POOL_NAME,
   MIN_LIQUIDATABLE_COLLATERAL,
   POOL_LIQUIDATION_INCENTIVE,
   SEED_RECEIVER,
@@ -27,7 +27,7 @@ import {
 } from "./commands";
 
 // ===================================================================================================
-// VIP-674 [BNB Chain]: the Bluechips Hub-Funded Spoke pool, part 1 of 3.
+// VIP-674 [BNB Chain]: the bStock mainstream Hub-Funded Spoke pool, part 1 of 3.
 //
 // Stands up the pool, lists USDT, USDC and U and connects them to their Hubs, and lists the tier 1 bStocks. Part 2
 // (./bscmainnet-part-2.ts) lists tiers 2 and 3, part 3 (./bscmainnet-part-3.ts) tier 4, into the same pool. Both need
@@ -53,19 +53,19 @@ const VIP_NUMBER = 674;
 
 export const PART_1: Vip674Part = {
   vipNumber: VIP_NUMBER,
-  comptroller: BLUECHIPS_COMPTROLLER,
+  comptroller: MAINSTREAM_COMPTROLLER,
   createsPool: true,
-  liquidity: LIQUIDITY_MARKETS_BLUECHIPS,
-  collateral: COLLATERAL_MARKETS_BLUECHIPS.filter(m => m.tier === 1),
+  liquidity: LIQUIDITY_MARKETS_MAINSTREAM,
+  collateral: COLLATERAL_MARKETS_MAINSTREAM.filter(m => m.tier === 1),
 };
 
 export const vip674 = (part: Vip674Part = PART_1) => {
   const meta = {
     version: "v2",
-    title: `VIP-${VIP_NUMBER} [BNB Chain] Bluechips Spoke pool: pool, liquidity and tier 1 bStocks (part 1 of 3)`,
+    title: `VIP-${VIP_NUMBER} [BNB Chain] bStock mainstream Spoke pool: pool, liquidity and tier 1 bStocks (part 1 of 3)`,
     description: `#### Summary
 
-If passed, this VIP will create the **${BLUECHIPS_POOL_NAME}** Hub-Funded Spoke pool on BNB Chain, next to the bStock index pool, and list its first markets:
+If passed, this VIP will create the **${MAINSTREAM_POOL_NAME}** Hub-Funded Spoke pool on BNB Chain, next to the bStock index pool, and list its first markets:
 
 - **Liquidity side**: USDT, USDC and U. Only the Liquidity Hub of the same token may supply each market, through the Spoke yield group that already funds the bStock index pool. They are borrowable and give no borrow power.
 - **Collateral side**: ${

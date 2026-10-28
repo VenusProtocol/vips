@@ -21,7 +21,7 @@ import {
 export * from "../../vip-670/addresses/bscmainnet";
 
 // ===================================================================================================
-// VIP-674: the "Bluechips" Hub-Funded Spoke pool. A second pool in SPOKE_POOL_REGISTRY, next to the live
+// VIP-674: the "bStock mainstream" Hub-Funded Spoke pool. A second pool in SPOKE_POOL_REGISTRY, next to the live
 // "bStock index" pool (`Comptroller_HubSpoke`), with single-stock bStocks as collateral and USDT, USDC and U as
 // liquidity. Its liquidity markets are funded by the same Spoke sources as the bStock index pool's.
 //
@@ -32,46 +32,45 @@ export * from "../../vip-670/addresses/bscmainnet";
 // token amount below is 18-decimal scaled.
 // ===================================================================================================
 
-export const BLUECHIPS_POOL_NAME = "Bluechips";
+export const MAINSTREAM_POOL_NAME = "bStock mainstream";
 
-/// Suffix of every market's symbol, `vTSLAB_Bluechips`. The bStock index markets use `_bStockIndex`.
-const SYMBOL_SUFFIX = "Bluechips";
+/// Suffix of every market's symbol, `vTSLAB_bStockMainstream`. The bStock index markets use `_bStockIndex`.
+const SYMBOL_SUFFIX = "bStockMainstream";
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-674's new contracts, from isolated-pools `025` and `028` (isolated-pools#575).
 // ---------------------------------------------------------------------------------------------------
 
-/// `Comptroller_Bluechips`, a BeaconProxy over SPOKE_COMPTROLLER_BEACON, so its `poolRegistry()` immutable is
+/// `Comptroller_bStockMainstream`, a BeaconProxy over SPOKE_COMPTROLLER_BEACON, so its `poolRegistry()` immutable is
 /// SPOKE_POOL_REGISTRY. Initialized with MAX_LOOPS_LIMIT and the ACM, no oracle and no market. Ownable2Step: the
 /// deployer still owns it and the Normal Timelock is only nominated.
-export const BLUECHIPS_COMPTROLLER = "0xE14175059adc1B3C533184710425805A3063455B";
+export const MAINSTREAM_COMPTROLLER = "0xE14175059adc1B3C533184710425805A3063455B";
 
-/// Each a BeaconProxy over SPOKE_VTOKEN_BEACON on BLUECHIPS_COMPTROLLER, owned by the Normal Timelock, with a 10%
-/// reserve factor and the Normal Timelock as `shortfall`, so no `setShortfallContract` is needed. `028` also deployed a
-/// vAMATB_Bluechips market; the listing sheet has since dropped AMATB, so no VIP lists it.
-export const VUSDT_BLUECHIPS = "0x6bdEB94bcFb8E7B256d05994B156900268BDc469";
-export const VUSDC_BLUECHIPS = "0xF2147D0CF323eb0dFCB5ded960d7f87f98EA9Ad8";
-export const VU_BLUECHIPS = "0xfBf57056e01D69afc037218f94Dbd00FD1740691";
-export const VNVDAB_BLUECHIPS = "0x63a5d9C2f30a1f122D630edF20D522126bC78766";
-export const VTSLAB_BLUECHIPS = "0x0e6349BC4a202c0Ace54D8519DdC0ce2eCd3315e";
-export const VSPCXB_BLUECHIPS = "0x82499db27652Ada8890E0684bD235dC5144b5179";
-export const VSKHYB_BLUECHIPS = "0xc100c81100ce8f83663b74d18B894EE16A862913";
-export const VCRCLB_BLUECHIPS = "0xAa1c37495E0eE032e3B2F795559A700396C3eBFF";
-export const VGOOGLB_BLUECHIPS = "0x813A5bCa146A625D2c679Cd934BA68ae0A02E5d9";
-export const VAAPLB_BLUECHIPS = "0x566467c09c43fdb403D1E30FA1b695d229e158aE";
-export const VMSTRB_BLUECHIPS = "0x85afab98CE7745776B7CC3FAA7f4cc7052FEE21E";
-export const VSNDKB_BLUECHIPS = "0x808fdAE079D3D04DB7CD7885941995730ceBB042";
-export const VMETAB_BLUECHIPS = "0xCFe2505Fc927FDeE6e92631841AD672D1ED07290";
-export const VMSFTB_BLUECHIPS = "0x0C2F70A6e4F81DF2F38338ACD83955C95fFCD86b";
-export const VNBISB_BLUECHIPS = "0x2Bf449b200EdB61dAB6c90C19562C20C92c501d9";
-export const VBEB_BLUECHIPS = "0xa99EC2269B67788f59380ec9D642AFD46d41e83B";
-export const VAMDB_BLUECHIPS = "0x628b58ed685D94cef0E3A1b052ef93477529D589";
-export const VMRNAB_BLUECHIPS = "0xE63e40d6e2578d1Cf0f8666fCB0aaAE77d8EF6b4";
-export const VMUB_BLUECHIPS = "0x0a3743D383DaDF01DDf0Aa04aD9A2a4D414FA91C";
-export const VINTCB_BLUECHIPS = "0x3D6239e4c0100ac08226e20d89C016de1a3020eb";
-export const VDRAMB_BLUECHIPS = "0x74dD3941432688aC4937e56a5368e47bCcFD58d7";
-export const VTSMB_BLUECHIPS = "0xaD7997FbDE9fe81A9Eb9c719209a663d0dC94E3c";
-export const VCOINB_BLUECHIPS = "0x9E77a943CC84c304AE0b60ea42e78a75e06dcad0";
+/// Each a BeaconProxy over SPOKE_VTOKEN_BEACON on MAINSTREAM_COMPTROLLER, owned by the Normal Timelock, with a 10%
+/// reserve factor and the Normal Timelock as `shortfall`, so no `setShortfallContract` is needed.
+export const VUSDT_MAINSTREAM = "0x2b12bC29044CE8f018Ae0aF5929450a8A6259Ed8";
+export const VUSDC_MAINSTREAM = "0xD7608E9dFe6CB4b527d41abF40d0f46D917c9EeA";
+export const VU_MAINSTREAM = "0x24Ee5A3F631f9c2FAf8a730d43F059D3eA9566AD";
+export const VNVDAB_MAINSTREAM = "0x7f47B2B501Faf33cbE38435C4aEf3Da023340586";
+export const VTSLAB_MAINSTREAM = "0xeC2476Fcc45AC88b0D2E2B977Fee19768e130a06";
+export const VSPCXB_MAINSTREAM = "0x4fbF32E1ED761A98747b8f4870E8ccAC6052eEF0";
+export const VSKHYB_MAINSTREAM = "0x31884079bCbE980d38DD48a32F62B46Abd177632";
+export const VCRCLB_MAINSTREAM = "0x47F80e9D3727F2297268fe6b2a861DCe3e6a4488";
+export const VGOOGLB_MAINSTREAM = "0x56009e54E2Aa6C36f3777f07DC7ec945b0b11BA6";
+export const VAAPLB_MAINSTREAM = "0xD77456aa785E4B0FF998dc626781C60e3E281dBB";
+export const VMSTRB_MAINSTREAM = "0x7b809DE9D18dBdab00f04506c7F82F253fc8d904";
+export const VSNDKB_MAINSTREAM = "0x410b649F5B29F8344Bf84a999778aeA2C9bab13c";
+export const VMETAB_MAINSTREAM = "0x44E91730193Ee0Ab539904bC24FC65A47c04d3d5";
+export const VMSFTB_MAINSTREAM = "0xb4CCfb60A9F20E37205AB60A0D2335BaCdd42Be6";
+export const VNBISB_MAINSTREAM = "0x8D36c5645185989edDaA37952C23e7360B544153";
+export const VBEB_MAINSTREAM = "0x8DEA78aC2A09b11Bf8732c5041a0F1CC28daeD31";
+export const VAMDB_MAINSTREAM = "0x23d96082D85562bC757194c045263778f8C1EFf7";
+export const VMRNAB_MAINSTREAM = "0xb074a42fc36998B47F126F49d1c134B8e891894c";
+export const VMUB_MAINSTREAM = "0x7318C484C6F51315F963279ef056F22740346e2A";
+export const VINTCB_MAINSTREAM = "0x188B98fc54fB5343AbB38fa657826EbC1eD42953";
+export const VDRAMB_MAINSTREAM = "0x7C790b26128112516f4beA9FCE763b2623023E0E";
+export const VTSMB_MAINSTREAM = "0x28e19e1edD491F01BcFD13f96D99b5c04E176428";
+export const VCOINB_MAINSTREAM = "0x04B9F583e59673c11Fa8603ea019C5B24644acc6";
 
 // ---------------------------------------------------------------------------------------------------
 // Underlyings. Beacon proxies of the same bStock token family as the Core pool's TSLAB.
@@ -136,7 +135,7 @@ export const ATLAS_FEED_CANDIDATES: Record<string, string[]> = {
 /// The listing sheet's tiers. They only drive the risk values; every tier is listed.
 export type Tier = 1 | 2 | 3 | 4;
 
-export type BluechipsCollateralMarket = CollateralMarket & {
+export type MainstreamCollateralMarket = CollateralMarket & {
   tier: Tier;
   /// Listed on the Core pool too, so already priced: VIP-674 sends no oracle or DBO command for it, and its `dbo` is
   /// `null`.
@@ -146,7 +145,7 @@ export type BluechipsCollateralMarket = CollateralMarket & {
 };
 
 /// The bStock index pool's market of the same asset, in the same Spoke source.
-export type BluechipsLiquidityMarket = LiquidityMarket & { indexMarket: string };
+export type MainstreamLiquidityMarket = LiquidityMarket & { indexMarket: string };
 
 /// The bStock index values, accepted for the new assets and to be tuned with `setThresholds` if needed.
 export const DBO_WINDOW: DboConfig = {
@@ -170,11 +169,11 @@ const liquidity = {
 
 const symbol = (asset: string) => `v${asset}_${SYMBOL_SUFFIX}`;
 
-export const LIQUIDITY_MARKETS_BLUECHIPS: BluechipsLiquidityMarket[] = [
+export const LIQUIDITY_MARKETS_MAINSTREAM: MainstreamLiquidityMarket[] = [
   {
     ...liquidity,
     symbol: symbol("USDT"),
-    vToken: VUSDT_BLUECHIPS,
+    vToken: VUSDT_MAINSTREAM,
     underlying: USDT,
     stack: HUB_STACKS[0],
     indexMarket: VUSDT_SPOKE,
@@ -182,7 +181,7 @@ export const LIQUIDITY_MARKETS_BLUECHIPS: BluechipsLiquidityMarket[] = [
   {
     ...liquidity,
     symbol: symbol("USDC"),
-    vToken: VUSDC_BLUECHIPS,
+    vToken: VUSDC_MAINSTREAM,
     underlying: USDC,
     stack: HUB_STACKS[1],
     indexMarket: VUSDC_SPOKE,
@@ -190,7 +189,7 @@ export const LIQUIDITY_MARKETS_BLUECHIPS: BluechipsLiquidityMarket[] = [
   {
     ...liquidity,
     symbol: symbol("U"),
-    vToken: VU_BLUECHIPS,
+    vToken: VU_MAINSTREAM,
     underlying: U,
     stack: HUB_STACKS[2],
     indexMarket: VU_SPOKE,
@@ -220,14 +219,14 @@ const newAsset = { ...collateral, pricedOnCore: false, dbo: DBO_WINDOW };
 
 // Seeds are about $10 each at the 2026-10-27 Atlas price, and their vTokens are minted to SEED_RECEIVER. Re-check them
 // against the price before proposing.
-export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
+export const COLLATERAL_MARKETS_MAINSTREAM: MainstreamCollateralMarket[] = [
   // Tier 1
   {
     ...onCore,
     ...risk("0.75", "0.8", "1.08", "0.04"),
     tier: 1,
     symbol: symbol("NVDAB"),
-    vToken: VNVDAB_BLUECHIPS,
+    vToken: VNVDAB_MAINSTREAM,
     underlying: NVDAB,
     supplyCap: cap(4580),
     initialSupply: parseUnits("0.046", 18),
@@ -239,7 +238,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.75", "0.8", "1.08", "0.04"),
     tier: 1,
     symbol: symbol("TSLAB"),
-    vToken: VTSLAB_BLUECHIPS,
+    vToken: VTSLAB_MAINSTREAM,
     underlying: TSLAB,
     supplyCap: cap(2460),
     initialSupply: parseUnits("0.026", 18),
@@ -251,7 +250,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 1,
     symbol: symbol("SPCXB"),
-    vToken: VSPCXB_BLUECHIPS,
+    vToken: VSPCXB_MAINSTREAM,
     underlying: SPCXB,
     supplyCap: cap(6700),
     initialSupply: parseUnits("0.068", 18),
@@ -263,7 +262,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.55", "0.65", "1.15", "0.075"),
     tier: 1,
     symbol: symbol("SKHYB"),
-    vToken: VSKHYB_BLUECHIPS,
+    vToken: VSKHYB_MAINSTREAM,
     underlying: SKHYB,
     supplyCap: cap(6480),
     initialSupply: parseUnits("0.068", 18),
@@ -275,7 +274,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.6", "0.7", "1.125", "0.0625"),
     tier: 1,
     symbol: symbol("CRCLB"),
-    vToken: VCRCLB_BLUECHIPS,
+    vToken: VCRCLB_MAINSTREAM,
     underlying: CRCLB,
     supplyCap: cap(12340),
     initialSupply: parseUnits("0.13", 18),
@@ -287,7 +286,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.7", "0.75", "1.1", "0.05"),
     tier: 1,
     symbol: symbol("GOOGLB"),
-    vToken: VGOOGLB_BLUECHIPS,
+    vToken: VGOOGLB_MAINSTREAM,
     underlying: GOOGLB,
     supplyCap: cap(3060),
     initialSupply: parseUnits("0.032", 18),
@@ -299,7 +298,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.7", "0.75", "1.1", "0.05"),
     tier: 1,
     symbol: symbol("AAPLB"),
-    vToken: VAAPLB_BLUECHIPS,
+    vToken: VAAPLB_MAINSTREAM,
     underlying: AAPLB,
     supplyCap: cap(2330),
     initialSupply: parseUnits("0.03", 18),
@@ -312,7 +311,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.6", "0.7", "1.125", "0.0625"),
     tier: 2,
     symbol: symbol("MSTRB"),
-    vToken: VMSTRB_BLUECHIPS,
+    vToken: VMSTRB_MAINSTREAM,
     underlying: MSTRB,
     supplyCap: cap(2120),
     initialSupply: parseUnits("0.072", 18),
@@ -324,7 +323,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 2,
     symbol: symbol("SNDKB"),
-    vToken: VSNDKB_BLUECHIPS,
+    vToken: VSNDKB_MAINSTREAM,
     underlying: SNDKB,
     supplyCap: cap(220),
     initialSupply: parseUnits("0.008", 18),
@@ -336,7 +335,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.7", "0.75", "1.1", "0.05"),
     tier: 2,
     symbol: symbol("METAB"),
-    vToken: VMETAB_BLUECHIPS,
+    vToken: VMETAB_MAINSTREAM,
     underlying: METAB,
     supplyCap: cap(480),
     initialSupply: parseUnits("0.016", 18),
@@ -348,7 +347,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.75", "0.8", "1.08", "0.04"),
     tier: 2,
     symbol: symbol("MSFTB"),
-    vToken: VMSFTB_BLUECHIPS,
+    vToken: VMSFTB_MAINSTREAM,
     underlying: MSFTB,
     supplyCap: cap(560),
     initialSupply: parseUnits("0.019", 18),
@@ -361,7 +360,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 3,
     symbol: symbol("NBISB"),
-    vToken: VNBISB_BLUECHIPS,
+    vToken: VNBISB_MAINSTREAM,
     underlying: NBISB,
     supplyCap: cap(580),
     initialSupply: parseUnits("0.064", 18),
@@ -373,7 +372,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 3,
     symbol: symbol("BEB"),
-    vToken: VBEB_BLUECHIPS,
+    vToken: VBEB_MAINSTREAM,
     underlying: BEB,
     supplyCap: cap(450),
     initialSupply: parseUnits("0.048", 18),
@@ -385,7 +384,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 3,
     symbol: symbol("AMDB"),
-    vToken: VAMDB_BLUECHIPS,
+    vToken: VAMDB_MAINSTREAM,
     underlying: AMDB,
     supplyCap: cap(180),
     initialSupply: parseUnits("0.019", 18),
@@ -397,7 +396,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 3,
     symbol: symbol("MRNAB"),
-    vToken: VMRNAB_BLUECHIPS,
+    vToken: VMRNAB_MAINSTREAM,
     underlying: MRNAB,
     supplyCap: cap(490),
     initialSupply: parseUnits("0.052", 18),
@@ -410,7 +409,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 4,
     symbol: symbol("MUB"),
-    vToken: VMUB_BLUECHIPS,
+    vToken: VMUB_MAINSTREAM,
     underlying: MUB,
     supplyCap: cap(100),
     initialSupply: parseUnits("0.011", 18),
@@ -422,7 +421,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 4,
     symbol: symbol("INTCB"),
-    vToken: VINTCB_BLUECHIPS,
+    vToken: VINTCB_MAINSTREAM,
     underlying: INTCB,
     supplyCap: cap(1060),
     initialSupply: parseUnits("0.11", 18),
@@ -434,7 +433,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.55", "0.65", "1.15", "0.075"),
     tier: 4,
     symbol: symbol("DRAMB"),
-    vToken: VDRAMB_BLUECHIPS,
+    vToken: VDRAMB_MAINSTREAM,
     underlying: DRAMB,
     supplyCap: cap(1920),
     initialSupply: parseUnits("0.21", 18),
@@ -446,7 +445,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.65", "0.75", "1.125", "0.0625"),
     tier: 4,
     symbol: symbol("TSMB"),
-    vToken: VTSMB_BLUECHIPS,
+    vToken: VTSMB_MAINSTREAM,
     underlying: TSMB,
     supplyCap: cap(230),
     initialSupply: parseUnits("0.024", 18),
@@ -458,7 +457,7 @@ export const COLLATERAL_MARKETS_BLUECHIPS: BluechipsCollateralMarket[] = [
     ...risk("0.5", "0.6", "1.15", "0.075"),
     tier: 4,
     symbol: symbol("COINB"),
-    vToken: VCOINB_BLUECHIPS,
+    vToken: VCOINB_MAINSTREAM,
     underlying: COINB,
     supplyCap: cap(630),
     initialSupply: parseUnits("0.063", 18),

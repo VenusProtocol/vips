@@ -11,17 +11,17 @@ import {
   APRO_ORACLE,
   ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
-  BLUECHIPS_POOL_NAME,
   BOUND_LOWER_RATIO,
   BOUND_UPPER_RATIO,
   BOUND_VALIDATOR,
-  BluechipsCollateralMarket,
-  BluechipsLiquidityMarket,
   CLOSE_FACTOR,
   COLLATERAL_GATEWAY,
   DEVIATION_BOUNDED_ORACLE,
   LIQUIDITY_IRM,
+  MAINSTREAM_POOL_NAME,
   MIN_LIQUIDATABLE_COLLATERAL,
+  MainstreamCollateralMarket,
+  MainstreamLiquidityMarket,
   NORMAL_TIMELOCK,
   PENDING,
   POOL_LIQUIDATION_INCENTIVE,
@@ -33,7 +33,7 @@ import {
   SpokeMarket,
   VTREASURY,
 } from "./addresses/bscmainnet";
-import { OTHER_GRANTS_BLUECHIPS, REGISTRY_GRANTS_BLUECHIPS } from "./permissions-bscmainnet";
+import { OTHER_GRANTS_MAINSTREAM, REGISTRY_GRANTS_MAINSTREAM } from "./permissions-bscmainnet";
 
 // ===================================================================================================
 // VIP-674 [BNB Chain]: the commands every part builds from. See ./bscmainnet.ts for the split.
@@ -76,8 +76,8 @@ export type Vip674Part = {
   comptroller: string;
   /// Part 1 stands up the pool and lists the liquidity markets. Later parts only add collateral markets.
   createsPool: boolean;
-  liquidity: BluechipsLiquidityMarket[];
-  collateral: BluechipsCollateralMarket[];
+  liquidity: MainstreamLiquidityMarket[];
+  collateral: MainstreamCollateralMarket[];
   /// The aggregator index of each of the part's batches, once `seedAggregatorBatches` has stored them.
   seededIndices?: number[];
 };
@@ -90,7 +90,7 @@ const newlyPriced = (part: Vip674Part) => part.collateral.filter(m => !m.pricedO
 /// Every address the part needs that is still `PENDING`. Exported so the simulation can report what it stands in for.
 export const pendingDeployments = (part: Vip674Part): string[] =>
   [
-    { name: "Comptroller_Bluechips", address: part.comptroller },
+    { name: "Comptroller_bStockMainstream", address: part.comptroller },
     ...marketsOf(part).map(m => ({ name: m.symbol, address: m.vToken })),
     ...marketsOf(part).map(m => ({ name: `${m.symbol} rate model`, address: m.interestRateModel })),
     ...part.collateral.map(m => ({ name: `${m.symbol} Atlas feed`, address: m.atlasFeed })),
@@ -123,11 +123,11 @@ const poolCommands = ({ comptroller }: Vip674Part): Command[] => [
   { target: comptroller, signature: "acceptOwnership()", params: [] },
   { target: comptroller, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
   { target: comptroller, signature: "setDeviationBoundedOracle(address)", params: [DEVIATION_BOUNDED_ORACLE] },
-  ...REGISTRY_GRANTS_BLUECHIPS.map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account)),
+  ...REGISTRY_GRANTS_MAINSTREAM.map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account)),
   {
     target: SPOKE_POOL_REGISTRY,
     signature: "addPool(string,address,uint256,uint256,uint256)",
-    params: [BLUECHIPS_POOL_NAME, comptroller, CLOSE_FACTOR, POOL_LIQUIDATION_INCENTIVE, MIN_LIQUIDATABLE_COLLATERAL],
+    params: [MAINSTREAM_POOL_NAME, comptroller, CLOSE_FACTOR, POOL_LIQUIDATION_INCENTIVE, MIN_LIQUIDATABLE_COLLATERAL],
   },
 ];
 
@@ -202,8 +202,9 @@ const listMarket = (m: SpokeMarket): Command[] => [
 ];
 
 /// Each Spoke source keeps its bStock index market first to deposit and last to withdraw: Hub deposits reach the
-/// Bluechips market once the bStock index market is full, and Hub withdrawals draw on the Bluechips market first.
-const wireHub = (comptroller: string, m: BluechipsLiquidityMarket): Command[] => {
+/// bStock mainstream market once the bStock index market is full, and Hub withdrawals draw on the bStock mainstream
+/// market first.
+const wireHub = (comptroller: string, m: MainstreamLiquidityMarket): Command[] => {
   const { spokeSource } = m.stack;
   return [
     {
@@ -219,7 +220,7 @@ const wireHub = (comptroller: string, m: BluechipsLiquidityMarket): Command[] =>
 
 const batchedCommands = (part: Vip674Part): Command[] => [
   ...(part.createsPool
-    ? OTHER_GRANTS_BLUECHIPS.map(({ role, account }) => giveCallPermission(ACM, part.comptroller, role, account))
+    ? OTHER_GRANTS_MAINSTREAM.map(({ role, account }) => giveCallPermission(ACM, part.comptroller, role, account))
     : []),
   ...marketsOf(part).map(m => ({
     target: m.vToken,
@@ -338,7 +339,7 @@ export const pricingLines = (part: Vip674Part): string[] =>
 
 export const contractLines = (part: Vip674Part): string[] =>
   [
-    ...(part.createsPool ? [["Comptroller_Bluechips", part.comptroller]] : []),
+    ...(part.createsPool ? [["Comptroller_bStockMainstream", part.comptroller]] : []),
     ...marketsOf(part).map(m => [m.symbol, m.vToken]),
     ...(part.createsPool ? [["CollateralGateway", COLLATERAL_GATEWAY]] : []),
   ].map(([name, address]) => `- ${name}: ${address}`);
@@ -351,7 +352,7 @@ export const collateralPartMeta = (part: Vip674Part, poolVipNumber: number, titl
 
 If passed, this VIP will list ${
     part.collateral.length
-  } more single-stock bStocks as collateral in the **${BLUECHIPS_POOL_NAME}** Hub-Funded Spoke pool on BNB Chain, which VIP-${poolVipNumber} creates. Anyone may supply them and use them as collateral. They are not borrowable.
+  } more single-stock bStocks as collateral in the **${MAINSTREAM_POOL_NAME}** Hub-Funded Spoke pool on BNB Chain, which VIP-${poolVipNumber} creates. Anyone may supply them and use them as collateral. They are not borrowable.
 
 #### Proposed changes
 
@@ -413,12 +414,12 @@ export const noteLines = (part: Vip674Part): string[] => [
   ...(part.liquidity.length === 0
     ? []
     : [
-        "- Each Spoke yield group deposits into its bStock index market first and into its Bluechips market after it, and withdraws from its Bluechips market first. Both markets share the yield group's caps on its Hub, which this VIP does not change.",
+        "- Each Spoke yield group deposits into its bStock index market first and into its bStock mainstream market after it, and withdraws from its bStock mainstream market first. Both markets share the yield group's caps on its Hub, which this VIP does not change.",
       ]),
 ];
 
 export const referenceLines = [
   "- [Spoke pool contracts](https://github.com/VenusProtocol/isolated-pools/pull/559)",
-  "- [Bluechips pool deployment](https://github.com/VenusProtocol/isolated-pools/pull/575)",
+  "- [bStock mainstream pool deployment](https://github.com/VenusProtocol/isolated-pools/pull/575)",
   "- [Spoke yield family](https://github.com/VenusProtocol/venus-liquidity-hub/pull/22)",
 ];
