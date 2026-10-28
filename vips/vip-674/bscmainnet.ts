@@ -46,7 +46,7 @@ export const LATE_PENALTY_RATE = parseUnits("1.1", 18); // 10% late penalty
 
 export const VAULT_NAME = "FRV Octagon solvBTC 29OCT2026 30";
 export const VAULT_SYMBOL = "FRV-og-29OCT2026-30";
-export const INSTITUTION_NAME = "Solv (Octagon Digital Asset Ltd.)";
+export const INSTITUTION_NAME = "Solv(Octagon)";
 
 export const vaultConfig = [
   U, // supplyAsset
