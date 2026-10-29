@@ -5,11 +5,13 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, seedProposalBatchesOnFork, testVip } from "src/vip-framework";
 import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
 import { REGISTRY_GRANTS } from "../../vips/vip-668/permissions-bscmainnet";
 import vip673 from "../../vips/vip-673/bscmainnet";
+import { APRO_ORACLE, ATLAS_ORACLE, MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
+import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -68,12 +70,11 @@ import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 // isolated-pools `025` and `028` will: BPNC as a copy of vceBTC, the comptroller and the four markets as beacon
 // proxies over the live
 // beacons, and the flat 6% rate model as a copy of the live JumpRateModelV2 set to FLAT_6_IRM. It applies VIP-673,
-// queued at FORK_BLOCK. VIP-675 has not run yet either, so VIP-678 extends the Spoke source queues of FORK_BLOCK
-// instead of QUEUES_AFTER_VIP_675.
+// queued at FORK_BLOCK, and part 1 of VIP-675, which grants the spoke comptroller wildcards and leaves the Spoke source
+// queues VIP-678 extends.
 // ===================================================================================================
 
-/// Before VIP-674 is proposed: the VIP Proposal Safe can hold one live proposal at a time.
-const FORK_BLOCK = 130275000;
+const FORK_BLOCK = 130482000;
 
 const ONE = parseUnits("1", 18);
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
@@ -105,6 +106,55 @@ const applyVip673 = async () => {
   console.warn(`[vip-678] VIP-673 (state ${state}) applied on the fork`);
 };
 
+/// bStocks keep balances in OpenZeppelin v5's ERC-7201 `ERC20` namespace, so the fork sets them directly.
+const OZ5_ERC20_STORAGE = "0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00";
+
+const FEED_IFACE = new ethers.utils.Interface([
+  "function decimals() view returns (uint8)",
+  "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
+]);
+
+/// A feed's answer in 18 decimals, read with `from` set to the oracle so the feed's caller gate lets it through.
+const readFeed = async (oracle: string, feed: string): Promise<BigNumber> => {
+  const call = async (fn: string) =>
+    FEED_IFACE.decodeFunctionResult(
+      fn,
+      await ethers.provider.call({ to: feed, from: oracle, data: FEED_IFACE.encodeFunctionData(fn) }),
+    );
+  const [decimals] = await call("decimals");
+  const [, answer] = await call("latestRoundData");
+  return BigNumber.from(answer).mul(BigNumber.from(10).pow(18 - decimals));
+};
+
+/// VIP-678 relies on VIP-675 part 1's spoke comptroller wildcards and Spoke source queues. Until the fork moves past its
+/// execution, apply it as the Normal Timelock, topping the VTreasury up with any bStock seed it lacks and pinning each
+/// bStock feed's answer as a direct price, as VIP-675's simulation does, so a stale feed cannot revert it.
+const applyVip675 = async () => {
+  const mainstream = new ethers.Contract(MAINSTREAM_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+  if ((await mainstream.owner()) === NORMAL_TIMELOCK) return;
+  for (const { underlying, initialSupply } of [...PART_1.liquidity, ...PART_1.collateral]) {
+    const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+    const balance: BigNumber = await token.balanceOf(VTREASURY);
+    if (!initialSupply || balance.gte(initialSupply)) continue;
+    // ponytail: OZ v5 slot only, so a short USDT, USDC or U seed would need a holder transfer instead
+    const slot = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [VTREASURY, OZ5_ERC20_STORAGE]),
+    );
+    await setSlot(underlying, slot, ethers.utils.hexZeroPad(initialSupply.toHexString(), 32));
+  }
+  const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+  const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+  const apro = new ethers.Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+  for (const { underlying, atlasFeed, aproFeed } of PART_1.collateral) {
+    await atlas.setDirectPrice(underlying, await readFeed(ATLAS_ORACLE, atlasFeed));
+    if (aproFeed !== null) await apro.setDirectPrice(underlying, await readFeed(APRO_ORACLE, aproFeed));
+  }
+  const proposal = await vip675(PART_1);
+  await seedProposalBatchesOnFork(proposal);
+  await pretendExecutingVip(proposal, NORMAL_TIMELOCK);
+  console.warn("[vip-678] VIP-675 part 1 applied on the fork");
+};
+
 /// A copy of the live JumpRateModelV2, which shares the block rate the new one is deployed with, set to FLAT_6_IRM.
 const deployFlatRateModel = async (): Promise<string> => {
   const address = ethers.utils.getAddress(
@@ -127,7 +177,7 @@ const deployFlatRateModel = async (): Promise<string> => {
   return address;
 };
 
-const setSlot = (address: string, slot: number, value: string) =>
+const setSlot = (address: string, slot: number | string, value: string) =>
   ethers.provider.send("hardhat_setStorageAt", [address, ethers.utils.hexValue(slot), value]);
 
 /// A string under 32 bytes, as Solidity stores it: left-aligned, with twice its length in the last byte.
@@ -218,6 +268,7 @@ const normalize = (addresses: string[]) => addresses.map(a => a.toLowerCase());
 
 forking(FORK_BLOCK, async () => {
   await applyVip673();
+  await applyVip675();
 
   const standIns = pendingInputs(BPN_INPUTS);
   const inputs = await deployStandIns();
@@ -396,6 +447,7 @@ forking(FORK_BLOCK, async () => {
         expect(await allowed(CRITICAL_GUARDIAN, role), role).to.be.false;
       }
       expect(await allowed(CRITICAL_GUARDIAN, "setMarketLiquidationIncentive(address,uint256)")).to.be.true;
+      expect(await allowed(CRITICAL_GUARDIAN, "setCloseFactor(uint256)")).to.be.true;
       expect(await allowed(PAUSE_GUARDIAN, "setAllowedLiquidator(address,bool)")).to.be.true;
       expect(await allowed(COLLATERAL_GATEWAY, "enterMarketForAccount(address,address)")).to.be.true;
     });

@@ -4,13 +4,7 @@ import { batch } from "src/auxiliaryCommandsAggregator";
 import { Batch, Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { ROUTER_ROLES, giveCallPermission } from "../vip-668/permissions";
-import {
-  CRITICAL_GUARDIAN_GRANTS,
-  NORMAL_TIMELOCK_GRANTS,
-  PAUSE_GUARDIAN_GRANTS,
-  REGISTRY_GRANTS,
-} from "../vip-668/permissions-bscmainnet";
+import { SET_CLOSE_FACTOR, giveCallPermission } from "../vip-668/permissions";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -33,7 +27,6 @@ import {
   FLAT_6_IRM,
   NORMAL_TIMELOCK,
   OPERATOR,
-  PAUSE_GUARDIAN,
   PENDING,
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
@@ -61,12 +54,10 @@ import {
 //
 // INLINE, because the aggregator cannot do them: `acceptOwnership` and every call that has to come from the Normal
 // Timelock (the BPNC mints into its own balance, the VTreasury withdrawals, `approve` and `addMarket`, which pulls the
-// seed from the caller), the price, which has to come before BPNC's `addMarket`, and the registry's grants, which
-// `addPool` needs.
+// seed from the caller), and the price, which has to come before BPNC's `addMarket`.
 //
 // ORDER that matters:
 //  - The Normal Timelock's `mint` grant before both BPNC mints.
-//  - The registry's six grants before `addPool`, which reverts without them.
 //  - BPNC's price before its `addMarket`: a collateral factor above 0 needs a nonzero price.
 //  - `addMarket` before every comptroller setter on that market (`MarketNotListed`).
 //  - `setProtocolSeizeShare(0)` before `setMarketLiquidationIncentive(1e18)`: the incentive has to be at least
@@ -78,7 +69,8 @@ import {
 //  - BPNC is deployed with the Normal Timelock as pending owner.
 //  - The VTreasury holds the USDT, USDC and U seeds, as it did on 2026-10-29.
 //  - VIP-675 has executed: each Spoke source's inner queues hold its bStock index and bStock mainstream markets, the
-//    queues VIP-678 extends. Re-read them on chain before proposing.
+//    queues VIP-678 extends, and every spoke comptroller's roles are granted as address(0) wildcards, including the six
+//    `addPool` needs. Re-read the queues on chain before proposing.
 //
 // NOT IN VIP-678:
 //  - `setShortfallContract` and `setReserveFactor`: the markets are deployed with the Normal Timelock as `shortfall`
@@ -129,7 +121,6 @@ const poolCommands = ({ comptroller }: BpnInputs) => [
   { target: comptroller, signature: "acceptOwnership()", params: [] },
   { target: comptroller, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
   { target: comptroller, signature: "setDeviationBoundedOracle(address)", params: [DEVIATION_BOUNDED_ORACLE] },
-  ...REGISTRY_GRANTS.map(role => giveCallPermission(ACM, comptroller, role, SPOKE_POOL_REGISTRY)),
   {
     target: SPOKE_POOL_REGISTRY,
     signature: "addPool(string,address,uint256,uint256,uint256)",
@@ -173,17 +164,11 @@ const listMarket = (m: BpnMarket, fromTreasury: boolean) => [
   },
 ];
 
-/// The other 14 comptroller grants: the Normal Timelock's six, the Critical Guardian's five, the Pause Guardian's two
-/// and CollateralGateway's `enterMarketForAccount`, the same VIP-668 and VIP-670 gave the bStock index pool. None
-/// carries over: each of those names its own comptroller. Then BPNC's roles, except the Normal Timelock's `mint`, which
-/// `tokenCommands` already granted.
+/// The comptroller's other roles are VIP-675's address(0) wildcards. Its Critical Guardian `setCloseFactor` is not:
+/// FRV's LiquidationAdapter checks the same string, so it stays scoped. Then BPNC's roles, except the Normal Timelock's
+/// `mint`, which `tokenCommands` already granted.
 const grantCommands = ({ comptroller, bpnc }: BpnInputs): Command[] => [
-  ...[
-    ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
-    ...CRITICAL_GUARDIAN_GRANTS.map(role => ({ role, account: CRITICAL_GUARDIAN })),
-    ...PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
-    ...ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY })),
-  ].map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account)),
+  giveCallPermission(ACM, comptroller, SET_CLOSE_FACTOR, CRITICAL_GUARDIAN),
   ...BPNC_ROLES.flatMap(({ role, accounts }) => accounts.map(account => ({ role, account })))
     .filter(({ role, account }) => role !== TIMELOCK_MINT.role || account !== TIMELOCK_MINT.account)
     .map(({ role, account }) => giveCallPermission(ACM, bpnc, role, account)),
@@ -249,7 +234,7 @@ const hubCommands = (m: BpnLiquidityMarket): Command[] => {
   ];
 };
 
-/// Each batch adds a grant and a revoke per distinct target and signature it calls, except on the ACM: 56 entries in
+/// Each batch adds a grant and a revoke per distinct target and signature it calls, except on the ACM: 43 entries in
 /// the first and 46 in the second, each seeded in one `addBatch` well under the per-tx gas cap.
 const toBatch = (commands: Command[], seededIndex?: number): Batch =>
   batch(commands, seededIndex === undefined ? { raw: true } : { raw: true, seededIndex });
@@ -323,7 +308,7 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
     }), and USDT, USDC and U each to its Hub's Spoke yield group.
 7. Turn on the pool's liquidation allowlist, with only the Operator on it.
 8. Add each liquidity market to its Spoke yield group, last to deposit and first to withdraw.
-9. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
+9. Give the Critical Guardian \`setCloseFactor\` on this comptroller. Its other roles, including the CollateralGateway's (${COLLATERAL_GATEWAY}) \`enterMarketForAccount\`, come from the wildcards VIP-675 grants to every spoke comptroller.
 
 Steps 5 to 9 and BPNC's lasting roles in step 1 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
 
@@ -360,6 +345,7 @@ ${liquidity
 - With a 0% liquidation incentive a liquidator receives exactly the value it repays, in BPNC.
 - Only the Operator can liquidate: every seizure in the pool checks the liquidation allowlist.
 - Pausing BPNC stops its transfers, so while it is paused BPNC can be neither supplied nor redeemed.
+- This VIP must execute after VIP-675, which grants the spoke comptroller wildcards and adds the bStock mainstream markets to each Spoke yield group's queues.
 
 #### Deployed contracts
 
