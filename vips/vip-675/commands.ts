@@ -36,21 +36,27 @@ import {
   SpokeMarket,
   VTREASURY,
 } from "./addresses/bscmainnet";
-import { OTHER_GRANTS_MAINSTREAM, REGISTRY_GRANTS_MAINSTREAM } from "./permissions-bscmainnet";
+import {
+  OTHER_WILDCARDS,
+  REGISTRY_WILDCARDS,
+  SCOPED_GRANTS_MAINSTREAM,
+  VIP_675_WILDCARDS,
+} from "./permissions-bscmainnet";
 
 // ===================================================================================================
 // VIP-675 [BNB Chain]: the commands every part builds from. See ./bscmainnet.ts for the split.
 //
 // SHAPE of each part, in this order:
-//  1. Part 1 only: take the comptroller's ownership, wire both oracles, grant SPOKE_POOL_REGISTRY its six roles and
-//     register the empty pool. `addPool` reverts without those grants, so they stay inline. `addPool` sets no
-//     metadata, so then set this pool's description, and the bStock index pool's, which VIP-668 left empty.
+//  1. Part 1 only: take the comptroller's ownership, wire both oracles, grant SPOKE_POOL_REGISTRY its six roles as
+//     wildcards and register the empty pool. `addPool` reverts without those grants, so they stay inline. `addPool`
+//     sets no metadata, so then set this pool's description, and the bStock index pool's, which VIP-668 left empty.
 //  2. Price the part's new assets: Atlas, APRO and the band where APRO has a feed, the ResilientOracle, then the DBO,
 //     whose `setTokenConfigs` reads the live price. Inline, because pricing has to come before the listing (`addMarket`
 //     sets a collateral factor above 0, which needs a nonzero price) and the one batch run comes after it.
 //  3. List the part's markets: VTreasury withdrawal, approve and `addMarket` per market. Inline: the withdrawal is
 //     `onlyOwner` and `addMarket` pulls the seed from `msg.sender`, so neither can run as the aggregator.
-//  4. The rest, in one run of adjacent aggregator batches: the other 14 comptroller grants (part 1), each market's
+//  4. The rest, in one run of adjacent aggregator batches: (part 1) the other 13 wildcards, the Critical Guardian's
+//     scoped `setCloseFactor` and the revokes of the bStock index pool's grants the wildcards replace, each market's
 //     reserve delta, the collateral markets' incentive, seize share and BORROW pause, and (part 1) each liquidity
 //     market's supply allowlist and Hub wiring. Each batch grants the aggregator what it calls and revokes it after, so
 //     none of the aggregator's own grants outlives the proposal.
@@ -123,6 +129,12 @@ const assertComplete = (part: Vip675Part) => {
   }
 };
 
+const revokeCallPermission = (contract: string, role: string, account: string): Command => ({
+  target: ACM,
+  signature: "revokeCallPermission(address,string,address)",
+  params: [contract, role, account],
+});
+
 /// `updatePoolMetadata(comptroller, (category, logoURL, description))`, with only the description set.
 const setPoolDescription = (comptroller: string, description: string): Command => ({
   target: SPOKE_POOL_REGISTRY,
@@ -134,7 +146,7 @@ const poolCommands = ({ comptroller }: Vip675Part): Command[] => [
   { target: comptroller, signature: "acceptOwnership()", params: [] },
   { target: comptroller, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
   { target: comptroller, signature: "setDeviationBoundedOracle(address)", params: [DEVIATION_BOUNDED_ORACLE] },
-  ...REGISTRY_GRANTS_MAINSTREAM.map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account)),
+  ...REGISTRY_WILDCARDS.map(({ role, account }) => giveCallPermission(ACM, constants.AddressZero, role, account)),
   {
     target: SPOKE_POOL_REGISTRY,
     signature: "addPool(string,address,uint256,uint256,uint256)",
@@ -233,7 +245,14 @@ const wireHub = (comptroller: string, m: MainstreamLiquidityMarket): Command[] =
 
 const batchedCommands = (part: Vip675Part): Command[] => [
   ...(part.createsPool
-    ? OTHER_GRANTS_MAINSTREAM.map(({ role, account }) => giveCallPermission(ACM, part.comptroller, role, account))
+    ? [
+        ...OTHER_WILDCARDS.map(({ role, account }) => giveCallPermission(ACM, constants.AddressZero, role, account)),
+        ...SCOPED_GRANTS_MAINSTREAM.map(({ role, account }) =>
+          giveCallPermission(ACM, part.comptroller, role, account),
+        ),
+        // After every wildcard: the bStock index pool keeps each role through it.
+        ...VIP_675_WILDCARDS.map(({ role, account }) => revokeCallPermission(SPOKE_COMPTROLLER, role, account)),
+      ]
     : []),
   ...marketsOf(part).map(m => ({
     target: m.vToken,

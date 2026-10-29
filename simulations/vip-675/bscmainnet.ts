@@ -57,9 +57,10 @@ import vip676, { PART_2 } from "../../vips/vip-675/bscmainnet-part-2";
 import vip677, { PART_3 } from "../../vips/vip-675/bscmainnet-part-3";
 import { Vip675Part, pendingDeployments, pendingRiskValues } from "../../vips/vip-675/commands";
 import {
-  VIP_675_GRANTS,
+  SCOPED_GRANTS_MAINSTREAM,
   VIP_675_ORACLE_ROLES,
   VIP_675_REGISTRY_ROLES,
+  VIP_675_WILDCARDS,
 } from "../../vips/vip-675/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
@@ -181,6 +182,11 @@ const feedAge = async (oracle: string, feed: string): Promise<number> => {
 };
 
 const ACM_EVENTS = new ethers.utils.Interface(ACM_ABI);
+const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
+/// Whether `account` holds `role` against `contract` itself, not through a wildcard.
+const holdsScoped = (contract: string, role: string, account: string): Promise<boolean> =>
+  acm.hasRole(ethers.utils.solidityKeccak256(["address", "string"], [contract, role]), account);
+
 /// How many `name` events the ACM emitted in the transaction.
 const acmEvents = async (txResponse: TransactionResponse, name: string): Promise<number> => {
   const { logs } = await txResponse.wait();
@@ -422,11 +428,14 @@ forking(FORK_BLOCK, async () => {
       [part.liquidity.length, part.liquidity.length, part.liquidity.length],
     );
     await expectEvents(txResponse, [HUB_ABI], ["YieldGroupCapRaised", "OuterDepositQueueSet"], [0, 0]);
-    // The aggregator revokes every role it grants itself, so only part 1's 20 comptroller grants are left. The mainnet
-    // ACM emits no PermissionGranted, so RoleGranted and RoleRevoked are the count.
+    // The aggregator revokes every role it grants itself, and each wildcard replaces one of the bStock index pool's
+    // grants, so only part 1's scoped grant is left. The mainnet ACM emits no PermissionGranted, so RoleGranted
+    // and RoleRevoked are the count.
     const granted = await acmEvents(txResponse, "RoleGranted");
     const revoked = await acmEvents(txResponse, "RoleRevoked");
-    expect(granted - revoked, "grants left after execution").to.equal(part.createsPool ? VIP_675_GRANTS.length : 0);
+    expect(granted - revoked, "grants left after execution").to.equal(
+      part.createsPool ? SCOPED_GRANTS_MAINSTREAM.length : 0,
+    );
   };
 
   describe("VIP-675 inputs", () => {
@@ -538,7 +547,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("gives no account a VIP-675 comptroller role as a wildcard, and no one `enterMarketForAccount` on this pool", async () => {
-      for (const { role, account: holder } of VIP_675_GRANTS) {
+      for (const { role, account: holder } of [...VIP_675_WILDCARDS, ...SCOPED_GRANTS_MAINSTREAM]) {
         expect(await mayCall(UNRELATED, holder, role), `${role} as a wildcard`).to.be.false;
       }
       for (const role of ROUTER_ROLES) {
@@ -546,6 +555,12 @@ forking(FORK_BLOCK, async () => {
           expect(await mayCall(UNRELATED, holder, role), `${holder} holds ${role} as a wildcard`).to.be.false;
           expect(await mayCall(COMPTROLLER, holder, role), `${holder} holds ${role}`).to.be.false;
         }
+      }
+    });
+
+    it("has the bStock index pool hold each wildcard role as a scoped grant", async () => {
+      for (const { role, account: holder } of VIP_675_WILDCARDS) {
+        expect(await holdsScoped(SPOKE_COMPTROLLER, role, holder), `${holder}: ${role}`).to.be.true;
       }
     });
 
@@ -706,8 +721,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("grants every comptroller role to its holder against this comptroller only", async () => {
-      for (const { role, account: holder } of VIP_675_GRANTS) {
+    it("grants the roles as wildcards, and the Critical Guardian's `setCloseFactor` on this comptroller", async () => {
+      for (const { role, account: holder } of VIP_675_WILDCARDS) {
+        expect(await mayCall(UNRELATED, holder, role), `${holder} holds ${role} as a wildcard`).to.be.true;
+        expect(await mayCall(COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
+      }
+      for (const { role, account: holder } of SCOPED_GRANTS_MAINSTREAM) {
         expect(await mayCall(COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
         expect(await mayCall(UNRELATED, holder, role), `${role} as a wildcard`).to.be.false;
       }
@@ -716,6 +735,16 @@ forking(FORK_BLOCK, async () => {
         for (const holder of KNOWN_ACCOUNTS) {
           expect(await mayCall(COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.false;
         }
+      }
+    });
+
+    it("revokes the bStock index pool's scoped grants the wildcards replace, without removing any access", async () => {
+      for (const { role, account: holder } of VIP_675_WILDCARDS) {
+        expect(await holdsScoped(SPOKE_COMPTROLLER, role, holder), `${holder} scoped ${role}`).to.be.false;
+        expect(await mayCall(SPOKE_COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
+      }
+      for (const { role, account: holder } of SCOPED_GRANTS_MAINSTREAM) {
+        expect(await holdsScoped(SPOKE_COMPTROLLER, role, holder), `${holder} scoped ${role}`).to.be.true;
       }
     });
 
