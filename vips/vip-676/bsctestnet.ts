@@ -2,7 +2,7 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const BSTOCK_PAUSE_SENTINEL = "0xC25b2B657D24380eDd1a1Cff5296385541e85204";
-export const NEW_BSTOCK_PAUSE_SENTINEL_IMPLEMENTATION = "0x0965e122751aC3Db4621eB7A571C9C4a7c9ED659";
+export const NEW_SENTINEL_IMPLEMENTATION = "0x0965e122751aC3Db4621eB7A571C9C4a7c9ED659";
 export const EBRAKE = "0x957c09e3Ac3d9e689244DC74307c94111FBa8B42";
 
 const DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
@@ -17,7 +17,7 @@ Upgrades the BStockPauseSentinel on BNB Chain Testnet to its HashDit-audited bui
 
 #### Actions
 
-1. Upgrade the **BStockPauseSentinel** proxy [${BSTOCK_PAUSE_SENTINEL}](https://testnet.bscscan.com/address/${BSTOCK_PAUSE_SENTINEL}) to [${NEW_BSTOCK_PAUSE_SENTINEL_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_BSTOCK_PAUSE_SENTINEL_IMPLEMENTATION}).
+1. Upgrade the **BStockPauseSentinel** proxy [${BSTOCK_PAUSE_SENTINEL}](https://testnet.bscscan.com/address/${BSTOCK_PAUSE_SENTINEL}) to [${NEW_SENTINEL_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_SENTINEL_IMPLEMENTATION}).
 
 #### Notes
 
@@ -33,7 +33,7 @@ Upgrades the BStockPauseSentinel on BNB Chain Testnet to its HashDit-audited bui
       {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [BSTOCK_PAUSE_SENTINEL, NEW_BSTOCK_PAUSE_SENTINEL_IMPLEMENTATION],
+        params: [BSTOCK_PAUSE_SENTINEL, NEW_SENTINEL_IMPLEMENTATION],
       },
     ],
     meta,

@@ -19,11 +19,7 @@ import vip676, {
   vSPYB,
   vTSLAB,
 } from "../../vips/vip-676/bscmainnet";
-import {
-  CORE_COMPTROLLER_PERMISSIONS,
-  CORE_ONLY_PERMISSIONS,
-  EBRAKE_WILDCARD_PERMISSIONS,
-} from "../../vips/vip-676/config";
+import { CORE_ONLY_PERMISSIONS, CORE_PERMISSIONS_TO_REVOKE, WILDCARD_PERMISSIONS } from "../../vips/vip-676/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import SENTINEL_ABI from "./abi/BStockPauseSentinel.json";
 import COMPLIANCE_ABI from "./abi/Compliance.json";
@@ -34,7 +30,8 @@ import PROXY_ABI from "./abi/OptimizedTransparentUpgradeableProxy.json";
 import PAUSE_MANAGER_ABI from "./abi/PauseManager.json";
 import SPOKE_COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 
-const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, CRITICAL_GUARDIAN, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } =
+  NETWORK_ADDRESSES.bscmainnet;
 
 const BLOCK_NUMBER = 130439277;
 
@@ -79,7 +76,7 @@ forking(BLOCK_NUMBER, async () => {
   const hasWildcard = (signature: string, account: string) =>
     acm.hasRole(ethers.utils.solidityKeccak256(["bytes32", "string"], [ethers.constants.HashZero, signature]), account);
 
-  // VIP-673 is queued and upgrades the same EBrake proxy first
+  // An already queued proposal upgrades the same EBrake proxy, so it runs first
   before(async () => {
     await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
   });
@@ -94,11 +91,11 @@ forking(BLOCK_NUMBER, async () => {
       expect(await sentinel.getMonitoredMarkets()).to.be.empty;
     });
 
-    it("EBrake holds its VIP-610 grants on the Core pool comptroller and no wildcards", async () => {
-      for (const signature of CORE_COMPTROLLER_PERMISSIONS) {
+    it("EBrake holds its per-contract grants on the Core pool comptroller and no wildcards", async () => {
+      for (const signature of CORE_PERMISSIONS_TO_REVOKE) {
         expect(await hasRole(UNITROLLER, signature, EBRAKE), signature).to.be.true;
       }
-      for (const signature of EBRAKE_WILDCARD_PERMISSIONS) {
+      for (const signature of WILDCARD_PERMISSIONS) {
         expect(await hasWildcard(signature, EBRAKE), signature).to.be.false;
       }
     });
@@ -128,12 +125,11 @@ forking(BLOCK_NUMBER, async () => {
     ],
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
-      // Plus the aggregator's DEFAULT_ADMIN_ROLE around the batch
       await expectEvents(
         txResponse,
         [ACM_ABI],
         ["RoleGranted", "RoleRevoked"],
-        [EBRAKE_WILDCARD_PERMISSIONS.length + SENTINEL_PERMISSIONS.length + 1, CORE_COMPTROLLER_PERMISSIONS.length + 1],
+        [WILDCARD_PERMISSIONS.length + SENTINEL_PERMISSIONS.length, CORE_PERMISSIONS_TO_REVOKE.length],
       );
       await expectEvents(
         txResponse,
@@ -158,7 +154,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("EBrake holds wildcards instead of its Core pool comptroller grants", async () => {
-      for (const signature of EBRAKE_WILDCARD_PERMISSIONS) {
+      for (const signature of WILDCARD_PERMISSIONS) {
         expect(await hasWildcard(signature, EBRAKE), `${signature} wildcard`).to.be.true;
         expect(await acm.isAllowedToCall(EBRAKE, signature, { from: UNITROLLER }), `${signature} on Core`).to.be.true;
         expect(
@@ -166,7 +162,7 @@ forking(BLOCK_NUMBER, async () => {
           `${signature} on bStock index`,
         ).to.be.true;
       }
-      for (const signature of CORE_COMPTROLLER_PERMISSIONS) {
+      for (const signature of CORE_PERMISSIONS_TO_REVOKE) {
         expect(await hasRole(UNITROLLER, signature, EBRAKE), signature).to.be.false;
       }
     });
@@ -316,7 +312,7 @@ forking(BLOCK_NUMBER, async () => {
       );
     });
 
-    it("Critical Guardian and Timelocks can set keepers and monitored markets, Guardian cannot", async () => {
+    it("Guardian and Timelocks can set keepers and monitored markets, Critical Guardian cannot", async () => {
       for (const account of SENTINEL_ADMINS) {
         const admin = await initMainnetUser(account, parseEther("1"));
         await expect(sentinel.connect(admin).setTrustedKeeper(GUARDIAN, true))
@@ -327,12 +323,13 @@ forking(BLOCK_NUMBER, async () => {
           .withArgs(VUSDT, true);
       }
 
-      await expect(sentinel.connect(guardian).setTrustedKeeper(GUARDIAN, true))
+      const criticalGuardian = await initMainnetUser(CRITICAL_GUARDIAN, parseEther("1"));
+      await expect(sentinel.connect(criticalGuardian).setTrustedKeeper(GUARDIAN, true))
         .to.be.revertedWithCustomError(sentinel, "Unauthorized")
-        .withArgs(GUARDIAN, BSTOCK_PAUSE_SENTINEL, "setTrustedKeeper(address,bool)");
-      await expect(sentinel.connect(guardian).setMarketMonitored(VUSDT, true))
+        .withArgs(CRITICAL_GUARDIAN, BSTOCK_PAUSE_SENTINEL, "setTrustedKeeper(address,bool)");
+      await expect(sentinel.connect(criticalGuardian).setMarketMonitored(VUSDT, true))
         .to.be.revertedWithCustomError(sentinel, "Unauthorized")
-        .withArgs(GUARDIAN, BSTOCK_PAUSE_SENTINEL, "setMarketMonitored(address,bool)");
+        .withArgs(CRITICAL_GUARDIAN, BSTOCK_PAUSE_SENTINEL, "setMarketMonitored(address,bool)");
     });
 
     it("Guardian pauses supply and lowers the supply cap of a Spoke market through EBrake", async () => {

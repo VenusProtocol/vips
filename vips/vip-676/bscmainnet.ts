@@ -1,17 +1,11 @@
 import { ethers } from "ethers";
-import { batch } from "src/auxiliaryCommandsAggregator";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import {
-  CORE_COMPTROLLER_PERMISSIONS,
-  EBRAKE_WILDCARD_PERMISSIONS,
-  IL_COMPTROLLER_PERMISSIONS,
-  REMOTE_CHAINS,
-} from "./config";
+import { CORE_PERMISSIONS_TO_REVOKE, REMOTE_CHAINS, WILDCARD_PERMISSIONS } from "./config";
 
-const { ACCESS_CONTROL_MANAGER, CRITICAL_GUARDIAN, FAST_TRACK_TIMELOCK, NORMAL_TIMELOCK, UNITROLLER } =
+const { ACCESS_CONTROL_MANAGER, FAST_TRACK_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } =
   NETWORK_ADDRESSES.bscmainnet;
 
 export const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
@@ -30,7 +24,7 @@ export const vQQQB = "0xeA32B70f4106d9ef6f0fF95f7422Fa679494c362";
 export const vSPYB = "0x259311A868B49CdA457C1843F89D4dDA33be0390";
 
 export const BSTOCK_MARKETS = [vTSLAB, vNVDAB, vSPCXB, vSKHYB, vQQQB, vSPYB];
-export const SENTINEL_ADMINS = [CRITICAL_GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
+export const SENTINEL_ADMINS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
 
 export const vip676 = () => {
   const meta = {
@@ -38,22 +32,20 @@ export const vip676 = () => {
     title: "VIP-676 [BNB Chain, Ethereum, Arbitrum One, Base] EBrake upgrade and bStock pause sentinel",
     description: `#### Summary
 
-If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new BStockPauseSentinel will watch every bStock market on BNB Chain. When a bStock's issuer pauses the token, or its compliance module blocks a market, a keeper calls the sentinel, which sets that market's collateral factor to 0 through EBrake.
+If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new BStockPauseSentinel will watch every bStock market on BNB Chain. When a bStock's issuer pauses the token, or its compliance module blocks a market, a keeper calls the sentinel, which sets that market's collateral factor to 0 through EBrake. EBrake is also upgraded to the same build on Ethereum, Arbitrum One and Base.
 
 #### Actions
 
-1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). EBrake now acts on each market through that market's own comptroller, so it also covers Spoke pool markets. Core pool behaviour and the storage layout are unchanged.
+1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). EBrake now acts on each market through that market's own comptroller, so it also covers Spoke pool markets. Core pool behaviour, the Hub pause actions and the storage layout are unchanged.
 2. Accept ownership of the **BStockPauseSentinel** at [${BSTOCK_PAUSE_SENTINEL}](https://bscscan.com/address/${BSTOCK_PAUSE_SENTINEL}).
-3. Through one AuxiliaryCommandsAggregator batch, give EBrake the comptroller permissions for the actions both the Core pool and Spoke pools have (pausing actions, the collateral factor and the borrow and supply caps) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. This replaces the ${
-      CORE_COMPTROLLER_PERMISSIONS.length
-    } matching per-contract grants on the Core pool comptroller from VIP-610, which are revoked. Its Core-only grants (flash loan pause, pool borrow and flash loan access) stay on the Core pool comptroller.
-4. In the same batch, grant the sentinel \`decreaseCF(address,uint256)\` on EBrake, and the Critical Guardian and the Normal and Fast-track Timelocks the sentinel's \`setTrustedKeeper\` and \`setMarketMonitored\`.
+3. Give EBrake the comptroller permissions for the actions both the Core pool and Spoke pools have (pausing actions, the collateral factor and the borrow and supply caps) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. This replaces the ${
+      CORE_PERMISSIONS_TO_REVOKE.length
+    } matching per-contract grants on the Core pool comptroller, which are revoked. EBrake's Core-only grants (flash loan pause, pool borrow and flash loan access) stay on the Core pool comptroller.
+4. Grant the sentinel \`decreaseCF(address,uint256)\` on EBrake, and the Guardian and the Normal and Fast-track Timelocks the sentinel's \`setTrustedKeeper\` and \`setMarketMonitored\`.
 5. Set [${KEEPER}](https://bscscan.com/address/${KEEPER}) as the sentinel's keeper. It is the keeper that already drives DeviationSentinel.
 6. Monitor the six bStock markets: vTSLAB, vNVDAB, vSPCXB and vSKHYB in the Core pool, and vQQQB and vSPYB in the bStock index Spoke pool.
-7. On Ethereum, Arbitrum One and Base, upgrade **EBrake** to the same build, and replace its ${
-      IL_COMPTROLLER_PERMISSIONS.length
-    } per-contract grants on the Core pool comptroller from VIP-616 with wildcards:
-${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newEBrakeImplementation}`).join("\n")}
+7. On Ethereum, Arbitrum One and Base, upgrade **EBrake** to the same build. EBrake's existing grants on each Core pool comptroller already cover it, so no permissions change there:
+${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
 
 #### Notes
 
@@ -75,40 +67,36 @@ ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newEBrakeImplementation}`).join("\
       },
       { target: BSTOCK_PAUSE_SENTINEL, signature: "acceptOwnership()", params: [] },
 
-      // 2. ACM permissions, as one aggregator batch so propose() fits the per-tx gas cap
-      batch(
-        [
-          // EBrake's comptroller permissions become wildcards
-          ...EBRAKE_WILDCARD_PERMISSIONS.map(signature => ({
-            target: ACCESS_CONTROL_MANAGER,
-            signature: "giveCallPermission(address,string,address)",
-            params: [ethers.constants.AddressZero, signature, EBRAKE],
-          })),
-          ...CORE_COMPTROLLER_PERMISSIONS.map(signature => ({
-            target: ACCESS_CONTROL_MANAGER,
-            signature: "revokeCallPermission(address,string,address)",
-            params: [UNITROLLER, signature, EBRAKE],
-          })),
+      // 2. ACM permissions
 
-          // Sentinel permissions
-          {
-            target: ACCESS_CONTROL_MANAGER,
-            signature: "giveCallPermission(address,string,address)",
-            params: [EBRAKE, "decreaseCF(address,uint256)", BSTOCK_PAUSE_SENTINEL],
-          },
-          ...SENTINEL_ADMINS.map(account => ({
-            target: ACCESS_CONTROL_MANAGER,
-            signature: "giveCallPermission(address,string,address)",
-            params: [BSTOCK_PAUSE_SENTINEL, "setTrustedKeeper(address,bool)", account],
-          })),
-          ...SENTINEL_ADMINS.map(account => ({
-            target: ACCESS_CONTROL_MANAGER,
-            signature: "giveCallPermission(address,string,address)",
-            params: [BSTOCK_PAUSE_SENTINEL, "setMarketMonitored(address,bool)", account],
-          })),
-        ],
-        { raw: true },
-      ),
+      // EBrake's comptroller permissions become wildcards
+      ...WILDCARD_PERMISSIONS.map(signature => ({
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, signature, EBRAKE],
+      })),
+      ...CORE_PERMISSIONS_TO_REVOKE.map(signature => ({
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [UNITROLLER, signature, EBRAKE],
+      })),
+
+      // Sentinel permissions
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [EBRAKE, "decreaseCF(address,uint256)", BSTOCK_PAUSE_SENTINEL],
+      },
+      ...SENTINEL_ADMINS.map(account => ({
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [BSTOCK_PAUSE_SENTINEL, "setTrustedKeeper(address,bool)", account],
+      })),
+      ...SENTINEL_ADMINS.map(account => ({
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [BSTOCK_PAUSE_SENTINEL, "setMarketMonitored(address,bool)", account],
+      })),
 
       // 3. Sentinel keeper and monitored markets
       { target: BSTOCK_PAUSE_SENTINEL, signature: "setTrustedKeeper(address,bool)", params: [KEEPER, true] },
@@ -118,27 +106,13 @@ ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newEBrakeImplementation}`).join("\
         params: [market, true],
       })),
 
-      // 4. Remote chains: EBrake upgrade and wildcard comptroller permissions
-      ...REMOTE_CHAINS.flatMap(chain => [
-        {
-          target: chain.proxyAdmin,
-          signature: "upgrade(address,address)",
-          params: [chain.eBrake, chain.newEBrakeImplementation],
-          dstChainId: chain.dstChainId,
-        },
-        ...IL_COMPTROLLER_PERMISSIONS.map(signature => ({
-          target: chain.acm,
-          signature: "giveCallPermission(address,string,address)",
-          params: [ethers.constants.AddressZero, signature, chain.eBrake],
-          dstChainId: chain.dstChainId,
-        })),
-        ...IL_COMPTROLLER_PERMISSIONS.map(signature => ({
-          target: chain.acm,
-          signature: "revokeCallPermission(address,string,address)",
-          params: [chain.coreComptroller, signature, chain.eBrake],
-          dstChainId: chain.dstChainId,
-        })),
-      ]),
+      // 4. Remote chains: EBrake upgrade
+      ...REMOTE_CHAINS.map(chain => ({
+        target: chain.proxyAdmin,
+        signature: "upgrade(address,address)",
+        params: [chain.eBrake, chain.newImplementation],
+        dstChainId: chain.dstChainId,
+      })),
     ],
     meta,
     ProposalType.REGULAR,
