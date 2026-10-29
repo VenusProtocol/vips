@@ -58,6 +58,10 @@ export const VIP_675_ORACLE_ROLES: { contract: string; role: string }[] = [
   { contract: DEVIATION_BOUNDED_ORACLE, role: "setTokenConfigs((address,uint64,uint256,uint256,bool,bool)[])" },
 ];
 
-/// The registry roles `addPool` and `addMarket` check. The Normal Timelock holds both as wildcards (VIP-668's
-/// ASSUMED_WILDCARDS), so no VIP-675 grant covers them.
-export const VIP_675_REGISTRY_ROLES = ["addPool(string,address,uint256,uint256,uint256)", "addMarket(AddMarketInput)"];
+/// The registry roles `addPool`, `addMarket` and `updatePoolMetadata` check. The Normal Timelock holds each as a
+/// wildcard (VIP-668's ASSUMED_WILDCARDS), so no VIP-675 grant covers them.
+export const VIP_675_REGISTRY_ROLES = [
+  "addPool(string,address,uint256,uint256,uint256)",
+  "addMarket(AddMarketInput)",
+  "updatePoolMetadata(address,VenusPoolMetaData)",
+];

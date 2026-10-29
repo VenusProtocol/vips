@@ -34,6 +34,10 @@ export * from "../../vip-670/addresses/bscmainnet";
 
 export const MAINSTREAM_POOL_NAME = "bStock mainstream";
 
+/// Each pool's registry description, shown under its name on the Spoke pools page.
+export const MAINSTREAM_POOL_DESCRIPTION = "Borrow against mainstream bStocks";
+export const INDEX_POOL_DESCRIPTION = "Borrow against bStock index";
+
 /// Suffix of every market's symbol, `vTSLAB_bStockMainstream`. The bStock index markets use `_bStockIndex`.
 const SYMBOL_SUFFIX = "bStockMainstream";
 

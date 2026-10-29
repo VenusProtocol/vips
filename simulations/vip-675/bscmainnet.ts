@@ -27,7 +27,9 @@ import {
   CRITICAL_TIMELOCK,
   DEVIATION_BOUNDED_ORACLE,
   FAST_TRACK_TIMELOCK,
+  INDEX_POOL_DESCRIPTION,
   LIQUIDITY_IRM,
+  MAINSTREAM_POOL_DESCRIPTION,
   MAINSTREAM_POOL_NAME,
   MAX_LOOPS_LIMIT,
   MIN_LIQUIDATABLE_COLLATERAL,
@@ -244,6 +246,8 @@ forking(FORK_BLOCK, async () => {
   const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
   const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   const registry = new ethers.Contract(SPOKE_POOL_REGISTRY, REGISTRY_ABI, ethers.provider);
+  /// `[category, logoURL, description]`, as a plain array.
+  const metadataOf = async (pool: string): Promise<string[]> => [...(await registry.getVenusPoolMetadata(pool))];
   const gateway = new ethers.Contract(COLLATERAL_GATEWAY, GATEWAY_ABI, ethers.provider);
   const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
   const vTokenOf = (address: string) => new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
@@ -397,8 +401,8 @@ forking(FORK_BLOCK, async () => {
     await expectEvents(
       txResponse,
       [REGISTRY_ABI],
-      ["PoolRegistered", "MarketAdded"],
-      [part.createsPool ? 1 : 0, markets],
+      ["PoolRegistered", "PoolMetadataUpdated", "MarketAdded"],
+      [part.createsPool ? 1 : 0, part.createsPool ? 2 : 0, markets],
     );
     await expectEvents(
       txResponse,
@@ -504,6 +508,11 @@ forking(FORK_BLOCK, async () => {
       expect((await registry.getPoolByComptroller(COMPTROLLER)).comptroller).to.equal(ethers.constants.AddressZero);
     });
 
+    it("has no metadata on this pool or the bStock index pool", async () => {
+      expect(await metadataOf(COMPTROLLER)).to.deep.equal(["", "", ""]);
+      expect(await metadataOf(SPOKE_COMPTROLLER)).to.deep.equal(["", "", ""]);
+    });
+
     it("builds each market on this comptroller, owned by the Normal Timelock, with the Timelock as shortfall", async () => {
       for (const m of MARKETS) {
         const v = vTokenOf(m.vToken);
@@ -604,7 +613,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("lets the Normal Timelock price the new assets, list the markets and pay the seeds", async () => {
+    it("lets the Normal Timelock price the assets, list the markets, set pool metadata and pay seeds", async () => {
       for (const { contract, role } of VIP_675_ORACLE_ROLES) {
         expect(await mayCall(contract, NORMAL_TIMELOCK, role), `${contract}: ${role}`).to.be.true;
       }
@@ -650,6 +659,11 @@ forking(FORK_BLOCK, async () => {
       expect(await comptroller.minLiquidatableCollateral()).to.equal(MIN_LIQUIDATABLE_COLLATERAL);
       expect(await comptroller.isLiquidationAllowlistEnabled()).to.be.false;
       expectAddress((await registry.getPoolByComptroller(SPOKE_COMPTROLLER)).comptroller, SPOKE_COMPTROLLER);
+    });
+
+    it("sets the description of this pool and of the bStock index pool, with no category or logo", async () => {
+      expect(await metadataOf(COMPTROLLER)).to.deep.equal(["", "", MAINSTREAM_POOL_DESCRIPTION]);
+      expect(await metadataOf(SPOKE_COMPTROLLER)).to.deep.equal(["", "", INDEX_POOL_DESCRIPTION]);
     });
 
     it("prices part 1's new assets, and leaves the Core assets' configs as they were", async () => {

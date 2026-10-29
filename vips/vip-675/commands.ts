@@ -17,7 +17,9 @@ import {
   CLOSE_FACTOR,
   COLLATERAL_GATEWAY,
   DEVIATION_BOUNDED_ORACLE,
+  INDEX_POOL_DESCRIPTION,
   LIQUIDITY_IRM,
+  MAINSTREAM_POOL_DESCRIPTION,
   MAINSTREAM_POOL_NAME,
   MIN_LIQUIDATABLE_COLLATERAL,
   MainstreamCollateralMarket,
@@ -29,6 +31,7 @@ import {
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
   SEED_RECEIVER,
+  SPOKE_COMPTROLLER,
   SPOKE_POOL_REGISTRY,
   SpokeMarket,
   VTREASURY,
@@ -40,7 +43,8 @@ import { OTHER_GRANTS_MAINSTREAM, REGISTRY_GRANTS_MAINSTREAM } from "./permissio
 //
 // SHAPE of each part, in this order:
 //  1. Part 1 only: take the comptroller's ownership, wire both oracles, grant SPOKE_POOL_REGISTRY its six roles and
-//     register the empty pool. `addPool` reverts without those grants, so they stay inline.
+//     register the empty pool. `addPool` reverts without those grants, so they stay inline. `addPool` sets no
+//     metadata, so then set this pool's description, and the bStock index pool's, which VIP-668 left empty.
 //  2. Price the part's new assets: Atlas, APRO and the band where APRO has a feed, the ResilientOracle, then the DBO,
 //     whose `setTokenConfigs` reads the live price. Inline, because pricing has to come before the listing (`addMarket`
 //     sets a collateral factor above 0, which needs a nonzero price) and the one batch run comes after it.
@@ -119,6 +123,13 @@ const assertComplete = (part: Vip675Part) => {
   }
 };
 
+/// `updatePoolMetadata(comptroller, (category, logoURL, description))`, with only the description set.
+const setPoolDescription = (comptroller: string, description: string): Command => ({
+  target: SPOKE_POOL_REGISTRY,
+  signature: "updatePoolMetadata(address,(string,string,string))",
+  params: [comptroller, ["", "", description]],
+});
+
 const poolCommands = ({ comptroller }: Vip675Part): Command[] => [
   { target: comptroller, signature: "acceptOwnership()", params: [] },
   { target: comptroller, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
@@ -129,6 +140,8 @@ const poolCommands = ({ comptroller }: Vip675Part): Command[] => [
     signature: "addPool(string,address,uint256,uint256,uint256)",
     params: [MAINSTREAM_POOL_NAME, comptroller, CLOSE_FACTOR, POOL_LIQUIDATION_INCENTIVE, MIN_LIQUIDATABLE_COLLATERAL],
   },
+  setPoolDescription(comptroller, MAINSTREAM_POOL_DESCRIPTION),
+  setPoolDescription(SPOKE_COMPTROLLER, INDEX_POOL_DESCRIPTION),
 ];
 
 const oracleCommands = (part: Vip675Part): Command[] => {

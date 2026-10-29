@@ -6,8 +6,10 @@ import {
   CLOSE_FACTOR,
   COLLATERAL_GATEWAY,
   COLLATERAL_MARKETS_MAINSTREAM,
+  INDEX_POOL_DESCRIPTION,
   LIQUIDITY_MARKETS_MAINSTREAM,
   MAINSTREAM_COMPTROLLER,
+  MAINSTREAM_POOL_DESCRIPTION,
   MAINSTREAM_POOL_NAME,
   MIN_LIQUIDATABLE_COLLATERAL,
   POOL_LIQUIDATION_INCENTIVE,
@@ -81,13 +83,14 @@ VIP-${VIP_NUMBER + 1} (tier 2 and 3) and VIP-${VIP_NUMBER + 2} (tier 4) list the
     )} pool-wide liquidation incentive and a $${tokens(
       MIN_LIQUIDATABLE_COLLATERAL,
     )} minimum liquidatable collateral, priced by the ResilientOracle and the DeviationBoundedOracle.
-2. Price the new assets with Atlas as the main oracle and a DeviationBoundedOracle window, with APRO as pivot where it has a feed. NVDAB, TSLAB, SPCXB and SKHYB keep the configs they already have for the Core pool.
-3. List the markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
-4. Give each collateral market a liquidation incentive of its own, set its protocol seize share where it is not the default 5%, and pause borrowing on them.
-5. Restrict supply on the USDT, USDC and U markets to each Hub's Spoke yield group, and add each market to its yield group, after the bStock index market to deposit and before it to withdraw.
-6. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
+2. Set the pool descriptions shown in the Venus app: "${MAINSTREAM_POOL_DESCRIPTION}" for this pool, and "${INDEX_POOL_DESCRIPTION}" for the bStock index pool, which has none yet.
+3. Price the new assets with Atlas as the main oracle and a DeviationBoundedOracle window, with APRO as pivot where it has a feed. NVDAB, TSLAB, SPCXB and SKHYB keep the configs they already have for the Core pool.
+4. List the markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
+5. Give each collateral market a liquidation incentive of its own, set its protocol seize share where it is not the default 5%, and pause borrowing on them.
+6. Restrict supply on the USDT, USDC and U markets to each Hub's Spoke yield group, and add each market to its yield group, after the bStock index market to deposit and before it to withdraw.
+7. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
 
-Most of steps 4 to 6 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
+Most of steps 5 to 7 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
 
 #### Market parameters
 
