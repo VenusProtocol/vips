@@ -19,6 +19,7 @@ export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
 export const NEW_EBRAKE_IMPLEMENTATION = "0x918794Bb15BAc47C8Bbba553e7EE8BB1bD4A0959";
 export const BSTOCK_PAUSE_SENTINEL = "0x0beAb536E620D094E1DddFe7f01D310F38390082";
 export const KEEPER = "0x57FA23F591203F61cef84A7BC892Df69Ca95C86e";
+const VIP_673_EBRAKE_IMPLEMENTATION = "0xeB18c8B6d0ddc13D3d7A8cD5FF684F11E5bcBCfb";
 
 export const SENTINEL_ADMINS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
 
@@ -48,6 +49,7 @@ ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
 #### Notes
 
 - The sentinel only lowers the collateral factor to 0 and keeps the liquidation threshold, so no position becomes liquidatable. Restoring the collateral factor stays with governance.
+- VIP-673 upgrades the same EBrake proxy to [${VIP_673_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${VIP_673_EBRAKE_IMPLEMENTATION}). It must execute before this VIP, because executing it afterwards would roll EBrake back to a build without Spoke pool support.
 - DeviationSentinel on the remote chains already runs the current build, so it is not upgraded.
 - EBrake and the sentinel were audited by HashDit, and these deployments include the fixes from that audit.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
