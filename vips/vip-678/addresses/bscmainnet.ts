@@ -53,10 +53,9 @@ export { CHAINLINK_ORACLE };
 export const BPNC_PRICE = parseUnits("1", 18);
 
 // ---------------------------------------------------------------------------------------------------
-// BPNC. A CustodyReceiptToken (fixed-rate-vaults), the contract VIP-656 took over as vceBTC: an 18-decimal ERC20 whose
-// mint, burn, pause and unpause are gated by the ACM. Pausing stops holder-to-holder transfers, which includes
-// supplying BPNC to its market and redeeming it. Deployed with fixed-rate-vaults' DeployCustodyReceiptToken, renamed,
-// which nominates the Normal Timelock as owner.
+// BPNC. A CustodyReceiptToken, the contract VIP-656 took over as vceBTC: an 18-decimal ERC20 whose mint, burn, pause
+// and unpause are gated by the ACM. Pausing stops holder-to-holder transfers, which includes supplying BPNC to its
+// market and redeeming it. Deployed from the copy in isolated-pools, which nominates the Normal Timelock as owner.
 // ---------------------------------------------------------------------------------------------------
 
 /// The first BPNC, minted by VIP-678 to OPERATOR.

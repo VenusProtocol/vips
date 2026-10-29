@@ -139,7 +139,7 @@ const shortString = (value: string) => {
   return ethers.utils.hexlify(word);
 };
 
-/// A copy of vceBTC as BPNC, as DeployCustodyReceiptToken leaves it: owned by the deployer, the Normal Timelock
+/// A copy of vceBTC as BPNC, as its deployment leaves it: owned by the deployer, the Normal Timelock
 /// nominated, no supply and no ACM permission.
 const deployBpnc = async (deployer: string): Promise<string> => {
   const address = ethers.utils.getAddress(
