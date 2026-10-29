@@ -153,6 +153,10 @@ export const FLAT_6_IRM = {
   kink: parseUnits("1", 18),
 };
 
+/// The only account allowed to liquidate in the pool. Every seizure checks the pool's liquidation allowlist, so no one
+/// else can liquidate BPNC, through `liquidateBorrow`, `liquidateAccount` or `healAccount`.
+export const BPN_LIQUIDATORS = [OPERATOR];
+
 // ---------------------------------------------------------------------------------------------------
 // Supply allowlists.
 // ---------------------------------------------------------------------------------------------------

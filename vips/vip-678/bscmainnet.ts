@@ -19,6 +19,7 @@ import {
   BPNC_ROLES,
   BPN_CLOSE_FACTOR,
   BPN_INPUTS,
+  BPN_LIQUIDATORS,
   BPN_MIN_LIQUIDATABLE_COLLATERAL,
   BPN_POOL_LIQUIDATION_INCENTIVE,
   BPN_POOL_NAME,
@@ -223,6 +224,16 @@ const allowlistCommands = (comptroller: string, markets: BpnMarket[]): Command[]
     })),
   ]);
 
+/// Only BPN_LIQUIDATORS may liquidate, listed before the allowlist is switched on.
+const liquidationCommands = (comptroller: string): Command[] => [
+  ...BPN_LIQUIDATORS.map(liquidator => ({
+    target: comptroller,
+    signature: "setAllowedLiquidator(address,bool)",
+    params: [liquidator, true],
+  })),
+  { target: comptroller, signature: "setLiquidationAllowlistEnabled(bool)", params: [true] },
+];
+
 /// The BPN Loan market goes last in each Spoke source's deposit queue and first in its withdraw queue.
 const hubCommands = (m: BpnLiquidityMarket): Command[] => {
   const { spokeSource } = m.stack;
@@ -242,7 +253,7 @@ const hubCommands = (m: BpnLiquidityMarket): Command[] => {
 };
 
 /// Each batch adds a grant and a revoke per distinct target and signature it calls, except on the ACM: 53 entries in
-/// the first and 40 in the second, each seeded in one `addBatch` well under the per-tx gas cap.
+/// the first and 46 in the second, each seeded in one `addBatch` well under the per-tx gas cap.
 const toBatch = (commands: Command[], seededIndex?: number): Batch =>
   batch(commands, seededIndex === undefined ? { raw: true } : { raw: true, seededIndex });
 
@@ -259,7 +270,14 @@ export const buildCommands = (inputs: BpnInputs): (Command | Batch)[] => {
     ...listMarket(collateral, false),
     ...liquidity.flatMap(m => listMarket(m, true)),
     toBatch([...grantCommands(inputs), ...riskCommands(inputs.comptroller, markets, collateral)], grantsAndRisk),
-    toBatch([...allowlistCommands(inputs.comptroller, markets), ...liquidity.flatMap(hubCommands)], allowlistsAndHub),
+    toBatch(
+      [
+        ...allowlistCommands(inputs.comptroller, markets),
+        ...liquidationCommands(inputs.comptroller),
+        ...liquidity.flatMap(hubCommands),
+      ],
+      allowlistsAndHub,
+    ),
   ];
 };
 
@@ -306,10 +324,11 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
 6. Restrict supply on every market to its allowlist: BPNC to the Venus custody Safe (${VENUS_CUSTODY_SAFE}) and BPN (${
       inputs.bpnSupplier
     }), and USDT, USDC and U each to its Hub's Spoke yield group.
-7. Add each liquidity market to its Spoke yield group, last to deposit and first to withdraw.
-8. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
+7. Turn on the pool's liquidation allowlist, with only the Operator on it.
+8. Add each liquidity market to its Spoke yield group, last to deposit and first to withdraw.
+9. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
 
-Steps 5 to 8 and BPNC's lasting roles in step 1 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
+Steps 5 to 9 and BPNC's lasting roles in step 1 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
 
 #### Market parameters
 
@@ -342,7 +361,7 @@ ${liquidity
       collateral.supplyCap,
     )} BPNC supply cap bound what can be borrowed against it.
 - With a 0% liquidation incentive a liquidator receives exactly the value it repays, in BPNC.
-- Liquidations are permissionless. The pool's liquidation allowlist stays off.
+- Only the Operator can liquidate: every seizure in the pool checks the liquidation allowlist.
 - Pausing BPNC stops its transfers, so while it is paused BPNC can be neither supplied nor redeemed.
 
 #### Deployed contracts

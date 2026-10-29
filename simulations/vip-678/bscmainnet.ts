@@ -18,6 +18,7 @@ import {
   BPNC_ROLES,
   BPN_CLOSE_FACTOR,
   BPN_INPUTS,
+  BPN_LIQUIDATORS,
   BPN_MIN_LIQUIDATABLE_COLLATERAL,
   BPN_POOL_LIQUIDATION_INCENTIVE,
   BPN_POOL_NAME,
@@ -397,7 +398,16 @@ forking(FORK_BLOCK, async () => {
       expect(await allowed(CRITICAL_GUARDIAN, "setMarketLiquidationIncentive(address,uint256)")).to.be.true;
       expect(await allowed(PAUSE_GUARDIAN, "setAllowedLiquidator(address,bool)")).to.be.true;
       expect(await allowed(COLLATERAL_GATEWAY, "enterMarketForAccount(address,address)")).to.be.true;
-      expect(await comptroller.isLiquidationAllowlistEnabled()).to.be.false;
+    });
+
+    it("lets only the Operator liquidate", async () => {
+      expect(await comptroller.isLiquidationAllowlistEnabled()).to.be.true;
+      for (const liquidator of BPN_LIQUIDATORS) {
+        expect(await comptroller.isAllowedLiquidator(liquidator), liquidator).to.be.true;
+      }
+      for (const account of [NORMAL_TIMELOCK, CRITICAL_GUARDIAN, inputs.bpnSupplier, outsider.address]) {
+        expect(await comptroller.isAllowedLiquidator(account), account).to.be.false;
+      }
     });
 
     it("charges a flat 6% borrow APY on USDT, USDC and U at any utilization", async () => {
@@ -515,6 +525,38 @@ forking(FORK_BLOCK, async () => {
         );
         const expected = repay.mul(usdtPrice).div(ONE).mul(ONE).div(exchangeRate);
         expect(seizeTokens).to.be.closeTo(expected, 1);
+      });
+
+      it("lets only the Operator liquidate BPN once it is short", async () => {
+        // A 10% lower BPNC price puts the loan, at 99% of the 90% CF, past the 95% LT.
+        const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        await chainlinkOracle.connect(timelock).setDirectPrice(inputs.bpnc, parseUnits("0.9", 18));
+        const [, , shortfall] = await comptroller.getAccountLiquidity(bpnSigner.address);
+        expect(shortfall).to.be.gt(0);
+
+        const repay = parseUnits("1000", 18);
+        const treasury = await initMainnetUser(VTREASURY, ethers.utils.parseEther("1"));
+        const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
+        for (const liquidator of [outsider, operator]) {
+          await erc20Of(USDT).connect(treasury).transfer(liquidator.address, repay);
+          await erc20Of(USDT).connect(liquidator).approve(USDT_MARKET.vToken, repay);
+        }
+        const vUSDT = vTokenOf(USDT_MARKET.vToken);
+        await expect(
+          vUSDT.connect(outsider).liquidateBorrow(bpnSigner.address, repay, COLLATERAL.vToken),
+        ).to.be.revertedWithCustomError(comptroller, "LiquidationNotAllowed");
+        await expect(comptroller.connect(outsider).healAccount(bpnSigner.address)).to.be.revertedWithCustomError(
+          comptroller,
+          "LiquidationNotAllowed",
+        );
+
+        const [, seizeTokens] = await comptroller.liquidateCalculateSeizeTokens(
+          USDT_MARKET.vToken,
+          COLLATERAL.vToken,
+          repay,
+        );
+        await vUSDT.connect(operator).liquidateBorrow(bpnSigner.address, repay, COLLATERAL.vToken);
+        expect(await vTokenOf(COLLATERAL.vToken).balanceOf(OPERATOR)).to.equal(seizeTokens);
       });
     });
   });
