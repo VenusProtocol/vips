@@ -17,11 +17,11 @@ import {
   VU_SPOKE,
 } from "../../vip-670/addresses/bscmainnet";
 
-// VIP-674 address book. Re-exports VIP-670's, which re-exports VIP-669's and VIP-668's.
+// VIP-675 address book. Re-exports VIP-670's, which re-exports VIP-669's and VIP-668's.
 export * from "../../vip-670/addresses/bscmainnet";
 
 // ===================================================================================================
-// VIP-674: the "bStock mainstream" Hub-Funded Spoke pool. A second pool in SPOKE_POOL_REGISTRY, next to the live
+// VIP-675: the "bStock mainstream" Hub-Funded Spoke pool. A second pool in SPOKE_POOL_REGISTRY, next to the live
 // "bStock index" pool (`Comptroller_HubSpoke`), with single-stock bStocks as collateral and USDT, USDC and U as
 // liquidity. Its liquidity markets are funded by the same Spoke sources as the bStock index pool's.
 //
@@ -38,7 +38,7 @@ export const MAINSTREAM_POOL_NAME = "bStock mainstream";
 const SYMBOL_SUFFIX = "bStockMainstream";
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-674's new contracts, from isolated-pools `025` and `028` (isolated-pools#575).
+// VIP-675's new contracts, from isolated-pools `025` and `028` (isolated-pools#575).
 // ---------------------------------------------------------------------------------------------------
 
 /// `Comptroller_bStockMainstream`, a BeaconProxy over SPOKE_COMPTROLLER_BEACON, so its `poolRegistry()` immutable is
@@ -99,7 +99,7 @@ export const COINB = "0x585BDE7C54ABB5cCD7791F923D6c2187635f3952";
 
 // ---------------------------------------------------------------------------------------------------
 // Feeds. NVDAB, TSLAB, SPCXB and SKHYB are already priced for the Core pool: their Atlas, APRO, band and DBO configs
-// are per asset, so this pool shares them and VIP-674 sends none. Their feeds are listed for the simulation to compare.
+// are per asset, so this pool shares them and VIP-675 sends none. Their feeds are listed for the simulation to compare.
 //
 // The other 16 have no Venus oracle or DBO config yet. Atlas has to authorize ATLAS_ORACLE on each of their feeds
 // before execution: the DBO's `setTokenConfigs` reads the live price, and every feed set below still rejects
@@ -137,7 +137,7 @@ export type Tier = 1 | 2 | 3 | 4;
 
 export type MainstreamCollateralMarket = CollateralMarket & {
   tier: Tier;
-  /// Listed on the Core pool too, so already priced: VIP-674 sends no oracle or DBO command for it, and its `dbo` is
+  /// Listed on the Core pool too, so already priced: VIP-675 sends no oracle or DBO command for it, and its `dbo` is
   /// `null`.
   pricedOnCore: boolean;
   /// Set with `setProtocolSeizeShare` where it differs from the PROTOCOL_SEIZE_SHARE the market is deployed with.

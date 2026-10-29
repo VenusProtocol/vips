@@ -36,7 +36,7 @@ import {
 import { OTHER_GRANTS_MAINSTREAM, REGISTRY_GRANTS_MAINSTREAM } from "./permissions-bscmainnet";
 
 // ===================================================================================================
-// VIP-674 [BNB Chain]: the commands every part builds from. See ./bscmainnet.ts for the split.
+// VIP-675 [BNB Chain]: the commands every part builds from. See ./bscmainnet.ts for the split.
 //
 // SHAPE of each part, in this order:
 //  1. Part 1 only: take the comptroller's ownership, wire both oracles, grant SPOKE_POOL_REGISTRY its six roles and
@@ -55,7 +55,7 @@ import { OTHER_GRANTS_MAINSTREAM, REGISTRY_GRANTS_MAINSTREAM } from "./permissio
 // batch run `setAllowedSupplier` before `addResource` (the adapter rejects a source the allowlist does not admit) and
 // `addResource` before both inner queues (`ResourceNotRegistered`).
 //
-// NOT IN VIP-674:
+// NOT IN VIP-675:
 //  - `setShortfallContract`: the markets are deployed with the Normal Timelock as `shortfall`.
 //  - `setReserveFactor`: every market is deployed with 10%.
 //  - `setProtocolSeizeShare` on a market whose share is the 5% it is deployed with: the liquidity markets, GOOGLB,
@@ -71,7 +71,7 @@ const ACTION_BORROW = 2;
 /// gas cap: a full batch seeds for about 13M in the simulation.
 const MAX_BATCH_ENTRIES = 80;
 
-export type Vip674Part = {
+export type Vip675Part = {
   vipNumber: number;
   comptroller: string;
   /// Part 1 stands up the pool and lists the liquidity markets. Later parts only add collateral markets.
@@ -82,13 +82,13 @@ export type Vip674Part = {
   seededIndices?: number[];
 };
 
-const marketsOf = (part: Vip674Part): SpokeMarket[] => [...part.liquidity, ...part.collateral];
+const marketsOf = (part: Vip675Part): SpokeMarket[] => [...part.liquidity, ...part.collateral];
 
 /// The part's assets that need pricing: every collateral asset not already priced for the Core pool.
-const newlyPriced = (part: Vip674Part) => part.collateral.filter(m => !m.pricedOnCore);
+const newlyPriced = (part: Vip675Part) => part.collateral.filter(m => !m.pricedOnCore);
 
 /// Every address the part needs that is still `PENDING`. Exported so the simulation can report what it stands in for.
-export const pendingDeployments = (part: Vip674Part): string[] =>
+export const pendingDeployments = (part: Vip675Part): string[] =>
   [
     { name: "Comptroller_bStockMainstream", address: part.comptroller },
     ...marketsOf(part).map(m => ({ name: m.symbol, address: m.vToken })),
@@ -99,7 +99,7 @@ export const pendingDeployments = (part: Vip674Part): string[] =>
     .map(({ name }) => name);
 
 /// Every risk value the part needs that is still open.
-export const pendingRiskValues = (part: Vip674Part): string[] => [
+export const pendingRiskValues = (part: Vip675Part): string[] => [
   ...marketsOf(part)
     .filter(m => m.initialSupply === null)
     .map(m => `${m.symbol} seed`),
@@ -108,18 +108,18 @@ export const pendingRiskValues = (part: Vip674Part): string[] => [
     .map(m => `${m.symbol} DBO window`),
 ];
 
-const assertComplete = (part: Vip674Part) => {
+const assertComplete = (part: Vip675Part) => {
   const missing = [...pendingDeployments(part), ...pendingRiskValues(part)];
   if (missing.length > 0) {
     throw new Error(
       `VIP-${part.vipNumber} [bscmainnet] is still a draft: ${missing.length} value(s) pending in ` +
-        `vips/vip-674/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
+        `vips/vip-675/addresses/bscmainnet.ts.\n  - ${missing.join("\n  - ")}\n` +
         `Deploy or decide them and fill them in first. Nothing here has a safe default.`,
     );
   }
 };
 
-const poolCommands = ({ comptroller }: Vip674Part): Command[] => [
+const poolCommands = ({ comptroller }: Vip675Part): Command[] => [
   { target: comptroller, signature: "acceptOwnership()", params: [] },
   { target: comptroller, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
   { target: comptroller, signature: "setDeviationBoundedOracle(address)", params: [DEVIATION_BOUNDED_ORACLE] },
@@ -131,7 +131,7 @@ const poolCommands = ({ comptroller }: Vip674Part): Command[] => [
   },
 ];
 
-const oracleCommands = (part: Vip674Part): Command[] => {
+const oracleCommands = (part: Vip675Part): Command[] => {
   const priced = newlyPriced(part);
   if (priced.length === 0) return [];
   // Both APRO-side batch setters revert on an empty array, so neither is sent without a pivoted asset.
@@ -218,7 +218,7 @@ const wireHub = (comptroller: string, m: MainstreamLiquidityMarket): Command[] =
   ];
 };
 
-const batchedCommands = (part: Vip674Part): Command[] => [
+const batchedCommands = (part: Vip675Part): Command[] => [
   ...(part.createsPool
     ? OTHER_GRANTS_MAINSTREAM.map(({ role, account }) => giveCallPermission(ACM, part.comptroller, role, account))
     : []),
@@ -278,14 +278,14 @@ const toBatches = (commands: Command[], seededIndices: number[] = []): Batch[] =
   }
   chunks.push(chunk);
   if (seededIndices.length > 0 && seededIndices.length !== chunks.length) {
-    throw new Error(`VIP-674: ${chunks.length} batches but ${seededIndices.length} seeded indices`);
+    throw new Error(`VIP-675: ${chunks.length} batches but ${seededIndices.length} seeded indices`);
   }
   return chunks.map((commands, i) =>
     batch(commands, seededIndices.length > 0 ? { raw: true, seededIndex: seededIndices[i] } : { raw: true }),
   );
 };
 
-export const buildCommands = (part: Vip674Part): (Command | Batch)[] => {
+export const buildCommands = (part: Vip675Part): (Command | Batch)[] => {
   assertComplete(part);
   return [
     ...(part.createsPool ? poolCommands(part) : []),
@@ -309,7 +309,7 @@ export const tokens = (amount: BigNumber) => {
 };
 const ticker = (m: SpokeMarket) => m.symbol.replace(/^v/, "").replace(/_.*$/, "");
 
-export const marketLines = (part: Vip674Part): string[] => [
+export const marketLines = (part: Vip675Part): string[] => [
   ...part.liquidity.map(
     m =>
       `- **${m.symbol}**: supply cap ${tokens(m.supplyCap)}, borrow cap ${tokens(m.borrowCap)}, reserve factor ${pct(
@@ -328,7 +328,7 @@ export const marketLines = (part: Vip674Part): string[] => [
   ),
 ];
 
-export const pricingLines = (part: Vip674Part): string[] =>
+export const pricingLines = (part: Vip675Part): string[] =>
   part.collateral.map(m =>
     m.pricedOnCore
       ? `- ${ticker(m)}: unchanged, the Core pool's Atlas and APRO configs and DeviationBoundedOracle window`
@@ -337,7 +337,7 @@ export const pricingLines = (part: Vip674Part): string[] =>
         }`,
   );
 
-export const contractLines = (part: Vip674Part): string[] =>
+export const contractLines = (part: Vip675Part): string[] =>
   [
     ...(part.createsPool ? [["Comptroller_bStockMainstream", part.comptroller]] : []),
     ...marketsOf(part).map(m => [m.symbol, m.vToken]),
@@ -345,7 +345,7 @@ export const contractLines = (part: Vip674Part): string[] =>
   ].map(([name, address]) => `- ${name}: ${address}`);
 
 /// The meta of a part that only adds collateral markets to the pool part 1 (`poolVipNumber`) creates.
-export const collateralPartMeta = (part: Vip674Part, poolVipNumber: number, title: string) => ({
+export const collateralPartMeta = (part: Vip675Part, poolVipNumber: number, title: string) => ({
   version: "v2",
   title,
   description: `#### Summary
@@ -388,7 +388,7 @@ ${referenceLines.join("\n")}`,
   abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
 });
 
-export const commonParameters = (part: Vip674Part) =>
+export const commonParameters = (part: Vip675Part) =>
   [
     ...(part.liquidity.length === 0
       ? []
@@ -409,7 +409,7 @@ export const commonParameters = (part: Vip674Part) =>
     `- New assets are priced by Atlas (${ATLAS_MAX_STALE_PERIOD}s max stale period), with APRO (${APRO_MAX_STALE_PERIOD}s) as pivot inside a ±5% band where APRO has a feed, and a DeviationBoundedOracle window with a 1 hour cooldown, a 12.5% trigger and a 5% reset.`,
   ].join("\n");
 
-export const noteLines = (part: Vip674Part): string[] => [
+export const noteLines = (part: Vip675Part): string[] => [
   "- Liquidations are permissionless. The pool's liquidation allowlist stays off.",
   ...(part.liquidity.length === 0
     ? []

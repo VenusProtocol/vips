@@ -14,7 +14,7 @@ import {
   SEED_RECEIVER,
 } from "./addresses/bscmainnet";
 import {
-  Vip674Part,
+  Vip675Part,
   buildCommands,
   commonParameters,
   contractLines,
@@ -27,7 +27,7 @@ import {
 } from "./commands";
 
 // ===================================================================================================
-// VIP-674 [BNB Chain]: the bStock mainstream Hub-Funded Spoke pool, part 1 of 3.
+// VIP-675 [BNB Chain]: the bStock mainstream Hub-Funded Spoke pool, part 1 of 3.
 //
 // Stands up the pool, lists USDT, USDC and U and connects them to their Hubs, and lists the tier 1 bStocks. Part 2
 // (./bscmainnet-part-2.ts) lists tiers 2 and 3, part 3 (./bscmainnet-part-3.ts) tier 4, into the same pool. Both need
@@ -38,7 +38,7 @@ import {
 // other 12 revert in one part. The aggregator cuts the op count and the propose() calldata, not execute() gas. The
 // split is by tier so each part reviews on its own.
 //
-// STATUS: DRAFT. `vip674()` throws while any address in ./addresses/bscmainnet.ts is still `PENDING`.
+// STATUS: DRAFT. `vip675()` throws while any address in ./addresses/bscmainnet.ts is still `PENDING`.
 //
 // AT EXECUTION, or the whole proposal reverts:
 //  - Atlas authorizes ATLAS_ORACLE on each new asset's feed, and each feed is fresh (3800s). APRO feeds are fresh
@@ -49,9 +49,9 @@ import {
 // ===================================================================================================
 
 /// The governor assigns the real number at proposal time.
-const VIP_NUMBER = 674;
+const VIP_NUMBER = 675;
 
-export const PART_1: Vip674Part = {
+export const PART_1: Vip675Part = {
   vipNumber: VIP_NUMBER,
   comptroller: MAINSTREAM_COMPTROLLER,
   createsPool: true,
@@ -59,7 +59,7 @@ export const PART_1: Vip674Part = {
   collateral: COLLATERAL_MARKETS_MAINSTREAM.filter(m => m.tier === 1),
 };
 
-export const vip674 = (part: Vip674Part = PART_1) => {
+export const vip675 = (part: Vip675Part = PART_1) => {
   const meta = {
     version: "v2",
     title: `VIP-${VIP_NUMBER} [BNB Chain] bStock mainstream Spoke pool: pool, liquidity and tier 1 bStocks (part 1 of 3)`,
@@ -118,4 +118,4 @@ ${referenceLines.join("\n")}`,
   return makeProposal(buildCommands(part), meta, ProposalType.REGULAR);
 };
 
-export default vip674;
+export default vip675;

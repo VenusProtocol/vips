@@ -51,16 +51,16 @@ import {
   SpokeMarket,
   U,
   VTREASURY,
-} from "../../vips/vip-674/addresses/bscmainnet";
-import vip674, { PART_1 } from "../../vips/vip-674/bscmainnet";
-import vip675, { PART_2 } from "../../vips/vip-674/bscmainnet-part-2";
-import vip676, { PART_3 } from "../../vips/vip-674/bscmainnet-part-3";
-import { Vip674Part, pendingDeployments, pendingRiskValues } from "../../vips/vip-674/commands";
+} from "../../vips/vip-675/addresses/bscmainnet";
+import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
+import vip676, { PART_2 } from "../../vips/vip-675/bscmainnet-part-2";
+import vip677, { PART_3 } from "../../vips/vip-675/bscmainnet-part-3";
+import { Vip675Part, pendingDeployments, pendingRiskValues } from "../../vips/vip-675/commands";
 import {
-  VIP_674_GRANTS,
-  VIP_674_ORACLE_ROLES,
-  VIP_674_REGISTRY_ROLES,
-} from "../../vips/vip-674/permissions-bscmainnet";
+  VIP_675_GRANTS,
+  VIP_675_ORACLE_ROLES,
+  VIP_675_REGISTRY_ROLES,
+} from "../../vips/vip-675/permissions-bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
@@ -92,7 +92,7 @@ const KNOWN_ACCOUNTS = [
 ];
 
 const account = (name: string) =>
-  ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-674 ${name}`), 12));
+  ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-675 ${name}`), 12));
 
 /// Fresh accounts. The default hardhat signer carries EIP-7702 code on BNB Chain.
 const SUPPLIER = account("collateral supplier");
@@ -193,7 +193,7 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
 
 /// Stands in on the fork for the canonical Atlas feed of each asset Atlas has not named one for yet, with its first
 /// live feed. Every value that is set on mainnet is kept.
-const standInOnFork = (part: Vip674Part): Vip674Part => ({
+const standInOnFork = (part: Vip675Part): Vip675Part => ({
   ...part,
   collateral: part.collateral.map(m => ({
     ...m,
@@ -206,14 +206,14 @@ const VIP_673 = 673;
 /// `ProposalState.Executed` in GovernorBravo.
 const EXECUTED_STATE = 7;
 
-/// VIP-673 is queued at FORK_BLOCK and is expected to execute before VIP-674 on mainnet, so until the fork moves past
+/// VIP-673 is queued at FORK_BLOCK and is expected to execute before VIP-675 on mainnet, so until the fork moves past
 /// its execution, apply its commands as the Normal Timelock.
 const applyVip673 = async () => {
   const governor = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.GOVERNOR_PROXY, GOVERNOR_ABI, ethers.provider);
   const state: number = await governor.state(VIP_673);
   if (state === EXECUTED_STATE) return;
   await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
-  console.warn(`[vip-674] VIP-673 (state ${state}) applied on the fork`);
+  console.warn(`[vip-675] VIP-673 (state ${state}) applied on the fork`);
 };
 
 forking(FORK_BLOCK, async () => {
@@ -222,7 +222,7 @@ forking(FORK_BLOCK, async () => {
   const standIns = [...new Set([PART_1, PART_2, PART_3].flatMap(pendingDeployments))];
   const [part1, part2, part3] = [PART_1, PART_2, PART_3].map(standInOnFork);
   if (standIns.length > 0) {
-    console.warn(`[vip-674] stood in on the fork for: ${standIns.join(", ")}`);
+    console.warn(`[vip-675] stood in on the fork for: ${standIns.join(", ")}`);
   }
 
   const COMPTROLLER = part1.comptroller;
@@ -251,7 +251,7 @@ forking(FORK_BLOCK, async () => {
   const hubOf = (address: string) => new ethers.Contract(address, HUB_ABI, ethers.provider);
   const groupOf = (address: string) => new ethers.Contract(address, YIELD_GROUP_ABI, ethers.provider);
 
-  // The Core assets' live configs, read before anything changes, so the simulation can show VIP-674 leaves them alone.
+  // The Core assets' live configs, read before anything changes, so the simulation can show VIP-675 leaves them alone.
   const coreConfigs: Record<string, unknown> = {};
   for (const m of onCore) {
     coreConfigs[m.underlying] = {
@@ -277,7 +277,7 @@ forking(FORK_BLOCK, async () => {
     timelockBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(NORMAL_TIMELOCK);
   }
   if (fundedOnFork.length > 0) {
-    console.warn(`[vip-674] funded the VTreasury on the fork with the seed of: ${fundedOnFork.join(", ")}`);
+    console.warn(`[vip-675] funded the VTreasury on the fork with the seed of: ${fundedOnFork.join(", ")}`);
   }
 
   // The feeds go stale over the simulated voting and timelock delay, so pin each feed's current answer as a direct
@@ -299,11 +299,11 @@ forking(FORK_BLOCK, async () => {
 
   // Unpinned batches take the next free index, so each part is seeded before the next one is built. `testVip` seeds
   // part 3's.
-  const proposal1 = await vip674(part1);
+  const proposal1 = await vip675(part1);
   await seedProposalBatchesOnFork(proposal1);
-  const proposal2 = await vip675(part2);
+  const proposal2 = await vip676(part2);
   await seedProposalBatchesOnFork(proposal2);
-  const proposal3 = await vip676(part3);
+  const proposal3 = await vip677(part3);
 
   const expectListed = async (markets: SpokeMarket[]) => {
     for (const m of markets) {
@@ -385,7 +385,7 @@ forking(FORK_BLOCK, async () => {
     }
   };
 
-  const expectEventsOf = async (txResponse: TransactionResponse, part: Vip674Part) => {
+  const expectEventsOf = async (txResponse: TransactionResponse, part: Vip675Part) => {
     const markets = [...part.liquidity, ...part.collateral].length;
     const priced = newlyPriced(part.collateral);
     const pivoted = priced.filter(m => m.aproFeed !== null).length;
@@ -429,12 +429,12 @@ forking(FORK_BLOCK, async () => {
     // ACM emits no PermissionGranted, so RoleGranted and RoleRevoked are the count.
     const granted = await acmEvents(txResponse, "RoleGranted");
     const revoked = await acmEvents(txResponse, "RoleRevoked");
-    expect(granted - revoked, "grants left after execution").to.equal(part.createsPool ? VIP_674_GRANTS.length : 0);
+    expect(granted - revoked, "grants left after execution").to.equal(part.createsPool ? VIP_675_GRANTS.length : 0);
   };
 
-  describe("VIP-674 inputs", () => {
+  describe("VIP-675 inputs", () => {
     it("stands in on the fork only for the Atlas feeds Atlas has not named yet, with every risk value set", async () => {
-      // Fails once Atlas names a feed: put it in vips/vip-674/addresses/bscmainnet.ts and drop it from
+      // Fails once Atlas names a feed: put it in vips/vip-675/addresses/bscmainnet.ts and drop it from
       // ATLAS_FEED_CANDIDATES.
       expect(standIns).to.have.members(
         Object.keys(ATLAS_FEED_CANDIDATES).map(asset => `v${asset}_bStockMainstream Atlas feed`),
@@ -469,7 +469,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("Pre-VIP: what VIP-674 relies on", () => {
+  describe("Pre-VIP: what VIP-675 relies on", () => {
     it("has no Venus oracle or DBO config for any new asset", async () => {
       const initialized = normalize(await dbo.getInitializedAssets());
       for (const m of newlyPriced(COLLATERAL)) {
@@ -532,8 +532,8 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("gives no account a VIP-674 comptroller role as a wildcard, and no one `enterMarketForAccount` on this pool", async () => {
-      for (const { role, account: holder } of VIP_674_GRANTS) {
+    it("gives no account a VIP-675 comptroller role as a wildcard, and no one `enterMarketForAccount` on this pool", async () => {
+      for (const { role, account: holder } of VIP_675_GRANTS) {
         expect(await mayCall(UNRELATED, holder, role), `${role} as a wildcard`).to.be.false;
       }
       for (const role of ROUTER_ROLES) {
@@ -545,7 +545,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("has every underlying at 18 decimals, accepting a zero-value transfer", async () => {
-      // Every amount in vips/vip-674/addresses/bscmainnet.ts is 18-decimal. A token that rejects a zero-value
+      // Every amount in vips/vip-675/addresses/bscmainnet.ts is 18-decimal. A token that rejects a zero-value
       // transfer can block `healAccount` on dust collateral.
       const data = new ethers.utils.Interface(ERC20_ABI).encodeFunctionData("transfer", [UNRELATED, 0]);
       for (const m of MARKETS) {
@@ -555,7 +555,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("prices USDT, USDC and U as the listing sheet does, with no DBO window, so VIP-674 changes none of them", async () => {
+    it("prices USDT, USDC and U as the listing sheet does, with no DBO window, so VIP-675 changes none of them", async () => {
       const initialized = normalize(await dbo.getInitializedAssets());
       for (const { symbol, underlying } of LIQUIDITY) {
         const config = await resilientOracle.getTokenConfig(underlying);
@@ -605,10 +605,10 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("lets the Normal Timelock price the new assets, list the markets and pay the seeds", async () => {
-      for (const { contract, role } of VIP_674_ORACLE_ROLES) {
+      for (const { contract, role } of VIP_675_ORACLE_ROLES) {
         expect(await mayCall(contract, NORMAL_TIMELOCK, role), `${contract}: ${role}`).to.be.true;
       }
-      for (const role of VIP_674_REGISTRY_ROLES) {
+      for (const role of VIP_675_REGISTRY_ROLES) {
         expect(await mayCall(SPOKE_POOL_REGISTRY, NORMAL_TIMELOCK, role), role).to.be.true;
       }
       const treasury = new ethers.Contract(VTREASURY, ["function owner() view returns (address)"], ethers.provider);
@@ -630,14 +630,14 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-674 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
+  testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, part1);
     },
   });
 
-  describe("Post-VIP-674", () => {
+  describe("Post-VIP-675", () => {
     it("registers the pool, owned by the Normal Timelock and wired to both oracles", async () => {
       const pool = await registry.getPoolByComptroller(COMPTROLLER);
       expect(pool.name).to.equal(MAINSTREAM_POOL_NAME);
@@ -695,7 +695,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("grants every comptroller role to its holder against this comptroller only", async () => {
-      for (const { role, account: holder } of VIP_674_GRANTS) {
+      for (const { role, account: holder } of VIP_675_GRANTS) {
         expect(await mayCall(COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
         expect(await mayCall(UNRELATED, holder, role), `${role} as a wildcard`).to.be.false;
       }
@@ -789,14 +789,14 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
+  testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, part2);
     },
   });
 
-  describe("Post-VIP-675", () => {
+  describe("Post-VIP-676", () => {
     it("prices part 2's assets", async () => {
       await expectPriced(COLLATERAL_2);
     });
@@ -827,13 +827,13 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
+  testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, part3);
     },
   });
 
-  describe("Post-VIP-676", () => {
+  describe("Post-VIP-677", () => {
     it("prices part 3's assets", async () => {
       await expectPriced(COLLATERAL_3);
     });
@@ -877,7 +877,7 @@ forking(FORK_BLOCK, async () => {
   // ProtocolShareReserve, full repayment, and each Hub drawing its liquidity back out of the bStock mainstream market
   // first.
   // Runs last: it halves prices and moves the clock.
-  describe("Post-VIP-676: end to end, across the whole pool", () => {
+  describe("Post-VIP-677: end to end, across the whole pool", () => {
     const HOLDER = account("e2e holder");
     const LIQUIDATOR = account("e2e liquidator");
     const borrowerOf = (c: MainstreamCollateralMarket) => account(`e2e borrower ${c.symbol}`);
