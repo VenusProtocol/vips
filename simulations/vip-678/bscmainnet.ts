@@ -8,11 +8,12 @@ import { forking, pretendExecutingVip, seedProposalBatchesOnFork, testVip } from
 import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
 import { REGISTRY_GRANTS } from "../../vips/vip-668/permissions-bscmainnet";
+import { APRO_ORACLE } from "../../vips/vip-670/addresses/bscmainnet";
 import vip673 from "../../vips/vip-673/bscmainnet";
-import { APRO_ORACLE, ATLAS_ORACLE, MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
+import { MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
 import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
+import vip678 from "../../vips/vip-678/bscmainnet";
 import {
-  ACM,
   ADAPTER_SPOKE_V1,
   BPNC_FIRST_MINT,
   BPNC_PRICE,
@@ -21,30 +22,24 @@ import {
   BPN_INPUTS,
   BPN_LIQUIDATORS,
   BPN_MIN_LIQUIDATABLE_COLLATERAL,
+  BPN_POOL_DESCRIPTION,
   BPN_POOL_LIQUIDATION_INCENTIVE,
   BPN_POOL_NAME,
-  CHAINLINK_ORACLE,
   COLLATERAL_GATEWAY,
-  CRITICAL_GUARDIAN,
   FLAT_6_IRM,
   InnerQueues,
-  NORMAL_TIMELOCK,
   OPERATOR,
-  PAUSE_GUARDIAN,
   QUEUES_AFTER_VIP_675,
   REDUCE_RESERVES_BLOCK_DELTA,
-  RESILIENT_ORACLE,
   SEED_RECEIVER,
   SPOKE_POOL_REGISTRY,
   U,
   USDC,
   USDT,
   VENUS_CUSTODY_SAFE,
-  VTREASURY,
   collateralMarket,
   liquidityMarkets,
-} from "../../vips/vip-678/addresses/bscmainnet";
-import vip678 from "../../vips/vip-678/bscmainnet";
+} from "../../vips/vip-678/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import GATEWAY_ABI from "./abi/CollateralGateway.json";
@@ -57,6 +52,17 @@ import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
+
+const {
+  ACCESS_CONTROL_MANAGER: ACM,
+  ATLAS_ORACLE,
+  CHAINLINK_ORACLE,
+  CRITICAL_GUARDIAN,
+  GUARDIAN: PAUSE_GUARDIAN,
+  NORMAL_TIMELOCK,
+  RESILIENT_ORACLE,
+  VTREASURY,
+} = NETWORK_ADDRESSES.bscmainnet;
 
 // ===================================================================================================
 // VIP-678 on a bscmainnet fork, against the deployed BPNC, comptroller, markets and flat 6% rate model. BPN's supplier
@@ -225,6 +231,11 @@ forking(FORK_BLOCK, async () => {
       expect(await comptroller.owner()).to.equal(NORMAL_TIMELOCK);
       const pool = await registry.getPoolByComptroller(BPN_INPUTS.comptroller);
       expect(pool.name).to.equal(BPN_POOL_NAME);
+      expect([...(await registry.getVenusPoolMetadata(BPN_INPUTS.comptroller))]).to.deep.equal([
+        "",
+        "",
+        BPN_POOL_DESCRIPTION,
+      ]);
       expect(await comptroller.closeFactorMantissa()).to.equal(BPN_CLOSE_FACTOR);
       expect(await comptroller.liquidationIncentiveMantissa()).to.equal(BPN_POOL_LIQUIDATION_INCENTIVE);
       expect(await comptroller.minLiquidatableCollateral()).to.equal(BPN_MIN_LIQUIDATABLE_COLLATERAL);
@@ -308,7 +319,7 @@ forking(FORK_BLOCK, async () => {
 
     it("adds each liquidity market to its Spoke source, last to deposit and first to withdraw", async () => {
       for (const m of LIQUIDITY) {
-        const source = groupOf(m.stack.spokeSource);
+        const source = groupOf(m.spokeSource);
         const [registered, paused, adapter] = await source.resourceConfig(m.vToken);
         expect(registered, m.symbol).to.be.true;
         expect(paused, m.symbol).to.be.false;
@@ -397,7 +408,7 @@ forking(FORK_BLOCK, async () => {
       });
 
       it("refuses USDT from anyone but the Hub's Spoke source", async () => {
-        const whale = await initMainnetUser(NETWORK_ADDRESSES.bscmainnet.VTREASURY, ethers.utils.parseEther("1"));
+        const whale = await initMainnetUser(VTREASURY, ethers.utils.parseEther("1"));
         await erc20Of(USDT).connect(whale).approve(USDT_MARKET.vToken, ONE);
         await expect(vTokenOf(USDT_MARKET.vToken).connect(whale).mint(ONE)).to.be.revertedWithCustomError(
           comptroller,
@@ -407,10 +418,10 @@ forking(FORK_BLOCK, async () => {
 
       it("lets the Operator move Hub USDT into the BPN Loan market", async () => {
         const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
-        const hub = new ethers.Contract(USDT_MARKET.stack.hub, HUB_ABI, operator);
-        const into = { yieldGroup: USDT_MARKET.stack.spokeSource, resource: USDT_MARKET.vToken, amount: funding };
+        const hub = new ethers.Contract(USDT_MARKET.hub, HUB_ABI, operator);
+        const into = { yieldGroup: USDT_MARKET.spokeSource, resource: USDT_MARKET.vToken, amount: funding };
         let from: typeof into | undefined;
-        for (const yieldGroup of USDT_MARKET.stack.depositQueue) {
+        for (const yieldGroup of (await hub.outerDepositQueue()) as string[]) {
           for (const resource of (await groupOf(yieldGroup).resources()) as string[]) {
             const leg = { yieldGroup, resource, amount: funding };
             if (
