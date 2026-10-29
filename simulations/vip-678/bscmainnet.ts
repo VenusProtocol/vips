@@ -23,7 +23,6 @@ import {
   BPN_MIN_LIQUIDATABLE_COLLATERAL,
   BPN_POOL_LIQUIDATION_INCENTIVE,
   BPN_POOL_NAME,
-  BpnInputs,
   CHAINLINK_ORACLE,
   COLLATERAL_GATEWAY,
   CRITICAL_GUARDIAN,
@@ -32,7 +31,6 @@ import {
   NORMAL_TIMELOCK,
   OPERATOR,
   PAUSE_GUARDIAN,
-  PENDING,
   QUEUES_AFTER_VIP_675,
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
@@ -46,7 +44,7 @@ import {
   collateralMarket,
   liquidityMarkets,
 } from "../../vips/vip-678/addresses/bscmainnet";
-import vip678, { pendingInputs } from "../../vips/vip-678/bscmainnet";
+import vip678 from "../../vips/vip-678/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import GATEWAY_ABI from "./abi/CollateralGateway.json";
@@ -146,36 +144,18 @@ const readQueues = async (spokeSource: string): Promise<InnerQueues> => {
   return { deposit: await source.innerDepositQueue(), withdraw: await source.innerWithdrawQueue() };
 };
 
-/// BPN_INPUTS on the fork: BPN's supplier is a fresh account until BPN names it, and the queues are read on chain.
-const resolveInputs = async (): Promise<BpnInputs> => {
-  const [, bpnSupplier] = await ethers.getSigners();
-  const queuesBefore: Record<string, InnerQueues> = {};
-  for (const spokeSource of Object.keys(QUEUES_AFTER_VIP_675)) {
-    queuesBefore[spokeSource] = await readQueues(spokeSource);
-  }
-  if (JSON.stringify(queuesBefore) !== JSON.stringify(QUEUES_AFTER_VIP_675)) {
-    console.warn("[vip-678] the Spoke source queues differ from QUEUES_AFTER_VIP_675");
-  }
-  const supplier = BPN_INPUTS.bpnSupplier === PENDING ? bpnSupplier.address : BPN_INPUTS.bpnSupplier;
-  return { ...BPN_INPUTS, bpnSupplier: supplier, queuesBefore };
-};
-
 const normalize = (addresses: string[]) => addresses.map(a => a.toLowerCase());
 
 forking(FORK_BLOCK, async () => {
   await applyVip673();
   await applyVip675();
 
-  const standIns = pendingInputs(BPN_INPUTS);
-  const inputs = await resolveInputs();
-  console.warn(`[vip-678] stood in on the fork for: ${standIns.join(", ")}`);
-
-  const COLLATERAL = collateralMarket(inputs);
-  const LIQUIDITY = liquidityMarkets(inputs);
+  const COLLATERAL = collateralMarket(BPN_INPUTS);
+  const LIQUIDITY = liquidityMarkets(BPN_INPUTS);
   const MARKETS = [COLLATERAL, ...LIQUIDITY];
   const [USDT_MARKET] = LIQUIDITY;
 
-  const comptroller = new ethers.Contract(inputs.comptroller, COMPTROLLER_ABI, ethers.provider);
+  const comptroller = new ethers.Contract(BPN_INPUTS.comptroller, COMPTROLLER_ABI, ethers.provider);
   const registry = new ethers.Contract(SPOKE_POOL_REGISTRY, REGISTRY_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -185,8 +165,10 @@ forking(FORK_BLOCK, async () => {
   const erc20Of = (address: string) => new ethers.Contract(address, ERC20_ABI, ethers.provider);
   const groupOf = (address: string) => new ethers.Contract(address, YIELD_GROUP_ABI, ethers.provider);
 
-  const [, bpnSigner, outsider] = await ethers.getSigners();
-  const bpnc = new ethers.Contract(inputs.bpnc, BPNC_ABI, ethers.provider);
+  const [, , outsider] = await ethers.getSigners();
+  // BPN's supplier, the placeholder until BPN names its address
+  const bpnSigner = await initMainnetUser(BPN_INPUTS.bpnSupplier, ethers.utils.parseEther("1"));
+  const bpnc = new ethers.Contract(BPN_INPUTS.bpnc, BPNC_ABI, ethers.provider);
   // The VTreasury pays the USDT, USDC and U seeds. VIP-678 mints BPNC's.
   const treasuryBefore: Record<string, BigNumber> = {};
   const timelockBefore: Record<string, BigNumber> = {};
@@ -205,12 +187,12 @@ forking(FORK_BLOCK, async () => {
       expect(await comptroller.getAllMarkets()).to.deep.equal([]);
       for (const m of MARKETS) {
         expect(await vTokenOf(m.vToken).owner(), m.symbol).to.equal(NORMAL_TIMELOCK);
-        expect(await vTokenOf(m.vToken).comptroller(), m.symbol).to.equal(inputs.comptroller);
+        expect(await vTokenOf(m.vToken).comptroller(), m.symbol).to.equal(BPN_INPUTS.comptroller);
       }
     });
 
     it("does not price BPNC", async () => {
-      await expect(resilientOracle.getPrice(inputs.bpnc)).to.be.reverted;
+      await expect(resilientOracle.getPrice(BPN_INPUTS.bpnc)).to.be.reverted;
     });
 
     it("has BPNC deployed with no supply and the Normal Timelock nominated as owner", async () => {
@@ -221,6 +203,14 @@ forking(FORK_BLOCK, async () => {
       expect(await bpnc.pendingOwner()).to.equal(NORMAL_TIMELOCK);
     });
 
+    it("has each Spoke source's inner queues as VIP-675 leaves them", async () => {
+      for (const [spokeSource, queues] of Object.entries(QUEUES_AFTER_VIP_675)) {
+        const onChain = await readQueues(spokeSource);
+        expect(normalize(onChain.deposit), spokeSource).to.deep.equal(normalize(queues.deposit));
+        expect(normalize(onChain.withdraw), spokeSource).to.deep.equal(normalize(queues.withdraw));
+      }
+    });
+
     it("has the VTreasury holding the USDT, USDC and U seeds", async () => {
       for (const m of LIQUIDITY) {
         expect(treasuryBefore[m.underlying], m.symbol).to.be.gte(m.initialSupply);
@@ -228,12 +218,12 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-678 [bscmainnet] BPN Loan Hub-Funded Spoke pool", await vip678(inputs), {});
+  testVip("VIP-678 [bscmainnet] BPN Loan Hub-Funded Spoke pool", await vip678(), {});
 
   describe("Post-VIP behavior", () => {
     it("registers the pool, owned by the Normal Timelock, with the listing doc's pool parameters", async () => {
       expect(await comptroller.owner()).to.equal(NORMAL_TIMELOCK);
-      const pool = await registry.getPoolByComptroller(inputs.comptroller);
+      const pool = await registry.getPoolByComptroller(BPN_INPUTS.comptroller);
       expect(pool.name).to.equal(BPN_POOL_NAME);
       expect(await comptroller.closeFactorMantissa()).to.equal(BPN_CLOSE_FACTOR);
       expect(await comptroller.liquidationIncentiveMantissa()).to.equal(BPN_POOL_LIQUIDATION_INCENTIVE);
@@ -243,15 +233,15 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("prices BPNC at a fixed $1 through the ChainlinkOracle alone", async () => {
-      const config = await resilientOracle.getTokenConfig(inputs.bpnc);
+      const config = await resilientOracle.getTokenConfig(BPN_INPUTS.bpnc);
       expect(config.oracles).to.deep.equal([
         CHAINLINK_ORACLE,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
       ]);
       expect(config.enableFlagsForOracles).to.deep.equal([true, false, false]);
-      expect(await chainlinkOracle.prices(inputs.bpnc)).to.equal(BPNC_PRICE);
-      expect(await resilientOracle.getPrice(inputs.bpnc)).to.equal(ONE);
+      expect(await chainlinkOracle.prices(BPN_INPUTS.bpnc)).to.equal(BPNC_PRICE);
+      expect(await resilientOracle.getPrice(BPN_INPUTS.bpnc)).to.equal(ONE);
       expect(await resilientOracle.getUnderlyingPrice(COLLATERAL.vToken)).to.equal(ONE);
     });
 
@@ -285,7 +275,7 @@ forking(FORK_BLOCK, async () => {
       const holders = [OPERATOR, NORMAL_TIMELOCK, CRITICAL_GUARDIAN];
       for (const { role, accounts } of BPNC_ROLES) {
         for (const account of holders) {
-          expect(await acm.isAllowedToCall(account, role, { from: inputs.bpnc }), `${role} ${account}`).to.equal(
+          expect(await acm.isAllowedToCall(account, role, { from: BPN_INPUTS.bpnc }), `${role} ${account}`).to.equal(
             accounts.includes(account),
           );
         }
@@ -313,7 +303,7 @@ forking(FORK_BLOCK, async () => {
         }
         expect(await comptroller.isAllowedSupplier(m.vToken, outsider.address), m.symbol).to.be.false;
       }
-      expect(COLLATERAL.allowedSuppliers).to.deep.equal([VENUS_CUSTODY_SAFE, inputs.bpnSupplier]);
+      expect(COLLATERAL.allowedSuppliers).to.deep.equal([VENUS_CUSTODY_SAFE, BPN_INPUTS.bpnSupplier]);
     });
 
     it("adds each liquidity market to its Spoke source, last to deposit and first to withdraw", async () => {
@@ -334,7 +324,7 @@ forking(FORK_BLOCK, async () => {
 
     it("grants the pool's roles against this comptroller", async () => {
       const allowed = (account: string, role: string) =>
-        acm.isAllowedToCall(account, role, { from: inputs.comptroller });
+        acm.isAllowedToCall(account, role, { from: BPN_INPUTS.comptroller });
       for (const role of REGISTRY_GRANTS) {
         expect(await allowed(SPOKE_POOL_REGISTRY, role), role).to.be.true;
       }
@@ -353,13 +343,13 @@ forking(FORK_BLOCK, async () => {
       for (const liquidator of BPN_LIQUIDATORS) {
         expect(await comptroller.isAllowedLiquidator(liquidator), liquidator).to.be.true;
       }
-      for (const account of [NORMAL_TIMELOCK, CRITICAL_GUARDIAN, inputs.bpnSupplier, outsider.address]) {
+      for (const account of [NORMAL_TIMELOCK, CRITICAL_GUARDIAN, BPN_INPUTS.bpnSupplier, outsider.address]) {
         expect(await comptroller.isAllowedLiquidator(account), account).to.be.false;
       }
     });
 
     it("charges a flat 6% borrow APY on USDT, USDC and U at any utilization", async () => {
-      const irm = new ethers.Contract(inputs.irmFlat6, IRM_ABI, ethers.provider);
+      const irm = new ethers.Contract(BPN_INPUTS.irmFlat6, IRM_ABI, ethers.provider);
       const blocksPerYear: BigNumber = await irm.blocksOrSecondsPerYear();
       const cash = parseUnits("1000000", 18);
       for (const borrows of [0, 500000, 999999].map(n => parseUnits(n.toString(), 18))) {
@@ -451,8 +441,9 @@ forking(FORK_BLOCK, async () => {
 
         // Leave room for the USDT price around $1.
         const borrow = liquidity.mul(ONE).div(usdtPrice).mul(99).div(100);
+        const usdtBefore: BigNumber = await erc20Of(USDT).balanceOf(bpnSigner.address);
         await vTokenOf(USDT_MARKET.vToken).connect(bpnSigner).borrow(borrow);
-        expect(await erc20Of(USDT).balanceOf(bpnSigner.address)).to.equal(borrow);
+        expect((await erc20Of(USDT).balanceOf(bpnSigner.address)).sub(usdtBefore)).to.equal(borrow);
         await expect(
           vTokenOf(USDT_MARKET.vToken).connect(bpnSigner).borrow(liquidity.div(50)),
         ).to.be.revertedWithCustomError(comptroller, "InsufficientLiquidity");
@@ -478,7 +469,7 @@ forking(FORK_BLOCK, async () => {
       it("lets only the Operator liquidate BPN once it is short", async () => {
         // A 10% lower BPNC price puts the loan, at 99% of the 90% CF, past the 95% LT.
         const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-        await chainlinkOracle.connect(timelock).setDirectPrice(inputs.bpnc, parseUnits("0.9", 18));
+        await chainlinkOracle.connect(timelock).setDirectPrice(BPN_INPUTS.bpnc, parseUnits("0.9", 18));
         const [, , shortfall] = await comptroller.getAccountLiquidity(bpnSigner.address);
         expect(shortfall).to.be.gt(0);
 

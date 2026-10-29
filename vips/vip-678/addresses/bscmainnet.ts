@@ -9,7 +9,6 @@ import {
   IRM_COLLATERAL,
   NORMAL_TIMELOCK,
   OPERATOR,
-  PENDING,
   SPOKE_SOURCE_U,
   SPOKE_SOURCE_USDC,
   SPOKE_SOURCE_USDT,
@@ -34,8 +33,7 @@ const { CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 //
 // Listing doc: "BPN Loan spoke pool listing" (Notion, 2026-10-29).
 //
-// STATUS: DRAFT. BPN has not named its supply address yet. Every `PENDING` fails loudly: the proposal throws with the
-// full list until it is empty.
+// STATUS: DRAFT. Only BPN's supply address, `bpnSupplier` in BPN_INPUTS, is still a placeholder.
 // ===================================================================================================
 
 export const BPN_POOL_NAME = "BPN Loan";
@@ -123,8 +121,6 @@ export type BpnInputs = {
   bpnSupplier: string;
   /// Each Spoke source's inner queues just before VIP-678 runs, keyed by the Spoke source.
   queuesBefore: Record<string, InnerQueues>;
-  /// The aggregator index of each of the two batches, once `seedAggregatorBatches` has stored them.
-  seededIndices?: [number, number];
 };
 
 export type InnerQueues = { deposit: string[]; withdraw: string[] };
@@ -137,7 +133,7 @@ export const BPN_INPUTS: BpnInputs = {
   vUSDC: "0xd43e18D5568E544aA98b2EB1f3039f4a24267B7c",
   vU: "0x60d7BFd15B2414e9a29DEB04b84F1AD8c9868E44",
   irmFlat6: "0xA3bCca7ab0a52953096e579f7A19740920C8D1e0",
-  bpnSupplier: PENDING,
+  bpnSupplier: "0x1111111111111111111111111111111111111111", // PLACEHOLDER: BPN names its supply address
   queuesBefore: QUEUES_AFTER_VIP_675,
 };
 
