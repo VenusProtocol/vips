@@ -34,9 +34,8 @@ const { CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 //
 // Listing doc: "BPN Loan spoke pool listing" (Notion, 2026-10-29).
 //
-// STATUS: DRAFT. BPNC is not deployed, nor are the pool's comptroller, its four markets or the flat rate model, and
-// BPN has not named its supply address yet. Every `PENDING` fails loudly: the proposal throws with the full list until
-// it is empty.
+// STATUS: DRAFT. BPN has not named its supply address yet. Every `PENDING` fails loudly: the proposal throws with the
+// full list until it is empty.
 // ===================================================================================================
 
 export const BPN_POOL_NAME = "BPN Loan";
@@ -105,10 +104,9 @@ export const QUEUES_AFTER_VIP_675: Record<string, InnerQueues> = {
 };
 
 // ---------------------------------------------------------------------------------------------------
-// What VIP-678 still waits for. The contracts are to be deployed with isolated-pools `025` and `028`, as
-// isolated-pools#575 did for the bStock mainstream pool: a BeaconProxy over SPOKE_COMPTROLLER_BEACON with the Normal
-// Timelock nominated as owner, and markets over SPOKE_VTOKEN_BEACON owned by the Normal Timelock, with a 10% reserve
-// factor and the Normal Timelock as `shortfall`.
+// VIP-678's inputs. The contracts are deployed by isolated-pools `025`, `028` and `029` (feat/bpn-loan-spoke-pool): a
+// BeaconProxy over SPOKE_COMPTROLLER_BEACON with the Normal Timelock nominated as owner, and markets over
+// SPOKE_VTOKEN_BEACON owned by the Normal Timelock, with a 10% reserve factor and the Normal Timelock as `shortfall`.
 // ---------------------------------------------------------------------------------------------------
 
 export type BpnInputs = {
@@ -132,13 +130,13 @@ export type BpnInputs = {
 export type InnerQueues = { deposit: string[]; withdraw: string[] };
 
 export const BPN_INPUTS: BpnInputs = {
-  bpnc: PENDING,
-  comptroller: PENDING,
-  vBPNC: PENDING,
-  vUSDT: PENDING,
-  vUSDC: PENDING,
-  vU: PENDING,
-  irmFlat6: PENDING,
+  bpnc: "0x6d7C501cF2603d8A3d9aE10Fee8809fd4EA9D689",
+  comptroller: "0xA73D31939c936d07fA0FD15b3d86C0fe2a72c282",
+  vBPNC: "0x7aC71651fC58214A26df172289899f6F52E227ef",
+  vUSDT: "0x722997e2211a224Ac98Cc55D8C1C973D63623a0b",
+  vUSDC: "0xd43e18D5568E544aA98b2EB1f3039f4a24267B7c",
+  vU: "0x60d7BFd15B2414e9a29DEB04b84F1AD8c9868E44",
+  irmFlat6: "0xA3bCca7ab0a52953096e579f7A19740920C8D1e0",
   bpnSupplier: PENDING,
   queuesBefore: QUEUES_AFTER_VIP_675,
 };

@@ -1,4 +1,3 @@
-import BEACON_PROXY from "@openzeppelin/contracts/build/contracts/BeaconProxy.json";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -29,20 +28,16 @@ import {
   COLLATERAL_GATEWAY,
   CRITICAL_GUARDIAN,
   FLAT_6_IRM,
-  IRM_LIQUIDITY,
   InnerQueues,
-  MAX_LOOPS_LIMIT,
   NORMAL_TIMELOCK,
   OPERATOR,
   PAUSE_GUARDIAN,
-  PROTOCOL_SHARE_RESERVE,
+  PENDING,
   QUEUES_AFTER_VIP_675,
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
   SEED_RECEIVER,
-  SPOKE_COMPTROLLER_BEACON,
   SPOKE_POOL_REGISTRY,
-  SPOKE_VTOKEN_BEACON,
   U,
   USDC,
   USDT,
@@ -66,11 +61,8 @@ import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
 // ===================================================================================================
-// VIP-678 on a bscmainnet fork. Nothing VIP-678 lists is deployed yet, so the simulation deploys stand-ins the way
-// isolated-pools `025` and `028` will: BPNC as a copy of vceBTC, the comptroller and the four markets as beacon
-// proxies over the live
-// beacons, and the flat 6% rate model as a copy of the live JumpRateModelV2 set to FLAT_6_IRM. It applies VIP-673,
-// queued at FORK_BLOCK, and part 1 of VIP-675, which grants the spoke comptroller wildcards and leaves the Spoke source
+// VIP-678 on a bscmainnet fork, against the deployed BPNC, comptroller, markets and flat 6% rate model. BPN's supplier
+// is a fresh account until BPN names it. It applies VIP-673, queued at FORK_BLOCK, and part 1 of VIP-675, which grants the spoke comptroller wildcards and leaves the Spoke source
 // queues VIP-678 extends.
 // ===================================================================================================
 
@@ -81,15 +73,6 @@ const ONE = parseUnits("1", 18);
 const ACTION_BORROW = 2;
 /// 1 underlying = 1e10 vTokens of 8 decimals, the 18-decimal default of isolated-pools `028`.
 const INITIAL_EXCHANGE_RATE = parseUnits("1", 28);
-/// JumpRateModelV2 keeps its AccessControlManager in this slot, after TimeManagerV8's 48-slot gap.
-const IRM_ACM_SLOT = 48;
-
-/// vceBTC, the CustodyReceiptToken VIP-656 took over. BPNC is the same contract, and its `decimals` (18) is an
-/// immutable in the code.
-const VCEBTC = "0xAB7D138c6e6fF1bfD3ac871d0dB08f9442Ce927F";
-/// CustodyReceiptToken's storage after OpenZeppelin's ERC20 (balances, allowances, total supply, name, symbol) and
-/// Ownable2Step (owner, pending owner), read from vceBTC.
-const TOKEN_SLOTS = { name: 3, symbol: 4, owner: 5, pendingOwner: 6, accessControlManager: 7 };
 
 const GOVERNOR_ABI = ["function state(uint256) view returns (uint8)"];
 const VIP_673 = 673;
@@ -155,113 +138,26 @@ const applyVip675 = async () => {
   console.warn("[vip-678] VIP-675 part 1 applied on the fork");
 };
 
-/// A copy of the live JumpRateModelV2, which shares the block rate the new one is deployed with, set to FLAT_6_IRM.
-const deployFlatRateModel = async (): Promise<string> => {
-  const address = ethers.utils.getAddress(
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes("vip-678 flat 6%")).slice(0, 42),
-  );
-  await ethers.provider.send("hardhat_setCode", [address, await ethers.provider.getCode(IRM_LIQUIDITY)]);
-  await ethers.provider.send("hardhat_setStorageAt", [
-    address,
-    ethers.utils.hexValue(IRM_ACM_SLOT),
-    ethers.utils.hexZeroPad(ACM, 32),
-  ]);
-  const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-  const { baseRatePerYear, multiplierPerYear, jumpMultiplierPerYear, kink } = FLAT_6_IRM;
-  await new ethers.Contract(address, IRM_ABI, timelock).updateJumpRateModel(
-    baseRatePerYear,
-    multiplierPerYear,
-    jumpMultiplierPerYear,
-    kink,
-  );
-  return address;
-};
-
 const setSlot = (address: string, slot: number | string, value: string) =>
   ethers.provider.send("hardhat_setStorageAt", [address, ethers.utils.hexValue(slot), value]);
-
-/// A string under 32 bytes, as Solidity stores it: left-aligned, with twice its length in the last byte.
-const shortString = (value: string) => {
-  const bytes = ethers.utils.toUtf8Bytes(value);
-  const word = new Uint8Array(32);
-  word.set(bytes);
-  word[31] = bytes.length * 2;
-  return ethers.utils.hexlify(word);
-};
-
-/// A copy of vceBTC as BPNC, as its deployment leaves it: owned by the deployer, the Normal Timelock
-/// nominated, no supply and no ACM permission.
-const deployBpnc = async (deployer: string): Promise<string> => {
-  const address = ethers.utils.getAddress(
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes("vip-678 BPNC")).slice(0, 42),
-  );
-  await ethers.provider.send("hardhat_setCode", [address, await ethers.provider.getCode(VCEBTC)]);
-  await setSlot(address, TOKEN_SLOTS.name, shortString("BPN Credit Token"));
-  await setSlot(address, TOKEN_SLOTS.symbol, shortString("BPNC"));
-  await setSlot(address, TOKEN_SLOTS.owner, ethers.utils.hexZeroPad(deployer, 32));
-  await setSlot(address, TOKEN_SLOTS.pendingOwner, ethers.utils.hexZeroPad(NORMAL_TIMELOCK, 32));
-  await setSlot(address, TOKEN_SLOTS.accessControlManager, ethers.utils.hexZeroPad(ACM, 32));
-  return address;
-};
 
 const readQueues = async (spokeSource: string): Promise<InnerQueues> => {
   const source = new ethers.Contract(spokeSource, YIELD_GROUP_ABI, ethers.provider);
   return { deposit: await source.innerDepositQueue(), withdraw: await source.innerWithdrawQueue() };
 };
 
-/// Deploys every `PENDING` input of BPN_INPUTS. BPN's supplier is a fresh account.
-const deployStandIns = async (): Promise<BpnInputs> => {
-  const [deployer, bpnSupplier] = await ethers.getSigners();
-  const bpnc = await deployBpnc(deployer.address);
-  const irmFlat6 = await deployFlatRateModel();
-
-  const proxies = new ethers.ContractFactory(BEACON_PROXY.abi, BEACON_PROXY.bytecode, deployer);
-  const comptrollerInit = new ethers.utils.Interface(COMPTROLLER_ABI).encodeFunctionData("initialize", [
-    MAX_LOOPS_LIMIT,
-    ACM,
-  ]);
-  const comptrollerProxy = await proxies.deploy(SPOKE_COMPTROLLER_BEACON, comptrollerInit);
-  await new ethers.Contract(comptrollerProxy.address, COMPTROLLER_ABI, deployer).transferOwnership(NORMAL_TIMELOCK);
-
-  const vTokenInterface = new ethers.utils.Interface(VTOKEN_ABI);
-  const deployMarket = async (underlying: string, rateModel: string, asset: string) => {
-    const init = vTokenInterface.encodeFunctionData("initialize", [
-      underlying,
-      comptrollerProxy.address,
-      rateModel,
-      INITIAL_EXCHANGE_RATE,
-      `Venus ${asset} (${BPN_POOL_NAME})`,
-      `v${asset}_BPNLoan`,
-      8,
-      NORMAL_TIMELOCK,
-      ACM,
-      [NORMAL_TIMELOCK, PROTOCOL_SHARE_RESERVE],
-      parseUnits("0.1", 18),
-    ]);
-    return (await proxies.deploy(SPOKE_VTOKEN_BEACON, init)).address;
-  };
-
-  const inputs: BpnInputs = {
-    ...BPN_INPUTS,
-    bpnc,
-    comptroller: comptrollerProxy.address,
-    vBPNC: await deployMarket(bpnc, collateralMarket(BPN_INPUTS).interestRateModel, "BPNC"),
-    vUSDT: await deployMarket(USDT, irmFlat6, "USDT"),
-    vUSDC: await deployMarket(USDC, irmFlat6, "USDC"),
-    vU: await deployMarket(U, irmFlat6, "U"),
-    irmFlat6,
-    bpnSupplier: bpnSupplier.address,
-  };
-
-  // VIP-678 extends the queues VIP-675 leaves. Until the fork moves past VIP-675, it extends today's.
+/// BPN_INPUTS on the fork: BPN's supplier is a fresh account until BPN names it, and the queues are read on chain.
+const resolveInputs = async (): Promise<BpnInputs> => {
+  const [, bpnSupplier] = await ethers.getSigners();
   const queuesBefore: Record<string, InnerQueues> = {};
   for (const spokeSource of Object.keys(QUEUES_AFTER_VIP_675)) {
     queuesBefore[spokeSource] = await readQueues(spokeSource);
   }
   if (JSON.stringify(queuesBefore) !== JSON.stringify(QUEUES_AFTER_VIP_675)) {
-    console.warn("[vip-678] VIP-675 has not run at FORK_BLOCK: the Spoke source queues are today's");
+    console.warn("[vip-678] the Spoke source queues differ from QUEUES_AFTER_VIP_675");
   }
-  return { ...inputs, queuesBefore };
+  const supplier = BPN_INPUTS.bpnSupplier === PENDING ? bpnSupplier.address : BPN_INPUTS.bpnSupplier;
+  return { ...BPN_INPUTS, bpnSupplier: supplier, queuesBefore };
 };
 
 const normalize = (addresses: string[]) => addresses.map(a => a.toLowerCase());
@@ -271,7 +167,7 @@ forking(FORK_BLOCK, async () => {
   await applyVip675();
 
   const standIns = pendingInputs(BPN_INPUTS);
-  const inputs = await deployStandIns();
+  const inputs = await resolveInputs();
   console.warn(`[vip-678] stood in on the fork for: ${standIns.join(", ")}`);
 
   const COLLATERAL = collateralMarket(inputs);
