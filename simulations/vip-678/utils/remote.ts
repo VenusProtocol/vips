@@ -7,8 +7,8 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip676 from "../../../vips/vip-676/bscmainnet";
-import { REMOTE_CHAINS } from "../../../vips/vip-676/config";
+import vip678 from "../../../vips/vip-678/bscmainnet";
+import { REMOTE_CHAINS } from "../../../vips/vip-678/config";
 import ACM_ABI from "../abi/AccessControlManager.json";
 import EBRAKE_ABI from "../abi/EBrake.json";
 import PROXY_ABI from "../abi/OptimizedTransparentUpgradeableProxy.json";
@@ -39,7 +39,7 @@ export const checkRemoteChain = async (name: string, timelock: string) => {
     });
   });
 
-  testForkedNetworkVipCommands(`VIP-676 EBrake upgrade on ${name}`, await vip676(), {
+  testForkedNetworkVipCommands(`VIP-678 EBrake upgrade on ${name}`, await vip678(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
     },

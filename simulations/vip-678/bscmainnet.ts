@@ -8,18 +8,18 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import vip673 from "../../vips/vip-673/bscmainnet";
-import vip676, {
+import { MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
+import vip678, { BSTOCK_PAUSE_SENTINEL, EBRAKE, KEEPER, SENTINEL_ADMINS } from "../../vips/vip-678/bscmainnet";
+import {
   BSTOCK_MARKETS,
-  BSTOCK_PAUSE_SENTINEL,
-  EBRAKE,
-  KEEPER,
-  SENTINEL_ADMINS,
+  CORE_ONLY_PERMISSIONS,
+  CORE_PERMISSIONS_TO_REVOKE,
+  WILDCARD_PERMISSIONS,
   vNVDAB,
   vQQQB,
   vSPYB,
   vTSLAB,
-} from "../../vips/vip-676/bscmainnet";
-import { CORE_ONLY_PERMISSIONS, CORE_PERMISSIONS_TO_REVOKE, WILDCARD_PERMISSIONS } from "../../vips/vip-676/config";
+} from "../../vips/vip-678/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import SENTINEL_ABI from "./abi/BStockPauseSentinel.json";
 import COMPLIANCE_ABI from "./abi/Compliance.json";
@@ -117,7 +117,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-676 EBrake on Spoke pools and bStock pause sentinel", await vip676(), {
+  testVip("VIP-678 EBrake on Spoke pools and bStock pause sentinel", await vip678(), {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: [
       "0x34221485302f6F2029660a000908B5FCABB9BC6e",
@@ -162,6 +162,10 @@ forking(BLOCK_NUMBER, async () => {
           await acm.isAllowedToCall(EBRAKE, signature, { from: BSTOCK_INDEX_COMPTROLLER }),
           `${signature} on bStock index`,
         ).to.be.true;
+        expect(
+          await acm.isAllowedToCall(EBRAKE, signature, { from: MAINSTREAM_COMPTROLLER }),
+          `${signature} on bStock mainstream`,
+        ).to.be.true;
       }
       for (const signature of CORE_PERMISSIONS_TO_REVOKE) {
         expect(await hasRole(UNITROLLER, signature, EBRAKE), signature).to.be.false;
@@ -184,10 +188,10 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("keeper is trusted and the six bStock markets are monitored", async () => {
+    it("keeper is trusted and every bStock market is monitored", async () => {
       expect(await sentinel.trustedKeepers(KEEPER)).to.be.true;
       const monitored = await sentinel.getMonitoredMarkets();
-      expect(monitored).to.have.lengthOf(6);
+      expect(monitored).to.have.lengthOf(26);
       expect(monitored).to.have.members(BSTOCK_MARKETS);
     });
 

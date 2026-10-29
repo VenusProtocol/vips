@@ -7,10 +7,10 @@ export const EBRAKE = "0x957c09e3Ac3d9e689244DC74307c94111FBa8B42";
 
 const DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 
-export const vip676 = () => {
+export const vip678 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-676 [BNB Chain Testnet] BStockPauseSentinel compliance-block check",
+    title: "VIP-678 [BNB Chain Testnet] BStockPauseSentinel compliance-block check",
     description: `#### Summary
 
 Upgrades the BStockPauseSentinel on BNB Chain Testnet to its HashDit-audited build. That build also treats a market as paused when the bStock's compliance module blocks the market's vToken, since the token can then no longer move in or out of the market.
@@ -41,4 +41,4 @@ Upgrades the BStockPauseSentinel on BNB Chain Testnet to its HashDit-audited bui
   );
 };
 
-export default vip676;
+export default vip678;

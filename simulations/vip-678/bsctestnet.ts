@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip676, { BSTOCK_PAUSE_SENTINEL, EBRAKE } from "../../vips/vip-676/bsctestnet";
+import vip678, { BSTOCK_PAUSE_SENTINEL, EBRAKE } from "../../vips/vip-678/bsctestnet";
 import SENTINEL_ABI from "./abi/BStockPauseSentinel.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
 import PROXY_ABI from "./abi/OptimizedTransparentUpgradeableProxy.json";
@@ -62,7 +62,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-676 BStockPauseSentinel compliance-block check", await vip676(), {
+  testVip("VIP-678 BStockPauseSentinel compliance-block check", await vip678(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
     },

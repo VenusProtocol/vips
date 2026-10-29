@@ -3,7 +3,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { CORE_PERMISSIONS_TO_REVOKE, REMOTE_CHAINS, WILDCARD_PERMISSIONS } from "./config";
+import {
+  BSTOCK_MARKETS,
+  CORE_PERMISSIONS_TO_REVOKE,
+  MAINSTREAM_BSTOCK_MARKETS,
+  REMOTE_CHAINS,
+  WILDCARD_PERMISSIONS,
+} from "./config";
 
 const { ACCESS_CONTROL_MANAGER, FAST_TRACK_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } =
   NETWORK_ADDRESSES.bscmainnet;
@@ -14,22 +20,12 @@ export const NEW_EBRAKE_IMPLEMENTATION = "0x918794Bb15BAc47C8Bbba553e7EE8BB1bD4A
 export const BSTOCK_PAUSE_SENTINEL = "0x0beAb536E620D094E1DddFe7f01D310F38390082";
 export const KEEPER = "0x57FA23F591203F61cef84A7BC892Df69Ca95C86e";
 
-// Core pool
-export const vTSLAB = "0x97421799419Eb782628e73e7220d8E0A207469a3";
-export const vNVDAB = "0xEb8Ca841cBe1BC4832A10b15c7dAB1081eDaD371";
-export const vSPCXB = "0xC36dFaCc7a125859C106F29b9F2d874CCF29A55A";
-export const vSKHYB = "0x3E281461efb3D53EC20DB207674373Ed8Ef3BbA9";
-// bStock index Spoke pool
-export const vQQQB = "0xeA32B70f4106d9ef6f0fF95f7422Fa679494c362";
-export const vSPYB = "0x259311A868B49CdA457C1843F89D4dDA33be0390";
-
-export const BSTOCK_MARKETS = [vTSLAB, vNVDAB, vSPCXB, vSKHYB, vQQQB, vSPYB];
 export const SENTINEL_ADMINS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
 
-export const vip676 = () => {
+export const vip678 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-676 [BNB Chain, Ethereum, Arbitrum One, Base] EBrake upgrade and bStock pause sentinel",
+    title: "VIP-678 [BNB Chain, Ethereum, Arbitrum One, Base] EBrake upgrade and bStock pause sentinel",
     description: `#### Summary
 
 If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new BStockPauseSentinel will watch every bStock market on BNB Chain. When a bStock's issuer pauses the token, or its compliance module blocks a market, a keeper calls the sentinel, which sets that market's collateral factor to 0 through EBrake. EBrake is also upgraded to the same build on Ethereum, Arbitrum One and Base.
@@ -41,7 +37,11 @@ If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new 
 3. Give EBrake the four comptroller permissions a Spoke pool checks (\`setActionsPaused\`, \`setCollateralFactor\`, \`setMarketBorrowCaps\` and \`setMarketSupplyCaps\`) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. The Core pool comptroller also checks \`setCollateralFactor(address,uint256,uint256)\`, so EBrake's per-contract grant for it there is revoked. EBrake's other grants on the Core pool comptroller stay as they are.
 4. Grant the sentinel \`decreaseCF(address,uint256)\` on EBrake, and the Guardian and the Normal and Fast-track Timelocks the sentinel's \`setTrustedKeeper\` and \`setMarketMonitored\`.
 5. Set [${KEEPER}](https://bscscan.com/address/${KEEPER}) as the sentinel's keeper. It is the keeper that already drives DeviationSentinel.
-6. Monitor the six bStock markets: vTSLAB, vNVDAB, vSPCXB and vSKHYB in the Core pool, and vQQQB and vSPYB in the bStock index Spoke pool.
+6. Monitor the ${
+      BSTOCK_MARKETS.length
+    } bStock markets: vTSLAB, vNVDAB, vSPCXB and vSKHYB in the Core pool, vQQQB and vSPYB in the bStock index Spoke pool, and the ${
+      MAINSTREAM_BSTOCK_MARKETS.length
+    } bStock markets of the bStock mainstream Spoke pool, which is being listed.
 7. On Ethereum, Arbitrum One and Base, upgrade **EBrake** to the same build. EBrake's existing grants on each Core pool comptroller already cover it, so no permissions change there:
 ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
 
@@ -117,4 +117,4 @@ ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
   );
 };
 
-export default vip676;
+export default vip678;

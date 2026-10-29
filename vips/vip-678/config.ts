@@ -1,7 +1,18 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
+import { COLLATERAL_MARKETS_MAINSTREAM } from "../vip-675/addresses/bscmainnet";
+
 const { ethereum, arbitrumone, basemainnet } = NETWORK_ADDRESSES;
+
+// Core pool
+export const vTSLAB = "0x97421799419Eb782628e73e7220d8E0A207469a3";
+export const vNVDAB = "0xEb8Ca841cBe1BC4832A10b15c7dAB1081eDaD371";
+export const vSPCXB = "0xC36dFaCc7a125859C106F29b9F2d874CCF29A55A";
+export const vSKHYB = "0x3E281461efb3D53EC20DB207674373Ed8Ef3BbA9";
+// bStock index Spoke pool
+export const vQQQB = "0xeA32B70f4106d9ef6f0fF95f7422Fa679494c362";
+export const vSPYB = "0x259311A868B49CdA457C1843F89D4dDA33be0390";
 
 // The comptroller functions a Spoke pool checks, granted to EBrake as wildcards so they cover every Spoke pool
 export const WILDCARD_PERMISSIONS = [
@@ -24,6 +35,11 @@ export const CORE_ONLY_PERMISSIONS = [
   "setIsBorrowAllowed(uint96,address,bool)",
   "setWhiteListFlashLoanAccount(address,bool)",
 ];
+
+// The bStock mainstream Spoke pool's bStock markets
+export const MAINSTREAM_BSTOCK_MARKETS = COLLATERAL_MARKETS_MAINSTREAM.map(market => market.vToken);
+
+export const BSTOCK_MARKETS = [vTSLAB, vNVDAB, vSPCXB, vSKHYB, vQQQB, vSPYB, ...MAINSTREAM_BSTOCK_MARKETS];
 
 export const REMOTE_CHAINS = [
   {
