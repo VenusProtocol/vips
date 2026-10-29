@@ -334,7 +334,7 @@ forking(FORK_BLOCK, async () => {
       expect(await bpnc.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
     });
 
-    it("leaves BPNC's mint and pause with the Operator, and its burn and unpause with governance", async () => {
+    it("gives BPNC's mint and pause to the Operator and governance, and its burn and unpause to governance", async () => {
       const holders = [OPERATOR, NORMAL_TIMELOCK, CRITICAL_GUARDIAN];
       for (const { role, accounts } of BPNC_ROLES) {
         for (const account of holders) {

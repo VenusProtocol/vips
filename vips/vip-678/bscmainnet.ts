@@ -65,8 +65,7 @@ import {
 // `addPool` needs.
 //
 // ORDER that matters:
-//  - Both BPNC mints inside the Normal Timelock's own `mint` grant, which is revoked right after: once VIP-678 has run,
-//    only the Operator can mint.
+//  - The Normal Timelock's `mint` grant before both BPNC mints.
 //  - The registry's six grants before `addPool`, which reverts without them.
 //  - BPNC's price before its `addMarket`: a collateral factor above 0 needs a nonzero price.
 //  - `addMarket` before every comptroller setter on that market (`MarketNotListed`).
@@ -115,20 +114,15 @@ const assertComplete = (inputs: BpnInputs) => {
   }
 };
 
-const revokeCallPermission = (contract: string, signature: string, account: string) => ({
-  target: ACM,
-  signature: "revokeCallPermission(address,string,address)",
-  params: [contract, signature, account],
-});
+/// The Normal Timelock's own `mint`, which the two mints below need. BPNC's other roles are granted in the first batch.
+const TIMELOCK_MINT = { role: "mint(address,uint256)", account: NORMAL_TIMELOCK };
 
-/// The Normal Timelock mints the first supply to the Operator and the market's seed to itself, under a grant that ends
-/// with the two mints. BPNC's lasting roles are granted in the first batch.
+/// The Normal Timelock mints the first supply to the Operator and the market's seed to itself.
 const tokenCommands = ({ bpnc }: BpnInputs, seed: BigNumber): Command[] => [
   { target: bpnc, signature: "acceptOwnership()", params: [] },
-  giveCallPermission(ACM, bpnc, "mint(address,uint256)", NORMAL_TIMELOCK),
+  giveCallPermission(ACM, bpnc, TIMELOCK_MINT.role, TIMELOCK_MINT.account),
   { target: bpnc, signature: "mint(address,uint256)", params: [OPERATOR, BPNC_FIRST_MINT] },
   { target: bpnc, signature: "mint(address,uint256)", params: [NORMAL_TIMELOCK, seed] },
-  revokeCallPermission(bpnc, "mint(address,uint256)", NORMAL_TIMELOCK),
 ];
 
 const poolCommands = ({ comptroller }: BpnInputs) => [
@@ -181,7 +175,8 @@ const listMarket = (m: BpnMarket, fromTreasury: boolean) => [
 
 /// The other 14 comptroller grants: the Normal Timelock's six, the Critical Guardian's five, the Pause Guardian's two
 /// and CollateralGateway's `enterMarketForAccount`, the same VIP-668 and VIP-670 gave the bStock index pool. None
-/// carries over: each of those names its own comptroller. Then BPNC's six.
+/// carries over: each of those names its own comptroller. Then BPNC's roles, except the Normal Timelock's `mint`, which
+/// `tokenCommands` already granted.
 const grantCommands = ({ comptroller, bpnc }: BpnInputs): Command[] => [
   ...[
     ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
@@ -189,7 +184,9 @@ const grantCommands = ({ comptroller, bpnc }: BpnInputs): Command[] => [
     ...PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
     ...ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY })),
   ].map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account)),
-  ...BPNC_ROLES.flatMap(({ role, accounts }) => accounts.map(account => giveCallPermission(ACM, bpnc, role, account))),
+  ...BPNC_ROLES.flatMap(({ role, accounts }) => accounts.map(account => ({ role, account })))
+    .filter(({ role, account }) => role !== TIMELOCK_MINT.role || account !== TIMELOCK_MINT.account)
+    .map(({ role, account }) => giveCallPermission(ACM, bpnc, role, account)),
 ];
 
 const riskCommands = (comptroller: string, markets: BpnMarket[], collateral: BpnMarket): Command[] => [
@@ -252,7 +249,7 @@ const hubCommands = (m: BpnLiquidityMarket): Command[] => {
   ];
 };
 
-/// Each batch adds a grant and a revoke per distinct target and signature it calls, except on the ACM: 53 entries in
+/// Each batch adds a grant and a revoke per distinct target and signature it calls, except on the ACM: 56 entries in
 /// the first and 46 in the second, each seeded in one `addBatch` well under the per-tx gas cap.
 const toBatch = (commands: Command[], seededIndex?: number): Batch =>
   batch(commands, seededIndex === undefined ? { raw: true } : { raw: true, seededIndex });
@@ -312,7 +309,7 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
 
 1. Take ownership of BPNC (${inputs.bpnc}) and mint its first ${tokens(
       BPNC_FIRST_MINT,
-    )} BPNC to the Liquidity Hub Operator (${OPERATOR}), plus the 10 BPNC that seed its market. Then give the Operator BPNC's \`mint\` and \`pause\`, and the Normal Timelock and Critical Guardian its \`burn\` and \`unpause\`. The Normal Timelock holds \`mint\` only for the two mints.
+    )} BPNC to the Liquidity Hub Operator (${OPERATOR}), plus the 10 BPNC that seed its market. Then give BPNC's \`mint\` and \`pause\` to the Operator, the Normal Timelock and the Critical Guardian, and its \`burn\` and \`unpause\` to the Normal Timelock and the Critical Guardian.
 2. Register the pool in the Spoke pool registry, with a ${pct(BPN_CLOSE_FACTOR)} close factor, a ${discount(
       BPN_POOL_LIQUIDATION_INCENTIVE,
     )} pool-wide liquidation incentive and a $${tokens(
