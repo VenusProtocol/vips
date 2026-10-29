@@ -19,7 +19,11 @@ import vip676, {
   vSPYB,
   vTSLAB,
 } from "../../vips/vip-676/bscmainnet";
-import { CORE_COMPTROLLER_PERMISSIONS, EBRAKE_WILDCARD_PERMISSIONS } from "../../vips/vip-676/config";
+import {
+  CORE_COMPTROLLER_PERMISSIONS,
+  CORE_ONLY_PERMISSIONS,
+  EBRAKE_WILDCARD_PERMISSIONS,
+} from "../../vips/vip-676/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import SENTINEL_ABI from "./abi/BStockPauseSentinel.json";
 import COMPLIANCE_ABI from "./abi/Compliance.json";
@@ -164,6 +168,13 @@ forking(BLOCK_NUMBER, async () => {
       }
       for (const signature of CORE_COMPTROLLER_PERMISSIONS) {
         expect(await hasRole(UNITROLLER, signature, EBRAKE), signature).to.be.false;
+      }
+    });
+
+    it("EBrake keeps its Core-only grants on the Core pool comptroller, without wildcards", async () => {
+      for (const signature of CORE_ONLY_PERMISSIONS) {
+        expect(await hasRole(UNITROLLER, signature, EBRAKE), signature).to.be.true;
+        expect(await hasWildcard(signature, EBRAKE), `${signature} wildcard`).to.be.false;
       }
     });
 

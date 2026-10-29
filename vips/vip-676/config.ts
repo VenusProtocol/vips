@@ -3,19 +3,23 @@ import { LzChainId } from "src/types";
 
 const { ethereum, arbitrumone, basemainnet } = NETWORK_ADDRESSES;
 
-// Granted to EBrake on the Core pool comptroller by VIP-610
+// VIP-610 grants on the Core pool comptroller for actions isolated pools have too, replaced by wildcards
 export const CORE_COMPTROLLER_PERMISSIONS = [
   "_setActionsPaused(address[],uint8[],bool)",
   "setCollateralFactor(uint96,address,uint256,uint256)",
   "setCollateralFactor(address,uint256,uint256)",
   "_setMarketBorrowCaps(address[],uint256[])",
   "_setMarketSupplyCaps(address[],uint256[])",
+];
+
+// VIP-610 grants for actions only the Core pool has, kept on the Core pool comptroller
+export const CORE_ONLY_PERMISSIONS = [
   "setFlashLoanPaused(bool)",
   "setIsBorrowAllowed(uint96,address,bool)",
   "setWhiteListFlashLoanAccount(address,bool)",
 ];
 
-// Every comptroller function EBrake calls, on the Core pool and on Spoke pools
+// The comptroller functions EBrake calls on both the Core pool and Spoke pools
 export const EBRAKE_WILDCARD_PERMISSIONS = [
   ...CORE_COMPTROLLER_PERMISSIONS,
   "setActionsPaused(address[],uint256[],bool)",

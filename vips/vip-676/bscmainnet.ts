@@ -18,8 +18,7 @@ export const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
 export const NEW_EBRAKE_IMPLEMENTATION = "0x918794Bb15BAc47C8Bbba553e7EE8BB1bD4A0959";
 export const BSTOCK_PAUSE_SENTINEL = "0x0beAb536E620D094E1DddFe7f01D310F38390082";
-// TODO: the bstock-pause-detector keeper (MAINNET_BSTOCK_KEEPER_PRIVATE_KEY in venus-monitoring)
-export const KEEPER = "0x000000000000000000000000000000000000dEaD";
+export const KEEPER = "0x57FA23F591203F61cef84A7BC892Df69Ca95C86e";
 
 // Core pool
 export const vTSLAB = "0x97421799419Eb782628e73e7220d8E0A207469a3";
@@ -45,11 +44,11 @@ If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new 
 
 1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). EBrake now acts on each market through that market's own comptroller, so it also covers Spoke pool markets. Core pool behaviour and the storage layout are unchanged.
 2. Accept ownership of the **BStockPauseSentinel** at [${BSTOCK_PAUSE_SENTINEL}](https://bscscan.com/address/${BSTOCK_PAUSE_SENTINEL}).
-3. Through one AuxiliaryCommandsAggregator batch, give EBrake every comptroller permission it uses as a wildcard (contract address zero), so it covers the Core pool and every Spoke pool, including ones added later. This replaces its ${
+3. Through one AuxiliaryCommandsAggregator batch, give EBrake the comptroller permissions for the actions both the Core pool and Spoke pools have (pausing actions, the collateral factor and the borrow and supply caps) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. This replaces the ${
       CORE_COMPTROLLER_PERMISSIONS.length
-    } per-contract grants on the Core pool comptroller from VIP-610, which are revoked.
+    } matching per-contract grants on the Core pool comptroller from VIP-610, which are revoked. Its Core-only grants (flash loan pause, pool borrow and flash loan access) stay on the Core pool comptroller.
 4. In the same batch, grant the sentinel \`decreaseCF(address,uint256)\` on EBrake, and the Critical Guardian and the Normal and Fast-track Timelocks the sentinel's \`setTrustedKeeper\` and \`setMarketMonitored\`.
-5. Set [${KEEPER}](https://bscscan.com/address/${KEEPER}) as the sentinel's keeper.
+5. Set [${KEEPER}](https://bscscan.com/address/${KEEPER}) as the sentinel's keeper. It is the keeper that already drives DeviationSentinel.
 6. Monitor the six bStock markets: vTSLAB, vNVDAB, vSPCXB and vSKHYB in the Core pool, and vQQQB and vSPYB in the bStock index Spoke pool.
 7. On Ethereum, Arbitrum One and Base, upgrade **EBrake** to the same build, and replace its ${
       IL_COMPTROLLER_PERMISSIONS.length
