@@ -1,6 +1,7 @@
 import { BigNumber, constants } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import { ProposalType } from "src/types";
+import { batch } from "src/auxiliaryCommandsAggregator";
+import { Batch, Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { ROUTER_ROLES, giveCallPermission } from "../vip-668/permissions";
@@ -13,7 +14,9 @@ import {
 import {
   ACM,
   ADAPTER_SPOKE_V1,
+  BPNC_FIRST_MINT,
   BPNC_PRICE,
+  BPNC_ROLES,
   BPN_CLOSE_FACTOR,
   BPN_INPUTS,
   BPN_MIN_LIQUIDATABLE_COLLATERAL,
@@ -28,6 +31,7 @@ import {
   DEVIATION_BOUNDED_ORACLE,
   FLAT_6_IRM,
   NORMAL_TIMELOCK,
+  OPERATOR,
   PAUSE_GUARDIAN,
   PENDING,
   REDUCE_RESERVES_BLOCK_DELTA,
@@ -43,26 +47,36 @@ import {
 // ===================================================================================================
 // VIP-678 [BNB Chain]: the BPN Loan Hub-Funded Spoke pool.
 //
-// Stands up the pool, prices BPNC at a fixed $1, lists BPNC as allowlisted collateral and USDT, USDC and U as
-// Hub-funded liquidity at a flat 6% borrow APY, and connects each liquidity market to its Hub's Spoke source.
+// Takes over BPNC and mints its first supply to the Operator, stands up the pool, prices BPNC at a fixed $1, lists BPNC
+// as allowlisted collateral and USDT, USDC and U as Hub-funded liquidity at a flat 6% borrow APY, and connects each
+// liquidity market to its Hub's Spoke source.
 //
 // STATUS: DRAFT. `vip678()` throws while any of BPN_INPUTS in ./addresses/bscmainnet.ts is still `PENDING`.
 //
-// 69 commands, under the Governor's 100-operation cap, so nothing goes through the AuxiliaryCommandsAggregator and
-// nothing has to be seeded before proposing.
+// WHY TWO AGGREGATOR BATCHES: as 79 plain commands, propose() through the proposer Safe needed 99.3% of the 16,777,216
+// per-tx gas cap. Everything after the listings goes through the AuxiliaryCommandsAggregator instead, in two adjacent
+// batches, which the team seeds with `seedAggregatorBatches` and pins in `BpnInputs.seededIndices` before proposing.
+// The aggregator holds the ACM admin role only while they run, and each batch revokes the grants it gave itself.
+//
+// INLINE, because the aggregator cannot do them: `acceptOwnership` and every call that has to come from the Normal
+// Timelock (the BPNC mints into its own balance, the VTreasury withdrawals, `approve` and `addMarket`, which pulls the
+// seed from the caller), the price, which has to come before BPNC's `addMarket`, and the registry's grants, which
+// `addPool` needs.
 //
 // ORDER that matters:
+//  - Both BPNC mints inside the Normal Timelock's own `mint` grant, which is revoked right after: once VIP-678 has run,
+//    only the Operator can mint.
 //  - The registry's six grants before `addPool`, which reverts without them.
 //  - BPNC's price before its `addMarket`: a collateral factor above 0 needs a nonzero price.
 //  - `addMarket` before every comptroller setter on that market (`MarketNotListed`).
-//  - The Normal Timelock's six spoke-only grants before the incentive and allowlist setters that need them.
 //  - `setProtocolSeizeShare(0)` before `setMarketLiquidationIncentive(1e18)`: the incentive has to be at least
 //    1 + the market's seize share, which is 5% when the market is deployed.
 //  - `setAllowedSupplier` before `addResource` (the Spoke adapter rejects a source the allowlist does not admit), and
 //    `addResource` before both inner queues (`ResourceNotRegistered`).
 //
 // AT EXECUTION, or the whole proposal reverts:
-//  - The VTreasury holds 10 BPNC. BPN sends it there; the VTreasury already holds the USDT, USDC and U seeds.
+//  - BPNC is deployed with the Normal Timelock as pending owner.
+//  - The VTreasury holds the USDT, USDC and U seeds, as it did on 2026-10-29.
 //  - VIP-675 has executed: each Spoke source's inner queues hold its bStock index and bStock mainstream markets, the
 //    queues VIP-678 extends. Re-read them on chain before proposing.
 //
@@ -100,6 +114,22 @@ const assertComplete = (inputs: BpnInputs) => {
   }
 };
 
+const revokeCallPermission = (contract: string, signature: string, account: string) => ({
+  target: ACM,
+  signature: "revokeCallPermission(address,string,address)",
+  params: [contract, signature, account],
+});
+
+/// The Normal Timelock mints the first supply to the Operator and the market's seed to itself, under a grant that ends
+/// with the two mints. BPNC's lasting roles are granted in the first batch.
+const tokenCommands = ({ bpnc }: BpnInputs, seed: BigNumber): Command[] => [
+  { target: bpnc, signature: "acceptOwnership()", params: [] },
+  giveCallPermission(ACM, bpnc, "mint(address,uint256)", NORMAL_TIMELOCK),
+  { target: bpnc, signature: "mint(address,uint256)", params: [OPERATOR, BPNC_FIRST_MINT] },
+  { target: bpnc, signature: "mint(address,uint256)", params: [NORMAL_TIMELOCK, seed] },
+  revokeCallPermission(bpnc, "mint(address,uint256)", NORMAL_TIMELOCK),
+];
+
 const poolCommands = ({ comptroller }: BpnInputs) => [
   { target: comptroller, signature: "acceptOwnership()", params: [] },
   { target: comptroller, signature: "setPriceOracle(address)", params: [RESILIENT_ORACLE] },
@@ -127,12 +157,17 @@ const oracleCommands = ({ bpnc }: BpnInputs) => [
   },
 ];
 
-const listMarket = (m: BpnMarket) => [
-  {
-    target: VTREASURY,
-    signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [m.underlying, m.initialSupply, NORMAL_TIMELOCK],
-  },
+/// BPNC's seed is already with the Normal Timelock, from `tokenCommands`. The others come from the VTreasury.
+const listMarket = (m: BpnMarket, fromTreasury: boolean) => [
+  ...(fromTreasury
+    ? [
+        {
+          target: VTREASURY,
+          signature: "withdrawTreasuryBEP20(address,uint256,address)",
+          params: [m.underlying, m.initialSupply, NORMAL_TIMELOCK],
+        },
+      ]
+    : []),
   { target: m.underlying, signature: "approve(address,uint256)", params: [SPOKE_POOL_REGISTRY, m.initialSupply] },
   {
     target: SPOKE_POOL_REGISTRY,
@@ -145,16 +180,18 @@ const listMarket = (m: BpnMarket) => [
 
 /// The other 14 comptroller grants: the Normal Timelock's six, the Critical Guardian's five, the Pause Guardian's two
 /// and CollateralGateway's `enterMarketForAccount`, the same VIP-668 and VIP-670 gave the bStock index pool. None
-/// carries over: each of those names its own comptroller.
-const grantCommands = ({ comptroller }: BpnInputs) =>
-  [
+/// carries over: each of those names its own comptroller. Then BPNC's six.
+const grantCommands = ({ comptroller, bpnc }: BpnInputs): Command[] => [
+  ...[
     ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
     ...CRITICAL_GUARDIAN_GRANTS.map(role => ({ role, account: CRITICAL_GUARDIAN })),
     ...PAUSE_GUARDIAN_GRANTS.map(role => ({ role, account: PAUSE_GUARDIAN })),
     ...ROUTER_ROLES.map(role => ({ role, account: COLLATERAL_GATEWAY })),
-  ].map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account));
+  ].map(({ role, account }) => giveCallPermission(ACM, comptroller, role, account)),
+  ...BPNC_ROLES.flatMap(({ role, accounts }) => accounts.map(account => giveCallPermission(ACM, bpnc, role, account))),
+];
 
-const riskCommands = (comptroller: string, markets: BpnMarket[], collateral: BpnMarket) => [
+const riskCommands = (comptroller: string, markets: BpnMarket[], collateral: BpnMarket): Command[] => [
   ...markets.map(m => ({
     target: m.vToken,
     signature: "setReduceReservesBlockDelta(uint256)",
@@ -176,7 +213,7 @@ const riskCommands = (comptroller: string, markets: BpnMarket[], collateral: Bpn
   },
 ];
 
-const allowlistCommands = (comptroller: string, markets: BpnMarket[]) =>
+const allowlistCommands = (comptroller: string, markets: BpnMarket[]): Command[] =>
   markets.flatMap(m => [
     { target: comptroller, signature: "setSupplyAllowlistEnabled(address,bool)", params: [m.vToken, true] },
     ...m.allowedSuppliers.map(supplier => ({
@@ -187,7 +224,7 @@ const allowlistCommands = (comptroller: string, markets: BpnMarket[]) =>
   ]);
 
 /// The BPN Loan market goes last in each Spoke source's deposit queue and first in its withdraw queue.
-const hubCommands = (m: BpnLiquidityMarket) => {
+const hubCommands = (m: BpnLiquidityMarket): Command[] => {
   const { spokeSource } = m.stack;
   return [
     { target: spokeSource, signature: "addResource(address,address)", params: [m.vToken, ADAPTER_SPOKE_V1] },
@@ -204,19 +241,25 @@ const hubCommands = (m: BpnLiquidityMarket) => {
   ];
 };
 
-export const buildCommands = (inputs: BpnInputs) => {
+/// Each batch adds a grant and a revoke per distinct target and signature it calls, except on the ACM: 53 entries in
+/// the first and 40 in the second, each seeded in one `addBatch` well under the per-tx gas cap.
+const toBatch = (commands: Command[], seededIndex?: number): Batch =>
+  batch(commands, seededIndex === undefined ? { raw: true } : { raw: true, seededIndex });
+
+export const buildCommands = (inputs: BpnInputs): (Command | Batch)[] => {
   assertComplete(inputs);
   const collateral = collateralMarket(inputs);
   const liquidity = liquidityMarkets(inputs);
   const markets = [collateral, ...liquidity];
+  const [grantsAndRisk, allowlistsAndHub] = inputs.seededIndices ?? [];
   return [
+    ...tokenCommands(inputs, collateral.initialSupply),
     ...poolCommands(inputs),
     ...oracleCommands(inputs),
-    ...markets.flatMap(listMarket),
-    ...grantCommands(inputs),
-    ...riskCommands(inputs.comptroller, markets, collateral),
-    ...allowlistCommands(inputs.comptroller, markets),
-    ...liquidity.flatMap(hubCommands),
+    ...listMarket(collateral, false),
+    ...liquidity.flatMap(m => listMarket(m, true)),
+    toBatch([...grantCommands(inputs), ...riskCommands(inputs.comptroller, markets, collateral)], grantsAndRisk),
+    toBatch([...allowlistCommands(inputs.comptroller, markets), ...liquidity.flatMap(hubCommands)], allowlistsAndHub),
   ];
 };
 
@@ -244,24 +287,29 @@ export const vip678 = (inputs: BpnInputs = BPN_INPUTS) => {
 
 If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool on BNB Chain, a loan to Better Payment Network (BPN):
 
-- **Collateral side**: BPNC (BPN Credit Token), priced at a fixed $1. Only allowlisted accounts may supply it. It is not borrowable.
+- **Collateral side**: BPNC (BPN Credit Token), a new token governed by Venus and priced at a fixed $1. Only allowlisted accounts may supply it. It is not borrowable.
 - **Liquidity side**: USDT, USDC and U. Only the Liquidity Hub of the same token may supply each market, through the Spoke yield group that already funds the bStock pools. They are borrowable at a flat 6% APY and give no borrow power.
 
 #### Proposed changes
 
-1. Register the pool in the Spoke pool registry, with a ${pct(BPN_CLOSE_FACTOR)} close factor, a ${discount(
+1. Take ownership of BPNC (${inputs.bpnc}) and mint its first ${tokens(
+      BPNC_FIRST_MINT,
+    )} BPNC to the Liquidity Hub Operator (${OPERATOR}), plus the 10 BPNC that seed its market. Then give the Operator BPNC's \`mint\` and \`pause\`, and the Normal Timelock and Critical Guardian its \`burn\` and \`unpause\`. The Normal Timelock holds \`mint\` only for the two mints.
+2. Register the pool in the Spoke pool registry, with a ${pct(BPN_CLOSE_FACTOR)} close factor, a ${discount(
       BPN_POOL_LIQUIDATION_INCENTIVE,
     )} pool-wide liquidation incentive and a $${tokens(
       BPN_MIN_LIQUIDATABLE_COLLATERAL,
     )} minimum liquidatable collateral, priced by the ResilientOracle and the DeviationBoundedOracle.
-2. Price BPNC at a fixed $1: a direct price on the ChainlinkOracle (${CHAINLINK_ORACLE}), the ResilientOracle's main and only oracle for BPNC.
-3. List the four markets, each seeded with 10 tokens from the Venus Treasury, with the seed vTokens sent to ${SEED_RECEIVER}.
-4. Set every market's liquidation incentive and protocol seize share to 0%, and pause borrowing on BPNC.
-5. Restrict supply on every market to its allowlist: BPNC to the Venus custody Safe (${VENUS_CUSTODY_SAFE}) and BPN (${
+3. Price BPNC at a fixed $1: a direct price on the ChainlinkOracle (${CHAINLINK_ORACLE}), the ResilientOracle's main and only oracle for BPNC.
+4. List the four markets, each seeded with 10 tokens: BPNC's minted in step 1, the others from the Venus Treasury, with the seed vTokens sent to ${SEED_RECEIVER}.
+5. Set every market's liquidation incentive and protocol seize share to 0%, and pause borrowing on BPNC.
+6. Restrict supply on every market to its allowlist: BPNC to the Venus custody Safe (${VENUS_CUSTODY_SAFE}) and BPN (${
       inputs.bpnSupplier
     }), and USDT, USDC and U each to its Hub's Spoke yield group.
-6. Add each liquidity market to its Spoke yield group, last to deposit and first to withdraw.
-7. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
+7. Add each liquidity market to its Spoke yield group, last to deposit and first to withdraw.
+8. Grant the pool's permissions: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}), against this comptroller only.
+
+Steps 5 to 8 and BPNC's lasting roles in step 1 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
 
 #### Market parameters
 
@@ -295,6 +343,7 @@ ${liquidity
     )} BPNC supply cap bound what can be borrowed against it.
 - With a 0% liquidation incentive a liquidator receives exactly the value it repays, in BPNC.
 - Liquidations are permissionless. The pool's liquidation allowlist stays off.
+- Pausing BPNC stops its transfers, so while it is paused BPNC can be neither supplied nor redeemed.
 
 #### Deployed contracts
 

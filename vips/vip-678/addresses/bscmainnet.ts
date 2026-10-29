@@ -3,9 +3,12 @@ import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import {
+  CRITICAL_GUARDIAN,
   HUB_STACKS,
   HubStack,
   IRM_COLLATERAL,
+  NORMAL_TIMELOCK,
+  OPERATOR,
   PENDING,
   SPOKE_SOURCE_U,
   SPOKE_SOURCE_USDC,
@@ -50,6 +53,25 @@ export { CHAINLINK_ORACLE };
 export const BPNC_PRICE = parseUnits("1", 18);
 
 // ---------------------------------------------------------------------------------------------------
+// BPNC. A CustodyReceiptToken (fixed-rate-vaults), the contract VIP-656 took over as vceBTC: an 18-decimal ERC20 whose
+// mint, burn, pause and unpause are gated by the ACM. Pausing stops holder-to-holder transfers, which includes
+// supplying BPNC to its market and redeeming it. Deployed with fixed-rate-vaults' DeployCustodyReceiptToken, renamed,
+// which nominates the Normal Timelock as owner.
+// ---------------------------------------------------------------------------------------------------
+
+/// The first BPNC, minted by VIP-678 to OPERATOR.
+export const BPNC_FIRST_MINT = parseUnits("3333334", 18);
+
+/// Who may call each ACM-gated BPNC function once VIP-678 has run. The Operator can mint and stop transfers; only
+/// governance can burn, which takes BPNC from any holder, and lift a pause.
+export const BPNC_ROLES: { role: string; accounts: string[] }[] = [
+  { role: "mint(address,uint256)", accounts: [OPERATOR] },
+  { role: "pause()", accounts: [OPERATOR] },
+  { role: "burn(address,uint256)", accounts: [NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
+  { role: "unpause()", accounts: [NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
+];
+
+// ---------------------------------------------------------------------------------------------------
 // Pool parameters.
 // ---------------------------------------------------------------------------------------------------
 
@@ -91,7 +113,7 @@ export const QUEUES_AFTER_VIP_675: Record<string, InnerQueues> = {
 // ---------------------------------------------------------------------------------------------------
 
 export type BpnInputs = {
-  /// BPN Credit Token, a plain 18-decimal ERC20. Owner and minter: the BPN Safe 0x83f4…6a7A.
+  /// BPN Credit Token, the CustodyReceiptToken above.
   bpnc: string;
   comptroller: string;
   vBPNC: string;
@@ -104,6 +126,8 @@ export type BpnInputs = {
   bpnSupplier: string;
   /// Each Spoke source's inner queues just before VIP-678 runs, keyed by the Spoke source.
   queuesBefore: Record<string, InnerQueues>;
+  /// The aggregator index of each of the two batches, once `seedAggregatorBatches` has stored them.
+  seededIndices?: [number, number];
 };
 
 export type InnerQueues = { deposit: string[]; withdraw: string[] };
@@ -154,7 +178,8 @@ export type BpnMarket = {
   liquidationIncentive: BigNumber;
   /// Set with `setProtocolSeizeShare` before the incentive, which it bounds from below.
   protocolSeizeShare: BigNumber;
-  /// Pulled from the VTreasury and minted to SEED_RECEIVER by `addMarket`.
+  /// Supplied by `addMarket`, with the vTokens minted to SEED_RECEIVER. Pulled from the VTreasury, except BPNC's, which
+  /// VIP-678 mints.
   initialSupply: BigNumber;
   /// The only accounts that may supply.
   allowedSuppliers: string[];
