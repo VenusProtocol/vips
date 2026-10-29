@@ -38,9 +38,7 @@ If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new 
 
 1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). EBrake now acts on each market through that market's own comptroller, so it also covers Spoke pool markets. Core pool behaviour, the Hub pause actions and the storage layout are unchanged.
 2. Accept ownership of the **BStockPauseSentinel** at [${BSTOCK_PAUSE_SENTINEL}](https://bscscan.com/address/${BSTOCK_PAUSE_SENTINEL}).
-3. Give EBrake the comptroller permissions for the actions both the Core pool and Spoke pools have (pausing actions, the collateral factor and the borrow and supply caps) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. This replaces the ${
-      CORE_PERMISSIONS_TO_REVOKE.length
-    } matching per-contract grants on the Core pool comptroller, which are revoked. EBrake's Core-only grants (flash loan pause, pool borrow and flash loan access) stay on the Core pool comptroller.
+3. Give EBrake the four comptroller permissions a Spoke pool checks (\`setActionsPaused\`, \`setCollateralFactor\`, \`setMarketBorrowCaps\` and \`setMarketSupplyCaps\`) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. The Core pool comptroller also checks \`setCollateralFactor(address,uint256,uint256)\`, so EBrake's per-contract grant for it there is revoked. EBrake's other grants on the Core pool comptroller stay as they are.
 4. Grant the sentinel \`decreaseCF(address,uint256)\` on EBrake, and the Guardian and the Normal and Fast-track Timelocks the sentinel's \`setTrustedKeeper\` and \`setMarketMonitored\`.
 5. Set [${KEEPER}](https://bscscan.com/address/${KEEPER}) as the sentinel's keeper. It is the keeper that already drives DeviationSentinel.
 6. Monitor the six bStock markets: vTSLAB, vNVDAB, vSPCXB and vSKHYB in the Core pool, and vQQQB and vSPYB in the bStock index Spoke pool.

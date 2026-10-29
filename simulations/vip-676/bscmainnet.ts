@@ -55,6 +55,7 @@ const CORE_CF = parseUnits("0.6", 18);
 const CORE_LT = parseUnits("0.7", 18);
 const SPOKE_CF = parseUnits("0.8", 18);
 const SPOKE_LT = parseUnits("0.85", 18);
+const TSLAB_SUPPLY_CAP = parseUnits("236", 18);
 const SPYB_SUPPLY_CAP = parseUnits("10000", 18);
 
 const SENTINEL_PERMISSIONS = [
@@ -92,7 +93,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("EBrake holds its per-contract grants on the Core pool comptroller and no wildcards", async () => {
-      for (const signature of CORE_PERMISSIONS_TO_REVOKE) {
+      for (const signature of [...CORE_PERMISSIONS_TO_REVOKE, ...CORE_ONLY_PERMISSIONS]) {
         expect(await hasRole(UNITROLLER, signature, EBRAKE), signature).to.be.true;
       }
       for (const signature of WILDCARD_PERMISSIONS) {
@@ -330,6 +331,21 @@ forking(BLOCK_NUMBER, async () => {
       await expect(sentinel.connect(criticalGuardian).setMarketMonitored(VUSDT, true))
         .to.be.revertedWithCustomError(sentinel, "Unauthorized")
         .withArgs(CRITICAL_GUARDIAN, BSTOCK_PAUSE_SENTINEL, "setMarketMonitored(address,bool)");
+    });
+
+    it("Guardian pauses supply and lowers the supply cap of a Core market through EBrake", async () => {
+      expect(await comptroller.actionPaused(vTSLAB, MINT_ACTION)).to.be.false;
+      await expect(ebrake.connect(guardian).pauseSupply(vTSLAB))
+        .to.emit(ebrake, "ActionPaused")
+        .withArgs(GUARDIAN, vTSLAB, MINT_ACTION);
+      expect(await comptroller.actionPaused(vTSLAB, MINT_ACTION)).to.be.true;
+
+      const newCap = TSLAB_SUPPLY_CAP.div(2);
+      expect(await comptroller.supplyCaps(vTSLAB)).to.equal(TSLAB_SUPPLY_CAP);
+      await expect(ebrake.connect(guardian).setMarketSupplyCaps([vTSLAB], [newCap]))
+        .to.emit(ebrake, "SupplyCapsDecreased")
+        .withArgs(GUARDIAN, [vTSLAB], [newCap]);
+      expect(await comptroller.supplyCaps(vTSLAB)).to.equal(newCap);
     });
 
     it("Guardian pauses supply and lowers the supply cap of a Spoke market through EBrake", async () => {

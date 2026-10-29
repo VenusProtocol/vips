@@ -3,28 +3,26 @@ import { LzChainId } from "src/types";
 
 const { ethereum, arbitrumone, basemainnet } = NETWORK_ADDRESSES;
 
-// EBrake's grants on the Core pool comptroller for actions Spoke pools have too, replaced by wildcards
-export const CORE_PERMISSIONS_TO_REVOKE = [
-  "_setActionsPaused(address[],uint8[],bool)",
-  "setCollateralFactor(uint96,address,uint256,uint256)",
+// The comptroller functions a Spoke pool checks, granted to EBrake as wildcards so they cover every Spoke pool
+export const WILDCARD_PERMISSIONS = [
+  "setActionsPaused(address[],uint256[],bool)",
   "setCollateralFactor(address,uint256,uint256)",
-  "_setMarketBorrowCaps(address[],uint256[])",
-  "_setMarketSupplyCaps(address[],uint256[])",
+  "setMarketBorrowCaps(address[],uint256[])",
+  "setMarketSupplyCaps(address[],uint256[])",
 ];
 
-// EBrake's grants for actions only the Core pool has, kept on the Core pool comptroller
+// The only one the Core pool comptroller checks too, so the wildcard replaces EBrake's per-contract grant there
+export const CORE_PERMISSIONS_TO_REVOKE = ["setCollateralFactor(address,uint256,uint256)"];
+
+// EBrake's other grants on the Core pool comptroller, which only the Core pool checks, kept as they are
 export const CORE_ONLY_PERMISSIONS = [
+  "_setActionsPaused(address[],uint8[],bool)",
+  "setCollateralFactor(uint96,address,uint256,uint256)",
+  "_setMarketBorrowCaps(address[],uint256[])",
+  "_setMarketSupplyCaps(address[],uint256[])",
   "setFlashLoanPaused(bool)",
   "setIsBorrowAllowed(uint96,address,bool)",
   "setWhiteListFlashLoanAccount(address,bool)",
-];
-
-// The comptroller functions EBrake calls on both the Core pool and Spoke pools
-export const WILDCARD_PERMISSIONS = [
-  ...CORE_PERMISSIONS_TO_REVOKE,
-  "setActionsPaused(address[],uint256[],bool)",
-  "setMarketBorrowCaps(address[],uint256[])",
-  "setMarketSupplyCaps(address[],uint256[])",
 ];
 
 export const REMOTE_CHAINS = [
