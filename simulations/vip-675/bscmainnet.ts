@@ -14,7 +14,6 @@ import {
   ADAPTER_SWAPS,
   APRO_MAX_STALE_PERIOD,
   APRO_ORACLE,
-  ATLAS_FEED_CANDIDATES,
   ATLAS_MAX_STALE_PERIOD,
   ATLAS_ORACLE,
   BOUND_LOWER_RATIO,
@@ -39,7 +38,6 @@ import {
   OPERATOR,
   ORACLE_GUARDIAN,
   PAUSE_GUARDIAN,
-  PENDING,
   POOL_LIQUIDATION_INCENTIVE,
   PROTOCOL_SEIZE_SHARE,
   PROTOCOL_SHARE_RESERVE,
@@ -77,9 +75,19 @@ import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-/// After isolated-pools#575 deploys the comptroller and the 23 markets.
-/// TODO: move past the VTreasury funding and Atlas's authorizations.
-const FORK_BLOCK = 130250000;
+/// After isolated-pools#575 deploys the comptroller and the 23 markets, and Atlas authorizes ATLAS_ORACLE on the 16 new
+/// assets' feeds.
+/// TODO: move past the VTreasury funding.
+const FORK_BLOCK = 130450000;
+
+/// The framework's fallback proposer has an Active proposal (674) at this block, and Governor Bravo allows one per
+/// proposer.
+const PROPOSER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
+const SUPPORTERS = [
+  "0x34221485302f6F2029660a000908B5FCABB9BC6e",
+  "0xc444949e0054a23c44fc45789738bdf64aed2391",
+  "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
+];
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -144,6 +152,7 @@ const mayCall = async (onBehalfOf: string, who: string, signature: string): Prom
 const FEED_IFACE = new ethers.utils.Interface([
   "function decimals() view returns (uint8)",
   "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
+  "function isAuthorizedCaller(address) view returns (bool)",
 ]);
 /// Reads a feed with `from` set to the oracle that reads it, scaled to 18 decimals. An `eth_call` from that address
 /// passes a feed's caller gate even when the oracle contract itself is not authorized, so this proves only that the
@@ -193,16 +202,6 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
   await ethers.provider.send("hardhat_setStorageAt", [token, slot, ethers.utils.hexZeroPad(balance.toHexString(), 32)]);
 };
 
-/// Stands in on the fork for the canonical Atlas feed of each asset Atlas has not named one for yet, with its first
-/// live feed. Every value that is set on mainnet is kept.
-const standInOnFork = (part: Vip675Part): Vip675Part => ({
-  ...part,
-  collateral: part.collateral.map(m => ({
-    ...m,
-    atlasFeed: m.atlasFeed === PENDING ? ATLAS_FEED_CANDIDATES[ticker(m)][0] : m.atlasFeed,
-  })),
-});
-
 const GOVERNOR_ABI = ["function state(uint256) view returns (uint8)"];
 const VIP_673 = 673;
 /// `ProposalState.Executed` in GovernorBravo.
@@ -221,17 +220,11 @@ const applyVip673 = async () => {
 forking(FORK_BLOCK, async () => {
   await applyVip673();
 
-  const standIns = [...new Set([PART_1, PART_2, PART_3].flatMap(pendingDeployments))];
-  const [part1, part2, part3] = [PART_1, PART_2, PART_3].map(standInOnFork);
-  if (standIns.length > 0) {
-    console.warn(`[vip-675] stood in on the fork for: ${standIns.join(", ")}`);
-  }
-
-  const COMPTROLLER = part1.comptroller;
-  const LIQUIDITY = part1.liquidity;
-  const COLLATERAL_1 = part1.collateral;
-  const COLLATERAL_2 = part2.collateral;
-  const COLLATERAL_3 = part3.collateral;
+  const COMPTROLLER = PART_1.comptroller;
+  const LIQUIDITY = PART_1.liquidity;
+  const COLLATERAL_1 = PART_1.collateral;
+  const COLLATERAL_2 = PART_2.collateral;
+  const COLLATERAL_3 = PART_3.collateral;
   const COLLATERAL = [...COLLATERAL_1, ...COLLATERAL_2, ...COLLATERAL_3];
   const MARKETS_1: SpokeMarket[] = [...LIQUIDITY, ...COLLATERAL_1];
   const MARKETS: SpokeMarket[] = [...MARKETS_1, ...COLLATERAL_2, ...COLLATERAL_3];
@@ -285,8 +278,8 @@ forking(FORK_BLOCK, async () => {
   }
 
   // The feeds go stale over the simulated voting and timelock delay, so pin each feed's current answer as a direct
-  // price, which `getPrice` returns without a staleness check. The oracles then never call the feeds, so the
-  // simulation does not cover Atlas's caller gate.
+  // price, which `getPrice` returns without a staleness check. The oracles then never call the feeds, so Atlas's caller
+  // gate is checked with `isAuthorizedCaller` instead.
   const prices: Record<string, BigNumber> = {};
   const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
   for (const m of COLLATERAL) {
@@ -303,11 +296,11 @@ forking(FORK_BLOCK, async () => {
 
   // Unpinned batches take the next free index, so each part is seeded before the next one is built. `testVip` seeds
   // part 3's.
-  const proposal1 = await vip675(part1);
+  const proposal1 = await vip675(PART_1);
   await seedProposalBatchesOnFork(proposal1);
-  const proposal2 = await vip676(part2);
+  const proposal2 = await vip676(PART_2);
   await seedProposalBatchesOnFork(proposal2);
-  const proposal3 = await vip677(part3);
+  const proposal3 = await vip677(PART_3);
 
   const expectListed = async (markets: SpokeMarket[]) => {
     for (const m of markets) {
@@ -437,14 +430,17 @@ forking(FORK_BLOCK, async () => {
   };
 
   describe("VIP-675 inputs", () => {
-    it("stands in on the fork only for the Atlas feeds Atlas has not named yet, with every risk value set", async () => {
-      // Fails once Atlas names a feed: put it in vips/vip-675/addresses/bscmainnet.ts and drop it from
-      // ATLAS_FEED_CANDIDATES.
-      expect(standIns).to.have.members(
-        Object.keys(ATLAS_FEED_CANDIDATES).map(asset => `v${asset}_bStockMainstream Atlas feed`),
-      );
+    it("has every address and risk value set", async () => {
       for (const part of [PART_1, PART_2, PART_3]) {
+        expect(pendingDeployments(part), `VIP-${part.vipNumber}`).to.deep.equal([]);
         expect(pendingRiskValues(part), `VIP-${part.vipNumber}`).to.deep.equal([]);
+      }
+    });
+
+    it("has every Atlas feed authorize ATLAS_ORACLE", async () => {
+      for (const m of COLLATERAL) {
+        const feed = new ethers.Contract(m.atlasFeed, FEED_IFACE, ethers.provider);
+        expect(await feed.isAuthorizedCaller(ATLAS_ORACLE), m.symbol).to.equal(true);
       }
     });
 
@@ -641,8 +637,10 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
     seedProposalBatches: false,
+    proposer: PROPOSER,
+    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
-      await expectEventsOf(txResponse, part1);
+      await expectEventsOf(txResponse, PART_1);
     },
   });
 
@@ -805,8 +803,10 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
     seedProposalBatches: false,
+    proposer: PROPOSER,
+    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
-      await expectEventsOf(txResponse, part2);
+      await expectEventsOf(txResponse, PART_2);
     },
   });
 
@@ -842,8 +842,10 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
+    proposer: PROPOSER,
+    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
-      await expectEventsOf(txResponse, part3);
+      await expectEventsOf(txResponse, PART_3);
     },
   });
 

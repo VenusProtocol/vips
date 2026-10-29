@@ -43,8 +43,7 @@ import {
 // STATUS: DRAFT. `vip675()` throws while any address in ./addresses/bscmainnet.ts is still `PENDING`.
 //
 // AT EXECUTION, or the whole proposal reverts:
-//  - Atlas authorizes ATLAS_ORACLE on each new asset's feed, and each feed is fresh (3800s). APRO feeds are fresh
-//    (3900s) and within 5% of Atlas.
+//  - Each new asset's Atlas feed is fresh (3800s). APRO feeds are fresh (3900s) and within 5% of Atlas.
 //  - None of the new assets has a DBO config (`MarketAlreadyInitialized`).
 //  - The VTreasury holds every seed. `withdrawTreasuryBEP20` caps at its balance and `addMarket` takes the rest from
 //    the Normal Timelock, which holds no bStock.

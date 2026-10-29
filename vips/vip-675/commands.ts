@@ -91,7 +91,7 @@ const marketsOf = (part: Vip675Part): SpokeMarket[] => [...part.liquidity, ...pa
 /// The part's assets that need pricing: every collateral asset not already priced for the Core pool.
 const newlyPriced = (part: Vip675Part) => part.collateral.filter(m => !m.pricedOnCore);
 
-/// Every address the part needs that is still `PENDING`. Exported so the simulation can report what it stands in for.
+/// Every address the part needs that is still `PENDING`. Exported so the simulation can check none is left.
 export const pendingDeployments = (part: Vip675Part): string[] =>
   [
     { name: "Comptroller_bStockMainstream", address: part.comptroller },
