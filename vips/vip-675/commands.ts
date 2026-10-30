@@ -16,6 +16,7 @@ import {
   BOUND_VALIDATOR,
   CLOSE_FACTOR,
   COLLATERAL_GATEWAY,
+  CORE_COMPTROLLER,
   DEVIATION_BOUNDED_ORACLE,
   INDEX_POOL_DESCRIPTION,
   LIQUIDITY_IRM,
@@ -36,12 +37,7 @@ import {
   SpokeMarket,
   VTREASURY,
 } from "./addresses/bscmainnet";
-import {
-  OTHER_WILDCARDS,
-  REGISTRY_WILDCARDS,
-  SCOPED_GRANTS_MAINSTREAM,
-  VIP_675_WILDCARDS,
-} from "./permissions-bscmainnet";
+import { CORE_GRANTS_REPLACED, OTHER_WILDCARDS, REGISTRY_WILDCARDS, VIP_675_WILDCARDS } from "./permissions-bscmainnet";
 
 // ===================================================================================================
 // VIP-675 [BNB Chain]: the commands every part builds from. See ./bscmainnet.ts for the split.
@@ -55,8 +51,8 @@ import {
 //     sets a collateral factor above 0, which needs a nonzero price) and the one batch run comes after it.
 //  3. List the part's markets: VTreasury withdrawal, approve and `addMarket` per market. Inline: the withdrawal is
 //     `onlyOwner` and `addMarket` pulls the seed from `msg.sender`, so neither can run as the aggregator.
-//  4. The rest, in one run of adjacent aggregator batches: (part 1) the other 13 wildcards, the Critical Guardian's
-//     scoped `setCloseFactor` and the revokes of the bStock index pool's grants the wildcards replace, each market's
+//  4. The rest, in one run of adjacent aggregator batches: (part 1) the other 14 wildcards and the revokes of the
+//     scoped grants they replace (the bStock index pool's 20 and CollateralGateway's on Core), each market's
 //     reserve delta, the collateral markets' incentive, seize share and BORROW pause, and (part 1) each liquidity
 //     market's supply allowlist and Hub wiring. Each batch grants the aggregator what it calls and revokes it after, so
 //     none of the aggregator's own grants outlives the proposal.
@@ -247,11 +243,9 @@ const batchedCommands = (part: Vip675Part): Command[] => [
   ...(part.createsPool
     ? [
         ...OTHER_WILDCARDS.map(({ role, account }) => giveCallPermission(ACM, constants.AddressZero, role, account)),
-        ...SCOPED_GRANTS_MAINSTREAM.map(({ role, account }) =>
-          giveCallPermission(ACM, part.comptroller, role, account),
-        ),
-        // After every wildcard: the bStock index pool keeps each role through it.
+        // After every wildcard: the bStock index pool and Core keep each role through it.
         ...VIP_675_WILDCARDS.map(({ role, account }) => revokeCallPermission(SPOKE_COMPTROLLER, role, account)),
+        ...CORE_GRANTS_REPLACED.map(({ role, account }) => revokeCallPermission(CORE_COMPTROLLER, role, account)),
       ]
     : []),
   ...marketsOf(part).map(m => ({
