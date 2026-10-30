@@ -4,10 +4,9 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
-import { forking, pretendExecutingVip, seedProposalBatchesOnFork, testVip } from "src/vip-framework";
+import { forking, seedProposalBatchesOnFork, testVip } from "src/vip-framework";
 
 import { ROUTER_ROLES } from "../../vips/vip-668/permissions";
-import vip673 from "../../vips/vip-673/bscmainnet";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -76,19 +75,9 @@ import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-/// After isolated-pools#575 deploys the comptroller and the 23 markets, and Atlas authorizes ATLAS_ORACLE on the 16 new
-/// assets' feeds.
-/// TODO: move past the VTreasury funding.
-const FORK_BLOCK = 130450000;
-
-/// The framework's fallback proposer has an Active proposal (674) at this block, and Governor Bravo allows one per
-/// proposer.
-const PROPOSER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
-const SUPPORTERS = [
-  "0x34221485302f6F2029660a000908B5FCABB9BC6e",
-  "0xc444949e0054a23c44fc45789738bdf64aed2391",
-  "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
-];
+/// After isolated-pools#575 deploys the comptroller and the 23 markets, Atlas authorizes ATLAS_ORACLE on the 16 new
+/// assets' feeds, the VTreasury receives the 20 bStock seeds and VIP-673 executes.
+const FORK_BLOCK = 130640000;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -187,7 +176,6 @@ const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
 const holdsScoped = (contract: string, role: string, account: string): Promise<boolean> =>
   acm.hasRole(ethers.utils.solidityKeccak256(["address", "string"], [contract, role]), account);
 
-/// How many `name` events the ACM emitted in the transaction.
 const acmEvents = async (txResponse: TransactionResponse, name: string): Promise<number> => {
   const { logs } = await txResponse.wait();
   const topic = ACM_EVENTS.getEventTopic(name);
@@ -208,24 +196,7 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
   await ethers.provider.send("hardhat_setStorageAt", [token, slot, ethers.utils.hexZeroPad(balance.toHexString(), 32)]);
 };
 
-const GOVERNOR_ABI = ["function state(uint256) view returns (uint8)"];
-const VIP_673 = 673;
-/// `ProposalState.Executed` in GovernorBravo.
-const EXECUTED_STATE = 7;
-
-/// VIP-673 is queued at FORK_BLOCK and is expected to execute before VIP-675 on mainnet, so until the fork moves past
-/// its execution, apply its commands as the Normal Timelock.
-const applyVip673 = async () => {
-  const governor = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.GOVERNOR_PROXY, GOVERNOR_ABI, ethers.provider);
-  const state: number = await governor.state(VIP_673);
-  if (state === EXECUTED_STATE) return;
-  await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
-  console.warn(`[vip-675] VIP-673 (state ${state}) applied on the fork`);
-};
-
 forking(FORK_BLOCK, async () => {
-  await applyVip673();
-
   const COMPTROLLER = PART_1.comptroller;
   const LIQUIDITY = PART_1.liquidity;
   const COLLATERAL_1 = PART_1.collateral;
@@ -245,7 +216,6 @@ forking(FORK_BLOCK, async () => {
   const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
   const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   const registry = new ethers.Contract(SPOKE_POOL_REGISTRY, REGISTRY_ABI, ethers.provider);
-  /// `[category, logoURL, description]`, as a plain array.
   const metadataOf = async (pool: string): Promise<string[]> => [...(await registry.getVenusPoolMetadata(pool))];
   const gateway = new ethers.Contract(COLLATERAL_GATEWAY, GATEWAY_ABI, ethers.provider);
   const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
@@ -266,21 +236,11 @@ forking(FORK_BLOCK, async () => {
     };
   }
 
-  // The VTreasury pays every seed. At FORK_BLOCK it holds none of them, so the fork tops it up.
   const treasuryBefore: Record<string, BigNumber> = {};
   const timelockBefore: Record<string, BigNumber> = {};
-  const fundedOnFork: string[] = [];
   for (const m of MARKETS) {
-    const balance: BigNumber = await erc20Of(m.underlying).balanceOf(VTREASURY);
-    if (balance.lt(m.initialSupply!)) {
-      await fund(m.underlying, VTREASURY, m.initialSupply!.sub(balance));
-      fundedOnFork.push(ticker(m));
-    }
     treasuryBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(VTREASURY);
     timelockBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(NORMAL_TIMELOCK);
-  }
-  if (fundedOnFork.length > 0) {
-    console.warn(`[vip-675] funded the VTreasury on the fork with the seed of: ${fundedOnFork.join(", ")}`);
   }
 
   // The feeds go stale over the simulated voting and timelock delay, so pin each feed's current answer as a direct
@@ -446,6 +406,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    it("has the VTreasury hold every seed", async () => {
+      for (const m of MARKETS) {
+        expect(treasuryBefore[m.underlying], m.symbol).to.be.gte(m.initialSupply!);
+      }
+    });
+
     it("has every Atlas feed authorize ATLAS_ORACLE", async () => {
       for (const m of COLLATERAL) {
         const feed = new ethers.Contract(m.atlasFeed, FEED_IFACE, ethers.provider);
@@ -578,7 +544,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("prices USDT, USDC and U as the listing sheet does, with no DBO window, so VIP-675 changes none of them", async () => {
+    it("prices USDT, USDC and U with no DBO window, so VIP-675 changes none of them", async () => {
       const initialized = normalize(await dbo.getInitializedAssets());
       for (const { symbol, underlying } of LIQUIDITY) {
         const config = await resilientOracle.getTokenConfig(underlying);
@@ -591,7 +557,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("builds the liquidity markets on the listing sheet's rate model, and the bStock markets on one that charges 0", async () => {
+    it("builds the liquidity markets on the bStock index pool's rate model, and the bStock markets on one that charges 0", async () => {
       const IRM_ABI = [
         "function baseRatePerBlock() view returns (uint256)",
         "function multiplierPerBlock() view returns (uint256)",
@@ -655,8 +621,6 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
     seedProposalBatches: false,
-    proposer: PROPOSER,
-    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_1);
     },
@@ -832,8 +796,6 @@ forking(FORK_BLOCK, async () => {
 
   testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
     seedProposalBatches: false,
-    proposer: PROPOSER,
-    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_2);
     },
@@ -871,8 +833,6 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
-    proposer: PROPOSER,
-    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_3);
     },

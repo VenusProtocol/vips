@@ -40,8 +40,6 @@ import {
 // other 12 revert in one part. The aggregator cuts the op count and the propose() calldata, not execute() gas. The
 // split is by tier so each part reviews on its own.
 //
-// STATUS: DRAFT. `vip675()` throws while any address in ./addresses/bscmainnet.ts is still `PENDING`.
-//
 // AT EXECUTION, or the whole proposal reverts:
 //  - Each new asset's Atlas feed is fresh (3800s). APRO feeds are fresh (3900s) and within 5% of Atlas.
 //  - None of the new assets has a DBO config (`MarketAlreadyInitialized`).

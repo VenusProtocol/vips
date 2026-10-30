@@ -43,8 +43,7 @@ export * from "../vip-670/permissions-bscmainnet";
 export const REGISTRY_WILDCARDS: Grant[] = REGISTRY_GRANTS.map(role => ({ role, account: SPOKE_POOL_REGISTRY }));
 
 /// The other 14: the Normal Timelock's six, the Critical Guardian's five, the Pause Guardian's two and
-/// CollateralGateway's `enterMarketForAccount`. Nothing in VIP-675 needs them first, so they run in the aggregator
-/// batch.
+/// CollateralGateway's `enterMarketForAccount`, in the aggregator batch.
 export const OTHER_WILDCARDS: Grant[] = [
   ...NORMAL_TIMELOCK_GRANTS.map(role => ({ role, account: NORMAL_TIMELOCK })),
   ...CRITICAL_GUARDIAN_GRANTS.map(role => ({ role, account: CRITICAL_GUARDIAN })),
