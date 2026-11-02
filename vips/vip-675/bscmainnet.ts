@@ -72,7 +72,7 @@ If passed, this VIP will create the **${MAINSTREAM_POOL_NAME}** Hub-Funded Spoke
       part.collateral.length
     } single-stock bStocks. Anyone may supply them and use them as collateral. They are not borrowable.
 
-VIP-${VIP_NUMBER + 1} (tier 2 and 3) and VIP-${VIP_NUMBER + 2} (tier 4) list the remaining bStocks into the same pool.
+VIP-${VIP_NUMBER + 2} (tier 2 and 3) and VIP-${VIP_NUMBER + 3} (tier 4) list the remaining bStocks into the same pool.
 
 #### Proposed changes
 
