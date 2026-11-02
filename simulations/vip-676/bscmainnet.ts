@@ -265,7 +265,7 @@ forking(FORK_BLOCK, async () => {
       expect(await bpnc.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
     });
 
-    it("gives BPNC's mint and pause to the Operator and governance, and its burn and unpause to governance", async () => {
+    it("gives BPNC's pause to the Operator and governance, and its mint, burn and unpause to governance only", async () => {
       const holders = [OPERATOR, NORMAL_TIMELOCK, CRITICAL_GUARDIAN];
       for (const { role, accounts } of BPNC_ROLES) {
         for (const account of holders) {
@@ -360,9 +360,9 @@ forking(FORK_BLOCK, async () => {
       const funding = parseUnits("1000000", 18);
 
       before(async () => {
-        const operator = await initMainnetUser(OPERATOR, ethers.utils.parseEther("1"));
-        await bpnc.connect(operator).mint(bpnSigner.address, supply);
-        await bpnc.connect(operator).mint(outsider.address, supply);
+        const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        await bpnc.connect(timelock).mint(bpnSigner.address, supply);
+        await bpnc.connect(timelock).mint(outsider.address, supply);
       });
 
       it("lets the Operator pause BPNC transfers, and only governance resume them", async () => {
@@ -374,6 +374,10 @@ forking(FORK_BLOCK, async () => {
           "ActionPaused",
         );
         await expect(bpnc.connect(operator).unpause()).to.be.revertedWithCustomError(bpnc, "Unauthorized");
+        await expect(bpnc.connect(operator).mint(outsider.address, 1)).to.be.revertedWithCustomError(
+          bpnc,
+          "Unauthorized",
+        );
         await expect(bpnc.connect(operator).burn(outsider.address, 1)).to.be.revertedWithCustomError(
           bpnc,
           "Unauthorized",

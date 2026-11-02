@@ -87,7 +87,7 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
     )} minimum liquidatable collateral, and set its description to "${BPN_POOL_DESCRIPTION}".
 3. Price BPNC at a fixed $1: a direct price on the ChainlinkOracle (${CHAINLINK_ORACLE}), the ResilientOracle's main and only oracle for BPNC.
 4. List the four markets, each seeded with 10 tokens: BPNC's minted in step 1, the others from the Venus Treasury, with the seed vTokens sent to ${SEED_RECEIVER}.
-5. Give BPNC's \`mint\` and \`pause\` to the Operator, the Normal Timelock and the Critical Guardian, and its \`burn\` and \`unpause\` to the Normal Timelock and the Critical Guardian. The comptroller's roles, including the CollateralGateway's (${COLLATERAL_GATEWAY}) \`enterMarketForAccount\`, come from the wildcards VIP-675 grants to every spoke comptroller.
+5. Give BPNC's \`pause\` to the Operator, the Normal Timelock and the Critical Guardian, and its \`mint\`, \`burn\` and \`unpause\` to the Normal Timelock and the Critical Guardian only. The comptroller's roles, including the CollateralGateway's (${COLLATERAL_GATEWAY}) \`enterMarketForAccount\`, come from the wildcards VIP-675 grants to every spoke comptroller.
 6. Send every market's reserves to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString(
       "en-US",
     )} blocks, set every market's liquidation incentive and protocol seize share to 0%, and pause borrowing on BPNC.
@@ -237,8 +237,7 @@ ${[COLLATERAL, ...LIQUIDITY].map(m => `- ${m.symbol}: ${m.vToken}`).join("\n")}
       // ────────────────────────────────────────────────────────────────
       // 5. Permissions
       // ────────────────────────────────────────────────────────────────
-      // the Normal Timelock's mint was granted in step 1
-      giveCallPermission(BPNC, "mint(address,uint256)", OPERATOR),
+      // the Normal Timelock's mint was granted in step 1; the Operator gets pause only
       giveCallPermission(BPNC, "mint(address,uint256)", CRITICAL_GUARDIAN),
       giveCallPermission(BPNC, "pause()", OPERATOR),
       giveCallPermission(BPNC, "pause()", NORMAL_TIMELOCK),

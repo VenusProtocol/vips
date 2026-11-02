@@ -59,10 +59,10 @@ export const BPNC_PRICE = parseUnits("1", 18);
 /// The first BPNC, minted by VIP-676 to OPERATOR.
 export const BPNC_FIRST_MINT = parseUnits("3333334", 18);
 
-/// Who may call each ACM-gated BPNC function once VIP-676 has run. The Operator can mint and stop transfers, as can
-/// governance; only governance can burn, which takes BPNC from any holder, and lift a pause.
+/// Who may call each ACM-gated BPNC function once VIP-676 has run. The Operator can only stop transfers; minting,
+/// burning, which takes BPNC from any holder, and lifting a pause are governance's alone.
 export const BPNC_ROLES: { role: string; accounts: string[] }[] = [
-  { role: "mint(address,uint256)", accounts: [OPERATOR, NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
+  { role: "mint(address,uint256)", accounts: [NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
   { role: "pause()", accounts: [OPERATOR, NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
   { role: "burn(address,uint256)", accounts: [NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
   { role: "unpause()", accounts: [NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
