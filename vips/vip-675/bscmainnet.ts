@@ -40,8 +40,6 @@ import {
 // other 12 revert in one part. The aggregator cuts the op count and the propose() calldata, not execute() gas. The
 // split is by tier so each part reviews on its own.
 //
-// STATUS: DRAFT. `vip675()` throws while any address in ./addresses/bscmainnet.ts is still `PENDING`.
-//
 // AT EXECUTION, or the whole proposal reverts:
 //  - Each new asset's Atlas feed is fresh (3800s). APRO feeds are fresh (3900s) and within 5% of Atlas.
 //  - None of the new assets has a DBO config (`MarketAlreadyInitialized`).
@@ -58,6 +56,7 @@ export const PART_1: Vip675Part = {
   createsPool: true,
   liquidity: LIQUIDITY_MARKETS_MAINSTREAM,
   collateral: COLLATERAL_MARKETS_MAINSTREAM.filter(m => m.tier === 1),
+  seededIndices: [5, 6],
 };
 
 export const vip675 = (part: Vip675Part = PART_1) => {
@@ -87,7 +86,7 @@ VIP-${VIP_NUMBER + 1} (tier 2 and 3) and VIP-${VIP_NUMBER + 2} (tier 4) list the
 4. List the markets, each seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
 5. Give each collateral market a liquidation incentive of its own, set its protocol seize share where it is not the default 5%, and pause borrowing on them.
 6. Restrict supply on the USDT, USDC and U markets to each Hub's Spoke yield group, and add each market to its yield group, after the bStock index market to deposit and before it to withdraw.
-7. Grant the Spoke pool permissions once for every Spoke pool, including later ones: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and \`enterMarketForAccount\` to the CollateralGateway (${COLLATERAL_GATEWAY}). Revoke the bStock index pool's own grants of the same permissions, which these cover. The Critical Guardian's \`setCloseFactor\` is granted against this comptroller only.
+7. Grant the Spoke pool permissions once for every Spoke pool, including later ones: the registry's, the Normal Timelock's, the Critical and Pause Guardians', and enterMarketForAccount to the CollateralGateway (${COLLATERAL_GATEWAY}). Revoke the grants these cover: the bStock index pool's own grants of the same permissions, and the CollateralGateway's enterMarketForAccount grant on the Core pool.
 
 Most of steps 5 to 7 run through the AuxiliaryCommandsAggregator, which holds the AccessControlManager admin role only while its batches run.
 
