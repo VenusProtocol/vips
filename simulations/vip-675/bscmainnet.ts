@@ -52,8 +52,8 @@ import {
   VTREASURY,
 } from "../../vips/vip-675/addresses/bscmainnet";
 import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
-import vip676, { PART_2 } from "../../vips/vip-675/bscmainnet-part-2";
-import vip677, { PART_3 } from "../../vips/vip-675/bscmainnet-part-3";
+import vip677, { PART_2 } from "../../vips/vip-675/bscmainnet-part-2";
+import vip678, { PART_3 } from "../../vips/vip-675/bscmainnet-part-3";
 import { Vip675Part, pendingDeployments, pendingRiskValues } from "../../vips/vip-675/commands";
 import {
   CORE_GRANTS_REPLACED,
@@ -264,9 +264,9 @@ forking(FORK_BLOCK, async () => {
   // part 3's.
   const proposal1 = await vip675(PART_1);
   await seedProposalBatchesOnFork(proposal1);
-  const proposal2 = await vip676(PART_2);
+  const proposal2 = await vip677(PART_2);
   await seedProposalBatchesOnFork(proposal2);
-  const proposal3 = await vip677(PART_3);
+  const proposal3 = await vip678(PART_3);
 
   const expectListed = async (markets: SpokeMarket[]) => {
     for (const m of markets) {
@@ -794,14 +794,14 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
+  testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_2);
     },
   });
 
-  describe("Post-VIP-676", () => {
+  describe("Post-VIP-677", () => {
     it("prices part 2's assets", async () => {
       await expectPriced(COLLATERAL_2);
     });
@@ -832,13 +832,13 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
+  testVip("VIP-678 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_3);
     },
   });
 
-  describe("Post-VIP-677", () => {
+  describe("Post-VIP-678", () => {
     it("prices part 3's assets", async () => {
       await expectPriced(COLLATERAL_3);
     });
@@ -882,7 +882,7 @@ forking(FORK_BLOCK, async () => {
   // ProtocolShareReserve, full repayment, and each Hub drawing its liquidity back out of the bStock mainstream market
   // first.
   // Runs last: it halves prices and moves the clock.
-  describe("Post-VIP-677: end to end, across the whole pool", () => {
+  describe("Post-VIP-678: end to end, across the whole pool", () => {
     const HOLDER = account("e2e holder");
     const LIQUIDATOR = account("e2e liquidator");
     const borrowerOf = (c: MainstreamCollateralMarket) => account(`e2e borrower ${c.symbol}`);
