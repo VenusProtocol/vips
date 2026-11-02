@@ -76,8 +76,8 @@ import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
 /// After isolated-pools#575 deploys the comptroller and the 23 markets, Atlas authorizes ATLAS_ORACLE on the 16 new
-/// assets' feeds, the VTreasury receives the 20 bStock seeds and VIP-673 executes.
-const FORK_BLOCK = 130640000;
+/// assets' feeds, the VTreasury receives the 20 bStock seeds, VIP-673 executes and part 1's batches are seeded at 5 and 6.
+const FORK_BLOCK = 131173400;
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
