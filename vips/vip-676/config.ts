@@ -11,8 +11,6 @@ const { CRITICAL_GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 // two pools, at a flat 6% borrow APY.
 //
 // Listing doc: "BPN Loan spoke pool listing" (Notion, 2026-10-29).
-//
-// STATUS: DRAFT. BPN's supply address, `bpnSupplier` in BPN_INPUTS, is pending BPN's confirmation.
 // ===================================================================================================
 
 // ---------------------------------------------------------------------------------------------------
