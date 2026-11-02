@@ -30,9 +30,9 @@ const { ACCESS_CONTROL_MANAGER, CHAINLINK_ORACLE, CRITICAL_GUARDIAN, NORMAL_TIME
   NETWORK_ADDRESSES.bscmainnet;
 
 // ===================================================================================================
-// VIP-678 [BNB Chain]: the BPN Loan Hub-Funded Spoke pool.
+// VIP-676 [BNB Chain]: the BPN Loan Hub-Funded Spoke pool.
 //
-// Every command is in vip678's `makeProposal` call below, in execution order, under numbered sections that match the
+// Every command is in vip676's `makeProposal` call below, in execution order, under numbered sections that match the
 // description's steps. What has to hold at execution and what the VIP leaves out are in the description's Notes.
 //
 // STATUS: DRAFT. BPN_INPUTS.bpnSupplier in ./config.ts is pending BPN's confirmation.
@@ -64,10 +64,10 @@ const COLLATERAL = collateralMarket(BPN_INPUTS);
 const LIQUIDITY = liquidityMarkets(BPN_INPUTS);
 const MARKETS = [COLLATERAL, ...LIQUIDITY];
 
-export const vip678 = () => {
+export const vip676 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-678 [BNB Chain] BPN Loan Hub-Funded Spoke pool",
+    title: "VIP-676 [BNB Chain] BPN Loan Hub-Funded Spoke pool",
     description: `#### Summary
 
 If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool on BNB Chain, a loan to Better Payment Network (BPN):
@@ -334,4 +334,4 @@ ${[COLLATERAL, ...LIQUIDITY].map(m => `- ${m.symbol}: ${m.vToken}`).join("\n")}
   );
 };
 
-export default vip678;
+export default vip676;

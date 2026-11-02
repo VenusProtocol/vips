@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 const { CRITICAL_GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
 // ===================================================================================================
-// VIP-678: the "BPN Loan" Hub-Funded Spoke pool. A third pool in SPOKE_POOL_REGISTRY, next to the bStock index and
+// VIP-676: the "BPN Loan" Hub-Funded Spoke pool. A third pool in SPOKE_POOL_REGISTRY, next to the bStock index and
 // bStock mainstream pools. Its one collateral asset is BPNC, the BPN Credit Token, priced at a fixed $1 and suppliable
 // only by allowlisted accounts. USDT, USDC and U are the liquidity side, funded by the same Spoke sources as the other
 // two pools, at a flat 6% borrow APY.
@@ -56,10 +56,10 @@ export const BPNC_PRICE = parseUnits("1", 18);
 // market and redeeming it. Deployed from the copy in isolated-pools, which nominates the Normal Timelock as owner.
 // ---------------------------------------------------------------------------------------------------
 
-/// The first BPNC, minted by VIP-678 to OPERATOR.
+/// The first BPNC, minted by VIP-676 to OPERATOR.
 export const BPNC_FIRST_MINT = parseUnits("3333334", 18);
 
-/// Who may call each ACM-gated BPNC function once VIP-678 has run. The Operator can mint and stop transfers, as can
+/// Who may call each ACM-gated BPNC function once VIP-676 has run. The Operator can mint and stop transfers, as can
 /// governance; only governance can burn, which takes BPNC from any holder, and lift a pause.
 export const BPNC_ROLES: { role: string; accounts: string[] }[] = [
   { role: "mint(address,uint256)", accounts: [OPERATOR, NORMAL_TIMELOCK, CRITICAL_GUARDIAN] },
@@ -93,7 +93,7 @@ export const VUSDC_MAINSTREAM = "0xD7608E9dFe6CB4b527d41abF40d0f46D917c9EeA";
 export const VU_MAINSTREAM = "0x24Ee5A3F631f9c2FAf8a730d43F059D3eA9566AD";
 
 /// Each Spoke source's inner queues once VIP-675 has run: its bStock index market first to deposit and last to
-/// withdraw, its bStock mainstream market after it. VIP-678 replaces each queue, so it reverts or drops a market if
+/// withdraw, its bStock mainstream market after it. VIP-676 replaces each queue, so it reverts or drops a market if
 /// the queues differ at execution. Re-read them on chain before proposing.
 const queues = (indexMarket: string, mainstreamMarket: string): InnerQueues => ({
   deposit: [indexMarket, mainstreamMarket],
@@ -106,7 +106,7 @@ export const QUEUES_AFTER_VIP_675: Record<string, InnerQueues> = {
 };
 
 // ---------------------------------------------------------------------------------------------------
-// VIP-678's inputs. The contracts are deployed by isolated-pools `025`, `028` and `029` (feat/bpn-loan-spoke-pool): a
+// VIP-676's inputs. The contracts are deployed by isolated-pools `025`, `028` and `029` (feat/bpn-loan-spoke-pool): a
 // BeaconProxy over SPOKE_COMPTROLLER_BEACON with the Normal Timelock nominated as owner, and markets over
 // SPOKE_VTOKEN_BEACON owned by the Normal Timelock, with a 10% reserve factor and the Normal Timelock as `shortfall`.
 // ---------------------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ export type BpnInputs = {
   irmFlat6: string;
   /// BPN's supply address on the BPNC allowlist.
   bpnSupplier: string;
-  /// Each Spoke source's inner queues just before VIP-678 runs, keyed by the Spoke source.
+  /// Each Spoke source's inner queues just before VIP-676 runs, keyed by the Spoke source.
   queuesBefore: Record<string, InnerQueues>;
 };
 
@@ -180,7 +180,7 @@ export type BpnMarket = {
   /// Set with `setProtocolSeizeShare` before the incentive, which it bounds from below.
   protocolSeizeShare: BigNumber;
   /// Supplied by `addMarket`, with the vTokens minted to SEED_RECEIVER. Pulled from the VTreasury, except BPNC's, which
-  /// VIP-678 mints.
+  /// VIP-676 mints.
   initialSupply: BigNumber;
   /// The only accounts that may supply.
   allowedSuppliers: string[];
@@ -189,7 +189,7 @@ export type BpnMarket = {
 export type BpnLiquidityMarket = BpnMarket & {
   hub: string;
   spokeSource: string; // spoke yield group
-  /// The Spoke source's inner queues just before VIP-678 runs.
+  /// The Spoke source's inner queues just before VIP-676 runs.
   queuesBefore: InnerQueues;
 };
 

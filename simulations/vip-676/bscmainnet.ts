@@ -11,7 +11,7 @@ import { REGISTRY_GRANTS } from "../../vips/vip-668/permissions-bscmainnet";
 import { APRO_ORACLE } from "../../vips/vip-670/addresses/bscmainnet";
 import { MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
 import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
-import vip678 from "../../vips/vip-678/bscmainnet";
+import vip676 from "../../vips/vip-676/bscmainnet";
 import {
   ADAPTER_SPOKE_V1,
   BPNC_FIRST_MINT,
@@ -38,7 +38,7 @@ import {
   VENUS_CUSTODY_SAFE,
   collateralMarket,
   liquidityMarkets,
-} from "../../vips/vip-678/config";
+} from "../../vips/vip-676/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import GATEWAY_ABI from "./abi/CollateralGateway.json";
@@ -64,9 +64,9 @@ const {
 } = NETWORK_ADDRESSES.bscmainnet;
 
 // ===================================================================================================
-// VIP-678 on a bscmainnet fork, against the deployed BPNC, comptroller, markets and flat 6% rate model. BPN's supplier
+// VIP-676 on a bscmainnet fork, against the deployed BPNC, comptroller, markets and flat 6% rate model. BPN's supplier
 // is a fresh account. It applies part 1 of VIP-675, which grants the spoke comptroller wildcards and leaves the Spoke
-// source queues VIP-678 extends.
+// source queues VIP-676 extends.
 // ===================================================================================================
 
 const FORK_BLOCK = 131185700;
@@ -97,7 +97,7 @@ const readFeed = async (oracle: string, feed: string): Promise<BigNumber> => {
   return BigNumber.from(answer).mul(BigNumber.from(10).pow(18 - decimals));
 };
 
-/// VIP-678 relies on VIP-675 part 1's spoke comptroller wildcards and Spoke source queues. Until the fork moves past its
+/// VIP-676 relies on VIP-675 part 1's spoke comptroller wildcards and Spoke source queues. Until the fork moves past its
 /// execution, apply it as the Normal Timelock, topping the VTreasury up with any bStock seed it lacks and pinning each
 /// bStock feed's answer as a direct price, as VIP-675's simulation does, so a stale feed cannot revert it.
 const applyVip675 = async () => {
@@ -123,7 +123,7 @@ const applyVip675 = async () => {
   const proposal = await vip675(PART_1);
   await seedProposalBatchesOnFork(proposal);
   await pretendExecutingVip(proposal, NORMAL_TIMELOCK);
-  console.warn("[vip-678] VIP-675 part 1 applied on the fork");
+  console.warn("[vip-676] VIP-675 part 1 applied on the fork");
 };
 
 const setSlot = (address: string, slot: number | string, value: string) =>
@@ -158,7 +158,7 @@ forking(FORK_BLOCK, async () => {
   // BPN's supplier
   const bpnSigner = await initMainnetUser(BPN_INPUTS.bpnSupplier, ethers.utils.parseEther("1"));
   const bpnc = new ethers.Contract(BPN_INPUTS.bpnc, BPNC_ABI, ethers.provider);
-  // The VTreasury pays the USDT, USDC and U seeds. VIP-678 mints BPNC's.
+  // The VTreasury pays the USDT, USDC and U seeds. VIP-676 mints BPNC's.
   const treasuryBefore: Record<string, BigNumber> = {};
   const timelockBefore: Record<string, BigNumber> = {};
   for (const m of LIQUIDITY) {
@@ -207,7 +207,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-678 [bscmainnet] BPN Loan Hub-Funded Spoke pool", await vip678(), {});
+  testVip("VIP-676 [bscmainnet] BPN Loan Hub-Funded Spoke pool", await vip676(), {});
 
   describe("Post-VIP behavior", () => {
     it("registers the pool, owned by the Normal Timelock, with the listing doc's pool parameters", async () => {
