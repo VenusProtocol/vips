@@ -93,7 +93,7 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
     )} blocks, set every market's liquidation incentive and protocol seize share to 0%, and pause borrowing on BPNC.
 7. Restrict supply on every market to its allowlist: BPNC to the Venus custody Safe (${VENUS_CUSTODY_SAFE}) and BPN (${BPN_SUPPLIER}), and USDT, USDC and U each to its Hub's Spoke yield group.
 8. Turn on the pool's liquidation allowlist, with only the Operator on it.
-9. Add each liquidity market to its Spoke yield group, last to deposit and first to withdraw.
+9. Add each liquidity market to its Spoke yield group, last to deposit and last to withdraw.
 
 #### Market parameters
 
@@ -306,7 +306,7 @@ ${[COLLATERAL, ...LIQUIDITY].map(m => `- ${m.symbol}: ${m.vToken}`).join("\n")}
       { target: COMPTROLLER, signature: "setLiquidationAllowlistEnabled(bool)", params: [true] },
 
       // ────────────────────────────────────────────────────────────────
-      // 9. Hub wiring: last in each deposit queue, first in each withdraw queue
+      // 9. Hub wiring: last in each deposit queue and last in each withdraw queue
       // ────────────────────────────────────────────────────────────────
       ...LIQUIDITY.flatMap(m => [
         // after step 7: the Spoke adapter rejects a source the allowlist does not admit
@@ -324,7 +324,7 @@ ${[COLLATERAL, ...LIQUIDITY].map(m => `- ${m.symbol}: ${m.vToken}`).join("\n")}
         {
           target: m.spokeSource, // spoke yield group
           signature: "setInnerWithdrawQueue(address[])",
-          params: [[m.vToken, ...m.queuesBefore.withdraw]],
+          params: [[...m.queuesBefore.withdraw, m.vToken]],
         },
       ]),
     ],

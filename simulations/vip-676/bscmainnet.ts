@@ -300,7 +300,7 @@ forking(FORK_BLOCK, async () => {
       expect(COLLATERAL.allowedSuppliers).to.deep.equal([VENUS_CUSTODY_SAFE, BPN_INPUTS.bpnSupplier]);
     });
 
-    it("adds each liquidity market to its Spoke source, last to deposit and first to withdraw", async () => {
+    it("adds each liquidity market to its Spoke source, last to deposit and last to withdraw", async () => {
       for (const m of LIQUIDITY) {
         const source = groupOf(m.spokeSource);
         const [registered, paused, adapter] = await source.resourceConfig(m.vToken);
@@ -311,7 +311,7 @@ forking(FORK_BLOCK, async () => {
           normalize([...m.queuesBefore.deposit, m.vToken]),
         );
         expect(normalize(await source.innerWithdrawQueue()), m.symbol).to.deep.equal(
-          normalize([m.vToken, ...m.queuesBefore.withdraw]),
+          normalize([...m.queuesBefore.withdraw, m.vToken]),
         );
       }
     });
