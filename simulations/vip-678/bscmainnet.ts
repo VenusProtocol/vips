@@ -65,8 +65,8 @@ const {
 
 // ===================================================================================================
 // VIP-678 on a bscmainnet fork, against the deployed BPNC, comptroller, markets and flat 6% rate model. BPN's supplier
-// is a fresh account until BPN names it. It applies part 1 of VIP-675, which grants the spoke comptroller wildcards and
-// leaves the Spoke source queues VIP-678 extends.
+// is a fresh account. It applies part 1 of VIP-675, which grants the spoke comptroller wildcards and leaves the Spoke
+// source queues VIP-678 extends.
 // ===================================================================================================
 
 const FORK_BLOCK = 131185700;
@@ -155,7 +155,7 @@ forking(FORK_BLOCK, async () => {
   const groupOf = (address: string) => new ethers.Contract(address, YIELD_GROUP_ABI, ethers.provider);
 
   const [, , outsider] = await ethers.getSigners();
-  // BPN's supplier, the placeholder until BPN names its address
+  // BPN's supplier
   const bpnSigner = await initMainnetUser(BPN_INPUTS.bpnSupplier, ethers.utils.parseEther("1"));
   const bpnc = new ethers.Contract(BPN_INPUTS.bpnc, BPNC_ABI, ethers.provider);
   // The VTreasury pays the USDT, USDC and U seeds. VIP-678 mints BPNC's.

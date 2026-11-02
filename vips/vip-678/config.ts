@@ -12,7 +12,7 @@ const { CRITICAL_GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 //
 // Listing doc: "BPN Loan spoke pool listing" (Notion, 2026-10-29).
 //
-// STATUS: DRAFT. Only BPN's supply address, `bpnSupplier` in BPN_INPUTS, is still a placeholder.
+// STATUS: DRAFT. BPN's supply address, `bpnSupplier` in BPN_INPUTS, is pending BPN's confirmation.
 // ===================================================================================================
 
 // ---------------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ export const BPN_INPUTS: BpnInputs = {
   vUSDC: "0xd43e18D5568E544aA98b2EB1f3039f4a24267B7c",
   vU: "0x60d7BFd15B2414e9a29DEB04b84F1AD8c9868E44",
   irmFlat6: "0xA3bCca7ab0a52953096e579f7A19740920C8D1e0",
-  bpnSupplier: "0x1111111111111111111111111111111111111111", // PLACEHOLDER: BPN names its supply address
+  bpnSupplier: "0x5940a31D2a9332d0fD73943934f023Fe3bDD39bA",
   queuesBefore: QUEUES_AFTER_VIP_675,
 };
 

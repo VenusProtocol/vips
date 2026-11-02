@@ -35,7 +35,7 @@ const { ACCESS_CONTROL_MANAGER, CHAINLINK_ORACLE, CRITICAL_GUARDIAN, NORMAL_TIME
 // Every command is in vip678's `makeProposal` call below, in execution order, under numbered sections that match the
 // description's steps. What has to hold at execution and what the VIP leaves out are in the description's Notes.
 //
-// STATUS: DRAFT. BPN_INPUTS.bpnSupplier in ./config.ts is a placeholder until BPN names its address.
+// STATUS: DRAFT. BPN_INPUTS.bpnSupplier in ./config.ts is pending BPN's confirmation.
 // ===================================================================================================
 
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
