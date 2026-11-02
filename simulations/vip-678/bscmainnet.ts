@@ -9,7 +9,6 @@ import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
 import { REGISTRY_GRANTS } from "../../vips/vip-668/permissions-bscmainnet";
 import { APRO_ORACLE } from "../../vips/vip-670/addresses/bscmainnet";
-import vip673 from "../../vips/vip-673/bscmainnet";
 import { MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
 import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
 import vip678 from "../../vips/vip-678/bscmainnet";
@@ -66,32 +65,17 @@ const {
 
 // ===================================================================================================
 // VIP-678 on a bscmainnet fork, against the deployed BPNC, comptroller, markets and flat 6% rate model. BPN's supplier
-// is a fresh account until BPN names it. It applies VIP-673, queued at FORK_BLOCK, and part 1 of VIP-675, which grants the spoke comptroller wildcards and leaves the Spoke source
-// queues VIP-678 extends.
+// is a fresh account until BPN names it. It applies part 1 of VIP-675, which grants the spoke comptroller wildcards and
+// leaves the Spoke source queues VIP-678 extends.
 // ===================================================================================================
 
-const FORK_BLOCK = 130482000;
+const FORK_BLOCK = 131185700;
 
 const ONE = parseUnits("1", 18);
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
 const ACTION_BORROW = 2;
 /// 1 underlying = 1e10 vTokens of 8 decimals, the 18-decimal default of isolated-pools `028`.
 const INITIAL_EXCHANGE_RATE = parseUnits("1", 28);
-
-const GOVERNOR_ABI = ["function state(uint256) view returns (uint8)"];
-const VIP_673 = 673;
-/// `ProposalState.Executed` in GovernorBravo.
-const EXECUTED_STATE = 7;
-
-/// VIP-673 is queued at FORK_BLOCK and executes before VIP-678 on mainnet, so until the fork moves past it, apply its
-/// commands as the Normal Timelock.
-const applyVip673 = async () => {
-  const governor = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.GOVERNOR_PROXY, GOVERNOR_ABI, ethers.provider);
-  const state: number = await governor.state(VIP_673);
-  if (state === EXECUTED_STATE) return;
-  await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
-  console.warn(`[vip-678] VIP-673 (state ${state}) applied on the fork`);
-};
 
 /// bStocks keep balances in OpenZeppelin v5's ERC-7201 `ERC20` namespace, so the fork sets them directly.
 const OZ5_ERC20_STORAGE = "0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00";
@@ -153,7 +137,6 @@ const readQueues = async (spokeSource: string): Promise<InnerQueues> => {
 const normalize = (addresses: string[]) => addresses.map(a => a.toLowerCase());
 
 forking(FORK_BLOCK, async () => {
-  await applyVip673();
   await applyVip675();
 
   const COLLATERAL = collateralMarket(BPN_INPUTS);
