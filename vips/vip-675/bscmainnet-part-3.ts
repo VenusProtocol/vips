@@ -20,6 +20,7 @@ export const PART_3: Vip675Part = {
   createsPool: false,
   liquidity: [],
   collateral: COLLATERAL_MARKETS_MAINSTREAM.filter(m => m.tier === 4),
+  seededIndices: [8],
 };
 
 export const vip678 = (part: Vip675Part = PART_3) =>

@@ -76,8 +76,19 @@ import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
 /// After isolated-pools#575 deploys the comptroller and the 23 markets, Atlas authorizes ATLAS_ORACLE on the 16 new
-/// assets' feeds, the VTreasury receives the 20 bStock seeds, VIP-673 executes and part 1's batches are seeded at 5 and 6.
-const FORK_BLOCK = 131173400;
+/// assets' feeds, the VTreasury receives the 20 bStock seeds, VIP-673 executes and all three parts' batches are seeded.
+const FORK_BLOCK = 131366432;
+
+// The framework's fallback proposer has active VIP-675 at this block. This voter set clears both the proposal
+// threshold and quorum without changing the existing proposal.
+const GOVERNANCE_VOTERS = {
+  proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
+  supporters: [
+    "0x5176671de05380379399b669ed276feec99d59cb",
+    "0xc444949e0054a23c44fc45789738bdf64aed2391",
+    "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
+  ],
+};
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -260,8 +271,7 @@ forking(FORK_BLOCK, async () => {
     await atlas.connect(timelock).setDirectPrice(underlying, MANTISSA_ONE);
   }
 
-  // Unpinned batches take the next free index, so each part is seeded before the next one is built. `testVip` seeds
-  // part 3's.
+  // All three parts use their pinned on-chain batches.
   const proposal1 = await vip675(PART_1);
   await seedProposalBatchesOnFork(proposal1);
   const proposal2 = await vip677(PART_2);
@@ -620,6 +630,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
+    ...GOVERNANCE_VOTERS,
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_1);
@@ -795,6 +806,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
+    ...GOVERNANCE_VOTERS,
     seedProposalBatches: false,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_2);
@@ -833,6 +845,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-678 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
+    ...GOVERNANCE_VOTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_3);
     },
