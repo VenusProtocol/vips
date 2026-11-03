@@ -41,7 +41,6 @@ import {
 } from "../../vips/vip-676/config";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
-import GATEWAY_ABI from "./abi/CollateralGateway.json";
 import BPNC_ABI from "./abi/CustodyReceiptToken.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import HUB_ABI from "./abi/Hub.json";
@@ -149,7 +148,6 @@ forking(FORK_BLOCK, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
-  const gateway = new ethers.Contract(COLLATERAL_GATEWAY, GATEWAY_ABI, ethers.provider);
   const vTokenOf = (address: string) => new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
   const erc20Of = (address: string) => new ethers.Contract(address, ERC20_ABI, ethers.provider);
   const groupOf = (address: string) => new ethers.Contract(address, YIELD_GROUP_ABI, ethers.provider);
@@ -257,12 +255,25 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("takes BPNC over and mints its first supply to the Operator, and the market's seed", async () => {
+    it("takes BPNC over and supplies its first supply on behalf of BPN, next to the market's seed", async () => {
       expect(await bpnc.owner()).to.equal(NORMAL_TIMELOCK);
-      expect(await bpnc.balanceOf(OPERATOR)).to.equal(BPNC_FIRST_MINT);
-      expect(await bpnc.balanceOf(COLLATERAL.vToken)).to.equal(COLLATERAL.initialSupply);
+      expect(await bpnc.balanceOf(COLLATERAL.vToken)).to.equal(BPNC_FIRST_MINT.add(COLLATERAL.initialSupply));
       expect(await bpnc.totalSupply()).to.equal(BPNC_FIRST_MINT.add(COLLATERAL.initialSupply));
-      expect(await bpnc.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
+      expect(await vTokenOf(COLLATERAL.vToken).balanceOf(BPN_INPUTS.bpnSupplier)).to.equal(
+        BPNC_FIRST_MINT.mul(ONE).div(INITIAL_EXCHANGE_RATE),
+      );
+      for (const account of [OPERATOR, NORMAL_TIMELOCK]) {
+        expect(await bpnc.balanceOf(account), account).to.equal(0);
+        expect(await vTokenOf(COLLATERAL.vToken).balanceOf(account), account).to.equal(0);
+      }
+      expect(await bpnc.allowance(NORMAL_TIMELOCK, COLLATERAL.vToken)).to.equal(0);
+      // as collateral, by the Normal Timelock, which keeps no enterMarketForAccount
+      expect(await comptroller.checkMembership(BPN_INPUTS.bpnSupplier, COLLATERAL.vToken)).to.be.true;
+      expect(
+        await acm.isAllowedToCall(NORMAL_TIMELOCK, "enterMarketForAccount(address,address)", {
+          from: BPN_INPUTS.comptroller,
+        }),
+      ).to.be.false;
     });
 
     it("gives BPNC's pause to the Operator and governance, and its mint, burn and unpause to governance only", async () => {
@@ -356,12 +367,11 @@ forking(FORK_BLOCK, async () => {
     });
 
     describe("a BPN loan", () => {
-      const supply = parseUnits("1000000", 18);
+      const supply = BPNC_FIRST_MINT;
       const funding = parseUnits("1000000", 18);
 
       before(async () => {
         const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-        await bpnc.connect(timelock).mint(bpnSigner.address, supply);
         await bpnc.connect(timelock).mint(outsider.address, supply);
       });
 
@@ -427,15 +437,20 @@ forking(FORK_BLOCK, async () => {
         expect(await vTokenOf(USDT_MARKET.vToken).getCash()).to.equal(funding.add(USDT_MARKET.initialSupply));
       });
 
-      it("takes BPNC through CollateralGateway and lends up to 90% of it in USDT", async () => {
-        await bpnc.connect(bpnSigner).approve(COLLATERAL_GATEWAY, supply);
-        await gateway.connect(bpnSigner).supplyAndEnterSpokeMarkets([COLLATERAL.vToken], [supply]);
+      it("lets BPN borrow up to 90% of the vBPNC the VIP supplied in USDT, with no step of its own", async () => {
         expect(await comptroller.checkMembership(bpnSigner.address, COLLATERAL.vToken)).to.be.true;
 
         // Borrow power is weighted by the collateral factor; `getAccountLiquidity` uses the liquidation threshold.
+        const [, fullLiquidity] = await comptroller.getBorrowingPower(bpnSigner.address);
+        expect(fullLiquidity).to.be.closeTo(supply.mul(COLLATERAL.collateralFactor).div(ONE), ONE);
+
+        // The market holds the 1M USDT funding, less than 90% of the 3.3M BPNC. At $0.30 the borrow power, 900k, is
+        // what binds, not the cash.
+        const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        await chainlinkOracle.connect(timelock).setDirectPrice(BPN_INPUTS.bpnc, parseUnits("0.3", 18));
         const [, liquidity] = await comptroller.getBorrowingPower(bpnSigner.address);
         const usdtPrice: BigNumber = await resilientOracle.getPrice(USDT);
-        expect(liquidity).to.be.closeTo(supply.mul(COLLATERAL.collateralFactor).div(ONE), ONE);
+        expect(liquidity).to.be.closeTo(fullLiquidity.mul(3).div(10), ONE);
 
         // Leave room for the USDT price around $1.
         const borrow = liquidity.mul(ONE).div(usdtPrice).mul(99).div(100);
@@ -449,6 +464,7 @@ forking(FORK_BLOCK, async () => {
           comptroller,
           "ActionPaused",
         );
+        await chainlinkOracle.connect(timelock).setDirectPrice(BPN_INPUTS.bpnc, BPNC_PRICE);
       });
 
       it("seizes BPNC worth exactly the debt repaid, with no discount and no protocol share", async () => {
@@ -465,9 +481,9 @@ forking(FORK_BLOCK, async () => {
       });
 
       it("lets only the Operator liquidate BPN once it is short", async () => {
-        // A 10% lower BPNC price puts the loan, at 99% of the 90% CF, past the 95% LT.
+        // 10% below the $0.30 it was borrowed at puts the loan, at 99% of the 90% CF, past the 95% LT.
         const timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-        await chainlinkOracle.connect(timelock).setDirectPrice(BPN_INPUTS.bpnc, parseUnits("0.9", 18));
+        await chainlinkOracle.connect(timelock).setDirectPrice(BPN_INPUTS.bpnc, parseUnits("0.27", 18));
         const [, , shortfall] = await comptroller.getAccountLiquidity(bpnSigner.address);
         expect(shortfall).to.be.gt(0);
 

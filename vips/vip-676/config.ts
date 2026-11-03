@@ -54,7 +54,7 @@ export const BPNC_PRICE = parseUnits("1", 18);
 // market and redeeming it. Deployed from the copy in isolated-pools, which nominates the Normal Timelock as owner.
 // ---------------------------------------------------------------------------------------------------
 
-/// The first BPNC, minted by VIP-676 to OPERATOR.
+/// The first BPNC, minted by VIP-676 and supplied to vBPNC on behalf of BPN, which receives the vBPNC.
 export const BPNC_FIRST_MINT = parseUnits("3333334", 18);
 
 /// Who may call each ACM-gated BPNC function once VIP-676 has run. The Operator can only stop transfers; minting,

@@ -39,6 +39,8 @@ const { ACCESS_CONTROL_MANAGER, CHAINLINK_ORACLE, CRITICAL_GUARDIAN, NORMAL_TIME
 /// `Action.BORROW` in isolated-pools `ComptrollerInterface.sol`.
 const ACTION_BORROW = 2;
 
+const ENTER_MARKET_FOR_ACCOUNT = "enterMarketForAccount(address,address)";
+
 const giveCallPermission = (contract: string, signature: string, account: string) => ({
   target: ACCESS_CONTROL_MANAGER,
   signature: "giveCallPermission(address,string,address)",
@@ -76,8 +78,10 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
 #### Proposed changes
 
 1. Take ownership of BPNC (${BPNC}) and mint its first ${tokens(
+      BPNC_FIRST_MINT.add(COLLATERAL.initialSupply),
+    )} BPNC to the Normal Timelock: ${tokens(
       BPNC_FIRST_MINT,
-    )} BPNC to the Liquidity Hub Operator (${OPERATOR}), plus the 10 BPNC that seed its market.
+    )} for BPN, supplied in step 8, and the 10 BPNC that seed its market.
 2. Take ownership of the pool's comptroller, price it with the ResilientOracle and the DeviationBoundedOracle, and register the pool in the Spoke pool registry with a ${pct(
       BPN_CLOSE_FACTOR,
     )} close factor, a ${discount(BPN_POOL_LIQUIDATION_INCENTIVE)} pool-wide liquidation incentive and a $${tokens(
@@ -90,8 +94,11 @@ If passed, this VIP will create the **${BPN_POOL_NAME}** Hub-Funded Spoke pool o
       "en-US",
     )} blocks, set every market's liquidation incentive and protocol seize share to 0%, and pause borrowing on BPNC.
 7. Restrict supply on every market to its allowlist: BPNC to the Venus custody Safe (${VENUS_CUSTODY_SAFE}) and BPN (${BPN_SUPPLIER}), and USDT, USDC and U each to its Hub's Spoke yield group.
-8. Turn on the pool's liquidation allowlist, with only the Operator on it.
-9. Add each liquidity market to its Spoke yield group, last to deposit and last to withdraw.
+8. Supply ${tokens(
+      BPNC_FIRST_MINT,
+    )} BPNC to the BPNC market on behalf of BPN and enable it as BPN's collateral, so BPN holds the vBPNC directly, can borrow against it at once, and the Operator never holds BPNC. The Normal Timelock is given enterMarketForAccount on the comptroller for this one call and loses it right after.
+9. Turn on the pool's liquidation allowlist, with only the Operator (${OPERATOR}) on it.
+10. Add each liquidity market to its Spoke yield group, last to deposit and last to withdraw.
 
 #### Market parameters
 
@@ -147,11 +154,14 @@ ${[COLLATERAL, ...LIQUIDITY].map(m => `- ${m.symbol}: ${m.vToken}`).join("\n")}
       // 1. BPNC: take ownership and mint the first supply
       // ────────────────────────────────────────────────────────────────
       { target: BPNC, signature: "acceptOwnership()", params: [] },
-      // before both mints; the Normal Timelock keeps it
+      // before the mint; the Normal Timelock keeps it
       giveCallPermission(BPNC, "mint(address,uint256)", NORMAL_TIMELOCK),
-      { target: BPNC, signature: "mint(address,uint256)", params: [OPERATOR, BPNC_FIRST_MINT] },
-      // vBPNC's seed, supplied in step 4
-      { target: BPNC, signature: "mint(address,uint256)", params: [NORMAL_TIMELOCK, COLLATERAL.initialSupply] },
+      // BPN's BPNC, supplied in step 8, and vBPNC's seed, supplied in step 4
+      {
+        target: BPNC,
+        signature: "mint(address,uint256)",
+        params: [NORMAL_TIMELOCK, BPNC_FIRST_MINT.add(COLLATERAL.initialSupply)],
+      },
 
       // ────────────────────────────────────────────────────────────────
       // 2. Pool
@@ -298,13 +308,37 @@ ${[COLLATERAL, ...LIQUIDITY].map(m => `- ${m.symbol}: ${m.vToken}`).join("\n")}
       ]),
 
       // ────────────────────────────────────────────────────────────────
-      // 8. Liquidation allowlist: only the Operator
+      // 8. BPN's BPNC, supplied on its behalf
+      // ────────────────────────────────────────────────────────────────
+      { target: BPNC, signature: "approve(address,uint256)", params: [COLLATERAL.vToken, BPNC_FIRST_MINT] },
+      // after step 7: preMintHook checks the allowlist against BPN, the account credited, not the Normal Timelock
+      {
+        target: COLLATERAL.vToken,
+        signature: "mintBehalf(address,uint256)",
+        params: [BPN_SUPPLIER, BPNC_FIRST_MINT],
+      },
+      // enterMarkets reads msg.sender, so the Normal Timelock enters BPN through enterMarketForAccount, held only
+      // for this call
+      giveCallPermission(COMPTROLLER, ENTER_MARKET_FOR_ACCOUNT, NORMAL_TIMELOCK),
+      {
+        target: COMPTROLLER,
+        signature: "enterMarketForAccount(address,address)",
+        params: [BPN_SUPPLIER, COLLATERAL.vToken],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [COMPTROLLER, ENTER_MARKET_FOR_ACCOUNT, NORMAL_TIMELOCK],
+      },
+
+      // ────────────────────────────────────────────────────────────────
+      // 9. Liquidation allowlist: only the Operator
       // ────────────────────────────────────────────────────────────────
       { target: COMPTROLLER, signature: "setAllowedLiquidator(address,bool)", params: [OPERATOR, true] },
       { target: COMPTROLLER, signature: "setLiquidationAllowlistEnabled(bool)", params: [true] },
 
       // ────────────────────────────────────────────────────────────────
-      // 9. Hub wiring: last in each deposit queue and last in each withdraw queue
+      // 10. Hub wiring: last in each deposit queue and last in each withdraw queue
       // ────────────────────────────────────────────────────────────────
       ...LIQUIDITY.flatMap(m => [
         // after step 7: the Spoke adapter rejects a source the allowlist does not admit
