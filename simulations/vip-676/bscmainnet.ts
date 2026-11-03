@@ -267,6 +267,10 @@ forking(FORK_BLOCK, async () => {
         expect(await vTokenOf(COLLATERAL.vToken).balanceOf(account), account).to.equal(0);
       }
       expect(await bpnc.allowance(NORMAL_TIMELOCK, COLLATERAL.vToken)).to.equal(0);
+      // BPN and SEED_RECEIVER hold every vBPNC
+      expect(await vTokenOf(COLLATERAL.vToken).totalSupply()).to.equal(
+        BPNC_FIRST_MINT.add(COLLATERAL.initialSupply).mul(ONE).div(INITIAL_EXCHANGE_RATE),
+      );
       // as collateral, by the Normal Timelock, which keeps no enterMarketForAccount
       expect(await comptroller.checkMembership(BPN_INPUTS.bpnSupplier, COLLATERAL.vToken)).to.be.true;
       expect(
