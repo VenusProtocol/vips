@@ -894,7 +894,7 @@ forking(FORK_BLOCK, async () => {
   // each liquidity asset and its liquidation after a price drop, a day of interest reaching the Hubs and the
   // ProtocolShareReserve, full repayment, and each Hub drawing its liquidity back out of the bStock mainstream market
   // first.
-  // Runs last: it halves prices and moves the clock.
+  // Runs after the per-part tests: it halves prices and moves the clock.
   describe("Post-VIP-678: end to end, across the whole pool", () => {
     const HOLDER = account("e2e holder");
     const LIQUIDATOR = account("e2e liquidator");
@@ -1044,6 +1044,106 @@ forking(FORK_BLOCK, async () => {
         expect(await vTokenOf(m.vToken).balanceOf(m.stack.spokeSource), m.symbol).to.be.lt(held);
         expect(await vTokenOf(m.indexMarket).balanceOf(m.stack.spokeSource), `${m.symbol} index`).to.equal(heldInIndex);
       }
+    });
+  });
+
+  // Each collateral market's CF and LT as the comptroller applies them, through the oracle path: a loan up to the
+  // borrowing power and not a wei more, and a liquidation that turns on exactly where the LT stops covering the loan.
+  // Runs after the end-to-end flow, whose exact seed vToken count its liquidations would shift. Each loan is repaid in
+  // full.
+  describe("Post-VIP-678: borrow limits at each market's CF and LT", () => {
+    /// Above the $100 minimum liquidatable collateral even after the lowest CF/LT drop (50/60).
+    const COLLATERAL_VALUE = ethers.utils.parseUnits("200", 18);
+    /// How far either side of the LT threshold the price is moved: 0.01%.
+    const EDGE_BPS = 1;
+    const LIQUIDATOR = account("cf liquidator");
+    /// Rounding in the comptroller's own valuation.
+    const DUST = ethers.utils.parseUnits("1", 12);
+    let timelock: Awaited<ReturnType<typeof initMainnetUser>>;
+
+    const pinPrice = async (c: MainstreamCollateralMarket, value: BigNumber) => {
+      await atlas.connect(timelock).setDirectPrice(c.underlying, value);
+      if (c.aproFeed !== null) {
+        await apro.connect(timelock).setDirectPrice(c.underlying, value);
+      }
+    };
+
+    before(async () => {
+      timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+    });
+
+    COLLATERAL.forEach((c, i) => {
+      const debt = LIQUIDITY[i % LIQUIDITY.length];
+      it(`lends ${ticker(debt)} against ${ticker(c)} up to its CF, and lets it be liquidated past its LT`, async () => {
+        const price = prices[c.underlying];
+        const borrower = await initMainnetUser(account(`cf borrower ${c.symbol}`), ethers.utils.parseEther("1"));
+        const supplied = COLLATERAL_VALUE.mul(MANTISSA_ONE).div(price);
+        await fund(c.underlying, borrower.address, supplied);
+        await erc20Of(c.underlying).connect(borrower).approve(COLLATERAL_GATEWAY, supplied);
+        await gateway.connect(borrower).supplyAndEnterSpokeMarkets([c.vToken], [supplied]);
+        // Valued as the comptroller values it: the vToken balance at the market's exchange rate, which earlier
+        // liquidations may have moved off the initial one.
+        const vCollateral = vTokenOf(c.vToken);
+        const held: BigNumber = (await vCollateral.balanceOf(borrower.address))
+          .mul(await vCollateral.exchangeRateStored())
+          .div(MANTISSA_ONE);
+        const value = held.mul(price).div(MANTISSA_ONE);
+
+        const [, power] = await comptroller.getBorrowingPower(borrower.address);
+        expect(power, `${c.symbol} borrowing power`).to.be.closeTo(
+          value.mul(c.collateralFactor).div(MANTISSA_ONE),
+          DUST,
+        );
+        const [, coverBefore] = await comptroller.getAccountLiquidity(borrower.address);
+        expect(coverBefore, `${c.symbol} LT liquidity`).to.be.closeTo(
+          value.mul(c.liquidationThreshold).div(MANTISSA_ONE),
+          DUST,
+        );
+
+        const v = vTokenOf(debt.vToken).connect(borrower);
+        await v.borrow(power);
+        expect(await erc20Of(debt.underlying).balanceOf(borrower.address), debt.symbol).to.equal(power);
+        await expect(v.borrow(1), `${c.symbol} past CF`).to.be.revertedWithCustomError(
+          comptroller,
+          "InsufficientLiquidity",
+        );
+        const [, powerLeft, powerShort] = await comptroller.getBorrowingPower(borrower.address);
+        expect(powerLeft.add(powerShort), `${c.symbol} borrowing power used`).to.be.lte(DUST);
+
+        // The price at which LT x collateral value equals the loan.
+        const loan: BigNumber = await v.callStatic.borrowBalanceCurrent(borrower.address);
+        const edge = loan.mul(MANTISSA_ONE).mul(MANTISSA_ONE).div(held.mul(c.liquidationThreshold));
+        expect(edge, `${c.symbol} LT edge`).to.be.closeTo(
+          price.mul(c.collateralFactor).div(c.liquidationThreshold),
+          price.div(10000),
+        );
+
+        const liquidator = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
+        const repay = loan.div(10);
+        await fund(debt.underlying, LIQUIDATOR, repay);
+        await erc20Of(debt.underlying).connect(liquidator).approve(debt.vToken, repay);
+
+        await pinPrice(c, edge.mul(10000 + EDGE_BPS).div(10000));
+        const [, , shortfallAbove] = await comptroller.getAccountLiquidity(borrower.address);
+        expect(shortfallAbove, `${c.symbol} shortfall just above the LT edge`).to.equal(0);
+        await expect(
+          vTokenOf(debt.vToken).connect(liquidator).liquidateBorrow(borrower.address, repay, c.vToken),
+          `${c.symbol} liquidated above the LT edge`,
+        ).to.be.revertedWithCustomError(comptroller, "InsufficientShortfall");
+
+        await pinPrice(c, edge.mul(10000 - EDGE_BPS).div(10000));
+        const [, , shortfallBelow] = await comptroller.getAccountLiquidity(borrower.address);
+        expect(shortfallBelow, `${c.symbol} shortfall just below the LT edge`).to.be.gt(0);
+        const seizedBefore: BigNumber = await vTokenOf(c.vToken).balanceOf(LIQUIDATOR);
+        await vTokenOf(debt.vToken).connect(liquidator).liquidateBorrow(borrower.address, repay, c.vToken);
+        expect(await vTokenOf(c.vToken).balanceOf(LIQUIDATOR), `${c.symbol} seized`).to.be.gt(seizedBefore);
+
+        await pinPrice(c, price);
+        await fund(debt.underlying, borrower.address, loan.div(100));
+        await erc20Of(debt.underlying).connect(borrower).approve(debt.vToken, ethers.constants.MaxUint256);
+        await v.repayBorrow(ethers.constants.MaxUint256);
+        expect(await v.borrowBalanceStored(borrower.address), `${c.symbol} debt`).to.equal(0);
+      });
     });
   });
 });
