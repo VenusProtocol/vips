@@ -2,39 +2,24 @@
   {
     "inputs": [
       {
-        "internalType": "contract IXVSVault",
-        "name": "xvsVault",
-        "type": "address"
-      },
-      {
-        "internalType": "contract IGovernorBravo",
-        "name": "governorBravo",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "poolRegistry",
-        "type": "address"
-      },
-      {
         "internalType": "contract ResilientOracleInterface",
         "name": "resilientOracle",
         "type": "address"
       },
       {
-        "internalType": "contract IDeviationBoundedOracle",
-        "name": "deviationBoundedOracle",
+        "internalType": "contract ITwapOracle",
+        "name": "twapOracle",
         "type": "address"
       },
       {
-        "internalType": "contract IRiskOracle",
-        "name": "riskOracle",
+        "internalType": "contract IRiskStewardReceiver",
+        "name": "riskStewardReceiver",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "maxPoolMarkets",
-        "type": "uint256"
+        "internalType": "contract ISpokePoolPolicyRegistry",
+        "name": "policyRegistry",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -44,11 +29,43 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "deployer",
+        "type": "address"
+      }
+    ],
+    "name": "ActivePoolExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "vToken",
         "type": "address"
       }
     ],
-    "name": "BadDebtOutstanding",
+    "name": "BadDebtExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BondManagerAlreadySet",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "coverage",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minCoverageRatio",
+        "type": "uint256"
+      }
+    ],
+    "name": "CoverageTooLow",
     "type": "error"
   },
   {
@@ -74,7 +91,13 @@
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
     "name": "ExceedsTierLimit",
     "type": "error"
   },
@@ -82,16 +105,27 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "required",
+        "name": "bondUsd",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "available",
+        "name": "requiredBondUsd",
         "type": "uint256"
       }
     ],
-    "name": "InsufficientLockedStake",
+    "name": "InsufficientBondValue",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "interestRateModel",
+        "type": "address"
+      }
+    ],
+    "name": "InterestRateModelNotAllowed",
     "type": "error"
   },
   {
@@ -107,12 +141,7 @@
         "type": "address"
       }
     ],
-    "name": "InvalidLiquidationThreshold",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidMarketDefaults",
+    "name": "InvalidCollateralFactors",
     "type": "error"
   },
   {
@@ -138,8 +167,14 @@
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "InvalidPoolParams",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidOracleConfig",
     "type": "error"
   },
   {
@@ -168,11 +203,16 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "requestId",
+        "name": "fromTierId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "toTierId",
         "type": "uint256"
       }
     ],
-    "name": "InvalidRequestType",
+    "name": "InvalidTierUpgrade",
     "type": "error"
   },
   {
@@ -183,18 +223,7 @@
         "type": "address"
       }
     ],
-    "name": "InvalidSeed",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tierId",
-        "type": "uint256"
-      }
-    ],
-    "name": "InvalidTier",
+    "name": "LoanAssetNotAllowed",
     "type": "error"
   },
   {
@@ -206,11 +235,6 @@
       }
     ],
     "name": "MarketNotListed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NoOutstandingBorrows",
     "type": "error"
   },
   {
@@ -238,12 +262,34 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
       }
     ],
-    "name": "RequestNotApproved",
+    "name": "OracleAlreadySet",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
+    "name": "PreviousUpdatePending",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
+    "name": "RedundantUpdate",
     "type": "error"
   },
   {
@@ -261,12 +307,23 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "count",
+        "name": "tierId",
+        "type": "uint256"
+      }
+    ],
+    "name": "TierDisabled",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "marketCount",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "maxCount",
+        "name": "maxMarketCount",
         "type": "uint256"
       }
     ],
@@ -309,11 +366,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "asset",
+        "name": "oracle",
         "type": "address"
       }
     ],
-    "name": "UnsupportedAsset",
+    "name": "UnsupportedOracle",
     "type": "error"
   },
   {
@@ -330,6 +387,19 @@
     "inputs": [],
     "name": "ZeroValueNotAllowed",
     "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "contract ISpokeBondManager",
+        "name": "newBondManager",
+        "type": "address"
+      }
+    ],
+    "name": "BondManagerSet",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -358,15 +428,9 @@
         "internalType": "address",
         "name": "comptroller",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
       }
     ],
-    "name": "ExitProposed",
+    "name": "ExitBuilt",
     "type": "event"
   },
   {
@@ -403,15 +467,9 @@
         "internalType": "address",
         "name": "comptroller",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
       }
     ],
-    "name": "ForceCloseProposed",
+    "name": "ForceCloseBuilt",
     "type": "event"
   },
   {
@@ -425,94 +483,6 @@
       }
     ],
     "name": "Initialized",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldLockedStake",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newLockedStake",
-        "type": "uint256"
-      }
-    ],
-    "name": "LockedStakeUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "interestRateModel",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reserveFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seedBurnPercent",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reduceReservesBlockDelta",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct SpokePoolManagerStorage.ProtocolMarketParams",
-        "name": "oldParams",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "interestRateModel",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reserveFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seedBurnPercent",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reduceReservesBlockDelta",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct SpokePoolManagerStorage.ProtocolMarketParams",
-        "name": "newParams",
-        "type": "tuple"
-      }
-    ],
-    "name": "MarketDefaultsUpdated",
     "type": "event"
   },
   {
@@ -551,6 +521,54 @@
       }
     ],
     "name": "NewAccessControlManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "requestId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "oracle",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "feed",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxStalePeriod",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolManager.OracleConfig",
+        "name": "oracleConfig",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "name": "OracleConfigUpdated",
     "type": "event"
   },
   {
@@ -620,53 +638,26 @@
     "anonymous": false,
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "closeFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationIncentive",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidatableCollateral",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct SpokePoolManagerStorage.PoolParams",
-        "name": "oldParams",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "closeFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationIncentive",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidatableCollateral",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct SpokePoolManagerStorage.PoolParams",
-        "name": "newParams",
-        "type": "tuple"
+        "indexed": true,
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
       }
     ],
-    "name": "PoolDefaultsUpdated",
+    "name": "PoolClosed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "name": "PoolGovernanceOperated",
     "type": "event"
   },
   {
@@ -679,19 +670,19 @@
         "type": "address"
       },
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "deployer",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldTierId",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "newTierId",
         "type": "uint256"
       }
     ],
-    "name": "PoolTakenOverByGovernance",
+    "name": "PoolTierUpgraded",
     "type": "event"
   },
   {
@@ -699,37 +690,18 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
+        "internalType": "contract ISpokePoolProposalBuilder",
+        "name": "oldProposalBuilder",
         "type": "address"
       },
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "tierId",
-        "type": "uint256"
-      }
-    ],
-    "name": "PoolTierUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract ISpokePoolProposer",
-        "name": "oldProposer",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "contract ISpokePoolProposer",
-        "name": "newProposer",
+        "internalType": "contract ISpokePoolProposalBuilder",
+        "name": "newProposalBuilder",
         "type": "address"
       }
     ],
-    "name": "ProposerUpdated",
+    "name": "ProposalBuilderUpdated",
     "type": "event"
   },
   {
@@ -740,9 +712,15 @@
         "internalType": "uint256",
         "name": "requestId",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "vTokens",
+        "type": "address[]"
       }
     ],
-    "name": "RequestApproved",
+    "name": "RequestBuilt",
     "type": "event"
   },
   {
@@ -756,31 +734,6 @@
       }
     ],
     "name": "RequestCanceled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address[]",
-        "name": "vTokens",
-        "type": "address[]"
-      }
-    ],
-    "name": "RequestProposed",
     "type": "event"
   },
   {
@@ -826,7 +779,7 @@
       },
       {
         "indexed": false,
-        "internalType": "enum SpokePoolManagerStorage.RequestType",
+        "internalType": "enum ISpokePoolManager.RequestType",
         "name": "requestType",
         "type": "uint8"
       },
@@ -844,94 +797,6 @@
       }
     ],
     "name": "RequestSubmitted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      }
-    ],
-    "name": "RequestUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "oldSource",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newSource",
-        "type": "address"
-      }
-    ],
-    "name": "SpokeSourceUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "deployer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "StakeReleased",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "StakeSeized",
     "type": "event"
   },
   {
@@ -957,104 +822,6 @@
       }
     ],
     "name": "SweepToken",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tierId",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "stakeAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidityUsd",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxCollateralFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidationThreshold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidationThreshold",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct SpokePoolManagerStorage.Tier",
-        "name": "oldTier",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "stakeAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidityUsd",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxCollateralFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidationThreshold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidationThreshold",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct SpokePoolManagerStorage.Tier",
-        "name": "tier",
-        "type": "tuple"
-      }
-    ],
-    "name": "TierUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract ISpokePoolValidator",
-        "name": "oldValidator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "contract ISpokePoolValidator",
-        "name": "newValidator",
-        "type": "address"
-      }
-    ],
-    "name": "ValidatorUpdated",
     "type": "event"
   },
   {
@@ -1091,75 +858,10 @@
   },
   {
     "inputs": [],
-    "name": "DEVIATION_BOUNDED_ORACLE",
+    "name": "POLICY_REGISTRY",
     "outputs": [
       {
-        "internalType": "contract IDeviationBoundedOracle",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "GOVERNOR_BRAVO",
-    "outputs": [
-      {
-        "internalType": "contract IGovernorBravo",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "MAX_POOL_MARKETS",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "MAX_SEED_USD",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "MIN_SEED_USD",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "POOL_REGISTRY",
-    "outputs": [
-      {
-        "internalType": "address",
+        "internalType": "contract ISpokePoolPolicyRegistry",
         "name": "",
         "type": "address"
       }
@@ -1195,12 +897,12 @@
   },
   {
     "inputs": [],
-    "name": "VTOKEN_DECIMALS",
+    "name": "RISK_STEWARD_RECEIVER",
     "outputs": [
       {
-        "internalType": "uint8",
+        "internalType": "contract IRiskStewardReceiver",
         "name": "",
-        "type": "uint8"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1208,10 +910,10 @@
   },
   {
     "inputs": [],
-    "name": "XVS_VAULT",
+    "name": "TWAP_ORACLE",
     "outputs": [
       {
-        "internalType": "contract IXVSVault",
+        "internalType": "contract ITwapOracle",
         "name": "",
         "type": "address"
       }
@@ -1242,12 +944,90 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "deployer",
+        "type": "address"
+      }
+    ],
+    "name": "activePools",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "bondManager",
+    "outputs": [
+      {
+        "internalType": "contract ISpokeBondManager",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "liquidationThresholds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "name": "buildExitProposal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "name": "buildForceCloseProposal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "requestId",
         "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
       }
     ],
-    "name": "approveRequest",
+    "name": "buildRequestProposal",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1273,6 +1053,76 @@
         "type": "address"
       }
     ],
+    "name": "closePool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "name": "exitProposals",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "name": "getBondValue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "name": "getExcessBondAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
     "name": "getPool",
     "outputs": [
       {
@@ -1283,7 +1133,7 @@
             "type": "address"
           },
           {
-            "internalType": "enum SpokePoolManagerStorage.PoolStatus",
+            "internalType": "enum ISpokePoolManager.PoolStatus",
             "name": "status",
             "type": "uint8"
           },
@@ -1293,43 +1143,19 @@
             "type": "bool"
           },
           {
-            "internalType": "uint16",
-            "name": "tierId",
-            "type": "uint16"
-          },
-          {
             "internalType": "uint64",
             "name": "windDownStartedAt",
             "type": "uint64"
           },
           {
             "internalType": "uint256",
-            "name": "lockedStake",
+            "name": "tierId",
             "type": "uint256"
           }
         ],
-        "internalType": "struct SpokePoolManagerStorage.Pool",
+        "internalType": "struct ISpokePoolManager.Pool",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "deployer",
-        "type": "address"
-      }
-    ],
-    "name": "getPools",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
       }
     ],
     "stateMutability": "view",
@@ -1348,19 +1174,14 @@
       {
         "components": [
           {
-            "internalType": "enum SpokePoolManagerStorage.RequestType",
+            "internalType": "enum ISpokePoolManager.RequestType",
             "name": "requestType",
             "type": "uint8"
           },
           {
-            "internalType": "enum SpokePoolManagerStorage.RequestStatus",
+            "internalType": "enum ISpokePoolManager.RequestStatus",
             "name": "status",
             "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "approved",
-            "type": "bool"
           },
           {
             "internalType": "address",
@@ -1374,52 +1195,18 @@
           },
           {
             "internalType": "uint256",
-            "name": "proposalId",
+            "name": "tierId",
             "type": "uint256"
           },
           {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "tierId",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "stake",
-                "type": "uint256"
-              },
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "components": [
-                  {
-                    "internalType": "uint256",
-                    "name": "closeFactor",
-                    "type": "uint256"
-                  },
-                  {
-                    "internalType": "uint256",
-                    "name": "liquidationIncentive",
-                    "type": "uint256"
-                  },
-                  {
-                    "internalType": "uint256",
-                    "name": "minLiquidatableCollateral",
-                    "type": "uint256"
-                  }
-                ],
-                "internalType": "struct SpokePoolManagerStorage.PoolParams",
-                "name": "params",
-                "type": "tuple"
-              }
-            ],
-            "internalType": "struct SpokePoolManagerStorage.PoolRequest",
-            "name": "pool",
-            "type": "tuple"
+            "internalType": "address",
+            "name": "bondAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "bondAmount",
+            "type": "uint256"
           },
           {
             "components": [
@@ -1427,21 +1214,6 @@
                 "internalType": "address",
                 "name": "asset",
                 "type": "address"
-              },
-              {
-                "internalType": "bool",
-                "name": "isLoanMarket",
-                "type": "bool"
-              },
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
               },
               {
                 "internalType": "uint256",
@@ -1459,69 +1231,51 @@
                 "type": "uint256"
               },
               {
-                "internalType": "uint256",
-                "name": "borrowCap",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "seed",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "interestRateModel",
-                "type": "address"
-              },
-              {
-                "internalType": "uint8",
-                "name": "decimals",
-                "type": "uint8"
-              },
-              {
-                "internalType": "uint256",
-                "name": "reserveFactor",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "seedBurnPercent",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "reduceReservesBlockDelta",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "initialExchangeRate",
-                "type": "uint256"
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "oracle",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "feed",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "maxStalePeriod",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct ISpokePoolManager.OracleConfig",
+                "name": "oracleConfig",
+                "type": "tuple"
               }
             ],
-            "internalType": "struct SpokePoolManagerStorage.MarketParams[]",
-            "name": "markets",
+            "internalType": "struct ISpokePoolManager.CollateralMarketRequestParams[]",
+            "name": "collateralMarkets",
             "type": "tuple[]"
           },
           {
             "components": [
               {
-                "internalType": "uint256",
-                "name": "tierId",
-                "type": "uint256"
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
               },
               {
-                "internalType": "bytes32",
-                "name": "termsHash",
-                "type": "bytes32"
+                "internalType": "address",
+                "name": "interestRateModel",
+                "type": "address"
               }
             ],
-            "internalType": "struct SpokePoolManagerStorage.TierRequest",
-            "name": "tier",
-            "type": "tuple"
+            "internalType": "struct ISpokePoolManager.LoanMarketRequestParams[]",
+            "name": "loanMarkets",
+            "type": "tuple[]"
           }
         ],
-        "internalType": "struct SpokePoolManagerStorage.Request",
+        "internalType": "struct ISpokePoolManager.Request",
         "name": "",
         "type": "tuple"
       }
@@ -1532,47 +1286,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tierId",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
       }
     ],
-    "name": "getTier",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "stakeAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidityUsd",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxCollateralFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidationThreshold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidationThreshold",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SpokePoolManagerStorage.Tier",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "handoverPoolToGovernance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1592,26 +1313,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "isLoanMarket",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
+        "name": "deployer",
         "type": "address"
       }
     ],
@@ -1619,35 +1321,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "marketDefaults",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "interestRateModel",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reserveFactor",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "seedBurnPercent",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reduceReservesBlockDelta",
+        "name": "requestId",
         "type": "uint256"
       }
     ],
@@ -1681,6 +1355,37 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
+    "name": "pauseCollateralSupply",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "name": "pauseDeployer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "pendingOwner",
     "outputs": [
@@ -1695,110 +1400,10 @@
   },
   {
     "inputs": [],
-    "name": "poolDefaults",
+    "name": "proposalBuilder",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "closeFactor",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "liquidationIncentive",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "minLiquidatableCollateral",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "liquidationThresholds",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      }
-    ],
-    "name": "proposeExit",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      }
-    ],
-    "name": "proposeForceClose",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      }
-    ],
-    "name": "proposeRequest",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "proposer",
-    "outputs": [
-      {
-        "internalType": "address",
+        "internalType": "contract ISpokePoolProposalBuilder",
         "name": "",
         "type": "address"
       }
@@ -1840,7 +1445,7 @@
         "type": "address"
       }
     ],
-    "name": "releaseStake",
+    "name": "releaseBond",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1893,21 +1498,6 @@
             "type": "address"
           },
           {
-            "internalType": "bool",
-            "name": "isLoanMarket",
-            "type": "bool"
-          },
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "symbol",
-            "type": "string"
-          },
-          {
             "internalType": "uint256",
             "name": "collateralFactor",
             "type": "uint256"
@@ -1923,22 +1513,51 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "borrowCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seed",
-            "type": "uint256"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "feed",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxStalePeriod",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ISpokePoolManager.OracleConfig",
+            "name": "oracleConfig",
+            "type": "tuple"
           }
         ],
-        "internalType": "struct SpokePoolManagerStorage.DeployerMarketParams[]",
-        "name": "markets",
+        "internalType": "struct ISpokePoolManager.CollateralMarketRequestParams[]",
+        "name": "collateralMarkets",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "interestRateModel",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct ISpokePoolManager.LoanMarketRequestParams[]",
+        "name": "loanMarkets",
         "type": "tuple[]"
       }
     ],
-    "name": "requestMarkets",
+    "name": "requestNewMarkets",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1957,9 +1576,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
+        "internalType": "address",
+        "name": "bondAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "bondAmount",
+        "type": "uint256"
       },
       {
         "components": [
@@ -1967,21 +1591,6 @@
             "internalType": "address",
             "name": "asset",
             "type": "address"
-          },
-          {
-            "internalType": "bool",
-            "name": "isLoanMarket",
-            "type": "bool"
-          },
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "symbol",
-            "type": "string"
           },
           {
             "internalType": "uint256",
@@ -1999,18 +1608,47 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "borrowCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seed",
-            "type": "uint256"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "feed",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxStalePeriod",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ISpokePoolManager.OracleConfig",
+            "name": "oracleConfig",
+            "type": "tuple"
           }
         ],
-        "internalType": "struct SpokePoolManagerStorage.DeployerMarketParams[]",
-        "name": "markets",
+        "internalType": "struct ISpokePoolManager.CollateralMarketRequestParams[]",
+        "name": "collateralMarkets",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "interestRateModel",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct ISpokePoolManager.LoanMarketRequestParams[]",
+        "name": "loanMarkets",
         "type": "tuple[]"
       }
     ],
@@ -2028,6 +1666,49 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "requestId",
+        "type": "uint256"
+      }
+    ],
+    "name": "requestProposals",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "requestId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "requestSeeds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "seed",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "comptroller",
         "type": "address"
@@ -2038,7 +1719,7 @@
         "type": "uint256"
       }
     ],
-    "name": "requestTier",
+    "name": "requestTierUpgrade",
     "outputs": [
       {
         "internalType": "uint256",
@@ -2063,11 +1744,11 @@
       },
       {
         "internalType": "address",
-        "name": "to",
+        "name": "receiver",
         "type": "address"
       }
     ],
-    "name": "seizeStake",
+    "name": "seizeBond",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2088,17 +1769,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "comptroller",
+        "internalType": "contract ISpokeBondManager",
+        "name": "newBondManager",
         "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "paused",
-        "type": "bool"
       }
     ],
-    "name": "setDeployerPaused",
+    "name": "setBondManager",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2106,34 +1782,50 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "interestRateModel",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reserveFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seedBurnPercent",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reduceReservesBlockDelta",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SpokePoolManagerStorage.ProtocolMarketParams",
-        "name": "params",
-        "type": "tuple"
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateralFactor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidationThreshold",
+        "type": "uint256"
       }
     ],
-    "name": "setMarketDefaults",
+    "name": "setCollateralFactor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "supplyCap",
+        "type": "uint256"
+      }
+    ],
+    "name": "setCollateralSupplyCap",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2154,118 +1846,39 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "closeFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationIncentive",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidatableCollateral",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SpokePoolManagerStorage.PoolParams",
-        "name": "params",
-        "type": "tuple"
-      }
-    ],
-    "name": "setPoolDefaults",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "requestId",
         "type": "uint256"
-      }
-    ],
-    "name": "setPoolTier",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract ISpokePoolProposer",
-        "name": "newProposer",
-        "type": "address"
-      }
-    ],
-    "name": "setProposer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
       {
         "internalType": "address",
         "name": "asset",
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "source",
-        "type": "address"
-      }
-    ],
-    "name": "setSpokeSource",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tierId",
-        "type": "uint256"
-      },
-      {
         "components": [
           {
-            "internalType": "uint256",
-            "name": "stakeAmount",
-            "type": "uint256"
+            "internalType": "address",
+            "name": "oracle",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "feed",
+            "type": "address"
           },
           {
             "internalType": "uint256",
-            "name": "maxLiquidityUsd",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxCollateralFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxLiquidationThreshold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidationThreshold",
+            "name": "maxStalePeriod",
             "type": "uint256"
           }
         ],
-        "internalType": "struct SpokePoolManagerStorage.Tier",
-        "name": "tier",
+        "internalType": "struct ISpokePoolManager.OracleConfig",
+        "name": "oracleConfig",
         "type": "tuple"
       }
     ],
-    "name": "setTier",
+    "name": "setOracleConfig",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2273,12 +1886,12 @@
   {
     "inputs": [
       {
-        "internalType": "contract ISpokePoolValidator",
-        "name": "newValidator",
+        "internalType": "contract ISpokePoolProposalBuilder",
+        "name": "newProposalBuilder",
         "type": "address"
       }
     ],
-    "name": "setValidator",
+    "name": "setProposalBuilder",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2307,25 +1920,6 @@
     "name": "settleRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "spokeSources",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -2370,37 +1964,16 @@
         "internalType": "address",
         "name": "comptroller",
         "type": "address"
-      }
-    ],
-    "name": "syncLockedStake",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      }
-    ],
-    "name": "takeOverByGovernance",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tierCount",
-    "outputs": [
+      },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "topUpBond",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -2422,225 +1995,11 @@
         "internalType": "address",
         "name": "comptroller",
         "type": "address"
-      },
-      {
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newBorrowCap",
-        "type": "uint256"
       }
     ],
-    "name": "updateBorrowCap",
+    "name": "unpauseDeployer",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newCollateralFactor",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newLiquidationThreshold",
-        "type": "uint256"
-      }
-    ],
-    "name": "updateCollateralFactor",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "newInterestRateModel",
-        "type": "address"
-      }
-    ],
-    "name": "updateInterestRateModel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "closeFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationIncentive",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minLiquidatableCollateral",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SpokePoolManagerStorage.PoolParams",
-        "name": "params",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "asset",
-            "type": "address"
-          },
-          {
-            "internalType": "bool",
-            "name": "isLoanMarket",
-            "type": "bool"
-          },
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "symbol",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationThreshold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "supplyCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "borrowCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seed",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "interestRateModel",
-            "type": "address"
-          },
-          {
-            "internalType": "uint8",
-            "name": "decimals",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reserveFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "seedBurnPercent",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reduceReservesBlockDelta",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "initialExchangeRate",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SpokePoolManagerStorage.MarketParams[]",
-        "name": "markets",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "updateRequest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newSupplyCap",
-        "type": "uint256"
-      }
-    ],
-    "name": "updateSupplyCap",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "validator",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -2654,6 +2013,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawExcessBond",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

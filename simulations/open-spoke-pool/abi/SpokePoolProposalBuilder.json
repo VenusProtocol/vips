@@ -2,13 +2,23 @@
   {
     "inputs": [
       {
-        "internalType": "contract SpokePoolManager",
+        "internalType": "contract ISpokePoolManager",
         "name": "spokePoolManager",
         "type": "address"
       },
       {
+        "internalType": "contract IGovernorBravo",
+        "name": "governorBravo",
+        "type": "address"
+      },
+      {
         "internalType": "address",
-        "name": "treasury",
+        "name": "poolRegistry",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IDeviationBoundedOracle",
+        "name": "deviationBoundedOracle",
         "type": "address"
       },
       {
@@ -35,6 +45,11 @@
         "internalType": "address",
         "name": "shortfall",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPoolMarkets",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
@@ -49,16 +64,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "vToken",
+        "name": "asset",
         "type": "address"
       }
     ],
-    "name": "InvalidLiquidationThreshold",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NoOutstandingBorrows",
+    "name": "LoanAssetNotAllowed",
     "type": "error"
   },
   {
@@ -69,19 +79,19 @@
         "type": "address"
       }
     ],
-    "name": "NotManager",
+    "name": "NotSpokePoolManager",
     "type": "error"
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "count",
+        "name": "marketCount",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "maxCount",
+        "name": "maxMarketCount",
         "type": "uint256"
       }
     ],
@@ -108,7 +118,33 @@
   },
   {
     "inputs": [],
-    "name": "EXIT_ACTIONS",
+    "name": "DEVIATION_BOUNDED_ORACLE",
+    "outputs": [
+      {
+        "internalType": "contract IDeviationBoundedOracle",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "GOVERNOR_BRAVO",
+    "outputs": [
+      {
+        "internalType": "contract IGovernorBravo",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_POOL_MARKETS",
     "outputs": [
       {
         "internalType": "uint256",
@@ -121,12 +157,12 @@
   },
   {
     "inputs": [],
-    "name": "MAX_ACTIONS_PER_MARKET",
+    "name": "POLICY_REGISTRY",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "contract ISpokePoolPolicyRegistry",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -134,25 +170,12 @@
   },
   {
     "inputs": [],
-    "name": "MAX_LOOPS_LIMIT",
+    "name": "POOL_REGISTRY",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "POOL_CREATION_ACTIONS",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -202,20 +225,7 @@
     "name": "SPOKE_POOL_MANAGER",
     "outputs": [
       {
-        "internalType": "contract SpokePoolManager",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "TREASURY",
-    "outputs": [
-      {
-        "internalType": "address",
+        "internalType": "contract ISpokePoolManager",
         "name": "",
         "type": "address"
       }
@@ -316,7 +326,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "",
+        "name": "proposal",
         "type": "bytes"
       }
     ],

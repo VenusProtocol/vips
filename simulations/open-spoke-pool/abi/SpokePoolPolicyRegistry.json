@@ -1,0 +1,1224 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "BondAssetNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "interestRateModel",
+        "type": "address"
+      }
+    ],
+    "name": "DuplicateInterestRateModel",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidLoanAssetConfig",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPoolParams",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidProtocolMarketParams",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tierId",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidTier",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "LoanAssetNotListed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "calledContract",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "methodSignature",
+        "type": "string"
+      }
+    ],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddressNotAllowed",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "oldSymbol",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "newSymbol",
+        "type": "string"
+      }
+    ],
+    "name": "AssetSymbolUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldFactor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newFactor",
+        "type": "uint256"
+      }
+    ],
+    "name": "BondAssetFactorUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "version",
+        "type": "uint8"
+      }
+    ],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "factor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "interestRateModels",
+            "type": "address[]"
+          },
+          {
+            "internalType": "address",
+            "name": "yieldGroup",
+            "type": "address"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.LoanAssetConfig",
+        "name": "oldConfig",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "factor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "interestRateModels",
+            "type": "address[]"
+          },
+          {
+            "internalType": "address",
+            "name": "yieldGroup",
+            "type": "address"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.LoanAssetConfig",
+        "name": "newConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "LoanAssetConfigUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "collateralInterestRateModel",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reserveFactor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reduceReservesBlockDelta",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.ProtocolMarketParams",
+        "name": "oldParams",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "collateralInterestRateModel",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reserveFactor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reduceReservesBlockDelta",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.ProtocolMarketParams",
+        "name": "newParams",
+        "type": "tuple"
+      }
+    ],
+    "name": "MarketParamsUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldAccessControlManager",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAccessControlManager",
+        "type": "address"
+      }
+    ],
+    "name": "NewAccessControlManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "closeFactor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationIncentive",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minLiquidatableCollateral",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.PoolParams",
+        "name": "oldParams",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "closeFactor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationIncentive",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minLiquidatableCollateral",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.PoolParams",
+        "name": "newParams",
+        "type": "tuple"
+      }
+    ],
+    "name": "PoolParamsUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "oldOracles",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "newOracles",
+        "type": "address[]"
+      }
+    ],
+    "name": "SupportedOraclesUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "tierId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minTierBondUsd",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "minCoverageRatio",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralFactor",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxLiquidationThreshold",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralMarkets",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralSupplyCapUsd",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "loanSupplyCapUsd",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ISpokePoolPolicyRegistry.PoolLimits",
+            "name": "limits",
+            "type": "tuple"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.Tier",
+        "name": "oldTier",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minTierBondUsd",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "minCoverageRatio",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralFactor",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxLiquidationThreshold",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralMarkets",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralSupplyCapUsd",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "loanSupplyCapUsd",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ISpokePoolPolicyRegistry.PoolLimits",
+            "name": "limits",
+            "type": "tuple"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ISpokePoolPolicyRegistry.Tier",
+        "name": "newTier",
+        "type": "tuple"
+      }
+    ],
+    "name": "TierUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "accessControlManager",
+    "outputs": [
+      {
+        "internalType": "contract IAccessControlManagerV8",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "interestRateModel",
+        "type": "address"
+      }
+    ],
+    "name": "addInterestRateModel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "assetSymbols",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "bondAssetFactors",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "factor",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBondAssets",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getLoanAssetConfig",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "factor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "interestRateModels",
+            "type": "address[]"
+          },
+          {
+            "internalType": "address",
+            "name": "yieldGroup",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct ISpokePoolPolicyRegistry.LoanAssetConfig",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getLoanAssets",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tierId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getLoanSupplyCapUsd",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tierId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "bondAsset",
+        "type": "address"
+      }
+    ],
+    "name": "getRequiredBondUsd",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSupportedOracles",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tierId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getTier",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minTierBondUsd",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "minCoverageRatio",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralFactor",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxLiquidationThreshold",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralMarkets",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralSupplyCapUsd",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "loanSupplyCapUsd",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ISpokePoolPolicyRegistry.PoolLimits",
+            "name": "limits",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ISpokePoolPolicyRegistry.Tier",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTierIds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "accessControlManager_",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "interestRateModel",
+        "type": "address"
+      }
+    ],
+    "name": "isAllowedInterestRateModel",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "oracle",
+        "type": "address"
+      }
+    ],
+    "name": "isSupportedOracle",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "supported",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "fromTierId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "toTierId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isUpgrade",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "marketParams",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "collateralInterestRateModel",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reserveFactor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reduceReservesBlockDelta",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "poolParams",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "closeFactor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidationIncentive",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minLiquidatableCollateral",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "accessControlManager_",
+        "type": "address"
+      }
+    ],
+    "name": "setAccessControlManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      }
+    ],
+    "name": "setAssetSymbol",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "factor",
+        "type": "uint256"
+      }
+    ],
+    "name": "setBondAssetFactor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "factor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "interestRateModels",
+            "type": "address[]"
+          },
+          {
+            "internalType": "address",
+            "name": "yieldGroup",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct ISpokePoolPolicyRegistry.LoanAssetConfig",
+        "name": "config",
+        "type": "tuple"
+      }
+    ],
+    "name": "setLoanAssetConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "factor",
+        "type": "uint256"
+      }
+    ],
+    "name": "setLoanAssetFactor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "collateralInterestRateModel",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reserveFactor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "reduceReservesBlockDelta",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ISpokePoolPolicyRegistry.ProtocolMarketParams",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "setMarketParams",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "closeFactor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationIncentive",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minLiquidatableCollateral",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ISpokePoolPolicyRegistry.PoolParams",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "setPoolParams",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "oracles",
+        "type": "address[]"
+      }
+    ],
+    "name": "setSupportedOracles",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tierId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minTierBondUsd",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "minCoverageRatio",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralFactor",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxLiquidationThreshold",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralMarkets",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxCollateralSupplyCapUsd",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "loanSupplyCapUsd",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct ISpokePoolPolicyRegistry.PoolLimits",
+            "name": "limits",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ISpokePoolPolicyRegistry.Tier",
+        "name": "tier",
+        "type": "tuple"
+      }
+    ],
+    "name": "setTier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
