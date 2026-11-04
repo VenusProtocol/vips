@@ -7,9 +7,10 @@ import { getCalldatas, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 
-import vip768, {
+import vip679, {
   BLOCKS_PER_MONTH,
   DEV_RECIPIENT,
+  HUB_MAX_DISTRIBUTION_SPEED,
   MONTHLY_VHU,
   MONTHLY_VHUSDT,
   NORMAL_TIMELOCK,
@@ -27,7 +28,7 @@ import vip768, {
   VHU_SPEED,
   VVHU,
   VVHUSDT,
-} from "../../vips/vip-768/bscmainnet";
+} from "../../vips/vip-679/bscmainnet";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PRIME_ABI from "./abi/PrimeV2.json";
 
@@ -58,7 +59,7 @@ const { MaxUint256 } = ethers.constants;
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 forking(FORK_BLOCK, async () => {
-  const proposal = await vip768();
+  const proposal = await vip679();
   const plp = new Contract(PLP, PLP_ABI, ethers.provider);
   const prime = await ethers.getContractAt(PRIME_ABI, PRIME);
   const usdt = new Contract(USDT, ERC20_ABI, ethers.provider);
@@ -124,6 +125,11 @@ forking(FORK_BLOCK, async () => {
         expect(await hub.decimals()).to.equal(24);
         expect(await plp.lastAccruedBlockOrSecond(hub.address)).to.equal(0);
       }
+      for (const asset of [usdt, u]) {
+        const oldCap = await plp.maxTokenDistributionSpeeds(asset.address);
+        expect(oldCap).to.equal(ethers.utils.parseUnits("1", await asset.decimals()));
+        expect(HUB_MAX_DISTRIBUTION_SPEED).to.equal(oldCap.mul(10 ** 6));
+      }
       expect(await vhUsdt.asset()).to.equal(USDT);
       expect(await vhU.asset()).to.equal(U);
       expect(await plp.tokenDistributionSpeeds(USDT)).to.equal("6944444444444444");
@@ -187,7 +193,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-768 November Prime rewards on Hub shares", proposal, {
+  testVip("VIP-679 November Prime rewards on Hub shares", proposal, {
     callbackAfterExecution: async tx => {
       await expect(tx).to.emit(plp, "SweepToken").withArgs(U, DEV_RECIPIENT, U_TO_SWAP);
       for (const market of [VVHUSDT, VVHU]) {
@@ -223,7 +229,9 @@ forking(FORK_BLOCK, async () => {
         expect(state.borrowMultiplier).to.equal(0);
         expect(await prime.vTokenForAsset(hub.address)).to.equal(market);
         expect(await plp.tokenDistributionSpeeds(hub.address)).to.equal(speed);
-        expect(await plp.maxTokenDistributionSpeeds(hub.address)).to.equal(speed);
+        expect(await plp.maxTokenDistributionSpeeds(hub.address)).to.equal(HUB_MAX_DISTRIBUTION_SPEED);
+        expect(HUB_MAX_DISTRIBUTION_SPEED).to.equal(ethers.utils.parseUnits("1", await hub.decimals()));
+        expect(speed).to.be.lt(HUB_MAX_DISTRIBUTION_SPEED);
         expect(await hub.balanceOf(PLP)).to.be.gt(0);
       }
       expect(await plp.tokenDistributionSpeeds(WBNB)).to.equal(0);

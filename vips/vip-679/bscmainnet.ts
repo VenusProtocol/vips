@@ -22,6 +22,8 @@ export const USDT_TO_DEPOSIT = parseUnits("22500", 18);
 export const U_TO_DEPOSIT = parseUnits("11500", 18);
 export const SUPPLY_MULTIPLIER = parseUnits("2", 18);
 export const BLOCKS_PER_MONTH = 192000 * 30;
+// Match the 1-token/block cap used by 18-decimal USDT/U, scaled to Hub share decimals.
+export const HUB_MAX_DISTRIBUTION_SPEED = parseUnits("1", 24);
 
 // Hub.previewDeposit(44,000 USDT / 11,000 U), BSC block 131549804 (2026-11-04).
 // Both share tokens have 24 decimals. These FIXED share speeds approximate the
@@ -31,7 +33,7 @@ export const MONTHLY_VHU = BigNumber.from("10949457384727242068042507424");
 export const VHUSDT_SPEED = MONTHLY_VHUSDT.div(BLOCKS_PER_MONTH);
 export const VHU_SPEED = MONTHLY_VHU.div(BLOCKS_PER_MONTH);
 
-export const vip768 = () =>
+export const vip679 = () =>
   makeProposal(
     [
       // Crystallize all old reward liabilities before moving only free inventory.
@@ -44,13 +46,13 @@ export const vip768 = () =>
         ],
       },
       { target: PLP, signature: "initializeTokens(address[])", params: [[VHUSDT, VHU]] },
-      // The default 1e18 cap is too small for 24-decimal shares. Cap at this allocation.
+      // Scale the existing 1-token/block convention to 24-decimal Hub shares.
       {
         target: PLP,
         signature: "setMaxTokensDistributionSpeed(address[],uint256[])",
         params: [
           [VHUSDT, VHU],
-          [VHUSDT_SPEED, VHU_SPEED],
+          [HUB_MAX_DISTRIBUTION_SPEED, HUB_MAX_DISTRIBUTION_SPEED],
         ],
       },
       {
@@ -79,7 +81,7 @@ export const vip768 = () =>
     ],
     {
       version: "v2",
-      title: "VIP-768 [BNB Chain] Prime Rewards Allocation — November 2026",
+      title: "VIP-679 [BNB Chain] Prime Rewards Allocation — November 2026",
       description: `#### Summary
 
 This proposal allocates approximately $55,000 of Prime rewards for November 2026: $44,000 to vhUSDT suppliers and $11,000 to vhU suppliers in Venus Core. It implements the [November community proposal](https://community.venus.io/t/bnb-chain-prime-rewards-allocation-november-2026/6013), moving rewards from the vUSDT supply and vU borrow markets to the vvhUSDT and vvhU supply markets. Rewards are paid in the corresponding Hub shares, vhUSDT and vhU. Existing USDT and U rewards remain claimable.
@@ -87,7 +89,7 @@ This proposal allocates approximately $55,000 of Prime rewards for November 2026
 #### Actions
 
 1. Stop new USDT and U rewards on the PrimeLiquidityProvider (PLP), accruing the old speeds through execution. Keep the existing Prime markets and their historical rewards.
-2. Initialise vhUSDT and vhU on the PLP and set their maximum distribution speeds to the new speeds below. Both tokens have 24 decimals, so the default 1e18 maximum would be insufficient.
+2. Initialise vhUSDT and vhU on the PLP and set each maximum distribution speed to 1e24 raw units per block (1 Hub share per block). This matches the 1-token-per-block cap of the existing 18-decimal USDT/U rewards, adjusted for the Hub shares' 24 decimals. These caps are independent of the monthly distribution speeds below.
 3. Move 22,500 USDT and 11,500 U from the PLP to the Normal Timelock, approve only those amounts to the corresponding Hubs, and deposit them with the PLP as the share receiver. These operations execute atomically; the received shares remain in the PLP for distribution. The extra 500 underlying tokens per leg provide inventory buffers without increasing the reward allocation.
 4. Transfer 22,000 U from the PLP to the [same conversion recipient used in VIP-665](https://bscscan.com/address/${DEV_RECIPIENT}). After conversion into USDT, the recipient must deposit the proceeds into the USDT Hub (${VHUSDT}) with receiver set to the PLP (${PLP}). Returning plain USDT does not fund vhUSDT rewards. This conversion and return are separate operations after VIP execution.
 5. Add vvhUSDT (${VVHUSDT}) and vvhU (${VVHU}) to PrimeV2, both with supply multiplier 2e18 and borrow multiplier 0, matching the former USDT supply multiplier.
@@ -128,4 +130,4 @@ The Normal Timelock owns the PLP and already holds the required PrimeV2 and PLP 
     ProposalType.REGULAR,
   );
 
-export default vip768;
+export default vip679;
