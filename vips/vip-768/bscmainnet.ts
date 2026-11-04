@@ -1,0 +1,131 @@
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+export const NORMAL_TIMELOCK = NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK;
+export const PRIME = "0x059EabA8676b03e4e8f009eFb7F587C28450F50f";
+export const PLP = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
+export const VHUSDT = "0x18AfDACF30F8671021dec4b78297E39d2FE87226";
+export const VHU = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
+export const VVHUSDT = "0xc0768948e668B7BacFf8b4BD1BaBe0eD2b512d3c";
+export const VVHU = "0x80a5694441810d2b871BEeD644b6d16D113ce06E";
+export const DEV_RECIPIENT = "0x080f8A0fB70F8F0F1b83C6178225a96CbE2BE0DE";
+export const U_TO_SWAP = parseUnits("22000", 18);
+
+// Seed both Hub reward legs atomically. The extra 500 underlying tokens per leg
+// cover share-price drift and conversion costs; they do not increase reward speeds.
+export const USDT_TO_DEPOSIT = parseUnits("22500", 18);
+export const U_TO_DEPOSIT = parseUnits("11500", 18);
+export const SUPPLY_MULTIPLIER = parseUnits("2", 18);
+export const BLOCKS_PER_MONTH = 192000 * 30;
+
+// Hub.previewDeposit(44,000 USDT / 11,000 U), BSC block 131549804 (2026-11-04).
+// Both share tokens have 24 decimals. These FIXED share speeds approximate the
+// underlying budgets at that snapshot; they do not track USD or the live Hub PPS.
+export const MONTHLY_VHUSDT = BigNumber.from("43693500110621916102848004828");
+export const MONTHLY_VHU = BigNumber.from("10949457384727242068042507424");
+export const VHUSDT_SPEED = MONTHLY_VHUSDT.div(BLOCKS_PER_MONTH);
+export const VHU_SPEED = MONTHLY_VHU.div(BLOCKS_PER_MONTH);
+
+export const vip768 = () =>
+  makeProposal(
+    [
+      // Crystallize all old reward liabilities before moving only free inventory.
+      {
+        target: PLP,
+        signature: "setTokensDistributionSpeed(address[],uint256[])",
+        params: [
+          [USDT, U],
+          [0, 0],
+        ],
+      },
+      { target: PLP, signature: "initializeTokens(address[])", params: [[VHUSDT, VHU]] },
+      // The default 1e18 cap is too small for 24-decimal shares. Cap at this allocation.
+      {
+        target: PLP,
+        signature: "setMaxTokensDistributionSpeed(address[],uint256[])",
+        params: [
+          [VHUSDT, VHU],
+          [VHUSDT_SPEED, VHU_SPEED],
+        ],
+      },
+      {
+        target: PLP,
+        signature: "sweepToken(address,address,uint256)",
+        params: [USDT, NORMAL_TIMELOCK, USDT_TO_DEPOSIT],
+      },
+      { target: PLP, signature: "sweepToken(address,address,uint256)", params: [U, NORMAL_TIMELOCK, U_TO_DEPOSIT] },
+      { target: USDT, signature: "approve(address,uint256)", params: [VHUSDT, USDT_TO_DEPOSIT] },
+      { target: VHUSDT, signature: "deposit(uint256,address)", params: [USDT_TO_DEPOSIT, PLP] },
+      { target: U, signature: "approve(address,uint256)", params: [VHU, U_TO_DEPOSIT] },
+      { target: VHU, signature: "deposit(uint256,address)", params: [U_TO_DEPOSIT, PLP] },
+      // Same conversion recipient as VIP-652/660/665. Follow-up deposits the USDT
+      // proceeds into the USDT Hub with receiver=PLP; returning plain USDT is insufficient.
+      { target: PLP, signature: "sweepToken(address,address,uint256)", params: [U, DEV_RECIPIENT, U_TO_SWAP] },
+      { target: PRIME, signature: "addMarket(address,uint256,uint256)", params: [VVHUSDT, SUPPLY_MULTIPLIER, 0] },
+      { target: PRIME, signature: "addMarket(address,uint256,uint256)", params: [VVHU, SUPPLY_MULTIPLIER, 0] },
+      {
+        target: PLP,
+        signature: "setTokensDistributionSpeed(address[],uint256[])",
+        params: [
+          [VHUSDT, VHU],
+          [VHUSDT_SPEED, VHU_SPEED],
+        ],
+      },
+    ],
+    {
+      version: "v2",
+      title: "VIP-768 [BNB Chain] Prime Rewards Allocation — November 2026",
+      description: `#### Summary
+
+This proposal allocates approximately $55,000 of Prime rewards for November 2026: $44,000 to vhUSDT suppliers and $11,000 to vhU suppliers in Venus Core. It implements the [November community proposal](https://community.venus.io/t/bnb-chain-prime-rewards-allocation-november-2026/6013), moving rewards from the vUSDT supply and vU borrow markets to the vvhUSDT and vvhU supply markets. Rewards are paid in the corresponding Hub shares, vhUSDT and vhU. Existing USDT and U rewards remain claimable.
+
+#### Actions
+
+1. Stop new USDT and U rewards on the PrimeLiquidityProvider (PLP), accruing the old speeds through execution. Keep the existing Prime markets and their historical rewards.
+2. Initialise vhUSDT and vhU on the PLP and set their maximum distribution speeds to the new speeds below. Both tokens have 24 decimals, so the default 1e18 maximum would be insufficient.
+3. Move 22,500 USDT and 11,500 U from the PLP to the Normal Timelock, approve only those amounts to the corresponding Hubs, and deposit them with the PLP as the share receiver. These operations execute atomically; the received shares remain in the PLP for distribution. The extra 500 underlying tokens per leg provide inventory buffers without increasing the reward allocation.
+4. Transfer 22,000 U from the PLP to the [same conversion recipient used in VIP-665](https://bscscan.com/address/${DEV_RECIPIENT}). After conversion into USDT, the recipient must deposit the proceeds into the USDT Hub (${VHUSDT}) with receiver set to the PLP (${PLP}). Returning plain USDT does not fund vhUSDT rewards. This conversion and return are separate operations after VIP execution.
+5. Add vvhUSDT (${VVHUSDT}) and vvhU (${VVHU}) to PrimeV2, both with supply multiplier 2e18 and borrow multiplier 0, matching the former USDT supply multiplier.
+6. Set the new share distribution speeds:
+
+| Reward token | Raw units per block (24 decimals) | Approximate allocation over 5,760,000 blocks |
+| --- | ---: | --- |
+| vhUSDT | ${VHUSDT_SPEED.toString()} | 43,693.500111 vhUSDT, worth 44,000 USDT at the snapshot |
+| vhU | ${VHU_SPEED.toString()} | 10,949.457385 vhU, worth 11,000 U at the snapshot |
+
+These speeds use each Hub's previewDeposit at block 131,549,804, on November 4, 2026. One vhUSDT share represented approximately 1.007014771 USDT and one vhU share approximately 1.004615993 U. Speeds are fixed in shares and use 192,000 blocks/day for 30 days; their underlying value varies with Hub share prices. WBNB rewards remain at zero.
+
+#### Funding and execution
+
+At block 131,549,804, the PLP held 28,793.39 USDT and 38,785.19 U free after deducting both stored and pending reward accrual. With no further inflows, four days of the old speeds leave approximately 23,460.06 USDT and 37,451.85 U at a November 8 execution. The deposits and 22,000 U conversion sweep leave approximately 960.06 USDT and 3,951.85 U free in the PLP, in addition to all rewards owed to existing claimants. At approximately 1:1 conversion, the Hubs receive 44,500 USDT and 11,500 U in total, including the inventory buffers. Recheck free balances, Hub capacity and conversion proceeds before execution; later execution and conversion costs reduce the buffers.
+
+The vhU leg is funded at execution; the initial vhUSDT deposit funds roughly half its 30-day allocation. Complete the 22,000 U conversion and Hub deposit promptly. Reward accrual is capped by available inventory and does not backfill an exhausted period. The VIP does not itself perform or guarantee the off-chain conversion.
+
+The 24-decimal Prime implementation upgrade from VIP-672 is already live. Adding both markets queues a score-update round for all current Prime holders. After execution, complete permissionless updateScores calls in batches of at most 20 and verify pendingScoreUpdates is zero. Until a holder's update, their new-market score is not yet included; claimPrime, issue and burn remain blocked while the round is pending. The existing markets remain listed so users can claim old USDT/U rewards. Hub share rewards received in a wallet must be supplied to Core to count toward future Prime scores.
+
+The Normal Timelock owns the PLP and already holds the required PrimeV2 and PLP ACM permissions. No grants, upgrades, Treasury funding, interest-rate changes, collateral-factor changes or market supply/borrow cap changes are included.
+
+#### References
+
+- [November community proposal](https://community.venus.io/t/bnb-chain-prime-rewards-allocation-november-2026/6013)
+- [VIP-665: October allocation and conversion route](https://app.venus.io/#/governance/proposal/665?chainId=56)
+- [VIP-672: Prime 24-decimal support](https://app.venus.io/#/governance/proposal/672?chainId=56)
+
+#### Voting options
+
+- **For** — Execute the proposal
+- **Against** — Do not execute the proposal
+- **Abstain** — Abstain from voting`,
+      forDescription: "I agree that Venus Protocol should proceed with this proposal",
+      againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+      abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
+    },
+    ProposalType.REGULAR,
+  );
+
+export default vip768;
