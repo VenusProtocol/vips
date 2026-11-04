@@ -118,10 +118,8 @@ It also restores a readable FLOKI price for the deprecated GameFi market, allowi
 5. Add vvhUSDT (${VVHUSDT}) and vvhU (${VVHU}) to PrimeV2, both with supply multiplier 2e18 and borrow multiplier 0, matching the former USDT supply multiplier.
 6. Set the new share distribution speeds:
 
-| Reward token | Raw units per block (24 decimals) | Approximate allocation over 5,760,000 blocks |
-| --- | ---: | --- |
-| vhUSDT | ${VHUSDT_SPEED.toString()} | 43,693.500111 vhUSDT, worth 44,000 USDT at the snapshot |
-| vhU | ${VHU_SPEED.toString()} | 10,949.457385 vhU, worth 11,000 U at the snapshot |
+- **vhUSDT**: ${VHUSDT_SPEED.toString()} raw units per block (24 decimals), approximately 43,693.500111 vhUSDT over 5,760,000 blocks, worth 44,000 USDT at the snapshot
+- **vhU**: ${VHU_SPEED.toString()} raw units per block (24 decimals), approximately 10,949.457385 vhU over 5,760,000 blocks, worth 11,000 U at the snapshot
 
 These speeds use each Hub's previewDeposit at block 131,549,804, on November 4, 2026. One vhUSDT share represented approximately 1.007014771 USDT and one vhU share approximately 1.004615993 U. Speeds are fixed in shares and use 192,000 blocks/day for 30 days; their underlying value varies with Hub share prices. WBNB rewards remain at zero.
 
