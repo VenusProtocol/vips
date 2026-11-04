@@ -10,6 +10,8 @@ import { bypassStalePrices } from "src/vip-framework/oracleStaleness";
 import vip679, {
   BLOCKS_PER_MONTH,
   DEV_RECIPIENT,
+  FLOKI,
+  FLOKI_PRICE,
   HUB_MAX_DISTRIBUTION_SPEED,
   MONTHLY_VHU,
   MONTHLY_VHUSDT,
@@ -39,6 +41,10 @@ const VWBNB = "0x6bCa74586218dB34cdB402295796b79663d816e9";
 const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
+const GAMEFI = "0x1b43ea8622e76627B81665B1eCeBB4867566B963";
+const VFLOKI = "0xc353B7a1E13dDba393B5E120D4169Da7185aA2cb";
+const VUSDT_GAMEFI = "0x4978591f17670A846137d9d613e333C38dc68A37";
+const FLOKI_SUPPLIER = "0xb16c60e0a93b73cd96bca5b0811715146b3f6fb4";
 const ERC20_ABI = [
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address,address) view returns (uint256)",
@@ -66,6 +72,43 @@ forking(FORK_BLOCK, async () => {
   const u = new Contract(U, ERC20_ABI, ethers.provider);
   const vhUsdt = new Contract(VHUSDT, HUB_ABI, ethers.provider);
   const vhU = new Contract(VHU, HUB_ABI, ethers.provider);
+  const floki = new Contract(FLOKI, ERC20_ABI, ethers.provider);
+  const vFloki = new Contract(
+    VFLOKI,
+    [
+      ...ERC20_ABI,
+      "function redeem(uint256) returns (uint256)",
+      "function balanceOfUnderlying(address) returns (uint256)",
+    ],
+    ethers.provider,
+  );
+  const gamefiUsdt = new Contract(
+    VUSDT_GAMEFI,
+    [
+      "function borrowBalanceStored(address) view returns (uint256)",
+      "function repayBorrow(uint256) returns (uint256)",
+      "function liquidateBorrow(address,uint256,address) returns (uint256)",
+    ],
+    ethers.provider,
+  );
+  const gamefi = new Contract(
+    GAMEFI,
+    [
+      "function markets(address) view returns (bool,uint256,uint256)",
+      "function actionPaused(address,uint8) view returns (bool)",
+      "function getAccountLiquidity(address) view returns (uint256,uint256,uint256)",
+      "error InsufficientLiquidity()",
+    ],
+    ethers.provider,
+  );
+  const oracle = new Contract(
+    bscmainnet.RESILIENT_ORACLE,
+    [
+      "function getUnderlyingPrice(address) view returns (uint256)",
+      "function getTokenConfig(address) view returns (tuple(address asset,address[3] oracles,bool[3] enableFlagsForOracles,bool cachingEnabled))",
+    ],
+    ethers.provider,
+  );
   let recipientBefore: BigNumber;
   let usdtBefore: BigNumber;
   let uBefore: BigNumber;
@@ -113,6 +156,25 @@ forking(FORK_BLOCK, async () => {
   });
 
   describe("Pre-VIP and execution-date funding", () => {
+    it("cannot redeem FLOKI with the expired oracle even after repaying the full debt", async () => {
+      const snapshot = await ethers.provider.send("evm_snapshot", []);
+      try {
+        const supplier = await initMainnetUser(FLOKI_SUPPLIER, parseEther("1"));
+        const whale = await initMainnetUser(USDT_WHALE, parseEther("1"));
+        await expect(oracle.getUnderlyingPrice(VFLOKI)).to.be.revertedWith("invalid resilient oracle price");
+        expect(await gamefiUsdt.borrowBalanceStored(supplier.address)).to.be.gt(0);
+        await usdt.connect(whale).transfer(supplier.address, parseEther("10"));
+        await usdt.connect(supplier).approve(VUSDT_GAMEFI, MaxUint256);
+        await gamefiUsdt.connect(supplier).repayBorrow(MaxUint256);
+        expect(await gamefiUsdt.borrowBalanceStored(supplier.address)).to.equal(0);
+        await expect(vFloki.connect(supplier).redeem(await vFloki.balanceOf(supplier.address))).to.be.revertedWith(
+          "invalid resilient oracle price",
+        );
+      } finally {
+        await ethers.provider.send("evm_revert", [snapshot]);
+      }
+    });
+
     it("uses the live 24-decimal Prime upgrade and uninitialised Hub rewards", async () => {
       const slot = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
       const implementation = await ethers.provider.getStorageAt(PRIME, slot);
@@ -193,13 +255,73 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-679 November Prime rewards on Hub shares", proposal, {
+  testVip("VIP-679 November Prime rewards and FLOKI exit price", proposal, {
     callbackAfterExecution: async tx => {
       await expect(tx).to.emit(plp, "SweepToken").withArgs(U, DEV_RECIPIENT, U_TO_SWAP);
       for (const market of [VVHUSDT, VVHU]) {
         await expect(tx).to.emit(prime, "MarketAdded").withArgs(market, SUPPLY_MULTIPLIER, 0);
       }
     },
+  });
+
+  describe("Post-VIP FLOKI exits", () => {
+    it("prices the 9-decimal FLOKI correctly without reopening the market", async () => {
+      expect(await floki.decimals()).to.equal(9);
+      expect(await oracle.getUnderlyingPrice(VFLOKI)).to.equal(FLOKI_PRICE.mul(BigNumber.from(10).pow(9)));
+      const config = await oracle.getTokenConfig(FLOKI);
+      expect(config.oracles).to.deep.equal([
+        bscmainnet.CHAINLINK_ORACLE,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ]);
+      expect(config.enableFlagsForOracles).to.deep.equal([true, false, false]);
+      expect(config.cachingEnabled).to.equal(false);
+      const [, collateralFactor, liquidationThreshold] = await gamefi.markets(VFLOKI);
+      expect(collateralFactor).to.equal(0);
+      expect(liquidationThreshold).to.equal(0);
+      for (const market of [VFLOKI, VUSDT_GAMEFI]) {
+        expect(await gamefi.actionPaused(market, 0)).to.equal(true); // mint
+        expect(await gamefi.actionPaused(market, 2)).to.equal(true); // borrow
+        for (const action of [1, 3, 4, 5]) {
+          expect(await gamefi.actionPaused(market, action)).to.equal(false);
+        }
+      }
+    });
+
+    it("restores liquidation of the outstanding debt", async () => {
+      const snapshot = await ethers.provider.send("evm_snapshot", []);
+      try {
+        const [, , shortfall] = await gamefi.getAccountLiquidity(FLOKI_SUPPLIER);
+        expect(shortfall).to.be.gt(0);
+        await usdt.connect(user).approve(VUSDT_GAMEFI, parseEther("0.1"));
+        const before = await vFloki.balanceOf(user.address);
+        await gamefiUsdt.connect(user).liquidateBorrow(FLOKI_SUPPLIER, parseEther("0.1"), VFLOKI);
+        expect(await vFloki.balanceOf(user.address)).to.be.gt(before);
+      } finally {
+        await ethers.provider.send("evm_revert", [snapshot]);
+      }
+    });
+
+    it("allows full redemption only after the supplier clears the remaining USDT debt", async () => {
+      const supplier = await initMainnetUser(FLOKI_SUPPLIER, parseEther("1"));
+      const shares = await vFloki.balanceOf(supplier.address);
+      await expect(vFloki.connect(supplier).redeem(shares)).to.be.revertedWithCustomError(
+        gamefi,
+        "InsufficientLiquidity",
+      );
+      await usdt
+        .connect(await initMainnetUser(USDT_WHALE, parseEther("1")))
+        .transfer(supplier.address, parseEther("10"));
+      await usdt.connect(supplier).approve(VUSDT_GAMEFI, MaxUint256);
+      await gamefiUsdt.connect(supplier).repayBorrow(MaxUint256);
+      expect(await gamefiUsdt.borrowBalanceStored(supplier.address)).to.equal(0);
+      const amount = await vFloki.callStatic.balanceOfUnderlying(supplier.address);
+      expect(amount).to.be.gt(ethers.utils.parseUnits("6600000000", 9));
+      const before = await floki.balanceOf(supplier.address);
+      await vFloki.connect(supplier).redeem(shares);
+      expect(await vFloki.balanceOf(supplier.address)).to.equal(0);
+      expect((await floki.balanceOf(supplier.address)).sub(before)).to.equal(amount);
+    });
   });
 
   describe("Post-VIP funding, scoring and claims", () => {

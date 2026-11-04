@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
@@ -15,6 +15,10 @@ export const VVHUSDT = "0xc0768948e668B7BacFf8b4BD1BaBe0eD2b512d3c";
 export const VVHU = "0x80a5694441810d2b871BEeD644b6d16D113ce06E";
 export const DEV_RECIPIENT = "0x080f8A0fB70F8F0F1b83C6178225a96CbE2BE0DE";
 export const U_TO_SWAP = parseUnits("22000", 18);
+export const FLOKI = "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E";
+// CoinGecko FLOKI/USD, 2026-11-04 05:19:49 UTC. Recheck before execution.
+// setDirectPrice takes 18-decimal USD, not the 27-decimal normalized FLOKI price.
+export const FLOKI_PRICE = parseUnits("0.00002228", 18);
 
 // Seed both Hub reward legs atomically. The extra 500 underlying tokens per leg
 // cover share-price drift and conversion costs; they do not increase reward speeds.
@@ -78,13 +82,32 @@ export const vip679 = () =>
           [VHUSDT_SPEED, VHU_SPEED],
         ],
       },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [FLOKI, FLOKI_PRICE],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            FLOKI,
+            [NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE, constants.AddressZero, constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+      },
     ],
     {
       version: "v2",
-      title: "VIP-679 [BNB Chain] Prime Rewards Allocation — November 2026",
+      title: "VIP-679 [BNB Chain] November Prime Rewards and FLOKI Exit Price",
       description: `#### Summary
 
 This proposal allocates approximately $55,000 of Prime rewards for November 2026: $44,000 to vhUSDT suppliers and $11,000 to vhU suppliers in Venus Core. It implements the [November community proposal](https://community.venus.io/t/bnb-chain-prime-rewards-allocation-november-2026/6013), moving rewards from the vUSDT supply and vU borrow markets to the vvhUSDT and vvhU supply markets. Rewards are paid in the corresponding Hub shares, vhUSDT and vhU. Existing USDT and U rewards remain claimable.
+
+It also restores a readable FLOKI price for the deprecated GameFi market, allowing affected debt-free suppliers to redeem. This is a separate oracle maintenance action, not part of the November Prime reward allocation.
 
 #### Actions
 
@@ -111,6 +134,14 @@ The vhU leg is funded at execution; the initial vhUSDT deposit funds roughly hal
 The 24-decimal Prime implementation upgrade from VIP-672 is already live. Adding both markets queues a score-update round for all current Prime holders. After execution, complete permissionless updateScores calls in batches of at most 20 and verify pendingScoreUpdates is zero. Until a holder's update, their new-market score is not yet included; claimPrime, issue and burn remain blocked while the round is pending. The existing markets remain listed so users can claim old USDT/U rewards. Hub share rewards received in a wallet must be supplied to Core to count toward future Prime scores.
 
 The Normal Timelock owns the PLP and already holds the required PrimeV2 and PLP ACM permissions. No grants, upgrades, Treasury funding, interest-rate changes, collateral-factor changes or market supply/borrow cap changes are included.
+
+#### FLOKI exit price
+
+Set FLOKI (${FLOKI}) to a fixed USD price of $0.00002228 on ChainlinkOracle and switch its ResilientOracle main source from the expired Binance Oracle to ChainlinkOracle. The value is the [CoinGecko FLOKI/USD quote](https://www.coingecko.com/en/coins/floki) updated on November 4, 2026 at 05:19:49 UTC. The two calls execute atomically; pivot and fallback remain unset, and caching remains disabled. FLOKI has 9 decimals; setDirectPrice receives 22,280,000,000,000 (18-decimal USD), yielding a normalized oracle price of 22,280,000,000,000,000,000,000.
+
+GameFi collateral factors and liquidation thresholds remain zero, and minting and borrowing remain paused. Suppliers with outstanding debt must repay it in full before redeeming; restoring the price also restores liquidation eligibility for indebted accounts whose other required prices are valid. Repay before VIP execution to avoid this exposure. Accounts also affected by other expired feeds may remain blocked. This action does not repay users, transfer their collateral, or resolve existing market bad debt.
+
+The fixed price applies to every consumer of this shared ResilientOracle, including configured FLOKI token-converter pairs. It does not expire or track the market. Recheck the price and converter exposure before execution and before resuming paused converters; a later governance update is required to change or remove the override. This is an exit price for a deprecated market, not a live feed or an authorization to reopen borrowing.
 
 #### References
 
