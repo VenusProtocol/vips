@@ -35,8 +35,8 @@ If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new 
 
 1. Upgrade the **EBrake** proxy to [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION}). EBrake now acts on each market through that market's own comptroller, so it also covers Spoke pool markets. Core pool behaviour, the Hub pause actions and the storage layout are unchanged.
 2. Accept ownership of the **BStockPauseSentinel** at [${BSTOCK_PAUSE_SENTINEL}](https://bscscan.com/address/${BSTOCK_PAUSE_SENTINEL}).
-3. Give EBrake the four comptroller permissions a Spoke pool checks (\`setActionsPaused\`, \`setCollateralFactor\`, \`setMarketBorrowCaps\` and \`setMarketSupplyCaps\`) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. The Core pool comptroller also checks \`setCollateralFactor(address,uint256,uint256)\`, so EBrake's per-contract grant for it there is revoked. EBrake's other grants on the Core pool comptroller stay as they are.
-4. Grant the sentinel \`decreaseCF(address,uint256)\` on EBrake, and the Guardian and the Normal and Fast-track Timelocks the sentinel's \`setTrustedKeeper\` and \`setMarketMonitored\`.
+3. Give EBrake the four comptroller permissions a Spoke pool checks (setActionsPaused, setCollateralFactor, setMarketBorrowCaps and setMarketSupplyCaps) as wildcards (contract address zero), so they cover every Spoke pool, including ones added later. The Core pool comptroller checks setCollateralFactor(address,uint256,uint256) too, so the wildcard covers it there and EBrake's now redundant per-contract grant for it is revoked. EBrake's other grants on the Core pool comptroller stay as they are.
+4. Grant the sentinel decreaseCF(address,uint256) on EBrake, and the Guardian and the Normal and Fast-track Timelocks the sentinel's setTrustedKeeper and setMarketMonitored.
 5. Set [${KEEPER}](https://bscscan.com/address/${KEEPER}) as the sentinel's keeper. It is the keeper that already drives DeviationSentinel.
 6. Monitor the ${
       BSTOCK_MARKETS.length
@@ -49,7 +49,7 @@ ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
 #### Notes
 
 - The sentinel only lowers the collateral factor to 0 and keeps the liquidation threshold, so no position becomes liquidatable. Restoring the collateral factor stays with governance.
-- VIP-675, VIP-677 and VIP-678 must execute first so all 20 mainstream markets are listed. Future bStock listings and delistings must update the sentinel with \`setMarketMonitored\`.
+- VIP-675, VIP-677 and VIP-678 must execute first so all 20 mainstream markets are listed. Future bStock listings and delistings must update the sentinel with setMarketMonitored.
 - VIP-673 already upgraded the same EBrake proxy to [${VIP_673_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${VIP_673_EBRAKE_IMPLEMENTATION}). This VIP builds on that implementation and retains its Hub pause actions.
 - DeviationSentinel on the remote chains already runs the current build, so it is not upgraded.
 - EBrake and the sentinel were audited by HashDit, and these deployments include the fixes from that audit.`,
