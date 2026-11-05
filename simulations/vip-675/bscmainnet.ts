@@ -4,10 +4,9 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
-import { forking, pretendExecutingVip, seedProposalBatchesOnFork, testVip } from "src/vip-framework";
+import { forking, seedProposalBatchesOnFork, testVip } from "src/vip-framework";
 
 import { ROUTER_ROLES } from "../../vips/vip-668/permissions";
-import vip673 from "../../vips/vip-673/bscmainnet";
 import {
   ACM,
   ADAPTER_SPOKE_V1,
@@ -53,11 +52,11 @@ import {
   VTREASURY,
 } from "../../vips/vip-675/addresses/bscmainnet";
 import vip675, { PART_1 } from "../../vips/vip-675/bscmainnet";
-import vip676, { PART_2 } from "../../vips/vip-675/bscmainnet-part-2";
-import vip677, { PART_3 } from "../../vips/vip-675/bscmainnet-part-3";
+import vip677, { PART_2 } from "../../vips/vip-675/bscmainnet-part-2";
+import vip678, { PART_3 } from "../../vips/vip-675/bscmainnet-part-3";
 import { Vip675Part, pendingDeployments, pendingRiskValues } from "../../vips/vip-675/commands";
 import {
-  SCOPED_GRANTS_MAINSTREAM,
+  CORE_GRANTS_REPLACED,
   VIP_675_ORACLE_ROLES,
   VIP_675_REGISTRY_ROLES,
   VIP_675_WILDCARDS,
@@ -76,19 +75,20 @@ import REGISTRY_ABI from "./abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-/// After isolated-pools#575 deploys the comptroller and the 23 markets, and Atlas authorizes ATLAS_ORACLE on the 16 new
-/// assets' feeds.
-/// TODO: move past the VTreasury funding.
-const FORK_BLOCK = 130450000;
+/// After isolated-pools#575 deploys the comptroller and the 23 markets, Atlas authorizes ATLAS_ORACLE on the 16 new
+/// assets' feeds, the VTreasury receives the 20 bStock seeds, VIP-673 executes and all three parts' batches are seeded.
+const FORK_BLOCK = 131366432;
 
-/// The framework's fallback proposer has an Active proposal (674) at this block, and Governor Bravo allows one per
-/// proposer.
-const PROPOSER = "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced";
-const SUPPORTERS = [
-  "0x34221485302f6F2029660a000908B5FCABB9BC6e",
-  "0xc444949e0054a23c44fc45789738bdf64aed2391",
-  "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
-];
+// The framework's fallback proposer has active VIP-675 at this block. This voter set clears both the proposal
+// threshold and quorum without changing the existing proposal.
+const GOVERNANCE_VOTERS = {
+  proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
+  supporters: [
+    "0x5176671de05380379399b669ed276feec99d59cb",
+    "0xc444949e0054a23c44fc45789738bdf64aed2391",
+    "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
+  ],
+};
 
 const { CHAINLINK_ORACLE, REDSTONE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -187,7 +187,6 @@ const acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
 const holdsScoped = (contract: string, role: string, account: string): Promise<boolean> =>
   acm.hasRole(ethers.utils.solidityKeccak256(["address", "string"], [contract, role]), account);
 
-/// How many `name` events the ACM emitted in the transaction.
 const acmEvents = async (txResponse: TransactionResponse, name: string): Promise<number> => {
   const { logs } = await txResponse.wait();
   const topic = ACM_EVENTS.getEventTopic(name);
@@ -208,24 +207,7 @@ const fund = async (token: string, to: string, amount: BigNumber) => {
   await ethers.provider.send("hardhat_setStorageAt", [token, slot, ethers.utils.hexZeroPad(balance.toHexString(), 32)]);
 };
 
-const GOVERNOR_ABI = ["function state(uint256) view returns (uint8)"];
-const VIP_673 = 673;
-/// `ProposalState.Executed` in GovernorBravo.
-const EXECUTED_STATE = 7;
-
-/// VIP-673 is queued at FORK_BLOCK and is expected to execute before VIP-675 on mainnet, so until the fork moves past
-/// its execution, apply its commands as the Normal Timelock.
-const applyVip673 = async () => {
-  const governor = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.GOVERNOR_PROXY, GOVERNOR_ABI, ethers.provider);
-  const state: number = await governor.state(VIP_673);
-  if (state === EXECUTED_STATE) return;
-  await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
-  console.warn(`[vip-675] VIP-673 (state ${state}) applied on the fork`);
-};
-
 forking(FORK_BLOCK, async () => {
-  await applyVip673();
-
   const COMPTROLLER = PART_1.comptroller;
   const LIQUIDITY = PART_1.liquidity;
   const COLLATERAL_1 = PART_1.collateral;
@@ -245,7 +227,6 @@ forking(FORK_BLOCK, async () => {
   const dbo = new ethers.Contract(DEVIATION_BOUNDED_ORACLE, DBO_ABI, ethers.provider);
   const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   const registry = new ethers.Contract(SPOKE_POOL_REGISTRY, REGISTRY_ABI, ethers.provider);
-  /// `[category, logoURL, description]`, as a plain array.
   const metadataOf = async (pool: string): Promise<string[]> => [...(await registry.getVenusPoolMetadata(pool))];
   const gateway = new ethers.Contract(COLLATERAL_GATEWAY, GATEWAY_ABI, ethers.provider);
   const psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, ethers.provider);
@@ -266,21 +247,11 @@ forking(FORK_BLOCK, async () => {
     };
   }
 
-  // The VTreasury pays every seed. At FORK_BLOCK it holds none of them, so the fork tops it up.
   const treasuryBefore: Record<string, BigNumber> = {};
   const timelockBefore: Record<string, BigNumber> = {};
-  const fundedOnFork: string[] = [];
   for (const m of MARKETS) {
-    const balance: BigNumber = await erc20Of(m.underlying).balanceOf(VTREASURY);
-    if (balance.lt(m.initialSupply!)) {
-      await fund(m.underlying, VTREASURY, m.initialSupply!.sub(balance));
-      fundedOnFork.push(ticker(m));
-    }
     treasuryBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(VTREASURY);
     timelockBefore[m.underlying] = await erc20Of(m.underlying).balanceOf(NORMAL_TIMELOCK);
-  }
-  if (fundedOnFork.length > 0) {
-    console.warn(`[vip-675] funded the VTreasury on the fork with the seed of: ${fundedOnFork.join(", ")}`);
   }
 
   // The feeds go stale over the simulated voting and timelock delay, so pin each feed's current answer as a direct
@@ -300,13 +271,12 @@ forking(FORK_BLOCK, async () => {
     await atlas.connect(timelock).setDirectPrice(underlying, MANTISSA_ONE);
   }
 
-  // Unpinned batches take the next free index, so each part is seeded before the next one is built. `testVip` seeds
-  // part 3's.
+  // All three parts use their pinned on-chain batches.
   const proposal1 = await vip675(PART_1);
   await seedProposalBatchesOnFork(proposal1);
-  const proposal2 = await vip676(PART_2);
+  const proposal2 = await vip677(PART_2);
   await seedProposalBatchesOnFork(proposal2);
-  const proposal3 = await vip677(PART_3);
+  const proposal3 = await vip678(PART_3);
 
   const expectListed = async (markets: SpokeMarket[]) => {
     for (const m of markets) {
@@ -428,13 +398,13 @@ forking(FORK_BLOCK, async () => {
       [part.liquidity.length, part.liquidity.length, part.liquidity.length],
     );
     await expectEvents(txResponse, [HUB_ABI], ["YieldGroupCapRaised", "OuterDepositQueueSet"], [0, 0]);
-    // The aggregator revokes every role it grants itself, and each wildcard replaces one of the bStock index pool's
-    // grants, so only part 1's scoped grant is left. The mainnet ACM emits no PermissionGranted, so RoleGranted
-    // and RoleRevoked are the count.
+    // The aggregator revokes every role it grants itself, each wildcard replaces one of the bStock index pool's
+    // grants, and part 1 also revokes CollateralGateway's grant on Core. The mainnet ACM emits no PermissionGranted,
+    // so RoleGranted and RoleRevoked are the count.
     const granted = await acmEvents(txResponse, "RoleGranted");
     const revoked = await acmEvents(txResponse, "RoleRevoked");
     expect(granted - revoked, "grants left after execution").to.equal(
-      part.createsPool ? SCOPED_GRANTS_MAINSTREAM.length : 0,
+      part.createsPool ? -CORE_GRANTS_REPLACED.length : 0,
     );
   };
 
@@ -443,6 +413,12 @@ forking(FORK_BLOCK, async () => {
       for (const part of [PART_1, PART_2, PART_3]) {
         expect(pendingDeployments(part), `VIP-${part.vipNumber}`).to.deep.equal([]);
         expect(pendingRiskValues(part), `VIP-${part.vipNumber}`).to.deep.equal([]);
+      }
+    });
+
+    it("has the VTreasury hold every seed", async () => {
+      for (const m of MARKETS) {
+        expect(treasuryBefore[m.underlying], m.symbol).to.be.gte(m.initialSupply!);
       }
     });
 
@@ -547,7 +523,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("gives no account a VIP-675 comptroller role as a wildcard, and no one `enterMarketForAccount` on this pool", async () => {
-      for (const { role, account: holder } of [...VIP_675_WILDCARDS, ...SCOPED_GRANTS_MAINSTREAM]) {
+      for (const { role, account: holder } of VIP_675_WILDCARDS) {
         expect(await mayCall(UNRELATED, holder, role), `${role} as a wildcard`).to.be.false;
       }
       for (const role of ROUTER_ROLES) {
@@ -558,9 +534,12 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("has the bStock index pool hold each wildcard role as a scoped grant", async () => {
+    it("has the bStock index pool hold each wildcard role as a scoped grant, and CollateralGateway its Core one", async () => {
       for (const { role, account: holder } of VIP_675_WILDCARDS) {
         expect(await holdsScoped(SPOKE_COMPTROLLER, role, holder), `${holder}: ${role}`).to.be.true;
+      }
+      for (const { role, account: holder } of CORE_GRANTS_REPLACED) {
+        expect(await holdsScoped(CORE_COMPTROLLER, role, holder), `${holder} on Core: ${role}`).to.be.true;
       }
     });
 
@@ -575,7 +554,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("prices USDT, USDC and U as the listing sheet does, with no DBO window, so VIP-675 changes none of them", async () => {
+    it("prices USDT, USDC and U with no DBO window, so VIP-675 changes none of them", async () => {
       const initialized = normalize(await dbo.getInitializedAssets());
       for (const { symbol, underlying } of LIQUIDITY) {
         const config = await resilientOracle.getTokenConfig(underlying);
@@ -588,7 +567,7 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("builds the liquidity markets on the listing sheet's rate model, and the bStock markets on one that charges 0", async () => {
+    it("builds the liquidity markets on the bStock index pool's rate model, and the bStock markets on one that charges 0", async () => {
       const IRM_ABI = [
         "function baseRatePerBlock() view returns (uint256)",
         "function multiplierPerBlock() view returns (uint256)",
@@ -651,9 +630,8 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip("VIP-675 [bscmainnet] bStock mainstream Spoke pool, part 1", proposal1, {
+    ...GOVERNANCE_VOTERS,
     seedProposalBatches: false,
-    proposer: PROPOSER,
-    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_1);
     },
@@ -721,14 +699,10 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("grants the roles as wildcards, and the Critical Guardian's `setCloseFactor` on this comptroller", async () => {
+    it("grants every role as a wildcard", async () => {
       for (const { role, account: holder } of VIP_675_WILDCARDS) {
         expect(await mayCall(UNRELATED, holder, role), `${holder} holds ${role} as a wildcard`).to.be.true;
         expect(await mayCall(COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
-      }
-      for (const { role, account: holder } of SCOPED_GRANTS_MAINSTREAM) {
-        expect(await mayCall(COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
-        expect(await mayCall(UNRELATED, holder, role), `${role} as a wildcard`).to.be.false;
       }
       // Its holder can make any account's supply seizable collateral, so none of the protocol's own accounts holds it.
       for (const role of ROUTER_ROLES) {
@@ -738,13 +712,14 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
-    it("revokes the bStock index pool's scoped grants the wildcards replace, without removing any access", async () => {
+    it("revokes the scoped grants the wildcards replace, without removing any access", async () => {
       for (const { role, account: holder } of VIP_675_WILDCARDS) {
         expect(await holdsScoped(SPOKE_COMPTROLLER, role, holder), `${holder} scoped ${role}`).to.be.false;
         expect(await mayCall(SPOKE_COMPTROLLER, holder, role), `${holder} may ${role}`).to.be.true;
       }
-      for (const { role, account: holder } of SCOPED_GRANTS_MAINSTREAM) {
-        expect(await holdsScoped(SPOKE_COMPTROLLER, role, holder), `${holder} scoped ${role}`).to.be.true;
+      for (const { role, account: holder } of CORE_GRANTS_REPLACED) {
+        expect(await holdsScoped(CORE_COMPTROLLER, role, holder), `${holder} scoped on Core ${role}`).to.be.false;
+        expect(await mayCall(CORE_COMPTROLLER, holder, role), `${holder} may ${role} on Core`).to.be.true;
       }
     });
 
@@ -830,16 +805,15 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-676 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
+  testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 2", proposal2, {
+    ...GOVERNANCE_VOTERS,
     seedProposalBatches: false,
-    proposer: PROPOSER,
-    supporters: SUPPORTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_2);
     },
   });
 
-  describe("Post-VIP-676", () => {
+  describe("Post-VIP-677", () => {
     it("prices part 2's assets", async () => {
       await expectPriced(COLLATERAL_2);
     });
@@ -870,15 +844,14 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-677 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
-    proposer: PROPOSER,
-    supporters: SUPPORTERS,
+  testVip("VIP-678 [bscmainnet] bStock mainstream Spoke pool, part 3", proposal3, {
+    ...GOVERNANCE_VOTERS,
     callbackAfterExecution: async txResponse => {
       await expectEventsOf(txResponse, PART_3);
     },
   });
 
-  describe("Post-VIP-677", () => {
+  describe("Post-VIP-678", () => {
     it("prices part 3's assets", async () => {
       await expectPriced(COLLATERAL_3);
     });
@@ -921,8 +894,8 @@ forking(FORK_BLOCK, async () => {
   // each liquidity asset and its liquidation after a price drop, a day of interest reaching the Hubs and the
   // ProtocolShareReserve, full repayment, and each Hub drawing its liquidity back out of the bStock mainstream market
   // first.
-  // Runs last: it halves prices and moves the clock.
-  describe("Post-VIP-677: end to end, across the whole pool", () => {
+  // Runs after the per-part tests: it halves prices and moves the clock.
+  describe("Post-VIP-678: end to end, across the whole pool", () => {
     const HOLDER = account("e2e holder");
     const LIQUIDATOR = account("e2e liquidator");
     const borrowerOf = (c: MainstreamCollateralMarket) => account(`e2e borrower ${c.symbol}`);
@@ -1071,6 +1044,106 @@ forking(FORK_BLOCK, async () => {
         expect(await vTokenOf(m.vToken).balanceOf(m.stack.spokeSource), m.symbol).to.be.lt(held);
         expect(await vTokenOf(m.indexMarket).balanceOf(m.stack.spokeSource), `${m.symbol} index`).to.equal(heldInIndex);
       }
+    });
+  });
+
+  // Each collateral market's CF and LT as the comptroller applies them, through the oracle path: a loan up to the
+  // borrowing power and not a wei more, and a liquidation that turns on exactly where the LT stops covering the loan.
+  // Runs after the end-to-end flow, whose exact seed vToken count its liquidations would shift. Each loan is repaid in
+  // full.
+  describe("Post-VIP-678: borrow limits at each market's CF and LT", () => {
+    /// Above the $100 minimum liquidatable collateral even after the lowest CF/LT drop (50/60).
+    const COLLATERAL_VALUE = ethers.utils.parseUnits("200", 18);
+    /// How far either side of the LT threshold the price is moved: 0.01%.
+    const EDGE_BPS = 1;
+    const LIQUIDATOR = account("cf liquidator");
+    /// Rounding in the comptroller's own valuation.
+    const DUST = ethers.utils.parseUnits("1", 12);
+    let timelock: Awaited<ReturnType<typeof initMainnetUser>>;
+
+    const pinPrice = async (c: MainstreamCollateralMarket, value: BigNumber) => {
+      await atlas.connect(timelock).setDirectPrice(c.underlying, value);
+      if (c.aproFeed !== null) {
+        await apro.connect(timelock).setDirectPrice(c.underlying, value);
+      }
+    };
+
+    before(async () => {
+      timelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+    });
+
+    COLLATERAL.forEach((c, i) => {
+      const debt = LIQUIDITY[i % LIQUIDITY.length];
+      it(`lends ${ticker(debt)} against ${ticker(c)} up to its CF, and lets it be liquidated past its LT`, async () => {
+        const price = prices[c.underlying];
+        const borrower = await initMainnetUser(account(`cf borrower ${c.symbol}`), ethers.utils.parseEther("1"));
+        const supplied = COLLATERAL_VALUE.mul(MANTISSA_ONE).div(price);
+        await fund(c.underlying, borrower.address, supplied);
+        await erc20Of(c.underlying).connect(borrower).approve(COLLATERAL_GATEWAY, supplied);
+        await gateway.connect(borrower).supplyAndEnterSpokeMarkets([c.vToken], [supplied]);
+        // Valued as the comptroller values it: the vToken balance at the market's exchange rate, which earlier
+        // liquidations may have moved off the initial one.
+        const vCollateral = vTokenOf(c.vToken);
+        const held: BigNumber = (await vCollateral.balanceOf(borrower.address))
+          .mul(await vCollateral.exchangeRateStored())
+          .div(MANTISSA_ONE);
+        const value = held.mul(price).div(MANTISSA_ONE);
+
+        const [, power] = await comptroller.getBorrowingPower(borrower.address);
+        expect(power, `${c.symbol} borrowing power`).to.be.closeTo(
+          value.mul(c.collateralFactor).div(MANTISSA_ONE),
+          DUST,
+        );
+        const [, coverBefore] = await comptroller.getAccountLiquidity(borrower.address);
+        expect(coverBefore, `${c.symbol} LT liquidity`).to.be.closeTo(
+          value.mul(c.liquidationThreshold).div(MANTISSA_ONE),
+          DUST,
+        );
+
+        const v = vTokenOf(debt.vToken).connect(borrower);
+        await v.borrow(power);
+        expect(await erc20Of(debt.underlying).balanceOf(borrower.address), debt.symbol).to.equal(power);
+        await expect(v.borrow(1), `${c.symbol} past CF`).to.be.revertedWithCustomError(
+          comptroller,
+          "InsufficientLiquidity",
+        );
+        const [, powerLeft, powerShort] = await comptroller.getBorrowingPower(borrower.address);
+        expect(powerLeft.add(powerShort), `${c.symbol} borrowing power used`).to.be.lte(DUST);
+
+        // The price at which LT x collateral value equals the loan.
+        const loan: BigNumber = await v.callStatic.borrowBalanceCurrent(borrower.address);
+        const edge = loan.mul(MANTISSA_ONE).mul(MANTISSA_ONE).div(held.mul(c.liquidationThreshold));
+        expect(edge, `${c.symbol} LT edge`).to.be.closeTo(
+          price.mul(c.collateralFactor).div(c.liquidationThreshold),
+          price.div(10000),
+        );
+
+        const liquidator = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
+        const repay = loan.div(10);
+        await fund(debt.underlying, LIQUIDATOR, repay);
+        await erc20Of(debt.underlying).connect(liquidator).approve(debt.vToken, repay);
+
+        await pinPrice(c, edge.mul(10000 + EDGE_BPS).div(10000));
+        const [, , shortfallAbove] = await comptroller.getAccountLiquidity(borrower.address);
+        expect(shortfallAbove, `${c.symbol} shortfall just above the LT edge`).to.equal(0);
+        await expect(
+          vTokenOf(debt.vToken).connect(liquidator).liquidateBorrow(borrower.address, repay, c.vToken),
+          `${c.symbol} liquidated above the LT edge`,
+        ).to.be.revertedWithCustomError(comptroller, "InsufficientShortfall");
+
+        await pinPrice(c, edge.mul(10000 - EDGE_BPS).div(10000));
+        const [, , shortfallBelow] = await comptroller.getAccountLiquidity(borrower.address);
+        expect(shortfallBelow, `${c.symbol} shortfall just below the LT edge`).to.be.gt(0);
+        const seizedBefore: BigNumber = await vTokenOf(c.vToken).balanceOf(LIQUIDATOR);
+        await vTokenOf(debt.vToken).connect(liquidator).liquidateBorrow(borrower.address, repay, c.vToken);
+        expect(await vTokenOf(c.vToken).balanceOf(LIQUIDATOR), `${c.symbol} seized`).to.be.gt(seizedBefore);
+
+        await pinPrice(c, price);
+        await fund(debt.underlying, borrower.address, loan.div(100));
+        await erc20Of(debt.underlying).connect(borrower).approve(debt.vToken, ethers.constants.MaxUint256);
+        await v.repayBorrow(ethers.constants.MaxUint256);
+        expect(await v.borrowBalanceStored(borrower.address), `${c.symbol} debt`).to.equal(0);
+      });
     });
   });
 });

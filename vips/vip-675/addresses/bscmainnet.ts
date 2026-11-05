@@ -16,7 +16,6 @@ import {
   VU_SPOKE,
 } from "../../vip-670/addresses/bscmainnet";
 
-// VIP-675 address book. Re-exports VIP-670's, which re-exports VIP-669's and VIP-668's.
 export * from "../../vip-670/addresses/bscmainnet";
 
 // ===================================================================================================
@@ -24,10 +23,7 @@ export * from "../../vip-670/addresses/bscmainnet";
 // "bStock index" pool (`Comptroller_HubSpoke`), with single-stock bStocks as collateral and USDT, USDC and U as
 // liquidity. Its liquidity markets are funded by the same Spoke sources as the bStock index pool's.
 //
-// STATUS: DRAFT. Every `PENDING` fails loudly: the proposals throw with the full list until it is empty.
-//
-// Token data read on chain on 2026-10-27 (block ~130,080,000), Atlas feeds on 2026-10-29 (block ~130,460,000). Every
-// underlying has 18 decimals, so every token amount below is 18-decimal scaled.
+// Every underlying has 18 decimals, so every token amount below is 18-decimal scaled.
 // ===================================================================================================
 
 export const MAINSTREAM_POOL_NAME = "bStock mainstream";
@@ -36,20 +32,15 @@ export const MAINSTREAM_POOL_NAME = "bStock mainstream";
 export const MAINSTREAM_POOL_DESCRIPTION = "Borrow against mainstream bStocks";
 export const INDEX_POOL_DESCRIPTION = "Borrow against bStock index";
 
-/// Suffix of every market's symbol, `vTSLAB_bStockMainstream`. The bStock index markets use `_bStockIndex`.
 const SYMBOL_SUFFIX = "bStockMainstream";
 
 // ---------------------------------------------------------------------------------------------------
 // VIP-675's new contracts, from isolated-pools `025` and `028` (isolated-pools#575).
 // ---------------------------------------------------------------------------------------------------
 
-/// `Comptroller_bStockMainstream`, a BeaconProxy over SPOKE_COMPTROLLER_BEACON, so its `poolRegistry()` immutable is
-/// SPOKE_POOL_REGISTRY. Initialized with MAX_LOOPS_LIMIT and the ACM, no oracle and no market. Ownable2Step: the
-/// deployer still owns it and the Normal Timelock is only nominated.
+/// `Comptroller_bStockMainstream`. Ownable2Step: the deployer still owns it and the Normal Timelock is only nominated.
 export const MAINSTREAM_COMPTROLLER = "0xE14175059adc1B3C533184710425805A3063455B";
 
-/// Each a BeaconProxy over SPOKE_VTOKEN_BEACON on MAINSTREAM_COMPTROLLER, owned by the Normal Timelock, with a 10%
-/// reserve factor and the Normal Timelock as `shortfall`, so no `setShortfallContract` is needed.
 export const VUSDT_MAINSTREAM = "0x2b12bC29044CE8f018Ae0aF5929450a8A6259Ed8";
 export const VUSDC_MAINSTREAM = "0xD7608E9dFe6CB4b527d41abF40d0f46D917c9EeA";
 export const VU_MAINSTREAM = "0x24Ee5A3F631f9c2FAf8a730d43F059D3eA9566AD";
@@ -75,7 +66,7 @@ export const VTSMB_MAINSTREAM = "0x28e19e1edD491F01BcFD13f96D99b5c04E176428";
 export const VCOINB_MAINSTREAM = "0x04B9F583e59673c11Fa8603ea019C5B24644acc6";
 
 // ---------------------------------------------------------------------------------------------------
-// Underlyings. Beacon proxies of the same bStock token family as the Core pool's TSLAB.
+// Underlyings.
 // ---------------------------------------------------------------------------------------------------
 
 export const NVDAB = "0x02Fca66C1D1aFB4E2A7884261eB00F63598a7436";
@@ -103,18 +94,16 @@ export const COINB = "0x585BDE7C54ABB5cCD7791F923D6c2187635f3952";
 // Feeds. NVDAB, TSLAB, SPCXB and SKHYB are already priced for the Core pool: their Atlas, APRO, band and DBO configs
 // are per asset, so this pool shares them and VIP-675 sends none. Their feeds are listed for the simulation to compare.
 //
-// The other 16 have no Venus oracle or DBO config yet. Each uses the Atlas feed Atlas lists for Venus, which
-// authorizes ATLAS_ORACLE (all 16 since block 130,433,478). The DBO's `setTokenConfigs` reads the live price, so a
-// feed that does not authorize it reverts the part with `OnlyAuthorizedCallerAllowed()`. Only CRCLB, SNDKB, METAB,
-// MSFTB and MUB have an APRO feed on BNB Chain, and APRO_ORACLE already reads each. The rest are priced by Atlas
-// alone, as SPYB is in the bStock index pool.
+// The other 16 have no oracle or DBO config yet. The DBO's `setTokenConfigs` reads the live price, so each Atlas feed
+// has to authorize ATLAS_ORACLE or the part reverts with `OnlyAuthorizedCallerAllowed()`. Only CRCLB, SNDKB, METAB,
+// MSFTB and MUB have an APRO feed on BNB Chain. The rest are priced by Atlas alone.
 // ---------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------
 // Markets.
 // ---------------------------------------------------------------------------------------------------
 
-/// The listing sheet's tiers. They only drive the risk values; every tier is listed.
+/// Tiers only drive the risk values; every tier is listed.
 export type Tier = 1 | 2 | 3 | 4;
 
 export type MainstreamCollateralMarket = CollateralMarket & {
@@ -129,7 +118,7 @@ export type MainstreamCollateralMarket = CollateralMarket & {
 /// The bStock index pool's market of the same asset, in the same Spoke source.
 export type MainstreamLiquidityMarket = LiquidityMarket & { indexMarket: string };
 
-/// The bStock index values, accepted for the new assets and to be tuned with `setThresholds` if needed.
+/// The bStock index pool's values.
 export const DBO_WINDOW: DboConfig = {
   cooldownPeriod: 3600,
   triggerThreshold: parseUnits("0.125", 18),
@@ -139,7 +128,7 @@ export const DBO_WINDOW: DboConfig = {
 };
 
 const liquidity = {
-  // The bStock index pool's rate model, reused by `028`: the listing sheet gives this pool the same one.
+  // The bStock index pool's rate model.
   interestRateModel: IRM_LIQUIDITY,
   collateralFactor: BigNumber.from(0),
   liquidationThreshold: BigNumber.from(0),
@@ -178,8 +167,8 @@ export const LIQUIDITY_MARKETS_MAINSTREAM: MainstreamLiquidityMarket[] = [
   },
 ];
 
-// The listing sheet's risk values. Supply caps are sized in USD by tier (T1 $1M, T2 $300k, T3 and T4 $100k, at most 15%
-// of the on-chain float) at the 2026-10-28 oracle price; re-convert them at the price before proposing.
+// Supply caps are sized in USD by tier (T1 $1M, T2 $300k, T3 and T4 $100k, at most 15% of the on-chain float) at the
+// 2026-10-28 oracle price. They are token amounts, so their USD value moves with price.
 const cap = (tokens: number) => parseUnits(tokens.toString(), 18);
 /// Every collateral market gets an incentive of its own, even where it equals the pool-wide 10%.
 const risk = (cf: string, lt: string, incentive: string, seizeShare: string) => ({
@@ -199,8 +188,8 @@ const collateral = {
 const onCore = { ...collateral, pricedOnCore: true, dbo: null };
 const newAsset = { ...collateral, pricedOnCore: false, dbo: DBO_WINDOW };
 
-// Seeds are about $10 each at the 2026-10-27 Atlas price, and their vTokens are minted to SEED_RECEIVER. Re-check them
-// against the price before proposing.
+// Seeds are about $10 each at the 2026-10-27 Atlas price, and their vTokens are minted to SEED_RECEIVER. The VTreasury
+// holds these amounts, so raising one needs a top-up first.
 export const COLLATERAL_MARKETS_MAINSTREAM: MainstreamCollateralMarket[] = [
   // Tier 1
   {
@@ -336,7 +325,7 @@ export const COLLATERAL_MARKETS_MAINSTREAM: MainstreamCollateralMarket[] = [
     atlasFeed: "0x2446ce421C462a5fe5E083933b2B7c98027Ca1A7",
     aproFeed: "0xBC92F296c48E31409eD4DbD638F1fbe0ee5A3724",
   },
-  // Tier 3. BNCB is not listed: neither Atlas nor APRO has a feed for it.
+  // Tier 3
   {
     ...newAsset,
     ...risk("0.5", "0.6", "1.15", "0.075"),

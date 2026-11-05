@@ -3,8 +3,8 @@ import { forking } from "src/vip-framework";
 
 import { checkRemoteChain } from "./utils/remote";
 
-const BLOCK_NUMBER = 26297212;
+const BLOCK_NUMBER = 53538140;
 
 forking(BLOCK_NUMBER, async () => {
-  await checkRemoteChain("Ethereum", NETWORK_ADDRESSES.ethereum.NORMAL_TIMELOCK);
+  await checkRemoteChain("Base", NETWORK_ADDRESSES.basemainnet.NORMAL_TIMELOCK);
 });

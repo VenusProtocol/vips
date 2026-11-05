@@ -3,7 +3,7 @@ import { forking } from "src/vip-framework";
 
 import { checkRemoteChain } from "./utils/remote";
 
-const BLOCK_NUMBER = 519306010;
+const BLOCK_NUMBER = 521417427;
 
 forking(BLOCK_NUMBER, async () => {
   await checkRemoteChain("Arbitrum One", NETWORK_ADDRESSES.arbitrumone.NORMAL_TIMELOCK);

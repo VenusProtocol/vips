@@ -23,13 +23,13 @@ const VIP_673_EBRAKE_IMPLEMENTATION = "0xeB18c8B6d0ddc13D3d7A8cD5FF684F11E5bcBCf
 
 export const SENTINEL_ADMINS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
 
-export const vip678 = () => {
+export const vip680 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-678 [BNB Chain, Ethereum, Arbitrum One, Base] EBrake upgrade and bStock pause sentinel",
+    title: "VIP-680 [BNB Chain, Ethereum, Arbitrum One, Base] EBrake upgrade and bStock pause sentinel",
     description: `#### Summary
 
-If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new BStockPauseSentinel will watch every bStock market on BNB Chain. When a bStock's issuer pauses the token, or its compliance module blocks a market, a keeper calls the sentinel, which sets that market's collateral factor to 0 through EBrake. EBrake is also upgraded to the same build on Ethereum, Arbitrum One and Base.
+If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new BStockPauseSentinel will monitor the 26 configured bStock markets on BNB Chain. When a bStock's issuer pauses the token, or its compliance module blocks a market, a keeper calls the sentinel, which sets that market's collateral factor to 0 through EBrake. EBrake is also upgraded to the same build on Ethereum, Arbitrum One and Base.
 
 #### Actions
 
@@ -42,14 +42,15 @@ If this VIP passes, EBrake will be able to act on Spoke pool markets, and a new 
       BSTOCK_MARKETS.length
     } bStock markets: vTSLAB, vNVDAB, vSPCXB and vSKHYB in the Core pool, vQQQB and vSPYB in the bStock index Spoke pool, and the ${
       MAINSTREAM_BSTOCK_MARKETS.length
-    } bStock markets of the bStock mainstream Spoke pool, which is being listed.
+    } bStock markets of the bStock mainstream Spoke pool, listed by VIP-675, VIP-677 and VIP-678.
 7. On Ethereum, Arbitrum One and Base, upgrade **EBrake** to the same build. EBrake's existing grants on each Core pool comptroller already cover it, so no permissions change there:
 ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
 
 #### Notes
 
 - The sentinel only lowers the collateral factor to 0 and keeps the liquidation threshold, so no position becomes liquidatable. Restoring the collateral factor stays with governance.
-- VIP-673 upgrades the same EBrake proxy to [${VIP_673_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${VIP_673_EBRAKE_IMPLEMENTATION}). It must execute before this VIP, because executing it afterwards would roll EBrake back to a build without Spoke pool support.
+- VIP-675, VIP-677 and VIP-678 must execute first so all 20 mainstream markets are listed. Future bStock listings and delistings must update the sentinel with \`setMarketMonitored\`.
+- VIP-673 already upgraded the same EBrake proxy to [${VIP_673_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${VIP_673_EBRAKE_IMPLEMENTATION}). This VIP builds on that implementation and retains its Hub pause actions.
 - DeviationSentinel on the remote chains already runs the current build, so it is not upgraded.
 - EBrake and the sentinel were audited by HashDit, and these deployments include the fixes from that audit.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -119,4 +120,4 @@ ${REMOTE_CHAINS.map(c => `   - ${c.name}: ${c.newImplementation}`).join("\n")}
   );
 };
 
-export default vip678;
+export default vip680;

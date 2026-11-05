@@ -7,9 +7,18 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import vip673 from "../../vips/vip-673/bscmainnet";
-import { MAINSTREAM_COMPTROLLER } from "../../vips/vip-675/addresses/bscmainnet";
-import vip678, { BSTOCK_PAUSE_SENTINEL, EBRAKE, KEEPER, SENTINEL_ADMINS } from "../../vips/vip-678/bscmainnet";
+import {
+  APRO_ORACLE,
+  ATLAS_ORACLE,
+  COLLATERAL_MARKETS_MAINSTREAM,
+  LIQUIDITY_MARKETS_MAINSTREAM,
+  MAINSTREAM_COMPTROLLER,
+  VTSLAB_MAINSTREAM,
+} from "../../vips/vip-675/addresses/bscmainnet";
+import vip675 from "../../vips/vip-675/bscmainnet";
+import vip677 from "../../vips/vip-675/bscmainnet-part-2";
+import vip678 from "../../vips/vip-675/bscmainnet-part-3";
+import vip680, { BSTOCK_PAUSE_SENTINEL, EBRAKE, KEEPER, SENTINEL_ADMINS } from "../../vips/vip-680/bscmainnet";
 import {
   BSTOCK_MARKETS,
   CORE_ONLY_PERMISSIONS,
@@ -19,7 +28,8 @@ import {
   vQQQB,
   vSPYB,
   vTSLAB,
-} from "../../vips/vip-678/config";
+} from "../../vips/vip-680/config";
+import CHAINLINK_ORACLE_ABI from "../vip-675/abi/ChainlinkOracle.json";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import SENTINEL_ABI from "./abi/BStockPauseSentinel.json";
 import COMPLIANCE_ABI from "./abi/Compliance.json";
@@ -33,7 +43,8 @@ import SPOKE_COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 const { ACCESS_CONTROL_MANAGER, CRITICAL_GUARDIAN, GUARDIAN, NORMAL_TIMELOCK, UNITROLLER } =
   NETWORK_ADDRESSES.bscmainnet;
 
-const BLOCK_NUMBER = 130439277;
+// After VIP-673 and all Mainstream listing batches were seeded; listing execution is simulated below.
+const BLOCK_NUMBER = 131781257;
 
 const DEPLOYER = "0x9b0A3EAE7f174937d31745B710BbeA68e9D1BEf7";
 const PAUSE_MANAGER = "0x9fc74Be63f3589485B2423984a7a0557e0CF700a";
@@ -77,9 +88,39 @@ forking(BLOCK_NUMBER, async () => {
   const hasWildcard = (signature: string, account: string) =>
     acm.hasRole(ethers.utils.solidityKeccak256(["bytes32", "string"], [ethers.constants.HashZero, signature]), account);
 
-  // An already queued proposal upgrades the same EBrake proxy, so it runs first
+  // Pin feed answers on the fork so listing and governance delays do not introduce stale-price failures.
+  // VIP-673 has already executed. Run the actual Mainstream listing commands before testing VIP-680.
   before(async () => {
-    await pretendExecutingVip(await vip673(), NORMAL_TIMELOCK);
+    const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseEther("1"));
+    const atlas = new Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+    const apro = new Contract(APRO_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+    for (const market of COLLATERAL_MARKETS_MAINSTREAM) {
+      for (const [oracle, feed] of [
+        [atlas, market.atlasFeed],
+        [apro, market.aproFeed],
+      ] as const) {
+        if (!feed) continue;
+        const aggregator = new Contract(
+          feed,
+          [
+            "function decimals() view returns (uint8)",
+            "function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)",
+          ],
+          ethers.provider,
+        );
+        const [, answer] = await aggregator.latestRoundData({ from: oracle.address });
+        const decimals = await aggregator.decimals({ from: oracle.address });
+        await oracle.setDirectPrice(market.underlying, answer.mul(parseUnits("1", 18 - decimals)));
+      }
+    }
+    const chainlink = new Contract(NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+    for (const market of LIQUIDITY_MARKETS_MAINSTREAM) {
+      await chainlink.setDirectPrice(market.underlying, parseEther("1"));
+      await atlas.setDirectPrice(market.underlying, parseEther("1"));
+    }
+    for (const listing of [vip675, vip677, vip678]) {
+      await pretendExecutingVip(await listing(), NORMAL_TIMELOCK);
+    }
   });
 
   describe("Pre-VIP behavior", () => {
@@ -117,10 +158,10 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-678 EBrake on Spoke pools and bStock pause sentinel", await vip678(), {
+  testVip("VIP-680 EBrake on Spoke pools and bStock pause sentinel", await vip680(), {
     proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
     supporters: [
-      "0x34221485302f6F2029660a000908B5FCABB9BC6e",
+      "0x5176671de05380379399b669ed276feec99d59cb",
       "0xc444949e0054a23c44fc45789738bdf64aed2391",
       "0xeBA4b3c462B9C16f7CCaF4BE6f4D3c17c377411E",
     ],
@@ -250,6 +291,44 @@ forking(BLOCK_NUMBER, async () => {
       const [snapshotCF, snapshotLT] = await ebrake.getMarketCFSnapshot(vTSLAB, CORE_POOL_ID);
       expect(snapshotCF).to.equal(CORE_CF);
       expect(snapshotLT).to.equal(CORE_LT);
+    });
+
+    it("zeroes all 26 markets when their underlying bStocks pause, preserving LT and snapshots", async () => {
+      for (const market of BSTOCK_MARKETS) {
+        const vToken = new Contract(
+          market,
+          ["function comptroller() view returns (address)", "function underlying() view returns (address)"],
+          ethers.provider,
+        );
+        const marketComptroller = await vToken.comptroller();
+        const pool = new Contract(
+          marketComptroller,
+          marketComptroller.toLowerCase() === UNITROLLER.toLowerCase() ? COMPTROLLER_ABI : SPOKE_COMPTROLLER_ABI,
+          ethers.provider,
+        );
+        const before = await pool.markets(market);
+        expect(before.isListed, market).to.be.true;
+        expect(before.collateralFactorMantissa, market).to.be.gt(0);
+        const underlying = await vToken.underlying();
+        if (!(await pauseManager.isTokenPaused(underlying))) await pauseManager.pauseToken(underlying);
+        await sentinel.connect(keeper).handleBStockPause(market);
+        const after = await pool.markets(market);
+        expect(after.collateralFactorMantissa, market).to.equal(0);
+        expect(after.liquidationThresholdMantissa, market).to.equal(before.liquidationThresholdMantissa);
+        const [cf, lt] = await ebrake.getMarketCFSnapshot(market, 0);
+        expect(cf, market).to.equal(before.collateralFactorMantissa);
+        expect(lt, market).to.equal(before.liquidationThresholdMantissa);
+      }
+    });
+
+    it("handles the same paused token in Core and Mainstream independently", async () => {
+      const mainstream = new Contract(MAINSTREAM_COMPTROLLER, SPOKE_COMPTROLLER_ABI, ethers.provider);
+      await pauseManager.pauseToken(TSLAB);
+      await sentinel.connect(keeper).handleBStockPause(vTSLAB);
+      expect((await mainstream.markets(VTSLAB_MAINSTREAM)).collateralFactorMantissa).to.be.gt(0);
+      await sentinel.connect(keeper).handleBStockPause(VTSLAB_MAINSTREAM);
+      expect((await comptroller.markets(vTSLAB)).collateralFactorMantissa).to.equal(0);
+      expect((await mainstream.markets(VTSLAB_MAINSTREAM)).collateralFactorMantissa).to.equal(0);
     });
 
     it("keeper zeroes a Spoke market's CF when the compliance module sanctions its vToken, keeping LT", async () => {
