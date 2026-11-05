@@ -1,0 +1,336 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract ISpokePoolManager",
+        "name": "spokePoolManager",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IGovernorBravo",
+        "name": "governorBravo",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "poolRegistry",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IDeviationBoundedOracle",
+        "name": "deviationBoundedOracle",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "spokeAdapter",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "comptrollerBeacon",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vTokenBeacon",
+        "type": "address"
+      },
+      {
+        "internalType": "address payable",
+        "name": "protocolShareReserve",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "shortfall",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPoolMarkets",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidArrayLength",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "LoanAssetNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "NotSpokePoolManager",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "marketCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxMarketCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TooManyMarkets",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddressNotAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "COMPTROLLER_BEACON",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEVIATION_BOUNDED_ORACLE",
+    "outputs": [
+      {
+        "internalType": "contract IDeviationBoundedOracle",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "GOVERNOR_BRAVO",
+    "outputs": [
+      {
+        "internalType": "contract IGovernorBravo",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_POOL_MARKETS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "POLICY_REGISTRY",
+    "outputs": [
+      {
+        "internalType": "contract ISpokePoolPolicyRegistry",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "POOL_REGISTRY",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PROTOCOL_SHARE_RESERVE",
+    "outputs": [
+      {
+        "internalType": "address payable",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SHORTFALL",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SPOKE_ADAPTER",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SPOKE_POOL_MANAGER",
+    "outputs": [
+      {
+        "internalType": "contract ISpokePoolManager",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "VTOKEN_BEACON",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "liquidationThresholds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "name": "buildExitProposal",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "name": "buildForceCloseProposal",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "requestId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "name": "buildRequestProposal",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "vTokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "proposal",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
