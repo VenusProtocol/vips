@@ -13,6 +13,7 @@ import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import GOVERNOR_ABI from "src/vip-framework/abi/governorBravoDelegateAbi.json";
 import { bypassStalePrices, pinOracleFeedPrice } from "src/vip-framework/oracleStaleness";
 
+import ACM_ABI from "./abi/AccessControlManager.json";
 import AGGREGATOR_ABI from "./abi/AggregatorV3.json";
 import BOND_ACCOUNT_ABI from "./abi/BondAccount.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
@@ -21,6 +22,7 @@ import IRM_ABI from "./abi/JumpRateModelV2.json";
 import REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import RISK_ORACLE_ABI from "./abi/RiskOracle.json";
+import RISK_STEWARD_RECEIVER_ABI from "./abi/RiskStewardReceiver.json";
 import BOND_MANAGER_ABI from "./abi/SpokeBondManager.json";
 import COMPTROLLER_ABI from "./abi/SpokeComptroller.json";
 import MANAGER_ABI from "./abi/SpokePoolManager.json";
@@ -83,6 +85,8 @@ forking(FORK_BLOCK, async () => {
   const policyRegistry = new ethers.Contract(await manager.POLICY_REGISTRY(), POLICY_REGISTRY_ABI, provider);
   const bondManager = new ethers.Contract(await manager.bondManager(), BOND_MANAGER_ABI, provider);
   const registry = new ethers.Contract(await builder.POOL_REGISTRY(), REGISTRY_ABI, provider);
+  const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, provider);
+  const receiver = new ethers.Contract(await manager.RISK_STEWARD_RECEIVER(), RISK_STEWARD_RECEIVER_ABI, provider);
 
   // ── The request ────────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -222,6 +226,19 @@ forking(FORK_BLOCK, async () => {
           expect(pool.deployerPaused).to.equal(false);
         });
       }
+
+      if (newPool) {
+        it("requests an enabled tier", async () => {
+          expect((await policyRegistry.getTier(request.tierId)).enabled).to.equal(true);
+        });
+      }
+
+      if (tierRequest) {
+        it("requests an upgrade of the pool's current tier", async () => {
+          const { tierId } = await manager.getPool(comptroller.address);
+          expect(await policyRegistry.isUpgrade(tierId, request.tierId)).to.equal(true);
+        });
+      }
     });
 
     describe("Policy", () => {
@@ -233,6 +250,85 @@ forking(FORK_BLOCK, async () => {
         // Else the comptroller rejects a deployer's update to the tier's maximum threshold
         const incentive = newPool ? poolParams.liquidationIncentive : await comptroller.liquidationIncentiveMantissa();
         expect(limits.maxLiquidationThreshold.mul(incentive)).to.be.lt(parseUnits("1", 36));
+      });
+
+      if (!newPool) {
+        it("keeps each loan market of the pool in its asset's YieldGroup", async () => {
+          for (const vToken of poolLoanMarkets) {
+            const asset = await new ethers.Contract(vToken, VTOKEN_ABI, provider).underlying();
+            const { yieldGroup } = await policyRegistry.getLoanAssetConfig(asset);
+            expect(await new ethers.Contract(yieldGroup, YIELD_GROUP_ABI, provider).resources()).to.include(vToken);
+          }
+        });
+      }
+    });
+
+    describe("Setup", () => {
+      it("sets the manager's wind-down period and residual debt limit", async () => {
+        expect(await manager.windDownPeriod()).to.be.gt(0);
+        expect(await manager.maxResidualPoolDebtUsd()).to.be.gt(0);
+      });
+
+      it("grants the roles the pool's VIPs and risk stewards need", async () => {
+        const steward = async (updateType: string) => (await receiver.getRiskParameterConfig(updateType)).riskSteward;
+        const loanAssets: string[] = await policyRegistry.getLoanAssets();
+        const yieldGroups: string[] = await Promise.all(
+          loanAssets.map(async asset => (await policyRegistry.getLoanAssetConfig(asset)).yieldGroup),
+        );
+        const oracles = [...(await policyRegistry.getSupportedOracles()), resilientOracle.address];
+
+        // [account, contracts, function signatures]
+        const roles: [string, string[], string[]][] = [
+          [
+            registry.address,
+            [comptroller.address],
+            [
+              "setCloseFactor(uint256)",
+              "setLiquidationIncentive(uint256)",
+              "setMinLiquidatableCollateral(uint256)",
+              "setCollateralFactor(address,uint256,uint256)",
+              "setMarketSupplyCaps(address[],uint256[])",
+              "setMarketBorrowCaps(address[],uint256[])",
+            ],
+          ],
+          [
+            bscmainnet.NORMAL_TIMELOCK,
+            [comptroller.address],
+            [
+              "setSupplyAllowlistEnabled(address,bool)",
+              "setAllowedSupplier(address,address,bool)",
+              "setForcedLiquidation(address,bool)",
+            ],
+          ],
+          [
+            bscmainnet.NORMAL_TIMELOCK,
+            yieldGroups,
+            ["addResource(address,address)", "raiseResourceCap(address,uint256)", "lowerResourceCap(address,uint256)"],
+          ],
+          [bscmainnet.NORMAL_TIMELOCK, [manager.address], ["settleRequest(uint256)", "startWindDown(address)"]],
+          [bscmainnet.NORMAL_TIMELOCK, oracles, ["setTokenConfig(TokenConfig)"]],
+          [await steward("collateralFactors"), [comptroller.address], ["setCollateralFactor(address,uint256,uint256)"]],
+          [await steward("supplyCap"), [comptroller.address], ["setMarketSupplyCaps(address[],uint256[])"]],
+          [
+            await steward("supplyPause"),
+            [comptroller.address],
+            ["setCollateralFactor(address,uint256,uint256)", "setActionsPaused(address[],uint256[],bool)"],
+          ],
+        ];
+
+        const missing: string[] = [];
+        for (const [account, contracts, signatures] of roles) {
+          for (const contract of contracts) {
+            for (const signature of signatures) {
+              // A role on the zero address covers every contract
+              const granted =
+                (await acm.hasPermission(account, contract, signature)) ||
+                (await acm.hasPermission(account, ethers.constants.AddressZero, signature));
+              if (!granted) missing.push(`${account} ${signature} on ${contract}`);
+            }
+          }
+        }
+        expect(missing).to.deep.equal([]);
       });
     });
 
