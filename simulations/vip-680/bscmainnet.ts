@@ -159,7 +159,8 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   testVip("VIP-680 EBrake on Spoke pools and bStock pause sentinel", await vip680(), {
-    proposer: "0xe5e62386933b74ea81bfd73a6a6591598e7f8ced",
+    // The usual proposer has active VIP-678 at this block; this Safe's VIP-677 is already queued.
+    proposer: "0x34221485302f6F2029660a000908B5FCABB9BC6e",
     supporters: [
       "0x5176671de05380379399b669ed276feec99d59cb",
       "0xc444949e0054a23c44fc45789738bdf64aed2391",
@@ -301,18 +302,15 @@ forking(BLOCK_NUMBER, async () => {
           ethers.provider,
         );
         const marketComptroller = await vToken.comptroller();
-        const pool = new Contract(
-          marketComptroller,
-          marketComptroller.toLowerCase() === UNITROLLER.toLowerCase() ? COMPTROLLER_ABI : SPOKE_COMPTROLLER_ABI,
-          ethers.provider,
-        );
-        const before = await pool.markets(market);
+        const isCore = marketComptroller.toLowerCase() === UNITROLLER.toLowerCase();
+        const pool = new Contract(marketComptroller, isCore ? COMPTROLLER_ABI : SPOKE_COMPTROLLER_ABI, ethers.provider);
+        const before = isCore ? await pool.poolMarkets(CORE_POOL_ID, market) : await pool.markets(market);
         expect(before.isListed, market).to.be.true;
         expect(before.collateralFactorMantissa, market).to.be.gt(0);
         const underlying = await vToken.underlying();
         if (!(await pauseManager.isTokenPaused(underlying))) await pauseManager.pauseToken(underlying);
         await sentinel.connect(keeper).handleBStockPause(market);
-        const after = await pool.markets(market);
+        const after = isCore ? await pool.poolMarkets(CORE_POOL_ID, market) : await pool.markets(market);
         expect(after.collateralFactorMantissa, market).to.equal(0);
         expect(after.liquidationThresholdMantissa, market).to.equal(before.liquidationThresholdMantissa);
         const [cf, lt] = await ebrake.getMarketCFSnapshot(market, 0);
