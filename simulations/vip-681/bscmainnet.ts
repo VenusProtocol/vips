@@ -26,6 +26,7 @@ import vip681, {
   SPOKE_BEACON,
   SYNC_RECEIPT,
   TRACKING_GROUPS,
+  UPDATE_RESOURCE_ADAPTER,
 } from "../../vips/vip-681/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
@@ -89,14 +90,19 @@ const BEACONS = [
 ];
 
 // `isAllowedToCall` keys the role on msg.sender, so it is asked from the guarded contract's own address
-const isAllowed = async (contract: string, account: string): Promise<boolean> => {
+const isAllowed = async (contract: string, account: string, signature: string): Promise<boolean> => {
   const acm = new ethers.utils.Interface(ACM_ABI);
-  const data = acm.encodeFunctionData("isAllowedToCall", [account, SYNC_RECEIPT]);
+  const data = acm.encodeFunctionData("isAllowedToCall", [account, signature]);
   const result = await ethers.provider.call({ to: ACCESS_CONTROL_MANAGER, data, from: contract });
   return acm.decodeFunctionResult("isAllowedToCall", result)[0];
 };
 const syncReceiptGrants = async (account: string) =>
-  Promise.all(TRACKING_GROUPS.map(group => isAllowed(group, account)));
+  Promise.all(TRACKING_GROUPS.map(group => isAllowed(group, account, SYNC_RECEIPT)));
+// The grants are wildcards, so they reach the Centrifuge groups too
+const updateResourceAdapterGrants = async (account: string) =>
+  Promise.all(
+    [...TRACKING_GROUPS, ...CENTRIFUGE_GROUPS].map(group => isAllowed(group, account, UPDATE_RESOURCE_ADAPTER)),
+  );
 
 const implementations = async () =>
   Promise.all(BEACONS.map(({ beacon }) => new Contract(beacon, BEACON_ABI, ethers.provider).implementation()));
@@ -201,6 +207,11 @@ forking(BLOCK_NUMBER, async () => {
       expect(await syncReceiptGrants(GUARDIAN)).to.deep.equal(TRACKING_GROUPS.map(() => false));
     });
 
+    it("both the Normal Timelock and the Guardian can repoint adapters on every group", async () => {
+      expect(await updateResourceAdapterGrants(NORMAL_TIMELOCK)).to.not.include(false);
+      expect(await updateResourceAdapterGrants(GUARDIAN)).to.not.include(false);
+    });
+
     it("records each Hub's total assets", async () => {
       hubTotalAssetsBefore = await Promise.all(
         HUBS.map(({ hub }) => new Contract(hub, HUB_ABI, ethers.provider).totalAssets()),
@@ -219,7 +230,7 @@ forking(BLOCK_NUMBER, async () => {
 
   testVip("VIP-681 [BNB Chain] Liquidity Hub receipt tracking upgrade", await vip681(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [1]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [1, 1]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [BEACONS.length]);
       await expectEvents(
         txResponse,
@@ -271,6 +282,11 @@ forking(BLOCK_NUMBER, async () => {
     it("the Normal Timelock holds syncReceipt on every group, and the Guardian does not", async () => {
       expect(await syncReceiptGrants(NORMAL_TIMELOCK)).to.deep.equal(TRACKING_GROUPS.map(() => true));
       expect(await syncReceiptGrants(GUARDIAN)).to.deep.equal(TRACKING_GROUPS.map(() => false));
+    });
+
+    it("only the Normal Timelock can repoint adapters: the Guardian lost updateResourceAdapter", async () => {
+      expect(await updateResourceAdapterGrants(NORMAL_TIMELOCK)).to.not.include(false);
+      expect(await updateResourceAdapterGrants(GUARDIAN)).to.not.include(true);
     });
   });
 

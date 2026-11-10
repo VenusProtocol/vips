@@ -1,9 +1,10 @@
 import { constants } from "ethers";
+import { solidityKeccak256 } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
 // ────────────────────────────────────────────────────────────────
 // YieldGroup beacons, one per family, and their implementations
@@ -94,6 +95,7 @@ export const RESOURCES: { group: string; resource: string; adapter: keyof typeof
 ];
 
 export const SYNC_RECEIPT = "syncReceipt(address,uint256)";
+export const UPDATE_RESOURCE_ADAPTER = "updateResourceAdapter(address,address)";
 export const SYNC_WHOLE_WALLET = constants.MaxUint256; // no cap: every tracked count starts at 0 after the upgrade
 
 export const vip681 = () => {
@@ -102,7 +104,7 @@ export const vip681 = () => {
     title: "VIP-681 [BNB Chain] Liquidity Hub receipt tracking upgrade",
     description: `#### Summary
 
-If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed.
+If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed. The VIP also revokes \`updateResourceAdapter\` from the Guardian.
 
 #### Actions
 
@@ -110,10 +112,11 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
 2. Upgrade the Core, Flux and Spoke beacons to the YieldGroup implementation [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to the YieldGroupFRV implementation [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}). Each beacon serves its family on all three Hubs, so this upgrades 12 YieldGroups. The new implementations add one storage mapping and leave the existing layout unchanged.
 3. Point all 19 registered resources at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
 4. Sync each resource's tracked receipt count to the receipts its YieldGroup holds, with no cap. The current implementation already values the whole balance, so each Hub's value stays the same.
+5. Revoke \`updateResourceAdapter(address,address)\` from the Guardian, which holds it as a wildcard since VIP-673. The Normal Timelock keeps the permission.
 
 #### Notes
 
-- All four steps must run in this one proposal. The new implementation prices positions through \`receiptValue\`, which the current adapters do not have, so a YieldGroup left on a current adapter would make its Hub's \`totalAssets()\` revert. Every tracked count also reads 0 until step 4 runs.
+- Steps 1 to 4 must run in this one proposal. The new implementation prices positions through \`receiptValue\`, which the current adapters do not have, so a YieldGroup left on a current adapter would make its Hub's \`totalAssets()\` revert. Every tracked count also reads 0 until step 4 runs.
 - The Centrifuge YieldGroups are not touched, because they do not track receipts.
 - The Guardian does not get \`syncReceipt\`, because a sync changes a Hub's share price.
 - The code has been audited by HashDit, and this deployment includes the fixes from that audit.
@@ -160,7 +163,7 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
       // ────────────────────────────────────────────────────────────────
       ...RESOURCES.map(({ group, resource, adapter }) => ({
         target: group,
-        signature: "updateResourceAdapter(address,address)",
+        signature: UPDATE_RESOURCE_ADAPTER,
         params: [resource, ADAPTERS[adapter].new],
       })),
 
@@ -172,6 +175,16 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
         signature: SYNC_RECEIPT,
         params: [resource, SYNC_WHOLE_WALLET],
       })),
+
+      // ────────────────────────────────────────────────────────────────
+      // 5. Guardian updateResourceAdapter revoke
+      // ────────────────────────────────────────────────────────────────
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        // This ACM keys a wildcard on bytes32(0), and its revokeCallPermission(address(0), ...) revokes nothing
+        signature: "revokeRole(bytes32,address)",
+        params: [solidityKeccak256(["bytes32", "string"], [constants.HashZero, UPDATE_RESOURCE_ADAPTER]), GUARDIAN],
+      },
     ],
     meta,
     ProposalType.REGULAR,
