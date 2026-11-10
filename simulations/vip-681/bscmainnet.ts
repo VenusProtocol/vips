@@ -43,6 +43,11 @@ const WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // holds U, USDC and
 const HUB_REGISTRY = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2";
 // Centrifuge does not track receipts, so the VIP leaves its groups alone
 const CENTRIFUGE_GROUPS = ["0x84bAeCF7Ac76039f731a0780EB59A03b2C7B593c", "0xDA5AFfeb43719f517676E031a727071c7D400983"];
+const CENTRIFUGE_BEACON = "0xAe90Cfb3E2Bc97508F58E7e076Acf38f3bfC820f";
+const CENTRIFUGE_IMPLEMENTATION = "0x4996aa488f5269B5C544Dab1C2d1126F6bBdFF24";
+const CENTRIFUGE_ADAPTER = "0xaa9D52758890997D91950E595886FF9CDEca81ae";
+// ERC-1967 slot a BeaconProxy reads its beacon from
+const BEACON_SLOT = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50";
 const HUBS = [
   { hub: HUB_U, asset: U },
   { hub: HUB_USDC, asset: USDC },
@@ -107,6 +112,40 @@ const adaptersInUse = async () =>
     }),
   );
 
+// Centrifuge runs behind its own beacon, which the VIP does not upgrade, on adapters it does not repoint
+const expectCentrifugeUntouched = async () => {
+  const beacon = new Contract(CENTRIFUGE_BEACON, BEACON_ABI, ethers.provider);
+  expect(await beacon.implementation()).to.equal(CENTRIFUGE_IMPLEMENTATION);
+  for (const group of CENTRIFUGE_GROUPS) {
+    const slot = await ethers.provider.getStorageAt(group, BEACON_SLOT);
+    expect(ethers.utils.getAddress(ethers.utils.hexDataSlice(slot, 12)), group).to.equal(CENTRIFUGE_BEACON);
+    const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
+    const resources: string[] = await yieldGroup.resources();
+    expect(resources, group).to.not.be.empty;
+    for (const resource of resources) {
+      expect((await yieldGroup.resourceConfig(resource)).adapter, resource).to.equal(CENTRIFUGE_ADAPTER);
+    }
+  }
+};
+
+// Each group's stored state, read through its live code. The adapter is left out because the VIP changes it
+const storedState = async () =>
+  Promise.all(
+    TRACKING_GROUPS.map(async group => {
+      const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
+      const resources: string[] = await yieldGroup.resources();
+      return {
+        accessControlManager: await yieldGroup.accessControlManager(),
+        hub: await yieldGroup.hub(),
+        asset: await yieldGroup.asset(),
+        resources,
+        innerDepositQueue: await yieldGroup.innerDepositQueue(),
+        innerWithdrawQueue: await yieldGroup.innerWithdrawQueue(),
+        paused: await Promise.all(resources.map(async resource => (await yieldGroup.resourceConfig(resource)).paused)),
+      };
+    }),
+  );
+
 const expectEveryCountToMatchItsWallet = async () => {
   for (const { group, resource, adapter } of RESOURCES) {
     const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
@@ -117,6 +156,7 @@ const expectEveryCountToMatchItsWallet = async () => {
 
 forking(BLOCK_NUMBER, async () => {
   let hubTotalAssetsBefore: BigNumber[];
+  let storedStateBefore: Awaited<ReturnType<typeof storedState>>;
 
   describe("Pre-VIP behavior", () => {
     it("beacons point at the current implementations", async () => {
@@ -170,6 +210,14 @@ forking(BLOCK_NUMBER, async () => {
       );
       hubTotalAssetsBefore.forEach((totalAssets, i) => expect(totalAssets, HUBS[i].hub).to.be.gt(0));
     });
+
+    it("records what each group stores", async () => {
+      storedStateBefore = await storedState();
+    });
+
+    it("the Centrifuge groups run behind the Centrifuge beacon, on its implementation and adapter", async () => {
+      await expectCentrifugeUntouched();
+    });
   });
 
   testVip("VIP-681 [BNB Chain] Liquidity Hub receipt tracking upgrade", await vip681(), {
@@ -192,6 +240,14 @@ forking(BLOCK_NUMBER, async () => {
 
     it("every resource uses its new adapter", async () => {
       expect(await adaptersInUse()).to.deep.equal(RESOURCES.map(({ adapter }) => ADAPTERS[adapter].new));
+    });
+
+    it("the new code reads every group's stored state unchanged", async () => {
+      expect(await storedState()).to.deep.equal(storedStateBefore);
+    });
+
+    it("Centrifuge is untouched: same beacon implementation and adapters", async () => {
+      await expectCentrifugeUntouched();
     });
 
     it("every tracked count equals the receipts its group holds", async () => {
@@ -243,10 +299,14 @@ forking(BLOCK_NUMBER, async () => {
       const donated = await vToken.balanceOf(donor.address);
       expect(donated).to.be.gt(1);
 
+      // Read after the mint, which accrues vUSDT interest, so the transfer is the only change before the next read
       const coreSource = new Contract(CORE_SOURCE_USDT, YIELD_GROUP_ABI, ethers.provider);
       const trackedBefore = await coreSource.trackedReceipt(VUSDT);
+      const groupAssetsBefore = await coreSource.totalAssets();
+
       await vToken.transfer(CORE_SOURCE_USDT, donated);
       expect(await coreSource.trackedReceipt(VUSDT)).to.equal(trackedBefore);
+      expect(await coreSource.totalAssets()).to.equal(groupAssetsBefore);
 
       // A cap one below the donation leaves exactly one donated vToken uncounted
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseEther("1"));
@@ -254,6 +314,12 @@ forking(BLOCK_NUMBER, async () => {
         .to.emit(coreSource, "ReceiptSynced")
         .withArgs(VUSDT, trackedBefore, trackedBefore.add(donated).sub(1));
       expect(await vToken.balanceOf(CORE_SOURCE_USDT)).to.equal(trackedBefore.add(donated));
+
+      // The sync admits what the added vTokens are worth, within 1 wei: pricing the position in one
+      // piece can round differently from pricing the two parts apart
+      const coreAdapter = new Contract(ADAPTERS.CORE.new, ADAPTER_ABI, ethers.provider);
+      const admitted = (await coreSource.totalAssets()).sub(groupAssetsBefore);
+      expect(admitted).to.be.closeTo(await coreAdapter.receiptValue(VUSDT, donated.sub(1)), 1);
     });
 
     it("only governance can call syncReceipt", async () => {
