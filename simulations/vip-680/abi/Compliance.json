@@ -1,0 +1,67 @@
+[
+  {
+    "type": "function",
+    "name": "OPS_ROLE",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getRoleMember",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "bytes32",
+        "name": "role"
+      },
+      {
+        "type": "uint256",
+        "name": "index"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "addToSanctionsList",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address[]",
+        "name": "accounts"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "addToBlocklist",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "token"
+      },
+      {
+        "type": "address[]",
+        "name": "accounts"
+      }
+    ],
+    "outputs": []
+  }
+]

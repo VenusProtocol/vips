@@ -1,0 +1,82 @@
+[
+  {
+    "type": "function",
+    "name": "markets",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "vToken"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "isListed"
+      },
+      {
+        "type": "uint256",
+        "name": "collateralFactorMantissa"
+      },
+      {
+        "type": "uint256",
+        "name": "liquidationThresholdMantissa"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getAllMarkets",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "address[]"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "actionPaused",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "market"
+      },
+      {
+        "type": "uint8",
+        "name": "action"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "supplyCaps",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "market"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "uint256"
+      }
+    ]
+  }
+]
