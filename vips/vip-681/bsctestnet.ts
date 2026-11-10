@@ -5,10 +5,8 @@ import { makeProposal } from "src/utils";
 
 const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 
-export { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK };
-
 // ────────────────────────────────────────────────────────────────
-// Beacons and implementations
+// YieldGroup beacons, one per family, and their implementations
 // ────────────────────────────────────────────────────────────────
 export const CORE_BEACON = "0xbBEe25aE7d2Db035Afc327fb0096fC88FDfF3170";
 export const FLUX_BEACON = "0x6b9CA74F82848668EA04D56E0A8396A816ba5330";
@@ -25,7 +23,8 @@ export const NEW_YIELD_GROUP_IMPLEMENTATION = "0x1c38e8c91c335Ac2B052E882eB8F7c0
 export const NEW_YIELD_GROUP_FRV_IMPLEMENTATION = "0x40bBb4d943BeEd8Dc9646c570c9C91fac9dd2457";
 
 // ────────────────────────────────────────────────────────────────
-// Yield groups that track receipts, on the two testnet Hubs that also run on mainnet
+// Yield groups that track receipts, on the USDT and USDC Hubs only
+// Covers just the Hubs mainnet runs (U, USDC, USDT; testnet has no U); other testnet asset Hubs are left out
 // ────────────────────────────────────────────────────────────────
 export const HUB_USDT = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61";
 export const CORE_SOURCE_USDT = "0x11e39DC7b8b16BBDA8D9C2903dF741Ae9341Ec88";
@@ -36,15 +35,6 @@ export const SPOKE_SOURCE_USDT = "0xb9Bf8232474aF0A18BbA0CbCc3bA10efD51542e2";
 export const HUB_USDC = "0xCf11a9db610584ee9bD56a271306956d3B0b929F";
 export const CORE_SOURCE_USDC = "0xB373788761b54258e69757D9A35715Be4e257CB7";
 export const FRV_SOURCE_USDC = "0x67BB7ac021Fd37a226B7A99bA27EEE382f7c5E5b";
-
-export const TRACKING_GROUPS = [
-  CORE_SOURCE_USDT,
-  FLUX_SOURCE_USDT,
-  FRV_SOURCE_USDT,
-  SPOKE_SOURCE_USDT,
-  CORE_SOURCE_USDC,
-  FRV_SOURCE_USDC,
-];
 
 // ────────────────────────────────────────────────────────────────
 // New adapters. They add receiptValue; the Core one also quotes cash net of reserves
@@ -99,7 +89,7 @@ Upgrades the YieldGroups of the USDT and USDC Liquidity Hubs on BNB Chain Testne
 
 #### Actions
 
-1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock on the six YieldGroups (Core, Flux, FRV and Spoke on USDT, Core and FRV on USDC), and to the Guardian on every contract, like its other testnet Hub roles. Grant \`updateResourceAdapter(address,address)\` to the Normal Timelock on the two USDC YieldGroups, which do not have it yet.
+1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock and the Guardian on every contract, like the Guardian's other testnet Hub roles. Grant \`updateResourceAdapter(address,address)\` to the Normal Timelock on the two USDC YieldGroups, which do not have it yet.
 2. Upgrade the Core, Flux and Spoke beacons to the YieldGroup implementation [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to the YieldGroupFRV implementation [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}).
 3. Point all 14 resources (11 on USDT, 3 on USDC) at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
 4. Sync each resource's tracked receipt count to the receipts the YieldGroup holds, with no cap, so each Hub's value stays the same.
@@ -124,20 +114,21 @@ Upgrades the YieldGroups of the USDT and USDC Liquidity Hubs on BNB Chain Testne
       // ────────────────────────────────────────────────────────────────
       // 1. Permissions
       // ────────────────────────────────────────────────────────────────
-      ...TRACKING_GROUPS.map(group => ({
+      {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [group, SYNC_RECEIPT, NORMAL_TIMELOCK],
-      })),
+        params: [constants.AddressZero, SYNC_RECEIPT, NORMAL_TIMELOCK], // wildcard: every YieldGroup on every Hub
+      },
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [constants.AddressZero, SYNC_RECEIPT, GUARDIAN], // wildcard, as the Guardian's other Hub roles are
       },
+      // The Normal Timelock has no updateResourceAdapter role on the USDC groups; the USDT ones already have it
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [CORE_SOURCE_USDC, UPDATE_RESOURCE_ADAPTER, NORMAL_TIMELOCK], // the USDT groups already have it
+        params: [CORE_SOURCE_USDC, UPDATE_RESOURCE_ADAPTER, NORMAL_TIMELOCK],
       },
       {
         target: ACCESS_CONTROL_MANAGER,

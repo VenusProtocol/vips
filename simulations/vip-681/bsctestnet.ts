@@ -3,11 +3,11 @@ import { expect } from "chai";
 import { BigNumber, Contract, constants } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip681, {
-  ACCESS_CONTROL_MANAGER,
   CORE_BEACON,
   CORE_SOURCE_USDC,
   CORE_SOURCE_USDT,
@@ -17,12 +17,10 @@ import vip681, {
   FRV_BEACON,
   FRV_SOURCE_USDC,
   FRV_SOURCE_USDT,
-  GUARDIAN,
   HUB_USDC,
   HUB_USDT,
   NEW_YIELD_GROUP_FRV_IMPLEMENTATION,
   NEW_YIELD_GROUP_IMPLEMENTATION,
-  NORMAL_TIMELOCK,
   OLD_CORE_IMPLEMENTATION,
   OLD_FLUX_IMPLEMENTATION,
   OLD_FRV_IMPLEMENTATION,
@@ -31,11 +29,12 @@ import vip681, {
   SPOKE_BEACON,
   SPOKE_SOURCE_USDT,
   SYNC_RECEIPT,
-  TRACKING_GROUPS,
   UPDATE_RESOURCE_ADAPTER,
 } from "../../vips/vip-681/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
+
+const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 
 // After the receipt-ledger implementations and adapters were deployed at block 141872731
 const BLOCK_NUMBER = 141878000;
@@ -56,6 +55,14 @@ const OLD_ADAPTER: Record<string, string> = {
   [CORE_SOURCE_USDC]: "0xDf669957448eCB23309eEFda4de230c62d22AE33",
   [FRV_SOURCE_USDC]: "0xeF0E85ab9A23F50EB4595CF7e2F5461feF7E7fc5",
 };
+const TRACKING_GROUPS = [
+  CORE_SOURCE_USDT,
+  FLUX_SOURCE_USDT,
+  FRV_SOURCE_USDT,
+  SPOKE_SOURCE_USDT,
+  CORE_SOURCE_USDC,
+  FRV_SOURCE_USDC,
+];
 const USDC_GROUPS = [CORE_SOURCE_USDC, FRV_SOURCE_USDC];
 
 const BEACON_ABI = [
@@ -174,7 +181,7 @@ forking(BLOCK_NUMBER, async () => {
 
   testVip("VIP-681 [BNB Chain Testnet] Liquidity Hub receipt tracking upgrade", await vip681(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [TRACKING_GROUPS.length + 1 + USDC_GROUPS.length]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [2 + USDC_GROUPS.length]); // two syncReceipt wildcards
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [BEACONS.length]);
       await expectEvents(
         txResponse,
