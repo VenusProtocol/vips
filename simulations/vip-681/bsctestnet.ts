@@ -32,6 +32,7 @@ import vip681, {
   UPDATE_RESOURCE_ADAPTER,
 } from "../../vips/vip-681/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
+import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
 const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
@@ -65,10 +66,6 @@ const TRACKING_GROUPS = [
 ];
 const USDC_GROUPS = [CORE_SOURCE_USDC, FRV_SOURCE_USDC];
 
-const BEACON_ABI = [
-  "function implementation() view returns (address)",
-  "event Upgraded(address indexed implementation)",
-];
 const ADAPTER_ABI = [
   "function receiptBalance(address resource, address holder) view returns (uint256)",
   "function receiptValue(address resource, uint256 shares) view returns (uint256)",
