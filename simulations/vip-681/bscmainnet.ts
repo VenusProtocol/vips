@@ -8,7 +8,6 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip681, {
-  ACCESS_CONTROL_MANAGER,
   ADAPTERS,
   CORE_BEACON,
   CORE_SOURCE_USDT,
@@ -19,7 +18,6 @@ import vip681, {
   HUB_USDT,
   NEW_YIELD_GROUP_FRV_IMPLEMENTATION,
   NEW_YIELD_GROUP_IMPLEMENTATION,
-  NORMAL_TIMELOCK,
   OLD_CORE_IMPLEMENTATION,
   OLD_FLUX_IMPLEMENTATION,
   OLD_FRV_IMPLEMENTATION,
@@ -32,15 +30,21 @@ import vip681, {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-const { GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
 // After the receipt-ledger implementations and adapters were deployed at block 132740503
 const BLOCK_NUMBER = 132741900;
 
+const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
-const HUBS = [HUB_U, HUB_USDC, HUB_USDT];
+const WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // holds U, USDC and USDT
+const HUBS = [
+  { hub: HUB_U, asset: U },
+  { hub: HUB_USDC, asset: USDC },
+  { hub: HUB_USDT, asset: USDT },
+];
 
 const BEACON_ABI = [
   "function implementation() view returns (address)",
@@ -148,8 +152,9 @@ forking(BLOCK_NUMBER, async () => {
 
     it("records each Hub's total assets", async () => {
       hubTotalAssetsBefore = await Promise.all(
-        HUBS.map(hub => new Contract(hub, HUB_ABI, ethers.provider).totalAssets()),
+        HUBS.map(({ hub }) => new Contract(hub, HUB_ABI, ethers.provider).totalAssets()),
       );
+      hubTotalAssetsBefore.forEach((totalAssets, i) => expect(totalAssets, HUBS[i].hub).to.be.gt(0));
     });
   });
 
@@ -191,7 +196,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("no Hub's total assets fall", async () => {
-      for (const [i, hub] of HUBS.entries()) {
+      for (const [i, { hub }] of HUBS.entries()) {
         expect(await new Contract(hub, HUB_ABI, ethers.provider).totalAssets(), hub).to.be.gte(hubTotalAssetsBefore[i]);
       }
     });
@@ -216,7 +221,7 @@ forking(BLOCK_NUMBER, async () => {
       // liquidity check against oracle prices that go stale while the VIP is voted on
       const [, , donor] = await ethers.getSigners();
       const amount = parseUnits("1000", 18);
-      const whale = await initMainnetUser(USDT_WHALE, parseEther("1"));
+      const whale = await initMainnetUser(WHALE, parseEther("1"));
       await new Contract(USDT, ERC20_ABI, whale).transfer(donor.address, amount);
       await new Contract(USDT, ERC20_ABI, donor).approve(VUSDT, amount);
       const vToken = new Contract(VUSDT, VTOKEN_ABI, donor);
@@ -245,25 +250,28 @@ forking(BLOCK_NUMBER, async () => {
         .withArgs(stranger.address, SYNC_RECEIPT);
     });
 
-    it("a Hub_USDT deposit and redeem round trip keeps every tracked count equal to its wallet", async () => {
-      const [, depositor] = await ethers.getSigners();
-      const amount = parseUnits("1000", 18);
-      const whale = await initMainnetUser(USDT_WHALE, parseEther("1"));
-      await new Contract(USDT, ERC20_ABI, whale).transfer(depositor.address, amount);
-      const usdt = new Contract(USDT, ERC20_ABI, depositor);
-      await usdt.approve(HUB_USDT, amount);
+    for (const { hub, asset } of HUBS) {
+      it(`a deposit and redeem round trip on ${hub} keeps every tracked count equal to its wallet`, async () => {
+        const [, depositor] = await ethers.getSigners();
+        const amount = parseUnits("1000", 18);
+        const whale = await initMainnetUser(WHALE, parseEther("1"));
+        await new Contract(asset, ERC20_ABI, whale).transfer(depositor.address, amount);
+        const token = new Contract(asset, ERC20_ABI, depositor);
+        await token.approve(hub, amount);
 
-      const hub = new Contract(HUB_USDT, HUB_ABI, depositor);
-      await hub.deposit(amount, depositor.address);
-      expect(await hub.balanceOf(depositor.address)).to.be.gt(0);
+        const asDepositor = new Contract(hub, HUB_ABI, depositor);
+        await asDepositor.deposit(amount, depositor.address);
+        expect(await asDepositor.balanceOf(depositor.address)).to.be.gt(0);
 
-      const shares = await hub.maxRedeem(depositor.address);
-      const expected = await hub.previewRedeem(shares);
-      await hub.redeem(shares, depositor.address, depositor.address);
-      // redeem accrues interest before paying, so it pays at least what the stale preview quoted
-      expect(await usdt.balanceOf(depositor.address)).to.be.gte(expected);
+        const shares = await asDepositor.maxRedeem(depositor.address);
+        const expected = await asDepositor.previewRedeem(shares);
+        const balanceBefore = await token.balanceOf(depositor.address);
+        await asDepositor.redeem(shares, depositor.address, depositor.address);
+        // redeem accrues interest before paying, so it pays at least what the stale preview quoted
+        expect((await token.balanceOf(depositor.address)).sub(balanceBefore)).to.be.gte(expected);
 
-      await expectEveryCountToMatchItsWallet();
-    });
+        await expectEveryCountToMatchItsWallet();
+      });
+    }
   });
 });

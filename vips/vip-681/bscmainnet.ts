@@ -5,10 +5,9 @@ import { makeProposal } from "src/utils";
 
 const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
-export { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK };
-
 // ────────────────────────────────────────────────────────────────
-// Beacons and implementations. Each beacon serves its family on the U, USDC and USDT Hubs
+// YieldGroup beacons, one per family, and their implementations
+// Each beacon serves its family on the U, USDC and USDT Hubs
 // ────────────────────────────────────────────────────────────────
 export const CORE_BEACON = "0x195a0F1BCF73C3Beb609a1271E8E08b8E4c098C6";
 export const FLUX_BEACON = "0x9bb6a3Ac5955fA8dc236560CA9D51483d1d79f15";
@@ -35,7 +34,7 @@ export const ADAPTERS = {
 };
 
 // ────────────────────────────────────────────────────────────────
-// Hubs and the YieldGroups the beacons upgrade
+// Every Hub in the HubRegistry, and the tracking YieldGroups the beacons upgrade (Centrifuge is not one)
 // ────────────────────────────────────────────────────────────────
 export const HUB_U = "0x0e5AA174d4F31b757a237eb1999DE151596788B0";
 export const HUB_USDC = "0x9D2D9592cF8DFbf59107fAab703d08494BE14617";
