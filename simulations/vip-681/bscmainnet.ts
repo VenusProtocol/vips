@@ -40,6 +40,9 @@ const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC"; // holds U, USDC and USDT
+const HUB_REGISTRY = "0x6D93Fd479f2d37445CFBe132412e316a0364acc2";
+// Centrifuge does not track receipts, so the VIP leaves its groups alone
+const CENTRIFUGE_GROUPS = ["0x84bAeCF7Ac76039f731a0780EB59A03b2C7B593c", "0xDA5AFfeb43719f517676E031a727071c7D400983"];
 const HUBS = [
   { hub: HUB_U, asset: U },
   { hub: HUB_USDC, asset: USDC },
@@ -55,7 +58,9 @@ const ADAPTER_ABI = [
   "function receiptValue(address resource, uint256 shares) view returns (uint256)",
   "function totalAssets(address resource, address holder) view returns (uint256)",
 ];
+const REGISTRY_ABI = ["function getHubs() view returns (address[])"];
 const HUB_ABI = [
+  "function registeredYieldGroups() view returns (address[])",
   "function totalAssets() view returns (uint256)",
   "function balanceOf(address) view returns (uint256)",
   "function deposit(uint256 assets, address receiver) returns (uint256)",
@@ -122,13 +127,22 @@ forking(BLOCK_NUMBER, async () => {
       expect(await adaptersInUse()).to.deep.equal(RESOURCES.map(({ adapter }) => ADAPTERS[adapter].old));
     });
 
-    it("every group's registered resources are the ones the VIP repoints", async () => {
-      for (const group of TRACKING_GROUPS) {
-        const registered = await new Contract(group, YIELD_GROUP_ABI, ethers.provider).resources();
-        expect(registered, group).to.deep.equal(
-          RESOURCES.filter(entry => entry.group === group).map(({ resource }) => resource),
-        );
+    it("every Hub, yield group and resource in the HubRegistry, except Centrifuge, is in the VIP", async () => {
+      const hubs: string[] = await new Contract(HUB_REGISTRY, REGISTRY_ABI, ethers.provider).getHubs();
+      expect(hubs).to.have.members(HUBS.map(({ hub }) => hub));
+
+      const groups: string[] = [];
+      const registered: string[] = [];
+      for (const hub of hubs) {
+        for (const group of await new Contract(hub, HUB_ABI, ethers.provider).registeredYieldGroups()) {
+          if (CENTRIFUGE_GROUPS.includes(group)) continue;
+          groups.push(group);
+          const resources: string[] = await new Contract(group, YIELD_GROUP_ABI, ethers.provider).resources();
+          registered.push(...resources.map(resource => `${group} ${resource}`));
+        }
       }
+      expect(groups).to.have.members(TRACKING_GROUPS);
+      expect(registered).to.have.members(RESOURCES.map(({ group, resource }) => `${group} ${resource}`));
     });
 
     it("new implementations are deployed with their initializers disabled", async () => {
