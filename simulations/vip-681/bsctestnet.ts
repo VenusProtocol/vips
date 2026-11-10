@@ -72,6 +72,7 @@ const ADAPTER_ABI = [
   "function totalAssets(address resource, address holder) view returns (uint256)",
 ];
 const HUB_ABI = [
+  "function registeredYieldGroups() view returns (address[])",
   "function totalAssets() view returns (uint256)",
   "function balanceOf(address) view returns (uint256)",
   "function deposit(uint256 assets, address receiver) returns (uint256)",
@@ -124,6 +125,40 @@ const adaptersInUse = async () =>
       return adapter;
     }),
   );
+
+type Resource = (typeof RESOURCES)[number];
+
+// The group's tracked receipts, priced by the new adapter
+const newAdapterValue = async ({ group, resource, adapter }: Resource): Promise<BigNumber> => {
+  const tracked = await new Contract(group, YIELD_GROUP_ABI, ethers.provider).trackedReceipt(resource);
+  return new Contract(adapter, ADAPTER_ABI, ethers.provider).receiptValue(resource, tracked);
+};
+
+// The group's whole wallet, priced by the adapter it had before the VIP
+const oldAdapterValue = ({ group, resource }: Resource): Promise<BigNumber> =>
+  new Contract(OLD_ADAPTER[group], ADAPTER_ABI, ethers.provider).totalAssets(resource, group);
+
+// The group's idle asset plus each of its resources on the old adapter
+const oldGroupTotalAssets = async (group: string, asset: Contract) => {
+  let total: BigNumber = await asset.balanceOf(group);
+  for (const entry of RESOURCES.filter(r => r.group === group)) {
+    total = total.add(await oldAdapterValue(entry));
+  }
+  return total;
+};
+
+// The Hub's idle asset plus each group: tracking groups on the old adapters, Centrifuge as it reports itself
+const oldHubTotalAssets = async (hub: string, assetAddress: string) => {
+  const asset = new Contract(assetAddress, TOKEN_ABI, ethers.provider);
+  let total: BigNumber = await asset.balanceOf(hub);
+  for (const group of await new Contract(hub, HUB_ABI, ethers.provider).registeredYieldGroups()) {
+    const groupTotal = TRACKING_GROUPS.includes(group)
+      ? await oldGroupTotalAssets(group, asset)
+      : await new Contract(group, YIELD_GROUP_ABI, ethers.provider).totalAssets();
+    total = total.add(groupTotal);
+  }
+  return total;
+};
 
 forking(BLOCK_NUMBER, async () => {
   const totalAssetsBefore: Record<string, BigNumber> = {};
@@ -208,14 +243,16 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("every resource is valued the same as its whole wallet", async () => {
-      for (const { group, resource, adapter } of RESOURCES) {
-        const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
-        const fresh = new Contract(adapter, ADAPTER_ABI, ethers.provider);
-        const tracked = await yieldGroup.trackedReceipt(resource);
-        expect(await fresh.receiptValue(resource, tracked), resource).to.equal(
-          await fresh.totalAssets(resource, group),
-        );
+    it("every resource is worth the same on its new adapter as on its old one, at the same block", async () => {
+      for (const entry of RESOURCES) {
+        expect(await newAdapterValue(entry), entry.resource).to.equal(await oldAdapterValue(entry));
+      }
+    });
+
+    it("every Hub reports the same total assets as the old code gives, at the same block", async () => {
+      for (const { hub, asset } of HUBS) {
+        const reported = await new Contract(hub, HUB_ABI, ethers.provider).totalAssets();
+        expect(reported, hub).to.equal(await oldHubTotalAssets(hub, asset));
       }
     });
 
