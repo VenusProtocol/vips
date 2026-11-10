@@ -8,13 +8,17 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip681, {
   ACCESS_CONTROL_MANAGER,
-  ADAPTERS,
   CORE_BEACON,
+  CORE_SOURCE_USDC,
   CORE_SOURCE_USDT,
   CORE_VUSDT,
   FLUX_BEACON,
+  FLUX_SOURCE_USDT,
   FRV_BEACON,
+  FRV_SOURCE_USDC,
+  FRV_SOURCE_USDT,
   GUARDIAN,
+  HUB_USDC,
   HUB_USDT,
   NEW_YIELD_GROUP_FRV_IMPLEMENTATION,
   NEW_YIELD_GROUP_IMPLEMENTATION,
@@ -25,8 +29,10 @@ import vip681, {
   OLD_SPOKE_IMPLEMENTATION,
   RESOURCES,
   SPOKE_BEACON,
+  SPOKE_SOURCE_USDT,
   SYNC_RECEIPT,
   TRACKING_GROUPS,
+  UPDATE_RESOURCE_ADAPTER,
 } from "../../vips/vip-681/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
@@ -35,6 +41,22 @@ import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 const BLOCK_NUMBER = 141878000;
 
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+const HUBS = [
+  { hub: HUB_USDT, asset: USDT },
+  { hub: HUB_USDC, asset: USDC },
+];
+
+// Adapter each group's resources use at the fork block
+const OLD_ADAPTER: Record<string, string> = {
+  [CORE_SOURCE_USDT]: "0x07c80ed1F928913ab68E1fABB2fe0439CdC99F88",
+  [FLUX_SOURCE_USDT]: "0x51d8cAdc16Df3F8Cd0D1B536e943FbDcE77AC523",
+  [FRV_SOURCE_USDT]: "0xcdd9cf27C388dAc9e89De257505aff9290183537",
+  [SPOKE_SOURCE_USDT]: "0x439034668f201B9f2D45286b4518e6DB122B5e17",
+  [CORE_SOURCE_USDC]: "0xDf669957448eCB23309eEFda4de230c62d22AE33",
+  [FRV_SOURCE_USDC]: "0xeF0E85ab9A23F50EB4595CF7e2F5461feF7E7fc5",
+};
+const USDC_GROUPS = [CORE_SOURCE_USDC, FRV_SOURCE_USDC];
 
 const BEACON_ABI = [
   "function implementation() view returns (address)",
@@ -53,7 +75,7 @@ const HUB_ABI = [
   "function maxRedeem(address owner) view returns (uint256)",
   "function previewRedeem(uint256 shares) view returns (uint256)",
 ];
-const USDT_ABI = [
+const TOKEN_ABI = [
   "function allocateTo(address, uint256)",
   "function approve(address, uint256) returns (bool)",
   "function balanceOf(address) view returns (uint256)",
@@ -72,14 +94,21 @@ const BEACONS = [
 ];
 
 // `isAllowedToCall` keys the role on msg.sender, so it is asked from the guarded contract's own address
-const isAllowed = async (contract: string, account: string): Promise<boolean> => {
+const isAllowed = async (contract: string, account: string, signature: string): Promise<boolean> => {
   const acm = new ethers.utils.Interface(ACM_ABI);
-  const data = acm.encodeFunctionData("isAllowedToCall", [account, SYNC_RECEIPT]);
+  const data = acm.encodeFunctionData("isAllowedToCall", [account, signature]);
   const result = await ethers.provider.call({ to: ACCESS_CONTROL_MANAGER, data, from: contract });
   return acm.decodeFunctionResult("isAllowedToCall", result)[0];
 };
 const syncReceiptGrants = async () =>
-  Promise.all(TRACKING_GROUPS.flatMap(group => [isAllowed(group, NORMAL_TIMELOCK), isAllowed(group, GUARDIAN)]));
+  Promise.all(
+    TRACKING_GROUPS.flatMap(group => [
+      isAllowed(group, NORMAL_TIMELOCK, SYNC_RECEIPT),
+      isAllowed(group, GUARDIAN, SYNC_RECEIPT),
+    ]),
+  );
+const usdcAdapterGrants = async () =>
+  Promise.all(USDC_GROUPS.map(group => isAllowed(group, NORMAL_TIMELOCK, UPDATE_RESOURCE_ADAPTER)));
 
 const implementations = async () =>
   Promise.all(BEACONS.map(({ beacon }) => new Contract(beacon, BEACON_ABI, ethers.provider).implementation()));
@@ -93,16 +122,24 @@ const adaptersInUse = async () =>
   );
 
 forking(BLOCK_NUMBER, async () => {
-  const hub = new Contract(HUB_USDT, HUB_ABI, ethers.provider);
-  let hubTotalAssetsBefore: BigNumber;
+  const totalAssetsBefore: Record<string, BigNumber> = {};
 
   describe("Pre-VIP behavior", () => {
     it("beacons point at the current implementations", async () => {
       expect(await implementations()).to.deep.equal(BEACONS.map(({ old }) => old));
     });
 
+    it("the VIP lists every resource registered on the six groups", async () => {
+      for (const group of TRACKING_GROUPS) {
+        const registered = await new Contract(group, YIELD_GROUP_ABI, ethers.provider).resources();
+        expect(registered, group).to.deep.equal(
+          RESOURCES.filter(r => r.group === group).map(({ resource }) => resource),
+        );
+      }
+    });
+
     it("every resource uses its current adapter", async () => {
-      expect(await adaptersInUse()).to.deep.equal(RESOURCES.map(({ adapter }) => ADAPTERS[adapter].old));
+      expect(await adaptersInUse()).to.deep.equal(RESOURCES.map(({ group }) => OLD_ADAPTER[group]));
     });
 
     it("new implementations are deployed with their initializers disabled", async () => {
@@ -114,7 +151,7 @@ forking(BLOCK_NUMBER, async () => {
 
     it("new adapters expose receiptValue", async () => {
       for (const { resource, adapter } of RESOURCES) {
-        const fresh = new Contract(ADAPTERS[adapter].new, ADAPTER_ABI, ethers.provider);
+        const fresh = new Contract(adapter, ADAPTER_ABI, ethers.provider);
         expect(await fresh.receiptValue(resource, 0)).to.equal(0);
       }
     });
@@ -123,15 +160,21 @@ forking(BLOCK_NUMBER, async () => {
       expect(await syncReceiptGrants()).to.deep.equal(Array(TRACKING_GROUPS.length * 2).fill(false));
     });
 
-    it("records the Hub's total assets", async () => {
-      hubTotalAssetsBefore = await hub.totalAssets();
-      expect(hubTotalAssetsBefore).to.be.gt(0);
+    it("the Normal Timelock cannot update adapters on the USDC groups yet", async () => {
+      expect(await usdcAdapterGrants()).to.deep.equal([false, false]);
+    });
+
+    it("records each Hub's total assets", async () => {
+      for (const { hub } of HUBS) {
+        totalAssetsBefore[hub] = await new Contract(hub, HUB_ABI, ethers.provider).totalAssets();
+        expect(totalAssetsBefore[hub], hub).to.be.gt(0);
+      }
     });
   });
 
   testVip("VIP-681 [BNB Chain Testnet] Liquidity Hub receipt tracking upgrade", await vip681(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [TRACKING_GROUPS.length + 1]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [TRACKING_GROUPS.length + 1 + USDC_GROUPS.length]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [BEACONS.length]);
       await expectEvents(
         txResponse,
@@ -148,13 +191,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("every resource uses its new adapter", async () => {
-      expect(await adaptersInUse()).to.deep.equal(RESOURCES.map(({ adapter }) => ADAPTERS[adapter].new));
+      expect(await adaptersInUse()).to.deep.equal(RESOURCES.map(({ adapter }) => adapter));
     });
 
     it("every tracked count equals the receipts its group holds", async () => {
       for (const { group, resource, adapter } of RESOURCES) {
         const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
-        const fresh = new Contract(ADAPTERS[adapter].new, ADAPTER_ABI, ethers.provider);
+        const fresh = new Contract(adapter, ADAPTER_ABI, ethers.provider);
         expect(await yieldGroup.trackedReceipt(resource), resource).to.equal(
           await fresh.receiptBalance(resource, group),
         );
@@ -164,7 +207,7 @@ forking(BLOCK_NUMBER, async () => {
     it("every resource is valued the same as its whole wallet", async () => {
       for (const { group, resource, adapter } of RESOURCES) {
         const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
-        const fresh = new Contract(ADAPTERS[adapter].new, ADAPTER_ABI, ethers.provider);
+        const fresh = new Contract(adapter, ADAPTER_ABI, ethers.provider);
         const tracked = await yieldGroup.trackedReceipt(resource);
         expect(await fresh.receiptValue(resource, tracked), resource).to.equal(
           await fresh.totalAssets(resource, group),
@@ -172,12 +215,18 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("the Hub's total assets do not fall", async () => {
-      expect(await hub.totalAssets()).to.be.gte(hubTotalAssetsBefore);
+    it("no Hub's total assets fall", async () => {
+      for (const { hub } of HUBS) {
+        expect(await new Contract(hub, HUB_ABI, ethers.provider).totalAssets(), hub).to.be.gte(totalAssetsBefore[hub]);
+      }
     });
 
     it("the Normal Timelock and the Guardian hold syncReceipt on every group", async () => {
       expect(await syncReceiptGrants()).to.deep.equal(Array(TRACKING_GROUPS.length * 2).fill(true));
+    });
+
+    it("the Normal Timelock can update adapters on the USDC groups", async () => {
+      expect(await usdcAdapterGrants()).to.deep.equal([true, true]);
     });
   });
 
@@ -193,8 +242,8 @@ forking(BLOCK_NUMBER, async () => {
     it("donated vTokens stay uncounted, and syncReceipt adds no more than its cap", async () => {
       const [, donor] = await ethers.getSigners();
       const amount = parseUnits("1000", 6);
-      await new Contract(USDT, USDT_ABI, donor).allocateTo(donor.address, amount);
-      await new Contract(USDT, USDT_ABI, donor).approve(CORE_VUSDT, amount);
+      await new Contract(USDT, TOKEN_ABI, donor).allocateTo(donor.address, amount);
+      await new Contract(USDT, TOKEN_ABI, donor).approve(CORE_VUSDT, amount);
       const vToken = new Contract(CORE_VUSDT, VTOKEN_ABI, donor);
       await vToken.mint(amount);
       const donated = await vToken.balanceOf(donor.address);
@@ -221,29 +270,32 @@ forking(BLOCK_NUMBER, async () => {
         .withArgs(stranger.address, SYNC_RECEIPT);
     });
 
-    it("a Hub deposit and redeem round trip keeps every tracked count equal to its wallet", async () => {
-      const [, , depositor] = await ethers.getSigners();
-      const amount = parseUnits("1000", 6);
-      const usdt = new Contract(USDT, USDT_ABI, depositor);
-      await usdt.allocateTo(depositor.address, amount);
-      await usdt.approve(HUB_USDT, amount);
+    for (const { hub, asset } of HUBS) {
+      it(`a deposit and redeem round trip on ${hub} keeps every tracked count equal to its wallet`, async () => {
+        const [, , depositor] = await ethers.getSigners();
+        const amount = parseUnits("1000", 6);
+        const token = new Contract(asset, TOKEN_ABI, depositor);
+        await token.allocateTo(depositor.address, amount);
+        await token.approve(hub, amount);
 
-      const asDepositor = hub.connect(depositor);
-      await asDepositor.deposit(amount, depositor.address);
-      expect(await asDepositor.balanceOf(depositor.address)).to.be.gt(0);
+        const asDepositor = new Contract(hub, HUB_ABI, depositor);
+        await asDepositor.deposit(amount, depositor.address);
+        expect(await asDepositor.balanceOf(depositor.address)).to.be.gt(0);
 
-      const shares = await asDepositor.maxRedeem(depositor.address);
-      const expected = await asDepositor.previewRedeem(shares);
-      await asDepositor.redeem(shares, depositor.address, depositor.address);
-      expect(await usdt.balanceOf(depositor.address)).to.equal(expected);
+        const shares = await asDepositor.maxRedeem(depositor.address);
+        const expected = await asDepositor.previewRedeem(shares);
+        const balanceBefore = await token.balanceOf(depositor.address);
+        await asDepositor.redeem(shares, depositor.address, depositor.address);
+        expect((await token.balanceOf(depositor.address)).sub(balanceBefore)).to.equal(expected);
 
-      for (const { group, resource, adapter } of RESOURCES) {
-        const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
-        const fresh = new Contract(ADAPTERS[adapter].new, ADAPTER_ABI, ethers.provider);
-        expect(await yieldGroup.trackedReceipt(resource), resource).to.equal(
-          await fresh.receiptBalance(resource, group),
-        );
-      }
-    });
+        for (const { group, resource, adapter } of RESOURCES) {
+          const yieldGroup = new Contract(group, YIELD_GROUP_ABI, ethers.provider);
+          const fresh = new Contract(adapter, ADAPTER_ABI, ethers.provider);
+          expect(await yieldGroup.trackedReceipt(resource), resource).to.equal(
+            await fresh.receiptBalance(resource, group),
+          );
+        }
+      });
+    }
   });
 });

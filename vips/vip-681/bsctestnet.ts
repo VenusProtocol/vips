@@ -25,32 +25,42 @@ export const NEW_YIELD_GROUP_IMPLEMENTATION = "0x1c38e8c91c335Ac2B052E882eB8F7c0
 export const NEW_YIELD_GROUP_FRV_IMPLEMENTATION = "0x40bBb4d943BeEd8Dc9646c570c9C91fac9dd2457";
 
 // ────────────────────────────────────────────────────────────────
-// Yield groups on Hub_USDT that track receipts
+// Yield groups that track receipts, on the two testnet Hubs that also run on mainnet
 // ────────────────────────────────────────────────────────────────
 export const HUB_USDT = "0x7cE6ADF754D0eC81A6CF8ACd9C7454F45077dc61";
 export const CORE_SOURCE_USDT = "0x11e39DC7b8b16BBDA8D9C2903dF741Ae9341Ec88";
 export const FLUX_SOURCE_USDT = "0x044E572144bc08ed2D90E081EeEd7b5b6Cb01016";
 export const FRV_SOURCE_USDT = "0xA0Fb0fFeBdcB7F45A3Ec841cCE7F78B7CeBD0f82";
 export const SPOKE_SOURCE_USDT = "0xb9Bf8232474aF0A18BbA0CbCc3bA10efD51542e2";
-export const TRACKING_GROUPS = [CORE_SOURCE_USDT, FLUX_SOURCE_USDT, FRV_SOURCE_USDT, SPOKE_SOURCE_USDT];
+
+export const HUB_USDC = "0xCf11a9db610584ee9bD56a271306956d3B0b929F";
+export const CORE_SOURCE_USDC = "0xB373788761b54258e69757D9A35715Be4e257CB7";
+export const FRV_SOURCE_USDC = "0x67BB7ac021Fd37a226B7A99bA27EEE382f7c5E5b";
+
+export const TRACKING_GROUPS = [
+  CORE_SOURCE_USDT,
+  FLUX_SOURCE_USDT,
+  FRV_SOURCE_USDT,
+  SPOKE_SOURCE_USDT,
+  CORE_SOURCE_USDC,
+  FRV_SOURCE_USDC,
+];
 
 // ────────────────────────────────────────────────────────────────
-// Adapters. The new ones add receiptValue; the Core one also quotes cash net of reserves
+// New adapters. They add receiptValue; the Core one also quotes cash net of reserves
 // ────────────────────────────────────────────────────────────────
-export const ADAPTERS = {
-  CORE: { old: "0x07c80ed1F928913ab68E1fABB2fe0439CdC99F88", new: "0x32DfFD70B8E91C20B708d03C8051ad59F2C6391D" },
-  FLUX: { old: "0x51d8cAdc16Df3F8Cd0D1B536e943FbDcE77AC523", new: "0xC17f2F74057a6beeeb32F3D1F6c8C6A7067e86f0" },
-  FRV: { old: "0xcdd9cf27C388dAc9e89De257505aff9290183537", new: "0x790960cBC0B5A88765cFE89C5bD604163f4E2D9C" },
-  SPOKE: { old: "0x439034668f201B9f2D45286b4518e6DB122B5e17", new: "0xbeAE38F78944F62c00943Fc7e335E0D59c359E98" },
-};
+export const ADAPTER_CORE = "0x32DfFD70B8E91C20B708d03C8051ad59F2C6391D";
+export const ADAPTER_FLUX = "0xC17f2F74057a6beeeb32F3D1F6c8C6A7067e86f0";
+export const ADAPTER_FRV = "0x790960cBC0B5A88765cFE89C5bD604163f4E2D9C";
+export const ADAPTER_SPOKE = "0xbeAE38F78944F62c00943Fc7e335E0D59c359E98";
 
 // ────────────────────────────────────────────────────────────────
-// Every resource registered on the four groups
+// Every resource registered on the six groups
 // ────────────────────────────────────────────────────────────────
 export const CORE_VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 export const FLUX_FUSDT = "0x52217232e12A1c906aB8DEf58532a3618970D025";
 export const SPOKE_VUSDT = "0xC88bAF0bA49a98F15A00182752f6d10bd3932F6a";
-export const FRV_VAULTS = [
+export const FRV_VAULTS_USDT = [
   "0x00f275BBc37Ec884Ea057F46463FfB669cd5F69d",
   "0x79B7c1b80ab09CbfF5a8350505AbCd3eb186b5B0",
   "0xF65a258bC1A01c3E19e46b7e6069082Ec4E49d82",
@@ -61,14 +71,22 @@ export const FRV_VAULTS = [
   "0xf1786b41E755395b10870630542Af4e6b4F8789f",
 ];
 
-export const RESOURCES: { group: string; resource: string; adapter: keyof typeof ADAPTERS }[] = [
-  { group: CORE_SOURCE_USDT, resource: CORE_VUSDT, adapter: "CORE" },
-  { group: FLUX_SOURCE_USDT, resource: FLUX_FUSDT, adapter: "FLUX" },
-  ...FRV_VAULTS.map(resource => ({ group: FRV_SOURCE_USDT, resource, adapter: "FRV" as const })),
-  { group: SPOKE_SOURCE_USDT, resource: SPOKE_VUSDT, adapter: "SPOKE" },
+export const CORE_VUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
+export const FRV_VAULT_HT_USDC = "0x3c26A1Cf735Fe22c7B0D75997C5E8707F11E4a70"; // htUSDCFRV
+export const FRV_VAULT_QA_USDC = "0xb4340266808bcfA85FcDa3382211ea6Df120D3c4"; // qaUSDCFRV
+
+export const RESOURCES = [
+  { group: CORE_SOURCE_USDT, resource: CORE_VUSDT, adapter: ADAPTER_CORE },
+  { group: FLUX_SOURCE_USDT, resource: FLUX_FUSDT, adapter: ADAPTER_FLUX },
+  ...FRV_VAULTS_USDT.map(resource => ({ group: FRV_SOURCE_USDT, resource, adapter: ADAPTER_FRV })),
+  { group: SPOKE_SOURCE_USDT, resource: SPOKE_VUSDT, adapter: ADAPTER_SPOKE },
+  { group: CORE_SOURCE_USDC, resource: CORE_VUSDC, adapter: ADAPTER_CORE },
+  { group: FRV_SOURCE_USDC, resource: FRV_VAULT_HT_USDC, adapter: ADAPTER_FRV },
+  { group: FRV_SOURCE_USDC, resource: FRV_VAULT_QA_USDC, adapter: ADAPTER_FRV },
 ];
 
 export const SYNC_RECEIPT = "syncReceipt(address,uint256)";
+export const UPDATE_RESOURCE_ADAPTER = "updateResourceAdapter(address,address)";
 export const SYNC_WHOLE_WALLET = constants.MaxUint256; // no cap: every tracked count starts at 0 after the upgrade
 
 export const vip681 = () => {
@@ -77,19 +95,20 @@ export const vip681 = () => {
     title: "VIP-681 [BNB Chain Testnet] Liquidity Hub receipt tracking upgrade",
     description: `#### Summary
 
-Upgrades the Core, Flux, FRV and Spoke YieldGroups of the Liquidity Hub (USDT) on BNB Chain Testnet so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly no longer change the Hub's share price until governance adds them with \`syncReceipt\`. The upgrade includes the HashDit audit fixes.
+Upgrades the YieldGroups of the USDT and USDC Liquidity Hubs on BNB Chain Testnet, the two testnet Hubs that also run on mainnet, so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly no longer change the Hub's share price until governance adds them with \`syncReceipt\`. The upgrade includes the HashDit audit fixes.
 
 #### Actions
 
-1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock on the four YieldGroups, and to the Guardian on every contract, like its other testnet Hub roles.
+1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock on the six YieldGroups (Core, Flux, FRV and Spoke on USDT, Core and FRV on USDC), and to the Guardian on every contract, like its other testnet Hub roles. Grant \`updateResourceAdapter(address,address)\` to the Normal Timelock on the two USDC YieldGroups, which do not have it yet.
 2. Upgrade the Core, Flux and Spoke beacons to the YieldGroup implementation [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to the YieldGroupFRV implementation [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}).
-3. Point all 11 resources at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
-4. Sync each resource's tracked receipt count to the receipts the YieldGroup holds, with no cap, so the Hub's value stays the same.
+3. Point all 14 resources (11 on USDT, 3 on USDC) at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
+4. Sync each resource's tracked receipt count to the receipts the YieldGroup holds, with no cap, so each Hub's value stays the same.
 
 #### Notes
 
-- Testnet only. Mainnet runs the same steps on the U, USDC and USDT Hubs.
+- Testnet only. Mainnet runs the same steps on the U, USDC and USDT Hubs; testnet has no U Hub.
 - All four steps must run in one proposal. The new implementation prices positions through \`receiptValue\`, which the old adapters do not have, and every tracked count reads 0 until step 4 runs.
+- Only the Hubs that also run on mainnet, USDT and USDC, are migrated. The other testnet asset Hubs (BTCB, FDUSD, AAVE, TUSD, vhTUSD, LTC, DOGE, TRX, ADA, ETH, CAKE, WBNB, BUSD, SOL and SXP) are left out on purpose. They share these beacons, so their \`totalAssets\` reverts until their resources are pointed at the new adapters and synced, which the Guardian can do with its wildcard roles.
 - The Centrifuge YieldGroup is not touched, because it does not track receipts.
 
 #### References
@@ -103,7 +122,7 @@ Upgrades the Core, Flux, FRV and Spoke YieldGroups of the Liquidity Hub (USDT) o
   return makeProposal(
     [
       // ────────────────────────────────────────────────────────────────
-      // 1. syncReceipt permission
+      // 1. Permissions
       // ────────────────────────────────────────────────────────────────
       ...TRACKING_GROUPS.map(group => ({
         target: ACCESS_CONTROL_MANAGER,
@@ -114,6 +133,16 @@ Upgrades the Core, Flux, FRV and Spoke YieldGroups of the Liquidity Hub (USDT) o
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [constants.AddressZero, SYNC_RECEIPT, GUARDIAN], // wildcard, as the Guardian's other Hub roles are
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CORE_SOURCE_USDC, UPDATE_RESOURCE_ADAPTER, NORMAL_TIMELOCK], // the USDT groups already have it
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [FRV_SOURCE_USDC, UPDATE_RESOURCE_ADAPTER, NORMAL_TIMELOCK],
       },
 
       // ────────────────────────────────────────────────────────────────
@@ -129,8 +158,8 @@ Upgrades the Core, Flux, FRV and Spoke YieldGroups of the Liquidity Hub (USDT) o
       // ────────────────────────────────────────────────────────────────
       ...RESOURCES.map(({ group, resource, adapter }) => ({
         target: group,
-        signature: "updateResourceAdapter(address,address)",
-        params: [resource, ADAPTERS[adapter].new],
+        signature: UPDATE_RESOURCE_ADAPTER,
+        params: [resource, adapter],
       })),
 
       // ────────────────────────────────────────────────────────────────
