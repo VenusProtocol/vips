@@ -29,6 +29,7 @@ import vip681, {
   UPDATE_RESOURCE_ADAPTER,
 } from "../../vips/vip-681/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
@@ -262,8 +263,15 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-681 [BNB Chain] Liquidity Hub receipt tracking upgrade", await vip681(), {
+  testVip("VIP-681 Liquidity Hub receipt tracking upgrade and PancakeSwapOracle ownership", await vip681(), {
     callbackAfterExecution: async txResponse => {
+      // one remote proposal each for Ethereum, Arbitrum One and Base
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [3, 0],
+      );
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [1, 1]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [BEACONS.length]);
       await expectEvents(

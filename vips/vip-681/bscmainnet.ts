@@ -1,7 +1,7 @@
 import { constants } from "ethers";
 import { solidityKeccak256 } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { ProposalType } from "src/types";
+import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
@@ -94,6 +94,13 @@ export const RESOURCES: { group: string; resource: string; adapter: keyof typeof
   { group: SPOKE_SOURCE_USDT, resource: "0x722997e2211a224Ac98Cc55D8C1C973D63623a0b", adapter: "SPOKE" }, // vUSDT_BPNLoan
 ];
 
+// ────────────────────────────────────────────────────────────────
+// PancakeSwapOracles still owned by their deployers, each with its chain's Normal Timelock as pending owner
+// ────────────────────────────────────────────────────────────────
+export const PANCAKESWAP_ORACLE_ETHEREUM = "0xCCB08e5107b406E67Ad8356023dd489CEbc79B40";
+export const PANCAKESWAP_ORACLE_ARBITRUMONE = "0x3Fd56a3Ad5aC85D1502988323386C68B2ed9366B";
+export const PANCAKESWAP_ORACLE_BASEMAINNET = "0x0512FD9052b601436478c086D36e62E3F0EB29C1";
+
 export const SYNC_RECEIPT = "syncReceipt(address,uint256)";
 export const UPDATE_RESOURCE_ADAPTER = "updateResourceAdapter(address,address)";
 export const SYNC_WHOLE_WALLET = constants.MaxUint256; // no cap: every tracked count starts at 0 after the upgrade
@@ -101,10 +108,11 @@ export const SYNC_WHOLE_WALLET = constants.MaxUint256; // no cap: every tracked 
 export const vip681 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-681 [BNB Chain] Liquidity Hub receipt tracking upgrade",
+    title:
+      "VIP-681 [BNB Chain, Ethereum, Arbitrum One, Base] Liquidity Hub receipt tracking upgrade and PancakeSwapOracle ownership",
     description: `#### Summary
 
-If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed. The VIP also revokes \`updateResourceAdapter\` from the Guardian.
+If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed. The VIP also revokes \`updateResourceAdapter\` from the Guardian, and has the Normal Timelocks on Ethereum, Arbitrum One and Base accept ownership of their PancakeSwapOracle.
 
 #### Actions
 
@@ -113,12 +121,14 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
 3. Point all 19 registered resources at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
 4. Sync each resource's tracked receipt count to the receipts its YieldGroup holds, with no cap. The current implementation already values the whole balance, so each Hub's value stays the same.
 5. Revoke \`updateResourceAdapter(address,address)\` from the Guardian, which holds it as a wildcard since VIP-673. The Normal Timelock keeps the permission.
+6. Accept ownership of the PancakeSwapOracle on Ethereum ([${PANCAKESWAP_ORACLE_ETHEREUM}](https://etherscan.io/address/${PANCAKESWAP_ORACLE_ETHEREUM})), Arbitrum One ([${PANCAKESWAP_ORACLE_ARBITRUMONE}](https://arbiscan.io/address/${PANCAKESWAP_ORACLE_ARBITRUMONE})) and Base ([${PANCAKESWAP_ORACLE_BASEMAINNET}](https://basescan.org/address/${PANCAKESWAP_ORACLE_BASEMAINNET})). Each deployer handed it to its chain's Normal Timelock, but VIP-616, which accepted the other sentinel contracts on these chains, left it out, so the deployer wallets still own it. BNB Chain's PancakeSwapOracle was accepted in VIP-590.
 
 #### Notes
 
 - Steps 1 to 4 must run in this one proposal. The new implementation prices positions through \`receiptValue\`, which the current adapters do not have, so a YieldGroup left on a current adapter would make its Hub's \`totalAssets()\` revert. Every tracked count also reads 0 until step 4 runs.
 - The Centrifuge YieldGroups are not touched, because they do not track receipts.
 - The Guardian does not get \`syncReceipt\`, because a sync changes a Hub's share price.
+- No market on Ethereum, Arbitrum One or Base prices through its PancakeSwapOracle today, so step 6 changes no price.
 - The code has been audited by HashDit, and this deployment includes the fixes from that audit.
 
 #### Deployed contracts
@@ -184,6 +194,28 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
         // This ACM keys a wildcard on bytes32(0), and its revokeCallPermission(address(0), ...) revokes nothing
         signature: "revokeRole(bytes32,address)",
         params: [solidityKeccak256(["bytes32", "string"], [constants.HashZero, UPDATE_RESOURCE_ADAPTER]), GUARDIAN],
+      },
+
+      // ────────────────────────────────────────────────────────────────
+      // 6. Missing PancakeSwapOracle ownership calls on Ethereum, Arbitrum One and Base (left out of VIP-616)
+      // ────────────────────────────────────────────────────────────────
+      {
+        target: PANCAKESWAP_ORACLE_ETHEREUM,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: PANCAKESWAP_ORACLE_ARBITRUMONE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: PANCAKESWAP_ORACLE_BASEMAINNET,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.basemainnet,
       },
     ],
     meta,
