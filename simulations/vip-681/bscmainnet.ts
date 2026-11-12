@@ -13,6 +13,8 @@ import vip681, {
   ALLEZ_LABS_USDC_AMOUNT,
   CORE_BEACON,
   CORE_SOURCE_USDT,
+  FLOKI,
+  FLOKI_PRICE_VIP_679,
   FLUX_BEACON,
   FRV_BEACON,
   HUB_U,
@@ -36,7 +38,8 @@ import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, CHAINLINK_ORACLE, GUARDIAN, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY } =
+  NETWORK_ADDRESSES.bscmainnet;
 
 // After the receipt-ledger implementations and adapters were deployed at block 132740503
 const BLOCK_NUMBER = 132741900;
@@ -64,6 +67,10 @@ const ADAPTER_ABI = [
   "function receiptBalance(address resource, address holder) view returns (uint256)",
   "function receiptValue(address resource, uint256 shares) view returns (uint256)",
   "function totalAssets(address resource, address holder) view returns (uint256)",
+];
+const ORACLE_ABI = [
+  "function prices(address asset) view returns (uint256)",
+  "function getPrice(address asset) view returns (uint256)",
 ];
 const REGISTRY_ABI = ["function getHubs() view returns (address[])"];
 const HUB_ABI = [
@@ -267,6 +274,13 @@ forking(BLOCK_NUMBER, async () => {
       expect(await vhUSDC.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
     });
 
+    it("FLOKI is priced at the VIP-679 direct price", async () => {
+      const chainlink = new Contract(CHAINLINK_ORACLE, ORACLE_ABI, ethers.provider);
+      expect(await chainlink.prices(FLOKI)).to.equal(FLOKI_PRICE_VIP_679);
+      const resilient = new Contract(RESILIENT_ORACLE, ORACLE_ABI, ethers.provider);
+      expect(await resilient.getPrice(FLOKI)).to.equal(FLOKI_PRICE_VIP_679.mul(10 ** 9)); // FLOKI has 9 decimals
+    });
+
     it("records what each group stores", async () => {
       storedStateBefore = await storedState();
     });
@@ -343,6 +357,13 @@ forking(BLOCK_NUMBER, async () => {
       expect((await usdc.balanceOf(ALLEZ_LABS)).sub(allezUsdcBefore)).to.equal(ALLEZ_LABS_USDC_AMOUNT);
       const vhUSDC = new Contract(HUB_USDC, HUB_ABI, ethers.provider);
       expect(await vhUSDC.balanceOf(VTREASURY)).to.equal(treasuryVhusdcBefore.sub(VHUSDC_WITHDRAW_AMOUNT));
+    });
+
+    it("FLOKI has no price: the direct price is cleared and the ResilientOracle reverts", async () => {
+      const chainlink = new Contract(CHAINLINK_ORACLE, ORACLE_ABI, ethers.provider);
+      expect(await chainlink.prices(FLOKI)).to.equal(0);
+      const resilient = new Contract(RESILIENT_ORACLE, ORACLE_ABI, ethers.provider);
+      await expect(resilient.getPrice(FLOKI)).to.be.reverted;
     });
 
     it("the unused vhUSDC stays with the Normal Timelock and is under 1% of the withdrawal", async () => {
