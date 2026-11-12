@@ -9,6 +9,8 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip681, {
   ADAPTERS,
+  ALLEZ_LABS,
+  ALLEZ_LABS_USDC_AMOUNT,
   CORE_BEACON,
   CORE_SOURCE_USDT,
   FLUX_BEACON,
@@ -27,13 +29,14 @@ import vip681, {
   SYNC_RECEIPT,
   TRACKING_GROUPS,
   UPDATE_RESOURCE_ADAPTER,
+  VHUSDC_WITHDRAW_AMOUNT,
 } from "../../vips/vip-681/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import BEACON_ABI from "./abi/UpgradeableBeacon.json";
 import YIELD_GROUP_ABI from "./abi/YieldGroup.json";
 
-const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, GUARDIAN, NORMAL_TIMELOCK, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
 // After the receipt-ledger implementations and adapters were deployed at block 132740503
 const BLOCK_NUMBER = 132741900;
@@ -194,6 +197,8 @@ const expectEveryCountToMatchItsWallet = async () => {
 
 forking(BLOCK_NUMBER, async () => {
   let hubTotalAssetsBefore: BigNumber[];
+  let allezUsdcBefore: BigNumber;
+  let treasuryVhusdcBefore: BigNumber;
   let storedStateBefore: Awaited<ReturnType<typeof storedState>>;
 
   describe("Pre-VIP behavior", () => {
@@ -252,6 +257,14 @@ forking(BLOCK_NUMBER, async () => {
         HUBS.map(({ hub }) => new Contract(hub, HUB_ABI, ethers.provider).totalAssets()),
       );
       hubTotalAssetsBefore.forEach((totalAssets, i) => expect(totalAssets, HUBS[i].hub).to.be.gt(0));
+    });
+
+    it("records the Allez Labs USDC and Treasury vhUSDC balances; the Normal Timelock holds no vhUSDC", async () => {
+      allezUsdcBefore = await new Contract(USDC, ERC20_ABI, ethers.provider).balanceOf(ALLEZ_LABS);
+      const vhUSDC = new Contract(HUB_USDC, HUB_ABI, ethers.provider);
+      treasuryVhusdcBefore = await vhUSDC.balanceOf(VTREASURY);
+      expect(treasuryVhusdcBefore).to.be.gte(VHUSDC_WITHDRAW_AMOUNT);
+      expect(await vhUSDC.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
     });
 
     it("records what each group stores", async () => {
@@ -317,10 +330,25 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("no Hub's total assets fall", async () => {
+    it("no Hub's total assets fall, apart from the USDC paid out of the USDC Hub to Allez Labs", async () => {
       for (const [i, { hub }] of HUBS.entries()) {
-        expect(await new Contract(hub, HUB_ABI, ethers.provider).totalAssets(), hub).to.be.gte(hubTotalAssetsBefore[i]);
+        const paidOut = hub === HUB_USDC ? ALLEZ_LABS_USDC_AMOUNT : 0;
+        const totalAssets: BigNumber = await new Contract(hub, HUB_ABI, ethers.provider).totalAssets();
+        expect(totalAssets.add(paidOut), hub).to.be.gte(hubTotalAssetsBefore[i]);
       }
+    });
+
+    it("Allez Labs receives exactly 105,000 USDC, paid from the Treasury's vhUSDC", async () => {
+      const usdc = new Contract(USDC, ERC20_ABI, ethers.provider);
+      expect((await usdc.balanceOf(ALLEZ_LABS)).sub(allezUsdcBefore)).to.equal(ALLEZ_LABS_USDC_AMOUNT);
+      const vhUSDC = new Contract(HUB_USDC, HUB_ABI, ethers.provider);
+      expect(await vhUSDC.balanceOf(VTREASURY)).to.equal(treasuryVhusdcBefore.sub(VHUSDC_WITHDRAW_AMOUNT));
+    });
+
+    it("the unused vhUSDC stays with the Normal Timelock and is under 1% of the withdrawal", async () => {
+      const left: BigNumber = await new Contract(HUB_USDC, HUB_ABI, ethers.provider).balanceOf(NORMAL_TIMELOCK);
+      expect(left).to.be.gt(0);
+      expect(left).to.be.lt(VHUSDC_WITHDRAW_AMOUNT.div(100));
     });
 
     it("the Normal Timelock holds syncReceipt on every group, and the Guardian does not", async () => {

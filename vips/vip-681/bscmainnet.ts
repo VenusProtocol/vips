@@ -1,9 +1,10 @@
 import { constants } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
+const { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
 // ────────────────────────────────────────────────────────────────
 // YieldGroup beacons, one per family, and their implementations
@@ -100,6 +101,15 @@ export const PANCAKESWAP_ORACLE_ETHEREUM = "0xCCB08e5107b406E67Ad8356023dd489CEb
 export const PANCAKESWAP_ORACLE_ARBITRUMONE = "0x3Fd56a3Ad5aC85D1502988323386C68B2ed9366B";
 export const PANCAKESWAP_ORACLE_BASEMAINNET = "0x0512FD9052b601436478c086D36e62E3F0EB29C1";
 
+// ────────────────────────────────────────────────────────────────
+// Allez Labs Q4 2026 payment, sourced from the Treasury's USDC Hub shares (vhUSDC)
+// ────────────────────────────────────────────────────────────────
+export const ALLEZ_LABS = "0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e"; // same recipient as VIP-594, VIP-612 and VIP-644
+export const ALLEZ_LABS_USDC_AMOUNT = parseUnits("105000", 18); // USDC
+// ~104,060 vhUSDC buys 105,000 USDC at the authoring blocks. The ~0.5% margin keeps the withdrawal from
+// reverting if the share price dips before execution; whatever is left stays with the Normal Timelock
+export const VHUSDC_WITHDRAW_AMOUNT = parseUnits("104600", 24); // vhUSDC has 24 decimals
+
 export const SYNC_RECEIPT = "syncReceipt(address,uint256)";
 export const UPDATE_RESOURCE_ADAPTER = "updateResourceAdapter(address,address)";
 export const SYNC_WHOLE_WALLET = constants.MaxUint256; // no cap: every tracked count starts at 0 after the upgrade
@@ -108,10 +118,10 @@ export const vip681 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-681 [BNB Chain, Ethereum, Arbitrum One, Base] Liquidity Hub receipt tracking upgrade and PancakeSwapOracle ownership",
+      "VIP-681 [BNB Chain, Ethereum, Arbitrum One, Base] Liquidity Hub receipt tracking upgrade, Allez Labs Q4 payment and PancakeSwapOracle ownership",
     description: `#### Summary
 
-If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed. The VIP also has the Normal Timelocks on Ethereum, Arbitrum One and Base accept ownership of their PancakeSwapOracle.
+If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed. The VIP also pays Allez Labs its Q4 2026 fee of 105,000 USDC from the Treasury's USDC Hub position, and has the Normal Timelocks on Ethereum, Arbitrum One and Base accept ownership of their PancakeSwapOracle.
 
 #### Actions
 
@@ -119,14 +129,16 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
 2. Upgrade the Core, Flux and Spoke beacons to the YieldGroup implementation [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to the YieldGroupFRV implementation [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}). Each beacon serves its family on all three Hubs, so this upgrades 12 YieldGroups. The new implementations add one storage mapping and leave the existing layout unchanged.
 3. Point all 19 registered resources at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
 4. Sync each resource's tracked receipt count to the receipts its YieldGroup holds, with no cap. The current implementation already values the whole balance, so each Hub's value stays the same.
-5. Accept ownership of the PancakeSwapOracle on Ethereum ([${PANCAKESWAP_ORACLE_ETHEREUM}](https://etherscan.io/address/${PANCAKESWAP_ORACLE_ETHEREUM})), Arbitrum One ([${PANCAKESWAP_ORACLE_ARBITRUMONE}](https://arbiscan.io/address/${PANCAKESWAP_ORACLE_ARBITRUMONE})) and Base ([${PANCAKESWAP_ORACLE_BASEMAINNET}](https://basescan.org/address/${PANCAKESWAP_ORACLE_BASEMAINNET})). Each deployer handed it to its chain's Normal Timelock, but VIP-616, which accepted the other sentinel contracts on these chains, left it out, so the deployer wallets still own it. BNB Chain's PancakeSwapOracle was accepted in VIP-590.
+5. Pay Allez Labs 105,000 USDC for Q4 2026 (26 October 2026 to 25 January 2027), billed quarterly in advance at $35,000 a month, the same amount as Q2 ([VIP-612](https://app.venus.io/#/governance/proposal/612?chainId=56)) and Q3 ([VIP-644](https://app.venus.io/#/governance/proposal/644?chainId=56)). The Treasury holds only about 8,800 liquid USDC, so the USDC comes from its USDC Hub shares: the Treasury sends 104,600 vhUSDC ([${HUB_USDC}](https://bscscan.com/address/${HUB_USDC})) to the Normal Timelock, which withdraws exactly 105,000 USDC from the Hub to Allez Labs ([${ALLEZ_LABS}](https://bscscan.com/address/${ALLEZ_LABS})).
+6. Accept ownership of the PancakeSwapOracle on Ethereum ([${PANCAKESWAP_ORACLE_ETHEREUM}](https://etherscan.io/address/${PANCAKESWAP_ORACLE_ETHEREUM})), Arbitrum One ([${PANCAKESWAP_ORACLE_ARBITRUMONE}](https://arbiscan.io/address/${PANCAKESWAP_ORACLE_ARBITRUMONE})) and Base ([${PANCAKESWAP_ORACLE_BASEMAINNET}](https://basescan.org/address/${PANCAKESWAP_ORACLE_BASEMAINNET})). Each deployer handed it to its chain's Normal Timelock, but VIP-616, which accepted the other sentinel contracts on these chains, left it out, so the deployer wallets still own it. BNB Chain's PancakeSwapOracle was accepted in VIP-590.
 
 #### Notes
 
 - Steps 1 to 4 must run in this one proposal. The new implementation prices positions through \`receiptValue\`, which the current adapters do not have, so a YieldGroup left on a current adapter would make its Hub's \`totalAssets()\` revert. Every tracked count also reads 0 until step 4 runs.
 - The Centrifuge YieldGroups are not touched, because they do not track receipts.
 - The Guardian does not get \`syncReceipt\`, because a sync changes a Hub's share price.
-- No market on Ethereum, Arbitrum One or Base prices through its PancakeSwapOracle today, so step 5 changes no price.
+- No market on Ethereum, Arbitrum One or Base prices through its PancakeSwapOracle today, so step 6 changes no price.
+- Step 5 runs after the sync, when the USDC Hub prices correctly again. 104,600 vhUSDC is about 0.5% more than the payment needs, so a small dip in the share price cannot make it revert. The unused vhUSDC, worth roughly 570 USDC, stays with the Normal Timelock and can be returned to the Treasury in a later VIP.
 - The code has been audited by HashDit, and this deployment includes the fixes from that audit.
 
 #### Deployed contracts
@@ -185,7 +197,21 @@ If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U,
       })),
 
       // ────────────────────────────────────────────────────────────────
-      // 5. Missing PancakeSwapOracle ownership calls on Ethereum, Arbitrum One and Base (left out of VIP-616)
+      // 5. Allez Labs Q4 2026 payment, after the sync so the USDC Hub prices correctly again
+      // ────────────────────────────────────────────────────────────────
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [HUB_USDC, VHUSDC_WITHDRAW_AMOUNT, NORMAL_TIMELOCK],
+      },
+      {
+        target: HUB_USDC,
+        signature: "withdraw(uint256,address,address)",
+        params: [ALLEZ_LABS_USDC_AMOUNT, ALLEZ_LABS, NORMAL_TIMELOCK],
+      },
+
+      // ────────────────────────────────────────────────────────────────
+      // 6. Missing PancakeSwapOracle ownership calls on Ethereum, Arbitrum One and Base (left out of VIP-616)
       // ────────────────────────────────────────────────────────────────
       {
         target: PANCAKESWAP_ORACLE_ETHEREUM,
