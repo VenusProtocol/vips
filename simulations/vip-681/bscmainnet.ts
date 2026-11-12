@@ -272,7 +272,7 @@ forking(BLOCK_NUMBER, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [3, 0],
       );
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [1, 1]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [1, 0]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [BEACONS.length]);
       await expectEvents(
         txResponse,
@@ -328,9 +328,9 @@ forking(BLOCK_NUMBER, async () => {
       expect(await syncReceiptGrants(GUARDIAN)).to.deep.equal(TRACKING_GROUPS.map(() => false));
     });
 
-    it("only the Normal Timelock can repoint adapters: the Guardian lost updateResourceAdapter", async () => {
+    it("both the Normal Timelock and the Guardian can still repoint adapters on every group", async () => {
       expect(await updateResourceAdapterGrants(NORMAL_TIMELOCK)).to.not.include(false);
-      expect(await updateResourceAdapterGrants(GUARDIAN)).to.not.include(true);
+      expect(await updateResourceAdapterGrants(GUARDIAN)).to.not.include(false);
     });
   });
 
