@@ -85,21 +85,15 @@ export const vip681 = () => {
     title: "VIP-681 [BNB Chain Testnet] Liquidity Hub receipt tracking upgrade",
     description: `#### Summary
 
-Upgrades the YieldGroups of the USDT and USDC Liquidity Hubs on BNB Chain Testnet, the two testnet Hubs that also run on mainnet, so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly no longer change the Hub's share price until governance adds them with \`syncReceipt\`. The upgrade includes the HashDit audit fixes.
+If passed, this VIP will upgrade the Core, Flux, FRV and Spoke YieldGroups of the USDT and USDC Liquidity Hubs on BNB Chain Testnet to receipt tracking.
 
 #### Actions
 
-1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock and the Guardian on every contract, like the Guardian's other testnet Hub roles. Grant \`updateResourceAdapter(address,address)\` to the Normal Timelock on the two USDC YieldGroups, which do not have it yet.
-2. Upgrade the Core, Flux and Spoke beacons to the YieldGroup implementation [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to the YieldGroupFRV implementation [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}).
-3. Point all 14 resources (11 on USDT, 3 on USDC) at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
-4. Sync each resource's tracked receipt count to the receipts the YieldGroup holds, with no cap, so each Hub's value stays the same.
-
-#### Notes
-
-- Testnet only. Mainnet runs the same steps on the U, USDC and USDT Hubs; testnet has no U Hub.
-- All four steps must run in one proposal. The new implementation prices positions through \`receiptValue\`, which the old adapters do not have, and every tracked count reads 0 until step 4 runs.
-- Only the Hubs that also run on mainnet, USDT and USDC, are migrated. The other testnet asset Hubs (BTCB, FDUSD, AAVE, TUSD, vhTUSD, LTC, DOGE, TRX, ADA, ETH, CAKE, WBNB, BUSD, SOL and SXP) are left out on purpose. They share these beacons, so their \`totalAssets\` reverts until their resources are pointed at the new adapters and synced, which the Guardian can do with its wildcard roles.
-- The Centrifuge YieldGroup is not touched, because it does not track receipts.
+1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock and the Guardian on every contract (wildcard)
+2. Grant \`updateResourceAdapter(address,address)\` to the Normal Timelock on the USDC Core and FRV YieldGroups
+3. Upgrade the Core, Flux and Spoke beacons to [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://testnet.bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION})
+4. Point 14 resources (11 on USDT, 3 on USDC) at the new Core, Flux, FRV and Spoke adapters
+5. Sync each of those resources' tracked receipt count to the receipts its YieldGroup holds, with no cap
 
 #### References
 

@@ -114,7 +114,6 @@ export const VHUSDC_WITHDRAW_AMOUNT = parseUnits("104600", 24); // vhUSDC has 24
 // FLOKI exit price set by VIP-679 on the ChainlinkOracle, removed here
 // ────────────────────────────────────────────────────────────────
 export const FLOKI = "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E";
-export const VFLOKI_GAMEFI = "0xc353B7a1E13dDba393B5E120D4169Da7185aA2cb";
 export const FLOKI_PRICE_VIP_679 = parseUnits("0.00002228", 18); // the direct price this VIP clears
 
 export const SYNC_RECEIPT = "syncReceipt(address,uint256)";
@@ -128,27 +127,27 @@ export const vip681 = () => {
       "VIP-681 [BNB Chain, Ethereum, Arbitrum One, Base] Liquidity Hub receipt tracking upgrade, Allez Labs Q4 payment, FLOKI price removal and PancakeSwapOracle ownership",
     description: `#### Summary
 
-If passed, this VIP upgrades the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs so that each one values only the receipt tokens it minted through its own deposits. Receipt tokens sent to a YieldGroup directly will no longer change a Hub's share price, so nobody can raise it by sending over-priced receipt tokens in. Governance can still add such tokens with \`syncReceipt\`, capped at the amount it reviewed. The VIP also pays Allez Labs its Q4 2026 fee of 105,000 USDC from the Treasury's USDC Hub position, removes the fixed FLOKI price set by VIP-679, and has the Normal Timelocks on Ethereum, Arbitrum One and Base accept ownership of their PancakeSwapOracle.
+If passed, this VIP will:
+
+- Upgrade the Core, Flux, FRV and Spoke YieldGroups of the U, USDC and USDT Liquidity Hubs to receipt tracking
+- Pay Allez Labs 105,000 USDC for Q4 2026
+- Remove the FLOKI direct price on the ChainlinkOracle
+- Accept ownership of the PancakeSwapOracle on Ethereum, Arbitrum One and Base
 
 #### Actions
 
-1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock as a wildcard (contract address zero), like its other YieldGroup roles from VIP-673.
-2. Upgrade the Core, Flux and Spoke beacons to the YieldGroup implementation [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to the YieldGroupFRV implementation [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}). Each beacon serves its family on all three Hubs, so this upgrades 12 YieldGroups. The new implementations add one storage mapping and leave the existing layout unchanged.
-3. Point all 19 registered resources at the new adapters, which add \`receiptValue\`. The Core adapter also quotes withdrawable cash net of the market's reserves.
-4. Sync each resource's tracked receipt count to the receipts its YieldGroup holds, with no cap. The current implementation already values the whole balance, so each Hub's value stays the same.
-5. Pay Allez Labs 105,000 USDC for Q4 2026 (26 October 2026 to 25 January 2027), billed quarterly in advance at $35,000 a month, the same amount as Q2 ([VIP-612](https://app.venus.io/#/governance/proposal/612?chainId=56)) and Q3 ([VIP-644](https://app.venus.io/#/governance/proposal/644?chainId=56)). The Treasury holds only about 8,800 liquid USDC, so the USDC comes from its USDC Hub shares: the Treasury sends 104,600 vhUSDC ([${HUB_USDC}](https://bscscan.com/address/${HUB_USDC})) to the Normal Timelock, which withdraws exactly 105,000 USDC from the Hub to Allez Labs ([${ALLEZ_LABS}](https://bscscan.com/address/${ALLEZ_LABS})).
-6. Remove the fixed FLOKI ([${FLOKI}](https://bscscan.com/address/${FLOKI})) price of $0.00002228 that [VIP-679](https://app.venus.io/#/governance/proposal/679?chainId=56) set on the ChainlinkOracle ([${CHAINLINK_ORACLE}](https://bscscan.com/address/${CHAINLINK_ORACLE})), by setting its direct price back to 0. The ChainlinkOracle has no FLOKI feed and the ResilientOracle has no pivot or fallback for FLOKI, so FLOKI has no price again, as before VIP-679.
-7. Accept ownership of the PancakeSwapOracle on Ethereum ([${PANCAKESWAP_ORACLE_ETHEREUM}](https://etherscan.io/address/${PANCAKESWAP_ORACLE_ETHEREUM})), Arbitrum One ([${PANCAKESWAP_ORACLE_ARBITRUMONE}](https://arbiscan.io/address/${PANCAKESWAP_ORACLE_ARBITRUMONE})) and Base ([${PANCAKESWAP_ORACLE_BASEMAINNET}](https://basescan.org/address/${PANCAKESWAP_ORACLE_BASEMAINNET})). Each deployer handed it to its chain's Normal Timelock, but VIP-616, which accepted the other sentinel contracts on these chains, left it out, so the deployer wallets still own it. BNB Chain's PancakeSwapOracle was accepted in VIP-590.
-
-#### Notes
-
-- Steps 1 to 4 must run in this one proposal. The new implementation prices positions through \`receiptValue\`, which the current adapters do not have, so a YieldGroup left on a current adapter would make its Hub's \`totalAssets()\` revert. Every tracked count also reads 0 until step 4 runs.
-- The Centrifuge YieldGroups are not touched, because they do not track receipts.
-- The Guardian does not get \`syncReceipt\`, because a sync changes a Hub's share price.
-- No market on Ethereum, Arbitrum One or Base prices through its PancakeSwapOracle today, so step 7 changes no price.
-- Step 5 runs after the sync, when the USDC Hub prices correctly again. 104,600 vhUSDC is about 0.5% more than the payment needs, so a small dip in the share price cannot make it revert. The unused vhUSDC, worth roughly 570 USDC, stays with the Normal Timelock and can be returned to the Treasury in a later VIP.
-- After step 6, the FLOKI exit window that VIP-679 opened on the GameFi pool closes. Suppliers in vFLOKI_GameFi ([${VFLOKI_GAMEFI}](https://bscscan.com/address/${VFLOKI_GAMEFI})) who use it as collateral can no longer redeem, and FLOKI token-converter pairs stop converting. The Core pool is not affected.
-- The code has been audited by HashDit, and this deployment includes the fixes from that audit.
+1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock on every contract (wildcard)
+2. Upgrade the Core, Flux and Spoke beacons to [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}) (12 YieldGroups)
+3. Point the 19 registered resources at the new Core, Flux, FRV and Spoke adapters
+4. Sync each resource's tracked receipt count to the receipts its YieldGroup holds, with no cap
+5. Pay Allez Labs ([${ALLEZ_LABS}](https://bscscan.com/address/${ALLEZ_LABS})) 105,000 USDC for Q4 2026 (26 October 2026 to 25 January 2027):
+   - Withdraw 104,600 vhUSDC ([${HUB_USDC}](https://bscscan.com/address/${HUB_USDC})) from the Venus Treasury to the Normal Timelock
+   - Withdraw 105,000 USDC from the USDC Hub to Allez Labs; the unused vhUSDC stays with the Normal Timelock
+6. Set the FLOKI ([${FLOKI}](https://bscscan.com/address/${FLOKI})) direct price on the ChainlinkOracle ([${CHAINLINK_ORACLE}](https://bscscan.com/address/${CHAINLINK_ORACLE})) to 0, removing the price set in [VIP-679](https://app.venus.io/#/governance/proposal/679?chainId=56)
+7. Accept ownership of the PancakeSwapOracle on:
+   - Ethereum: [${PANCAKESWAP_ORACLE_ETHEREUM}](https://etherscan.io/address/${PANCAKESWAP_ORACLE_ETHEREUM})
+   - Arbitrum One: [${PANCAKESWAP_ORACLE_ARBITRUMONE}](https://arbiscan.io/address/${PANCAKESWAP_ORACLE_ARBITRUMONE})
+   - Base: [${PANCAKESWAP_ORACLE_BASEMAINNET}](https://basescan.org/address/${PANCAKESWAP_ORACLE_BASEMAINNET})
 
 #### Deployed contracts
 
