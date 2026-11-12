@@ -136,7 +136,7 @@ If passed, this VIP will:
 
 #### Actions
 
-1. Grant \`syncReceipt(address,uint256)\` to the Normal Timelock on every contract (wildcard)
+1. Grant syncReceipt(address,uint256) to the Normal Timelock on every contract (wildcard)
 2. Upgrade the Core, Flux and Spoke beacons to [${NEW_YIELD_GROUP_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_IMPLEMENTATION}), and the FRV beacon to [${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}](https://bscscan.com/address/${NEW_YIELD_GROUP_FRV_IMPLEMENTATION}) (12 YieldGroups)
 3. Point the 19 registered resources at the new Core, Flux, FRV and Spoke adapters
 4. Sync each resource's tracked receipt count to the receipts its YieldGroup holds, with no cap
