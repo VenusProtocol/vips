@@ -25,12 +25,10 @@ export const SUSN = "0xdA67B4284609d2d48e5d10cfAc411572727dc1eD"; // collateral,
 // Stork's on-chain verifier and the sUSN feed it stores: the sUSN -> USN exchange rate, 18 dec, pushed hourly.
 export const STORK = "0x7D06cc8210228365896A3cc8Aac88c5551529112";
 export const SUSN_STORK_FEED_ID = "0x77003d6da8f95711efa901495c607c987dfaedd55d24c6f935286f2851ed915e";
-// PENDING: the Chainlink-interface adapter over (STORK, SUSN_STORK_FEED_ID) that reports updatedAt in seconds.
-// Stork's own StorkChainlinkAdapter reports nanoseconds, which the ChainlinkOracle rejects. This placeholder
-// has no code on BNB Chain, so a proposal built with it reverts at createVault.
-export const SUSN_STORK_FEED = "0x4054d459d804612a60b282ae6EA91dfFbd7A03eC";
-// 1h + 5min: the feed is pushed hourly; its oldest value before a push was 3,700s (Sept 10 - Nov 13).
-export const MAX_STALE_PERIOD = 3900;
+// Venus's StorkChainlinkAdapter (oracle repo): serves the price from Stork's sUSN feed through the Chainlink
+// interface, so the ChainlinkOracle uses it as sUSN's feed.
+export const SUSN_STORK_FEED = "0xBa0331C346280A20c6b67C43512466030bAf13E0";
+export const MAX_STALE_PERIOD = 3900; // 1h heartbeat + 5min
 
 // controller.predictVaultAddress(INSTITUTION_OPERATOR) at institutionNonce 0; re-derive if a vault is
 // created for this operator, or the vault implementation changes, before execution.
@@ -96,7 +94,7 @@ This VIP lists a fixed-term institutional loan vault for Noon Capital on the Ven
 
 #### Description
 
-**Oracle.** sUSN is new to Venus. It is priced from Stork's sUSN feed (ID ${SUSN_STORK_FEED_ID}) on the Stork contract [${STORK}](https://bscscan.com/address/${STORK}). The feed reports the sUSN to USN exchange rate of the Staked USN vault on Ethereum, ≈1.2365 at authoring, and is pushed hourly. A Chainlink-interface adapter, [${SUSN_STORK_FEED}](https://bscscan.com/address/${SUSN_STORK_FEED}), reads the feed for the ChainlinkOracle, which becomes sUSN's single ResilientOracle source (no pivot, no fallback). The maxStalePeriod is 1 hour 5 minutes (3,900s); the feed's oldest value before an update was 3,700s from September 10 to November 13, 2026.
+**Oracle.** sUSN is new to Venus. It is priced from Stork's sUSN feed (ID ${SUSN_STORK_FEED_ID}) on the Stork contract [${STORK}](https://bscscan.com/address/${STORK}). The feed reports the sUSN to USN exchange rate of the Staked USN vault on Ethereum, ≈1.2365 at authoring, and is pushed hourly. The StorkChainlinkAdapter [${SUSN_STORK_FEED}](https://bscscan.com/address/${SUSN_STORK_FEED}) serves it through the Chainlink interface as sUSN's feed on the ChainlinkOracle. It reads the feed through Stork's 1-hour age check and reports its update time in seconds. The ChainlinkOracle becomes sUSN's single ResilientOracle source (no pivot, no fallback). The ChainlinkOracle's maxStalePeriod is 1 hour 5 minutes (3,900s), but Stork's 1-hour limit fires first. The feed's oldest value before an update was 3,700s from September 10 to November 13, 2026, so sUSN can go unpriced for a few minutes when a push runs late.
 
 **Vault terms.**
 
@@ -119,7 +117,7 @@ At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal 
 **Considerations.**
 
 - **The oracle tracks the exchange rate, not the market.** USN is valued at $1, so a USN depeg would not lower sUSN's price on Venus. Noon Capital both issues sUSN and borrows against it.
-- **Price-gated actions need fresh pushes.** If the feed goes more than 3,900s without an update, getPrice(sUSN) reverts, and with it the institution's drawdown (claimRaisedFunds), withdrawCollateral during Lock, and both liquidation paths. Deposits, redemptions, repayment and state updates are unaffected.
+- **Price-gated actions need fresh pushes.** If the feed goes more than 1 hour without an update, getPrice(sUSN) reverts, and with it the institution's drawdown (claimRaisedFunds), withdrawCollateral during Lock, and both liquidation paths. Deposits, redemptions, repayment and state updates are unaffected.
 - **100% margin.** The institution posts all 1,152,073.71 sUSN before the Critical Guardian calls openVault, so the vault cannot fail for a collateral shortfall.
 - **sUSN is pausable and has an issuer blacklist.** Noon's admin can pause sUSN transfers on BNB Chain or blacklist any address, the vault's included, which would block collateral deposits, withdrawals and seizures. sUSN on BNB Chain is bridged from Ethereum over Hyperlane, and had no supply on BNB Chain at authoring.
 - **Liquidation incentive split.** Half of the 10% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.

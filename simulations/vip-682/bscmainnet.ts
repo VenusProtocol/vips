@@ -55,7 +55,7 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 133289000;
+const FORK_BLOCK = 133352189;
 
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
@@ -86,25 +86,11 @@ const ETHEREUM_SUSN = "0xE24a3DC889621612422A64E6388927901608B91D";
 
 // Stork stores each feed's latest value at keccak256(id . 3), packed as quantizedValue << 64 | timestampNs.
 const STORK_VALUE_SLOT = keccak256(defaultAbiCoder.encode(["bytes32", "uint256"], [SUSN_STORK_FEED_ID, 3]));
+// Stork's own age limit. The adapter reads through it, so it fires before the ChainlinkOracle's MAX_STALE_PERIOD.
+const STORK_VALID_TIME_PERIOD = 3600;
 
 // sUSN price at which the debt crosses the 86% threshold, as stated in the VIP description.
 const DESCRIBED_LIQUIDATION_PRICE = parseUnits("1.014", 18);
-
-// FOLLOW-UP: SUSN_STORK_FEED is not deployed yet. Until it is, the sim installs this reference adapter there:
-// Stork's StorkChainlinkAdapter with startedAt/updatedAt in seconds. Source (solc 0.8.25, optimizer 200 runs):
-//   contract StorkChainlinkAdapterSeconds {
-//     IStork public immutable stork;
-//     bytes32 public immutable priceId;
-//     constructor(IStork stork_, bytes32 priceId_) { stork = stork_; priceId = priceId_; }
-//     function decimals() external pure returns (uint8) { return 18; }
-//     function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
-//       IStork.TemporalNumericValue memory value = stork.getTemporalNumericValueUnsafeV1(priceId);
-//       uint256 updatedAt = value.timestampNs / 1e9;
-//       return (uint80(value.timestampNs), value.quantizedValue, updatedAt, updatedAt, uint80(value.timestampNs));
-//     }
-//   }
-const REFERENCE_ADAPTER_BYTECODE =
-  "0x60c0604052348015600e575f80fd5b50604051610388380380610388833981016040819052602b916040565b6001600160a01b0390911660805260a0526075565b5f80604083850312156050575f80fd5b82516001600160a01b03811681146065575f80fd5b6020939093015192949293505050565b60805160a0516102e66100a25f395f81816053015261014c01525f8181609c015261011d01526102e65ff3fe608060405234801561000f575f80fd5b506004361061004a575f3560e01c8063311893341461004e578063313ce567146100885780635515f7f614610097578063feaf968c146100d6575b5f80fd5b6100757f000000000000000000000000000000000000000000000000000000000000000081565b6040519081526020015b60405180910390f35b6040516012815260200161007f565b6100be7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b03909116815260200161007f565b6100de610115565b6040805169ffffffffffffffffffff968716815260208101959095528401929092526060830152909116608082015260a00161007f565b5f805f805f807f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663f69058c17f00000000000000000000000000000000000000000000000000000000000000006040518263ffffffff1660e01b815260040161018991815260200190565b6040805180830381865afa1580156101a3573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906101c79190610206565b80519091506101db90633b9aca009061027e565b815160209092015167ffffffffffffffff928316975060170b95501692508291508490509091929394565b5f60408284031215610216575f80fd5b6040516040810167ffffffffffffffff828210818311171561024657634e487b7160e01b5f52604160045260245ffd5b8160405284519150808216821461025b575f80fd5b5081526020830151601781900b8114610272575f80fd5b60208201529392505050565b5f67ffffffffffffffff808416806102a457634e487b7160e01b5f52601260045260245ffd5b9216919091049291505056fea2646970667358221220ba648031f35edb2fce51f945bd9b430e922fe564cc4896302ba87ad76157275564736f6c63430008190033";
 
 // ERC4626 redemption with the vault's virtual asset/share offset of 1.
 const previewRedeemAt = (shares: BigNumber, totalAssets: BigNumber, totalSupply: BigNumber): BigNumber =>
@@ -139,7 +125,10 @@ forking(FORK_BLOCK, async () => {
   const u = new ethers.Contract(U, ERC20_ABI, ethers.provider);
   const stork = new ethers.Contract(
     STORK,
-    ["function getTemporalNumericValueUnsafeV1(bytes32 id) view returns ((uint64 timestampNs, int192 quantizedValue))"],
+    [
+      "function getTemporalNumericValueUnsafeV1(bytes32 id) view returns ((uint64 timestampNs, int192 quantizedValue))",
+      "function validTimePeriodSeconds() view returns (uint256)",
+    ],
     ethers.provider,
   );
   const positionToken = new ethers.Contract(POSITION_TOKEN, POSITION_TOKEN_ABI, ethers.provider);
@@ -192,15 +181,6 @@ forking(FORK_BLOCK, async () => {
     liveRate = (await stork.getTemporalNumericValueUnsafeV1(SUSN_STORK_FEED_ID)).quantizedValue;
     susnDirectPriceOnChain = await chainlinkOracle.prices(SUSN);
 
-    expect(await ethers.provider.getCode(SUSN_STORK_FEED)).to.equal("0x");
-    const [deployer] = await ethers.getSigners();
-    const reference = await new ethers.ContractFactory(
-      ["constructor(address stork, bytes32 priceId)"],
-      REFERENCE_ADAPTER_BYTECODE,
-      deployer,
-    ).deploy(STORK, SUSN_STORK_FEED_ID);
-    await ethers.provider.send("hardhat_setCode", [SUSN_STORK_FEED, await ethers.provider.getCode(reference.address)]);
-
     // createVault prices sUSN from the feed the VIP adds, after the governance warp; the pin is lifted after the VIP.
     await pinOracleFeedPrice(CHAINLINK_ORACLE, {
       asset: SUSN,
@@ -226,9 +206,10 @@ forking(FORK_BLOCK, async () => {
       await expect(resilientOracle.getPrice(SUSN)).to.be.reverted;
     });
 
-    it("Stork's sUSN feed is fresh and within 1% of the $1.24 deal price", async () => {
+    it("Stork's sUSN feed is within its 1-hour limit and 1% of the $1.24 deal price", async () => {
+      expect(await stork.validTimePeriodSeconds()).to.equal(STORK_VALID_TIME_PERIOD);
       const value = await stork.getTemporalNumericValueUnsafeV1(SUSN_STORK_FEED_ID);
-      expect((await time.latest()) - value.timestampNs.div(1e9).toNumber()).to.be.lte(MAX_STALE_PERIOD);
+      expect((await time.latest()) - value.timestampNs.div(1e9).toNumber()).to.be.lte(STORK_VALID_TIME_PERIOD);
       expect(value.quantizedValue).to.be.closeTo(parseUnits("1.24", 18), parseUnits("0.0124", 18));
     });
 
@@ -307,9 +288,9 @@ forking(FORK_BLOCK, async () => {
       await setStorkRate(liveRate);
     });
 
-    it("stops pricing sUSN once the feed is older than 3,900s", async () => {
+    it("stops pricing sUSN once the value is older than Stork's 1-hour limit", async () => {
       const fresh = await takeSnapshot();
-      await time.increase(MAX_STALE_PERIOD - 10);
+      await time.increase(STORK_VALID_TIME_PERIOD - 10);
       expect(await resilientOracle.getPrice(SUSN)).to.equal(liveRate);
       await time.increase(20);
       await expect(resilientOracle.getPrice(SUSN)).to.be.reverted;
