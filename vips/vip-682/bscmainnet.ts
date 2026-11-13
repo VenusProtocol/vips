@@ -4,14 +4,16 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { ADAPTER_FRV } from "../vip-669/addresses/bscmainnet";
+import { ADAPTERS } from "../vip-681/bscmainnet";
 
 // ===================================================================================================
 // VIP-682 [BNB Chain] — Noon Capital sUSN Fixed Rate Vault
 // ===================================================================================================
 
 export const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
-export { ADAPTER_FRV }; // VIP-669's AdapterFRV, which the live U FRV resources use
+// VIP-681's new AdapterFRV. VIP-681 must be proposed and executed before this VIP: once it upgrades the FRV
+// beacon, a resource left on the old adapter (0x1824…657c) makes the U Hub's totalAssets() revert.
+export const ADAPTER_FRV = ADAPTERS.FRV.new;
 
 export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
 export const LIQUIDATION_ADAPTER = "0x17A6222fB8b4b6D852cA54f5bc376a6A2c6224Bd";
