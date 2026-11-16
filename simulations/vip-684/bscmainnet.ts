@@ -68,8 +68,8 @@ const FORK_BLOCK = 133916000;
 const VIP_681_PROPOSAL_ID = 681;
 const QUEUED = 5;
 
-// BPNC's deployment: the same CustodyReceiptToken bytecode, deployed by isolated-pools deploy/029. Until ctBTC is
-// deployed, the sim deploys a stand-in from this creation code with ctBTC's constructor arguments.
+// BPNC's deployment: the same CustodyReceiptToken source ctBTC is deployed from. Until ctBTC is deployed, the sim
+// deploys a stand-in from this creation code with ctBTC's constructor arguments.
 const BPNC_DEPLOY_TX = "0xed7d851ec5aeef7f8dcf37a1791b2817662df12351598f74483fd7d6bdc8505f";
 const encodeTokenArgs = (name: string, symbol: string) =>
   defaultAbiCoder.encode(["string", "string", "uint8", "address"], [name, symbol, 18, ACCESS_CONTROL_MANAGER]);
@@ -128,7 +128,7 @@ const executeQueuedVip681 = async () => {
   await governor.connect(executor).execute(VIP_681_PROPOSAL_ID);
 };
 
-// Deploys a CustodyReceiptToken named like ctBTC and nominates the Normal Timelock, as deploy/029 does.
+// Deploys a CustodyReceiptToken named like ctBTC and nominates the Normal Timelock, as its deploy script does.
 const deployCtBTCStandIn = async (): Promise<string> => {
   const deployTx = await ethers.provider.getTransaction(BPNC_DEPLOY_TX);
   const bpncArgs = encodeTokenArgs("BPN Credit Token", "BPNC").slice(2);
@@ -314,8 +314,8 @@ forking(FORK_BLOCK, async () => {
       const bounds = await boundValidator.validateConfigs(CTBTC_ADDRESS);
       expect(bounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
       expect(bounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
-      // Each sub-oracle is pinned at its feed's price at the fork block, so ctBTC reads BTCB's price there.
-      expect(await resilientOracle.getPrice(CTBTC_ADDRESS)).to.equal(btcbPriceAtFork);
+      // The BTC/USD feed's answer moves with block time on the fork, so the pins can land after btcbPriceAtFork's read.
+      expect(await resilientOracle.getPrice(CTBTC_ADDRESS)).to.be.closeTo(btcbPriceAtFork, btcbPriceAtFork.div(100));
     });
 
     it("hands ctBTC to the Normal Timelock", async () => {
