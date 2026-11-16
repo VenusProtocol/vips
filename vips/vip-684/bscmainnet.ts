@@ -75,14 +75,13 @@ export const IDEAL_COLLATERAL_AMOUNT = CTBTC_MINT_AMOUNT;
 export const MARGIN_RATE = parseUnits("1", 18); // 100%: all collateral is posted before the vault opens
 export const POSITION_TOKEN_ID = 0;
 
-// The doc's 92% hard-liquidation threshold fails createVault with a 10% incentive: the controller requires
-// threshold x incentive < 1 (and threshold x late penalty < 1). 90% is used until the doc settles it.
-export const LIQUIDATION_THRESHOLD = parseUnits("0.9", 18);
-export const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18); // 10% bonus
-export const LATE_PENALTY_RATE = parseUnits("1.1", 18); // 10% late penalty
+// createVault requires threshold x incentive < 1 and threshold x late penalty < 1: 0.92 x 1.08 = 0.9936.
+export const LIQUIDATION_THRESHOLD = parseUnits("0.92", 18);
+export const LIQUIDATION_INCENTIVE = parseUnits("1.08", 18); // 8% bonus
+export const LATE_PENALTY_RATE = parseUnits("1.08", 18); // 8% late penalty
 
-export const VAULT_NAME = "FRV LTP ctBTC 20NOV2026 30";
-export const VAULT_SYMBOL = "FRV-ltp-20NOV2026-30";
+export const VAULT_NAME = "FRV LTP ctBTC 20NOV2026 90";
+export const VAULT_SYMBOL = "FRV-ltp-20NOV2026-90";
 export const INSTITUTION_NAME = "LTP";
 
 export const vaultConfig = [
@@ -133,9 +132,9 @@ This VIP lists a fixed-term institutional loan vault for LTP on the Venus Instit
 - Borrow cap: min 10 USDT / max 1,000,000 USDT · Minimum supplier deposit: none
 - Open window: 1 day · Lock (loan term): 90 days · Settlement window: 3 days
 - Ideal collateral: 20 ctBTC · Margin rate: 100%
-- Liquidation threshold: 90% · Liquidation incentive: 10% · Late-penalty rate: 10%
+- Liquidation threshold: 92% · Liquidation incentive: 8% · Late-penalty rate: 8%
 
-The full 1,000,000 USDT drawdown plus the 90-day coupon is a debt of ≈1,012,822 USDT, which reaches the 90% liquidation threshold at a BTC price of ≈$56,268. The 85% margin call (≈$59,578) is an off-chain monitoring threshold with no on-chain parameter.
+The full 1,000,000 USDT drawdown plus the 90-day coupon is a debt of ≈1,012,822 USDT, which reaches the 92% liquidation threshold at a BTC price of ≈$55,045. The 85% margin call (≈$59,578) is an off-chain monitoring threshold with no on-chain parameter. At the ≈$64,536 BTC price at authoring, the 20 ctBTC are worth ≈$1.29M, so that debt is ≈78.5% of the collateral: the margin call is a ≈7.7% BTC fall away and liquidation a ≈14.7% fall.
 
 **Liquidity Hub.** The vault is added as a resource on the USDT Hub's FRV source (${FRV_SOURCE_USDT}) behind the shared AdapterFRV (${ADAPTER_FRV}), so the Hub Operator can allocate USDT into it.
 
@@ -143,7 +142,7 @@ The full 1,000,000 USDT drawdown plus the 90-day coupon is a debt of ≈1,012,82
 
 - **ctBTC is only as good as the custody behind it.** Its price is BTCB's, but nothing on chain links it to the BTC LTP holds. Governance and the Critical Guardian can mint ctBTC, burn it from any holder and pause its transfers.
 - **100% margin.** LTP posts all 20 ctBTC before the Critical Guardian calls openVault, so the vault cannot fail for a collateral shortfall.
-- **Liquidation incentive split.** Half of the 10% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
+- **Liquidation incentive split.** Half of the 8% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
 
 **Access control.** The Normal Timelock already holds setTokenConfig on the four oracles, setValidateConfig on the BoundValidator, createVault on the controller and addResource on the USDT FRV source. The only new permissions are the eight ctBTC grants.
 

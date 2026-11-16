@@ -97,8 +97,8 @@ const USDT_CORE_SOURCE = "0xC9E6ceD9589363f8dC5695Be2C79AB4dDaECC94B";
 const HUB_OPERATOR = "0x83f426233B358A36953F6951161E76FB7c866a7A";
 const NO_RESOURCE = ethers.constants.AddressZero;
 
-// BTC price at which the debt crosses the 90% threshold, as stated in the VIP description.
-const DESCRIBED_LIQUIDATION_PRICE = parseUnits("56268", 18);
+// BTC price at which the debt crosses the 92% threshold, as stated in the VIP description.
+const DESCRIBED_LIQUIDATION_PRICE = parseUnits("55045", 18);
 
 // ERC4626 redemption with the vault's virtual asset/share offset of 1.
 const previewRedeemAt = (shares: BigNumber, totalAssets: BigNumber, totalSupply: BigNumber): BigNumber =>
@@ -686,8 +686,8 @@ forking(FORK_BLOCK, async () => {
       lockSnapshot = await takeSnapshot();
     });
 
-    it("the 90% threshold is crossed at the BTC price stated in the VIP", async () => {
-      // collateral x price x 90% = debt in USD
+    it("the 92% threshold is crossed at the BTC price stated in the VIP", async () => {
+      // collateral x price x 92% = debt in USD
       const debtUSD = (await vault.outstandingDebt())
         .mul(await resilientOracle.getPrice(USDT))
         .div(parseUnits("1", 18));
