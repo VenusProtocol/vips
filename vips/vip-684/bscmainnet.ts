@@ -33,13 +33,12 @@ export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E69
 export const USDT = "0x55d398326f99059fF775485246999027B3197955"; // loan (supply) asset, 18 dec
 export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 
-// ctBTC ("Custodian BTC"): a CustodyReceiptToken, 18 dec, standing for BTC LTP holds in custody.
-// Deployed by fixed-rate-vaults DeployCustodyReceiptToken.s.sol, which nominates the Normal Timelock as owner. Not
-// deployed yet: the zero address until it is, and the simulation deploys a stand-in.
-export const CTBTC = "0x0000000000000000000000000000000000000000";
+// ctBTC ("Custodian BTC"): a CustodyReceiptToken, 18 dec, standing for BTC LTP holds in custody. Deployed by
+// fixed-rate-vaults DeployCustodyReceiptToken.s.sol, which nominated the Normal Timelock as owner (block 133939405).
+export const CTBTC = "0x578B847Fc479Ac4AAfA2F505BEf4f74Bf2e16228";
 
 // ctBTC is priced exactly like BTCB: the same feed and maxStalePeriod on each of BTCB's three sub-oracles, the same
-// main/pivot/fallback order on the ResilientOracle, and the same bound. Read from BTCB at block 133916000.
+// main/pivot/fallback order on the ResilientOracle, and the same bound. Read from BTCB at block 133940210.
 export const BTCB_FEEDS = [
   { oracle: CHAINLINK_ORACLE, feed: "0x8ECF7dE377F788A813F5215668E282556b35f300", maxStalePeriod: 100 },
   { oracle: REDSTONE_ORACLE, feed: "0xa51738d1937FFc553d5070f43300B385AA2D9F55", maxStalePeriod: 100 },
@@ -95,8 +94,8 @@ export const vaultConfig = [
   LOCK_DURATION, // lockDuration
   SETTLEMENT_WINDOW, // settlementWindow
 ];
-export const instConfig = (ctBTC: string) => [
-  ctBTC, // collateralAsset
+export const instConfig = [
+  CTBTC, // collateralAsset
   IDEAL_COLLATERAL_AMOUNT, // idealCollateralAmount
   MARGIN_RATE, // marginRate
   INSTITUTION_OPERATOR, // institutionOperator
@@ -108,7 +107,7 @@ export const riskConfig = [
   LATE_PENALTY_RATE, // latePenaltyRate
 ];
 
-export const vip684 = (ctBTC: string = CTBTC) => {
+export const vip684 = () => {
   const meta = {
     version: "v2",
     title: "VIP-684 [BNB Chain] List the LTP ctBTC Fixed-Term Institutional Loan Vault",
@@ -118,7 +117,7 @@ This VIP lists a fixed-term institutional loan vault for LTP on the Venus Instit
 
 #### Description
 
-**ctBTC.** ctBTC ([${ctBTC}](https://bscscan.com/address/${ctBTC})) is a CustodyReceiptToken, the contract behind vceBTC (VIP-656) and BPNC (VIP-676): an 18-decimal ERC-20 whose mint, burn, pause and unpause are gated by the Access Control Manager. Pausing stops holder-to-holder transfers, so while ctBTC is paused no collateral can be posted to or withdrawn from the vault, no liquidation can seize it and the protocol's share cannot be swept to the ProtocolShareReserve. Minting and burning still work. The VIP accepts its ownership for the Normal Timelock and grants all four functions to the Normal Timelock and the Critical Guardian. It then mints 20 ctBTC to LTP (${INSTITUTION_OPERATOR}), the whole supply.
+**ctBTC.** ctBTC ([${CTBTC}](https://bscscan.com/address/${CTBTC})) is a CustodyReceiptToken, the contract behind vceBTC (VIP-656) and BPNC (VIP-676): an 18-decimal ERC-20 whose mint, burn, pause and unpause are gated by the Access Control Manager. Pausing stops holder-to-holder transfers, so while ctBTC is paused no collateral can be posted to or withdrawn from the vault, no liquidation can seize it and the protocol's share cannot be swept to the ProtocolShareReserve. Minting and burning still work. The VIP accepts its ownership for the Normal Timelock and grants all four functions to the Normal Timelock and the Critical Guardian. It then mints 20 ctBTC to LTP (${INSTITUTION_OPERATOR}), the whole supply.
 
 **Oracle.** ctBTC reads BTCB's price sources: the same feed and maximum stale period on the Chainlink, RedStone and Atlas oracles, the same ResilientOracle order (Chainlink main, Atlas pivot, RedStone fallback) and the same 1% BoundValidator band. ctBTC therefore returns the BTCB price.
 
@@ -126,7 +125,7 @@ This VIP lists a fixed-term institutional loan vault for LTP on the Venus Instit
 
 - Vault: ${LTP_VAULT} · Share: ${VAULT_NAME} (${VAULT_SYMBOL})
 - Loan (supply) asset: USDT (${USDT})
-- Collateral: ctBTC (${ctBTC})
+- Collateral: ctBTC (${CTBTC})
 - Institution operator: ${INSTITUTION_OPERATOR}
 - Fixed APY: 5.2% · Reserve factor: 10% (4.68% supply APY)
 - Borrow cap: min 10 USDT / max 1,000,000 USDT · Minimum supplier deposit: none
@@ -134,7 +133,7 @@ This VIP lists a fixed-term institutional loan vault for LTP on the Venus Instit
 - Ideal collateral: 20 ctBTC (≈ $1,428,570 at the deal price of $71,428.5) · Margin rate: 100%
 - Liquidation threshold: 92% · Liquidation incentive: 8% · Late-penalty rate: 8%
 
-At the maximum 1,000,000 USDT drawdown the loan is ≈70% of the collateral's deal value. With the 90-day coupon the debt is ≈1,012,822 USDT, which reaches the 92% liquidation threshold at a BTC price of ≈$55,045. The 85% margin call (≈$59,578) is an off-chain monitoring threshold with no on-chain parameter. BTC has fallen since the deal: at the ≈$64,372 price at authoring, the 20 ctBTC are worth ≈$1.29M, so that debt is ≈78.7% of the collateral: the margin call is a ≈7.4% BTC fall away and liquidation a ≈14.5% fall.
+At the maximum 1,000,000 USDT drawdown the loan is ≈70% of the collateral's deal value. With the 90-day coupon the debt is ≈1,012,822 USDT, which reaches the 92% liquidation threshold at a BTC price of ≈$55,045. The 85% margin call (≈$59,578) is an off-chain monitoring threshold with no on-chain parameter. BTC has fallen since the deal: at the ≈$64,026 price at authoring, the 20 ctBTC are worth ≈$1.28M, so that debt is ≈79.1% of the collateral: the margin call is a ≈6.9% BTC fall away and liquidation a ≈14.0% fall.
 
 **Liquidity Hub.** The vault is added as a resource on the USDT Hub's FRV source (${FRV_SOURCE_USDT}) behind the shared AdapterFRV (${ADAPTER_FRV}), so the Hub Operator can allocate USDT into it.
 
@@ -143,7 +142,7 @@ At the maximum 1,000,000 USDT drawdown the loan is ≈70% of the collateral's de
 - **ctBTC is only as good as the custody behind it.** Its price is BTCB's, but nothing on chain links it to the BTC LTP holds. Governance and the Critical Guardian can mint ctBTC, burn it from any holder and pause its transfers.
 - **100% margin.** LTP posts all 20 ctBTC before the Critical Guardian calls openVault, so the vault cannot fail for a collateral shortfall.
 - **Liquidation incentive split.** Half of the 8% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
-- **Liquidators.** The LiquidationAdapter's whitelists cover every institutional vault. Today only the Critical Guardian is on them; VIP-682 adds the liquidator bot and the Venus Operational Fund Multisig.
+- **Liquidators.** The LiquidationAdapter's whitelists cover every institutional vault. Today the Critical Guardian and VIP-655's Asseto liquidator (0xfb4c772fe9D1FB57cf70c1aF3AD768B8e62cb8cd) are on them; VIP-682 adds the liquidator bot and the Venus Operational Fund Multisig.
 
 **Access control.** The Normal Timelock already holds setTokenConfig on the four oracles, setValidateConfig on the BoundValidator, createVault on the controller and addResource on the USDT FRV source. The only new permissions are the eight ctBTC grants.
 
@@ -176,29 +175,29 @@ This VIP depends on VIP-681, which must be executed first: it replaces the Adapt
       ...BTCB_FEEDS.map(({ oracle, feed, maxStalePeriod }) => ({
         target: oracle,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[ctBTC, feed, maxStalePeriod]],
+        params: [[CTBTC, feed, maxStalePeriod]],
       })),
       {
         target: BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[ctBTC, BTCB_UPPER_BOUND, BTCB_LOWER_BOUND]],
+        params: [[CTBTC, BTCB_UPPER_BOUND, BTCB_LOWER_BOUND]],
       },
       {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[ctBTC, BTCB_RESILIENT_ORACLES, [true, true, true], false]],
+        params: [[CTBTC, BTCB_RESILIENT_ORACLES, [true, true, true], false]],
       },
 
-      { target: ctBTC, signature: "acceptOwnership()", params: [] },
+      { target: CTBTC, signature: "acceptOwnership()", params: [] },
       ...CTBTC_ROLE_HOLDERS.flatMap(account =>
         CTBTC_ROLES.map(role => ({
           target: ACCESS_CONTROL_MANAGER,
           signature: "giveCallPermission(address,string,address)",
-          params: [ctBTC, role, account],
+          params: [CTBTC, role, account],
         })),
       ),
       {
-        target: ctBTC,
+        target: CTBTC,
         signature: "mint(address,uint256)",
         params: [INSTITUTION_OPERATOR, CTBTC_MINT_AMOUNT],
       },
@@ -208,7 +207,7 @@ This VIP depends on VIP-681, which must be executed first: it replaces the Adapt
         signature:
           "createVault((address,uint256,uint256,uint256,uint256,uint256,uint40,uint40,uint40)," +
           "(address,uint256,uint256,address,uint256),(uint256,uint256,uint256),string,string,string)",
-        params: [vaultConfig, instConfig(ctBTC), riskConfig, VAULT_NAME, VAULT_SYMBOL, INSTITUTION_NAME],
+        params: [vaultConfig, instConfig, riskConfig, VAULT_NAME, VAULT_SYMBOL, INSTITUTION_NAME],
       },
 
       {

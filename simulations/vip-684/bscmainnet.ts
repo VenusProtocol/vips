@@ -2,7 +2,7 @@ import { SnapshotRestorer, setBalance, takeSnapshot, time } from "@nomicfoundati
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { defaultAbiCoder, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
@@ -62,17 +62,11 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 133916000;
+const FORK_BLOCK = 133940210;
 
 // VIP-681 is queued at this block. It replaces the AdapterFRV this VIP registers the vault with, so it runs first.
 const VIP_681_PROPOSAL_ID = 681;
 const QUEUED = 5;
-
-// BPNC's deployment: the same CustodyReceiptToken source ctBTC is deployed from. Until ctBTC is deployed, the sim
-// deploys a stand-in from this creation code with ctBTC's constructor arguments.
-const BPNC_DEPLOY_TX = "0xed7d851ec5aeef7f8dcf37a1791b2817662df12351598f74483fd7d6bdc8505f";
-const encodeTokenArgs = (name: string, symbol: string) =>
-  defaultAbiCoder.encode(["string", "string", "uint8", "address"], [name, symbol, 18, ACCESS_CONTROL_MANAGER]);
 
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
@@ -128,27 +122,9 @@ const executeQueuedVip681 = async () => {
   await governor.connect(executor).execute(VIP_681_PROPOSAL_ID);
 };
 
-// Deploys a CustodyReceiptToken named like ctBTC and nominates the Normal Timelock, as its deploy script does.
-const deployCtBTCStandIn = async (): Promise<string> => {
-  const deployTx = await ethers.provider.getTransaction(BPNC_DEPLOY_TX);
-  const bpncArgs = encodeTokenArgs("BPN Credit Token", "BPNC").slice(2);
-  expect(deployTx.data.endsWith(bpncArgs)).to.equal(true);
-  const creationCode = deployTx.data.slice(0, deployTx.data.length - bpncArgs.length);
-
-  const [deployer] = await ethers.getSigners();
-  const tx = await deployer.sendTransaction({
-    data: creationCode + encodeTokenArgs("Custodian BTC", "ctBTC").slice(2),
-  });
-  const { contractAddress } = await tx.wait();
-  const token = new ethers.Contract(contractAddress, CTBTC_ABI, deployer);
-  await token.transferOwnership(NORMAL_TIMELOCK);
-  return contractAddress;
-};
-
 forking(FORK_BLOCK, async () => {
   // VIP-681 pays its LayerZero fees from the Normal Timelock, whose balance the price helpers below reset to 1 BNB.
   const timelockBalance = await ethers.provider.getBalance(NORMAL_TIMELOCK);
-  const CTBTC_ADDRESS = CTBTC === ethers.constants.AddressZero ? await deployCtBTCStandIn() : CTBTC;
 
   // BTCB as the chain has it, before the price helpers below lengthen its stale periods.
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -164,7 +140,7 @@ forking(FORK_BLOCK, async () => {
   // createVault prices ctBTC from the feeds the VIP adds, after the governance warp; each pin is the feed's price.
   // Pinned before VIP-681's warp to its ETA, which leaves BTCB's 100-second feeds stale.
   for (const { oracle, feed, maxStalePeriod } of BTCB_FEEDS) {
-    await pinOracleFeedPrice(oracle, { asset: CTBTC_ADDRESS, feed, maxStalePeriod });
+    await pinOracleFeedPrice(oracle, { asset: CTBTC, feed, maxStalePeriod });
   }
   await bypassStalePrices([USDT, BTCB]);
   await setBalance(NORMAL_TIMELOCK, timelockBalance);
@@ -173,7 +149,7 @@ forking(FORK_BLOCK, async () => {
   const controller = new ethers.Contract(INSTITUTIONAL_VAULT_CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, ethers.provider);
   const acm = new ethers.Contract(ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
-  const ctBTC = new ethers.Contract(CTBTC_ADDRESS, CTBTC_ABI, ethers.provider);
+  const ctBTC = new ethers.Contract(CTBTC, CTBTC_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
   const positionToken = new ethers.Contract(POSITION_TOKEN, POSITION_TOKEN_ABI, ethers.provider);
   const frvSource = new ethers.Contract(FRV_SOURCE_USDT, FRV_SOURCE_ABI, ethers.provider);
@@ -199,14 +175,14 @@ forking(FORK_BLOCK, async () => {
   let criticalGuardian: SignerWithAddress;
 
   const isAllowed = (account: string, role: string): Promise<boolean> =>
-    acm.isAllowedToCall(account, role, { from: CTBTC_ADDRESS });
+    acm.isAllowedToCall(account, role, { from: CTBTC });
 
   // Test-only: prices ctBTC at `price` on all three of its sub-oracles, keeping the VIP's ResilientOracle config.
   const setCtBTCPrice = async (price: BigNumber) => {
     for (const { oracle } of BTCB_FEEDS) {
-      await subOracle(oracle).connect(timelock).setDirectPrice(CTBTC_ADDRESS, price);
+      await subOracle(oracle).connect(timelock).setDirectPrice(CTBTC, price);
     }
-    expect(await resilientOracle.getPrice(CTBTC_ADDRESS)).to.equal(price);
+    expect(await resilientOracle.getPrice(CTBTC)).to.equal(price);
   };
 
   before(async () => {
@@ -245,7 +221,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("ctBTC is not priced on Venus yet", async () => {
-      await expect(resilientOracle.getPrice(CTBTC_ADDRESS)).to.be.reverted;
+      await expect(resilientOracle.getPrice(CTBTC)).to.be.reverted;
     });
 
     it("BTCB's oracle config is the one the VIP copies", async () => {
@@ -256,6 +232,7 @@ forking(FORK_BLOCK, async () => {
       const roConfig = await resilientOracle.getTokenConfig(BTCB);
       expect(roConfig.oracles).to.deep.equal(BTCB_RESILIENT_ORACLES);
       expect(roConfig.enableFlagsForOracles).to.deep.equal([true, true, true]);
+      expect(roConfig.cachingEnabled).to.equal(false);
       const bounds = await boundValidator.validateConfigs(BTCB);
       expect(bounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
       expect(bounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
@@ -281,7 +258,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-684 List the LTP ctBTC Fixed-Term Institutional Loan Vault", await vip684(CTBTC_ADDRESS), {
+  testVip("VIP-684 List the LTP ctBTC Fixed-Term Institutional Loan Vault", await vip684(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [3]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [1]);
@@ -303,19 +280,19 @@ forking(FORK_BLOCK, async () => {
 
     it("prices ctBTC from BTCB's feeds, oracle order and bound", async () => {
       for (const { oracle, feed, maxStalePeriod } of BTCB_FEEDS) {
-        const config = await subOracle(oracle).tokenConfigs(CTBTC_ADDRESS);
+        const config = await subOracle(oracle).tokenConfigs(CTBTC);
         expect(config.feed).to.equal(feed);
         expect(config.maxStalePeriod).to.equal(maxStalePeriod);
       }
-      const roConfig = await resilientOracle.getTokenConfig(CTBTC_ADDRESS);
+      const roConfig = await resilientOracle.getTokenConfig(CTBTC);
       expect(roConfig.oracles).to.deep.equal(BTCB_RESILIENT_ORACLES);
       expect(roConfig.enableFlagsForOracles).to.deep.equal([true, true, true]);
       expect(roConfig.cachingEnabled).to.equal(false);
-      const bounds = await boundValidator.validateConfigs(CTBTC_ADDRESS);
+      const bounds = await boundValidator.validateConfigs(CTBTC);
       expect(bounds.upperBoundRatio).to.equal(BTCB_UPPER_BOUND);
       expect(bounds.lowerBoundRatio).to.equal(BTCB_LOWER_BOUND);
       // The BTC/USD feed's answer moves with block time on the fork, so the pins can land after btcbPriceAtFork's read.
-      expect(await resilientOracle.getPrice(CTBTC_ADDRESS)).to.be.closeTo(btcbPriceAtFork, btcbPriceAtFork.div(100));
+      expect(await resilientOracle.getPrice(CTBTC)).to.be.closeTo(btcbPriceAtFork, btcbPriceAtFork.div(100));
     });
 
     it("hands ctBTC to the Normal Timelock", async () => {
@@ -360,7 +337,7 @@ forking(FORK_BLOCK, async () => {
 
     it("sets the collateral terms and mints the position NFT to the operator", async () => {
       const inst = await vault.institutionalConfig();
-      expect(inst.collateralAsset).to.equal(CTBTC_ADDRESS);
+      expect(inst.collateralAsset).to.equal(CTBTC);
       expect(inst.idealCollateralAmount).to.equal(IDEAL_COLLATERAL_AMOUNT);
       expect(inst.marginRate).to.equal(MARGIN_RATE);
       expect(inst.institutionOperator).to.equal(INSTITUTION_OPERATOR);
@@ -447,7 +424,7 @@ forking(FORK_BLOCK, async () => {
       vault = new ethers.Contract(await controller.allVaults(vaultsBefore), VAULT_ABI, ethers.provider);
       operator = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
       [, lender] = await ethers.getSigners();
-      livePrice = await resilientOracle.getPrice(CTBTC_ADDRESS);
+      livePrice = await resilientOracle.getPrice(CTBTC);
     });
 
     it("the 100% margin is the whole collateral: less than all of it is refused", async () => {
@@ -645,7 +622,7 @@ forking(FORK_BLOCK, async () => {
       const seize = REPAY.mul(await resilientOracle.getPrice(USDT))
         .div(parseUnits("1", 18))
         .mul(incentive)
-        .div(await resilientOracle.getPrice(CTBTC_ADDRESS));
+        .div(await resilientOracle.getPrice(CTBTC));
       const bonus = seize.sub(seize.mul(parseUnits("1", 18)).div(incentive));
       const protocolShare = bonus.div(2);
       const debtBefore = await vault.outstandingDebt();
@@ -655,7 +632,7 @@ forking(FORK_BLOCK, async () => {
 
       expect((await ctBTC.balanceOf(CRITICAL_GUARDIAN)).sub(liquidatorBefore)).to.equal(seize.sub(protocolShare));
       expect(await ctBTC.balanceOf(vault.address)).to.equal(IDEAL_COLLATERAL_AMOUNT.sub(seize));
-      expect(await liquidationAdapter.protocolShareAccrued(CTBTC_ADDRESS)).to.equal(protocolShare);
+      expect(await liquidationAdapter.protocolShareAccrued(CTBTC)).to.equal(protocolShare);
       expect(await vault.outstandingDebt()).to.equal(debtBefore.sub(REPAY));
     };
 
@@ -694,7 +671,8 @@ forking(FORK_BLOCK, async () => {
       const liquidationPrice = debtUSD
         .mul(parseUnits("1", 18))
         .div(IDEAL_COLLATERAL_AMOUNT.mul(LIQUIDATION_THRESHOLD).div(parseUnits("1", 18)));
-      expect(liquidationPrice).to.be.closeTo(DESCRIBED_LIQUIDATION_PRICE, parseUnits("60", 18));
+      // The description prices USDT at $1; its oracle price moves the threshold by a fraction of a percent.
+      expect(liquidationPrice).to.be.closeTo(DESCRIBED_LIQUIDATION_PRICE, DESCRIBED_LIQUIDATION_PRICE.div(200));
 
       await setCtBTCPrice(liquidationPrice.mul(1001).div(1000));
       expect((await vault.getVaultLiquidity())[1]).to.equal(0);
@@ -716,11 +694,11 @@ forking(FORK_BLOCK, async () => {
     });
 
     it("protocol share of the seized ctBTC sweeps to the PSR", async () => {
-      const accrued = await liquidationAdapter.protocolShareAccrued(CTBTC_ADDRESS);
+      const accrued = await liquidationAdapter.protocolShareAccrued(CTBTC);
       expect(accrued).to.be.gt(0);
-      await liquidationAdapter.connect(timelock).sweepProtocolShareToReserve(CTBTC_ADDRESS);
+      await liquidationAdapter.connect(timelock).sweepProtocolShareToReserve(CTBTC);
       expect(await ctBTC.balanceOf(PROTOCOL_SHARE_RESERVE)).to.equal(accrued);
-      expect(await liquidationAdapter.protocolShareAccrued(CTBTC_ADDRESS)).to.equal(0);
+      expect(await liquidationAdapter.protocolShareAccrued(CTBTC)).to.equal(0);
     });
 
     it("Critical Guardian liquidates the vault once the settlement deadline passes (overdue)", async () => {
