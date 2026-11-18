@@ -1,15 +1,14 @@
-import { SnapshotRestorer, setBalance, takeSnapshot, time } from "@nomicfoundation/hardhat-network-helpers";
+import { SnapshotRestorer, takeSnapshot, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { bypassStalePrices, pinOracleFeedPrice } from "src/vip-framework/oracleStaleness";
 
-import vip684, {
+import vip682, {
   ACCESS_CONTROL_MANAGER,
   ADAPTER_FRV,
   BOUND_VALIDATOR,
@@ -46,7 +45,7 @@ import vip684, {
   USDT,
   VAULT_NAME,
   VAULT_SYMBOL,
-} from "../../vips/vip-684/bscmainnet";
+} from "../../vips/vip-682/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/BoundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
@@ -60,13 +59,8 @@ import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
-
-const FORK_BLOCK = 133940210;
-
-// VIP-681 is queued at this block. It replaces the AdapterFRV this VIP registers the vault with, so it runs first.
-const VIP_681_PROPOSAL_ID = 681;
-const QUEUED = 5;
+// After VIP-681 executed, which installed the AdapterFRV this VIP registers the vault with.
+const FORK_BLOCK = 134230000;
 
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
@@ -106,26 +100,7 @@ const termInterest = (principal: BigNumber): BigNumber =>
 
 const reserveCut = (interest: BigNumber): BigNumber => interest.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
 
-const executeQueuedVip681 = async () => {
-  const governor = new ethers.Contract(
-    bscmainnet.GOVERNOR_PROXY,
-    [
-      "function state(uint256) view returns (uint8)",
-      "function proposals(uint256) view returns (uint256 id, address proposer, uint256 eta)",
-      "function execute(uint256) payable",
-    ],
-    ethers.provider,
-  );
-  if ((await governor.state(VIP_681_PROPOSAL_ID)) !== QUEUED) return;
-  await time.increaseTo((await governor.proposals(VIP_681_PROPOSAL_ID)).eta.toNumber());
-  const [executor] = await ethers.getSigners();
-  await governor.connect(executor).execute(VIP_681_PROPOSAL_ID);
-};
-
 forking(FORK_BLOCK, async () => {
-  // VIP-681 pays its LayerZero fees from the Normal Timelock, whose balance the price helpers below reset to 1 BNB.
-  const timelockBalance = await ethers.provider.getBalance(NORMAL_TIMELOCK);
-
   // BTCB as the chain has it, before the price helpers below lengthen its stale periods.
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const subOracle = (address: string) =>
@@ -138,13 +113,10 @@ forking(FORK_BLOCK, async () => {
   const btcbFeedsAtFork = await Promise.all(BTCB_FEEDS.map(({ oracle }) => subOracle(oracle).tokenConfigs(BTCB)));
 
   // createVault prices ctBTC from the feeds the VIP adds, after the governance warp; each pin is the feed's price.
-  // Pinned before VIP-681's warp to its ETA, which leaves BTCB's 100-second feeds stale.
   for (const { oracle, feed, maxStalePeriod } of BTCB_FEEDS) {
     await pinOracleFeedPrice(oracle, { asset: CTBTC, feed, maxStalePeriod });
   }
   await bypassStalePrices([USDT, BTCB]);
-  await setBalance(NORMAL_TIMELOCK, timelockBalance);
-  await executeQueuedVip681();
 
   const controller = new ethers.Contract(INSTITUTIONAL_VAULT_CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, ethers.provider);
@@ -258,7 +230,7 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-684 List the LTP ctBTC Fixed-Term Institutional Loan Vault", await vip684(), {
+  testVip("VIP-682 List the LTP ctBTC Fixed-Term Institutional Loan Vault", await vip682(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [3]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [1]);

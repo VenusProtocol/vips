@@ -6,7 +6,7 @@ import { makeProposal } from "src/utils";
 import { ADAPTERS, FRV_SOURCE_USDT } from "../vip-681/bscmainnet";
 
 // ===================================================================================================
-// VIP-684 [BNB Chain] — LTP ctBTC Fixed Rate Vault
+// VIP-682 [BNB Chain] — LTP ctBTC Fixed Rate Vault
 //
 // Listing doc: "[LTP] Institution fixed term vault check list" (Notion, 2026-11-16).
 // ===================================================================================================
@@ -23,8 +23,8 @@ export const {
 } = bscmainnet;
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 
-// VIP-681's new AdapterFRV. VIP-681 must be executed before this VIP: once it upgrades the FRV beacon, a resource
-// left on the old adapter (0x1824…657c) makes the USDT Hub's totalAssets() revert.
+// VIP-681's new AdapterFRV, live since VIP-681 executed. Since its FRV beacon upgrade, a resource left on the old
+// adapter (0x1824…657c) makes the USDT Hub's totalAssets() revert.
 export const ADAPTER_FRV = ADAPTERS.FRV.new;
 export { FRV_SOURCE_USDT };
 
@@ -107,10 +107,10 @@ export const riskConfig = [
   LATE_PENALTY_RATE, // latePenaltyRate
 ];
 
-export const vip684 = () => {
+export const vip682 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-684 [BNB Chain] List the LTP ctBTC Fixed-Term Institutional Loan Vault",
+    title: "VIP-682 [BNB Chain] List the LTP ctBTC Fixed-Term Institutional Loan Vault",
     description: `#### Summary
 
 This VIP lists a fixed-term institutional loan vault for LTP on the Venus Institutional Fixed Rate Vault system on BNB Chain. The vault allows LTP to borrow up to 1,000,000 USDT for 90 days at a 5.2% fixed APY, collateralised by 20 BTC held in custody. The VIP onboards **ctBTC** ("Custodian BTC"), a governance-controlled receipt token for that BTC priced identically to BTCB, mints the 20 ctBTC to LTP, creates the vault and registers it on the USDT Liquidity Hub.
@@ -142,11 +142,11 @@ At the maximum 1,000,000 USDT drawdown the loan is ≈70% of the collateral's de
 - **ctBTC is only as good as the custody behind it.** Its price is BTCB's, but nothing on chain links it to the BTC LTP holds. Governance and the Critical Guardian can mint ctBTC, burn it from any holder and pause its transfers.
 - **100% margin.** LTP posts all 20 ctBTC before the Critical Guardian calls openVault, so the vault cannot fail for a collateral shortfall.
 - **Liquidation incentive split.** Half of the 8% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
-- **Liquidators.** The LiquidationAdapter's whitelists cover every institutional vault. Today the Critical Guardian and VIP-655's Asseto liquidator (0xfb4c772fe9D1FB57cf70c1aF3AD768B8e62cb8cd) are on them; VIP-682 adds the liquidator bot and the Venus Operational Fund Multisig.
+- **Liquidators.** The LiquidationAdapter's whitelists cover every institutional vault. Today the Critical Guardian and VIP-655's Asseto liquidator (0xfb4c772fe9D1FB57cf70c1aF3AD768B8e62cb8cd) are on them.
 
 **Access control.** The Normal Timelock already holds setTokenConfig on the four oracles, setValidateConfig on the BoundValidator, createVault on the controller and addResource on the USDT FRV source. The only new permissions are the eight ctBTC grants.
 
-This VIP depends on VIP-681, which must be executed first: it replaces the AdapterFRV that the vault is registered with.
+The vault is registered behind the AdapterFRV that VIP-681 put in place.
 
 #### Actions
 
@@ -221,4 +221,4 @@ This VIP depends on VIP-681, which must be executed first: it replaces the Adapt
   );
 };
 
-export default vip684;
+export default vip682;
