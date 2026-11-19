@@ -155,7 +155,7 @@ This VIP has three parts:
 
 1. **Noon Capital vault (BNB Chain).** Lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub.
 2. **CAPO update (BNB Chain).** Tightens the capped-oracle (CAPO) parameters of sUSDe, WBETH, slisBNB and asBNB on BNB Chain Core, following Allez Labs' recommendation.
-3. **EBrake per-pool snapshot reset (BNB Chain, Ethereum, Arbitrum One, Base).** Upgrades EBrake to a build that lets governance clear the stored collateral factor snapshot of a single pool, instead of every pool of a market at once, and grants the new function on BNB Chain to the Guardian and the Normal and Fast-track Timelocks. EBrake is upgraded to the same build on Ethereum, Arbitrum One and Base.
+3. **EBrake per-pool snapshot reset (BNB Chain, Ethereum, Arbitrum One, Base).** Lets governance clear the collateral factor snapshot of a single pool (Cantina Apex VENU1-91).
 
 #### Part 1: Noon Capital sUSN Fixed-Term Institutional Loan Vault
 
@@ -212,16 +212,12 @@ The Normal Timelock already holds setGrowthRate, setSnapshotGap and setSnapshot 
 
 #### Part 3: EBrake Per-Pool Collateral Factor Snapshot Reset
 
-EBrake stores a market's collateral factor and liquidation threshold per pool before it lowers the collateral factor, so that governance can recover the pre-incident values later and clear the snapshot with \`resetCFSnapshot(address)\`. That function clears the snapshot of every pool of the market. When governance restores the collateral factor in one pool while other pools stay tightened, clearing everything also erases the baseline of the pools that are still tightened. This was reported as a Low severity finding in the [Cantina Apex audit](https://ai.cantina.xyz/venus/workspace/VENU1) of the periphery contracts (VENU1-91).
+\`resetCFSnapshot(address)\` clears a market's collateral factor snapshot in every pool, so restoring one pool also erases the baseline of pools that stay tightened (Cantina Apex VENU1-91, Low). The new EBrake build adds \`resetCFSnapshot(address,uint96)\`, which clears one pool; nothing else changes. Ethereum, Arbitrum One and Base get the same build, where the new function reverts.
 
-The new build adds \`resetCFSnapshot(address market, uint96 poolId)\`, which clears the snapshot of one pool and emits \`PoolCFSnapshotReset(market, poolId)\`. It only touches EBrake's own storage. It is available on BNB Chain, where a market can be listed in several pools, and reverts on the other chains like \`decreaseCF(address,uint96,uint256)\` does. Nothing else in EBrake changes.
+- BNB Chain: ${EBRAKE} → ${NEW_EBRAKE_IMPLEMENTATION}
+${REMOTE_CHAINS.map(c => `- ${c.name}: ${c.eBrake} → ${c.newImplementation}`).join("\n")}
 
-- BNB Chain: EBrake [${EBRAKE}](https://bscscan.com/address/${EBRAKE}) → [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION})
-${REMOTE_CHAINS.map(c => `- ${c.name}: EBrake ${c.eBrake} → ${c.newImplementation}`).join("\n")}
-
-The proxy addresses, their owners, the comptrollers EBrake acts on, the ACM and the storage layout stay the same. VIP-680 upgraded EBrake on these four chains; the implementations proposed here build on that one and add only the function above, and are verified on each block explorer.
-
-**Access control.** \`${RESET_POOL_CF_SNAPSHOT}\` on BNB Chain is granted to the Guardian and the Normal and Fast-track Timelocks, the accounts that already hold \`resetCFSnapshot(address)\`. No permission changes on Ethereum, Arbitrum One and Base, because the new function is not available there.
+On BNB Chain the new permission goes to the Guardian and the Normal and Fast-track Timelocks, which hold \`resetCFSnapshot(address)\`. No permission changes on the other chains.
 
 #### Actions
 
