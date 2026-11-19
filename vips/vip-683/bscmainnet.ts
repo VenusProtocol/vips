@@ -151,55 +151,49 @@ export const vip683 = () => {
       "VIP-683 [BNB Chain, Ethereum, Arbitrum One, Base] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault, Update CAPO Parameters and Add the EBrake Per-Pool Snapshot Reset",
     description: `#### Summary
 
-This VIP has three parts:
-
-1. **Noon Capital vault (BNB Chain).** Lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub.
-2. **CAPO update (BNB Chain).** Tightens the capped-oracle (CAPO) parameters of sUSDe, WBETH, slisBNB and asBNB on BNB Chain Core, following Allez Labs' recommendation.
+1. **Noon Capital vault (BNB Chain).** Lists a 30-day fixed-term vault for Noon Capital: up to 1,000,000 U at a 6% fixed APY, collateralised by 1,152,073.71 sUSN, priced from a new Stork feed.
+2. **CAPO update (BNB Chain).** Tightens the CAPO parameters of sUSDe, WBETH, slisBNB and asBNB, following Allez Labs.
 3. **EBrake per-pool snapshot reset (BNB Chain, Ethereum, Arbitrum One, Base).** Lets governance clear the collateral factor snapshot of a single pool (Cantina Apex VENU1-91).
 
 #### Part 1: Noon Capital sUSN Fixed-Term Institutional Loan Vault
 
-**Oracle.** sUSN is new to Venus. It is priced from Stork's sUSN feed (ID ${SUSN_STORK_FEED_ID}) on the Stork contract [${STORK}](https://bscscan.com/address/${STORK}). The feed reports the sUSN to USN exchange rate of the Staked USN vault on Ethereum, ≈1.2365 at authoring, and is pushed hourly. The StorkChainlinkAdapter [${SUSN_STORK_FEED}](https://bscscan.com/address/${SUSN_STORK_FEED}) serves it through the Chainlink interface as sUSN's feed on the ChainlinkOracle. It reads the feed through Stork's 1-hour age check and reports its update time in seconds. The ChainlinkOracle becomes sUSN's single ResilientOracle source (no pivot, no fallback). The ChainlinkOracle's maxStalePeriod is 1 hour 5 minutes (3,900s), but Stork's 1-hour limit fires first. The feed's oldest value before an update was 3,700s from September 10 to November 13, 2026, so sUSN can go unpriced for a few minutes when a push runs late.
+**Oracle.** sUSN is priced from Stork's hourly sUSN feed (ID ${SUSN_STORK_FEED_ID}) on ${STORK}: the sUSN → USN rate of the Ethereum Staked USN vault, ≈1.2365 at authoring. The StorkChainlinkAdapter ${SUSN_STORK_FEED} serves it to the ChainlinkOracle, sUSN's only ResilientOracle source. maxStalePeriod is 3,900s; Stork's own 1-hour limit fires first.
 
 **Vault terms.**
 
 - Vault: ${NOON_VAULT} · Share: ${VAULT_NAME} (${VAULT_SYMBOL})
-- Loan (supply) asset: U (${U})
-- Collateral: sUSN (${SUSN})
+- Loan asset: U (${U}) · Collateral: sUSN (${SUSN})
 - Institution operator: ${INSTITUTION_OPERATOR}
 - Fixed APY: 6% · Reserve factor: 10% (5.4% supply APY)
 - Borrow cap: min 10 U / max 1,000,000 U · Minimum supplier deposit: none
-- Open window: 1 day · Lock (loan term): 30 days · Settlement window: 3 days
-- Ideal collateral: 1,152,073.71 sUSN (≈ $1,428,571 at the deal price of $1.24) · Margin rate: 100%
-- Liquidation threshold: 86% · Liquidation incentive: 10% · Late-penalty rate: 10%
+- Open: 1 day · Lock: 30 days · Settlement window: 3 days
+- Collateral: 1,152,073.71 sUSN (≈ $1,428,571 at $1.24) · Margin rate: 100%
+- Liquidation threshold: 86% · Liquidation incentive: 10% · Late penalty: 10%
 
-At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal value. With the 30-day coupon the debt is ≈1,004,932 U, which reaches the 86% liquidation threshold if the sUSN price falls ≈18% from its authoring value, to ≈$1.014. The 80% margin call (≈$1.090, a ≈11.8% fall) is an off-chain monitoring threshold with no on-chain parameter.
+At the full drawdown the loan is ≈70% of the collateral value. With the coupon (≈1,004,932 U) it reaches the 86% threshold if sUSN falls ≈18%, to ≈$1.014. The 80% margin call (≈$1.090) is monitored off-chain.
 
-**Liquidators.** The LiquidationAdapter (${LIQUIDATION_ADAPTER}) whitelists the deal's liquidator bot (${LIQUIDATOR_BOT}) and the Venus Operational Fund Multisig (${OPS_FUND_MULTISIG}) for both the health-factor path (liquidate) and the overdue path (liquidateOverdueVault). The whitelist covers every institutional vault on the adapter, not only this one. The Critical Guardian remains whitelisted for both.
+**Liquidators.** The LiquidationAdapter (${LIQUIDATION_ADAPTER}) whitelists the liquidator bot ${LIQUIDATOR_BOT} and the Venus Operational Fund Multisig ${OPS_FUND_MULTISIG} for liquidate and liquidateOverdueVault, on every institutional vault.
 
-**Liquidity Hub.** The vault is added as a resource on the U Hub's FRV source (${U_FRV_SOURCE}) behind the shared AdapterFRV (${ADAPTER_FRV}), so the Hub Operator can allocate U into it.
+**Liquidity Hub.** The vault becomes a resource of the U Hub's FRV source (${U_FRV_SOURCE}) behind the AdapterFRV ${ADAPTER_FRV}.
 
 **Considerations.**
 
-- **The oracle tracks the exchange rate, not the market.** USN is valued at $1, so a USN depeg would not lower sUSN's price on Venus. Noon Capital both issues sUSN and borrows against it.
-- **Price-gated actions need fresh pushes.** If the feed goes more than 1 hour without an update, getPrice(sUSN) reverts, and with it the institution's drawdown (claimRaisedFunds), withdrawCollateral during Lock, and both liquidation paths. Deposits, redemptions, repayment and state updates are unaffected.
-- **100% margin.** The institution posts all 1,152,073.71 sUSN before the Critical Guardian calls openVault, so the vault cannot fail for a collateral shortfall.
-- **sUSN is pausable and has an issuer blacklist.** Noon's admin can pause sUSN transfers on BNB Chain or blacklist any address, the vault's included, which would block collateral deposits, withdrawals and seizures. sUSN on BNB Chain is bridged from Ethereum over Hyperlane, and had no supply on BNB Chain at authoring.
-- **Liquidation incentive split.** Half of the 10% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
-
-**Access control.** No new permissions are required: the Normal Timelock already holds setTokenConfig on both oracles, createVault on the controller, setLiquidatorWhitelist and setSettlerWhitelist on the adapter, and addResource on the U FRV source.
+- USN is valued at $1, so a USN depeg would not lower sUSN's price. Noon issues sUSN and borrows against it.
+- If the feed is over 1 hour old, sUSN pricing reverts, blocking drawdown, collateral withdrawal during Lock and liquidations.
+- Noon can pause sUSN on BNB Chain or blacklist any address, the vault included.
+- Half of the 10% liquidation incentive goes to the protocol.
 
 #### Part 2: CAPO Parameters
 
-**CAPO parameters.** The capped oracles of sUSDe, WBETH, slisBNB and asBNB limit how fast each token's exchange rate to its base token can grow. Their growth rates were set when yields were much higher, so the caps no longer bind closely. Following Allez Labs' recommendation, the growth rate becomes the highest 15-day annualised yield over the past year, rounded up to the next 0.5% with a 2% floor. sUSDe is the exception: 15%, above the formula's 5.5%. For slisBNB and asBNB the snapshot gap becomes one month of growth at the new rate, 0.17%. The snapshot interval stays 30 days.
+The growth rates were set when yields were higher, so the caps no longer bind closely. Per Allez Labs, the growth rate becomes the highest 15-day annualised yield of the past year, rounded up to 0.5%, with a 2% floor (sUSDe: 15%, above the formula's 5.5%). slisBNB and asBNB get a snapshot gap of one month's growth (0.17%). The snapshot interval stays 30 days.
 
-- sUSDe, main oracle [${SUSDE_ORACLE_MAIN}](https://bscscan.com/address/${SUSDE_ORACLE_MAIN}): growth rate 28.27% → 15%, snapshot gap unchanged (2.2%)
-- sUSDe, pivot oracle [${SUSDE_ORACLE_PIVOT}](https://bscscan.com/address/${SUSDE_ORACLE_PIVOT}): growth rate 28.27% → 15%, snapshot gap unchanged (2.2%)
-- WBETH [${WBETH_ORACLE}](https://bscscan.com/address/${WBETH_ORACLE}): growth rate 4.64% → 3%, snapshot gap unchanged (0.38%)
-- slisBNB [${SLISBNB_ORACLE}](https://bscscan.com/address/${SLISBNB_ORACLE}): growth rate 5% → 2%, snapshot gap 0.35% → 0.17%
-- asBNB [${ASBNB_ORACLE}](https://bscscan.com/address/${ASBNB_ORACLE}): growth rate 5% → 2%, snapshot gap 2.5% → 0.17%
+- sUSDe main ${SUSDE_ORACLE_MAIN}: growth 28.27% → 15%, gap unchanged (2.2%)
+- sUSDe pivot ${SUSDE_ORACLE_PIVOT}: growth 28.27% → 15%, gap unchanged (2.2%)
+- WBETH ${WBETH_ORACLE}: growth 4.64% → 3%, gap unchanged (0.38%)
+- slisBNB ${SLISBNB_ORACLE}: growth 5% → 2%, gap 0.35% → 0.17%
+- asBNB ${ASBNB_ORACLE}: growth 5% → 2%, gap 2.5% → 0.17%
 
-A new snapshot gap only applies at the next scheduled snapshot refresh; until then the current snapshot keeps the old gap. The VIP therefore also resets the slisBNB and asBNB snapshots to the exchange rate at block ${CAPO_SEED_BLOCK} (November 19, 2026) plus the new gap:
+A new gap only applies at the next snapshot refresh, so the slisBNB and asBNB snapshots are reset to the rate at block ${CAPO_SEED_BLOCK} plus the new gap:
 
 - slisBNB: snapshot ${capoSeededSnapshot(CAPO_RESEEDS[0].seedExchangeRate).toString()}, gap ${capoSnapshotGap(
       CAPO_RESEEDS[0].seedExchangeRate,
@@ -208,16 +202,16 @@ A new snapshot gap only applies at the next scheduled snapshot refresh; until th
       CAPO_RESEEDS[1].seedExchangeRate,
     ).toString()}
 
-The Normal Timelock already holds setGrowthRate, setSnapshotGap and setSnapshot on the five capped oracles, so no new permissions are required.
-
 #### Part 3: EBrake Per-Pool Collateral Factor Snapshot Reset
 
-\`resetCFSnapshot(address)\` clears a market's collateral factor snapshot in every pool, so restoring one pool also erases the baseline of pools that stay tightened (Cantina Apex VENU1-91, Low). The new EBrake build adds \`resetCFSnapshot(address,uint96)\`, which clears one pool; nothing else changes. Ethereum, Arbitrum One and Base get the same build, where the new function reverts.
+\`resetCFSnapshot(address)\` clears a market's CF snapshot in every pool, so restoring one pool also erases the baseline of pools that stay tightened (Cantina Apex VENU1-91, Low). The new EBrake build adds \`resetCFSnapshot(address,uint96)\` to clear one pool; nothing else changes. Ethereum, Arbitrum One and Base get the same build, where the new function reverts.
 
 - BNB Chain: ${EBRAKE} → ${NEW_EBRAKE_IMPLEMENTATION}
 ${REMOTE_CHAINS.map(c => `- ${c.name}: ${c.eBrake} → ${c.newImplementation}`).join("\n")}
 
-On BNB Chain the new permission goes to the Guardian and the Normal and Fast-track Timelocks, which hold \`resetCFSnapshot(address)\`. No permission changes on the other chains.
+#### Permissions
+
+Parts 1 and 2 need none: the Normal Timelock already holds every function. Part 3 grants \`${RESET_POOL_CF_SNAPSHOT}\` on BNB Chain to the Guardian and the Normal and Fast-track Timelocks, the holders of \`resetCFSnapshot(address)\`.
 
 #### Actions
 
