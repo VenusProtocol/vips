@@ -9,10 +9,11 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { bypassStalePrices, pinOracleFeedPrice } from "src/vip-framework/oracleStaleness";
 
-import vip682, {
+import vip683, {
   ADAPTER_FRV,
   CAPO_GROWTH_RATES,
   CAPO_RESEEDS,
+  CAPO_SEED_BLOCK,
   CAPO_SEED_TIMESTAMP,
   CAPO_SNAPSHOT_INTERVAL,
   CHAINLINK_ORACLE,
@@ -48,7 +49,7 @@ import vip682, {
   VAULT_SYMBOL,
   capoSeededSnapshot,
   capoSnapshotGap,
-} from "../../vips/vip-682/bscmainnet";
+} from "../../vips/vip-683/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import CAPPED_ORACLE_ABI from "./abi/CorrelatedTokenOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -62,7 +63,7 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 133352189;
+const FORK_BLOCK = CAPO_SEED_BLOCK;
 
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
@@ -314,21 +315,30 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-682 List the Noon Capital sUSN Fixed-Term Institutional Loan Vault", await vip682(), {
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
-      await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultCreated"], [1]);
-      await expectEvents(txResponse, [ADAPTER_ABI], ["LiquidatorWhitelistUpdated", "SettlerWhitelistUpdated"], [2, 2]);
-      await expectEvents(txResponse, [FRV_SOURCE_ABI], ["ResourceAdded"], [1]);
-      await expectEvents(
-        txResponse,
-        [CAPPED_ORACLE_ABI],
-        ["GrowthRateUpdated", "SnapshotGapUpdated", "SnapshotUpdated"],
-        [CAPO_GROWTH_RATES.length, CAPO_RESEEDS.length, CAPO_RESEEDS.length],
-      );
+  testVip(
+    "VIP-683 List the Noon Capital sUSN Fixed-Term Institutional Loan Vault and Update CAPO Parameters",
+    await vip683(),
+    {
+      callbackAfterExecution: async txResponse => {
+        await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
+        await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
+        await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultCreated"], [1]);
+        await expectEvents(
+          txResponse,
+          [ADAPTER_ABI],
+          ["LiquidatorWhitelistUpdated", "SettlerWhitelistUpdated"],
+          [2, 2],
+        );
+        await expectEvents(txResponse, [FRV_SOURCE_ABI], ["ResourceAdded"], [1]);
+        await expectEvents(
+          txResponse,
+          [CAPPED_ORACLE_ABI],
+          ["GrowthRateUpdated", "SnapshotGapUpdated", "SnapshotUpdated"],
+          [CAPO_GROWTH_RATES.length, CAPO_RESEEDS.length, CAPO_RESEEDS.length],
+        );
+      },
     },
-  });
+  );
 
   describe("Post-VIP behavior", () => {
     let vault: Contract;

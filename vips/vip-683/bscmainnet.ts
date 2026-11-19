@@ -8,12 +8,12 @@ import { makeProposal } from "src/utils";
 import { ADAPTERS } from "../vip-681/bscmainnet";
 
 // ===================================================================================================
-// VIP-682 [BNB Chain] — Noon Capital sUSN Fixed Rate Vault
+// VIP-683 [BNB Chain] — Noon Capital sUSN Fixed Rate Vault
 // ===================================================================================================
 
 export const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
-// VIP-681's new AdapterFRV. VIP-681 must be proposed and executed before this VIP: once it upgrades the FRV
-// beacon, a resource left on the old adapter (0x1824…657c) makes the U Hub's totalAssets() revert.
+// VIP-681's new AdapterFRV (VIP-681 is executed). Since its FRV beacon upgrade, a resource left on the old
+// adapter (0x1824…657c) makes the U Hub's totalAssets() revert.
 export const ADAPTER_FRV = ADAPTERS.FRV.new;
 
 export const INSTITUTIONAL_VAULT_CONTROLLER = "0x6D9e91cB766259af42619c14c994E694E57e6E85";
@@ -111,21 +111,22 @@ export const CAPO_GROWTH_RATES = [
 
 // setSnapshotGap only takes effect at the next scheduled refresh, up to 30 days later: the current
 // snapshot keeps the old gap until then. So the slisBNB and asBNB snapshots are reset here, to the
-// exchange rate read at block 133352189 (2026-11-13T12:31:32Z) plus the new gap.
-export const CAPO_SEED_TIMESTAMP = 1794573092;
+// exchange rate read at CAPO_SEED_BLOCK plus the new gap, stamped with that block's time (2026-11-19T08:03:27Z).
+export const CAPO_SEED_BLOCK = 134468000;
+export const CAPO_SEED_TIMESTAMP = 1795075407;
 export const CAPO_RESEEDS = [
-  { name: "slisBNB", oracle: SLISBNB_ORACLE, seedExchangeRate: BigNumber.from("1039524036317712154") },
+  { name: "slisBNB", oracle: SLISBNB_ORACLE, seedExchangeRate: BigNumber.from("1039639897220465804") },
   { name: "asBNB", oracle: ASBNB_ORACLE, seedExchangeRate: BigNumber.from("1027512203878882689") },
 ];
 
 export const capoSnapshotGap = (exchangeRate: BigNumber) => exchangeRate.mul(CAPO_SNAPSHOT_GAP_BPS).div(10000);
 export const capoSeededSnapshot = (exchangeRate: BigNumber) => exchangeRate.add(capoSnapshotGap(exchangeRate));
 
-export const vip682 = () => {
+export const vip683 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-682 [BNB Chain] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault and Update CAPO Parameters",
+      "VIP-683 [BNB Chain] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault and Update CAPO Parameters",
     description: `#### Summary
 
 This VIP lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system on BNB Chain. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub. It also tightens the capped-oracle (CAPO) parameters of sUSDe, WBETH, slisBNB and asBNB on BNB Chain Core, following Allez Labs' recommendation.
@@ -168,7 +169,7 @@ At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal 
 - slisBNB [${SLISBNB_ORACLE}](https://bscscan.com/address/${SLISBNB_ORACLE}): growth rate 5% → 2%, snapshot gap 0.35% → 0.17%
 - asBNB [${ASBNB_ORACLE}](https://bscscan.com/address/${ASBNB_ORACLE}): growth rate 5% → 2%, snapshot gap 2.5% → 0.17%
 
-A new snapshot gap only applies at the next scheduled snapshot refresh; until then the current snapshot keeps the old gap. The VIP therefore also resets the slisBNB and asBNB snapshots to the exchange rate at block 133352189 (November 13, 2026) plus the new gap:
+A new snapshot gap only applies at the next scheduled snapshot refresh; until then the current snapshot keeps the old gap. The VIP therefore also resets the slisBNB and asBNB snapshots to the exchange rate at block ${CAPO_SEED_BLOCK} (November 19, 2026) plus the new gap:
 
 - slisBNB: snapshot ${capoSeededSnapshot(CAPO_RESEEDS[0].seedExchangeRate).toString()}, gap ${capoSnapshotGap(
       CAPO_RESEEDS[0].seedExchangeRate,
@@ -275,4 +276,4 @@ The Normal Timelock already holds setGrowthRate, setSnapshotGap and setSnapshot 
   );
 };
 
-export default vip682;
+export default vip683;
