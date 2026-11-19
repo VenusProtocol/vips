@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -84,13 +85,50 @@ export const riskConfig = [
   LATE_PENALTY_RATE, // latePenaltyRate
 ];
 
+// ===================================================================================================
+// CAPO update on BSC Core, per Allez Labs: growth rate = highest 15-day annualised yield over the past
+// year, rounded up to the next 0.5%, 2% floor (sUSDe set to 15%, above the formula's 5.5%). slisBNB and
+// asBNB also get a snapshot gap of one month of growth at the new rate (17 bps).
+// ===================================================================================================
+
+// setGrowthRate sets the growth rate and the snapshot interval together; the interval stays 30 days.
+export const CAPO_SNAPSHOT_INTERVAL = 30 * 24 * 60 * 60;
+export const CAPO_SNAPSHOT_GAP_BPS = 17;
+
+export const SUSDE_ORACLE_MAIN = "0x2B2895104f958E1EC042E6Ba5cbfeCbAD3C5beDb";
+export const SUSDE_ORACLE_PIVOT = "0xA67F01322AF8EBa444D788Ee398775b446de51a0";
+export const WBETH_ORACLE = "0x49938fc72262c126eb5D4BdF6430C55189AEB2BA";
+export const SLISBNB_ORACLE = "0xDDE6446E66c786afF4cd3D183a908bCDa57DF9c1";
+export const ASBNB_ORACLE = "0x652B90D1d45a7cD5BE82c5Fb61a4A00bA126dde5";
+
+export const CAPO_GROWTH_RATES = [
+  { name: "sUSDe (main)", oracle: SUSDE_ORACLE_MAIN, annualGrowthRate: parseUnits("0.15", 18) },
+  { name: "sUSDe (pivot)", oracle: SUSDE_ORACLE_PIVOT, annualGrowthRate: parseUnits("0.15", 18) },
+  { name: "WBETH", oracle: WBETH_ORACLE, annualGrowthRate: parseUnits("0.03", 18) },
+  { name: "slisBNB", oracle: SLISBNB_ORACLE, annualGrowthRate: parseUnits("0.02", 18) },
+  { name: "asBNB", oracle: ASBNB_ORACLE, annualGrowthRate: parseUnits("0.02", 18) },
+];
+
+// setSnapshotGap only takes effect at the next scheduled refresh, up to 30 days later: the current
+// snapshot keeps the old gap until then. So the slisBNB and asBNB snapshots are reset here, to the
+// exchange rate read at block 133352189 (2026-11-13T12:31:32Z) plus the new gap.
+export const CAPO_SEED_TIMESTAMP = 1794573092;
+export const CAPO_RESEEDS = [
+  { name: "slisBNB", oracle: SLISBNB_ORACLE, seedExchangeRate: BigNumber.from("1039524036317712154") },
+  { name: "asBNB", oracle: ASBNB_ORACLE, seedExchangeRate: BigNumber.from("1027512203878882689") },
+];
+
+export const capoSnapshotGap = (exchangeRate: BigNumber) => exchangeRate.mul(CAPO_SNAPSHOT_GAP_BPS).div(10000);
+export const capoSeededSnapshot = (exchangeRate: BigNumber) => exchangeRate.add(capoSnapshotGap(exchangeRate));
+
 export const vip682 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-682 [BNB Chain] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault",
+    title:
+      "VIP-682 [BNB Chain] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault and Update CAPO Parameters",
     description: `#### Summary
 
-This VIP lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system on BNB Chain. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub.
+This VIP lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system on BNB Chain. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub. It also tightens the capped-oracle (CAPO) parameters of sUSDe, WBETH, slisBNB and asBNB on BNB Chain Core, following Allez Labs' recommendation.
 
 #### Description
 
@@ -122,6 +160,25 @@ At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal 
 - **sUSN is pausable and has an issuer blacklist.** Noon's admin can pause sUSN transfers on BNB Chain or blacklist any address, the vault's included, which would block collateral deposits, withdrawals and seizures. sUSN on BNB Chain is bridged from Ethereum over Hyperlane, and had no supply on BNB Chain at authoring.
 - **Liquidation incentive split.** Half of the 10% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
 
+**CAPO parameters.** The capped oracles of sUSDe, WBETH, slisBNB and asBNB limit how fast each token's exchange rate to its base token can grow. Their growth rates were set when yields were much higher, so the caps no longer bind closely. Following Allez Labs' recommendation, the growth rate becomes the highest 15-day annualised yield over the past year, rounded up to the next 0.5% with a 2% floor. sUSDe is the exception: 15%, above the formula's 5.5%. For slisBNB and asBNB the snapshot gap becomes one month of growth at the new rate, 0.17%. The snapshot interval stays 30 days.
+
+- sUSDe, main oracle [${SUSDE_ORACLE_MAIN}](https://bscscan.com/address/${SUSDE_ORACLE_MAIN}): growth rate 28.27% → 15%, snapshot gap unchanged (2.2%)
+- sUSDe, pivot oracle [${SUSDE_ORACLE_PIVOT}](https://bscscan.com/address/${SUSDE_ORACLE_PIVOT}): growth rate 28.27% → 15%, snapshot gap unchanged (2.2%)
+- WBETH [${WBETH_ORACLE}](https://bscscan.com/address/${WBETH_ORACLE}): growth rate 4.64% → 3%, snapshot gap unchanged (0.38%)
+- slisBNB [${SLISBNB_ORACLE}](https://bscscan.com/address/${SLISBNB_ORACLE}): growth rate 5% → 2%, snapshot gap 0.35% → 0.17%
+- asBNB [${ASBNB_ORACLE}](https://bscscan.com/address/${ASBNB_ORACLE}): growth rate 5% → 2%, snapshot gap 2.5% → 0.17%
+
+A new snapshot gap only applies at the next scheduled snapshot refresh; until then the current snapshot keeps the old gap. The VIP therefore also resets the slisBNB and asBNB snapshots to the exchange rate at block 133352189 (November 13, 2026) plus the new gap:
+
+- slisBNB: snapshot ${capoSeededSnapshot(CAPO_RESEEDS[0].seedExchangeRate).toString()}, gap ${capoSnapshotGap(
+      CAPO_RESEEDS[0].seedExchangeRate,
+    ).toString()}
+- asBNB: snapshot ${capoSeededSnapshot(CAPO_RESEEDS[1].seedExchangeRate).toString()}, gap ${capoSnapshotGap(
+      CAPO_RESEEDS[1].seedExchangeRate,
+    ).toString()}
+
+The Normal Timelock already holds setGrowthRate, setSnapshotGap and setSnapshot on the five capped oracles, so no new permissions are required.
+
 **Access control.** No new permissions are required: the Normal Timelock already holds setTokenConfig on both oracles, createVault on the controller, setLiquidatorWhitelist and setSettlerWhitelist on the adapter, and addResource on the U FRV source.
 
 #### Actions
@@ -131,6 +188,9 @@ At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal 
 3. Create the Noon Capital vault on the InstitutionalVaultController (${INSTITUTIONAL_VAULT_CONTROLLER}): createVault(...).
 4. Whitelist the liquidator bot and the Venus Operational Fund Multisig on the LiquidationAdapter: setLiquidatorWhitelist and setSettlerWhitelist for each.
 5. Register the vault as a resource on the U Hub's FRV source (${U_FRV_SOURCE}): addResource(${NOON_VAULT}, ${ADAPTER_FRV}).
+6. Set the new CAPO growth rates, with the 30-day snapshot interval, on the sUSDe main and pivot, WBETH, slisBNB and asBNB oracles: setGrowthRate.
+7. Set the new snapshot gap on the slisBNB and asBNB oracles: setSnapshotGap.
+8. Reset the slisBNB and asBNB snapshots with the new gap: setSnapshot.
 
 #### Voting options
 
@@ -190,6 +250,25 @@ At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal 
         signature: "addResource(address,address)",
         params: [NOON_VAULT, ADAPTER_FRV],
       },
+
+      // CAPO update
+      ...CAPO_GROWTH_RATES.map(({ oracle, annualGrowthRate }) => ({
+        target: oracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [annualGrowthRate, CAPO_SNAPSHOT_INTERVAL],
+      })),
+      ...CAPO_RESEEDS.flatMap(({ oracle, seedExchangeRate }) => [
+        {
+          target: oracle,
+          signature: "setSnapshotGap(uint256)",
+          params: [capoSnapshotGap(seedExchangeRate)],
+        },
+        {
+          target: oracle,
+          signature: "setSnapshot(uint256,uint256)",
+          params: [capoSeededSnapshot(seedExchangeRate), CAPO_SEED_TIMESTAMP],
+        },
+      ]),
     ],
     meta,
     ProposalType.REGULAR,

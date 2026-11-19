@@ -11,6 +11,10 @@ import { bypassStalePrices, pinOracleFeedPrice } from "src/vip-framework/oracleS
 
 import vip682, {
   ADAPTER_FRV,
+  CAPO_GROWTH_RATES,
+  CAPO_RESEEDS,
+  CAPO_SEED_TIMESTAMP,
+  CAPO_SNAPSHOT_INTERVAL,
   CHAINLINK_ORACLE,
   FIXED_APY,
   IDEAL_COLLATERAL_AMOUNT,
@@ -42,8 +46,11 @@ import vip682, {
   U_FRV_SOURCE,
   VAULT_NAME,
   VAULT_SYMBOL,
+  capoSeededSnapshot,
+  capoSnapshotGap,
 } from "../../vips/vip-682/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
+import CAPPED_ORACLE_ABI from "./abi/CorrelatedTokenOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import FRV_SOURCE_ABI from "./abi/FRVSource.json";
 import HUB_ABI from "./abi/Hub.json";
@@ -104,6 +111,24 @@ const termInterest = (principal: BigNumber): BigNumber =>
 
 const reserveCut = (interest: BigNumber): BigNumber => interest.mul(RESERVE_FACTOR).div(parseUnits("1", 18));
 
+// CAPO: SECONDS_PER_YEAR from solidity-utilities, and the per-second growth rates live before the VIP.
+const SECONDS_PER_YEAR = 31_536_000;
+const CAPO_GROWTH_RATE_PER_SECOND_BEFORE: Record<string, number> = {
+  "sUSDe (main)": 8964358193, // 28.27%
+  "sUSDe (pivot)": 8964358193,
+  WBETH: 1471334348, // 4.64%
+  slisBNB: 1585489599, // 5%
+  asBNB: 1585489599,
+};
+const RESEEDED = new Set(CAPO_RESEEDS.map(({ oracle }) => oracle));
+// Headroom = how far the exchange rate can rise above its live value before the cap binds.
+const headroomBps = async (capo: Contract): Promise<number> =>
+  (await capo.getMaxAllowedExchangeRate())
+    .mul(10_000)
+    .div(await capo.getUnderlyingAmount())
+    .sub(10_000)
+    .toNumber();
+
 forking(FORK_BLOCK, async () => {
   const controller = new ethers.Contract(INSTITUTIONAL_VAULT_CONTROLLER, CONTROLLER_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -145,6 +170,8 @@ forking(FORK_BLOCK, async () => {
     ethers.provider,
   );
   const liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, ADAPTER_ABI, ethers.provider);
+  const capoOracle = (address: string) => new ethers.Contract(address, CAPPED_ORACLE_ABI, ethers.provider);
+  const capoBefore: Record<string, { gap: BigNumber; snapshot: BigNumber; timestamp: BigNumber }> = {};
 
   let vaultsBefore: BigNumber;
   let openSnapshot: SnapshotRestorer;
@@ -188,6 +215,19 @@ forking(FORK_BLOCK, async () => {
       maxStalePeriod: MAX_STALE_PERIOD,
     });
     await bypassStalePrices([U]);
+
+    for (const { oracle } of CAPO_GROWTH_RATES) {
+      const capo = capoOracle(oracle);
+      capoBefore[oracle] = {
+        gap: await capo.snapshotGap(),
+        snapshot: await capo.snapshotMaxExchangeRate(),
+        timestamp: await capo.snapshotTimestamp(),
+      };
+    }
+    // The capped oracles read their exchange rate after the governance warp.
+    await bypassStalePrices(
+      await Promise.all(CAPO_GROWTH_RATES.map(({ oracle }) => capoOracle(oracle).CORRELATED_TOKEN())),
+    );
   });
 
   describe("Pre-VIP behavior", () => {
@@ -250,6 +290,30 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  describe("Pre-VIP CAPO", () => {
+    for (const { name, oracle } of CAPO_GROWTH_RATES) {
+      it(`${name}: the oracle prices its token on the ResilientOracle, at the old growth rate and a 30-day interval`, async () => {
+        const capo = capoOracle(oracle);
+        const { oracles } = await resilientOracle.getTokenConfig(await capo.CORRELATED_TOKEN());
+        expect(oracles).to.include(oracle);
+        expect(await capo.growthRatePerSecond()).to.equal(CAPO_GROWTH_RATE_PER_SECOND_BEFORE[name]);
+        expect(await capo.snapshotInterval()).to.equal(CAPO_SNAPSHOT_INTERVAL);
+        expect(await capo.isCapped()).to.equal(false);
+      });
+    }
+
+    for (const { name, oracle, seedExchangeRate } of CAPO_RESEEDS) {
+      it(`${name}: the seed is the exchange rate at the fork block, the VIP's authoring block`, async () => {
+        expect(await capoOracle(oracle).getUnderlyingAmount()).to.equal(seedExchangeRate);
+        expect((await ethers.provider.getBlock(FORK_BLOCK)).timestamp).to.equal(CAPO_SEED_TIMESTAMP);
+      });
+    }
+
+    it("asBNB still carries the ≈2.5% gap in its current snapshot", async () => {
+      expect(await headroomBps(capoOracle(CAPO_RESEEDS[1].oracle))).to.be.gte(250);
+    });
+  });
+
   testVip("VIP-682 List the Noon Capital sUSN Fixed-Term Institutional Loan Vault", await vip682(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
@@ -257,6 +321,12 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultCreated"], [1]);
       await expectEvents(txResponse, [ADAPTER_ABI], ["LiquidatorWhitelistUpdated", "SettlerWhitelistUpdated"], [2, 2]);
       await expectEvents(txResponse, [FRV_SOURCE_ABI], ["ResourceAdded"], [1]);
+      await expectEvents(
+        txResponse,
+        [CAPPED_ORACLE_ABI],
+        ["GrowthRateUpdated", "SnapshotGapUpdated", "SnapshotUpdated"],
+        [CAPO_GROWTH_RATES.length, CAPO_RESEEDS.length, CAPO_RESEEDS.length],
+      );
     },
   });
 
@@ -356,6 +426,49 @@ forking(FORK_BLOCK, async () => {
       expect(resourceConfig.adapter).to.equal(ADAPTER_FRV);
       expect(await adapterFrv.resourceName(vault.address)).to.equal(VAULT_NAME);
     });
+  });
+
+  describe("Post-VIP CAPO", () => {
+    for (const { name, oracle, annualGrowthRate } of CAPO_GROWTH_RATES) {
+      it(`${name}: sets the new growth rate, keeps the 30-day interval, and does not cap the live rate`, async () => {
+        const capo = capoOracle(oracle);
+        expect(await capo.growthRatePerSecond()).to.equal(annualGrowthRate.div(SECONDS_PER_YEAR));
+        expect(await capo.snapshotInterval()).to.equal(CAPO_SNAPSHOT_INTERVAL);
+        expect(await capo.isCapped()).to.equal(false);
+      });
+
+      if (!RESEEDED.has(oracle)) {
+        it(`${name}: leaves the snapshot and its gap unchanged`, async () => {
+          const capo = capoOracle(oracle);
+          expect(await capo.snapshotGap()).to.equal(capoBefore[oracle].gap);
+          expect(await capo.snapshotMaxExchangeRate()).to.equal(capoBefore[oracle].snapshot);
+          expect(await capo.snapshotTimestamp()).to.equal(capoBefore[oracle].timestamp);
+        });
+      }
+    }
+
+    for (const { name, oracle, seedExchangeRate } of CAPO_RESEEDS) {
+      it(`${name}: sets the 17 bps gap and resets the snapshot to the seed rate plus that gap`, async () => {
+        const capo = capoOracle(oracle);
+        expect(await capo.snapshotGap()).to.equal(capoSnapshotGap(seedExchangeRate));
+        expect(await capo.snapshotMaxExchangeRate()).to.equal(capoSeededSnapshot(seedExchangeRate));
+        expect(await capo.snapshotTimestamp()).to.equal(CAPO_SEED_TIMESTAMP);
+      });
+
+      it(`${name}: headroom is now under 0.5% (the new gap plus 2%/yr since the seed)`, async () => {
+        expect(await headroomBps(capoOracle(oracle))).to.be.lt(50);
+      });
+
+      it(`${name}: the next scheduled refresh keeps the new gap`, async () => {
+        const capo = capoOracle(oracle);
+        const restore = await takeSnapshot();
+        await time.increaseTo(CAPO_SEED_TIMESTAMP + CAPO_SNAPSHOT_INTERVAL + 1);
+        await capo.connect(timelock).updateSnapshot();
+        const rate = await capo.getUnderlyingAmount();
+        expect(await capo.snapshotMaxExchangeRate()).to.equal(rate.add(capoSnapshotGap(seedExchangeRate)));
+        await restore.restore();
+      });
+    }
   });
 
   describe("Post-VIP vault lifecycle", () => {
