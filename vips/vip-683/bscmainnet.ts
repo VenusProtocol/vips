@@ -6,9 +6,17 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { ADAPTERS } from "../vip-681/bscmainnet";
+import { REMOTE_CHAINS, RESET_POOL_CF_SNAPSHOT } from "./config";
 
 // ===================================================================================================
-// VIP-683 [BNB Chain] — Noon Capital sUSN Fixed Rate Vault
+// VIP-683 [BNB Chain, Ethereum, Arbitrum One, Base]
+//   Part 1: Noon Capital sUSN Fixed Rate Vault
+//   Part 2: CAPO update on BSC Core
+//   Part 3: EBrake per-pool CF snapshot reset
+// ===================================================================================================
+
+// ===================================================================================================
+// Part 1: Noon Capital sUSN Fixed Rate Vault
 // ===================================================================================================
 
 export const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
@@ -86,7 +94,7 @@ export const riskConfig = [
 ];
 
 // ===================================================================================================
-// CAPO update on BSC Core, per Allez Labs: growth rate = highest 15-day annualised yield over the past
+// Part 2: CAPO update on BSC Core, per Allez Labs: growth rate = highest 15-day annualised yield over the past
 // year, rounded up to the next 0.5%, 2% floor (sUSDe set to 15%, above the formula's 5.5%). slisBNB and
 // asBNB also get a snapshot gap of one month of growth at the new rate (17 bps).
 // ===================================================================================================
@@ -122,16 +130,34 @@ export const CAPO_RESEEDS = [
 export const capoSnapshotGap = (exchangeRate: BigNumber) => exchangeRate.mul(CAPO_SNAPSHOT_GAP_BPS).div(10000);
 export const capoSeededSnapshot = (exchangeRate: BigNumber) => exchangeRate.add(capoSnapshotGap(exchangeRate));
 
+// ===================================================================================================
+// Part 3: EBrake per-pool CF snapshot reset (Cantina Apex VENU1-91). The new build adds
+// resetCFSnapshot(address,uint96); the same build goes to Ethereum, Arbitrum One and Base, where it reverts.
+// ===================================================================================================
+
+const { ACCESS_CONTROL_MANAGER, FAST_TRACK_TIMELOCK, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
+
+export const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
+export const NEW_EBRAKE_IMPLEMENTATION = "0x0e18f3CA31080fBeF44378372Ec8602fA64cBC63";
+
+// The accounts that already hold resetCFSnapshot(address) on EBrake
+export const RESET_GRANTEES = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK];
+
 export const vip683 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-683 [BNB Chain] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault and Update CAPO Parameters",
+      "VIP-683 [BNB Chain, Ethereum, Arbitrum One, Base] List the Noon Capital sUSN Fixed-Term Institutional Loan Vault, Update CAPO Parameters and Add the EBrake Per-Pool Snapshot Reset",
     description: `#### Summary
 
-This VIP lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system on BNB Chain. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub. It also tightens the capped-oracle (CAPO) parameters of sUSDe, WBETH, slisBNB and asBNB on BNB Chain Core, following Allez Labs' recommendation.
+This VIP has three parts:
 
-#### Description
+1. **Noon Capital vault (BNB Chain).** Lists a fixed-term institutional loan vault for Noon Capital on the Venus Institutional Fixed Rate Vault system. The vault allows the institution to borrow up to 1,000,000 U for 30 days at a 6% fixed APY, collateralised by 1,152,073.71 sUSN (Staked USN). The VIP prices sUSN from a Stork feed, creates the vault, whitelists two liquidators and registers the vault on the U Liquidity Hub.
+2. **CAPO update (BNB Chain).** Tightens the capped-oracle (CAPO) parameters of sUSDe, WBETH, slisBNB and asBNB on BNB Chain Core, following Allez Labs' recommendation.
+3. **EBrake per-pool snapshot reset (BNB Chain, Ethereum, Arbitrum One, Base).** Upgrades EBrake to a build that lets governance clear the stored collateral factor snapshot of a single pool, instead of every pool of a market at once, and grants the new function on BNB Chain to the Guardian and the Normal and Fast-track Timelocks. EBrake is upgraded to the same build on Ethereum, Arbitrum One and Base.
+
+#### Part 1: Noon Capital sUSN Fixed-Term Institutional Loan Vault
 
 **Oracle.** sUSN is new to Venus. It is priced from Stork's sUSN feed (ID ${SUSN_STORK_FEED_ID}) on the Stork contract [${STORK}](https://bscscan.com/address/${STORK}). The feed reports the sUSN to USN exchange rate of the Staked USN vault on Ethereum, ≈1.2365 at authoring, and is pushed hourly. The StorkChainlinkAdapter [${SUSN_STORK_FEED}](https://bscscan.com/address/${SUSN_STORK_FEED}) serves it through the Chainlink interface as sUSN's feed on the ChainlinkOracle. It reads the feed through Stork's 1-hour age check and reports its update time in seconds. The ChainlinkOracle becomes sUSN's single ResilientOracle source (no pivot, no fallback). The ChainlinkOracle's maxStalePeriod is 1 hour 5 minutes (3,900s), but Stork's 1-hour limit fires first. The feed's oldest value before an update was 3,700s from September 10 to November 13, 2026, so sUSN can go unpriced for a few minutes when a push runs late.
 
@@ -161,6 +187,10 @@ At the maximum 1,000,000 U drawdown the loan is ≈70% of the collateral's deal 
 - **sUSN is pausable and has an issuer blacklist.** Noon's admin can pause sUSN transfers on BNB Chain or blacklist any address, the vault's included, which would block collateral deposits, withdrawals and seizures. sUSN on BNB Chain is bridged from Ethereum over Hyperlane, and had no supply on BNB Chain at authoring.
 - **Liquidation incentive split.** Half of the 10% incentive goes to the protocol: the LiquidationAdapter's protocolLiquidationShare is already 50% for all vaults.
 
+**Access control.** No new permissions are required: the Normal Timelock already holds setTokenConfig on both oracles, createVault on the controller, setLiquidatorWhitelist and setSettlerWhitelist on the adapter, and addResource on the U FRV source.
+
+#### Part 2: CAPO Parameters
+
 **CAPO parameters.** The capped oracles of sUSDe, WBETH, slisBNB and asBNB limit how fast each token's exchange rate to its base token can grow. Their growth rates were set when yields were much higher, so the caps no longer bind closely. Following Allez Labs' recommendation, the growth rate becomes the highest 15-day annualised yield over the past year, rounded up to the next 0.5% with a 2% floor. sUSDe is the exception: 15%, above the formula's 5.5%. For slisBNB and asBNB the snapshot gap becomes one month of growth at the new rate, 0.17%. The snapshot interval stays 30 days.
 
 - sUSDe, main oracle [${SUSDE_ORACLE_MAIN}](https://bscscan.com/address/${SUSDE_ORACLE_MAIN}): growth rate 28.27% → 15%, snapshot gap unchanged (2.2%)
@@ -180,18 +210,40 @@ A new snapshot gap only applies at the next scheduled snapshot refresh; until th
 
 The Normal Timelock already holds setGrowthRate, setSnapshotGap and setSnapshot on the five capped oracles, so no new permissions are required.
 
-**Access control.** No new permissions are required: the Normal Timelock already holds setTokenConfig on both oracles, createVault on the controller, setLiquidatorWhitelist and setSettlerWhitelist on the adapter, and addResource on the U FRV source.
+#### Part 3: EBrake Per-Pool Collateral Factor Snapshot Reset
+
+EBrake stores a market's collateral factor and liquidation threshold per pool before it lowers the collateral factor, so that governance can recover the pre-incident values later and clear the snapshot with \`resetCFSnapshot(address)\`. That function clears the snapshot of every pool of the market. When governance restores the collateral factor in one pool while other pools stay tightened, clearing everything also erases the baseline of the pools that are still tightened. This was reported as a Low severity finding in the [Cantina Apex audit](https://ai.cantina.xyz/venus/workspace/VENU1) of the periphery contracts (VENU1-91).
+
+The new build adds \`resetCFSnapshot(address market, uint96 poolId)\`, which clears the snapshot of one pool and emits \`PoolCFSnapshotReset(market, poolId)\`. It only touches EBrake's own storage. It is available on BNB Chain, where a market can be listed in several pools, and reverts on the other chains like \`decreaseCF(address,uint96,uint256)\` does. Nothing else in EBrake changes.
+
+- BNB Chain: EBrake [${EBRAKE}](https://bscscan.com/address/${EBRAKE}) → [${NEW_EBRAKE_IMPLEMENTATION}](https://bscscan.com/address/${NEW_EBRAKE_IMPLEMENTATION})
+${REMOTE_CHAINS.map(c => `- ${c.name}: EBrake ${c.eBrake} → ${c.newImplementation}`).join("\n")}
+
+The proxy addresses, their owners, the comptrollers EBrake acts on, the ACM and the storage layout stay the same. VIP-680 upgraded EBrake on these four chains; the implementations proposed here build on that one and add only the function above, and are verified on each block explorer.
+
+**Access control.** \`${RESET_POOL_CF_SNAPSHOT}\` on BNB Chain is granted to the Guardian and the Normal and Fast-track Timelocks, the accounts that already hold \`resetCFSnapshot(address)\`. No permission changes on Ethereum, Arbitrum One and Base, because the new function is not available there.
 
 #### Actions
+
+**Part 1: Noon Capital vault (BNB Chain)**
 
 1. Register the sUSN Stork adapter on the ChainlinkOracle (${CHAINLINK_ORACLE}): setTokenConfig(sUSN, ${SUSN_STORK_FEED}, 3900).
 2. Price sUSN on the ResilientOracle (${RESILIENT_ORACLE}) with the ChainlinkOracle as its single main source.
 3. Create the Noon Capital vault on the InstitutionalVaultController (${INSTITUTIONAL_VAULT_CONTROLLER}): createVault(...).
 4. Whitelist the liquidator bot and the Venus Operational Fund Multisig on the LiquidationAdapter: setLiquidatorWhitelist and setSettlerWhitelist for each.
 5. Register the vault as a resource on the U Hub's FRV source (${U_FRV_SOURCE}): addResource(${NOON_VAULT}, ${ADAPTER_FRV}).
+
+**Part 2: CAPO update (BNB Chain)**
+
 6. Set the new CAPO growth rates, with the 30-day snapshot interval, on the sUSDe main and pivot, WBETH, slisBNB and asBNB oracles: setGrowthRate.
 7. Set the new snapshot gap on the slisBNB and asBNB oracles: setSnapshotGap.
 8. Reset the slisBNB and asBNB snapshots with the new gap: setSnapshot.
+
+**Part 3: EBrake (BNB Chain, Ethereum, Arbitrum One, Base)**
+
+9. Upgrade the EBrake proxy on BNB Chain to the new implementation.
+10. Grant \`${RESET_POOL_CF_SNAPSHOT}\` on EBrake to the Guardian and the Normal and Fast-track Timelocks.
+11. Upgrade EBrake to the same build on Ethereum, Arbitrum One and Base.
 
 #### Voting options
 
@@ -270,6 +322,28 @@ The Normal Timelock already holds setGrowthRate, setSnapshotGap and setSnapshot 
           params: [capoSeededSnapshot(seedExchangeRate), CAPO_SEED_TIMESTAMP],
         },
       ]),
+
+      // EBrake: upgrade on BNB Chain
+      {
+        target: DEFAULT_PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [EBRAKE, NEW_EBRAKE_IMPLEMENTATION],
+      },
+
+      // EBrake: per-pool snapshot reset permission
+      ...RESET_GRANTEES.map(account => ({
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [EBRAKE, RESET_POOL_CF_SNAPSHOT, account],
+      })),
+
+      // EBrake: upgrade on Ethereum, Arbitrum One and Base
+      ...REMOTE_CHAINS.map(chain => ({
+        target: chain.proxyAdmin,
+        signature: "upgrade(address,address)",
+        params: [chain.eBrake, chain.newImplementation],
+        dstChainId: chain.dstChainId,
+      })),
     ],
     meta,
     ProposalType.REGULAR,

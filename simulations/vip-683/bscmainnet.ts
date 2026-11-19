@@ -17,6 +17,7 @@ import vip683, {
   CAPO_SEED_TIMESTAMP,
   CAPO_SNAPSHOT_INTERVAL,
   CHAINLINK_ORACLE,
+  EBRAKE,
   FIXED_APY,
   IDEAL_COLLATERAL_AMOUNT,
   INSTITUTIONAL_VAULT_CONTROLLER,
@@ -33,10 +34,12 @@ import vip683, {
   MAX_STALE_PERIOD,
   MIN_BORROW_CAP,
   MIN_SUPPLIER_DEPOSIT,
+  NEW_EBRAKE_IMPLEMENTATION,
   NOON_VAULT,
   OPEN_DURATION,
   OPS_FUND_MULTISIG,
   RESERVE_FACTOR,
+  RESET_GRANTEES,
   RESILIENT_ORACLE,
   SETTLEMENT_WINDOW,
   STORK,
@@ -50,8 +53,12 @@ import vip683, {
   capoSeededSnapshot,
   capoSnapshotGap,
 } from "../../vips/vip-683/bscmainnet";
+import { RESET_POOL_CF_SNAPSHOT } from "../../vips/vip-683/config";
+import ACM_ABI from "./abi/AccessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import CAPPED_ORACLE_ABI from "./abi/CorrelatedTokenOracle.json";
+import EBRAKE_ABI from "./abi/EBrake.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import FRV_SOURCE_ABI from "./abi/FRVSource.json";
 import HUB_ABI from "./abi/Hub.json";
@@ -59,6 +66,7 @@ import POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
 import VAULT_ABI from "./abi/InstitutionalLoanVault.json";
 import CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import ADAPTER_ABI from "./abi/LiquidationAdapter.json";
+import PROXY_ABI from "./abi/OptimizedTransparentUpgradeableProxy.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -123,6 +131,21 @@ const CAPO_GROWTH_RATE_PER_SECOND_BEFORE: Record<string, number> = {
 };
 const RESEEDED = new Set(CAPO_RESEEDS.map(({ oracle }) => oracle));
 // Headroom = how far the exchange rate can rise above its live value before the cap binds.
+// EBrake: the implementation VIP-680 installed, and vUSDT, listed in the Core pool and E-Mode pool 4 with the
+// same CF and LT at the fork block.
+const IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"; // EIP-1967
+const OLD_EBRAKE_IMPLEMENTATION = "0x918794Bb15BAc47C8Bbba553e7EE8BB1bD4A0959";
+const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const CORE_POOL_ID = 0;
+const EMODE_POOL_ID = 4;
+const vUSDT_CF = parseUnits("0.8", 18);
+const vUSDT_LT = parseUnits("0.8", 18);
+const vUSDT_LOWER_CF = parseUnits("0.7", 18);
+
+const implementationOf = async (proxy: string) =>
+  ethers.utils.getAddress("0x" + (await ethers.provider.getStorageAt(proxy, IMPLEMENTATION_SLOT)).slice(26));
+
 const headroomBps = async (capo: Contract): Promise<number> =>
   (await capo.getMaxAllowedExchangeRate())
     .mul(10_000)
@@ -172,6 +195,9 @@ forking(FORK_BLOCK, async () => {
   );
   const liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, ADAPTER_ABI, ethers.provider);
   const capoOracle = (address: string) => new ethers.Contract(address, CAPPED_ORACLE_ABI, ethers.provider);
+  const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, ethers.provider);
+  const ebrake = new ethers.Contract(EBRAKE, EBRAKE_ABI, ethers.provider);
+  const comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
   const capoBefore: Record<string, { gap: BigNumber; snapshot: BigNumber; timestamp: BigNumber }> = {};
 
   let vaultsBefore: BigNumber;
@@ -315,8 +341,26 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
+  describe("Pre-VIP EBrake", () => {
+    it("EBrake runs the VIP-680 implementation", async () => {
+      expect(await implementationOf(EBRAKE)).to.equal(OLD_EBRAKE_IMPLEMENTATION);
+    });
+
+    it("nobody holds the per-pool reset permission", async () => {
+      for (const account of [...RESET_GRANTEES, bscmainnet.CRITICAL_TIMELOCK]) {
+        expect(await acm.isAllowedToCall(account, RESET_POOL_CF_SNAPSHOT, { from: EBRAKE }), account).to.be.false;
+      }
+    });
+
+    it("the grantees hold the market-wide reset permission", async () => {
+      for (const account of RESET_GRANTEES) {
+        expect(await acm.isAllowedToCall(account, "resetCFSnapshot(address)", { from: EBRAKE }), account).to.be.true;
+      }
+    });
+  });
+
   testVip(
-    "VIP-683 List the Noon Capital sUSN Fixed-Term Institutional Loan Vault and Update CAPO Parameters",
+    "VIP-683 List the Noon Capital sUSN Fixed-Term Institutional Loan Vault, Update CAPO Parameters and Add the EBrake Per-Pool Snapshot Reset",
     await vip683(),
     {
       callbackAfterExecution: async txResponse => {
@@ -336,6 +380,8 @@ forking(FORK_BLOCK, async () => {
           ["GrowthRateUpdated", "SnapshotGapUpdated", "SnapshotUpdated"],
           [CAPO_GROWTH_RATES.length, CAPO_RESEEDS.length, CAPO_RESEEDS.length],
         );
+        await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [1]);
+        await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [RESET_GRANTEES.length]);
       },
     },
   );
@@ -479,6 +525,101 @@ forking(FORK_BLOCK, async () => {
         await restore.restore();
       });
     }
+  });
+
+  describe("Post-VIP EBrake", () => {
+    it("EBrake runs the new implementation", async () => {
+      expect(await implementationOf(EBRAKE)).to.equal(NEW_EBRAKE_IMPLEMENTATION);
+    });
+
+    it("EBrake keeps its comptroller, ACM and owner", async () => {
+      expect(await ebrake.COMPTROLLER()).to.equal(bscmainnet.UNITROLLER);
+      expect(await ebrake.IS_REMOTE_CHAIN()).to.be.false;
+      expect(await ebrake.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
+      expect(await ebrake.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
+
+    it("the grantees hold the per-pool reset permission and the Critical Timelock does not", async () => {
+      for (const account of RESET_GRANTEES) {
+        expect(await acm.isAllowedToCall(account, RESET_POOL_CF_SNAPSHOT, { from: EBRAKE }), account).to.be.true;
+      }
+      expect(await acm.isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, RESET_POOL_CF_SNAPSHOT, { from: EBRAKE })).to.be
+        .false;
+    });
+  });
+
+  describe("Post-VIP EBrake functional", () => {
+    let outer: SnapshotRestorer;
+    let snapshot: SnapshotRestorer;
+    let guardian: Contract;
+
+    before(async () => {
+      outer = await takeSnapshot();
+      guardian = ebrake.connect(await initMainnetUser(bscmainnet.GUARDIAN, parseUnits("1")));
+
+      // The governance delay leaves the fork's USDT feeds stale, and setCollateralFactor needs a valid price
+      const setDirectPrice = ["function setDirectPrice(address asset, uint256 price)"];
+      await new Contract(bscmainnet.CHAINLINK_ORACLE, setDirectPrice, timelock).setDirectPrice(USDT, parseUnits("1"));
+      await new Contract(bscmainnet.REDSTONE_ORACLE, setDirectPrice, timelock).setDirectPrice(USDT, parseUnits("1"));
+      await new Contract(
+        bscmainnet.BINANCE_ORACLE,
+        ["function setMaxStalePeriod(string symbol, uint256 maxStalePeriod)"],
+        timelock,
+      ).setMaxStalePeriod("USDT", 365 * 24 * 3600);
+    });
+
+    after(async () => {
+      await outer.restore();
+    });
+
+    beforeEach(async () => {
+      snapshot = await takeSnapshot();
+      // Tighten vUSDT in both pools so EBrake snapshots each of them
+      for (const poolId of [CORE_POOL_ID, EMODE_POOL_ID]) {
+        const market = await comptroller.poolMarkets(poolId, vUSDT);
+        expect(market.collateralFactorMantissa).to.equal(vUSDT_CF);
+        expect(market.liquidationThresholdMantissa).to.equal(vUSDT_LT);
+        await guardian["decreaseCF(address,uint96,uint256)"](vUSDT, poolId, vUSDT_LOWER_CF);
+        expect(await ebrake.getMarketCFSnapshot(vUSDT, poolId)).to.deep.equal([vUSDT_CF, vUSDT_LT]);
+      }
+    });
+
+    afterEach(async () => {
+      await snapshot.restore();
+    });
+
+    it("Guardian clears the Core pool snapshot and keeps the E-Mode pool snapshot", async () => {
+      await expect(guardian["resetCFSnapshot(address,uint96)"](vUSDT, CORE_POOL_ID))
+        .to.emit(ebrake, "PoolCFSnapshotReset")
+        .withArgs(vUSDT, CORE_POOL_ID);
+
+      expect(await ebrake.getMarketCFSnapshot(vUSDT, CORE_POOL_ID)).to.deep.equal([0, 0]);
+      expect(await ebrake.getMarketCFSnapshot(vUSDT, EMODE_POOL_ID)).to.deep.equal([vUSDT_CF, vUSDT_LT]);
+    });
+
+    it("Normal Timelock clears the E-Mode pool snapshot and keeps the Core pool snapshot", async () => {
+      await expect(ebrake.connect(timelock)["resetCFSnapshot(address,uint96)"](vUSDT, EMODE_POOL_ID))
+        .to.emit(ebrake, "PoolCFSnapshotReset")
+        .withArgs(vUSDT, EMODE_POOL_ID);
+
+      expect(await ebrake.getMarketCFSnapshot(vUSDT, CORE_POOL_ID)).to.deep.equal([vUSDT_CF, vUSDT_LT]);
+      expect(await ebrake.getMarketCFSnapshot(vUSDT, EMODE_POOL_ID)).to.deep.equal([0, 0]);
+    });
+
+    it("the market-wide reset still clears every pool", async () => {
+      await expect(guardian["resetCFSnapshot(address)"](vUSDT)).to.emit(ebrake, "CFSnapshotReset").withArgs(vUSDT);
+
+      expect(await ebrake.getMarketCFSnapshot(vUSDT, CORE_POOL_ID)).to.deep.equal([0, 0]);
+      expect(await ebrake.getMarketCFSnapshot(vUSDT, EMODE_POOL_ID)).to.deep.equal([0, 0]);
+    });
+
+    it("an account without the permission cannot clear a pool snapshot", async () => {
+      const critical = ebrake.connect(await initMainnetUser(bscmainnet.CRITICAL_TIMELOCK, parseUnits("1")));
+      await expect(critical["resetCFSnapshot(address,uint96)"](vUSDT, CORE_POOL_ID)).to.be.revertedWithCustomError(
+        ebrake,
+        "Unauthorized",
+      );
+    });
   });
 
   describe("Post-VIP vault lifecycle", () => {
