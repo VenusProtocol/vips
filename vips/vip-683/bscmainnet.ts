@@ -204,14 +204,14 @@ A new gap only applies at the next snapshot refresh, so the slisBNB and asBNB sn
 
 #### Part 3: EBrake Per-Pool Collateral Factor Snapshot Reset
 
-\`resetCFSnapshot(address)\` clears a market's CF snapshot in every pool, so restoring one pool also erases the baseline of pools that stay tightened (Cantina Apex VENU1-91, Low). The new EBrake build adds \`resetCFSnapshot(address,uint96)\` to clear one pool; nothing else changes. Ethereum, Arbitrum One and Base get the same build, where the new function reverts.
+resetCFSnapshot(address) clears a market's CF snapshot in every pool, so restoring one pool also erases the baseline of pools that stay tightened (Cantina Apex VENU1-91, Low). The new EBrake build adds resetCFSnapshot(address,uint96) to clear one pool; nothing else changes. Ethereum, Arbitrum One and Base get the same build, where the new function reverts.
 
 - BNB Chain: ${EBRAKE} → ${NEW_EBRAKE_IMPLEMENTATION}
 ${REMOTE_CHAINS.map(c => `- ${c.name}: ${c.eBrake} → ${c.newImplementation}`).join("\n")}
 
 #### Permissions
 
-Parts 1 and 2 need none: the Normal Timelock already holds every function. Part 3 grants \`${RESET_POOL_CF_SNAPSHOT}\` on BNB Chain to the Guardian and the Normal and Fast-track Timelocks, the holders of \`resetCFSnapshot(address)\`.
+Parts 1 and 2 need none: the Normal Timelock already holds every function. Part 3 grants ${RESET_POOL_CF_SNAPSHOT} on BNB Chain to the Guardian and the Normal and Fast-track Timelocks, the holders of resetCFSnapshot(address).
 
 #### Actions
 
@@ -232,7 +232,7 @@ Parts 1 and 2 need none: the Normal Timelock already holds every function. Part 
 **Part 3: EBrake (BNB Chain, Ethereum, Arbitrum One, Base)**
 
 9. Upgrade the EBrake proxy on BNB Chain to the new implementation.
-10. Grant \`${RESET_POOL_CF_SNAPSHOT}\` on EBrake to the Guardian and the Normal and Fast-track Timelocks.
+10. Grant ${RESET_POOL_CF_SNAPSHOT} on EBrake to the Guardian and the Normal and Fast-track Timelocks.
 11. Upgrade EBrake to the same build on Ethereum, Arbitrum One and Base.
 
 #### Voting options
