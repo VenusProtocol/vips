@@ -5,6 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
+import { BSTOCK_PAUSE_SENTINEL, KEEPER } from "../../vips/vip-680/bscmainnet";
 import {
   ACM,
   ANTB,
@@ -37,6 +38,8 @@ import RESILIENT_ORACLE_ABI from "../vip-675/abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "../vip-675/abi/SpokeComptroller.json";
 import REGISTRY_ABI from "../vip-675/abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "../vip-675/abi/VToken.json";
+import SENTINEL_ABI from "../vip-680/abi/BStockPauseSentinel.json";
+import PAUSE_MANAGER_ABI from "../vip-680/abi/PauseManager.json";
 
 /// After isolated-pools#590 deployed vANTB_bStockMainstream (block 135,438,083).
 const FORK_BLOCK = 135439000;
@@ -45,6 +48,9 @@ const { CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
 /// USDT's Core market, which holds USDT as cash and funds the fork.
 const CORE_VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+
+/// The bStock issuer's PauseManager, which every bStock the sentinel monitors reports.
+const PAUSE_MANAGER = "0x9fc74Be63f3589485B2423984a7a0557e0CF700a";
 
 const account = (name: string) =>
   ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-685 ${name}`), 12));
@@ -131,6 +137,8 @@ forking(FORK_BLOCK, async () => {
   const registry = new ethers.Contract(SPOKE_POOL_REGISTRY, REGISTRY_ABI, ethers.provider);
   const gateway = new ethers.Contract(COLLATERAL_GATEWAY, GATEWAY_ABI, ethers.provider);
   const vAntb = vTokenOf(V_ANTB);
+  const sentinel = new ethers.Contract(BSTOCK_PAUSE_SENTINEL, SENTINEL_ABI, ethers.provider);
+  const monitoredBefore: string[] = await sentinel.getMonitoredMarkets();
   // The pool's tier 4 COINB market, which `028` built the same way.
   const reference = vTokenOf(COLLATERAL_MARKETS_MAINSTREAM.find(c => c.symbol === "vCOINB_bStockMainstream")!.vToken);
 
@@ -220,6 +228,17 @@ forking(FORK_BLOCK, async () => {
       expect(await vAntb.protocolSeizeShareMantissa()).to.equal(PROTOCOL_SEIZE_SHARE);
     });
 
+    it("has the BStockPauseSentinel monitor the pool's other bStocks but not vANTB, and ANTB on the same PauseManager", async () => {
+      expect(await sentinel.isMarketMonitored(reference.address)).to.be.true;
+      expect(await sentinel.isMarketMonitored(V_ANTB)).to.be.false;
+      const bStockToken = ["function pauseManager() view returns (address)"];
+      expectAddress(await new ethers.Contract(ANTB, bStockToken, ethers.provider).pauseManager(), PAUSE_MANAGER);
+      expectAddress(
+        await new ethers.Contract(await reference.underlying(), bStockToken, ethers.provider).pauseManager(),
+        PAUSE_MANAGER,
+      );
+    });
+
     it("lets the Normal Timelock make every call inline, with no aggregator", async () => {
       const roles: [string, string][] = [
         [ATLAS_ORACLE, "setTokenConfig(TokenConfig)"],
@@ -231,6 +250,7 @@ forking(FORK_BLOCK, async () => {
         [POOL, "setActionsPaused(address[],uint256[],bool)"],
         [V_ANTB, "setReduceReservesBlockDelta(uint256)"],
         [V_ANTB, "setProtocolSeizeShare(uint256)"],
+        [BSTOCK_PAUSE_SENTINEL, "setMarketMonitored(address,bool)"],
       ];
       for (const [contract, role] of roles) {
         expect(await mayCall(contract, NORMAL_TIMELOCK, role), `${contract}: ${role}`).to.be.true;
@@ -258,6 +278,7 @@ forking(FORK_BLOCK, async () => {
         ["MarketSupported", "NewMarketLiquidationIncentive", "ActionPausedMarket"],
         [1, 1, 1],
       );
+      await expectEvents(txResponse, [SENTINEL_ABI], ["MarketMonitoringUpdated"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [0, 0]);
     },
   });
@@ -306,7 +327,7 @@ forking(FORK_BLOCK, async () => {
       expect(await erc20Of(ANTB).allowance(NORMAL_TIMELOCK, SPOKE_POOL_REGISTRY)).to.equal(0);
     });
 
-    it("gives the market its own incentive and seize share, sweeps reserves every 100 blocks, and pauses borrowing", async () => {
+    it("gives the market its own incentive and seize share, the pool's reserve delta, and pauses borrowing", async () => {
       const incentive: BigNumber = await comptroller.effectiveLiquidationIncentive(V_ANTB);
       expect(incentive).to.equal(m.liquidationIncentive);
       expect(await vAntb.protocolSeizeShareMantissa()).to.equal(m.protocolSeizeShare);
@@ -314,9 +335,20 @@ forking(FORK_BLOCK, async () => {
       // LT x incentive stays under 1, so a liquidation never seizes more than the collateral backing the loan.
       expect(m.liquidationThreshold.mul(incentive)).to.be.lt(MANTISSA_ONE.mul(MANTISSA_ONE));
       expect(await vAntb.reduceReservesBlockDelta()).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
+      // 28,800 blocks, as on the pool's other markets.
+      expect(await vAntb.reduceReservesBlockDelta()).to.equal(await reference.reduceReservesBlockDelta());
       expect(await comptroller.actionPaused(V_ANTB, ACTION_BORROW)).to.be.true;
       expect(await comptroller.actionPaused(V_ANTB, ACTION_MINT)).to.be.false;
       expect(await comptroller.isSupplyAllowlistEnabled(V_ANTB)).to.be.false;
+    });
+
+    it("has the BStockPauseSentinel monitor the market, which ANTB's issuer has neither paused nor blocked", async () => {
+      expect(await sentinel.isMarketMonitored(V_ANTB)).to.be.true;
+      expect(await sentinel.getMonitoredMarkets()).to.have.length(monitoredBefore.length + 1);
+      const [isPaused, underlying, pauseManager] = await sentinel.checkBStockPause(V_ANTB);
+      expect(isPaused).to.be.false;
+      expectAddress(underlying, ANTB);
+      expectAddress(pauseManager, PAUSE_MANAGER);
     });
 
     // The CF and LT as the comptroller applies them: a USDT loan up to the borrowing power and not a wei more, and a
@@ -369,6 +401,22 @@ forking(FORK_BLOCK, async () => {
       await erc20Of(USDT).connect(borrower).approve(VUSDT_MAINSTREAM, ethers.constants.MaxUint256);
       await vUsdt.repayBorrow(ethers.constants.MaxUint256);
       expect(await vUsdt.borrowBalanceStored(BORROWER)).to.equal(0);
+    });
+
+    // Last: it leaves the market's CF at 0.
+    it("lets the keeper zero the market's CF through the sentinel when the issuer pauses ANTB, keeping its LT", async () => {
+      let pauseManager = new ethers.Contract(PAUSE_MANAGER, PAUSE_MANAGER_ABI, ethers.provider);
+      const pauser = await pauseManager.getRoleMember(await pauseManager.OPS_ROLE(), 0);
+      pauseManager = pauseManager.connect(await initMainnetUser(pauser, ethers.utils.parseEther("1")));
+      await pauseManager.pauseToken(ANTB);
+
+      const keeper = await initMainnetUser(KEEPER, ethers.utils.parseEther("1"));
+      await expect(sentinel.connect(keeper).handleBStockPause(V_ANTB))
+        .to.emit(sentinel, "BStockPauseHandled")
+        .withArgs(V_ANTB, ANTB, PAUSE_MANAGER);
+      const market = await comptroller.markets(V_ANTB);
+      expect(market.collateralFactorMantissa).to.equal(0);
+      expect(market.liquidationThresholdMantissa).to.equal(m.liquidationThreshold);
     });
   });
 });

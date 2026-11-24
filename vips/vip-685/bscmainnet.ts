@@ -4,6 +4,7 @@ import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { pct, tokens } from "../vip-675/commands";
+import { BSTOCK_PAUSE_SENTINEL } from "../vip-680/bscmainnet";
 import {
   ANTB_MARKET,
   ATLAS_MAX_STALE_PERIOD,
@@ -26,12 +27,14 @@ import {
 // The same steps as VIP-677 and VIP-678, which added collateral markets to the pool VIP-675 created, for one market:
 //  1. Price ANTB: Atlas, the ResilientOracle, then the DBO, whose `setTokenConfigs` reads the live price. Before the
 //     listing, because `addMarket` sets a collateral factor above 0, which needs a nonzero price.
-//  2. List it: VTreasury withdrawal, approve and `addMarket`, which pulls the seed from the Normal Timelock.
+//  2. List it: VTreasury withdrawal, approve and `addMarket`, which pulls the seed from the Normal Timelock. Then have
+//     the BStockPauseSentinel monitor it, as VIP-680 did for the pool's other bStocks.
 //  3. Its reserve delta, its own liquidation incentive, its protocol seize share (after the incentive, which bounds it)
 //     and BORROW paused.
 //
 // Step 3 runs inline, not through the AuxiliaryCommandsAggregator as in VIP-675: the Normal Timelock holds each of
-// those roles as an address(0) wildcard, which VIP-675 granted for every Spoke pool.
+// those roles as an address(0) wildcard, which VIP-675 granted for every Spoke pool. It holds the sentinel's
+// `setMarketMonitored` as a grant from VIP-680.
 //
 // AT EXECUTION, or the whole proposal reverts:
 //  - The Atlas feed is fresh (3800s), and still authorizes ATLAS_ORACLE.
@@ -92,6 +95,7 @@ const listCommands = (m: Vip685Market): Command[] => [
       [m.vToken, m.collateralFactor, m.liquidationThreshold, m.initialSupply, SEED_RECEIVER, m.supplyCap, m.borrowCap],
     ],
   },
+  { target: BSTOCK_PAUSE_SENTINEL, signature: "setMarketMonitored(address,bool)", params: [m.vToken, true] },
 ];
 
 const setupCommands = (m: Vip685Market): Command[] => [
@@ -124,7 +128,7 @@ If passed, this VIP will list ANTB (Anthropic bStock) as collateral in the **${M
 #### Proposed changes
 
 1. Price ANTB with Atlas as the main oracle and a DeviationBoundedOracle window. APRO has no ANTB feed on BNB Chain, so there is no pivot.
-2. List the market, seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}.
+2. List the market, seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}, and add it to the markets the BStockPauseSentinel (${BSTOCK_PAUSE_SENTINEL}) monitors.
 3. Give the market a liquidation incentive of its own, set its protocol seize share, and pause borrowing on it.
 
 #### Market parameters
@@ -137,7 +141,9 @@ If passed, this VIP will list ANTB (Anthropic bStock) as collateral in the **${M
       m.initialSupply,
     )} ANTB
 - ANTB charges no interest.
-- The market sends its reserves to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA} blocks.
+- The market sends its reserves to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString(
+      "en-US",
+    )} blocks, as the pool's other markets do.
 
 #### Pricing
 
@@ -147,6 +153,7 @@ If passed, this VIP will list ANTB (Anthropic bStock) as collateral in the **${M
 #### Notes
 
 - Liquidations are permissionless. The pool's liquidation allowlist stays off.
+- If ANTB's issuer pauses the token, or its compliance module blocks the market, a keeper can have the BStockPauseSentinel set the market's collateral factor to 0 through EBrake. The liquidation threshold stays, so no position becomes liquidatable.
 
 #### Deployed contracts
 
