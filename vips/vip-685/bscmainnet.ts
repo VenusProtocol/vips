@@ -11,7 +11,6 @@ import {
   DEVIATION_BOUNDED_ORACLE,
   MAINSTREAM_POOL_NAME,
   NORMAL_TIMELOCK,
-  PENDING,
   POOL,
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
@@ -112,15 +111,8 @@ const setupCommands = (m: Vip685Market): Command[] => [
 
 export const commands = (m: Vip685Market): Command[] => [...priceCommands(m), ...listCommands(m), ...setupCommands(m)];
 
-/// `vToken` is for the simulation only, which deploys a stand-in while `VANTB_MAINSTREAM` is still PENDING.
-export const vip685 = ({ vToken = ANTB_MARKET.vToken }: { vToken?: string } = {}) => {
-  if (vToken === PENDING) {
-    throw new Error(
-      `VIP-${VIP_NUMBER} [bscmainnet] is still a draft: ${ANTB_MARKET.symbol} is not deployed. Deploy it with ` +
-        "isolated-pools `028` and set VANTB_MAINSTREAM in vips/vip-685/addresses/bscmainnet.ts first.",
-    );
-  }
-  const m: Vip685Market = { ...ANTB_MARKET, vToken };
+export const vip685 = () => {
+  const m = ANTB_MARKET;
 
   const meta = {
     version: "v2",

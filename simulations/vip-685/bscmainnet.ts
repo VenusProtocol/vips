@@ -1,4 +1,3 @@
-import BEACON_PROXY from "@venusprotocol/isolated-pools/artifacts/@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol/BeaconProxy.json";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
@@ -15,9 +14,7 @@ import {
   COLLATERAL_GATEWAY,
   COLLATERAL_MARKETS_MAINSTREAM,
   DEVIATION_BOUNDED_ORACLE,
-  IRM_COLLATERAL,
   NORMAL_TIMELOCK,
-  PENDING,
   POOL,
   PROTOCOL_SEIZE_SHARE,
   PROTOCOL_SHARE_RESERVE,
@@ -41,8 +38,8 @@ import COMPTROLLER_ABI from "../vip-675/abi/SpokeComptroller.json";
 import REGISTRY_ABI from "../vip-675/abi/SpokePoolRegistry.json";
 import VTOKEN_ABI from "../vip-675/abi/VToken.json";
 
-/// After the Atlas ANTB feed authorized ATLAS_ORACLE.
-const FORK_BLOCK = 135430800;
+/// After isolated-pools#590 deployed vANTB_bStockMainstream (block 135,438,083).
+const FORK_BLOCK = 135439000;
 
 const { CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
@@ -53,7 +50,6 @@ const account = (name: string) =>
   ethers.utils.getAddress(ethers.utils.hexDataSlice(ethers.utils.id(`vip-685 ${name}`), 12));
 
 /// Fresh accounts. The default hardhat signer carries EIP-7702 code on BNB Chain.
-const DEPLOYER = account("stand-in deployer");
 const BORROWER = account("borrower");
 const LIQUIDATOR = account("liquidator");
 
@@ -124,33 +120,9 @@ const fundUsdt = async (to: string, amount: BigNumber) => {
   await erc20Of(USDT).connect(holder).transfer(to, amount);
 };
 
-/// The market as isolated-pools `028` builds it: a BeaconProxy on SpokeVTokenBeacon, initialized with the arguments
-/// it passes for a pool's bStocks.
-const deployStandIn = async (): Promise<string> => {
-  const deployer = await initMainnetUser(DEPLOYER, ethers.utils.parseEther("1"));
-  const init = new ethers.utils.Interface(VTOKEN_ABI).encodeFunctionData("initialize", [
-    ANTB,
-    POOL,
-    IRM_COLLATERAL,
-    INITIAL_EXCHANGE_RATE,
-    ANTB_MARKET.name,
-    ANTB_MARKET.symbol,
-    8,
-    NORMAL_TIMELOCK,
-    ACM,
-    [NORMAL_TIMELOCK, PROTOCOL_SHARE_RESERVE],
-    ANTB_MARKET.reserveFactor,
-  ]);
-  const factory = new ethers.ContractFactory(BEACON_PROXY.abi, BEACON_PROXY.bytecode, deployer);
-  const proxy = await factory.deploy(SPOKE_VTOKEN_BEACON, init);
-  await proxy.deployed();
-  return proxy.address;
-};
-
 forking(FORK_BLOCK, async () => {
-  const deployed = ANTB_MARKET.vToken !== PENDING;
-  const V_ANTB = deployed ? ANTB_MARKET.vToken : await deployStandIn();
-  const m = { ...ANTB_MARKET, vToken: V_ANTB };
+  const m = ANTB_MARKET;
+  const V_ANTB = m.vToken;
 
   const atlas = new ethers.Contract(ATLAS_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -159,7 +131,7 @@ forking(FORK_BLOCK, async () => {
   const registry = new ethers.Contract(SPOKE_POOL_REGISTRY, REGISTRY_ABI, ethers.provider);
   const gateway = new ethers.Contract(COLLATERAL_GATEWAY, GATEWAY_ABI, ethers.provider);
   const vAntb = vTokenOf(V_ANTB);
-  // The pool's tier 4 COINB market, built by the same `028` run the real vANTB market will come from.
+  // The pool's tier 4 COINB market, which `028` built the same way.
   const reference = vTokenOf(COLLATERAL_MARKETS_MAINSTREAM.find(c => c.symbol === "vCOINB_bStockMainstream")!.vToken);
 
   const { price, age } = await readFeed();
@@ -179,18 +151,10 @@ forking(FORK_BLOCK, async () => {
   await chainlink.connect(timelock).setDirectPrice(USDT, MANTISSA_ONE);
   await atlas.connect(timelock).setDirectPrice(USDT, MANTISSA_ONE);
 
-  const proposal = await vip685({ vToken: V_ANTB });
+  const proposal = await vip685();
 
   describe("VIP-685 inputs", () => {
-    // Pending, not failed, while the real market is not deployed: the rest runs against the stand-in.
-    if (deployed) {
-      it("has vANTB_bStockMainstream deployed", async () => {
-        expect(await vAntb.symbol()).to.equal(m.symbol);
-      });
-    } else {
-      it("has vANTB_bStockMainstream deployed (isolated-pools 028, then VANTB_MAINSTREAM)");
-    }
-
+    // Pending, not failed, while the VTreasury lacks the seed: the rest runs on the fork's top-up.
     if (treasuryHeld.gte(m.initialSupply)) {
       it("has the VTreasury hold the seed", async () => {
         expect(treasuryHeld).to.be.gte(m.initialSupply);

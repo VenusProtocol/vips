@@ -7,7 +7,6 @@ import {
   DboConfig,
   IRM_COLLATERAL,
   MAINSTREAM_COMPTROLLER,
-  PENDING,
 } from "../../vip-675/addresses/bscmainnet";
 
 export * from "../../vip-675/addresses/bscmainnet";
@@ -25,10 +24,9 @@ export const POOL = MAINSTREAM_COMPTROLLER;
 /// Anthropic (bStocks). A BeaconProxy on the same beacon as the pool's other bStocks.
 export const ANTB = "0x38Dd26788Cf2d901E3aBf04efE3007d459d0Fc53";
 
-/// `VToken_vANTB_bStockMainstream`, which isolated-pools `028` deploys from the bscmainnet spoke config
-/// (isolated-pools#590). PENDING until then: `vip685()` refuses to build, and the simulation deploys a stand-in with
-/// the arguments `028` uses.
-export const VANTB_MAINSTREAM = PENDING;
+/// `VToken_vANTB_bStockMainstream`, deployed by isolated-pools `028` from the bscmainnet spoke config
+/// (isolated-pools#590) at block 135,438,083.
+export const VANTB_MAINSTREAM = "0x1Caa2718D36686d722f836F2cFCeBe0395C2147f";
 
 /// Atlas "SingleFeed ANTB/USD". `isAuthorizedCaller(ATLAS_ORACLE)` is true (2026-11-24, block 135,419,767). APRO has no
 /// ANTB feed on BNB Chain, so ANTB is priced by Atlas alone.
