@@ -447,11 +447,16 @@ forking(FORK_BLOCK, async () => {
       expect(runtime.confiscatedMarginRemaining).to.equal(MARGIN_AMOUNT);
     });
 
-    it("lender gets the deposit back, without interest", async () => {
+    it("lender gets the deposit back without interest, plus the whole margin in sUSN", async () => {
       const shares = await vault.balanceOf(lender.address);
-      const before = await u.balanceOf(lender.address);
-      await vault.connect(lender).redeem(shares, lender.address, lender.address);
-      expect(await u.balanceOf(lender.address)).to.equal(before.add(LENDER_DEPOSIT));
+      const uBefore = await u.balanceOf(lender.address);
+      const sUSNBefore = await sUSN.balanceOf(lender.address);
+      await expect(vault.connect(lender).redeem(shares, lender.address, lender.address))
+        .to.emit(vault, "MarginCompensationClaimed")
+        .withArgs(lender.address, MARGIN_AMOUNT);
+      expect(await u.balanceOf(lender.address)).to.equal(uBefore.add(LENDER_DEPOSIT));
+      expect(await sUSN.balanceOf(lender.address)).to.equal(sUSNBefore.add(MARGIN_AMOUNT));
+      expect((await vault.institutionalRuntime()).confiscatedMarginRemaining).to.equal(0);
     });
 
     it("operator cannot withdraw the confiscated margin", async () => {
@@ -459,6 +464,59 @@ forking(FORK_BLOCK, async () => {
         vault,
         "InsufficientCollateral",
       );
+    });
+  });
+
+  describe("Post-VIP lifecycle: Hub-funded vault, collateral not completed", () => {
+    let vault: Contract;
+    let operator: SignerWithAddress;
+    let hubOperator: SignerWithAddress;
+    const HUB_ALLOCATION = MAX_BORROW_CAP;
+    const holders = [U_FRV_SOURCE, U_HUB, U_CORE_SOURCE];
+    const sUSNOf = () => Promise.all(holders.map(h => sUSN.balanceOf(h)));
+
+    before(async () => {
+      await fundraisingSnapshot.restore();
+      vault = new ethers.Contract(NEW_NOON_VAULT, VAULT_ABI, ethers.provider);
+      operator = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
+      hubOperator = await initMainnetUser(HUB_OPERATOR, parseUnits("1"));
+      await hub
+        .connect(hubOperator)
+        .reallocate(
+          [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
+          [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
+        );
+      await time.increase(OPEN_DURATION + 1);
+      await expect(vault.connect(operator).updateVaultState())
+        .to.emit(vault, "MarginConfiscated")
+        .withArgs(MARGIN_AMOUNT);
+      expect(await vault.state()).to.equal(VaultState.Failed);
+    });
+
+    it("Hub operator moves the 1M U back to Core; the sUSN compensation goes with the redeem", async () => {
+      expect(await adapterFrv.maxWithdraw(vault.address, U_FRV_SOURCE)).to.equal(HUB_ALLOCATION);
+      const before = await sUSNOf();
+      await hub
+        .connect(hubOperator)
+        .reallocate(
+          [{ yieldGroup: U_FRV_SOURCE, resource: vault.address, amount: HUB_ALLOCATION }],
+          [{ yieldGroup: U_CORE_SOURCE, resource: NO_RESOURCE, amount: HUB_ALLOCATION }],
+        );
+      const after = await sUSNOf();
+      expect(after[0].sub(before[0])).to.equal(0); // FRV source
+      expect(after[1].sub(before[1])).to.equal(MARGIN_AMOUNT); // Hub
+      expect(after[2].sub(before[2])).to.equal(0); // Core source
+      expect(await vault.balanceOf(U_FRV_SOURCE)).to.equal(0);
+      expect((await vault.institutionalRuntime()).confiscatedMarginRemaining).to.equal(0);
+    });
+
+    it("only the Normal Timelock can sweep the Hub's sUSN, to the treasury", async () => {
+      const criticalGuardian = await initMainnetUser(bscmainnet.CRITICAL_GUARDIAN, parseUnits("1"));
+      await expect(hub.connect(criticalGuardian).sweep(SUSN, bscmainnet.VTREASURY)).to.be.reverted;
+      const before = await sUSN.balanceOf(bscmainnet.VTREASURY);
+      await hub.connect(timelock).sweep(SUSN, bscmainnet.VTREASURY);
+      expect((await sUSN.balanceOf(bscmainnet.VTREASURY)).sub(before)).to.equal(MARGIN_AMOUNT);
+      expect(await sUSN.balanceOf(U_HUB)).to.equal(0);
     });
   });
 });

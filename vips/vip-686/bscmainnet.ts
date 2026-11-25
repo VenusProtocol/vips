@@ -28,8 +28,10 @@ import {
 // The VIP-683 vault. Still in WaitingForMargin, with no collateral and no shares.
 export const OLD_NOON_VAULT = NOON_VAULT;
 
-// controller.predictVaultAddress(INSTITUTION_OPERATOR) at institutionNonce 1; re-derive if another vault is
-// created for this operator, or the vault implementation changes, before execution.
+// controller.predictVaultAddress(INSTITUTION_OPERATOR) at institutionNonce 1, from the current vaultImplementation.
+// Execution precondition: until this VIP executes, no other vault may be created for this operator (createVault is
+// also held by the Fast-track Timelock and the Critical Guardian) and vaultImplementation must not change. Either
+// moves the vault to another address, and addResource on this empty one reverts the whole proposal.
 export const NEW_NOON_VAULT = "0x7967aA085051cFd1412E14a8Be8466bb31ee4d68";
 
 export const MARGIN_RATE = parseUnits("0.0001", 18); // 0.01%
@@ -59,7 +61,9 @@ VIP-683 listed a 30-day fixed-term vault for Noon Capital with a 100% margin, so
 
 - Margin rate: 100% → 0.01%, so the margin is ${MARGIN_AMOUNT.toString()} wei (115.207371 sUSN, ≈ $143 at $1.24).
 - Noon deposits the margin, governance opens the vault, and Noon deposits the rest of the 1,152,073.71 sUSN during the 1-day Open period.
-- If lenders supply at least the 10 U minimum but the collateral is not complete when the Open period ends, the vault fails. Lenders get their U back without interest, and the 115.207371 sUSN margin is confiscated for them.
+- If lenders supply at least the 10 U minimum but the collateral is not complete when the Open period ends, the vault fails. Lenders get their U back without interest, and the 115.207371 sUSN margin is shared among them pro rata.
+
+**Trade-off.** At 0.01% the lenders' protection on a failed vault is about $143, against up to 1,000,000 U left idle for the Open day. Noon asked for it so it can start with a small deposit, and the team accepted that trade. If the U Hub is the lender, its share of the sUSN lands in the Hub contract, outside the Hub's share price; only a Normal Timelock VIP can sweep it out.
 
 #### New vault
 
@@ -73,6 +77,10 @@ VIP-683 listed a 30-day fixed-term vault for Noon Capital with a 100% margin, so
 - Liquidation threshold: 86% · Liquidation incentive: 10% · Late penalty: 10%
 
 Unchanged from VIP-683: the sUSN price from the Stork feed, and the liquidator bot and the Venus Operational Fund Multisig whitelisted on the LiquidationAdapter for every institutional vault.
+
+#### Execution precondition
+
+The new vault's address is predicted from the operator's vault count and the controller's vault implementation. Until this VIP executes, no other vault may be created for ${INSTITUTION_OPERATOR} and the vault implementation must not change; either would make step 4 revert, and the whole VIP with it.
 
 #### Actions
 
