@@ -16,8 +16,6 @@ import vip684, {
   GUARDIAN,
   HUB,
   HUB_USDT,
-  KEEPER_1,
-  KEEPER_2,
   MAX_ORACLE_DEVIATION_BPS,
   MIN_AMOUNT_PER_BUY,
   NORMAL_TIMELOCK,
@@ -120,7 +118,7 @@ forking(BLOCK_NUMBER, async () => {
           "KeeperUpdated",
           "RouterAllowlisted",
         ],
-        [1, MIN_AMOUNT_PER_BUY.length, 1, 1, PAIRS.length, PAIRS.length * 2, 1, 2, ALLOWED_ROUTERS.length],
+        [1, MIN_AMOUNT_PER_BUY.length, 1, 1, PAIRS.length, PAIRS.length * 2, 1, 1, ALLOWED_ROUTERS.length],
       );
     },
   });
@@ -173,9 +171,8 @@ forking(BLOCK_NUMBER, async () => {
       expect([route.router, route.path]).to.deep.equal([PCS_V3_ROUTER, USDT_WBNB_PATH]);
     });
 
-    it("adds the keepers and the swap allowlist", async () => {
-      expect(await smartDCA.isKeeper(KEEPER_1)).to.equal(true);
-      expect(await smartDCA.isKeeper(KEEPER_2)).to.equal(true);
+    it("adds the Guardian as keeper and the swap allowlist", async () => {
+      expect(await smartDCA.isKeeper(GUARDIAN)).to.equal(true);
       for (const router of ALLOWED_ROUTERS) {
         expect(await smartDCA.allowedRouters(router), router).to.equal(true);
       }

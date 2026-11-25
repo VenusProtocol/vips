@@ -10,10 +10,6 @@ export { ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, GUARDIAN };
 
 export const SMART_DCA = "0xc039F3D5C111a7e6B1B9515CcFe6Ae4C564c4546"; // SmartDCA proxy
 
-// PLACEHOLDERS
-export const KEEPER_1 = "0x1000000000000000000000000000000000000002"; // TBD: first backend keeper wallet
-export const KEEPER_2 = "0x1000000000000000000000000000000000000003"; // TBD: second backend keeper wallet
-
 // Tokens
 export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c"; // 6 decimals on testnet
 export const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531"; // 6 decimals on testnet
@@ -98,7 +94,7 @@ Takes ownership of Smart DCA on BNB Chain Testnet, grants its ACM permissions an
 5. Set the oracle band on keeper swaps to 1%, as on mainnet.
 6. Add the 6 pairs. USDT waits in the USDT Liquidity Hub, USDC and U in their Core pool markets, and the bought assets in their Core pool markets.
 7. Set the \`forceBuy\` route of the USDT/WBNB pair to the PancakeSwap V3 USDT-WBNB 0.01% pool, the only one with liquidity.
-8. Add the 2 keepers (TBD).
+8. Add the Guardian as the keeper.
 9. Allow the PancakeSwap V3 router and the 5 tokens in keeper swaps.
 
 #### Notes
@@ -180,9 +176,8 @@ Takes ownership of Smart DCA on BNB Chain Testnet, grants its ACM permissions an
         params: [USDT_WBNB_PAIR_ID, PCS_V3_ROUTER, USDT_WBNB_PATH],
       },
 
-      // 8. Keepers
-      { target: SMART_DCA, signature: "setKeeper(address,bool)", params: [KEEPER_1, true] },
-      { target: SMART_DCA, signature: "setKeeper(address,bool)", params: [KEEPER_2, true] },
+      // 8. Keeper
+      { target: SMART_DCA, signature: "setKeeper(address,bool)", params: [GUARDIAN, true] },
 
       // 9. Keeper swap allowlist
       ...ALLOWED_ROUTERS.map(router => ({
