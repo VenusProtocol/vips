@@ -36,14 +36,14 @@ import {
   U,
   U_FRV_SOURCE,
 } from "../../vips/vip-683/bscmainnet";
-import vip686, {
+import vip684, {
   MARGIN_AMOUNT,
   MARGIN_RATE,
   NEW_NOON_VAULT,
   OLD_NOON_VAULT,
   VAULT_NAME,
   VAULT_SYMBOL,
-} from "../../vips/vip-686/bscmainnet";
+} from "../../vips/vip-684/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import FRV_SOURCE_ABI from "./abi/FRVSource.json";
 import HUB_ABI from "./abi/Hub.json";
@@ -221,8 +221,8 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip(
-    "VIP-686 Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% Margin",
-    await vip686(),
+    "VIP-684 Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% Margin",
+    await vip684(),
     {
       callbackAfterExecution: async txResponse => {
         await expectEvents(txResponse, [VAULT_ABI], ["VaultCancelled"], [1]);

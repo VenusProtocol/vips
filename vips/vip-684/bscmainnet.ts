@@ -18,7 +18,7 @@ import {
 } from "../vip-683/bscmainnet";
 
 // ===================================================================================================
-// VIP-686 [BNB Chain] Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% margin
+// VIP-684 [BNB Chain] Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% margin
 //
 // VIP-683 created the Noon vault with a 100% margin: Noon had to deposit all 1,152,073.71 sUSN before the
 // vault could open. Noon wants to open it with a small deposit, so this VIP cancels that vault and creates
@@ -49,10 +49,10 @@ export const instConfig = [
   POSITION_TOKEN_ID, // positionTokenId (overwritten)
 ];
 
-export const vip686 = () => {
+export const vip684 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-686 [BNB Chain] Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% Margin",
+    title: "VIP-684 [BNB Chain] Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% Margin",
     description: `#### Summary
 
 VIP-683 listed a 30-day fixed-term vault for Noon Capital with a 100% margin, so Noon had to deposit all 1,152,073.71 sUSN before the vault could open. Noon wants to open it with a small deposit. This VIP cancels that vault, which holds no collateral and no deposits, and lists a new one on the same terms with a 0.01% margin.
@@ -129,4 +129,4 @@ The new vault's address is predicted from the operator's vault count and the con
   );
 };
 
-export default vip686;
+export default vip684;
