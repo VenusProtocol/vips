@@ -14,7 +14,6 @@ import {
   NOON_VAULT,
   POSITION_TOKEN_ID,
   SUSN,
-  U,
   U_FRV_SOURCE,
   riskConfig,
   vaultConfig,
@@ -219,111 +218,51 @@ export const vip684 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-684 [BNB Chain] Relist the Noon sUSN Vault with a 0.01% Margin, List ANTB in the bStock Mainstream Spoke Pool, Remove Matured FRVs from the Liquidity Hub and Whitelist a Chainlink OEV Searcher",
+      "VIP-684 [BNB Chain] Noon sUSN Vault Relist, ANTB bStock Listing, Matured FRV Cleanup and Chainlink OEV Searcher Whitelist",
     description: `#### Summary
 
 If passed, this VIP will, on BNB Chain:
 
-1. Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% margin.
-2. List ANTB (Anthropic bStock) as collateral in the **${MAINSTREAM_POOL_NAME}** Hub-Funded Spoke pool, which VIP-675 created.
-3. Remove three matured Fixed Rate Vaults from the Liquidity Hub.
-4. Whitelist a Chainlink OEV searcher for Core Pool flash loans.
+1. Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% margin
+2. List ANTB (Anthropic bStock) as collateral in the **${MAINSTREAM_POOL_NAME}** Spoke pool
+3. Remove three matured Fixed Rate Vaults from the Liquidity Hub
+4. Whitelist a Chainlink OEV searcher for Core Pool flash loans
 
-The four parts are independent.
+#### Part 1: Relist the Noon sUSN vault
 
-### Part 1: Relist the Noon Capital sUSN vault with a 0.01% margin
+VIP-683 listed the Noon vault with a 100% margin, so Noon had to deposit all 1,152,073.71 sUSN before it could open. Noon wants to start with a small deposit. This VIP cancels and closes that vault, which holds no collateral and no deposits, and creates a new one on the same terms with a 0.01% margin (115.207371 sUSN).
 
-VIP-683 listed a 30-day fixed-term vault for Noon Capital with a 100% margin, so Noon had to deposit all 1,152,073.71 sUSN before the vault could open. Noon wants to open it with a small deposit. This VIP cancels and closes that vault, which holds no collateral and no deposits, and lists a new one on the same terms with a 0.01% margin.
+- Old vault ${OLD_NOON_VAULT}: cancelVault, removeResource from the U Hub's FRV source (${U_FRV_SOURCE}), closeVault
+- New vault ${NEW_NOON_VAULT} (${VAULT_NAME}): createVault, addResource behind the AdapterFRV (${ADAPTER_FRV})
+- Terms unchanged from VIP-683: U against sUSN, 6% fixed APY, up to 1,000,000 U, 1-day Open, 30-day Lock, 86% liquidation threshold
+- If the collateral is incomplete when Open ends, the vault fails: lenders get their U back without interest and share the margin (≈ $143)
+- Precondition: until execution, no other vault may be created for ${INSTITUTION_OPERATOR} and the vault implementation must not change
 
-#### Margin
+#### Part 2: List ANTB in the bStock mainstream Spoke pool
 
-- Margin rate: 100% → 0.01%, so the margin is ${MARGIN_AMOUNT.toString()} wei (115.207371 sUSN, ≈ $143 at $1.24).
-- Noon deposits the margin, governance opens the vault, and Noon deposits the rest of the 1,152,073.71 sUSN during the 1-day Open period.
-- If lenders supply at least the 10 U minimum but the collateral is not complete when the Open period ends, the vault fails. Lenders get their U back without interest, and the 115.207371 sUSN margin is shared among them pro rata.
-
-**Trade-off.** At 0.01% the lenders' protection on a failed vault is about $143, against up to 1,000,000 U left idle for the Open day. Noon asked for it so it can start with a small deposit, and the team accepted that trade. If the U Hub is the lender, its share of the sUSN lands in the Hub contract, outside the Hub's share price; only a Normal Timelock VIP can sweep it out.
-
-#### New vault
-
-- Vault: ${NEW_NOON_VAULT} · Share: ${VAULT_NAME} (${VAULT_SYMBOL})
-- Loan asset: U (${U}) · Collateral: sUSN (${SUSN})
-- Institution operator: ${INSTITUTION_OPERATOR} · Institution: ${INSTITUTION_NAME}
-- Fixed APY: 6% · Reserve factor: 10% (5.4% supply APY)
-- Borrow cap: min 10 U / max 1,000,000 U · Minimum supplier deposit: none
-- Open: 1 day · Lock: 30 days · Settlement window: 3 days
-- Collateral: 1,152,073.71 sUSN (≈ $1,428,571 at $1.24) · Margin rate: 0.01%
-- Liquidation threshold: 86% · Liquidation incentive: 10% · Late penalty: 10%
-
-Unchanged from VIP-683: the sUSN price from the Stork feed, and the liquidator bot and the Venus Operational Fund Multisig whitelisted on the LiquidationAdapter for every institutional vault.
-
-#### Execution precondition
-
-The new vault's address is predicted from the operator's vault count and the controller's vault implementation. Until this VIP executes, no other vault may be created for ${INSTITUTION_OPERATOR} and the vault implementation must not change; either would make step 5 of Part 1 revert, and the whole VIP with it.
-
-#### Actions (Part 1)
-
-1. Cancel the VIP-683 vault ${OLD_NOON_VAULT} on the InstitutionalVaultController (${INSTITUTIONAL_VAULT_CONTROLLER}): cancelVault. It moves to Failed; there is no collateral to refund.
-2. Remove it from the U Hub's FRV source (${U_FRV_SOURCE}): removeResource.
-3. Close it on the InstitutionalVaultController: closeVault. Failed → Closed, the terminal delisted state that blocks every operation on the vault.
-4. Create the new vault on the InstitutionalVaultController: createVault(...).
-5. Register the new vault on the U Hub's FRV source behind the AdapterFRV ${ADAPTER_FRV}: addResource.
-
-### Part 2: List ANTB in the bStock mainstream Spoke pool
-
-Anyone may supply ANTB and use it as collateral. It is not borrowable.
-
-#### Proposed changes (Part 2)
-
-1. Price ANTB with Atlas as the main oracle and a DeviationBoundedOracle window. APRO has no ANTB feed on BNB Chain, so there is no pivot.
-2. List the market, seeded from the Venus Treasury with the seed vTokens sent to ${SEED_RECEIVER}, and add it to the markets the BStockPauseSentinel (${BSTOCK_PAUSE_SENTINEL}) monitors.
-3. Give the market a liquidation incentive of its own, set its protocol seize share, and pause borrowing on it.
-
-#### Market parameters
-
-- **${m.symbol}**: collateral factor ${pct(m.collateralFactor)}, liquidation threshold ${pct(
+- **${m.symbol}** (${m.vToken}): collateral factor ${pct(m.collateralFactor)}, liquidation threshold ${pct(
       m.liquidationThreshold,
     )}, liquidation incentive ${pct(m.liquidationIncentive.sub(parseUnits("1", 18)))}, protocol seize share ${pct(
       m.protocolSeizeShare,
-    )}, supply cap ${tokens(m.supplyCap)} ANTB, borrow cap 0, reserve factor ${pct(m.reserveFactor)}, seed ${tokens(
-      m.initialSupply,
-    )} ANTB
-- ANTB charges no interest.
-- The market sends its reserves to the ProtocolShareReserve every ${REDUCE_RESERVES_BLOCK_DELTA.toLocaleString(
-      "en-US",
-    )} blocks, as the pool's other markets do.
-
-#### Pricing
-
-- Atlas ${m.atlasFeed} (${ATLAS_MAX_STALE_PERIOD}s max stale period), no pivot.
-- DeviationBoundedOracle window: a 1 hour cooldown, a 12.5% trigger and a 5% reset, as on the pool's other new assets.
-
-#### Notes
-
-- Liquidations are permissionless. The pool's liquidation allowlist stays off.
-- If ANTB's issuer pauses the token, or its compliance module blocks the market, a keeper can have the BStockPauseSentinel set the market's collateral factor to 0 through EBrake. The liquidation threshold stays, so no position becomes liquidatable.
-
-#### Deployed contracts
-
-- ${m.symbol}: ${m.vToken}
-- ANTB: ${m.underlying}
-
-#### References
-
-- [VIP-675: the bStock mainstream Spoke pool](https://app.venus.io/#/governance/proposal/675?chainId=56)
+    )}, supply cap ${tokens(m.supplyCap)} ANTB, borrow cap 0 (borrowing paused), reserve factor ${pct(m.reserveFactor)}
+- Seed: ${tokens(m.initialSupply)} ANTB from the Venus Treasury, vTokens to ${SEED_RECEIVER}
+- Price: Atlas ${
+      m.atlasFeed
+    } (${ATLAS_MAX_STALE_PERIOD}s max stale) with a DeviationBoundedOracle window; APRO has no ANTB feed, so no pivot
+- Monitored by the BStockPauseSentinel (${BSTOCK_PAUSE_SENTINEL})
 - [vANTB_bStockMainstream deployment](https://github.com/VenusProtocol/isolated-pools/pull/590)
 
-### Part 3: Remove matured FRVs from the Liquidity Hub
+#### Part 3: Remove matured FRVs from the Liquidity Hub
 
-These vaults have matured and the Liquidity Hub has withdrawn from them. Removing them from the Hub's FRV sources keeps the sources' resource lists to live vaults. The vaults themselves are untouched, so their remaining lenders can still redeem.
+The Hub has withdrawn from these vaults. The vaults stay as they are, so their remaining lenders can still redeem.
 
 ${MATURED_FRVS.map(
-  ({ name, vault, source }) =>
-    `- ${name}: ${vault}, from ${source === U_FRV_SOURCE ? "the U" : "the USDT"} Hub's FRV source (${source})`,
+  ({ name, vault, source }) => `- ${name}: ${vault} (${source === U_FRV_SOURCE ? "U" : "USDT"} Hub)`,
 ).join("\n")}
 
-### Part 4: Whitelist a Chainlink OEV searcher for flash loans
+#### Part 4: Whitelist a Chainlink OEV searcher
 
-At Chainlink's request, add ${CHAINLINK_OEV_SEARCHER} to the Core Pool flash loan whitelist (setWhiteListFlashLoanAccount on the Unitroller ${UNITROLLER}), for OEV-enabled liquidations. This follows [VIP-591](https://app.venus.io/#/governance/proposal/591?chainId=56), which whitelisted Chainlink's first OEV searcher under the [Two-Vendor OEV Integration Framework](https://community.venus.io/t/venus-community-proposal-two-vendor-oev-integration-framework/5657).
+At Chainlink's request, add ${CHAINLINK_OEV_SEARCHER} to the Core Pool flash loan whitelist for OEV liquidations, as [VIP-591](https://app.venus.io/#/governance/proposal/591?chainId=56) did for Chainlink's first searcher.
 
 #### Voting options
 
