@@ -90,7 +90,7 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const FORK_BLOCK = 135663000;
+const FORK_BLOCK = 135832237;
 
 const POSITION_TOKEN = "0x3Ed56f6937fc8549f9325405d1e8E650739647Fa";
 
