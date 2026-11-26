@@ -99,6 +99,7 @@ const VaultState = {
   PendingSettlement: 5,
   Matured: 7,
   Failed: 8,
+  Closed: 10,
 };
 
 const U_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
@@ -471,7 +472,7 @@ forking(FORK_BLOCK, async () => {
   testVip("VIP-684 [bscmainnet] Relist the Noon sUSN vault with a 0.01% margin, and list ANTB", proposal, {
     callbackAfterExecution: async txResponse => {
       // Part 1
-      await expectEvents(txResponse, [VAULT_ABI], ["VaultCancelled"], [1]);
+      await expectEvents(txResponse, [VAULT_ABI], ["VaultCancelled", "VaultClosed"], [1, 1]);
       await expectEvents(txResponse, [FRV_SOURCE_ABI], ["ResourceRemoved", "ResourceAdded"], [1, 1]);
       await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultCreated"], [1]);
       // Part 2
@@ -506,11 +507,19 @@ forking(FORK_BLOCK, async () => {
       await setStorkRate(liveRate);
     });
 
-    it("cancels the VIP-683 vault: Failed, nothing refunded, its position NFT still with the operator", async () => {
-      expect(await oldVault.state()).to.equal(VaultState.Failed);
+    it("cancels and closes the VIP-683 vault: Closed, nothing refunded, its position NFT still with the operator", async () => {
+      expect(await oldVault.state()).to.equal(VaultState.Closed);
       expect((await oldVault.institutionalRuntime()).totalCollateralDeposited).to.equal(0);
       expect(await positionToken.ownerOf(oldPositionTokenId)).to.equal(INSTITUTION_OPERATOR);
       expect(await oldVault.maxDeposit(INSTITUTION_OPERATOR)).to.equal(0);
+    });
+
+    it("the closed VIP-683 vault refuses the margin deposit", async () => {
+      const operator = await initMainnetUser(INSTITUTION_OPERATOR, parseUnits("1"));
+      await expect(oldVault.connect(operator).depositCollateral(MARGIN_AMOUNT)).to.be.revertedWithCustomError(
+        oldVault,
+        "InvalidState",
+      );
     });
 
     it("removes the VIP-683 vault from the U FRV source", async () => {

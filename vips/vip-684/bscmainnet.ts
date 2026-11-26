@@ -45,7 +45,7 @@ import {
 // Part 1: relist the Noon Capital sUSN vault with a 0.01% margin.
 //
 // VIP-683 created the Noon vault with a 100% margin: Noon had to deposit all 1,152,073.71 sUSN before the
-// vault could open. Noon wants to open it with a small deposit, so this VIP cancels that vault and creates
+// vault could open. Noon wants to open it with a small deposit, so this VIP cancels and closes that vault and creates
 // a new one on the same terms with a 0.01% margin.
 // ===================================================================================================
 
@@ -186,7 +186,7 @@ The two parts are independent.
 
 ### Part 1: Relist the Noon Capital sUSN vault with a 0.01% margin
 
-VIP-683 listed a 30-day fixed-term vault for Noon Capital with a 100% margin, so Noon had to deposit all 1,152,073.71 sUSN before the vault could open. Noon wants to open it with a small deposit. This VIP cancels that vault, which holds no collateral and no deposits, and lists a new one on the same terms with a 0.01% margin.
+VIP-683 listed a 30-day fixed-term vault for Noon Capital with a 100% margin, so Noon had to deposit all 1,152,073.71 sUSN before the vault could open. Noon wants to open it with a small deposit. This VIP cancels and closes that vault, which holds no collateral and no deposits, and lists a new one on the same terms with a 0.01% margin.
 
 #### Margin
 
@@ -211,14 +211,15 @@ Unchanged from VIP-683: the sUSN price from the Stork feed, and the liquidator b
 
 #### Execution precondition
 
-The new vault's address is predicted from the operator's vault count and the controller's vault implementation. Until this VIP executes, no other vault may be created for ${INSTITUTION_OPERATOR} and the vault implementation must not change; either would make step 4 of Part 1 revert, and the whole VIP with it.
+The new vault's address is predicted from the operator's vault count and the controller's vault implementation. Until this VIP executes, no other vault may be created for ${INSTITUTION_OPERATOR} and the vault implementation must not change; either would make step 5 of Part 1 revert, and the whole VIP with it.
 
 #### Actions (Part 1)
 
 1. Cancel the VIP-683 vault ${OLD_NOON_VAULT} on the InstitutionalVaultController (${INSTITUTIONAL_VAULT_CONTROLLER}): cancelVault. It moves to Failed; there is no collateral to refund.
 2. Remove it from the U Hub's FRV source (${U_FRV_SOURCE}): removeResource.
-3. Create the new vault on the InstitutionalVaultController: createVault(...).
-4. Register the new vault on the U Hub's FRV source behind the AdapterFRV ${ADAPTER_FRV}: addResource.
+3. Close it on the InstitutionalVaultController: closeVault. Failed → Closed, the terminal delisted state that blocks every operation on the vault.
+4. Create the new vault on the InstitutionalVaultController: createVault(...).
+5. Register the new vault on the U Hub's FRV source behind the AdapterFRV ${ADAPTER_FRV}: addResource.
 
 ### Part 2: List ANTB in the bStock mainstream Spoke pool
 
@@ -284,6 +285,12 @@ Anyone may supply ANTB and use it as collateral. It is not borrowable.
       {
         target: U_FRV_SOURCE,
         signature: "removeResource(address)",
+        params: [OLD_NOON_VAULT],
+      },
+      // After removeResource, so the vault leaves the FRV source before it is frozen. Valid only from Failed.
+      {
+        target: INSTITUTIONAL_VAULT_CONTROLLER,
+        signature: "closeVault(address)",
         params: [OLD_NOON_VAULT],
       },
       {
