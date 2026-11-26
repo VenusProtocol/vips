@@ -36,9 +36,11 @@ import {
 } from "./addresses/bscmainnet";
 
 // ===================================================================================================
-// VIP-684 [BNB Chain], two independent parts, all from the Normal Timelock:
+// VIP-684 [BNB Chain], four independent parts, all from the Normal Timelock:
 //  1. Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% margin.
 //  2. List ANTB as collateral in the bStock mainstream Spoke pool.
+//  3. Remove three matured FRVs from the Liquidity Hub's FRV sources.
+//  4. Whitelist a Chainlink OEV searcher for Core Pool flash loans.
 // ===================================================================================================
 
 // ===================================================================================================
@@ -168,21 +170,66 @@ export const antbCommands = (m: AntbMarket): Command[] => [
   ...antbSetupCommands(m),
 ];
 
+// ===================================================================================================
+// Part 3: remove matured FRVs from the Liquidity Hub.
+//
+// All three are Matured and the Hub holds none of their shares, so `removeResource` passes its zero-balance gate.
+// Their lenders can still redeem: removal only takes them off the Hub's FRV sources, the vaults stay as they are.
+// ===================================================================================================
+
+/// The USDT Hub's FRV source.
+export const USDT_FRV_SOURCE = "0x621eF38cE0C4e7060fF0bF3D609E3D46EC144bE7";
+
+export const MATURED_FRVS = [
+  { name: "FRV Asseto CASH+ 13AUG2026-30", vault: "0x41179fc6ff878b7795B900888E0B61fd8029bceA", source: U_FRV_SOURCE },
+  {
+    name: "FRV hashglobal hBNB 05OCT2026 30",
+    vault: "0xfE419E150d63ff288b9802533f6Fe2f886DB6FED",
+    source: U_FRV_SOURCE,
+  },
+  { name: "FRV Solv BTCB 17AUG2026 30", vault: "0x086fd7972510dF9d9cFdc4efB8677fc72d290103", source: USDT_FRV_SOURCE },
+];
+
+const maturedFrvCommands: Command[] = MATURED_FRVS.map(({ vault, source }) => ({
+  target: source,
+  signature: "removeResource(address)",
+  params: [vault],
+}));
+
+// ===================================================================================================
+// Part 4: whitelist a Chainlink OEV searcher for Core Pool flash loans, as VIP-591 did for 0x82aC…5298.
+//
+// An ERC-1967 proxy deployed by the same address (0xede071d1…3dac38) as the VIP-591 searcher.
+// ===================================================================================================
+
+export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+export const CHAINLINK_OEV_SEARCHER = "0xb672f0049F845fbDeCDCDdA1e8f16aaD0A094fF2";
+
+const flashLoanCommands: Command[] = [
+  {
+    target: UNITROLLER,
+    signature: "setWhiteListFlashLoanAccount(address,bool)",
+    params: [CHAINLINK_OEV_SEARCHER, true],
+  },
+];
+
 export const vip684 = () => {
   const m = ANTB_MARKET;
 
   const meta = {
     version: "v2",
     title:
-      "VIP-684 [BNB Chain] Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% Margin, and List ANTB in the bStock Mainstream Spoke Pool",
+      "VIP-684 [BNB Chain] Relist the Noon sUSN Vault with a 0.01% Margin, List ANTB in the bStock Mainstream Spoke Pool, Remove Matured FRVs from the Liquidity Hub and Whitelist a Chainlink OEV Searcher",
     description: `#### Summary
 
 If passed, this VIP will, on BNB Chain:
 
 1. Relist the Noon Capital sUSN Fixed-Term Institutional Loan Vault with a 0.01% margin.
 2. List ANTB (Anthropic bStock) as collateral in the **${MAINSTREAM_POOL_NAME}** Hub-Funded Spoke pool, which VIP-675 created.
+3. Remove three matured Fixed Rate Vaults from the Liquidity Hub.
+4. Whitelist a Chainlink OEV searcher for Core Pool flash loans.
 
-The two parts are independent.
+The four parts are independent.
 
 ### Part 1: Relist the Noon Capital sUSN vault with a 0.01% margin
 
@@ -265,6 +312,19 @@ Anyone may supply ANTB and use it as collateral. It is not borrowable.
 - [VIP-675: the bStock mainstream Spoke pool](https://app.venus.io/#/governance/proposal/675?chainId=56)
 - [vANTB_bStockMainstream deployment](https://github.com/VenusProtocol/isolated-pools/pull/590)
 
+### Part 3: Remove matured FRVs from the Liquidity Hub
+
+These vaults have matured and the Liquidity Hub has withdrawn from them. Removing them from the Hub's FRV sources keeps the sources' resource lists to live vaults. The vaults themselves are untouched, so their remaining lenders can still redeem.
+
+${MATURED_FRVS.map(
+  ({ name, vault, source }) =>
+    `- ${name}: ${vault}, from ${source === U_FRV_SOURCE ? "the U" : "the USDT"} Hub's FRV source (${source})`,
+).join("\n")}
+
+### Part 4: Whitelist a Chainlink OEV searcher for flash loans
+
+At Chainlink's request, add ${CHAINLINK_OEV_SEARCHER} to the Core Pool flash loan whitelist (setWhiteListFlashLoanAccount on the Unitroller ${UNITROLLER}), for OEV-enabled liquidations. This follows [VIP-591](https://app.venus.io/#/governance/proposal/591?chainId=56), which whitelisted Chainlink's first OEV searcher under the [Two-Vendor OEV Integration Framework](https://community.venus.io/t/venus-community-proposal-two-vendor-oev-integration-framework/5657).
+
 #### Voting options
 
 - **For** — Execute the proposal
@@ -306,6 +366,8 @@ Anyone may supply ANTB and use it as collateral. It is not borrowable.
         params: [NEW_NOON_VAULT, ADAPTER_FRV],
       },
       ...antbCommands(m),
+      ...maturedFrvCommands,
+      ...flashLoanCommands,
     ],
     meta,
     ProposalType.REGULAR,

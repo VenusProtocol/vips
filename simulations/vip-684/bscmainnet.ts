@@ -60,13 +60,17 @@ import {
   VUSDT_MAINSTREAM,
 } from "../../vips/vip-684/addresses/bscmainnet";
 import vip684, {
+  CHAINLINK_OEV_SEARCHER,
   MARGIN_AMOUNT,
   MARGIN_RATE,
+  MATURED_FRVS,
   NEW_NOON_VAULT,
   OLD_NOON_VAULT,
+  UNITROLLER,
   VAULT_NAME,
   VAULT_SYMBOL,
 } from "../../vips/vip-684/bscmainnet";
+import FLASH_LOAN_FACET_ABI from "../vip-591/abi/FlashLoanFacet.json";
 import ACM_ABI from "../vip-675/abi/AccessControlManager.json";
 import CHAINLINK_ORACLE_ABI from "../vip-675/abi/ChainlinkOracle.json";
 import GATEWAY_ABI from "../vip-675/abi/CollateralGateway.json";
@@ -101,6 +105,9 @@ const VaultState = {
   Failed: 8,
   Closed: 10,
 };
+
+/// Views every FRV vault type (institutional and Ceffu) shares.
+const FRV_VIEW_ABI = ["function state() view returns (uint8)", "function balanceOf(address) view returns (uint256)"];
 
 const U_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
@@ -252,6 +259,7 @@ forking(FORK_BLOCK, async () => {
     ethers.provider,
   );
   const oldVault = new ethers.Contract(OLD_NOON_VAULT, VAULT_ABI, ethers.provider);
+  const unitroller = new ethers.Contract(UNITROLLER, FLASH_LOAN_FACET_ABI, ethers.provider);
 
   // ---- Part 2 (ANTB) fork setup
   const m = ANTB_MARKET;
@@ -349,6 +357,22 @@ forking(FORK_BLOCK, async () => {
       const usd = (amount: BigNumber) => Number(ethers.utils.formatUnits(amount.mul(price).div(MANTISSA_ONE), 18));
       expect(usd(m.supplyCap)).to.be.within(90_000, 110_000);
       expect(usd(m.initialSupply)).to.be.within(9, 11);
+    });
+  });
+
+  describe("Parts 3 and 4 pre-VIP", () => {
+    for (const { name, vault, source } of MATURED_FRVS) {
+      it(`${name} is Matured, on its Hub FRV source, with no Hub shares`, async () => {
+        const frv = new ethers.Contract(vault, FRV_VIEW_ABI, ethers.provider);
+        const group = new ethers.Contract(source, FRV_SOURCE_ABI, ethers.provider);
+        expect(await frv.state()).to.equal(VaultState.Matured);
+        expect(await group.resources()).to.include(vault);
+        expect(await frv.balanceOf(source)).to.equal(0);
+      });
+    }
+
+    it("the Chainlink OEV searcher is not yet whitelisted for flash loans", async () => {
+      expect(await unitroller.authorizedFlashLoan(CHAINLINK_OEV_SEARCHER)).to.equal(false);
     });
   });
 
@@ -473,8 +497,11 @@ forking(FORK_BLOCK, async () => {
     callbackAfterExecution: async txResponse => {
       // Part 1
       await expectEvents(txResponse, [VAULT_ABI], ["VaultCancelled", "VaultClosed"], [1, 1]);
-      await expectEvents(txResponse, [FRV_SOURCE_ABI], ["ResourceRemoved", "ResourceAdded"], [1, 1]);
+      // The VIP-683 Noon vault and the three matured FRVs (Part 3).
+      await expectEvents(txResponse, [FRV_SOURCE_ABI], ["ResourceRemoved", "ResourceAdded"], [4, 1]);
       await expectEvents(txResponse, [CONTROLLER_ABI], ["VaultCreated"], [1]);
+      // Part 4
+      await expectEvents(txResponse, [FLASH_LOAN_FACET_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
       // Part 2
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
@@ -495,6 +522,22 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(txResponse, [SENTINEL_ABI], ["MarketMonitoringUpdated"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted", "RoleRevoked"], [0, 0]);
     },
+  });
+
+  describe("Parts 3 and 4 post-VIP", () => {
+    for (const { name, vault, source } of MATURED_FRVS) {
+      it(`${name} is off its Hub FRV source, and still Matured`, async () => {
+        const frv = new ethers.Contract(vault, FRV_VIEW_ABI, ethers.provider);
+        const group = new ethers.Contract(source, FRV_SOURCE_ABI, ethers.provider);
+        expect(await group.resources()).to.not.include(vault);
+        expect((await group.resourceConfig(vault)).registered).to.equal(false);
+        expect(await frv.state()).to.equal(VaultState.Matured);
+      });
+    }
+
+    it("whitelists the Chainlink OEV searcher for flash loans", async () => {
+      expect(await unitroller.authorizedFlashLoan(CHAINLINK_OEV_SEARCHER)).to.equal(true);
+    });
   });
 
   describe("Part 1 (Noon) post-VIP behavior", () => {
